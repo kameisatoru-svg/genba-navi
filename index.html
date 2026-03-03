@@ -1320,20 +1320,22 @@ function startSpeechRecognition(SpeechRecognition) {
   realtimeText = '';
   state.recording = true;
   state.recSeconds = 0;
-  clearInterval(state.timerInterval);
+  clearInterval(state.timerInterval); // タイマーは最初の1回だけ起動
   startTimer();
 
   const mic = document.getElementById('micRing');
   const vs  = document.getElementById('voiceSt');
   const ss  = document.getElementById('speechStatus');
-  const mia = document.getElementById('memoInputArea');
   if(mic) mic.classList.add('recording');
   if(vs)  { vs.textContent = '録音中… タップで停止'; vs.style.color = 'var(--red)'; }
   if(ss)  ss.style.display = 'block';
-  if(mia) mia.value = '話しかけてください...';
+  const mia = document.getElementById('memoInputArea');
+  if(mia) { mia.value = ''; onMemoInput(mia); }
+
+  let lastResultIndex = 0; // 重複防止用
 
   function createAndStart() {
-    if (!state.recording) return; // 停止済みなら何もしない
+    if (!state.recording) return;
 
     const sr = new SpeechRecognition();
     speechRecognition = sr;
@@ -1343,14 +1345,14 @@ function startSpeechRecognition(SpeechRecognition) {
     sr.maxAlternatives = 1;
 
     sr.onresult = (event) => {
-      let interim = '', final = '';
+      let interim = '', newFinal = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (event.results[i].isFinal) final += event.results[i][0].transcript;
+        if (event.results[i].isFinal) newFinal += event.results[i][0].transcript;
         else interim += event.results[i][0].transcript;
       }
-      if (final) realtimeText += final;
+      if (newFinal) realtimeText += newFinal;
       const mia = document.getElementById('memoInputArea');
-      if(mia) { mia.value = realtimeText + (interim ? interim : ''); onMemoInput(mia); }
+      if(mia) { mia.value = realtimeText + interim; onMemoInput(mia); }
     };
 
     sr.onerror = (e) => {
@@ -1358,21 +1360,17 @@ function startSpeechRecognition(SpeechRecognition) {
         showToast('マイクのアクセスが拒否されました', 'error');
         stopRecording();
       }
-      // aborted / no-speech 等は無視
+      // no-speech / aborted は無視して継続
     };
 
     sr.onend = () => {
-      if (!state.recording) return;   // 停止ボタンが押された
-      if (speechRecognition !== sr) return; // 別インスタンスに切り替わった
-      // 録音継続中 → 100ms後に新インスタンスで再開
-      setTimeout(createAndStart, 100);
+      if (!state.recording) return;        // 停止済み → 再起動しない
+      if (speechRecognition !== sr) return; // 別インスタンス → 無視
+      setTimeout(createAndStart, 150);      // 少し待って再起動
     };
 
-    try {
-      sr.start();
-    } catch(e) {
-      // already started等 → 少し待って再試行
-      setTimeout(createAndStart, 300);
+    try { sr.start(); } catch(e) {
+      setTimeout(createAndStart, 400);
     }
   }
 
