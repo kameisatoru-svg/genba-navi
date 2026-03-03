@@ -1,0 +1,2458 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>現場ナビ PRO</title>
+
+<!-- PWA: スタンドアロン全画面 -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="現場ナビ">
+<meta name="theme-color" content="#0f1117">
+<meta name="application-name" content="現場ナビPRO">
+
+<!-- PWA マニフェスト（インライン Blob） -->
+<script>
+(function(){
+  const icon192 = `<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+    <rect width="192" height="192" rx="36" fill="#0f1117"/>
+    <rect x="16" y="16" width="160" height="160" rx="28" fill="#1a1d27"/>
+    <text x="96" y="72" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="28" fill="#f5a623">現場ナビ</text>
+    <text x="96" y="102" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="16" fill="#aaa">PRO</text>
+    <rect x="36" y="118" width="120" height="3" rx="1.5" fill="#f5a623" opacity=".5"/>
+    <rect x="36" y="130" width="80" height="3" rx="1.5" fill="#f5a623" opacity=".3"/>
+    <rect x="36" y="142" width="100" height="3" rx="1.5" fill="#f5a623" opacity=".3"/>
+    <rect x="36" y="154" width="60" height="3" rx="1.5" fill="#f5a623" opacity=".3"/>
+  </svg>`;
+  const svgBlob = new Blob([icon192], {type:'image/svg+xml'});
+  const iconUrl = URL.createObjectURL(svgBlob);
+
+  const manifest = {
+    name: '現場ナビ PRO',
+    short_name: '現場ナビ',
+    description: '内装工事現場支援アプリ',
+    start_url: './',
+    display: 'standalone',
+    orientation: 'portrait',
+    background_color: '#0f1117',
+    theme_color: '#0f1117',
+    icons: [
+      { src: iconUrl, sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
+      { src: iconUrl, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }
+    ]
+  };
+  const mBlob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+  const mUrl = URL.createObjectURL(mBlob);
+  const link = document.createElement('link');
+  link.rel = 'manifest'; link.href = mUrl;
+  document.head.appendChild(link);
+
+  // Apple touch icon
+  const aLink = document.createElement('link');
+  aLink.rel = 'apple-touch-icon'; aLink.href = iconUrl;
+  document.head.appendChild(aLink);
+})();
+</script>
+
+<!-- Service Worker 登録（オフライン対応＋ホーム画面追加を有効化） -->
+<script>
+if('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE = 'genba-navi-v1';
+    self.addEventListener('install', e => {
+      self.skipWaiting();
+    });
+    self.addEventListener('activate', e => {
+      e.waitUntil(clients.claim());
+    });
+    self.addEventListener('fetch', e => {
+      // ネットワーク優先、失敗時にキャッシュ
+      e.respondWith(
+        fetch(e.request).catch(() => caches.match(e.request))
+      );
+    });
+  `;
+  const swBlob = new Blob([swCode], {type:'application/javascript'});
+  const swUrl = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swUrl, {scope: './'}).catch(()=>{});
+}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --surface3:#2a2e42;
+  --border:#2e3348; --accent:#f5a623; --accent2:#e05c2a;
+  --blue:#4a9eff; --green:#3dd68c; --red:#ff5f5f; --purple:#b06aff;
+  --text:#e8eaf2; --muted:#6b7294;
+  --font:'Noto Sans JP',sans-serif; --mono:'DM Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{height:100%;height:-webkit-fill-available;}body{min-height:100vh;min-height:-webkit-fill-available;overflow:hidden;position:fixed;width:100%;top:0;left:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);}
+
+/* TOPBAR */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:200;
+  height:calc(52px + env(safe-area-inset-top,0px));
+  padding-top:env(safe-area-inset-top,0px);
+  background:rgba(15,17,23,.97);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);display:flex;align-items:center;
+  justify-content:space-between;padding-left:16px;padding-right:16px;}
+.logo{font-size:16px;font-weight:900;letter-spacing:-.5px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.topbar-project{font-size:11px;color:var(--muted);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.topbar-project span{color:var(--accent);}
+.icon-btn{width:34px;height:34px;border-radius:8px;background:var(--surface2);
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+
+/* BOTTOM NAV */
+/* ===== MOBILE FIXES ===== */
+/* iOSセーフエリア対応 */
+:root {
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+
+.bottomnav{position:fixed;bottom:0;left:0;right:0;z-index:200;
+  background:rgba(15,17,23,.97);border-top:1px solid var(--border);
+  display:flex;
+  height:calc(58px + var(--safe-bottom));
+  padding-bottom:var(--safe-bottom);}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:2px;cursor:pointer;border:none;
+  background:transparent;color:var(--muted);font-size:9px;font-family:var(--font);
+  transition:color .2s;position:relative;padding:0;
+  min-height:44px; /* タッチターゲット最小44px */
+  }
+.nav-btn.active{color:var(--accent);}
+.nav-btn svg{width:20px;height:20px;}
+.nav-btn::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:0;height:2px;background:var(--accent);border-radius:0 0 2px 2px;transition:width .2s;}
+.nav-btn.active::after{width:28px;}
+.nav-badge{position:absolute;top:6px;right:calc(50% - 16px);
+  background:var(--red);color:#fff;font-size:8px;font-weight:700;
+  min-width:14px;height:14px;border-radius:7px;display:flex;align-items:center;justify-content:center;padding:0 3px;}
+
+/* MAIN — キーボード表示時はDVH使用 */
+main{position:fixed;top:calc(52px + env(safe-area-inset-top,0px));bottom:calc(58px + env(safe-area-inset-bottom,0px));left:0;right:0;overflow:hidden;}
+.screen{display:none;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;padding-bottom:32px;}
+.screen.active{display:block;}
+.screen::-webkit-scrollbar{display:none;}
+
+/* UTILS */
+.section-title{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);
+  text-transform:uppercase;margin:18px 0 10px;}
+.section-title:first-child{margin-top:6px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.btn{border:none;border-radius:10px;padding:14px 16px;font-size:15px;
+  font-weight:600;font-family:var(--font);cursor:pointer;transition:opacity .15s;
+  min-height:48px;-webkit-appearance:none;appearance:none;touch-action:manipulation;}
+.btn:active{opacity:.75;}
+.btn-primary{background:var(--accent);color:#000;width:100%;}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);width:100%;}
+.btn-row{display:flex;gap:8px;margin-top:12px;}
+.form-input{width:100%;background:var(--bg);border:1px solid var(--border);
+  border-radius:8px;padding:12px 14px;color:var(--text);
+  font-size:16px; /* iOSズーム防止：16px必須 */
+  font-family:var(--font);outline:none;transition:border-color .2s;
+  -webkit-appearance:none;appearance:none;}
+.form-input:focus{border-color:var(--accent);}
+.form-label{font-size:11px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;
+  margin-bottom:6px;display:block;}
+.form-group{margin-bottom:12px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.chip{font-size:10px;padding:3px 8px;border-radius:20px;font-weight:600;display:inline-flex;align-items:center;}
+.chip.orange{background:rgba(245,166,35,.15);color:var(--accent);border:1px solid rgba(245,166,35,.3);}
+.chip.green{background:rgba(61,214,140,.12);color:var(--green);border:1px solid rgba(61,214,140,.3);}
+.chip.blue{background:rgba(74,158,255,.12);color:var(--blue);border:1px solid rgba(74,158,255,.3);}
+.chip.red{background:rgba(255,95,95,.12);color:var(--red);border:1px solid rgba(255,95,95,.3);}
+
+/* ===== HOME ===== */
+.greeting{padding:16px 0 10px;font-size:20px;font-weight:900;line-height:1.25;}
+.greeting span{color:var(--accent);}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:10px 12px;text-align:center;}
+.stat-box.hl{border-color:var(--accent);background:rgba(245,166,35,.07);}
+.stat-val{font-size:22px;font-weight:900;font-family:var(--mono);color:var(--text);}
+.stat-val.accent{color:var(--accent);}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;}
+.qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:4px;}
+.qa-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:14px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:border-color .15s;touch-action:manipulation;min-height:60px;}
+.qa-card:active{border-color:var(--accent);}
+.qa-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.qa-ico.o{background:rgba(245,166,35,.15);}
+.qa-ico.b{background:rgba(74,158,255,.15);}
+.qa-ico.g{background:rgba(61,214,140,.15);}
+.qa-ico.r{background:rgba(255,95,95,.15);}
+.qa-ico.p{background:rgba(176,106,255,.15);}
+.qa-lbl{font-size:12px;font-weight:700;line-height:1.3;}
+.qa-sub{font-size:10px;color:var(--muted);margin-top:1px;}
+.proj-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:13px 14px;margin-bottom:9px;cursor:pointer;position:relative;overflow:hidden;
+  transition:border-color .15s;touch-action:manipulation;}
+.proj-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+.proj-card.c-orange::before{background:var(--accent);}
+.proj-card.c-blue::before{background:var(--blue);}
+.proj-card.c-green::before{background:var(--green);}
+.proj-card:active{border-color:var(--accent);}
+.pc-top{display:flex;justify-content:space-between;align-items:flex-start;}
+.pc-name{font-size:14px;font-weight:700;margin-bottom:3px;}
+.pc-loc{font-size:11px;color:var(--muted);}
+.pc-meta{display:flex;gap:14px;margin-top:9px;flex-wrap:wrap;}
+.pc-meta-item{font-size:11px;color:var(--muted);}
+.pc-meta-item strong{color:var(--text);font-weight:600;}
+
+/* ===== SKETCH ===== */
+.canvas-toolbar{display:flex;gap:7px;padding:8px 0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.tool-btn{flex-shrink:0;background:var(--surface);border:1px solid var(--border);
+  border-radius:7px;padding:9px 12px;cursor:pointer;color:var(--text);
+  font-size:11px;font-family:var(--font);display:flex;align-items:center;gap:5px;touch-action:manipulation;min-height:40px;}
+.tool-btn.active{border-color:var(--accent);background:rgba(245,166,35,.1);color:var(--accent);}
+.canvas-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+canvas{display:block;touch-action:none;}
+.measure-list{border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.measure-row{display:flex;align-items:center;gap:10px;padding:11px 14px;
+  border-bottom:1px solid var(--border);background:var(--surface);}
+.measure-row:last-child{border-bottom:none;}
+.measure-lbl{font-size:13px;flex:1;}
+.measure-input{font-family:var(--mono);font-size:16px;font-weight:500;color:var(--accent);
+  background:var(--surface2);border:1px solid var(--border);border-radius:6px;
+  padding:5px 10px;width:100px;text-align:right;outline:none;}
+.measure-input:focus{border-color:var(--accent);}
+.measure-input.auto{color:var(--green);pointer-events:none;}
+.measure-unit{font-size:11px;color:var(--muted);width:24px;}
+
+/* ===== ESTIMATE ===== */
+.est-hero{background:linear-gradient(135deg,rgba(245,166,35,.13),rgba(224,92,42,.08));
+  border:1px solid rgba(245,166,35,.35);border-radius:12px;padding:16px;margin-bottom:14px;}
+.est-hero-lbl{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.est-hero-num{font-size:34px;font-weight:900;font-family:var(--mono);color:var(--accent);line-height:1.1;}
+.est-hero-num span{font-size:15px;}
+.est-breakdown{display:flex;gap:14px;margin-top:8px;flex-wrap:wrap;}
+.est-bd-item{font-size:11px;color:var(--muted);}
+.est-bd-item strong{color:var(--text);font-size:12px;}
+.est-table{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.est-row{display:flex;align-items:center;padding:11px 13px;border-bottom:1px solid var(--border);gap:8px;}
+.est-row:last-child{border-bottom:none;}
+.est-row.hdr{background:var(--surface2);font-size:9px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;}
+.est-row.total-row{background:rgba(245,166,35,.06);}
+.ec-name{flex:2;font-size:12px;}
+.ec-qty{flex:1;font-size:11px;text-align:center;color:var(--muted);font-family:var(--mono);}
+.ec-price{flex:1.4;font-size:12px;text-align:right;font-family:var(--mono);font-weight:600;}
+.ec-price.accent{color:var(--accent);font-size:14px;}
+.ec-del{width:36px;height:36px;border-radius:8px;background:rgba(255,95,95,.1);
+  border:none;color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation;flex-shrink:0;}
+.add-item-btn{width:100%;background:transparent;border:1px dashed var(--border);
+  border-top:none;color:var(--muted);padding:11px;cursor:pointer;font-size:12px;
+  font-family:var(--font);border-radius:0 0 12px 12px;transition:all .15s;}
+.add-item-btn:active{color:var(--accent);border-color:var(--accent);}
+.price-master{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:12px;}
+.pm-row{display:flex;align-items:center;padding:10px 13px;border-bottom:1px solid var(--border);}
+.pm-row:last-child{border-bottom:none;}
+.pm-name{flex:2;font-size:12px;}
+.pm-unit{flex:1;font-size:11px;color:var(--muted);}
+.pm-price{flex:1.2;font-size:12px;font-family:var(--mono);text-align:right;color:var(--accent);}
+.pm-add{width:36px;height:36px;border-radius:8px;background:rgba(245,166,35,.12);
+  border:1px solid rgba(245,166,35,.3);color:var(--accent);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:16px;touch-action:manipulation;}
+
+/* ===== VOICE ===== */
+.voice-top{display:flex;flex-direction:column;align-items:center;padding:20px 0 14px;}
+.mic-ring{width:88px;height:88px;border-radius:50%;background:var(--surface2);
+  border:2px solid var(--border);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .3s;position:relative;}
+.mic-ring.recording{border-color:var(--red);background:rgba(255,95,95,.1);
+  animation:pulse 1.2s infinite;}
+.mic-ring.processing{border-color:var(--accent);background:rgba(245,166,35,.1);
+  animation:spin-glow 1s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,95,95,.4);}50%{box-shadow:0 0 0 18px rgba(255,95,95,0);}}
+@keyframes spin-glow{0%,100%{box-shadow:0 0 8px rgba(245,166,35,.5);}50%{box-shadow:0 0 18px rgba(245,166,35,.8);}}
+.voice-st{margin:12px 0 4px;font-size:14px;font-weight:600;}
+.voice-timer{font-family:var(--mono);color:var(--muted);font-size:20px;}
+.file-import{border:1.5px dashed var(--border);border-radius:10px;padding:14px;
+  text-align:center;cursor:pointer;transition:border-color .2s;background:var(--surface);}
+.file-import:active{border-color:var(--accent);}
+.file-import-lbl{font-size:13px;color:var(--muted);margin-top:6px;}
+.file-import-sub{font-size:10px;color:var(--muted);margin-top:3px;}
+.transcript-area{background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:13px;min-height:80px;font-size:13px;line-height:1.75;
+  color:var(--text);margin-top:12px;white-space:pre-wrap;}
+.transcript-area .ph{color:var(--muted);font-style:italic;}
+.vn-list{margin-top:4px;}
+.vn-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:11px 13px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;}
+.vn-ico{width:30px;height:30px;border-radius:7px;background:rgba(245,166,35,.12);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.vn-text{font-size:12px;line-height:1.65;}
+.vn-meta{font-size:10px;color:var(--muted);margin-top:3px;}
+.vn-actions{display:flex;gap:6px;margin-top:7px;}
+.vn-act-btn{font-size:11px;padding:7px 12px;border-radius:6px;cursor:pointer;
+  background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font);touch-action:manipulation;min-height:34px;}
+.vn-act-btn:active{color:var(--accent);border-color:var(--accent);}
+
+/* ===== PHOTOS ===== */
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px;}
+.photo-cell{aspect-ratio:1;border-radius:8px;overflow:hidden;background:var(--surface2);
+  border:1px solid var(--border);position:relative;cursor:pointer;}
+.photo-cell img{width:100%;height:100%;object-fit:cover;}
+.photo-cell .ph-overlay{position:absolute;bottom:0;left:0;right:0;
+  background:linear-gradient(transparent,rgba(0,0,0,.7));padding:6px 5px 4px;
+  font-size:9px;color:#fff;}
+.photo-add-btn{aspect-ratio:1;border-radius:8px;border:1.5px dashed var(--border);
+  background:var(--surface);display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:4px;cursor:pointer;touch-action:manipulation;}
+.photo-add-btn:active{border-color:var(--accent);}
+.photo-add-btn svg{opacity:.4;}
+.photo-add-btn span{font-size:10px;color:var(--muted);}
+.photo-filter{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:6px;-webkit-overflow-scrolling:touch;}
+.pf-btn{flex-shrink:0;font-size:12px;padding:8px 14px;border-radius:20px;
+  background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;touch-action:manipulation;min-height:36px;}
+.pf-btn.active{background:rgba(245,166,35,.12);border-color:var(--accent);color:var(--accent);}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:300;
+  background:rgba(0,0,0,.75);backdrop-filter:blur(4px);align-items:flex-end;}
+.modal-overlay.show{display:flex;}
+.modal-sheet{background:var(--surface);border-radius:18px 18px 0 0;
+  padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));
+  width:100%;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  border-top:1px solid var(--border);animation:slideUp .22s ease;}
+.modal-sheet::-webkit-scrollbar{display:none;}
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.modal-handle{width:38px;height:3px;background:var(--border);border-radius:2px;margin:0 auto 14px;}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:14px;}
+
+/* AI BADGE */
+.ai-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;
+  background:linear-gradient(135deg,rgba(176,106,255,.2),rgba(74,158,255,.15));
+  border:1px solid rgba(176,106,255,.3);color:var(--purple);
+  padding:3px 8px;border-radius:20px;font-weight:600;}
+
+/* LOADING */
+.loading-dots{display:inline-flex;gap:3px;}
+.loading-dots span{width:5px;height:5px;border-radius:50%;background:var(--accent);
+  animation:dot-bounce .8s infinite alternate;}
+.loading-dots span:nth-child(2){animation-delay:.15s;}
+.loading-dots span:nth-child(3){animation-delay:.3s;}
+@keyframes dot-bounce{from{opacity:.3;transform:translateY(0);}to{opacity:1;transform:translateY(-4px);}}
+
+/* TOAST */
+.toast{position:fixed;top:calc(60px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%) translateY(-80px);
+  background:var(--green);color:#000;padding:10px 20px;border-radius:20px;
+  font-size:13px;font-weight:700;z-index:400;transition:transform .3s;
+  white-space:nowrap;max-width:90vw;text-align:center;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.error{background:var(--red);color:#fff;}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">現場ナビ<span style="font-weight:300;font-size:12px;margin-left:4px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">PRO</span></div>
+  <div class="topbar-right">
+    <div class="topbar-project" id="topbarProject">案件: <span>MOKU 内装</span></div>
+    <div class="icon-btn" onclick="openModal('settings')">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </div>
+  </div>
+</div>
+
+<main>
+<!-- HOME -->
+<div class="screen active" id="screen-home">
+  <div class="greeting">おはようございます<br><span id="greetName">山田さん</span></div>
+  <div class="stat-grid">
+    <div class="stat-box"><div class="stat-val" id="statProjects">3</div><div class="stat-lbl">進行中</div></div>
+    <div class="stat-box hl"><div class="stat-val accent" id="statAmount">2.4M</div><div class="stat-lbl">今月見積</div></div>
+    <div class="stat-box"><div class="stat-val" id="statVoice">8</div><div class="stat-lbl">音声メモ</div></div>
+  </div>
+
+  <div class="section-title">クイックアクション</div>
+  <div class="qa-grid">
+    <div class="qa-card" onclick="switchScreen('sketch')">
+      <div class="qa-ico o"><svg width="20" height="20" fill="none" stroke="#f5a623" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+      <div><div class="qa-lbl">平面図<br>スケッチ</div></div>
+    </div>
+    <div class="qa-card" onclick="switchScreen('voice')">
+      <div class="qa-ico r"><svg width="20" height="20" fill="none" stroke="#ff5f5f" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg></div>
+      <div><div class="qa-lbl">音声メモ<br>録音</div></div>
+    </div>
+    <div class="qa-card" onclick="switchScreen('estimate')">
+      <div class="qa-ico g"><svg width="20" height="20" fill="none" stroke="#3dd68c" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg></div>
+      <div><div class="qa-lbl">AI見積<br>作成</div></div>
+    </div>
+    <div class="qa-card" onclick="switchScreen('photos')">
+      <div class="qa-ico b"><svg width="20" height="20" fill="none" stroke="#4a9eff" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+      <div><div class="qa-lbl">現場<br>写真</div></div>
+    </div>
+    <div class="qa-card" onclick="openModal('newProject')" style="grid-column:span 2;">
+      <div class="qa-ico p"><svg width="20" height="20" fill="none" stroke="#b06aff" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+      <div><div class="qa-lbl">新規案件登録</div><div class="qa-sub">顧客情報・現場情報を入力</div></div>
+    </div>
+  </div>
+
+  <div class="section-title">進行中案件</div>
+  <div id="projectList">
+    <div class="proj-card c-orange" onclick="selectProject('moku');switchScreen('estimate')">
+      <div class="pc-top">
+        <div><div class="pc-name">カフェ「MOKU」内装改装</div><div class="pc-loc">📍 大分市中央町 3-12</div></div>
+        <div class="chip orange">打合中</div>
+      </div>
+      <div class="pc-meta">
+        <div class="pc-meta-item">面積: <strong>42㎡</strong></div>
+        <div class="pc-meta-item">見積: <strong>¥1,408,000</strong></div>
+        <div class="pc-meta-item">着工: <strong>3/15</strong></div>
+      </div>
+    </div>
+    <div class="proj-card c-blue" onclick="selectProject('beauty');switchScreen('sketch')">
+      <div class="pc-top">
+        <div><div class="pc-name">美容室リノベーション</div><div class="pc-loc">📍 別府市北浜 1-5</div></div>
+        <div class="chip blue">現調予定</div>
+      </div>
+      <div class="pc-meta">
+        <div class="pc-meta-item">面積: <strong>28㎡</strong></div>
+        <div class="pc-meta-item">見積: <strong>作成中</strong></div>
+        <div class="pc-meta-item">現調: <strong>3/5</strong></div>
+      </div>
+    </div>
+    <div class="proj-card c-green">
+      <div class="pc-top">
+        <div><div class="pc-name">居酒屋 壁紙張替</div><div class="pc-loc">📍 大分市春日町</div></div>
+        <div class="chip green">完了</div>
+      </div>
+      <div class="pc-meta">
+        <div class="pc-meta-item">面積: <strong>18㎡</strong></div>
+        <div class="pc-meta-item">見積: <strong>¥374,000</strong></div>
+        <div class="pc-meta-item">完工: <strong>2/28</strong></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SKETCH -->
+<div class="screen" id="screen-sketch">
+  <div class="section-title">平面図スケッチ & 実測入力</div>
+  <div class="canvas-toolbar">
+    <div class="tool-btn active" id="tb-pen" onclick="setTool('pen',this)">✏️ ペン</div>
+    <div class="tool-btn" id="tb-rect" onclick="setTool('rect',this)">⬜ 矩形</div>
+    <div class="tool-btn" id="tb-line" onclick="setTool('line',this)">╱ 直線</div>
+    <div class="tool-btn" id="tb-dim" onclick="setTool('dim',this)">↔ 寸法</div>
+    <div class="tool-btn" id="tb-door" onclick="setTool('door',this)">🚪 扉</div>
+    <div class="tool-btn" id="tb-sash" onclick="setTool('sash',this)">🪟 サッシ</div>
+    <div class="tool-btn" id="tb-erase" onclick="setTool('erase',this)">🧹 消しゴム</div>
+    <div class="tool-btn" onclick="undoDraw()">↩ 戻す</div>
+    <div class="tool-btn" onclick="clearCanvas()">🗑 全消去</div>
+  </div>
+  <div style="font-size:10px;color:var(--muted);padding:2px 2px 4px;">
+    🚪 扉・🪟 サッシ：縦にドラッグ→縦向き　横にドラッグ→横向き　その後動かした方向に開きます
+  </div>
+  <div class="canvas-wrap" id="canvasWrap">
+    <canvas id="sketchCanvas"></canvas>
+  </div>
+
+  <div class="section-title" style="margin-top:16px;">実測入力</div>
+  <div class="measure-list">
+    <div class="measure-row">
+      <div class="measure-lbl">間口 (幅)</div>
+      <input class="measure-input" id="mWidth" type="text" value="5400" inputmode="decimal" oninput="calcAuto()">
+      <div class="measure-unit">mm</div>
+    </div>
+    <div class="measure-row">
+      <div class="measure-lbl">奥行 (深さ)</div>
+      <input class="measure-input" id="mDepth" type="text" value="7800" inputmode="decimal" oninput="calcAuto()">
+      <div class="measure-unit">mm</div>
+    </div>
+    <div class="measure-row">
+      <div class="measure-lbl">天井高</div>
+      <input class="measure-input" id="mHeight" type="text" value="2400" inputmode="decimal" oninput="calcAuto()">
+      <div class="measure-unit">mm</div>
+    </div>
+    <div class="measure-row">
+      <div class="measure-lbl">開口部(ドア等)</div>
+      <input class="measure-input" id="mOpenings" type="text" value="3.6" inputmode="decimal" oninput="calcAuto()">
+      <div class="measure-unit">㎡</div>
+    </div>
+    <div class="measure-row" style="background:rgba(61,214,140,.04);">
+      <div class="measure-lbl" style="font-weight:600;">床面積 <span style="font-size:10px;color:var(--green);">自動</span></div>
+      <input class="measure-input auto" id="calcFloor" readonly value="42.12">
+      <div class="measure-unit">㎡</div>
+    </div>
+    <div class="measure-row" style="background:rgba(61,214,140,.04);">
+      <div class="measure-lbl" style="font-weight:600;">壁面積 <span style="font-size:10px;color:var(--green);">自動</span></div>
+      <input class="measure-input auto" id="calcWall" readonly value="125.1">
+      <div class="measure-unit">㎡</div>
+    </div>
+    <div class="measure-row" style="background:rgba(61,214,140,.04);">
+      <div class="measure-lbl" style="font-weight:600;">天井面積 <span style="font-size:10px;color:var(--green);">自動</span></div>
+      <input class="measure-input auto" id="calcCeiling" readonly value="42.12">
+      <div class="measure-unit">㎡</div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="switchScreen('photos')" style="flex:1;">📷 写真を撮る</button>
+    <button class="btn btn-primary" onclick="goToEstimate()" style="flex:2;">この実測でAI見積作成 →</button>
+  </div>
+</div>
+
+<!-- ESTIMATE -->
+<div class="screen" id="screen-estimate">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">
+    <div>
+      <div style="font-size:15px;font-weight:700;" id="estProjectName">カフェ「MOKU」内装改装</div>
+      <div style="font-size:11px;color:var(--muted);" id="estDate">見積日: 2025年3月3日</div>
+    </div>
+    <div class="ai-badge">✦ AI計算</div>
+  </div>
+
+  <div class="est-hero" style="margin-top:12px;">
+    <div class="est-hero-lbl">合計金額（税込）</div>
+    <div class="est-hero-num" id="estTotal">¥1,408,000<span> 円</span></div>
+    <div class="est-breakdown">
+      <div class="est-bd-item">材料費 <strong id="bMaterial">¥640,000</strong></div>
+      <div class="est-bd-item">施工費 <strong id="bLabor">¥640,000</strong></div>
+      <div class="est-bd-item">消費税 <strong id="bTax">¥128,000</strong></div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;margin-bottom:12px;">
+    <button class="tool-btn" onclick="openAIEstimate()" style="flex:1;justify-content:center;">✦ AI自動計算</button>
+    <button class="tool-btn" onclick="openModal('addItem')" style="flex:1;justify-content:center;">＋ 項目追加</button>
+    <button class="tool-btn" onclick="openModal('pricemaster')" style="flex:1;justify-content:center;">📋 単価表</button>
+  </div>
+
+  <div class="est-table">
+    <div class="est-row hdr">
+      <div class="ec-name">項目</div>
+      <div class="ec-qty">数量</div>
+      <div class="ec-price">金額</div>
+      <div style="width:26px;"></div>
+    </div>
+    <div id="estItems"></div>
+  </div>
+  <button class="add-item-btn" onclick="openModal('addItem')">＋ 項目を追加</button>
+
+  <div class="btn-row" style="margin-top:16px;">
+    <button class="btn btn-secondary" onclick="generatePDF()" style="flex:1;">📄 PDF出力</button>
+    <button class="btn btn-primary" onclick="shareEstimate()" style="flex:1;">📤 顧客へ送付</button>
+  </div>
+
+  <div class="section-title">単価マスター（参照）</div>
+  <div class="price-master" id="priceMasterRef"></div>
+</div>
+
+<!-- VOICE / MEMO -->
+<div class="screen" id="screen-voice">
+  <div class="section-title">打ち合わせメモ & AI解析</div>
+
+  <!-- マイク録音 -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px;text-align:center;">
+    <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:12px;">🎙 マイク録音（Chrome直接起動時）</div>
+    <div id="micRing" onclick="toggleRecord()"
+      style="width:72px;height:72px;border-radius:50%;background:var(--red);
+      display:flex;align-items:center;justify-content:center;margin:0 auto 10px;
+      cursor:pointer;transition:all .2s;box-shadow:0 0 0 0 rgba(239,68,68,.4);"
+      class="mic-ring">
+      <svg width="30" height="30" fill="white" viewBox="0 0 24 24">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke="white" stroke-width="2" fill="none"/>
+        <line x1="12" y1="19" x2="12" y2="23" stroke="white" stroke-width="2"/>
+        <line x1="8" y1="23" x2="16" y2="23" stroke="white" stroke-width="2"/>
+      </svg>
+    </div>
+    <div id="voiceSt" style="font-size:12px;color:var(--muted);">タップで録音開始</div>
+    <div id="voiceTimer" style="font-size:20px;font-weight:700;color:var(--text);margin:4px 0;font-family:var(--font-mono);">00:00</div>
+    <div id="speechStatus" style="display:none;font-size:11px;color:var(--accent);margin-top:4px;">● リアルタイム認識中</div>
+  </div>
+
+  <!-- 音声ファイルインポート -->
+  <div id="audioImportWrap" style="margin-bottom:12px;">
+    <div onclick="document.getElementById('audioFileInput').click()"
+      style="border:1.5px dashed var(--border);border-radius:10px;padding:12px 14px;
+      cursor:pointer;background:var(--surface);display:flex;align-items:center;gap:10px;">
+      <svg width="22" height="22" fill="none" stroke="var(--muted)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);">音声ファイルをインポート</div>
+        <div id="importedFileName" style="font-size:10px;color:var(--muted);">m4a・mp3・wav対応（Talixレコーダー）</div>
+      </div>
+      <input type="file" id="audioFileInput" accept="audio/*" style="display:none" onchange="handleAudioFile(event)">
+    </div>
+    <div id="audioPlayerWrap" style="display:none;"></div>
+  </div>
+
+  <!-- Talix連携フロー説明 -->
+  <div style="background:linear-gradient(135deg,rgba(245,166,35,.1),rgba(74,158,255,.07));border:1px solid rgba(245,166,35,.25);border-radius:12px;padding:13px 14px;margin-bottom:12px;">
+    <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px;">📱 Talix連携の流れ</div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text);flex-wrap:wrap;">
+      <span style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;">① Talixで録音</span>
+      <span style="color:var(--muted);">→</span>
+      <span style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;">② AI文字起こし / 議事録</span>
+      <span style="color:var(--muted);">→</span>
+      <span style="background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.3);border-radius:6px;padding:4px 10px;color:var(--accent);">③ ここにペースト</span>
+      <span style="color:var(--muted);">→</span>
+      <span style="background:rgba(61,214,140,.1);border:1px solid rgba(61,214,140,.3);border-radius:6px;padding:4px 10px;color:var(--green);">④ 見積へ自動反映</span>
+    </div>
+  </div>
+
+  <!-- テキスト入力エリア -->
+  <div style="font-size:11px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;">
+    <span>Talixの文字起こし・議事録テキストをペースト</span>
+    <button onclick="clearMemoInput()" style="font-size:10px;background:none;border:none;color:var(--muted);cursor:pointer;font-family:var(--font);">クリア</button>
+  </div>
+  <textarea id="memoInputArea"
+    style="width:100%;min-height:160px;background:var(--surface);border:1px solid var(--border);
+    border-radius:12px;padding:13px 14px;color:var(--text);font-size:13px;
+    font-family:var(--font);resize:none;outline:none;line-height:1.8;
+    transition:border-color .2s;"
+    placeholder="ここにTalixの文字起こしや議事録テキストをペーストしてください。
+
+例）
+お客様：壁はブリックタイル調のクロスにしてほしいです。
+担当：承知しました。床はどうされますか？
+お客様：床はフローリングで、傷がつきにくいものをお願いします。予算は少し超えてもいいので品質重視で。
+担当：天井は白で統一しますか？
+お客様：はい、それでお願いします。"
+    oninput="onMemoInput(this)"
+    onfocus="this.style.borderColor='var(--accent)'"
+    onblur="this.style.borderColor='var(--border)'"></textarea>
+
+  <!-- 文字数・アクションバー -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin:8px 0 10px;">
+    <span id="memoCharCount" style="font-size:11px;color:var(--muted);">0 文字</span>
+    <div style="display:flex;gap:6px;">
+      <button onclick="insertSampleText()" style="font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--muted);padding:5px 10px;cursor:pointer;font-family:var(--font);">サンプル挿入</button>
+    </div>
+  </div>
+
+  <!-- AIアクションボタン -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+    <button onclick="aiOrganizeMemo()" 
+      style="background:rgba(176,106,255,.12);border:1px solid rgba(176,106,255,.3);
+      border-radius:10px;padding:13px;color:#b06aff;font-size:13px;font-weight:700;
+      cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:6px;">
+      ✦ メモを整理
+    </button>
+    <button onclick="aiExtractToEstimate()"
+      style="background:var(--accent);border:none;
+      border-radius:10px;padding:13px;color:#000;font-size:13px;font-weight:700;
+      cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:6px;">
+      → 見積へ反映
+    </button>
+    <button onclick="aiSaveAsMemo()"
+      style="background:var(--surface);border:1px solid var(--border);
+      border-radius:10px;padding:13px;color:var(--text);font-size:13px;font-weight:600;
+      cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:6px;
+      grid-column:span 2;">
+      💾 整理してメモ保存
+    </button>
+  </div>
+
+  <!-- 整理結果プレビュー -->
+  <div id="organizedResult" style="display:none;">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+      AI整理結果 <span class="ai-badge">✦ Claude AI</span>
+    </div>
+    <div id="organizedText" style="background:var(--surface);border:1px solid var(--accent);border-radius:12px;
+      padding:13px 14px;font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;
+      margin-bottom:10px;"></div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="saveOrganizedMemo()" class="btn btn-secondary" style="flex:1;">💾 保存</button>
+      <button onclick="applyOrganizedToEstimate()" class="btn btn-primary" style="flex:1;">見積へ反映 →</button>
+    </div>
+  </div>
+
+  <!-- 保存済みメモ -->
+  <div class="section-title" style="margin-top:20px;">保存済みメモ</div>
+  <div class="vn-list" id="voiceNoteList"></div>
+</div>
+
+<!-- PHOTOS -->
+<div class="screen" id="screen-photos">
+  <div class="section-title">現場写真管理</div>
+  <div class="photo-filter" id="photoFilter">
+    <div class="pf-btn active" onclick="filterPhotos('all',this)">すべて</div>
+    <div class="pf-btn" onclick="filterPhotos('before',this)">施工前</div>
+    <div class="pf-btn" onclick="filterPhotos('during',this)">施工中</div>
+    <div class="pf-btn" onclick="filterPhotos('after',this)">施工後</div>
+    <div class="pf-btn" onclick="filterPhotos('issue',this)">要確認</div>
+  </div>
+  <div class="photo-grid" id="photoGrid">
+    <div class="photo-add-btn" onclick="document.getElementById('photoInput').click()">
+      <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      <span>写真追加</span>
+      <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="addPhoto(event)">
+    </div>
+  </div>
+  <div id="noPhotos" style="text-align:center;padding:30px;color:var(--muted);font-size:13px;">
+    📷 写真を追加して現場記録を残しましょう
+  </div>
+</div>
+</main>
+
+<!-- BOTTOM NAV -->
+<nav class="bottomnav">
+  <button class="nav-btn active" id="nav-home" onclick="switchScreen('home')">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>ホーム
+  </button>
+  <button class="nav-btn" id="nav-sketch" onclick="switchScreen('sketch')">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>平面図
+  </button>
+  <button class="nav-btn" id="nav-estimate" onclick="switchScreen('estimate')">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>見積
+  </button>
+  <button class="nav-btn" id="nav-voice" onclick="switchScreen('voice')">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>メモ
+  </button>
+  <button class="nav-btn" id="nav-photos" onclick="switchScreen('photos')">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>写真
+  </button>
+</nav>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal-sheet" id="modalSheet"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== STATE =====
+const state = {
+  currentProject: 'moku',
+  userName: '山田',
+  companyName: '',
+  companyZip: '',
+  companyAddr: '',
+  companyTel: '',
+  companyFax: '',
+  projects: {
+    moku: { name:'カフェ「MOKU」内装改装', client:'株式会社MOKU', addr:'大分市中央町3-12', floor:42.12, wall:125.1, ceiling:42.12 },
+    beauty: { name:'美容室リノベーション', client:'Hair Studio K', addr:'別府市北浜1-5', floor:28, wall:84, ceiling:28 }
+  },
+  measurements: { width:5400, depth:7800, height:2400, openings:3.6 },
+  estimateItems: [
+    { id:1, name:'壁紙（クロス）張替', spec:'LW-11 ベージュ系', qty:125.1, unit:'㎡', unitPrice:2800, category:'material' },
+    { id:2, name:'フローリング施工', spec:'複合フローリング', qty:42.12, unit:'㎡', unitPrice:4500, category:'material' },
+    { id:3, name:'天井クロス張替', spec:'白系 / 42㎡', qty:42.12, unit:'㎡', unitPrice:2000, category:'material' },
+    { id:4, name:'壁紙施工費', spec:'', qty:125.1, unit:'㎡', unitPrice:1500, category:'labor' },
+    { id:5, name:'床施工費', spec:'', qty:42.12, unit:'㎡', unitPrice:3000, category:'labor' },
+    { id:6, name:'下地補修・パテ', spec:'', qty:1, unit:'式', unitPrice:85000, category:'labor' },
+    { id:7, name:'養生・廃材処分', spec:'', qty:1, unit:'式', unitPrice:33000, category:'other' },
+  ],
+  voiceNotes: [
+    { id:1, project:'moku', text:'カウンター下の配管確認が必要。電気工事士に連絡すること。壁紙は明るめのベージュ系希望とのこと。', time:'3/3 10:42', duration:'0:38' },
+    { id:2, project:'beauty', text:'美容室。シャンプー台横の壁は防水対応が必須。床はクッションフロアでよい。予算は50万以内希望。', time:'3/1 14:15', duration:'1:02' },
+    { id:3, project:'moku', text:'間仕切りを追加したい（カウンター〜テーブル間）。ブリックタイル調クロス希望。品質重視でOK。', time:'3/2 14:00', duration:'0:55' },
+  ],
+  photos: [],
+  priceMaster: [
+    { name:'壁紙（クロス）材料', unit:'㎡', price:1200, cat:'material' },
+    { name:'クロス施工費', unit:'㎡', price:1500, cat:'labor' },
+    { name:'フローリング材料', unit:'㎡', price:3500, cat:'material' },
+    { name:'フローリング施工費', unit:'㎡', price:3000, cat:'labor' },
+    { name:'タイル材料', unit:'㎡', price:4500, cat:'material' },
+    { name:'タイル施工費', unit:'㎡', price:5000, cat:'labor' },
+    { name:'天井クロス材料', unit:'㎡', price:800, cat:'material' },
+    { name:'天井クロス施工費', unit:'㎡', price:2000, cat:'labor' },
+    { name:'クッションフロア', unit:'㎡', price:1800, cat:'material' },
+    { name:'CF施工費', unit:'㎡', price:2000, cat:'labor' },
+    { name:'防水加工', unit:'㎡', price:3000, cat:'labor' },
+    { name:'下地補修（パテ）', unit:'式', price:85000, cat:'labor' },
+    { name:'養生・廃材処分', unit:'式', price:33000, cat:'other' },
+    { name:'間仕切り壁設置', unit:'m', price:45000, cat:'labor' },
+  ],
+  canvasHistory: [],
+  recording: false,
+  timerInterval: null,
+  recSeconds: 0,
+  currentTranscript: '',
+};
+
+// ===== NAVIGATION =====
+function switchScreen(name) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  const nb = document.getElementById('nav-'+name);
+  if(nb) nb.classList.add('active');
+  if(name==='estimate') renderEstimate();
+  if(name==='voice') renderVoiceNotes();
+  if(name==='photos') renderPhotos();
+  if(name==='sketch') {
+    setTimeout(()=>{
+      if(!canvasReady) {
+        initCanvas();
+      } else {
+        resizeCanvas();
+      }
+    }, 80);
+  }
+}
+
+function selectProject(id) {
+  state.currentProject = id;
+  const p = state.projects[id];
+  if(p) {
+    document.getElementById('topbarProject').innerHTML = `案件: <span>${p.name.substring(0,10)}</span>`;
+    document.getElementById('estProjectName').textContent = p.name;
+  }
+}
+
+// ===== API KEY =====
+function getApiKey() {
+  return localStorage.getItem('genba_api_key') || '';
+}
+
+function noKeyFallback(fn) {
+  showToast('APIキー未設定。設定 ⚙️ からAPIキーを入力してください', 'error');
+  if(fn) fn();
+}
+
+function callClaude(messages, maxTokens=800) {
+  const key = getApiKey();
+  if(!key) return Promise.reject(new Error('NO_KEY'));
+  return fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens, messages })
+  }).then(r => {
+    if(!r.ok) return r.json().then(e => { throw new Error(e.error?.message || 'API Error ' + r.status); });
+    return r.json();
+  });
+}
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(()=>t.className='toast',2200);
+}
+
+// ===== CANVAS =====
+let canvas, ctx, drawing=false, tool='pen', startX, startY;
+let canvasReady = false;
+// グリッド専用オフスクリーン
+let gridCanvas, gridCtx;
+// 描画内容専用オフスクリーン（グリッドと分離）
+let drawCanvas, drawCtx;
+
+function initCanvas() {
+  canvas = document.getElementById('sketchCanvas');
+  if(!canvas) return;
+  ctx = canvas.getContext('2d');
+
+  gridCanvas = document.createElement('canvas');
+  gridCtx    = gridCanvas.getContext('2d');
+  drawCanvas = document.createElement('canvas');
+  drawCtx    = drawCanvas.getContext('2d');
+
+  resizeCanvas();
+
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', onDraw);
+  canvas.addEventListener('mouseup',   endDraw);
+  canvas.addEventListener('mouseleave',endDraw);
+  canvas.addEventListener('touchstart', e=>{e.preventDefault(); startDraw(e);}, {passive:false});
+  canvas.addEventListener('touchmove',  e=>{e.preventDefault(); onDraw(e);},   {passive:false});
+  canvas.addEventListener('touchend',   e=>{e.preventDefault(); endDraw();},   {passive:false});
+
+  canvasReady = true;
+}
+
+function resizeCanvas() {
+  if(!canvas) return;
+  if(!gridCanvas) {
+    gridCanvas = document.createElement('canvas');
+    gridCtx    = gridCanvas.getContext('2d');
+    drawCanvas = document.createElement('canvas');
+    drawCtx    = drawCanvas.getContext('2d');
+  }
+  const wrap = document.getElementById('canvasWrap') || canvas.parentElement;
+  const w = wrap.offsetWidth;
+  if(w === 0) return;
+  const h = Math.min(500, Math.max(320, window.innerHeight * 0.52));
+
+  // サイズ変更前に描画内容を退避
+  let savedData = null;
+  if(drawCanvas.width > 0 && state.canvasHistory.length > 0) {
+    savedData = state.canvasHistory[state.canvasHistory.length - 1];
+  }
+
+  canvas.width     = w; canvas.height     = h;
+  gridCanvas.width = w; gridCanvas.height = h;
+  drawCanvas.width = w; drawCanvas.height = h;
+
+  // グリッド描画
+  buildGrid();
+
+  // 描画内容を復元
+  if(savedData) {
+    const img = new Image();
+    img.onload = () => { drawCtx.drawImage(img, 0, 0); composite(); };
+    img.src = savedData;
+  } else {
+    composite();
+  }
+}
+
+// グリッドをgridCanvasに描く
+function buildGrid() {
+  if(!gridCtx || gridCanvas.width === 0) return;
+  gridCtx.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
+  gridCtx.strokeStyle = '#2e3348';
+  gridCtx.lineWidth   = 0.5;
+  for(let x = 0; x <= gridCanvas.width;  x += 20) {
+    gridCtx.beginPath(); gridCtx.moveTo(x,0); gridCtx.lineTo(x,gridCanvas.height); gridCtx.stroke();
+  }
+  for(let y = 0; y <= gridCanvas.height; y += 20) {
+    gridCtx.beginPath(); gridCtx.moveTo(0,y); gridCtx.lineTo(gridCanvas.width,y); gridCtx.stroke();
+  }
+}
+
+// グリッド + 描画内容を表示キャンバスに合成
+function composite() {
+  if(!ctx || canvas.width === 0) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(gridCanvas, 0, 0);   // グリッドを底に
+  ctx.drawImage(drawCanvas, 0, 0);   // 描画を上に
+}
+
+function setTool(t, el) {
+  tool = t;
+  document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function getPos(e) {
+  const r   = canvas.getBoundingClientRect();
+  const src = e.touches ? e.touches[0] : e;
+  return {
+    x: (src.clientX - r.left) * (canvas.width  / r.width),
+    y: (src.clientY - r.top)  * (canvas.height / r.height)
+  };
+}
+
+// ===== 描画 =====
+let shapeSnapshot = null; // シェイプ系プレビュー用スナップショット
+
+function startDraw(e) {
+  drawing = true;
+  const p = getPos(e);
+  startX = p.x; startY = p.y;
+
+  if(tool === 'pen' || tool === 'erase') {
+    drawCtx.beginPath();
+    drawCtx.moveTo(startX, startY);
+  } else {
+    // シェイプ系：描画開始時点のdrawCanvasを保存（同期）
+    shapeSnapshot = drawCtx.getImageData(0, 0, drawCanvas.width, drawCanvas.height);
+  }
+}
+
+function onDraw(e) {
+  if(!drawing) return;
+  const p = getPos(e);
+
+  if(tool === 'pen') {
+    drawCtx.strokeStyle = '#f5a623';
+    drawCtx.lineWidth   = 2;
+    drawCtx.lineCap     = 'round';
+    drawCtx.lineJoin    = 'round';
+    drawCtx.lineTo(p.x, p.y);
+    drawCtx.stroke();
+    composite();
+
+  } else if(tool === 'erase') {
+    drawCtx.globalCompositeOperation = 'destination-out';
+    drawCtx.lineWidth = 20;
+    drawCtx.lineCap   = 'round';
+    drawCtx.lineTo(p.x, p.y);
+    drawCtx.stroke();
+    drawCtx.globalCompositeOperation = 'source-over';
+    composite();
+
+  } else {
+    // シェイプ系：スナップショットに戻してからプレビュー描画（同期）
+    if(shapeSnapshot) drawCtx.putImageData(shapeSnapshot, 0, 0);
+    drawShape(p.x, p.y);
+    composite();
+  }
+}
+
+function drawShape(ex, ey) {
+  const dx = ex - startX, dy = ey - startY;
+  drawCtx.strokeStyle = '#f5a623';
+  drawCtx.lineWidth   = 2;
+  drawCtx.lineCap     = 'round';
+
+  if(tool === 'rect') {
+    drawCtx.strokeRect(startX, startY, dx, dy);
+
+  } else if(tool === 'line') {
+    drawCtx.beginPath();
+    drawCtx.moveTo(startX, startY);
+    drawCtx.lineTo(ex, ey);
+    drawCtx.stroke();
+
+  } else if(tool === 'dim') {
+    drawCtx.beginPath();
+    drawCtx.moveTo(startX, startY);
+    drawCtx.lineTo(ex, ey);
+    drawCtx.stroke();
+    const len = Math.round(Math.hypot(dx, dy));
+    drawCtx.fillStyle = '#f5a623';
+    drawCtx.font      = 'bold 11px DM Mono,monospace';
+    drawCtx.fillText(len + 'px', (startX+ex)/2 - 16, (startY+ey)/2 - 6);
+
+  } else if(tool === 'door') {
+    // ドラッグ方向を自動判定：横長なら横扉、縦長なら縦扉
+    const isH = Math.abs(dx) >= Math.abs(dy);
+    drawDoor(startX, startY, ex, ey, dx, dy, isH);
+
+  } else if(tool === 'sash') {
+    const isH = Math.abs(dx) >= Math.abs(dy);
+    drawSash(startX, startY, ex, ey, dx, dy, isH);
+  }
+}
+
+// 扉：建築図面標準（壁線 + 扉弧）
+// isH=true→横扉（壁が横、扉がy方向に開く）
+// isH=false→縦扉（壁が縦、扉がx方向に開く）
+function drawDoor(x1, y1, x2, y2, dx, dy, isH) {
+  drawCtx.strokeStyle = '#4a9eff';
+  drawCtx.lineWidth   = 2;
+  drawCtx.lineCap     = 'round';
+
+  if(isH) {
+    // 横扉：壁は x軸方向、扉は y方向に開く
+    const r = Math.abs(dx);
+    const sign = dy >= 0 ? 1 : -1;
+    // 壁線
+    drawCtx.beginPath();
+    drawCtx.moveTo(x1, y1); drawCtx.lineTo(x2, y1);
+    drawCtx.stroke();
+    // 弧
+    drawCtx.beginPath();
+    if(dx >= 0) {
+      drawCtx.arc(x1, y1, r, 0, sign * Math.PI/2, sign < 0);
+    } else {
+      drawCtx.arc(x1, y1, r, Math.PI, Math.PI - sign * Math.PI/2, sign > 0);
+    }
+    drawCtx.stroke();
+
+  } else {
+    // 縦扉：壁は y軸方向、扉は x方向に開く
+    const r = Math.abs(dy);
+    const sign = dx >= 0 ? 1 : -1;
+    // 壁線
+    drawCtx.beginPath();
+    drawCtx.moveTo(x1, y1); drawCtx.lineTo(x1, y2);
+    drawCtx.stroke();
+    // 弧
+    drawCtx.beginPath();
+    if(dy >= 0) {
+      drawCtx.arc(x1, y1, r, Math.PI/2, Math.PI/2 - sign * Math.PI/2, sign > 0);
+    } else {
+      drawCtx.arc(x1, y1, r, -Math.PI/2, -Math.PI/2 - sign * Math.PI/2, sign > 0);
+    }
+    drawCtx.stroke();
+  }
+}
+
+// サッシ（引き違い）：isH=true→横、false→縦
+function drawSash(x1, y1, x2, y2, dx, dy, isH) {
+  drawCtx.strokeStyle = '#3dd68c';
+  drawCtx.lineWidth   = 2;
+  drawCtx.strokeRect(x1, y1, dx, dy);
+
+  drawCtx.lineWidth = 1.5;
+  if(isH) {
+    // 横サッシ：縦2分割
+    const mx = x1 + dx / 2;
+    drawCtx.beginPath(); drawCtx.moveTo(mx, y1); drawCtx.lineTo(mx, y2); drawCtx.stroke();
+    drawCtx.strokeStyle = 'rgba(61,214,140,.45)';
+    drawCtx.beginPath(); drawCtx.moveTo(x1 + dx*0.25, y1+3); drawCtx.lineTo(x1 + dx*0.25, y2-3); drawCtx.stroke();
+    drawCtx.beginPath(); drawCtx.moveTo(x1 + dx*0.75, y1+3); drawCtx.lineTo(x1 + dx*0.75, y2-3); drawCtx.stroke();
+  } else {
+    // 縦サッシ：横2分割
+    const my = y1 + dy / 2;
+    drawCtx.beginPath(); drawCtx.moveTo(x1, my); drawCtx.lineTo(x2, my); drawCtx.stroke();
+    drawCtx.strokeStyle = 'rgba(61,214,140,.45)';
+    drawCtx.beginPath(); drawCtx.moveTo(x1+3, y1 + dy*0.25); drawCtx.lineTo(x2-3, y1 + dy*0.25); drawCtx.stroke();
+    drawCtx.beginPath(); drawCtx.moveTo(x1+3, y1 + dy*0.75); drawCtx.lineTo(x2-3, y1 + dy*0.75); drawCtx.stroke();
+  }
+}
+
+function endDraw() {
+  if(!drawing) return;
+  drawing = false;
+  // 履歴にdrawCanvas内容を保存
+  state.canvasHistory.push(drawCanvas.toDataURL());
+  if(state.canvasHistory.length > 30) state.canvasHistory.shift();
+}
+
+function undoDraw() {
+  state.canvasHistory.pop();
+  drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+  if(state.canvasHistory.length > 0) {
+    const img = new Image();
+    img.onload = () => { drawCtx.drawImage(img, 0, 0); composite(); };
+    img.src = state.canvasHistory[state.canvasHistory.length - 1];
+  } else {
+    composite();
+  }
+}
+
+function clearCanvas() {
+  drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+  state.canvasHistory = [];
+  composite();
+}
+
+function saveSketch() {
+  showToast('スケッチを保存しました ✓');
+}
+
+// 古い関数（互換）
+function drawGrid() { composite(); }
+function redrawAll() { composite(); }
+function drawGridToOffscreen() { buildGrid(); }
+
+// ===== MEASUREMENTS =====
+function calcAuto() {
+  const w = parseFloat(document.getElementById('mWidth').value.replace(',',''))||0;
+  const d = parseFloat(document.getElementById('mDepth').value.replace(',',''))||0;
+  const h = parseFloat(document.getElementById('mHeight').value.replace(',',''))||0;
+  const op = parseFloat(document.getElementById('mOpenings').value)||0;
+  const floor = Math.round((w/1000)*(d/1000)*100)/100;
+  const wall = Math.round(((w/1000 + d/1000)*2*(h/1000) - op)*10)/10;
+  const ceil = floor;
+  document.getElementById('calcFloor').value = floor.toFixed(2);
+  document.getElementById('calcWall').value = wall.toFixed(1);
+  document.getElementById('calcCeiling').value = ceil.toFixed(2);
+  state.measurements = { width:w, depth:d, height:h, openings:op };
+}
+
+function goToEstimate() {
+  const floor = parseFloat(document.getElementById('calcFloor').value)||42.12;
+  const wall = parseFloat(document.getElementById('calcWall').value)||125.1;
+  const ceil = parseFloat(document.getElementById('calcCeiling').value)||42.12;
+  state.projects[state.currentProject].floor = floor;
+  state.projects[state.currentProject].wall = wall;
+  state.projects[state.currentProject].ceiling = ceil;
+  switchScreen('estimate');
+  showToast('実測値を見積に反映しました ✓');
+}
+
+// ===== ESTIMATE =====
+function calcEstimateTotal() {
+  let material=0, labor=0, other=0;
+  state.estimateItems.forEach(item=>{
+    const sub = item.qty * item.unitPrice;
+    if(item.category==='material') material+=sub;
+    else if(item.category==='labor') labor+=sub;
+    else other+=sub;
+  });
+  const subtotal = material+labor+other;
+  const tax = Math.round(subtotal*0.1);
+  const total = subtotal+tax;
+  return { material, labor, other, subtotal, tax, total };
+}
+
+function renderEstimate() {
+  const totals = calcEstimateTotal();
+  const eTotal = document.getElementById('estTotal');
+  if(!eTotal) return; // 画面が表示されていない場合はスキップ
+  eTotal.innerHTML = `¥${totals.total.toLocaleString()}<span> 円</span>`;
+  document.getElementById('bMaterial').textContent = `¥${totals.material.toLocaleString()}`;
+  document.getElementById('bLabor').textContent = `¥${totals.labor.toLocaleString()}`;
+  document.getElementById('bTax').textContent = `¥${totals.tax.toLocaleString()}`;
+
+  const tbody = document.getElementById('estItems');
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  state.estimateItems.forEach(item=>{
+    const sub = item.qty * item.unitPrice;
+    const tr = document.createElement('div');
+    tr.className = 'est-row';
+    tr.innerHTML = `
+      <div class="ec-name">
+        <div style="font-weight:600;">${item.name}</div>
+        ${item.spec?`<div style="font-size:10px;color:var(--muted);">${item.spec}</div>`:''}
+      </div>
+      <div class="ec-qty">${item.qty}${item.unit}</div>
+      <div class="ec-price">¥${sub.toLocaleString()}</div>
+      <button class="ec-del" onclick="deleteItem(${item.id})">✕</button>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Subtotal row
+  const sub = document.createElement('div');
+  sub.className = 'est-row';
+  sub.innerHTML = `<div class="ec-name" style="font-weight:700;">小計</div><div class="ec-qty"></div><div class="ec-price">¥${totals.subtotal.toLocaleString()}</div><div style="width:26px;"></div>`;
+  tbody.appendChild(sub);
+  const tax = document.createElement('div');
+  tax.className = 'est-row';
+  tax.innerHTML = `<div class="ec-name" style="color:var(--muted);">消費税（10%）</div><div class="ec-qty"></div><div class="ec-price">¥${totals.tax.toLocaleString()}</div><div style="width:26px;"></div>`;
+  tbody.appendChild(tax);
+  const tot = document.createElement('div');
+  tot.className = 'est-row total-row';
+  tot.innerHTML = `<div class="ec-name" style="font-weight:700;font-size:14px;">合計</div><div class="ec-qty"></div><div class="ec-price accent">¥${totals.total.toLocaleString()}</div><div style="width:26px;"></div>`;
+  tbody.appendChild(tot);
+
+  // Price master ref
+  renderPriceMasterRef();
+}
+
+function renderPriceMasterRef() {
+  const el = document.getElementById('priceMasterRef');
+  if(!el) return;
+  el.innerHTML = state.priceMaster.map(pm=>`
+    <div class="pm-row">
+      <div class="pm-name">${pm.name}</div>
+      <div class="pm-unit">${pm.unit}</div>
+      <div class="pm-price">¥${pm.price.toLocaleString()}</div>
+      <button class="pm-add" onclick="addFromMaster('${pm.name}',${pm.price},'${pm.unit}','${pm.cat}')">＋</button>
+    </div>
+  `).join('');
+}
+
+function deleteItem(id) {
+  state.estimateItems = state.estimateItems.filter(i=>i.id!==id);
+  renderEstimate();
+  showToast('項目を削除しました');
+}
+
+function addFromMaster(name, price, unit, cat) {
+  const qty = prompt(`「${name}」の数量を入力:`, '1');
+  if(!qty) return;
+  state.estimateItems.push({
+    id: Date.now(), name, spec:'', qty:parseFloat(qty)||1, unit, unitPrice:price, category:cat
+  });
+  renderEstimate();
+  showToast(`「${name}」を追加しました ✓`);
+}
+
+// ===== AI ESTIMATE =====
+async function openAIEstimate() {
+  const p = state.projects[state.currentProject];
+  const notes = state.voiceNotes.filter(v=>v.project===state.currentProject).map(v=>v.text).join('\n');
+  showToast('AIが見積を計算中...', '');
+  
+  const prompt = `あなたは内装工事の見積の専門家です。以下の情報から見積項目を生成してください。
+
+案件: ${p.name}
+床面積: ${p.floor}㎡
+壁面積: ${p.wall}㎡
+天井面積: ${p.ceiling}㎡
+顧客メモ: ${notes || 'なし'}
+
+単価マスター（参考）:
+${state.priceMaster.map(pm=>`- ${pm.name}: ¥${pm.price}/${pm.unit}`).join('\n')}
+
+以下のJSON形式のみで回答してください（前後の説明不要）:
+[
+  {"name":"項目名","spec":"仕様詳細","qty":数値,"unit":"単位","unitPrice":単価,"category":"material|labor|other"},
+  ...
+]
+
+実際の面積に基づいて計算し、5〜10項目を返してください。`;
+
+  try {
+    if(!getApiKey()) throw new Error('NO_KEY');
+    const data = await callClaude([{role:'user',content:prompt}], 1000);
+    const text = data.content?.[0]?.text || '[]';
+    const clean = text.replace(/```json|```/g,'').trim();
+    const items = JSON.parse(clean);
+    state.estimateItems = items.map((item,i)=>({...item, id:Date.now()+i}));
+    renderEstimate();
+    showToast('AI見積計算が完了しました ✓');
+  } catch(e) {
+    // フォールバック：面積から標準項目を自動生成
+    const p = state.projects[state.currentProject];
+    state.estimateItems = [
+      {id:Date.now()+1, name:'壁紙（クロス）材料', spec:'LW-11系', qty:parseFloat(p.wall)||0, unit:'㎡', unitPrice:1200, category:'material'},
+      {id:Date.now()+2, name:'クロス施工費', spec:'', qty:parseFloat(p.wall)||0, unit:'㎡', unitPrice:1500, category:'labor'},
+      {id:Date.now()+3, name:'フローリング材料', spec:'複合フローリング', qty:parseFloat(p.floor)||0, unit:'㎡', unitPrice:3500, category:'material'},
+      {id:Date.now()+4, name:'フローリング施工費', spec:'', qty:parseFloat(p.floor)||0, unit:'㎡', unitPrice:3000, category:'labor'},
+      {id:Date.now()+5, name:'天井クロス材料', spec:'白系', qty:parseFloat(p.ceiling)||0, unit:'㎡', unitPrice:800, category:'material'},
+      {id:Date.now()+6, name:'天井クロス施工費', spec:'', qty:parseFloat(p.ceiling)||0, unit:'㎡', unitPrice:2000, category:'labor'},
+      {id:Date.now()+7, name:'下地補修・パテ', spec:'', qty:1, unit:'式', unitPrice:85000, category:'labor'},
+      {id:Date.now()+8, name:'養生・廃材処分', spec:'', qty:1, unit:'式', unitPrice:33000, category:'other'},
+    ];
+    renderEstimate();
+    if(e.message === 'NO_KEY') showToast('⚙️ APIキー未設定。標準見積を生成しました');
+    else showToast('標準見積を自動生成しました（単価・数量は要確認）');
+  }
+}
+
+// ===== VOICE =====
+let mediaRecorder = null;
+let audioChunks = [];
+let speechRecognition = null;
+let realtimeText = '';
+
+async function toggleRecord() {
+  if (!state.recording) {
+    // まずWeb Speech APIを試みる（リアルタイム日本語認識）
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      startSpeechRecognition(SpeechRecognition);
+    } else {
+      // Web Speech非対応 → MediaRecorder + AI要約
+      startMediaRecorder();
+    }
+  } else {
+    stopRecording();
+  }
+}
+
+function startSpeechRecognition(SpeechRecognition) {
+  try {
+    speechRecognition = new SpeechRecognition();
+    speechRecognition.lang = 'ja-JP';
+    speechRecognition.continuous = true;
+    speechRecognition.interimResults = true;
+    realtimeText = '';
+
+    speechRecognition.onstart = () => {
+      state.recording = true;
+      state.recSeconds = 0;
+      document.getElementById('micRing').classList.add('recording');
+      document.getElementById('voiceSt').textContent = '録音中（リアルタイム認識）';
+      document.getElementById('voiceSt').style.color = 'var(--red)';
+      document.getElementById('speechStatus').style.display = 'block';
+      document.getElementById('memoInputArea').value = '話しかけてください...';
+      startTimer();
+    };
+
+    speechRecognition.onresult = (event) => {
+      let interim = '';
+      let final = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          final += event.results[i][0].transcript;
+        } else {
+          interim += event.results[i][0].transcript;
+        }
+      }
+      if (final) realtimeText += final;
+      const mia = document.getElementById('memoInputArea');
+      if(mia) { mia.value = realtimeText + (interim ? '…' + interim : ''); onMemoInput(mia); }
+    };
+
+    speechRecognition.onerror = (e) => {
+      if (e.error === 'not-allowed') {
+        showToast('マイクへのアクセスが拒否されました', 'error');
+        stopRecording();
+      } else if (e.error === 'network') {
+        showToast('ネットワークエラー。Talixファイルインポートをお試しください。', 'error');
+        stopRecording();
+      }
+    };
+
+    speechRecognition.onend = () => {
+      if (state.recording) {
+        // 自動停止された場合は再起動
+        try { speechRecognition.start(); } catch(e) { stopRecording(); }
+      }
+    };
+
+    speechRecognition.start();
+  } catch(e) {
+    showToast('音声認識を開始できませんでした', 'error');
+  }
+}
+
+async function startMediaRecorder() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.onstop = () => {
+      stream.getTracks().forEach(t => t.stop());
+      // MediaRecorderはブラウザ内でのみ録音できるが文字起こしAPI未接続
+      // → AIに「録音完了、内容を整理して」と依頼
+      processRecordedAudio();
+    };
+    mediaRecorder.start();
+    state.recording = true;
+    state.recSeconds = 0;
+    document.getElementById('micRing').classList.add('recording');
+    document.getElementById('voiceSt').textContent = '録音中...';
+    document.getElementById('voiceSt').style.color = 'var(--red)';
+    startTimer();
+  } catch(e) {
+    // マイク不可 → メモ入力モードに切り替え
+    showToast('マイクが使えません。テキスト入力をお試しください。', 'error');
+    openManualMemoModal();
+  }
+}
+
+function stopRecording() {
+  state.recording = false;
+  clearInterval(state.timerInterval);
+  document.getElementById('micRing').classList.remove('recording');
+  document.getElementById('speechStatus').style.display = 'none';
+
+  if (speechRecognition) {
+    speechRecognition.stop();
+    speechRecognition = null;
+    // Web Speech結果をAIで整形
+    if (realtimeText.trim()) {
+      document.getElementById('micRing').classList.add('processing');
+      document.getElementById('voiceSt').textContent = 'AIで整理中...';
+      document.getElementById('voiceSt').style.color = 'var(--accent)';
+      polishTranscript(realtimeText);
+    } else {
+      resetMicUI();
+      showToast('音声が認識されませんでした', 'error');
+    }
+  } else if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop();
+    document.getElementById('micRing').classList.add('processing');
+    document.getElementById('voiceSt').textContent = 'AI処理中...';
+    document.getElementById('voiceSt').style.color = 'var(--accent)';
+  }
+}
+
+function startTimer() {
+  state.timerInterval = setInterval(() => {
+    state.recSeconds++;
+    const m = String(Math.floor(state.recSeconds / 60)).padStart(2, '0');
+    const s = String(state.recSeconds % 60).padStart(2, '0');
+    document.getElementById('voiceTimer').textContent = m + ':' + s;
+  }, 1000);
+}
+
+async function processRecordedAudio() {
+  // MediaRecorderの音声はWhisper APIなしでは文字起こし不可
+  // → ユーザーに手動入力を促す or AIでメモテンプレを提示
+  const p = state.projects[state.currentProject];
+  const prompt = `内装工事現場の打ち合わせ後のメモテンプレートを作成してください。
+案件: ${p.name}
+以下の項目を含む、現場メモのひな形を日本語150字以内で作成してください：
+確認事項、顧客要望、材料指定、注意点。
+テキストのみ返答してください。`;
+  try {
+    const data = await callClaude([{ role: 'user', content: prompt }], 300);
+    const text = data.content?.[0]?.text || '';
+    finishTranscript('【録音完了 - 内容を編集してください】\n' + text);
+  } catch(e) {
+    finishTranscript('【録音完了】\nここに内容を入力してください。');
+  }
+}
+
+// ===== Talixファイルインポート（強化版）=====
+function handleAudioFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const sizeKB = (file.size / 1024).toFixed(0);
+  const sizeMB = (file.size / 1024 / 1024).toFixed(1);
+  const displaySize = file.size > 1024*1024 ? sizeMB+'MB' : sizeKB+'KB';
+
+  // ファイル名表示
+  const fn = document.getElementById('importedFileName');
+  if(fn) { fn.textContent = `📎 ${file.name} (${displaySize})`; fn.style.color = 'var(--accent)'; }
+
+  // 音声プレイヤーを表示
+  showAudioPlayer(file);
+
+  e.target.value = '';
+}
+
+function showAudioPlayer(file) {
+  const wrap = document.getElementById('audioPlayerWrap');
+  if (!wrap) return;
+
+  wrap.style.cssText = 'display:block;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-top:8px;';
+  wrap.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <span style="font-size:18px;">🎵</span>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--text);">${file.name}</div>
+        <div style="font-size:10px;color:var(--muted);">読み込み中...</div>
+      </div>
+    </div>
+    <div id="audioPlayerSlot" style="color:var(--muted);font-size:12px;text-align:center;padding:10px;">⏳ 音声を読み込んでいます...</div>
+  `;
+
+  // FileReaderでBase64変換（Blob URLはサンドボックスで使えないため）
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const slot = document.getElementById('audioPlayerSlot');
+    if (!slot) return;
+    slot.outerHTML = `
+      <audio id="audioPlayer" controls style="width:100%;height:40px;" src="${ev.target.result}"></audio>
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <button onclick="document.getElementById('audioPlayer').playbackRate=0.75"
+          style="flex:1;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:11px;padding:5px;cursor:pointer;">🐢 0.75x</button>
+        <button onclick="document.getElementById('audioPlayer').playbackRate=1.0"
+          style="flex:1;background:var(--surface3);border:1px solid rgba(245,166,35,.4);border-radius:6px;color:var(--accent);font-size:11px;padding:5px;cursor:pointer;">▶ 1.0x</button>
+        <button onclick="document.getElementById('audioPlayer').playbackRate=1.5"
+          style="flex:1;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:11px;padding:5px;cursor:pointer;">🐇 1.5x</button>
+        <button onclick="skipAudio(-5)"
+          style="flex:1;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:11px;padding:5px;cursor:pointer;">↩ 5秒戻し</button>
+      </div>
+    `;
+    showToast('音声を再生しながらメモ欄に内容を入力してください');
+  };
+  reader.onerror = () => {
+    const slot = document.getElementById('audioPlayerSlot');
+    if(slot) slot.innerHTML = '<span style="color:var(--red);">⚠ 読み込み失敗。別のファイルをお試しください。</span>';
+  };
+  reader.readAsDataURL(file);
+
+  // ひな形を自動挿入
+  const ta = document.getElementById('memoInputArea');
+  if (ta && !ta.value.trim()) {
+    ta.value = `【ファイル】${file.name}\n\n【顧客要望】\n\n【材料・仕様】\n\n【確認事項】\n\n【注意点】\n`;
+    ta.focus();
+    onMemoInput(ta);
+  }
+}
+
+function skipAudio(sec) {
+  const p = document.getElementById('audioPlayer');
+  if (p) p.currentTime = Math.max(0, p.currentTime + sec);
+}
+async function polishTranscript(rawText) {
+  const p = state.projects[state.currentProject];
+  const prompt = `以下は内装工事現場の打ち合わせを音声認識した生テキストです。
+案件: ${p.name}
+
+【生テキスト】
+${rawText}
+
+このテキストを読みやすい現場メモとして整理してください。
+誤認識と思われる箇所は（？）を付けてください。
+200字以内でまとめてください。テキストのみ返答してください。`;
+
+  try {
+    if(!getApiKey()) throw new Error('NO_KEY');
+    const data = await callClaude([{ role: 'user', content: prompt }], 400);
+    finishTranscript(data.content?.[0]?.text || rawText);
+  } catch(e) {
+    // APIキーなし or エラー → 生テキストをそのまま使用
+    finishTranscript(rawText);
+    if(e.message === 'NO_KEY') showToast('⚙️ APIキーを設定するとAIが音声テキストを整形します', '');
+  }
+}
+
+function finishTranscript(text) {
+  const mic = document.getElementById('micRing');
+  if(mic) mic.classList.remove('processing');
+  const vs = document.getElementById('voiceSt');
+  if(vs) { vs.textContent = '完了 ✓ メモ欄に内容が入力されました'; vs.style.color = 'var(--green)'; }
+  // memoInputAreaに書き込む
+  const ta = document.getElementById('memoInputArea');
+  if(ta) { ta.value = text; onMemoInput(ta); ta.focus(); }
+  state.currentTranscript = text;
+}
+
+function editTranscript() {
+  const ta = document.getElementById('memoInputArea');
+  if(ta) ta.focus();
+  showToast('メモ欄を直接編集できます ✓');
+}
+
+function resetMicUI() {
+  const mic = document.getElementById('micRing');
+  if(mic) mic.classList.remove('recording', 'processing');
+  const vs = document.getElementById('voiceSt');
+  if(vs) { vs.textContent = 'タップで録音開始'; vs.style.color = ''; }
+  const vt = document.getElementById('voiceTimer');
+  if(vt) vt.textContent = '00:00';
+  const ss = document.getElementById('speechStatus');
+  if(ss) ss.style.display = 'none';
+}
+
+function openManualMemoModal() {
+  openModal('manualMemo');
+}
+
+function saveVoiceNote() {
+  const ta = document.getElementById('memoInputArea');
+  const text = (ta ? ta.value : state.currentTranscript || '').trim();
+  if (!text) { showToast('内容がありません', 'error'); return; }
+  const now = new Date();
+  const timeStr = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const dur = state.recSeconds > 0 ? `${Math.floor(state.recSeconds/60)}:${String(state.recSeconds%60).padStart(2,'0')}` : '—';
+  state.voiceNotes.unshift({
+    id: Date.now(), project: state.currentProject, text, time: timeStr, duration: dur
+  });
+  renderVoiceNotes();
+  document.getElementById('statVoice').textContent = state.voiceNotes.length;
+  showToast('メモを保存しました ✓');
+  if(ta) { ta.value = ''; onMemoInput(ta); }
+  state.currentTranscript = '';
+  const player = document.getElementById('audioPlayerWrap');
+  if(player) { player.style.display='none'; player.innerHTML=''; }
+  const fn = document.getElementById('importedFileName');
+  if(fn) { fn.textContent = 'm4a・mp3・wav対応（Talixレコーダー）'; fn.style.color = ''; }
+  resetMicUI();
+}
+
+async function applyToEstimate() {
+  if(!state.currentTranscript) { showToast('メモ内容がありません', 'error'); return; }
+  showToast('見積項目を抽出中...');
+  const text = state.currentTranscript;
+
+  const prompt = `内装工事の打ち合わせメモから、追加すべき見積項目を抽出してください。
+
+メモ内容: ${text}
+
+JSON形式のみで返答してください:
+[{"name":"項目名","spec":"仕様","qty":数値,"unit":"単位","unitPrice":単価,"category":"material|labor|other"}]
+
+項目がなければ空配列 [] を返してください。単価は日本の内装工事の相場で設定してください。`;
+
+  let items = [];
+  try {
+    if(!getApiKey()) throw new Error('NO_KEY');
+    const data = await callClaude([{role:'user',content:prompt}], 500);
+    const raw = data.content?.[0]?.text||'[]';
+    items = JSON.parse(raw.replace(/```json|```/g,'').trim());
+  } catch(e) {
+    items = localExtractItems(text);
+    if(e.message === 'NO_KEY') showToast('⚙️ APIキーを設定するとAIが正確に抽出します', '');
+  }
+
+  if(items.length > 0){
+    items.forEach((item,i)=>state.estimateItems.push({...item,id:Date.now()+i}));
+    switchScreen('estimate');
+    showToast(`${items.length}項目を見積に追加しました ✓`);
+  } else {
+    showToast('該当項目が見つかりませんでした。手動で追加してください。');
+  }
+}
+
+// ===== テキストメモ（Talix連携） =====
+function onMemoInput(el) {
+  document.getElementById('memoCharCount').textContent = el.value.length + ' 文字';
+}
+
+function clearMemoInput() {
+  document.getElementById('memoInputArea').value = '';
+  document.getElementById('memoCharCount').textContent = '0 文字';
+  document.getElementById('organizedResult').style.display = 'none';
+}
+
+function insertSampleText() {
+  const sample = `お客様：壁はブリックタイル調のクロスにしてほしいです。
+担当：承知しました。床はどうされますか？
+お客様：床はフローリングで、傷がつきにくいものをお願いします。予算は少し超えてもいいので品質重視で。
+担当：天井は白で統一しますか？
+お客様：はい、それでお願いします。カウンター席とテーブル席の間に間仕切りも追加したいです。
+担当：間仕切りの高さはどのくらいご希望ですか？
+お客様：腰くらいの高さで、圧迫感のないものがいいです。`;
+  const ta = document.getElementById('memoInputArea');
+  ta.value = sample;
+  document.getElementById('memoCharCount').textContent = sample.length + ' 文字';
+}
+
+async function aiOrganizeMemo() {
+  const text = document.getElementById('memoInputArea').value.trim();
+  if (!text) { showToast('テキストをペーストしてください', 'error'); return; }
+  const p = state.projects[state.currentProject];
+  showToast('AIで整理中...');
+
+  const prompt = `以下は内装工事現場の打ち合わせ記録です。
+案件名: ${p.name}
+
+【打ち合わせ記録】
+${text}
+
+これを以下の形式で整理してください。テキストのみ、箇条書きで簡潔に：
+
+【顧客要望】
+・（要望を箇条書き）
+
+【材料・仕様】
+・（材料・仕様を箇条書き）
+
+【確認事項】
+・（要確認の事項）
+
+【注意点】
+・（施工時の注意点）`;
+
+  let result = '';
+  try {
+    if(!getApiKey()) throw new Error('NO_KEY');
+    const data = await callClaude([{ role: 'user', content: prompt }], 600);
+    result = data.content?.[0]?.text || '';
+    if (!result) throw new Error('empty');
+  } catch(e) {
+    if(e.message === 'NO_KEY') {
+      result = localOrganizeMemo(text);
+      showToast('⚙️ APIキーを設定するとAIが整形します', '');
+    } else {
+      result = localOrganizeMemo(text);
+    }
+  }
+
+  document.getElementById('organizedText').textContent = result;
+  document.getElementById('organizedResult').style.display = 'block';
+  document.getElementById('organizedResult').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  showToast('整理完了 ✓');
+  state.currentTranscript = result;
+}
+
+// API不使用のローカル整形（キーワードベース）
+function localOrganizeMemo(text) {
+  const lines = text.split(/[\n。！？]/).map(l => l.trim()).filter(l => l.length > 2);
+  
+  const wants = [], materials = [], checks = [], notes = [];
+  const wantKw = ['希望','したい','してほしい','お願い','欲しい','にしたい','でお願い'];
+  const matKw = ['クロス','フローリング','タイル','壁紙','床材','天井','塗装','CF','クッション'];
+  const checkKw = ['確認','要確認','連絡','相談','検討','調べ','聞く'];
+  const noteKw = ['注意','注意点','気をつけ','防水','電気','配管','配線','養生'];
+
+  lines.forEach(line => {
+    if (wantKw.some(k => line.includes(k))) wants.push(line);
+    else if (matKw.some(k => line.includes(k))) materials.push(line);
+    else if (checkKw.some(k => line.includes(k))) checks.push(line);
+    else if (noteKw.some(k => line.includes(k))) notes.push(line);
+    else wants.push(line); // 分類不明はとりあえず要望へ
+  });
+
+  const fmt = (arr) => arr.length ? arr.map(l => '・' + l).join('\n') : '・（なし）';
+  return `【顧客要望】\n${fmt(wants)}\n\n【材料・仕様】\n${fmt(materials)}\n\n【確認事項】\n${fmt(checks)}\n\n【注意点】\n${fmt(notes)}`;
+}
+
+async function aiExtractToEstimate() {
+  const text = document.getElementById('memoInputArea').value.trim();
+  if (!text) { showToast('テキストをペーストしてください', 'error'); return; }
+  showToast('AIが見積項目を抽出中...');
+
+  const prompt = `以下は内装工事現場の打ち合わせ記録です。
+
+【記録】
+${text}
+
+単価マスター参考:
+${state.priceMaster.map(pm=>`・${pm.name}: ¥${pm.price}/${pm.unit}`).join('\n')}
+
+この記録から見積に追加すべき工事項目を抽出してください。
+JSONのみで返答してください（説明不要）:
+[{"name":"項目名","spec":"仕様","qty":数値,"unit":"単位","unitPrice":単価,"category":"material|labor|other"}]
+項目がなければ [] を返してください。`;
+
+  let items = [];
+  try {
+    if(!getApiKey()) throw new Error('NO_KEY');
+    const data = await callClaude([{ role: 'user', content: prompt }], 800);
+    const raw = data.content?.[0]?.text || '[]';
+    items = JSON.parse(raw.replace(/```json|```/g, '').trim());
+  } catch(e) {
+    items = localExtractItems(text);
+    if(e.message === 'NO_KEY') showToast('⚙️ APIキーを設定するとAIが正確に抽出します', '');
+  }
+
+  if (items.length > 0) {
+    items.forEach((item, i) => state.estimateItems.push({ ...item, id: Date.now() + i }));
+    autoSaveMemo(text, items.length);
+    switchScreen('estimate');
+    showToast(`✓ ${items.length}項目を見積に追加しました`);
+  } else {
+    showToast('抽出できる項目がありませんでした。手動で追加してください。');
+  }
+}
+
+// ローカル抽出（APIなし）
+function localExtractItems(text) {
+  const items = [];
+  const master = state.priceMaster;
+  const p = state.projects[state.currentProject];
+
+  master.forEach(pm => {
+    if (text.includes(pm.name.substring(0,4)) ||
+        (pm.name.includes('クロス') && text.includes('クロス')) ||
+        (pm.name.includes('壁紙') && (text.includes('壁紙') || text.includes('クロス'))) ||
+        (pm.name.includes('フローリング') && text.includes('フローリング')) ||
+        (pm.name.includes('タイル') && text.includes('タイル')) ||
+        (pm.name.includes('防水') && text.includes('防水')) ||
+        (pm.name.includes('間仕切り') && (text.includes('間仕切り') || text.includes('パーティション')))
+    ) {
+      const qty = pm.unit === '㎡' ? (parseFloat(p.floor) || 1) : 1;
+      items.push({
+        name: pm.name, spec: '', qty, unit: pm.unit,
+        unitPrice: pm.price, category: pm.cat
+      });
+    }
+  });
+  return items.slice(0, 6); // 最大6項目
+}
+
+async function aiSaveAsMemo() {
+  const text = document.getElementById('memoInputArea').value.trim();
+  if (!text) { showToast('テキストをペーストしてください', 'error'); return; }
+  // まず整理してから保存
+  await aiOrganizeMemo();
+  const organized = document.getElementById('organizedText').textContent;
+  if (organized) {
+    saveNoteText(organized);
+    clearMemoInput();
+  }
+}
+
+function saveOrganizedMemo() {
+  const text = document.getElementById('organizedText').textContent;
+  if (!text) return;
+  saveNoteText(text);
+  document.getElementById('organizedResult').style.display = 'none';
+  clearMemoInput();
+}
+
+async function applyOrganizedToEstimate() {
+  const text = document.getElementById('organizedText').textContent;
+  if (!text) return;
+  // 元のmemoInputAreaを一時的にorganizedTextに差し替えて抽出
+  const orig = document.getElementById('memoInputArea').value;
+  document.getElementById('memoInputArea').value = text;
+  await aiExtractToEstimate();
+  document.getElementById('memoInputArea').value = orig;
+}
+
+function saveNoteText(text) {
+  const now = new Date();
+  const timeStr = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  state.voiceNotes.unshift({ id: Date.now(), project: state.currentProject, text, time: timeStr, duration: '—' });
+  renderVoiceNotes();
+  document.getElementById('statVoice').textContent = state.voiceNotes.length;
+  showToast('メモを保存しました ✓');
+}
+
+function autoSaveMemo(text, itemCount) {
+  const now = new Date();
+  const timeStr = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  state.voiceNotes.unshift({
+    id: Date.now(), project: state.currentProject,
+    text: `【見積反映済 ${itemCount}項目】\n${text.substring(0, 200)}...`,
+    time: timeStr, duration: '—'
+  });
+  renderVoiceNotes();
+  document.getElementById('statVoice').textContent = state.voiceNotes.length;
+}
+
+function renderVoiceNotes() {
+  const list = document.getElementById('voiceNoteList');
+  if(!list) return;
+  const notes = state.voiceNotes.filter(n=>n.project===state.currentProject);
+  if(!notes.length){ list.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px;">まだ音声メモがありません</div>'; return; }
+  list.innerHTML = notes.map(n=>`
+    <div class="vn-card">
+      <div class="vn-ico"><svg width="14" height="14" fill="none" stroke="#f5a623" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/></svg></div>
+      <div style="flex:1;">
+        <div class="vn-text">${n.text}</div>
+        <div class="vn-meta">${n.time} · ${n.duration}</div>
+        <div class="vn-actions">
+          <div class="vn-act-btn" onclick="applyNoteToEstimate(${n.id})">見積へ反映</div>
+          <div class="vn-act-btn" onclick="deleteVoiceNote(${n.id})">削除</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function deleteVoiceNote(id) {
+  state.voiceNotes = state.voiceNotes.filter(n=>n.id!==id);
+  renderVoiceNotes();
+  showToast('削除しました');
+}
+
+async function applyNoteToEstimate(id) {
+  const note = state.voiceNotes.find(n=>n.id===id);
+  if(!note) return;
+  state.currentTranscript = note.text;
+  await applyToEstimate();
+}
+
+// ===== PHOTOS =====
+let photos = [];
+
+function addPhoto(e) {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    photos.push({
+      id: Date.now(),
+      src: ev.target.result,
+      name: file.name,
+      tag: 'before',
+      project: state.currentProject,
+      time: new Date().toLocaleString('ja-JP')
+    });
+    renderPhotos();
+    showToast('写真を追加しました ✓');
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+function renderPhotos(filter='all') {
+  const grid = document.getElementById('photoGrid');
+  if(!grid) return;
+  const noP = document.getElementById('noPhotos');
+  const pjPhotos = photos.filter(p=>p.project===state.currentProject && (filter==='all'||p.tag===filter));
+  grid.innerHTML = `
+    <div class="photo-add-btn" onclick="document.getElementById('photoInput').click()">
+      <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      <span>写真追加</span>
+      <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="addPhoto(event)">
+    </div>
+  `;
+  if(noP) noP.style.display = pjPhotos.length===0 ? 'block' : 'none';
+  pjPhotos.forEach(p=>{
+    const cell = document.createElement('div');
+    cell.className='photo-cell';
+    cell.innerHTML=`<img src="${p.src}" alt="${p.name}"><div class="ph-overlay">${p.tag}</div>`;
+    cell.onclick=()=>openPhotoDetail(p);
+    grid.appendChild(cell);
+  });
+}
+
+function filterPhotos(tag, el) {
+  document.querySelectorAll('.pf-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderPhotos(tag);
+}
+
+function openPhotoDetail(p) {
+  openModal('photoDetail', p);
+}
+
+// ===== PDF（印刷ダイアログ方式 / 日本語対応） =====
+function generatePDF() {
+  const p = state.projects[state.currentProject];
+  const totals = calcEstimateTotal();
+  const today = new Date();
+  const wareki = '令和 ' + (today.getFullYear() - 2018) + ' 年 ' +
+    (today.getMonth()+1) + ' 月 ' + today.getDate() + ' 日';
+
+  const rows = state.estimateItems.map((item, i) => {
+    const sub = Math.round(item.qty * item.unitPrice).toLocaleString();
+    const unitPriceStr = item.unitPrice > 0 ? item.unitPrice.toLocaleString() : '';
+    return `<tr>
+      <td class="name-cell">${item.name}${item.spec ? '　' + item.spec : ''}</td>
+      <td class="center">${item.unit}</td>
+      <td class="right">${item.qty}</td>
+      <td class="right">${unitPriceStr}</td>
+      <td class="right">${sub}</td>
+      <td class="備考"></td>
+    </tr>`;
+  }).join('');
+
+  // 空行（余白行）を追加
+  const emptyRows = Math.max(0, 3 - state.estimateItems.length % 3);
+  const blankRows = Array(emptyRows).fill('<tr><td class="name-cell"></td><td></td><td></td><td></td><td></td><td></td></tr>').join('');
+
+  const overlay = document.createElement('div');
+  overlay.id = 'pdfOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#fff;overflow-y:auto;';
+  overlay.innerHTML = `
+  <style>
+    #pdfOverlay {
+      font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","MS PGothic","Yu Gothic",sans-serif;
+      color:#000; font-size:12px; background:#fff;
+    }
+    #pdfOverlay .toolbar {
+      position:sticky;top:0;background:#1a1d27;padding:10px 16px;
+      display:flex;gap:10px;align-items:center;z-index:10;
+    }
+    #pdfOverlay .toolbar button {
+      padding:10px 22px;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;
+    }
+    #pdfOverlay .print-btn { background:#f5a623;color:#000; }
+    #pdfOverlay .close-btn { background:#444;color:#fff; }
+    #pdfOverlay .toolbar span { color:#aaa;font-size:11px;flex:1; }
+
+    #pdfOverlay .doc {
+      max-width:210mm;margin:0 auto;padding:12mm 14mm;
+      box-sizing:border-box;
+    }
+
+    /* ヘッダー行 */
+    #pdfOverlay .top-row {
+      display:flex;justify-content:space-between;align-items:flex-start;
+      margin-bottom:6px;
+    }
+    #pdfOverlay .no-page { font-size:11px; }
+    #pdfOverlay .doc-title {
+      font-size:26px;font-weight:900;letter-spacing:6px;
+      border:2px solid #000;padding:4px 24px;text-align:center;
+    }
+    #pdfOverlay .date-block { font-size:12px;text-align:right;line-height:1.8; }
+
+    /* 顧客・会社 */
+    #pdfOverlay .client-row {
+      display:flex;justify-content:space-between;align-items:flex-start;
+      margin:12px 0 8px;
+    }
+    #pdfOverlay .client-name {
+      font-size:18px;font-weight:700;border-bottom:2px solid #000;
+      padding-bottom:3px;min-width:200px;
+    }
+    #pdfOverlay .company-block {
+      font-size:11px;line-height:1.9;text-align:right;
+    }
+    #pdfOverlay .company-block .company-name {
+      font-size:14px;font-weight:700;
+    }
+
+    /* 税込金額 */
+    #pdfOverlay .price-block {
+      margin:10px 0;
+    }
+    #pdfOverlay .price-label {
+      font-size:13px;font-weight:700;text-decoration:underline;
+      text-underline-offset:3px;
+    }
+    #pdfOverlay .price-main {
+      font-size:28px;font-weight:900;letter-spacing:1px;margin-left:12px;
+    }
+    #pdfOverlay .price-sub {
+      font-size:12px;color:#333;margin-top:2px;margin-left:4px;
+    }
+
+    /* 工事情報 */
+    #pdfOverlay .koujou-grid {
+      display:grid;grid-template-columns:auto 1fr;gap:2px 8px;
+      margin:10px 0;font-size:12px;
+    }
+    #pdfOverlay .koujou-label { white-space:nowrap;font-weight:600; }
+    #pdfOverlay .koujou-val {
+      border-bottom:1px solid #ccc;padding-bottom:1px;min-height:18px;
+    }
+
+    /* 明細表 */
+    #pdfOverlay table {
+      width:100%;border-collapse:collapse;margin-top:12px;
+    }
+    #pdfOverlay table th {
+      background:#555;color:#fff;
+      padding:6px 8px;font-size:11px;font-weight:700;
+      border:1px solid #333;text-align:center;
+    }
+    #pdfOverlay table td {
+      border:1px solid #bbb;padding:6px 8px;font-size:12px;vertical-align:middle;
+    }
+    #pdfOverlay td.name-cell { min-width:180px; }
+    #pdfOverlay td.center { text-align:center; }
+    #pdfOverlay td.right { text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap; }
+    #pdfOverlay td.備考 { min-width:60px; }
+    #pdfOverlay tr:nth-child(even) td { background:#f9f9f9; }
+
+    /* 合計行 */
+    #pdfOverlay .subtotal-row td {
+      background:#f0f0f0;font-weight:700;padding:7px 8px;
+      border:1px solid #aaa;
+    }
+    #pdfOverlay .tax-row td {
+      background:#f5f5f5;padding:6px 8px;border:1px solid #aaa;font-size:11px;
+    }
+    #pdfOverlay .total-row td {
+      background:#1a1d27;color:#fff;font-size:15px;font-weight:900;
+      padding:9px 8px;border:1px solid #000;
+    }
+
+    /* 注記 */
+    #pdfOverlay .notes {
+      margin-top:14px;font-size:10px;color:#555;line-height:2;
+    }
+
+    @media print {
+      #pdfOverlay .toolbar { display:none !important; }
+      #pdfOverlay .doc { padding:8mm 10mm; }
+      #pdfOverlay { font-size:11px; }
+      @page { size:A4;margin:0; }
+    }
+  </style>
+
+  <div class="toolbar">
+    <button class="print-btn" onclick="window.print()">🖨️ 印刷 / PDF保存</button>
+    <button class="close-btn" onclick="document.getElementById('pdfOverlay').remove()">✕ 閉じる</button>
+    <div style="flex:1;font-size:11px;color:#aaa;line-height:1.6;">
+      印刷ボタン →「PDFとして保存」→ 保存先で<strong style="color:#f5a623;">「Googleドライブ」</strong>を選択
+    </div>
+  </div>
+
+  <div class="doc">
+    <!-- No. / タイトル / 日付 -->
+    <div class="top-row">
+      <div class="no-page">No.</div>
+      <div class="doc-title">御　見　積　書</div>
+      <div class="date-block">${wareki}</div>
+    </div>
+
+    <!-- 顧客名 / 会社情報 -->
+    <div class="client-row">
+      <div>
+        <div class="client-name">${p.client || p.name}&nbsp;御中</div>
+      </div>
+      <div class="company-block">
+        <div class="company-name">${state.companyName || '株式会社　　　　　'}</div>
+        <div>〒${state.companyZip || '　　　　　'}</div>
+        <div>${state.companyAddr || '　　　　　　　　　　'}</div>
+        <div>TEL.${state.companyTel || '　　　　　　　　'}</div>
+        <div>FAX.${state.companyFax || '　　　　　　　　'}</div>
+      </div>
+    </div>
+
+    <!-- 税込見積金額 -->
+    <div class="price-block">
+      <span class="price-label">税込見積金額</span>
+      <span class="price-main">￥${totals.total.toLocaleString()}.-</span>
+      <div class="price-sub">
+        消費税額：￥${totals.tax.toLocaleString()}.-　　合計金額：￥${totals.subtotal.toLocaleString()}.-
+      </div>
+    </div>
+
+    <!-- 工事情報 -->
+    <div class="koujou-grid">
+      <div class="koujou-label">工事件名：</div>
+      <div class="koujou-val">${p.name}</div>
+      <div class="koujou-label">工事場所：</div>
+      <div class="koujou-val">${p.addr || ''}</div>
+      <div class="koujou-label">工事概要：</div>
+      <div class="koujou-val"></div>
+      <div class="koujou-label">工事期間：</div>
+      <div class="koujou-val"></div>
+      <div class="koujou-label">支払条件：</div>
+      <div class="koujou-val"></div>
+      <div class="koujou-label">有効期限：</div>
+      <div class="koujou-val"></div>
+    </div>
+
+    <!-- 明細表 -->
+    <table>
+      <thead>
+        <tr>
+          <th style="width:42%">名　称　／　規　格</th>
+          <th style="width:8%">単位</th>
+          <th style="width:10%">数　量</th>
+          <th style="width:14%">単　価</th>
+          <th style="width:16%">金　額</th>
+          <th style="width:10%">備　考</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+        ${blankRows}
+      </tbody>
+      <tbody>
+        <tr class="subtotal-row">
+          <td colspan="4" style="text-align:right;">【合　計】</td>
+          <td class="right">${totals.subtotal.toLocaleString()}</td>
+          <td></td>
+        </tr>
+        <tr class="tax-row">
+          <td colspan="4" style="text-align:right;">消費税（10%）</td>
+          <td class="right">${totals.tax.toLocaleString()}</td>
+          <td></td>
+        </tr>
+        <tr class="total-row">
+          <td colspan="4" style="text-align:right;">税込合計金額</td>
+          <td class="right">￥${totals.total.toLocaleString()}.-</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="notes">
+      ※ 本見積書の有効期限は発行より30日間です。<br>
+      ※ 材料費の市場変動により、金額が変更になる場合があります。<br>
+      ※ 上記金額は現地確認に基づく概算です。着工前に最終確認をお願いいたします。
+    </div>
+  </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function shareEstimate() {
+  const p = state.projects[state.currentProject];
+  const totals = calcEstimateTotal();
+  const text = `【御見積書】\n${p.name}\n合計: ¥${totals.total.toLocaleString()}円（税込）\n\n現場ナビ PRO より`;
+  if(navigator.share){
+    navigator.share({ title:'御見積書', text });
+  } else {
+    navigator.clipboard.writeText(text).then(()=>showToast('クリップボードにコピーしました ✓'));
+  }
+}
+
+// ===== MODALS =====
+function openModal(type, data) {
+  const sheet = document.getElementById('modalSheet');
+  let html = '';
+
+  if(type==='manualMemo'){
+    html = `<div class="modal-handle"></div>
+    <div class="modal-title">現場メモを手入力</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">マイクが使えない場合、直接テキストで入力できます</div>
+    <div class="form-group"><label class="form-label">打ち合わせ内容・メモ</label>
+      <textarea class="form-input" id="manual-memo-text" rows="6" placeholder="例：壁紙はベージュ系希望。床はフローリング。天井は白で統一。" style="resize:vertical;"></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="saveManualMemo()">メモとして保存</button>`;
+  }
+  else if(type==='newProject'){
+    html = `<div class="modal-handle"></div>
+    <div class="modal-title">新規案件登録</div>
+    <div class="form-group"><label class="form-label">案件名・店舗名</label><input class="form-input" id="np-name" placeholder="例：カフェ〇〇 内装改装"></div>
+    <div class="form-group"><label class="form-label">顧客名</label><input class="form-input" id="np-client" placeholder="例：株式会社〇〇"></div>
+    <div class="form-group"><label class="form-label">現場住所</label><input class="form-input" id="np-addr" placeholder="例：大分市中央町 3-12"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">現調予定日</label><input class="form-input" id="np-date" type="date"></div>
+      <div class="form-group"><label class="form-label">予算（万円）</label><input class="form-input" id="np-budget" type="number" placeholder="100" inputmode="numeric"></div>
+    </div>
+    <div class="form-group"><label class="form-label">備考・要望</label><input class="form-input" id="np-memo" placeholder="顧客の要望など"></div>
+    <button class="btn btn-primary" onclick="registerProject()">登録する</button>`;
+  }
+  else if(type==='addItem'){
+    html = `<div class="modal-handle"></div>
+    <div class="modal-title">見積項目を追加</div>
+    <div class="form-group"><label class="form-label">項目名</label><input class="form-input" id="ai-name" placeholder="例：壁紙張替"></div>
+    <div class="form-group"><label class="form-label">仕様</label><input class="form-input" id="ai-spec" placeholder="例：LW-11 ベージュ系"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">数量</label><input class="form-input" id="ai-qty" type="number" placeholder="1" inputmode="decimal"></div>
+      <div class="form-group"><label class="form-label">単位</label><input class="form-input" id="ai-unit" placeholder="㎡ / 式 / m"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">単価（円）</label><input class="form-input" id="ai-price" type="number" placeholder="1000" inputmode="numeric"></div>
+      <div class="form-group"><label class="form-label">分類</label>
+        <select class="form-input" id="ai-cat">
+          <option value="material">材料費</option>
+          <option value="labor">施工費</option>
+          <option value="other">その他</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="addItemFromModal()">追加する</button>`;
+  }
+  else if(type==='pricemaster'){
+    html = `<div class="modal-handle"></div>
+    <div class="modal-title">単価マスター</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">タップで見積に追加</div>
+    ${state.priceMaster.map(pm=>`
+      <div class="pm-row" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;">
+        <div class="pm-name">${pm.name}</div>
+        <div class="pm-unit" style="color:var(--muted);font-size:11px;">${pm.unit}</div>
+        <div class="pm-price">¥${pm.price.toLocaleString()}</div>
+        <button class="pm-add" onclick="addFromMasterModal('${pm.name}',${pm.price},'${pm.unit}','${pm.cat}')">＋</button>
+      </div>`).join('')}`;
+  }
+  else if(type==='photoDetail' && data){
+    html = `<div class="modal-handle"></div>
+    <img src="${data.src}" style="width:100%;border-radius:10px;margin-bottom:12px;">
+    <div style="font-size:13px;font-weight:600;">${data.name}</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:4px;">${data.time}</div>
+    <div style="margin-top:12px;">タグ:
+      ${['before','during','after','issue'].map(tag=>`
+        <button class="vn-act-btn" style="margin:3px;${data.tag===tag?'border-color:var(--accent);color:var(--accent);':''}"
+          onclick="setPhotoTag(${data.id},'${tag}');closeModal();">${{before:'施工前',during:'施工中',after:'施工後',issue:'要確認'}[tag]}</button>
+      `).join('')}
+    </div>
+    <div class="btn-row" style="margin-top:12px;">
+      <button class="btn btn-secondary" onclick="deletePhoto(${data.id})" style="flex:1;">🗑 削除</button>
+      <button class="btn btn-primary" onclick="closeModal()" style="flex:1;">閉じる</button>
+    </div>`;
+  }
+  else if(type==='settings'){
+    const savedKey = localStorage.getItem('genba_api_key') || '';
+    const maskedKey = savedKey ? savedKey.substring(0,8) + '••••••••••••••••••••' : '';
+    html = `<div class="modal-handle"></div>
+    <div class="modal-title">設定</div>
+
+    <div class="section-title">🔑 Claude APIキー</div>
+    <div class="form-group">
+      <label class="form-label">APIキー（sk-ant-...）</label>
+      <input class="form-input" id="set-apikey" type="password"
+        value="${savedKey}"
+        placeholder="sk-ant-api03-..."
+        autocomplete="off" autocorrect="off" spellcheck="false">
+      <div style="font-size:11px;color:var(--muted);margin-top:5px;line-height:1.7;">
+        ・<a href="https://console.anthropic.com/" target="_blank" style="color:var(--accent);">console.anthropic.com</a> で取得<br>
+        ・端末内にのみ保存。外部送信はされません<br>
+        ・設定すると音声認識・AI整形・見積反映がフル動作します
+      </div>
+    </div>
+
+    <div class="section-title">👤 担当者</div>
+    <div class="form-group"><label class="form-label">お名前</label><input class="form-input" id="set-name" value="${state.userName}" placeholder="山田"></div>
+
+    <div class="section-title">🏢 自社情報（見積書に印刷）</div>
+    <div class="form-group"><label class="form-label">会社名</label><input class="form-input" id="set-company" value="${state.companyName}" placeholder="株式会社アート・レイズ"></div>
+    <div class="form-group"><label class="form-label">郵便番号</label><input class="form-input" id="set-zip" value="${state.companyZip}" placeholder="874-0829"></div>
+    <div class="form-group"><label class="form-label">住所</label><input class="form-input" id="set-addr" value="${state.companyAddr}" placeholder="別府市上原町13組"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">TEL</label><input class="form-input" id="set-tel" value="${state.companyTel}" placeholder="0977-21-0603" inputmode="tel"></div>
+      <div class="form-group"><label class="form-label">FAX</label><input class="form-input" id="set-fax" value="${state.companyFax}" placeholder="0977-21-0610" inputmode="tel"></div>
+    </div>
+    <div class="section-title">💴 見積設定</div>
+    <div class="form-group"><label class="form-label">消費税率（%）</label><input class="form-input" id="set-tax" value="10" type="number" inputmode="numeric"></div>
+    <button class="btn btn-primary" onclick="saveSettings()">保存</button>`;
+  }
+
+  sheet.innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function addFromMasterModal(name, price, unit, cat) {
+  const qty = prompt(`「${name}」の数量を入力:`, '1');
+  if(!qty) return;
+  state.estimateItems.push({id:Date.now(),name,spec:'',qty:parseFloat(qty)||1,unit,unitPrice:price,category:cat});
+  closeModal();
+  renderEstimate();
+  showToast(`「${name}」を追加しました ✓`);
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+function closeModalOutside(e) { if(e.target===document.getElementById('modalOverlay')) closeModal(); }
+
+function saveManualMemo() {
+  const text = document.getElementById('manual-memo-text').value.trim();
+  if(!text){ showToast('内容を入力してください','error'); return; }
+  finishTranscript(text);
+  closeModal();
+}
+
+function registerProject() {
+  const name = document.getElementById('np-name').value;
+  if(!name){ showToast('案件名を入力してください','error'); return; }
+  const id = 'proj_'+Date.now();
+  state.projects[id] = {
+    name, client: document.getElementById('np-client').value,
+    addr: document.getElementById('np-addr').value,
+    floor:0, wall:0, ceiling:0
+  };
+  closeModal();
+  showToast(`「${name}」を登録しました ✓`);
+  state.currentProject = id;
+  document.getElementById('topbarProject').innerHTML = `案件: <span>${name.substring(0,10)}</span>`;
+}
+
+function addItemFromModal() {
+  const name = document.getElementById('ai-name').value;
+  if(!name){ showToast('項目名を入力してください','error'); return; }
+  state.estimateItems.push({
+    id: Date.now(),
+    name,
+    spec: document.getElementById('ai-spec').value,
+    qty: parseFloat(document.getElementById('ai-qty').value)||1,
+    unit: document.getElementById('ai-unit').value||'式',
+    unitPrice: parseInt(document.getElementById('ai-price').value)||0,
+    category: document.getElementById('ai-cat').value
+  });
+  closeModal();
+  renderEstimate();
+  showToast('項目を追加しました ✓');
+}
+
+function saveSettings() {
+  // APIキー
+  const apikey = document.getElementById('set-apikey');
+  if(apikey && apikey.value.trim()) {
+    localStorage.setItem('genba_api_key', apikey.value.trim());
+  }
+  // 担当者名
+  const name = document.getElementById('set-name').value;
+  if(name) { state.userName = name; document.getElementById('greetName').textContent = name+'さん'; }
+  // 自社情報
+  const co   = document.getElementById('set-company'); if(co)  state.companyName = co.value;
+  const zip  = document.getElementById('set-zip');     if(zip) state.companyZip  = zip.value;
+  const addr = document.getElementById('set-addr');    if(addr)state.companyAddr = addr.value;
+  const tel  = document.getElementById('set-tel');     if(tel) state.companyTel  = tel.value;
+  const fax  = document.getElementById('set-fax');     if(fax) state.companyFax  = fax.value;
+  closeModal();
+  const hasKey = !!getApiKey();
+  showToast(hasKey ? '設定を保存しました ✓ AI機能が有効です' : '設定を保存しました（APIキー未設定）');
+}
+
+function setPhotoTag(id, tag) {
+  const photo = photos.find(p=>p.id===id);
+  if(photo) photo.tag = tag;
+  renderPhotos();
+}
+
+function deletePhoto(id) {
+  photos = photos.filter(p=>p.id!==id);
+  renderPhotos();
+  showToast('写真を削除しました');
+}
+
+// ===== INIT =====
+window.addEventListener('load', ()=>{
+  calcAuto();
+  const ed = document.getElementById('estDate');
+  if(ed) ed.textContent = '見積日: ' + new Date().toLocaleDateString('ja-JP');
+
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', handleViewportResize);
+    window.visualViewport.addEventListener('scroll', handleViewportResize);
+  }
+
+  // スタンドアロン（ホーム画面から起動）かどうか確認
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true;
+
+  if(!isStandalone && !localStorage.getItem('pwa_banner_dismissed')) {
+    // ホーム画面追加の案内バナーを表示
+    setTimeout(() => {
+      const banner = document.createElement('div');
+      banner.id = 'pwaBanner';
+      banner.style.cssText = `
+        position:fixed;bottom:70px;left:12px;right:12px;z-index:8888;
+        background:linear-gradient(135deg,#1a1d27,#22263a);
+        border:1px solid rgba(245,166,35,.4);border-radius:14px;
+        padding:13px 14px;display:flex;align-items:center;gap:12px;
+        box-shadow:0 4px 24px rgba(0,0,0,.5);
+        animation:slideUp .3s ease;
+      `;
+      banner.innerHTML = `
+        <div style="font-size:28px;line-height:1;">🏗️</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:700;color:#f5a623;margin-bottom:2px;">ホーム画面に追加できます</div>
+          <div style="font-size:11px;color:#aaa;line-height:1.5;">Chrome右上メニュー →「ホーム画面に追加」でアプリとして起動できます</div>
+        </div>
+        <div onclick="document.getElementById('pwaBanner').remove();localStorage.setItem('pwa_banner_dismissed','1')"
+          style="color:#666;font-size:20px;padding:4px;cursor:pointer;line-height:1;">✕</div>
+      `;
+      document.body.appendChild(banner);
+      setTimeout(() => { if(banner.parentNode) banner.remove(); }, 8000);
+    }, 1500);
+  }
+});
+
+function handleViewportResize() {
+  const vv = window.visualViewport;
+  if (!vv) return;
+  const mainEl = document.querySelector('main');
+  if (!mainEl) return;
+
+  // キーボード表示でviewportが縮んだ場合、mainのbottomをキーボード高さ分調整
+  const keyboardHeight = window.innerHeight - vv.height - vv.offsetTop;
+  const navHeight = 58 + (parseInt(getComputedStyle(document.documentElement)
+    .getPropertyValue('--safe-bottom') || '0') || 0);
+
+  if (keyboardHeight > 50) {
+    // キーボード表示中
+    mainEl.style.bottom = keyboardHeight + 'px';
+  } else {
+    // キーボード非表示
+    mainEl.style.bottom = '';
+  }
+}
+
+window.addEventListener('resize', ()=>{ if(canvasReady) resizeCanvas(); });
+</script>
+</body>
+</html>
