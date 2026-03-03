@@ -1317,60 +1317,66 @@ async function toggleRecord() {
 }
 
 function startSpeechRecognition(SpeechRecognition) {
-  try {
-    speechRecognition = new SpeechRecognition();
-    speechRecognition.lang = 'ja-JP';
-    speechRecognition.continuous = true;
-    speechRecognition.interimResults = true;
-    realtimeText = '';
+  realtimeText = '';
+  state.recording = true;
+  state.recSeconds = 0;
+  clearInterval(state.timerInterval);
+  startTimer();
 
-    speechRecognition.onstart = () => {
-      state.recording = true;
-      state.recSeconds = 0;
-      document.getElementById('micRing').classList.add('recording');
-      document.getElementById('voiceSt').textContent = '録音中（リアルタイム認識）';
-      document.getElementById('voiceSt').style.color = 'var(--red)';
-      document.getElementById('speechStatus').style.display = 'block';
-      document.getElementById('memoInputArea').value = '話しかけてください...';
-      startTimer();
-    };
+  const mic = document.getElementById('micRing');
+  const vs  = document.getElementById('voiceSt');
+  const ss  = document.getElementById('speechStatus');
+  const mia = document.getElementById('memoInputArea');
+  if(mic) mic.classList.add('recording');
+  if(vs)  { vs.textContent = '録音中… タップで停止'; vs.style.color = 'var(--red)'; }
+  if(ss)  ss.style.display = 'block';
+  if(mia) mia.value = '話しかけてください...';
 
-    speechRecognition.onresult = (event) => {
-      let interim = '';
-      let final = '';
+  function createAndStart() {
+    if (!state.recording) return; // 停止済みなら何もしない
+
+    const sr = new SpeechRecognition();
+    speechRecognition = sr;
+    sr.lang = 'ja-JP';
+    sr.continuous = false;
+    sr.interimResults = true;
+    sr.maxAlternatives = 1;
+
+    sr.onresult = (event) => {
+      let interim = '', final = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (event.results[i].isFinal) {
-          final += event.results[i][0].transcript;
-        } else {
-          interim += event.results[i][0].transcript;
-        }
+        if (event.results[i].isFinal) final += event.results[i][0].transcript;
+        else interim += event.results[i][0].transcript;
       }
       if (final) realtimeText += final;
       const mia = document.getElementById('memoInputArea');
-      if(mia) { mia.value = realtimeText + (interim ? '…' + interim : ''); onMemoInput(mia); }
+      if(mia) { mia.value = realtimeText + (interim ? interim : ''); onMemoInput(mia); }
     };
 
-    speechRecognition.onerror = (e) => {
+    sr.onerror = (e) => {
       if (e.error === 'not-allowed') {
-        showToast('マイクへのアクセスが拒否されました', 'error');
-        stopRecording();
-      } else if (e.error === 'network') {
-        showToast('ネットワークエラー。Talixファイルインポートをお試しください。', 'error');
+        showToast('マイクのアクセスが拒否されました', 'error');
         stopRecording();
       }
+      // aborted / no-speech 等は無視
     };
 
-    speechRecognition.onend = () => {
-      // state.recordingがfalseなら絶対に再起動しない
-      if (!state.recording) return;
-      if (!speechRecognition) return;
-      try { speechRecognition.start(); } catch(e) {}
+    sr.onend = () => {
+      if (!state.recording) return;   // 停止ボタンが押された
+      if (speechRecognition !== sr) return; // 別インスタンスに切り替わった
+      // 録音継続中 → 100ms後に新インスタンスで再開
+      setTimeout(createAndStart, 100);
     };
 
-    speechRecognition.start();
-  } catch(e) {
-    showToast('音声認識を開始できませんでした', 'error');
+    try {
+      sr.start();
+    } catch(e) {
+      // already started等 → 少し待って再試行
+      setTimeout(createAndStart, 300);
+    }
   }
+
+  createAndStart();
 }
 
 async function startMediaRecorder() {
@@ -1406,10 +1412,9 @@ function stopRecording() {
   document.getElementById('speechStatus').style.display = 'none';
 
   if (speechRecognition) {
-    state.recording = false; // onend より先にfalseにする（二重保険）
     const sr = speechRecognition;
-    speechRecognition = null;
-    try { sr.abort(); } catch(e) { try { sr.stop(); } catch(e2) {} }
+    speechRecognition = null; // nullにしてonendのガードを効かせる
+    try { sr.stop(); } catch(e) {}
     // Web Speech結果をAIで整形
     if (realtimeText.trim()) {
       document.getElementById('micRing').classList.add('processing');
