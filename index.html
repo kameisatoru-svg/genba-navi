@@ -8,9 +8,9 @@
 <!-- PWA: スタンドアロン全画面 -->
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="現場ナビ">
-<meta name="theme-color" content="#0f1117">
+<meta name="theme-color" content="#FFFBF5">
 <meta name="application-name" content="現場ナビPRO">
 
 <!-- PWA マニフェスト（インライン Blob） -->
@@ -36,8 +36,8 @@
     start_url: './',
     display: 'standalone',
     orientation: 'any',
-    background_color: '#0f1117',
-    theme_color: '#0f1117',
+    background_color: '#FFFBF5',
+    theme_color: '#FFFBF5',
     icons: [
       { src: iconUrl, sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
       { src: iconUrl, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }
@@ -68,10 +68,10 @@ if('serviceWorker' in navigator) {
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --surface3:#2a2e42;
-  --border:#2e3348; --accent:#f5a623; --accent2:#e05c2a;
-  --blue:#4a9eff; --green:#3dd68c; --red:#ff5f5f; --purple:#b06aff;
-  --text:#e8eaf2; --muted:#6b7294;
+  --bg:#FFFBF5; --surface:#FFFFFF; --surface2:#FFF3E0; --surface3:#FFE8C0;
+  --border:#FFD9A0; --accent:#E8710A; --accent2:#FF9800;
+  --blue:#1558D6; --green:#1A7F3C; --red:#D93025; --purple:#7B2FBE;
+  --text:#1A1200; --muted:#9E7B40;
   --font:'Noto Sans JP',sans-serif; --mono:'DM Mono',monospace;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -82,7 +82,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);}
 .topbar{position:fixed;top:0;left:0;right:0;z-index:200;
   height:calc(52px + env(safe-area-inset-top,0px));
   padding-top:env(safe-area-inset-top,0px);
-  background:rgba(15,17,23,.97);backdrop-filter:blur(12px);
+  background:rgba(255,251,245,.98);backdrop-filter:blur(12px);
   border-bottom:1px solid var(--border);display:flex;align-items:center;
   justify-content:space-between;padding-left:16px;padding-right:16px;}
 .logo{font-size:16px;font-weight:900;letter-spacing:-.5px;
@@ -103,7 +103,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);}
 }
 
 .bottomnav{position:fixed;bottom:0;left:0;right:0;z-index:200;
-  background:rgba(15,17,23,.97);border-top:1px solid var(--border);
+  background:rgba(255,251,245,.98);border-top:1px solid var(--border);
   display:flex;
   height:calc(58px + var(--safe-bottom));
   padding-bottom:var(--safe-bottom);}
@@ -907,7 +907,7 @@ function resizeCanvas() {
 function buildGrid() {
   if(!gridCtx || gridCanvas.width === 0) return;
   gridCtx.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
-  gridCtx.strokeStyle = '#2e3348';
+  '#FFD9A0';
   gridCtx.lineWidth   = 0.5;
   for(let x = 0; x <= gridCanvas.width;  x += 20) {
     gridCtx.beginPath(); gridCtx.moveTo(x,0); gridCtx.lineTo(x,gridCanvas.height); gridCtx.stroke();
@@ -962,7 +962,7 @@ function onDraw(e) {
   const p = getPos(e);
 
   if(tool === 'pen') {
-    drawCtx.strokeStyle = '#f5a623';
+    '#E8710A';
     drawCtx.lineWidth   = 2;
     drawCtx.lineCap     = 'round';
     drawCtx.lineJoin    = 'round';
@@ -989,7 +989,7 @@ function onDraw(e) {
 
 function drawShape(ex, ey) {
   const dx = ex - startX, dy = ey - startY;
-  drawCtx.strokeStyle = '#f5a623';
+  '#E8710A';
   drawCtx.lineWidth   = 2;
   drawCtx.lineCap     = 'round';
 
