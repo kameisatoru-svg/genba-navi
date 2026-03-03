@@ -1332,56 +1332,61 @@ async function toggleRecord() {
 
 function startSpeechRecognition(SpeechRecognition) {
   try {
-    speechRecognition = new SpeechRecognition();
-    speechRecognition.lang = 'ja-JP';
-    speechRecognition.continuous = true;
-    speechRecognition.interimResults = true;
     realtimeText = '';
+    state.recording = true;
+    state.recSeconds = 0;
+    clearInterval(state.timerInterval); // 既存タイマーを必ずクリア
+    startTimer();
 
-    speechRecognition.onstart = () => {
-      state.recording = true;
-      state.recSeconds = 0;
-      document.getElementById('micRing').classList.add('recording');
-      document.getElementById('voiceSt').textContent = '録音中（リアルタイム認識）';
-      document.getElementById('voiceSt').style.color = 'var(--red)';
-      document.getElementById('speechStatus').style.display = 'block';
-      document.getElementById('memoInputArea').value = '話しかけてください...';
-      startTimer();
-    };
+    document.getElementById('micRing').classList.add('recording');
+    document.getElementById('voiceSt').textContent = '録音中（タップで停止）';
+    document.getElementById('voiceSt').style.color = 'var(--red)';
+    document.getElementById('speechStatus').style.display = 'block';
+    document.getElementById('memoInputArea').value = '話しかけてください...';
 
-    speechRecognition.onresult = (event) => {
-      let interim = '';
-      let final = '';
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (event.results[i].isFinal) {
-          final += event.results[i][0].transcript;
-        } else {
-          interim += event.results[i][0].transcript;
-        }
-      }
-      if (final) realtimeText += final;
-      const mia = document.getElementById('memoInputArea');
-      if(mia) { mia.value = realtimeText + (interim ? '…' + interim : ''); onMemoInput(mia); }
-    };
-
-    speechRecognition.onerror = (e) => {
-      if (e.error === 'not-allowed') {
-        showToast('マイクへのアクセスが拒否されました', 'error');
-        stopRecording();
-      } else if (e.error === 'network') {
-        showToast('ネットワークエラー。Talixファイルインポートをお試しください。', 'error');
-        stopRecording();
-      }
-    };
-
-    speechRecognition.onend = () => {
-      // state.recordingがfalseなら絶対に再起動しない
+    function doRecognize() {
+      // 停止済みなら起動しない
       if (!state.recording) return;
-      if (!speechRecognition) return;
-      try { speechRecognition.start(); } catch(e) {}
-    };
 
-    speechRecognition.start();
+      const sr = new SpeechRecognition();
+      speechRecognition = sr;
+      sr.lang = 'ja-JP';
+      sr.continuous = false;      // falseにして自動停止を制御しやすくする
+      sr.interimResults = true;
+
+      sr.onresult = (event) => {
+        let interim = '', final = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          if (event.results[i].isFinal) final += event.results[i][0].transcript;
+          else interim += event.results[i][0].transcript;
+        }
+        if (final) realtimeText += final;
+        const mia = document.getElementById('memoInputArea');
+        if(mia) { mia.value = realtimeText + (interim ? '…' + interim : ''); onMemoInput(mia); }
+      };
+
+      sr.onerror = (e) => {
+        if (e.error === 'not-allowed') {
+          showToast('マイクへのアクセスが拒否されました', 'error');
+          stopRecording();
+        }
+        // network等のエラーは無視して継続
+      };
+
+      sr.onend = () => {
+        // このインスタンスが現在のものでない場合は無視
+        if (speechRecognition !== sr) return;
+        // 録音継続中なら新しいインスタンスで再起動
+        if (state.recording) {
+          setTimeout(doRecognize, 100);
+        }
+      };
+
+      try { sr.start(); } catch(e) { /* 既に起動中等は無視 */ }
+    }
+
+    doRecognize();
+
   } catch(e) {
     showToast('音声認識を開始できませんでした', 'error');
   }
@@ -2471,4 +2476,4 @@ function handleViewportResize() {
   }
 }
 
-window.addEventListener('resize', ()=>{ 
+window.addEventListener('re
