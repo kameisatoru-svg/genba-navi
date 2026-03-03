@@ -597,7 +597,7 @@ canvas{display:block;touch-action:none;}
         <div style="font-size:13px;font-weight:600;color:var(--text);">音声ファイルをインポート</div>
         <div id="importedFileName" style="font-size:10px;color:var(--muted);">m4a・mp3・wav対応（Talixレコーダー）</div>
       </div>
-      <input type="file" id="audioFileInput" accept="audio/*" style="display:none" onchange="handleAudioFile(event)">
+      <input type="file" id="audioFileInput" accept=".m4a,.mp3,.wav,.aac,.ogg,.opus,.webm,.weba,.3gp,.amr" style="display:none" onchange="handleAudioFile(event)">
     </div>
     <div id="audioPlayerWrap" style="display:none;"></div>
   </div>
