@@ -1358,8 +1358,8 @@ function startSpeechRecognition(SpeechRecognition) {
     };
 
     speechRecognition.onend = () => {
-      if (state.recording) {
-        // 自動停止された場合は再起動
+      // state.recordingがtrueかつspeechRecognitionが生きている時だけ再起動
+      if (state.recording && speechRecognition) {
         try { speechRecognition.start(); } catch(e) { stopRecording(); }
       }
     };
@@ -1403,8 +1403,9 @@ function stopRecording() {
   document.getElementById('speechStatus').style.display = 'none';
 
   if (speechRecognition) {
-    speechRecognition.stop();
-    speechRecognition = null;
+    const sr = speechRecognition;
+    speechRecognition = null; // 先にnullにしてonendでの再起動を防ぐ
+    sr.stop();
     // Web Speech結果をAIで整形
     if (realtimeText.trim()) {
       document.getElementById('micRing').classList.add('processing');
