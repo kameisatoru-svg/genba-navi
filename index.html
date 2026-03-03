@@ -58,25 +58,11 @@
 
 <!-- Service Worker 登録（オフライン対応＋ホーム画面追加を有効化） -->
 <script>
+// Service Worker: 古いキャッシュを全削除して常に最新を取得
 if('serviceWorker' in navigator) {
-  const swCode = `
-    const CACHE = 'genba-navi-v1';
-    self.addEventListener('install', e => {
-      self.skipWaiting();
-    });
-    self.addEventListener('activate', e => {
-      e.waitUntil(clients.claim());
-    });
-    self.addEventListener('fetch', e => {
-      // ネットワーク優先、失敗時にキャッシュ
-      e.respondWith(
-        fetch(e.request).catch(() => caches.match(e.request))
-      );
-    });
-  `;
-  const swBlob = new Blob([swCode], {type:'application/javascript'});
-  const swUrl = URL.createObjectURL(swBlob);
-  navigator.serviceWorker.register(swUrl, {scope: './'}).catch(()=>{});
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(r => r.unregister());
+  });
 }
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -2471,4 +2457,7 @@ function handleViewportResize() {
   }
 }
 
-window.addEventListener('resize', ()=>{ 
+window.addEventListener('resize', ()=>{ if(canvasReady) resizeCanvas(); });
+</script>
+</body>
+</html>
