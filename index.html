@@ -8,9 +8,9 @@
 <!-- PWA: スタンドアロン全画面 -->
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="現場ナビ">
-<meta name="theme-color" content="#FFFBF5">
+<meta name="theme-color" content="#0f1117">
 <meta name="application-name" content="現場ナビPRO">
 
 <!-- PWA マニフェスト（インライン Blob） -->
@@ -36,8 +36,8 @@
     start_url: './',
     display: 'standalone',
     orientation: 'any',
-    background_color: '#FFFBF5',
-    theme_color: '#FFFBF5',
+    background_color: '#0f1117',
+    theme_color: '#0f1117',
     icons: [
       { src: iconUrl, sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
       { src: iconUrl, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }
@@ -68,10 +68,10 @@ if('serviceWorker' in navigator) {
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:#FFFBF5; --surface:#FFFFFF; --surface2:#FFF3E0; --surface3:#FFE8C0;
-  --border:#FFD9A0; --accent:#E8710A; --accent2:#FF9800;
-  --blue:#1558D6; --green:#1A7F3C; --red:#D93025; --purple:#7B2FBE;
-  --text:#1A1200; --muted:#9E7B40;
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --surface3:#2a2e42;
+  --border:#2e3348; --accent:#f5a623; --accent2:#e05c2a;
+  --blue:#4a9eff; --green:#3dd68c; --red:#ff5f5f; --purple:#b06aff;
+  --text:#e8eaf2; --muted:#6b7294;
   --font:'Noto Sans JP',sans-serif; --mono:'DM Mono',monospace;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -82,7 +82,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);}
 .topbar{position:fixed;top:0;left:0;right:0;z-index:200;
   height:calc(52px + env(safe-area-inset-top,0px));
   padding-top:env(safe-area-inset-top,0px);
-  background:rgba(255,251,245,.98);backdrop-filter:blur(12px);
+  background:rgba(15,17,23,.97);backdrop-filter:blur(12px);
   border-bottom:1px solid var(--border);display:flex;align-items:center;
   justify-content:space-between;padding-left:16px;padding-right:16px;}
 .logo{font-size:16px;font-weight:900;letter-spacing:-.5px;
@@ -103,7 +103,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);}
 }
 
 .bottomnav{position:fixed;bottom:0;left:0;right:0;z-index:200;
-  background:rgba(255,251,245,.98);border-top:1px solid var(--border);
+  background:rgba(15,17,23,.97);border-top:1px solid var(--border);
   display:flex;
   height:calc(58px + var(--safe-bottom));
   padding-bottom:var(--safe-bottom);}
@@ -199,7 +199,27 @@ main{position:fixed;top:calc(52px + env(safe-area-inset-top,0px));bottom:calc(58
   border-radius:7px;padding:9px 12px;cursor:pointer;color:var(--text);
   font-size:11px;font-family:var(--font);display:flex;align-items:center;gap:5px;touch-action:manipulation;min-height:40px;}
 .tool-btn.active{border-color:var(--accent);background:rgba(245,166,35,.1);color:var(--accent);}
-.canvas-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.canvas-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;position:relative;touch-action:none;}
+/* 図面フルスクリーンモード */
+.sketch-fullscreen{position:fixed!important;inset:0!important;z-index:400!important;background:var(--bg)!important;border-radius:0!important;display:flex!important;flex-direction:column!important;}
+.sketch-fullscreen .canvas-wrap{flex:1!important;border-radius:0!important;border:none!important;}
+.sketch-fullscreen #sketchCanvas{width:100%!important;height:100%!important;}
+/* 分割レイアウト（Fold3展開時） */
+@media(min-width:600px){
+  #sketch-split-layout{display:flex!important;gap:8px!important;}
+  #sketch-left-panel{flex:1;min-width:0;}
+  #sketch-right-panel{width:320px;flex-shrink:0;overflow-y:auto;}
+}
+/* 図面サムネイルグリッド */
+.sketch-thumb{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;position:relative;}
+.sketch-thumb img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;}
+.sketch-thumb .thumb-label{font-size:11px;padding:5px 8px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sketch-thumb .thumb-del{position:absolute;top:4px;right:4px;background:rgba(255,95,95,.8);border:none;color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;display:none;align-items:center;justify-content:center;}
+.sketch-thumb:hover .thumb-del{display:flex;}
+/* 拡大ビュアー */
+#sketchViewer{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:600;display:none;flex-direction:column;align-items:center;justify-content:center;}
+#sketchViewer img{max-width:100%;max-height:80vh;object-fit:contain;touch-action:pinch-zoom;}
+
 canvas{display:block;touch-action:none;}
 .measure-list{border:1px solid var(--border);border-radius:12px;overflow:hidden;}
 .measure-row{display:flex;align-items:center;gap:10px;padding:11px 14px;
@@ -347,7 +367,7 @@ canvas{display:block;touch-action:none;}
   }
   .screen { padding: 10px 16px; }
   /* キャンバスは横向き時に高さを抑える */
-  #sketchCanvas { max-height: 200px !important; }
+  #sketchCanvas { max-height: none !important; }
   /* ホームのクイックアクションを3列に */
   #screen-home .quick-grid { grid-template-columns: repeat(3, 1fr) !important; }
 }
@@ -394,9 +414,9 @@ canvas{display:block;touch-action:none;}
       <div class="qa-ico b"><svg width="20" height="20" fill="none" stroke="#4a9eff" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
       <div><div class="qa-lbl">現場<br>写真</div></div>
     </div>
-    <div class="qa-card" onclick="openModal('newProject')" style="grid-column:span 2;">
-      <div class="qa-ico p"><svg width="20" height="20" fill="none" stroke="#b06aff" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
-      <div><div class="qa-lbl">新規案件登録</div><div class="qa-sub">顧客情報・現場情報を入力</div></div>
+    <div class="qa-card" onclick="switchScreen('anken')" style="grid-column:span 2;">
+      <div class="qa-ico p"><svg width="20" height="20" fill="none" stroke="#b06aff" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg></div>
+      <div><div class="qa-lbl">案件管理</div><div class="qa-sub">18工程の進捗管理・AIファイル読込</div></div>
     </div>
   </div>
 
@@ -439,27 +459,81 @@ canvas{display:block;touch-action:none;}
 </div>
 
 <!-- SKETCH -->
-<div class="screen" id="screen-sketch">
-  <div class="section-title">平面図スケッチ & 実測入力</div>
-  <div class="canvas-toolbar">
-    <div class="tool-btn active" id="tb-pen" onclick="setTool('pen',this)">✏️ ペン</div>
-    <div class="tool-btn" id="tb-rect" onclick="setTool('rect',this)">⬜ 矩形</div>
-    <div class="tool-btn" id="tb-line" onclick="setTool('line',this)">╱ 直線</div>
-    <div class="tool-btn" id="tb-dim" onclick="setTool('dim',this)">↔ 寸法</div>
-    <div class="tool-btn" id="tb-door" onclick="setTool('door',this)">🚪 扉</div>
-    <div class="tool-btn" id="tb-sash" onclick="setTool('sash',this)">🪟 サッシ</div>
-    <div class="tool-btn" id="tb-erase" onclick="setTool('erase',this)">🧹 消しゴム</div>
-    <div class="tool-btn" onclick="undoDraw()">↩ 戻す</div>
-    <div class="tool-btn" onclick="clearCanvas()">🗑 全消去</div>
-  </div>
-  <div style="font-size:10px;color:var(--muted);padding:2px 2px 4px;">
-    🚪 扉・🪟 サッシ：縦にドラッグ→縦向き　横にドラッグ→横向き　その後動かした方向に開きます
-  </div>
-  <div class="canvas-wrap" id="canvasWrap">
-    <canvas id="sketchCanvas"></canvas>
+<div class="screen" id="screen-sketch" style="padding:0;">
+  <!-- サブタブ -->
+  <div style="display:flex;gap:0;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;">
+    <button id="stab-sketch" onclick="switchSketchTab('sketch')" style="flex:1;padding:10px 4px;font-size:12px;font-weight:700;border:none;border-bottom:2px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;">✏️ 図面</button>
+    <button id="stab-measure" onclick="switchSketchTab('measure')" style="flex:1;padding:10px 4px;font-size:12px;font-weight:700;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);cursor:pointer;">📐 実測</button>
+    <button id="stab-pickup" onclick="switchSketchTab('pickup')" style="flex:1;padding:10px 4px;font-size:12px;font-weight:700;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);cursor:pointer;">📦 拾い出し</button>
   </div>
 
-  <div class="section-title" style="margin-top:16px;">実測入力</div>
+  <!-- ===== 図面パネル ===== -->
+  <div id="spanel-sketch" style="display:flex;flex-direction:column;height:calc(100% - 42px);">
+    <!-- ツールバー -->
+    <div style="display:flex;align-items:center;gap:0;padding:4px 6px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;flex-shrink:0;">
+      <div class="tool-btn active" id="tb-pen" onclick="setTool('pen',this)" style="min-width:44px;">✏️</div>
+      <div class="tool-btn" id="tb-rect" onclick="setTool('rect',this)" style="min-width:44px;">⬜</div>
+      <div class="tool-btn" id="tb-line" onclick="setTool('line',this)" style="min-width:44px;">╱</div>
+      <div class="tool-btn" id="tb-dim" onclick="setTool('dim',this)" style="min-width:44px;">↔</div>
+      <div class="tool-btn" id="tb-door" onclick="setTool('door',this)" style="min-width:44px;">🚪</div>
+      <div class="tool-btn" id="tb-sash" onclick="setTool('sash',this)" style="min-width:44px;">🪟</div>
+      <div class="tool-btn" id="tb-erase" onclick="setTool('erase',this)" style="min-width:44px;">🧹</div>
+      <div style="flex:1;"></div>
+      <div class="tool-btn" onclick="undoDraw()" style="min-width:44px;">↩</div>
+      <div class="tool-btn" onclick="clearCanvas()" style="min-width:44px;">🗑</div>
+      <div class="tool-btn" onclick="saveSketchNamed()" style="min-width:44px;color:var(--green);">💾</div>
+      <div class="tool-btn" onclick="exportSketchJpeg()" style="min-width:44px;color:var(--blue);">📷</div>
+      <div class="tool-btn" onclick="toggleCanvasFullscreen()" style="min-width:44px;color:var(--accent);" id="tb-fullscreen">⛶</div>
+    </div>
+
+    <!-- キャンバス本体（最大化） -->
+    <div class="canvas-wrap" id="canvasWrap" style="flex:1;border-radius:0;border:none;border-bottom:1px solid var(--border);">
+      <canvas id="sketchCanvas" style="width:100%;height:100%;display:block;"></canvas>
+    </div>
+
+    <!-- 保存済み図面一覧 -->
+    <div style="flex-shrink:0;padding:8px;background:var(--bg);border-top:1px solid var(--border);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);">保存済み図面</div>
+        <label style="font-size:11px;color:var(--blue);cursor:pointer;">📁 JPEGを取込
+          <input type="file" accept="image/*" style="display:none;" onchange="importSketchImage(event)">
+        </label>
+      </div>
+      <div id="sketchGallery" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;min-height:70px;align-items:center;">
+        <div style="color:var(--muted);font-size:11px;padding:10px;">💾 保存ボタンで図面を追加</div>
+      </div>
+    </div>
+  </div><!-- /spanel-sketch -->
+
+  <!-- 実測パネル -->
+  <div id="spanel-measure" style="display:none;height:calc(100% - 42px);overflow:hidden;">
+  <div id="sketch-split-layout" style="display:flex;height:100%;gap:0;">
+    <!-- 左：図面参照パネル -->
+    <div id="sketch-left-panel" style="display:none;border-right:1px solid var(--border);flex-direction:column;background:var(--bg);">
+      <div style="padding:6px 8px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:11px;font-weight:700;color:var(--accent);">📐 図面参照</div>
+        <div style="display:flex;gap:4px;">
+          <button onclick="zoomSketchRef(-0.2)" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);width:28px;height:28px;border-radius:6px;font-size:14px;cursor:pointer;">－</button>
+          <button onclick="zoomSketchRef(0.2)" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);width:28px;height:28px;border-radius:6px;font-size:14px;cursor:pointer;">＋</button>
+          <button onclick="hideSketchRef()" style="background:transparent;border:none;color:var(--muted);font-size:16px;cursor:pointer;">✕</button>
+        </div>
+      </div>
+      <div id="sketchRefWrap" style="flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:flex-start;padding:8px;">
+        <img id="sketchRefImg" src="" style="transform-origin:top left;transition:transform .2s;max-width:none;" onclick="openSketchViewer(this.src)">
+      </div>
+      <div style="padding:6px 8px;background:var(--surface);border-top:1px solid var(--border);overflow-x:auto;white-space:nowrap;scrollbar-width:none;">
+        <div id="sketchRefGallery" style="display:inline-flex;gap:6px;"></div>
+      </div>
+    </div>
+    <!-- 右：入力パネル -->
+    <div id="sketch-right-panel" style="flex:1;overflow-y:auto;padding:10px;min-width:0;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div class="section-title" style="margin:0;flex:1;">部屋別　実測入力</div>
+        <button onclick="toggleSketchRef()" style="background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.3);color:var(--accent);padding:6px 10px;border-radius:8px;font-size:11px;cursor:pointer;white-space:nowrap;">📐 図面を表示</button>
+      </div>
+  <div id="roomList" style="margin-bottom:10px;"></div>
+  <button onclick="addRoom()" style="width:100%;background:transparent;border:1px dashed rgba(74,158,255,.4);color:var(--blue);padding:10px;border-radius:10px;font-size:13px;cursor:pointer;margin-bottom:14px;">＋ 部屋を追加</button>
+  <div class="section-title">全体実測（自動計算用）</div>
   <div class="measure-list">
     <div class="measure-row">
       <div class="measure-lbl">間口 (幅)</div>
@@ -501,57 +575,458 @@ canvas{display:block;touch-action:none;}
     <button class="btn btn-secondary" onclick="switchScreen('photos')" style="flex:1;">📷 写真を撮る</button>
     <button class="btn btn-primary" onclick="goToEstimate()" style="flex:2;">この実測でAI見積作成 →</button>
   </div>
+    </div><!-- /sketch-right-panel -->
+  </div><!-- /sketch-split-layout -->
+  </div><!-- /spanel-measure -->
+
+  <!-- 拾い出しパネル -->
+  <div id="spanel-pickup" style="display:none;height:calc(100% - 42px);overflow:hidden;">
+  <div style="display:flex;height:100%;gap:0;">
+    <!-- 左：図面参照（拾い出し用） -->
+    <div id="pickup-left-panel" style="display:none;border-right:1px solid var(--border);flex-direction:column;background:var(--bg);width:45%;">
+      <div style="padding:6px 8px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:11px;font-weight:700;color:var(--accent);">📐 図面参照</div>
+        <div style="display:flex;gap:4px;">
+          <button onclick="zoomPickupRef(-0.2)" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);width:28px;height:28px;border-radius:6px;font-size:14px;cursor:pointer;">－</button>
+          <button onclick="zoomPickupRef(0.2)" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);width:28px;height:28px;border-radius:6px;font-size:14px;cursor:pointer;">＋</button>
+          <button onclick="hidePickupRef()" style="background:transparent;border:none;color:var(--muted);font-size:16px;cursor:pointer;">✕</button>
+        </div>
+      </div>
+      <div id="pickupRefWrap" style="flex:1;overflow:auto;padding:8px;">
+        <img id="pickupRefImg" src="" style="transform-origin:top left;transition:transform .2s;max-width:none;" onclick="openSketchViewer(this.src)">
+      </div>
+      <div style="padding:6px 8px;background:var(--surface);border-top:1px solid var(--border);overflow-x:auto;white-space:nowrap;scrollbar-width:none;">
+        <div id="pickupRefGallery" style="display:inline-flex;gap:6px;"></div>
+      </div>
+    </div>
+    <!-- 右：拾い出し入力 -->
+    <div style="flex:1;overflow-y:auto;padding:10px;min-width:0;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="section-title" style="margin:0;">材料拾い出し</div>
+      <div style="display:flex;gap:6px;">
+        <button onclick="togglePickupRef()" style="background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.3);color:var(--accent);padding:6px 8px;border-radius:8px;font-size:11px;cursor:pointer;">📐 図面</button>
+        <button onclick="sendPickupToEstimate()" style="background:var(--green);border:none;color:#000;padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">→ 見積反映</button>
+      </div>
+    </div>
+
+    <!-- 工事種別タブ -->
+    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px;scrollbar-width:none;">
+      <button class="ptab active" onclick="switchPickupTab('cloth',this)" style="flex-shrink:0;padding:7px 14px;border-radius:20px;border:1px solid var(--accent);background:rgba(245,166,35,.15);color:var(--accent);font-size:12px;font-weight:700;cursor:pointer;">🏠 クロス</button>
+      <button class="ptab" onclick="switchPickupTab('floor',this)" style="flex-shrink:0;padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;">🪵 床材</button>
+      <button class="ptab" onclick="switchPickupTab('light',this)" style="flex-shrink:0;padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;">💡 照明</button>
+      <button class="ptab" onclick="switchPickupTab('wood',this)" style="flex-shrink:0;padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;">🪚 木材</button>
+      <button class="ptab" onclick="switchPickupTab('paint',this)" style="flex-shrink:0;padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;">🎨 塗装</button>
+      <button class="ptab" onclick="switchPickupTab('door',this)" style="flex-shrink:0;padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;">🪟 建具</button>
+      <button class="ptab" onclick="switchPickupTab('custom',this)" style="flex-shrink:0;padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;">＋ カスタム</button>
+    </div>
+
+    <!-- クロス -->
+    <div id="pickup-cloth" class="pickup-panel">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:12px;">🏠 クロス（壁紙）拾い出し</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">実測値から自動計算。ロス率を調整できます</div>
+        <div class="form-row" style="margin-bottom:8px;">
+          <div><label class="form-label">壁面積（㎡）</label><input class="form-input" id="pu_cloth_wall" type="number" step="0.1" placeholder="自動取得" oninput="calcCloth()"></div>
+          <div><label class="form-label">ロス率（%）</label><input class="form-input" id="pu_cloth_loss" type="number" value="10" oninput="calcCloth()"></div>
+        </div>
+        <div class="form-row" style="margin-bottom:8px;">
+          <div><label class="form-label">幅（mm）</label><input class="form-input" id="pu_cloth_width" type="number" value="900" oninput="calcCloth()"></div>
+          <div><label class="form-label">柄リピート（mm）</label><input class="form-input" id="pu_cloth_repeat" type="number" value="0" oninput="calcCloth()"></div>
+        </div>
+        <div style="background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);border-radius:10px;padding:12px;margin-top:8px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">📊 計算結果</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
+            <div><div style="font-size:18px;font-weight:900;color:var(--accent);" id="pu_cloth_sqm">-</div><div style="font-size:10px;color:var(--muted);">必要㎡</div></div>
+            <div><div style="font-size:18px;font-weight:900;color:var(--accent);" id="pu_cloth_rolls">-</div><div style="font-size:10px;color:var(--muted);">本数(m換算)</div></div>
+            <div><div style="font-size:18px;font-weight:900;color:var(--accent);" id="pu_cloth_strips">-</div><div style="font-size:10px;color:var(--muted);">幅数</div></div>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:10px;"><label class="form-label">メモ・品番</label><input class="form-input" id="pu_cloth_memo" type="text" placeholder="品番・色番など"></div>
+      </div>
+    </div>
+
+    <!-- 床材 -->
+    <div id="pickup-floor" class="pickup-panel" style="display:none;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:12px;">🪵 床材拾い出し</div>
+        <div class="form-row" style="margin-bottom:8px;">
+          <div><label class="form-label">床面積（㎡）</label><input class="form-input" id="pu_floor_sqm" type="number" step="0.1" placeholder="自動取得" oninput="calcFloorMat()"></div>
+          <div><label class="form-label">ロス率（%）</label><input class="form-input" id="pu_floor_loss" type="number" value="8" oninput="calcFloorMat()"></div>
+        </div>
+        <div class="form-row" style="margin-bottom:8px;">
+          <div><label class="form-label">材料幅（mm）</label><input class="form-input" id="pu_floor_w" type="number" value="1800" oninput="calcFloorMat()"></div>
+          <div><label class="form-label">材料長さ（mm）</label><input class="form-input" id="pu_floor_l" type="number" value="900" oninput="calcFloorMat()"></div>
+        </div>
+        <div style="background:rgba(74,158,255,.08);border:1px solid rgba(74,158,255,.2);border-radius:10px;padding:12px;margin-top:8px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">📊 計算結果</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:center;">
+            <div><div style="font-size:18px;font-weight:900;color:var(--blue);" id="pu_floor_need">-</div><div style="font-size:10px;color:var(--muted);">必要㎡</div></div>
+            <div><div style="font-size:18px;font-weight:900;color:var(--blue);" id="pu_floor_sheets">-</div><div style="font-size:10px;color:var(--muted);">枚数</div></div>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:10px;"><label class="form-label">メモ・品番</label><input class="form-input" id="pu_floor_memo" type="text" placeholder="品番・色番など"></div>
+      </div>
+    </div>
+
+    <!-- 照明 -->
+    <div id="pickup-light" class="pickup-panel" style="display:none;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:#f5e642;margin-bottom:12px;">💡 照明器具拾い出し</div>
+        <div id="lightItems">
+          <div class="light-row" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <input class="form-input" style="flex:2;" type="text" value="蛍光灯" placeholder="器具名">
+            <input class="form-input" style="flex:1;" type="number" value="0" placeholder="台数" min="0" oninput="calcLight()">
+            <span style="font-size:12px;color:var(--muted);flex-shrink:0;">台</span>
+          </div>
+          <div class="light-row" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <input class="form-input" style="flex:2;" type="text" value="ダウンライト" placeholder="器具名">
+            <input class="form-input" style="flex:1;" type="number" value="0" placeholder="台数" min="0" oninput="calcLight()">
+            <span style="font-size:12px;color:var(--muted);flex-shrink:0;">台</span>
+          </div>
+          <div class="light-row" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <input class="form-input" style="flex:2;" type="text" value="スイッチ" placeholder="器具名">
+            <input class="form-input" style="flex:1;" type="number" value="0" placeholder="個数" min="0" oninput="calcLight()">
+            <span style="font-size:12px;color:var(--muted);flex-shrink:0;">箇所</span>
+          </div>
+          <div class="light-row" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <input class="form-input" style="flex:2;" type="text" value="コンセント" placeholder="器具名">
+            <input class="form-input" style="flex:1;" type="number" value="0" placeholder="個数" min="0" oninput="calcLight()">
+            <span style="font-size:12px;color:var(--muted);flex-shrink:0;">箇所</span>
+          </div>
+        </div>
+        <button onclick="addLightRow()" style="width:100%;background:transparent;border:1px dashed rgba(245,230,66,.3);color:#f5e642;padding:8px;border-radius:8px;font-size:12px;cursor:pointer;margin-top:4px;">＋ 器具を追加</button>
+        <div style="background:rgba(245,230,66,.06);border:1px solid rgba(245,230,66,.2);border-radius:10px;padding:10px;margin-top:10px;" id="lightSummary">
+          <div style="font-size:11px;color:var(--muted);">器具を入力してください</div>
+        </div>
+        <div class="form-group" style="margin-top:10px;"><label class="form-label">メモ</label><input class="form-input" id="pu_light_memo" type="text" placeholder="メーカー・型番など"></div>
+      </div>
+    </div>
+
+    <!-- 木材 -->
+    <div id="pickup-wood" class="pickup-panel" style="display:none;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:#c8892a;margin-bottom:12px;">🪚 木材拾い出し</div>
+        <div id="woodItems"></div>
+        <button onclick="addWoodRow()" style="width:100%;background:transparent;border:1px dashed rgba(200,137,42,.3);color:#c8892a;padding:8px;border-radius:8px;font-size:12px;cursor:pointer;margin-bottom:10px;">＋ 材料を追加</button>
+        <div style="background:rgba(200,137,42,.08);border:1px solid rgba(200,137,42,.2);border-radius:10px;padding:12px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">📊 合計</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:center;">
+            <div><div style="font-size:18px;font-weight:900;color:#c8892a;" id="pu_wood_total_m">-</div><div style="font-size:10px;color:var(--muted);">総延長（m）</div></div>
+            <div><div style="font-size:18px;font-weight:900;color:#c8892a;" id="pu_wood_total_m3">-</div><div style="font-size:10px;color:var(--muted);">材積（m³）</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 塗装 -->
+    <div id="pickup-paint" class="pickup-panel" style="display:none;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:#e05c2a;margin-bottom:12px;">🎨 塗装拾い出し</div>
+        <div class="form-row" style="margin-bottom:8px;">
+          <div><label class="form-label">塗装面積（㎡）</label><input class="form-input" id="pu_paint_sqm" type="number" step="0.1" placeholder="㎡" oninput="calcPaint()"></div>
+          <div><label class="form-label">塗回数</label><input class="form-input" id="pu_paint_coats" type="number" value="2" oninput="calcPaint()"></div>
+        </div>
+        <div class="form-row" style="margin-bottom:8px;">
+          <div><label class="form-label">塗布量（m²/L）</label><input class="form-input" id="pu_paint_spread" type="number" value="6" oninput="calcPaint()"></div>
+          <div><label class="form-label">缶サイズ（L）</label><input class="form-input" id="pu_paint_can" type="number" value="15" oninput="calcPaint()"></div>
+        </div>
+        <div style="background:rgba(224,92,42,.08);border:1px solid rgba(224,92,42,.2);border-radius:10px;padding:12px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:center;">
+            <div><div style="font-size:18px;font-weight:900;color:#e05c2a;" id="pu_paint_liters">-</div><div style="font-size:10px;color:var(--muted);">必要L数</div></div>
+            <div><div style="font-size:18px;font-weight:900;color:#e05c2a;" id="pu_paint_cans">-</div><div style="font-size:10px;color:var(--muted);">缶数</div></div>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:10px;"><label class="form-label">塗料名・品番</label><input class="form-input" id="pu_paint_memo" type="text" placeholder="塗料名・品番など"></div>
+      </div>
+    </div>
+
+    <!-- 建具 -->
+    <div id="pickup-door" class="pickup-panel" style="display:none;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:var(--teal,#2ac8c8);margin-bottom:12px;">🪟 建具・サッシ拾い出し</div>
+        <div id="doorItems"></div>
+        <button onclick="addDoorRow()" style="width:100%;background:transparent;border:1px dashed rgba(42,200,200,.3);color:#2ac8c8;padding:8px;border-radius:8px;font-size:12px;cursor:pointer;">＋ 建具を追加</button>
+        <div style="background:rgba(42,200,200,.06);border:1px solid rgba(42,200,200,.2);border-radius:10px;padding:10px;margin-top:10px;" id="doorSummary">
+          <div style="font-size:11px;color:var(--muted);">建具を入力してください</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- カスタム -->
+    <div id="pickup-custom" class="pickup-panel" style="display:none;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:var(--purple);margin-bottom:12px;">＋ カスタム拾い出し</div>
+        <div id="customItems"></div>
+        <button onclick="addCustomRow()" style="width:100%;background:transparent;border:1px dashed rgba(176,106,255,.3);color:var(--purple);padding:8px;border-radius:8px;font-size:12px;cursor:pointer;">＋ 項目を追加</button>
+      </div>
+    </div>
+
+    <!-- 拾い出し合計サマリー -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:12px;">
+      <div style="font-size:12px;font-weight:700;margin-bottom:8px;">📋 拾い出しサマリー</div>
+      <div id="pickupSummary" style="font-size:12px;color:var(--muted);line-height:2;">入力後にサマリーが表示されます</div>
+    </div>
+    </div><!-- /pickup-right -->
+  </div><!-- /pickup-split -->
+  </div><!-- /spanel-pickup -->
+
 </div>
 
 <!-- ESTIMATE -->
-<div class="screen" id="screen-estimate">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">
-    <div>
-      <div style="font-size:15px;font-weight:700;" id="estProjectName">カフェ「MOKU」内装改装</div>
-      <div style="font-size:11px;color:var(--muted);" id="estDate">見積日: 2025年3月3日</div>
+<div class="screen" id="screen-estimate" style="padding:0;">
+  <!-- サブタブ -->
+  <div style="display:flex;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;">
+    <button id="etab-estimate" onclick="switchEstTab('estimate')" style="flex:1;padding:10px 4px;font-size:12px;font-weight:700;border:none;border-bottom:2px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;">📋 見積書</button>
+    <button id="etab-invoice" onclick="switchEstTab('invoice')" style="flex:1;padding:10px 4px;font-size:12px;font-weight:700;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);cursor:pointer;">💴 請求書</button>
+    <button id="etab-gantt" onclick="switchEstTab('gantt')" style="flex:1;padding:10px 4px;font-size:12px;font-weight:700;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);cursor:pointer;">📅 工程表</button>
+  </div>
+
+  <!-- ===== 見積書パネル ===== -->
+  <div id="epanel-estimate" style="height:calc(100% - 42px);overflow-y:auto;padding:12px;">
+    <!-- ヘッダー -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;">
+        <div style="flex:1;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">案件名</div>
+          <input id="estProjectName" class="form-input" style="font-size:14px;font-weight:700;padding:6px 8px;" value="カフェ「MOKU」内装改装">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">施主名</div>
+          <input id="estClientName" class="form-input" style="font-size:13px;padding:6px 8px;" placeholder="施主名・会社名">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">見積日</div>
+          <input id="estDate" class="form-input" type="date" style="font-size:13px;padding:6px 8px;">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">有効期限</div>
+          <input id="estValidity" class="form-input" type="date" style="font-size:13px;padding:6px 8px;">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">消費税</div>
+          <select id="estTaxRate" class="form-input" style="font-size:13px;padding:6px 8px;" onchange="renderEstimate()">
+            <option value="0.10">10%</option>
+            <option value="0.08">8%（軽減）</option>
+            <option value="0">非課税</option>
+          </select>
+        </div>
+      </div>
     </div>
-    <div class="ai-badge">✦ AI計算</div>
+
+    <!-- 合計ヒーロー -->
+    <div class="est-hero" style="margin-bottom:10px;">
+      <div class="est-hero-lbl">見積金額（税込）</div>
+      <div class="est-hero-num" id="estTotal">¥0<span> 円</span></div>
+      <div class="est-breakdown">
+        <div class="est-bd-item">材料費 <strong id="bMaterial">¥0</strong></div>
+        <div class="est-bd-item">施工費 <strong id="bLabor">¥0</strong></div>
+        <div class="est-bd-item">諸経費 <strong id="bOther">¥0</strong></div>
+        <div class="est-bd-item">消費税 <strong id="bTax">¥0</strong></div>
+      </div>
+    </div>
+
+    <!-- AIファイル読込・アクション -->
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+      <button onclick="openEstAiImport()" style="flex:1;min-width:70px;background:linear-gradient(135deg,rgba(176,106,255,.2),rgba(74,158,255,.15));border:1px solid rgba(176,106,255,.3);color:#c89aff;padding:9px 4px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">🤖 AI読込</button>
+      <button onclick="openAIEstimate()" style="flex:1;min-width:70px;background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.3);color:var(--accent);padding:9px 4px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">✦ AI自動計算</button>
+      <button onclick="addEstItemInline()" style="flex:1;min-width:70px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 4px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">＋ 行追加</button>
+      <button onclick="insertFromPriceMaster()" style="flex:1;min-width:70px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 4px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">📋 単価表</button>
+      <button onclick="saveEstimateToStorage()" style="flex:1;min-width:70px;background:rgba(61,214,140,.15);border:1px solid rgba(61,214,140,.3);color:var(--green);padding:9px 4px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">💾 保存</button>
+      <button onclick="printEstimate()" style="flex:1;min-width:70px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 4px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">🖨️ 印刷</button>
+    </div>
+    <!-- 保存済み見積一覧 -->
+    <div id="savedEstimatesBar" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:10px;">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;">保存済み見積</div>
+      <div id="savedEstimatesList" style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;"></div>
+    </div>
+
+    <!-- 見積明細テーブル（インライン編集対応） -->
+    <div class="est-table" style="margin-bottom:8px;">
+      <div class="est-row hdr">
+        <div class="ec-name">項目名 / 仕様</div>
+        <div class="ec-qty" style="width:70px;">数量</div>
+        <div class="ec-qty" style="width:70px;">単価</div>
+        <div class="ec-price" style="width:80px;">金額</div>
+        <div style="width:26px;"></div>
+      </div>
+      <div id="estItems"></div>
+    </div>
+    <button onclick="addEstItemInline()" style="width:100%;background:transparent;border:1px dashed rgba(245,166,35,.3);color:var(--accent);padding:10px;border-radius:8px;font-size:13px;cursor:pointer;margin-bottom:14px;">＋ 行を追加</button>
+
+    <!-- 備考 -->
+    <div style="margin-bottom:12px;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">備考・特記事項</div>
+      <textarea id="estNotes" class="form-input" rows="3" placeholder="支払条件・工事条件など" style="font-size:13px;"></textarea>
+    </div>
+
+    <!-- アクションボタン -->
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="copyEstimateText()" style="flex:1;">📋 コピー</button>
+      <button class="btn btn-secondary" onclick="exportEstimatePDF()" style="flex:1;">📄 PDF</button>
+      <button class="btn btn-primary" onclick="convertToInvoice()" style="flex:1;">💴 請求書へ</button>
+    </div>
+
+    <!-- AI読込パネル -->
+    <div id="estAiImportPanel" style="display:none;background:var(--surface);border:1px solid rgba(176,106,255,.3);border-radius:12px;padding:14px;margin-top:12px;">
+      <div style="font-size:13px;font-weight:700;color:#c89aff;margin-bottom:10px;">🤖 AIファイル読込（見積）</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">PDF・JPEG・音声テキストを読み込んで見積に反映します</div>
+      <label style="display:block;border:2px dashed rgba(176,106,255,.3);border-radius:10px;padding:16px;text-align:center;cursor:pointer;margin-bottom:10px;">
+        <div style="font-size:24px;margin-bottom:6px;">📎</div>
+        <div style="font-size:12px;color:#c89aff;">PDF・JPEG・PNG を添付</div>
+        <input type="file" accept="image/*,application/pdf" multiple style="display:none;" onchange="handleEstAiFiles(event)">
+      </label>
+      <div id="estAiFilePreview" style="margin-bottom:8px;"></div>
+      <textarea id="estAiTextInput" class="form-input" rows="3" placeholder="または見積内容をテキストで入力（音声文字起こしのペーストも可）" style="font-size:13px;margin-bottom:10px;"></textarea>
+      <div style="display:flex;gap:8px;">
+        <button onclick="runEstAiImport()" style="flex:2;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;color:#fff;padding:12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🤖 AI読込実行</button>
+        <button onclick="document.getElementById('estAiImportPanel').style.display='none'" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px;border-radius:8px;cursor:pointer;">閉じる</button>
+      </div>
+      <div id="estAiResult" style="margin-top:10px;font-size:12px;color:var(--muted);"></div>
+    </div>
+
+    <div class="section-title" style="margin-top:16px;">単価マスター（参照）</div>
+    <div class="price-master" id="priceMasterRef"></div>
   </div>
 
-  <div class="est-hero" style="margin-top:12px;">
-    <div class="est-hero-lbl">合計金額（税込）</div>
-    <div class="est-hero-num" id="estTotal">¥1,408,000<span> 円</span></div>
-    <div class="est-breakdown">
-      <div class="est-bd-item">材料費 <strong id="bMaterial">¥640,000</strong></div>
-      <div class="est-bd-item">施工費 <strong id="bLabor">¥640,000</strong></div>
-      <div class="est-bd-item">消費税 <strong id="bTax">¥128,000</strong></div>
+  <!-- ===== 請求書パネル ===== -->
+  <div id="epanel-invoice" style="display:none;height:calc(100% - 42px);overflow-y:auto;padding:12px;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;">
+      <div style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:12px;">💴 請求書</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">請求先</div><input id="invClient" class="form-input" style="font-size:13px;padding:6px 8px;" placeholder="施主名・会社名"></div>
+        <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">請求日</div><input id="invDate" class="form-input" type="date" style="font-size:13px;padding:6px 8px;"></div>
+        <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">支払期日</div><input id="invDueDate" class="form-input" type="date" style="font-size:13px;padding:6px 8px;"></div>
+        <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">工事件名</div><input id="invProjectName" class="form-input" style="font-size:13px;padding:6px 8px;" placeholder="工事件名"></div>
+      </div>
+    </div>
+
+    <!-- 請求金額ヒーロー -->
+    <div style="background:linear-gradient(135deg,rgba(255,95,95,.15),rgba(224,92,42,.1));border:1px solid rgba(255,95,95,.3);border-radius:14px;padding:16px;text-align:center;margin-bottom:12px;">
+      <div style="font-size:11px;color:rgba(255,150,150,.8);margin-bottom:4px;">ご請求金額（税込）</div>
+      <div style="font-size:32px;font-weight:900;color:#ff8888;" id="invTotal">¥0</div>
+      <div style="display:flex;justify-content:center;gap:16px;margin-top:8px;font-size:11px;color:rgba(255,150,150,.7);">
+        <span>小計 <strong id="invSubtotal" style="color:#ffaaaa;">¥0</strong></span>
+        <span>消費税 <strong id="invTax" style="color:#ffaaaa;">¥0</strong></span>
+      </div>
+    </div>
+
+    <!-- 請求明細（見積から引き継ぎ・個別編集可） -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:10px;">
+      <div style="padding:10px 12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:12px;font-weight:700;">請求明細</div>
+        <button onclick="syncInvoiceFromEstimate()" style="font-size:11px;background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.3);color:var(--accent);padding:4px 10px;border-radius:6px;cursor:pointer;">見積から同期</button>
+      </div>
+      <div id="invItems" style="padding:8px;"></div>
+      <button onclick="addInvItemInline()" style="width:100%;background:transparent;border:none;border-top:1px solid var(--border);color:var(--accent);padding:10px;font-size:12px;cursor:pointer;">＋ 行を追加</button>
+    </div>
+
+    <!-- 振込先 -->
+    <div style="margin-bottom:12px;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">振込先口座</div>
+      <textarea id="invBank" class="form-input" rows="3" placeholder="例：〇〇銀行 〇〇支店 普通 1234567 カ）アート・レイズ" style="font-size:13px;"></textarea>
+    </div>
+    <div style="margin-bottom:12px;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">備考</div>
+      <textarea id="invNotes" class="form-input" rows="2" placeholder="振込手数料はご負担ください 等" style="font-size:13px;"></textarea>
+    </div>
+
+    <!-- 印章・社名ブロック -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">発行元情報（初回設定後は自動入力）</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">会社名・屋号</div><input id="invCompanyName" class="form-input" style="font-size:12px;" placeholder="例：アート・レイズ"></div>
+        <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">担当者名</div><input id="invPersonName" class="form-input" style="font-size:12px;" placeholder="例：田中 太郎"></div>
+        <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">電話番号</div><input id="invTel" class="form-input" style="font-size:12px;" placeholder="例：0977-XX-XXXX"></div>
+        <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">インボイス登録番号</div><input id="invRegNo" class="form-input" style="font-size:12px;" placeholder="T1234567890123"></div>
+      </div>
+      <button onclick="saveInvCompanyInfo()" style="margin-top:8px;width:100%;background:rgba(61,214,140,.1);border:1px solid rgba(61,214,140,.3);color:var(--green);padding:7px;border-radius:8px;font-size:12px;cursor:pointer;">💾 発行元情報を保存</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="copyInvoiceText()" style="flex:1;">📋 コピー</button>
+      <button class="btn btn-secondary" onclick="exportInvoicePDF()" style="flex:1;">📄 PDF</button>
+      <button class="btn btn-primary" onclick="shareInvoiceToLine()" style="flex:1;background:var(--green);color:#000;">📱 LINE送付</button>
     </div>
   </div>
 
-  <div style="display:flex;gap:8px;margin-bottom:12px;">
-    <button class="tool-btn" onclick="openAIEstimate()" style="flex:1;justify-content:center;">✦ AI自動計算</button>
-    <button class="tool-btn" onclick="openModal('addItem')" style="flex:1;justify-content:center;">＋ 項目追加</button>
-    <button class="tool-btn" onclick="openModal('pricemaster')" style="flex:1;justify-content:center;">📋 単価表</button>
-  </div>
-
-  <div class="est-table">
-    <div class="est-row hdr">
-      <div class="ec-name">項目</div>
-      <div class="ec-qty">数量</div>
-      <div class="ec-price">金額</div>
-      <div style="width:26px;"></div>
+  <!-- ===== ガントチャートパネル ===== -->
+  <div id="epanel-gantt" style="display:none;height:calc(100% - 42px);overflow:hidden;flex-direction:column;">
+    <!-- ツールバー -->
+    <div style="padding:8px 10px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+        <div style="font-size:13px;font-weight:700;flex:1;">📅 工程表</div>
+        <button onclick="openAiGantt()" style="background:linear-gradient(135deg,rgba(176,106,255,.2),rgba(74,158,255,.15));border:1px solid rgba(176,106,255,.3);color:#c89aff;padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">🤖 AI生成</button>
+        <button onclick="addGanttRow()" style="background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.3);color:var(--accent);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">＋ 工種追加</button>
+        <button onclick="ganttShareText()" style="background:rgba(61,214,140,.15);border:1px solid rgba(61,214,140,.3);color:var(--green);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">📋 共有</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:4px;">
+          <span style="font-size:11px;color:var(--muted);">開始</span>
+          <input id="ganttStartDate" type="date" class="form-input" style="font-size:12px;padding:4px 6px;width:130px;" onchange="renderGantt()">
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <span style="font-size:11px;color:var(--muted);">表示</span>
+          <select id="ganttWeeks" class="form-input" style="font-size:12px;padding:4px 6px;width:72px;" onchange="renderGantt()">
+            <option value="3">3週</option>
+            <option value="4">4週</option>
+            <option value="5" selected>5週</option>
+            <option value="6">6週</option>
+            <option value="8">8週</option>
+          </select>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <span style="font-size:11px;color:var(--muted);">列幅</span>
+          <select id="ganttColW" class="form-input" style="font-size:12px;padding:4px 6px;width:68px;" onchange="renderGantt()">
+            <option value="24">小</option>
+            <option value="32" selected>中</option>
+            <option value="44">大</option>
+          </select>
+        </div>
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--muted);">
+          <input type="checkbox" id="ganttShowProgress" onchange="renderGantt()" style="width:14px;height:14px;">進捗表示
+        </label>
+      </div>
     </div>
-    <div id="estItems"></div>
-  </div>
-  <button class="add-item-btn" onclick="openModal('addItem')">＋ 項目を追加</button>
 
-  <div class="btn-row" style="margin-top:16px;">
-    <button class="btn btn-secondary" onclick="generatePDF()" style="flex:1;">📄 PDF出力</button>
-    <button class="btn btn-primary" onclick="shareEstimate()" style="flex:1;">📤 顧客へ送付</button>
-  </div>
+    <!-- AI生成パネル -->
+    <div id="ganttAiPanel" style="display:none;background:var(--surface);border-bottom:1px solid rgba(176,106,255,.3);padding:12px;flex-shrink:0;">
+      <div style="font-size:12px;font-weight:700;color:#c89aff;margin-bottom:8px;">🤖 AI工程表生成</div>
+      <textarea id="ganttAiInput" class="form-input" rows="3" placeholder="工事内容を入力（例：別府市内カフェ　スケルトン解体からフルリノベ　工期5週間　クロス・床材・照明・カウンター造作）" style="font-size:12px;margin-bottom:8px;"></textarea>
+      <div style="display:flex;gap:8px;">
+        <button onclick="runAiGantt()" style="flex:2;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;color:#fff;padding:10px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">🤖 工程表を生成</button>
+        <button onclick="document.getElementById('ganttAiPanel').style.display='none'" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:12px;cursor:pointer;">閉じる</button>
+      </div>
+      <div id="ganttAiStatus" style="margin-top:8px;font-size:11px;color:var(--muted);"></div>
+    </div>
 
-  <div class="section-title">単価マスター（参照）</div>
-  <div class="price-master" id="priceMasterRef"></div>
+    <!-- チャートエリア（横スクロール） -->
+    <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
+      <!-- ヘッダー固定エリア -->
+      <div id="ganttHeaderWrap" style="overflow:hidden;flex-shrink:0;background:var(--surface2);">
+        <div id="ganttHeader" style=""></div>
+      </div>
+      <!-- ボディスクロールエリア -->
+      <div id="ganttBodyWrap" style="flex:1;overflow:auto;" onscroll="syncGanttScroll(this)">
+        <div id="ganttBody" style=""></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- VOICE / MEMO -->
-<div class="screen" id="screen-voice">
-  <div class="section-title">打ち合わせメモ & AI解析</div>
+<div class="screen" id="screen-voice" style="padding:0;">
+  <!-- サブタブ -->
+  <div style="display:flex;background:var(--surface);border-bottom:1px solid var(--border);">
+    <button id="vtab-memo" onclick="switchVoiceTab('memo')" style="flex:1;padding:10px 4px;font-size:12px;font-weight:700;border:none;border-bottom:2px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;">🎙 録音・メモ</button>
+    <button id="vtab-summary" onclick="switchVoiceTab('summary')" style="flex:1;padding:10px 4px;font-size:12px;font-weight:700;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);cursor:pointer;">✦ AI要約</button>
+    <button id="vtab-tasks" onclick="switchVoiceTab('tasks')" style="flex:1;padding:10px 4px;font-size:12px;font-weight:700;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);cursor:pointer;">✅ タスク</button>
+    <button id="vtab-notes" onclick="switchVoiceTab('notes')" style="flex:1;padding:10px 4px;font-size:12px;font-weight:700;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);cursor:pointer;">📝 メモ一覧</button>
+  </div>
+
+  <!-- 録音・入力パネル -->
+  <div id="vpanel-memo" style="height:calc(100% - 42px);overflow-y:auto;padding:12px;">
+  <div class="section-title" style="margin-top:0;">打ち合わせメモ & AI解析</div>
 
   <!-- マイク録音 -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px;text-align:center;">
@@ -669,32 +1144,233 @@ canvas{display:block;touch-action:none;}
     </div>
   </div>
 
-  <!-- 保存済みメモ -->
-  <div class="section-title" style="margin-top:20px;">保存済みメモ</div>
-  <div class="vn-list" id="voiceNoteList"></div>
+  </div><!-- /vpanel-memo -->
+
+  <!-- AI要約パネル -->
+  <div id="vpanel-summary" style="display:none;height:calc(100% - 42px);overflow-y:auto;padding:12px;">
+    <div style="background:linear-gradient(135deg,rgba(176,106,255,.12),rgba(74,158,255,.08));border:1px solid rgba(176,106,255,.25);border-radius:14px;padding:14px;margin-bottom:12px;">
+      <div style="font-size:13px;font-weight:700;color:#c89aff;margin-bottom:6px;">✦ AI打ち合わせ要約</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">録音・メモタブのテキストをAIが構造化して要約します</div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="runAiSummary()" style="flex:2;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;color:#fff;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">✦ 要約を生成</button>
+        <button onclick="copySummary()" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px;border-radius:10px;font-size:12px;cursor:pointer;">📋 コピー</button>
+      </div>
+    </div>
+    <div id="summaryLoading" style="display:none;text-align:center;padding:30px;">
+      <div style="font-size:32px;margin-bottom:8px;">✦</div>
+      <div style="font-size:13px;color:var(--accent);">AIが要約中...</div>
+    </div>
+    <div id="summaryResult" style="display:none;">
+      <!-- 要約結果が動的に挿入される -->
+    </div>
+    <div id="summaryEmpty" style="text-align:center;padding:40px;color:var(--muted);font-size:12px;">
+      📝 録音・メモタブにテキストを入力してから<br>「要約を生成」を押してください
+    </div>
+  </div>
+
+  <!-- タスク抽出パネル -->
+  <div id="vpanel-tasks" style="display:none;height:calc(100% - 42px);overflow-y:auto;padding:12px;">
+    <div style="background:rgba(61,214,140,.08);border:1px solid rgba(61,214,140,.25);border-radius:14px;padding:14px;margin-bottom:12px;">
+      <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:6px;">✅ タスク・確認事項の自動抽出</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">打ち合わせ内容からToDoと確認事項をAIが自動抽出します</div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="runAiTaskExtract()" style="flex:2;background:var(--green);border:none;color:#000;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">✅ タスクを抽出</button>
+        <button onclick="addManualTask()" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px;border-radius:10px;font-size:12px;cursor:pointer;">＋ 手動追加</button>
+      </div>
+    </div>
+    <div id="taskLoading" style="display:none;text-align:center;padding:30px;">
+      <div style="font-size:32px;margin-bottom:8px;">⚙️</div>
+      <div style="font-size:13px;color:var(--green);">タスクを抽出中...</div>
+    </div>
+    <div id="taskList" style="margin-bottom:12px;"></div>
+    <!-- 完了済み -->
+    <div id="doneTaskSection" style="display:none;">
+      <div style="font-size:11px;color:var(--muted);margin:12px 0 6px;">✓ 完了済み</div>
+      <div id="doneTaskList"></div>
+    </div>
+  </div>
+
+  <!-- メモ一覧パネル -->
+  <div id="vpanel-notes" style="display:none;height:calc(100% - 42px);overflow-y:auto;padding:12px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="section-title" style="margin:0;">保存済みメモ一覧</div>
+      <select id="noteFilterProject" onchange="renderVoiceNotes()" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:4px 8px;font-size:11px;outline:none;">
+        <option value="all">全案件</option>
+      </select>
+    </div>
+    <div class="vn-list" id="voiceNoteList"></div>
+  </div>
 </div>
 
 <!-- PHOTOS -->
-<div class="screen" id="screen-photos">
-  <div class="section-title">現場写真管理</div>
-  <div class="photo-filter" id="photoFilter">
-    <div class="pf-btn active" onclick="filterPhotos('all',this)">すべて</div>
-    <div class="pf-btn" onclick="filterPhotos('before',this)">施工前</div>
-    <div class="pf-btn" onclick="filterPhotos('during',this)">施工中</div>
-    <div class="pf-btn" onclick="filterPhotos('after',this)">施工後</div>
-    <div class="pf-btn" onclick="filterPhotos('issue',this)">要確認</div>
+<div class="screen" id="screen-photos" style="padding:0;">
+  <!-- ヘッダー -->
+  <div style="display:flex;align-items:center;gap:6px;padding:8px 10px;background:var(--surface);border-bottom:1px solid var(--border);">
+    <div style="flex:1;overflow-x:auto;scrollbar-width:none;">
+      <div style="display:flex;gap:6px;white-space:nowrap;">
+        <button class="pf-btn active" id="pfilter-all" onclick="filterPhotos('all',this)" style="flex-shrink:0;">📷 全て</button>
+        <button class="pf-btn" id="pfilter-before" onclick="filterPhotos('before',this)" style="flex-shrink:0;">🔵 施工前</button>
+        <button class="pf-btn" id="pfilter-during" onclick="filterPhotos('during',this)" style="flex-shrink:0;">🟡 施工中</button>
+        <button class="pf-btn" id="pfilter-after" onclick="filterPhotos('after',this)" style="flex-shrink:0;">🟢 施工後</button>
+        <button class="pf-btn" id="pfilter-issue" onclick="filterPhotos('issue',this)" style="flex-shrink:0;">🔴 要確認</button>
+        <button class="pf-btn" id="pfilter-site" onclick="filterPhotos('site',this)" style="flex-shrink:0;">📐 現況</button>
+      </div>
+    </div>
+    <label style="background:var(--accent);color:#000;font-size:11px;font-weight:700;padding:7px 12px;border-radius:8px;cursor:pointer;flex-shrink:0;white-space:nowrap;">
+      📷 撮影・追加
+      <input type="file" id="photoInput" accept="image/*" multiple style="display:none" onchange="addPhoto(event)">
+    </label>
   </div>
-  <div class="photo-grid" id="photoGrid">
-    <div class="photo-add-btn" onclick="document.getElementById('photoInput').click()">
-      <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-      <span>写真追加</span>
-      <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="addPhoto(event)">
+
+  <!-- 統計バー -->
+  <div id="photoStats" style="display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--bg);"></div>
+
+  <!-- グリッド -->
+  <div style="flex:1;overflow-y:auto;padding:8px;">
+    <div class="photo-grid" id="photoGrid"></div>
+    <div id="noPhotos" style="display:none;text-align:center;padding:40px;color:var(--muted);font-size:13px;">
+      📷 写真を追加して現場記録を残しましょう
     </div>
   </div>
-  <div id="noPhotos" style="text-align:center;padding:30px;color:var(--muted);font-size:13px;">
-    📷 写真を追加して現場記録を残しましょう
+
+  <!-- 写真詳細ビュアー -->
+  <div id="photoViewer" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:600;flex-direction:column;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(0,0,0,.5);">
+      <div style="flex:1;">
+        <input id="pvTitle" style="background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.3);color:#fff;font-size:14px;font-weight:700;outline:none;width:100%;font-family:var(--font);" placeholder="写真タイトル・説明">
+      </div>
+      <button onclick="closePhotoViewer()" style="background:rgba(255,95,95,.4);border:none;color:#fff;width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer;margin-left:10px;">✕</button>
+    </div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;" id="pvImgWrap">
+      <img id="pvImg" src="" style="max-width:100%;max-height:70vh;object-fit:contain;touch-action:pinch-zoom;">
+    </div>
+    <div style="padding:10px 14px;background:rgba(0,0,0,.7);">
+      <!-- タグ選択 -->
+      <div style="display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;">
+        <button class="ptag-btn active" data-tag="before" onclick="setPvTag('before',this)" style="flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid var(--blue);background:rgba(74,158,255,.2);color:#88aaff;font-size:11px;cursor:pointer;">🔵 施工前</button>
+        <button class="ptag-btn" data-tag="during" onclick="setPvTag('during',this)" style="flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;">🟡 施工中</button>
+        <button class="ptag-btn" data-tag="after" onclick="setPvTag('after',this)" style="flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;">🟢 施工後</button>
+        <button class="ptag-btn" data-tag="issue" onclick="setPvTag('issue',this)" style="flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;">🔴 要確認</button>
+        <button class="ptag-btn" data-tag="site" onclick="setPvTag('site',this)" style="flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;">📐 現況</button>
+      </div>
+      <!-- 部位タグ -->
+      <div style="margin-bottom:10px;">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:5px;">部位タグ（複数選択可）</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;" id="pvLocationTags">
+          <button class="ploc-btn" data-loc="壁" onclick="togglePvLoc('壁',this)" style="padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;">壁</button>
+          <button class="ploc-btn" data-loc="床" onclick="togglePvLoc('床',this)" style="padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;">床</button>
+          <button class="ploc-btn" data-loc="天井" onclick="togglePvLoc('天井',this)" style="padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;">天井</button>
+          <button class="ploc-btn" data-loc="入口" onclick="togglePvLoc('入口',this)" style="padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;">入口</button>
+          <button class="ploc-btn" data-loc="窓" onclick="togglePvLoc('窓',this)" style="padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;">窓</button>
+          <button class="ploc-btn" data-loc="柱" onclick="togglePvLoc('柱',this)" style="padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;">柱</button>
+          <button class="ploc-btn" data-loc="配管" onclick="togglePvLoc('配管',this)" style="padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;">配管</button>
+          <button class="ploc-btn" data-loc="電気" onclick="togglePvLoc('電気',this)" style="padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;">電気</button>
+          <button class="ploc-btn" data-loc="外壁" onclick="togglePvLoc('外壁',this)" style="padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;">外壁</button>
+        </div>
+      </div>
+      <!-- AI説明文・アクション -->
+      <div style="display:flex;gap:8px;align-items:flex-start;">
+        <textarea id="pvNote" placeholder="メモ・説明（AI生成も可）" style="flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;font-size:12px;padding:8px;outline:none;resize:none;font-family:var(--font);min-height:52px;" oninput="savePvNote()"></textarea>
+        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+          <button onclick="runPhotoAiDesc()" style="background:linear-gradient(135deg,rgba(176,106,255,.4),rgba(74,158,255,.3));border:1px solid rgba(176,106,255,.4);color:#c89aff;padding:8px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">✦ AI説明</button>
+          <button onclick="deleteCurrentPhoto()" style="background:rgba(255,95,95,.2);border:1px solid rgba(255,95,95,.3);color:#ff8888;padding:8px 10px;border-radius:8px;font-size:11px;cursor:pointer;">🗑 削除</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
+<!-- 案件管理画面 -->
+<div class="screen" id="screen-anken">
+  <div id="anken-list-view">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+      <div class="section-title" style="margin:0;">案件一覧</div>
+      <button onclick="openNewAnken()" style="background:var(--accent);border:none;color:#000;font-size:12px;font-weight:700;padding:7px 14px;border-radius:8px;cursor:pointer;">＋ 新規案件</button>
+    </div>
+
+    <!-- AIファイル読込バナー -->
+    <div style="background:linear-gradient(135deg,rgba(176,106,255,.15),rgba(74,158,255,.1));border:1px solid rgba(176,106,255,.3);border-radius:12px;padding:14px;margin:12px 0;cursor:pointer;" onclick="openAiImport()">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="font-size:24px;">🤖</div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#c89aff;">AIファイル読込</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">名刺・見積書・図面・PDFを撮影/添付 → 案件情報を自動入力</div>
+        </div>
+        <div style="margin-left:auto;color:var(--muted);">›</div>
+      </div>
+    </div>
+
+    <!-- 案件リスト -->
+    <div id="ankenList"></div>
+  </div>
+
+  <!-- 案件詳細ビュー -->
+  <div id="anken-detail-view" style="display:none;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+      <button onclick="backToAnkenList()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;">← 戻る</button>
+      <div style="font-size:15px;font-weight:700;" id="ankenDetailTitle"></div>
+    </div>
+
+    <!-- 進捗バー -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <span style="font-size:12px;color:var(--muted);">工程進捗</span>
+        <span style="font-size:18px;font-weight:900;color:var(--accent);" id="ankenProgress">0%</span>
+      </div>
+      <div style="background:var(--bg);border-radius:99px;height:6px;overflow:hidden;">
+        <div id="ankenProgressBar" style="background:linear-gradient(90deg,var(--accent),#f0b55a);height:100%;border-radius:99px;transition:width .4s;width:0%;"></div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;" id="ankenProgressLabel"></div>
+    </div>
+
+    <!-- 18工程リスト -->
+    <div id="ankenStages"></div>
+
+    <!-- 現場案内テンプレートセクション -->
+    <div id="genbaAnnaiBanner" style="display:none;background:rgba(61,214,140,.08);border:1px solid rgba(61,214,140,.3);border-radius:12px;padding:14px;margin-top:8px;">
+      <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:10px;">🗺️ 現場案内テンプレート</div>
+      <div id="genbaAnnaiContent" style="font-size:12px;color:var(--muted);white-space:pre-wrap;line-height:1.8;background:var(--bg);border-radius:8px;padding:12px;"></div>
+      <button onclick="copyGenbaTmpl()" style="margin-top:10px;background:var(--green);border:none;color:#000;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;width:100%;">📋 コピーしてLINE/メールで送る</button>
+    </div>
+  </div>
+
+  <!-- AIファイル読込モーダル -->
+  <div id="aiImportPanel" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;overflow-y:auto;padding:20px;">
+    <div style="background:var(--surface);border-radius:16px;padding:20px;max-width:480px;margin:0 auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div style="font-size:16px;font-weight:700;">🤖 AIファイル読込</div>
+        <button onclick="closeAiImport()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:8px;cursor:pointer;">✕</button>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">名刺・見積書・図面・PDFを添付するとAIが自動で読み取ります</div>
+
+      <!-- ファイル添付エリア -->
+      <div onclick="document.getElementById('aiFileInput').click()" style="border:2px dashed rgba(176,106,255,.4);border-radius:12px;padding:24px;text-align:center;cursor:pointer;margin-bottom:14px;background:rgba(176,106,255,.05);">
+        <div style="font-size:32px;margin-bottom:8px;">📎</div>
+        <div style="font-size:13px;font-weight:600;color:#c89aff;">ファイルを添付 / カメラで撮影</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">PDF・JPEG・PNG対応</div>
+        <input type="file" id="aiFileInput" accept="image/*,application/pdf" multiple style="display:none" onchange="handleAiFiles(event)">
+      </div>
+
+      <!-- プレビュー -->
+      <div id="aiFilePreview" style="margin-bottom:14px;"></div>
+
+      <!-- テキスト入力 -->
+      <div style="margin-bottom:14px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">またはテキストで情報を入力</div>
+        <textarea id="aiTextInput" rows="4" placeholder="例：施主は山田太郎様、住所は別府市北浜1-2-3、工事内容はクロス張替え、予算は80万円程度..." style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px;font-size:14px;font-family:var(--font);resize:vertical;outline:none;"></textarea>
+      </div>
+
+      <!-- 読込先案件 -->
+      <div style="margin-bottom:16px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">読込先案件</div>
+        <select id="aiTargetAnken" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px;font-size:14px;outline:none;"></select>
+      </div>
+
+      <button onclick="runAiImport()" style="width:100%;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;color:#fff;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">🤖 AIで自動入力する</button>
+      <div id="aiImportResult" style="margin-top:14px;font-size:12px;color:var(--muted);line-height:1.7;"></div>
+    </div>
+  </div>
+</div>
+
 </main>
 
 <!-- BOTTOM NAV -->
@@ -703,13 +1379,13 @@ canvas{display:block;touch-action:none;}
     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>ホーム
   </button>
   <button class="nav-btn" id="nav-sketch" onclick="switchScreen('sketch')">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>平面図
-  </button>
-  <button class="nav-btn" id="nav-estimate" onclick="switchScreen('estimate')">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>見積
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>図面
   </button>
   <button class="nav-btn" id="nav-voice" onclick="switchScreen('voice')">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>メモ
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>音声
+  </button>
+  <button class="nav-btn" id="nav-anken" onclick="switchScreen('anken')">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>案件
   </button>
   <button class="nav-btn" id="nav-photos" onclick="switchScreen('photos')">
     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>写真
@@ -725,6 +1401,35 @@ canvas{display:block;touch-action:none;}
 <div class="toast" id="toast"></div>
 
 <script>
+
+// ===== 18工程マスター =====
+const STAGES_MASTER = [
+  { id:"inquiry",   phase:1, label:"問合せ受付",        icon:"📞", fields:["client","tel","email","memo"] },
+  { id:"meishi",    phase:1, label:"名刺交換・登録",      icon:"💼", fields:["company","contact","address","email","tel"] },
+  { id:"meeting",   phase:1, label:"打ち合わせ",         icon:"💬", fields:["date","content","next"] },
+  { id:"measure",   phase:2, label:"実測",              icon:"📐", fields:["date","area","dimensions","notes"] },
+  { id:"sketch",    phase:2, label:"スケッチ・図面",      icon:"✏", fields:["notes"] },
+  { id:"pickup",    phase:2, label:"材料拾い出し",        icon:"📦", fields:["items","notes"] },
+  { id:"photos_s",  phase:2, label:"現状写真撮影",        icon:"📷", fields:["notes"] },
+  { id:"partner",   phase:3, label:"協力業者連携",        icon:"🤝", fields:["company","work","price","date"] },
+  { id:"estimate",  phase:3, label:"見積作成・提出",       icon:"📋", fields:["date","total","validity","notes"] },
+  { id:"contract",  phase:3, label:"契約",              icon:"✍", fields:["date","amount","startDate","endDate","notes"] },
+  { id:"schedule",  phase:4, label:"工程表作成",          icon:"📅", fields:["startDate","endDate","phases","notes"] },
+  { id:"contact2",  phase:4, label:"業者連絡",            icon:"📲", fields:["date","company","content","reply"] },
+  { id:"guide",     phase:4, label:"現場案内テンプレ送信", icon:"🗺", fields:["date","startTime","endTime","address","parking","mapUrl","notes"] },
+  { id:"construct", phase:4, label:"着工",              icon:"🏗", fields:["startDate","notes"] },
+  { id:"complete",  phase:5, label:"完了確認",            icon:"✅", fields:["date","checklist","punch","signoff"] },
+  { id:"invoice",   phase:5, label:"請求書作成",          icon:"💴", fields:["date","dueDate","amount","bank","notes"] },
+  { id:"archive",   phase:5, label:"現場資料まとめ",       icon:"🗂️", fields:["photos","drawings","summary","lessons"] },
+  { id:"close",     phase:5, label:"案件クローズ",         icon:"🎉", fields:["sales","memo"] },
+];
+const PHASE_LABELS = {1:"受注前",2:"現場調査",3:"見積・契約",4:"施工準備・着工",5:"完了・請求"};
+const PHASE_COLORS = {1:"#f5a623",2:"#4a9eff",3:"#3dd68c",4:"#b06aff",5:"#ff5f5f"};
+let ankenData = JSON.parse(localStorage.getItem("genba_anken")||"[]");
+let currentAnkenId = null;
+function saveAnken(){localStorage.setItem("genba_anken",JSON.stringify(ankenData));}
+function getAnken(id){return ankenData.find(a=>a.id===id);}
+
 // ===== STATE =====
 const state = {
   currentProject: 'moku',
@@ -784,9 +1489,10 @@ function switchScreen(name) {
   document.getElementById('screen-'+name).classList.add('active');
   const nb = document.getElementById('nav-'+name);
   if(nb) nb.classList.add('active');
-  if(name==='estimate') renderEstimate();
+  if(name==='estimate'){ switchEstTab('estimate'); renderEstimate(); }
   if(name==='voice') renderVoiceNotes();
   if(name==='photos') renderPhotos();
+  if(name==='anken'){renderAnkenList();}
   if(name==='sketch') {
     setTimeout(()=>{
       if(!canvasReady) {
@@ -829,6 +1535,2080 @@ function callClaude(messages, maxTokens=800) {
     return r.json();
   });
 }
+
+// ===== 案件管理 =====
+function openNewAnken(){
+  const name=prompt("案件名を入力してください（例：別府駅前カフェ改装）");
+  if(!name)return;
+  const id="anken_"+Date.now();
+  ankenData.push({id,name,stages:{},created:new Date().toLocaleDateString("ja")});
+  saveAnken(); renderAnkenList(); openAnkenDetail(id);
+}
+
+function renderAnkenList(){
+  const el=document.getElementById("ankenList");
+  if(!el)return;
+  if(ankenData.length===0){
+    el.innerHTML="<div style='text-align:center;padding:40px;color:var(--muted);font-size:13px;'>📋 案件がありません<br>右上の「＋ 新規案件」から追加</div>";
+    return;
+  }
+  el.innerHTML=ankenData.map(a=>{
+    const done=STAGES_MASTER.filter(s=>a.stages[s.id]&&a.stages[s.id].done).length;
+    const pct=Math.round(done/STAGES_MASTER.length*100);
+    const next=STAGES_MASTER.find(s=>!(a.stages[s.id]&&a.stages[s.id].done));
+    const col=next?PHASE_COLORS[next.phase]:"#3dd68c";
+    const lbl=next?PHASE_LABELS[next.phase]:"完了";
+    return `<div onclick="openAnkenDetail('${a.id}')" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid ${col};border-radius:12px;padding:13px 14px;margin-bottom:9px;cursor:pointer;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+        <div style="font-size:14px;font-weight:700;">${a.name}</div>
+        <div style="font-size:10px;color:${col};background:${col}22;padding:3px 8px;border-radius:99px;">${lbl}</div>
+      </div>
+      <div style="background:var(--bg);border-radius:99px;height:4px;overflow:hidden;">
+        <div style="background:${col};width:${pct}%;height:100%;border-radius:99px;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:5px;">
+        <div style="font-size:10px;color:var(--muted);">${a.created}</div>
+        <div style="font-size:10px;color:var(--muted);">${done}/${STAGES_MASTER.length}工程 ${pct}%</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function openAnkenDetail(id){
+  currentAnkenId=id;
+  const a=getAnken(id);
+  if(!a)return;
+  document.getElementById("anken-list-view").style.display="none";
+  document.getElementById("anken-detail-view").style.display="block";
+  document.getElementById("ankenDetailTitle").textContent=a.name;
+  renderAnkenDetail();
+}
+
+function backToAnkenList(){
+  document.getElementById("anken-list-view").style.display="block";
+  document.getElementById("anken-detail-view").style.display="none";
+  renderAnkenList();
+}
+
+function renderAnkenDetail(){
+  const a=getAnken(currentAnkenId);
+  if(!a)return;
+  const done=STAGES_MASTER.filter(s=>a.stages[s.id]&&a.stages[s.id].done).length;
+  const pct=Math.round(done/STAGES_MASTER.length*100);
+  document.getElementById("ankenProgress").textContent=pct+"%";
+  document.getElementById("ankenProgressBar").style.width=pct+"%";
+  document.getElementById("ankenProgressLabel").textContent=done+" / "+STAGES_MASTER.length+" 工程完了";
+  let html=""; let lastPhase=0;
+  STAGES_MASTER.forEach((stage,idx)=>{
+    if(stage.phase!==lastPhase){
+      lastPhase=stage.phase;
+      const col=PHASE_COLORS[stage.phase];
+      html+=`<div style="display:flex;align-items:center;gap:8px;margin:14px 0 8px;">
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+        <div style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:99px;color:${col};background:${col}18;border:1px solid ${col}44;">PHASE ${stage.phase}　${PHASE_LABELS[stage.phase]}</div>
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+      </div>`;
+    }
+    const sd=a.stages[stage.id]||{};
+    const isDone=sd.done;
+    const hasData=sd.data&&Object.values(sd.data).some(v=>v);
+    const col=PHASE_COLORS[stage.phase];
+    html+=`<div style="background:${isDone?"#141a14":"var(--surface)"};border:1px solid ${isDone?"#2a4a2a":"var(--border)"};border-left:3px solid ${isDone?"#3dd68c":col};border-radius:10px;padding:12px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px;">
+      <div style="font-size:18px;">${isDone?"✅":stage.icon}</div>
+      <div style="flex:1;cursor:pointer;" onclick="openStageModal('${stage.id}')">
+        <div style="font-size:13px;font-weight:600;color:${isDone?"#5a8a5a":"var(--text)"};">${String(idx+1).padStart(2,"0")}. ${stage.label}</div>
+        ${hasData?`<div style="font-size:10px;color:var(--blue);margin-top:2px;">✎ 入力済み</div>`:""}
+        ${stage.id==="guide"&&hasData?`<div style="font-size:10px;color:var(--green);margin-top:2px;cursor:pointer;" onclick="event.stopPropagation();showGenbaTmpl()">🗺️ テンプレートを表示</div>`:""}
+      </div>
+      <button onclick="toggleStageDone('${stage.id}')" style="background:${isDone?"rgba(61,214,140,.2)":"transparent"};border:1px solid ${isDone?"#3dd68c":"var(--border)"};color:${isDone?"#3dd68c":"var(--muted)"};padding:5px 10px;border-radius:99px;font-size:11px;cursor:pointer;white-space:nowrap;">${isDone?"完了":"未完"}</button>
+    </div>`;
+  });
+  document.getElementById("ankenStages").innerHTML=html;
+}
+
+function toggleStageDone(stageId){
+  const a=getAnken(currentAnkenId);
+  if(!a)return;
+  if(!a.stages[stageId])a.stages[stageId]={};
+  a.stages[stageId].done=!a.stages[stageId].done;
+  saveAnken(); renderAnkenDetail();
+}
+
+function openStageModal(stageId){
+  const stage=STAGES_MASTER.find(s=>s.id===stageId);
+  const a=getAnken(currentAnkenId);
+  if(!stage||!a)return;
+  const sd=a.stages[stageId]||{};
+  const data=sd.data||{};
+  const col=PHASE_COLORS[stage.phase];
+  const fieldDefs={date:"日付",client:"施主名",tel:"電話番号",email:"メール",memo:"メモ",
+    company:"会社名",contact:"担当者名",address:"住所",content:"内容",next:"次回アクション",
+    area:"エリア・部位",dimensions:"寸法メモ",notes:"特記事項",items:"材料・数量",
+    work:"依頼内容",price:"金額（円）",total:"合計金額（円）",validity:"有効期限",
+    amount:"契約金額（円）",startDate:"開始日",endDate:"完了予定日",phases:"工程内容",
+    reply:"返答内容",startTime:"作業開始時間",endTime:"作業終了予定",
+    parking:"駐車場情報",mapUrl:"地図URL",checklist:"確認項目",punch:"是正事項",
+    signoff:"施主確認",dueDate:"支払期日",bank:"振込先口座",photos:"写真保存場所",
+    drawings:"図面ファイル",summary:"現場総括",lessons:"改善点",sales:"売上金額"};
+  const longFields=["content","memo","notes","items","phases","reply","checklist","punch","signoff","summary","lessons","dimensions"];
+  let fieldsHtml=stage.fields.map(f=>{
+    const label=fieldDefs[f]||f;
+    const val=(data[f]||"").replace(/"/g,"&quot;");
+    if(longFields.includes(f))return`<div class="form-group"><label class="form-label">${label}</label><textarea class="form-input" id="sf_${f}" rows="3">${data[f]||""}</textarea></div>`;
+    const inputType=["date","startDate","endDate","validity","dueDate"].includes(f)?"date":["startTime","endTime"].includes(f)?"time":["price","total","amount","sales"].includes(f)?"number":"text";
+    return`<div class="form-group"><label class="form-label">${label}</label><input class="form-input" type="${inputType}" id="sf_${f}" value="${val}"></div>`;
+  }).join("");
+  const guidePreview=stageId==="guide"?`<div style="margin-top:14px;background:rgba(61,214,140,.05);border:1px solid rgba(61,214,140,.2);border-radius:10px;padding:12px;"><div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:8px;">📋 LINE/メールテンプレート（入力と連動）</div><pre id="guideTmplPreview" style="font-size:11px;color:var(--muted);white-space:pre-wrap;line-height:1.8;"></pre></div>`:"";
+  document.getElementById("modalSheet").innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+      <span style="font-size:20px;">${stage.icon}</span>
+      <div><div style="font-size:10px;color:${col};letter-spacing:1px;">STEP ${STAGES_MASTER.indexOf(stage)+1}</div>
+      <div style="font-size:16px;font-weight:700;">${stage.label}</div></div>
+    </div>
+    ${fieldsHtml}${guidePreview}
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="saveStageData('${stageId}',false)" style="flex:1;">💾 保存</button>
+      <button class="btn btn-primary" onclick="saveStageData('${stageId}',true)" style="flex:2;background:${col};">✅ 完了にする</button>
+    </div>`;
+  document.getElementById("modalOverlay").style.display="flex";
+  if(stageId==="guide"){
+    stage.fields.forEach(f=>{const el=document.getElementById("sf_"+f);if(el)el.addEventListener("input",updateGuideTmplPreview);});
+    updateGuideTmplPreview();
+  }
+}
+
+function updateGuideTmplPreview(){
+  const el=document.getElementById("guideTmplPreview");
+  if(!el)return;
+  const g=id=>(document.getElementById("sf_"+id)||{}).value||"";
+  el.textContent=buildGuideTmpl({date:g("date"),startTime:g("startTime"),endTime:g("endTime"),address:g("address"),parking:g("parking"),mapUrl:g("mapUrl"),notes:g("notes")});
+}
+
+function buildGuideTmpl(d){
+  const a=getAnken(currentAnkenId);
+  return `【現場案内】${a?a.name:""}
+
+■ 工事日時
+${d.date||"　年　月　日"}　${d.startTime||"　　:　　"} ～ ${d.endTime||"　　:　　"}
+
+■ 現場住所
+${d.address||"（住所を入力）"}
+
+■ 駐車場
+${d.parking||"（駐車場情報を入力）"}
+
+■ 地図
+${d.mapUrl||"（GoogleマップURLを入力）"}
+
+■ 注意事項
+${d.notes||"（搬入口・騒音・養生等）"}
+
+どうぞよろしくお願いいたします。`;
+}
+
+function saveStageData(stageId,markDone){
+  const a=getAnken(currentAnkenId);
+  const stage=STAGES_MASTER.find(s=>s.id===stageId);
+  if(!a||!stage)return;
+  if(!a.stages[stageId])a.stages[stageId]={};
+  const data={};
+  stage.fields.forEach(f=>{const el=document.getElementById("sf_"+f);if(el)data[f]=el.value;});
+  a.stages[stageId].data=data;
+  if(markDone)a.stages[stageId].done=true;
+  saveAnken(); closeModal(); renderAnkenDetail();
+  showToast(markDone?"✅ 完了しました！":"💾 保存しました");
+  if(stageId==="guide")showGenbaTmpl();
+}
+
+function showGenbaTmpl(){
+  const a=getAnken(currentAnkenId);
+  if(!a)return;
+  const sd=a.stages["guide"];
+  if(!sd||!sd.data)return;
+  document.getElementById("genbaAnnaiContent").textContent=buildGuideTmpl(sd.data);
+  document.getElementById("genbaAnnaiBanner").style.display="block";
+  document.getElementById("genbaAnnaiBanner").scrollIntoView({behavior:"smooth"});
+}
+
+function copyGenbaTmpl(){
+  const text=document.getElementById("genbaAnnaiContent").textContent;
+  navigator.clipboard.writeText(text).then(()=>showToast("📋 コピーしました！"));
+}
+
+// ===== AIファイル読込 =====
+let aiImportFiles=[];
+function openAiImport(){
+  aiImportFiles=[];
+  document.getElementById("aiImportPanel").style.display="block";
+  document.getElementById("aiFilePreview").innerHTML="";
+  document.getElementById("aiTextInput").value="";
+  document.getElementById("aiImportResult").innerHTML="";
+  const sel=document.getElementById("aiTargetAnken");
+  sel.innerHTML="<option value='new'>＋ 新規案件として登録</option>"+
+    ankenData.map(a=>`<option value="${a.id}">${a.name}</option>`).join("");
+}
+function closeAiImport(){document.getElementById("aiImportPanel").style.display="none";}
+function handleAiFiles(e){
+  aiImportFiles=Array.from(e.target.files);
+  const preview=document.getElementById("aiFilePreview");
+  preview.innerHTML=aiImportFiles.map(f=>{
+    const icon=f.type.includes("pdf")?"📄":"🖼️";
+    return`<div style="display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;margin:3px;font-size:12px;">${icon} ${f.name}</div>`;
+  }).join("");
+}
+async function runAiImport(){
+  const key=getApiKey();
+  if(!key){showToast("APIキーを設定してください","error");return;}
+  const resultEl=document.getElementById("aiImportResult");
+  resultEl.innerHTML="<div style='color:var(--accent);'>🤖 AIが読み取り中...</div>";
+  try{
+    const contentParts=[];
+    const textInput=document.getElementById("aiTextInput").value.trim();
+    for(const file of aiImportFiles){
+      if(file.type.startsWith("image/")){
+        const b64=await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result.split(",")[1]);r.readAsDataURL(file);});
+        contentParts.push({type:"image",source:{type:"base64",media_type:file.type,data:b64}});
+      }
+    }
+    const prompt=`店舗内装工事の業務支援AIです。画像・テキストから案件情報を読み取りJSON形式のみで返してください。
+抽出項目：ankenName(案件名), client(施主名), tel(電話番号), email(メール), address(住所), contact(担当者名), estimateAmount(見積金額数字のみ), notes(その他重要情報)
+${textInput?"テキスト情報：\n"+textInput:""}
+必ずJSONのみ返してください。例：{"ankenName":"","client":"","tel":"","email":"","address":"","contact":"","estimateAmount":"","notes":""}`;
+    contentParts.push({type:"text",text:prompt});
+    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",
+      headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:contentParts}]})});
+    const data=await res.json();
+    const text=data.content?.map(c=>c.text||"").join("")||"";
+    const parsed=JSON.parse(text.replace(/```json|```/g,"").trim());
+    const targetId=document.getElementById("aiTargetAnken").value;
+    let anken;
+    if(targetId==="new"){
+      const id="anken_"+Date.now();
+      anken={id,name:parsed.ankenName||"新規案件",stages:{},created:new Date().toLocaleDateString("ja")};
+      ankenData.push(anken);
+    }else{anken=getAnken(targetId);}
+    if(!anken)throw new Error("案件が見つかりません");
+    anken.stages.inquiry={data:{client:parsed.client,tel:parsed.tel,email:parsed.email,memo:parsed.notes},done:false};
+    anken.stages.meishi={data:{company:parsed.client,contact:parsed.contact,address:parsed.address,tel:parsed.tel,email:parsed.email},done:false};
+    if(parsed.estimateAmount)anken.stages.estimate={data:{total:parsed.estimateAmount,notes:parsed.notes},done:false};
+    saveAnken(); renderAnkenList();
+    resultEl.innerHTML=`<div style="background:rgba(61,214,140,.1);border:1px solid rgba(61,214,140,.3);border-radius:10px;padding:12px;">
+      <div style="color:var(--green);font-weight:700;margin-bottom:8px;">✅ 読み取り完了！</div>
+      <div>案件名：${parsed.ankenName||"-"}</div><div>施主：${parsed.client||"-"}</div>
+      <div>TEL：${parsed.tel||"-"}</div><div>住所：${parsed.address||"-"}</div>
+      ${parsed.estimateAmount?`<div>金額：¥${Number(parsed.estimateAmount).toLocaleString()}</div>`:""}
+    </div>
+    <button onclick="closeAiImport();openAnkenDetail('${anken.id}')" style="width:100%;margin-top:10px;background:var(--accent);border:none;color:#000;padding:12px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">案件を開く →</button>`;
+  }catch(err){resultEl.innerHTML=`<div style="color:var(--red);">⚠️ エラー：${err.message}</div>`;}
+}
+
+
+// ===== スケッチサブタブ =====
+function switchSketchTab(tab) {
+  ['sketch','measure','pickup'].forEach(t => {
+    document.getElementById('spanel-'+t).style.display = t===tab ? 'block' : 'none';
+    const btn = document.getElementById('stab-'+t);
+    if(btn){ btn.style.background = t===tab ? 'var(--accent)' : 'transparent'; btn.style.color = t===tab ? '#000' : 'var(--muted)'; }
+  });
+  if(tab==='sketch') { setTimeout(()=>{ if(!canvasReady) initCanvas(); else resizeCanvas(); },80); }
+  if(tab==='measure') { syncMeasureToPickup(); }
+  if(tab==='pickup') { syncMeasureToPickup(); updatePickupSummary(); }
+}
+
+function syncMeasureToPickup() {
+  const floor = parseFloat(document.getElementById('calcFloor').value)||0;
+  const wall = parseFloat(document.getElementById('calcWall').value)||0;
+  if(floor&&document.getElementById('pu_floor_sqm')&&!document.getElementById('pu_floor_sqm').value) document.getElementById('pu_floor_sqm').value=floor;
+  if(wall&&document.getElementById('pu_cloth_wall')&&!document.getElementById('pu_cloth_wall').value) document.getElementById('pu_cloth_wall').value=wall;
+  calcCloth(); calcFloorMat(); calcPaint();
+}
+
+// ===== 拾い出しタブ切替 =====
+function switchPickupTab(tab, btn) {
+  document.querySelectorAll('.pickup-panel').forEach(p=>p.style.display='none');
+  document.getElementById('pickup-'+tab).style.display='block';
+  document.querySelectorAll('.ptab').forEach(b=>{
+    b.style.background='transparent'; b.style.color='var(--muted)'; b.style.borderColor='var(--border)';
+  });
+  if(btn){ btn.style.background='rgba(245,166,35,.15)'; btn.style.color='var(--accent)'; btn.style.borderColor='var(--accent)'; }
+}
+
+// ===== クロス計算 =====
+function calcCloth() {
+  const wall = parseFloat(document.getElementById('pu_cloth_wall').value)||0;
+  const loss = parseFloat(document.getElementById('pu_cloth_loss').value)||10;
+  const width = parseFloat(document.getElementById('pu_cloth_width').value)||900;
+  const repeat = parseFloat(document.getElementById('pu_cloth_repeat').value)||0;
+  if(!wall) return;
+  const needed = wall * (1 + loss/100);
+  const widthM = width/1000;
+  const strips = Math.ceil(needed / (widthM * 2.4)); // 仮：高さ2.4m
+  const rolls = Math.ceil(needed / widthM);
+  document.getElementById('pu_cloth_sqm').textContent = needed.toFixed(1)+'㎡';
+  document.getElementById('pu_cloth_rolls').textContent = rolls+'m';
+  document.getElementById('pu_cloth_strips').textContent = strips+'幅';
+  updatePickupSummary();
+}
+
+// ===== 床材計算 =====
+function calcFloorMat() {
+  const sqm = parseFloat(document.getElementById('pu_floor_sqm').value)||0;
+  const loss = parseFloat(document.getElementById('pu_floor_loss').value)||8;
+  const w = parseFloat(document.getElementById('pu_floor_w').value)||1800;
+  const l = parseFloat(document.getElementById('pu_floor_l').value)||900;
+  if(!sqm) return;
+  const needed = sqm * (1 + loss/100);
+  const oneSheet = (w/1000)*(l/1000);
+  const sheets = Math.ceil(needed / oneSheet);
+  document.getElementById('pu_floor_need').textContent = needed.toFixed(1)+'㎡';
+  document.getElementById('pu_floor_sheets').textContent = sheets+'枚';
+  updatePickupSummary();
+}
+
+// ===== 照明計算 =====
+function addLightRow() {
+  const div = document.createElement('div');
+  div.className='light-row';
+  div.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:8px;';
+  div.innerHTML=`<input class="form-input" style="flex:2;" type="text" placeholder="器具名"><input class="form-input" style="flex:1;" type="number" value="0" min="0" oninput="calcLight()"><span style="font-size:12px;color:var(--muted);flex-shrink:0;">台</span><button onclick="this.parentElement.remove();calcLight()" style="background:transparent;border:none;color:var(--red);font-size:16px;cursor:pointer;">×</button>`;
+  document.getElementById('lightItems').appendChild(div);
+}
+function calcLight() {
+  const rows = document.querySelectorAll('#lightItems .light-row');
+  let summary = '';
+  rows.forEach(row => {
+    const name = row.querySelector('input[type="text"]')?.value||'';
+    const qty = parseInt(row.querySelector('input[type="number"]')?.value)||0;
+    if(name&&qty>0) summary += `${name}：${qty}台
+`;
+  });
+  document.getElementById('lightSummary').innerHTML = summary ? `<pre style="font-size:12px;color:var(--text);white-space:pre-wrap;">${summary}</pre>` : '<div style="font-size:11px;color:var(--muted);">器具を入力してください</div>';
+  updatePickupSummary();
+}
+
+// ===== 木材計算 =====
+function addWoodRow() {
+  const div = document.createElement('div');
+  div.style.cssText='background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;';
+  div.innerHTML=`
+    <div style="display:flex;gap:6px;margin-bottom:6px;align-items:center;">
+      <input class="form-input" style="flex:3;" type="text" placeholder="材料名（例：垂木）">
+      <button onclick="this.closest('div').parentElement.remove();calcWood()" style="background:transparent;border:none;color:var(--red);font-size:18px;cursor:pointer;">×</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;">
+      <div><div style="font-size:10px;color:var(--muted);">幅mm</div><input class="form-input" type="number" placeholder="30" oninput="calcWood()"></div>
+      <div><div style="font-size:10px;color:var(--muted);">厚mmm</div><input class="form-input" type="number" placeholder="45" oninput="calcWood()"></div>
+      <div><div style="font-size:10px;color:var(--muted);">長さm</div><input class="form-input" type="number" step="0.1" placeholder="2.0" oninput="calcWood()"></div>
+      <div><div style="font-size:10px;color:var(--muted);">本数</div><input class="form-input" type="number" placeholder="2" oninput="calcWood()"></div>
+    </div>`;
+  document.getElementById('woodItems').appendChild(div);
+}
+function calcWood() {
+  const rows = document.querySelectorAll('#woodItems > div');
+  let totalM=0, totalM3=0;
+  rows.forEach(row=>{
+    const nums = row.querySelectorAll('input[type="number"]');
+    if(nums.length<4) return;
+    const w=(parseFloat(nums[0].value)||0)/1000;
+    const t=(parseFloat(nums[1].value)||0)/1000;
+    const l=parseFloat(nums[2].value)||0;
+    const n=parseFloat(nums[3].value)||0;
+    totalM += l*n;
+    totalM3 += w*t*l*n;
+  });
+  document.getElementById('pu_wood_total_m').textContent = totalM.toFixed(1)+'m';
+  document.getElementById('pu_wood_total_m3').textContent = totalM3.toFixed(4)+'m³';
+  updatePickupSummary();
+}
+
+// ===== 塗装計算 =====
+function calcPaint() {
+  const sqm=parseFloat(document.getElementById('pu_paint_sqm').value)||0;
+  const coats=parseFloat(document.getElementById('pu_paint_coats').value)||2;
+  const spread=parseFloat(document.getElementById('pu_paint_spread').value)||6;
+  const canSize=parseFloat(document.getElementById('pu_paint_can').value)||15;
+  if(!sqm) return;
+  const liters = (sqm * coats) / spread;
+  const cans = Math.ceil(liters / canSize);
+  document.getElementById('pu_paint_liters').textContent = liters.toFixed(1)+'L';
+  document.getElementById('pu_paint_cans').textContent = cans+'缶';
+  updatePickupSummary();
+}
+
+// ===== 建具 =====
+function addDoorRow() {
+  const div = document.createElement('div');
+  div.style.cssText='background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;';
+  div.innerHTML=`
+    <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;">
+      <input class="form-input" style="flex:2;" type="text" placeholder="種類（ドア・サッシ等）">
+      <button onclick="this.closest('div').parentElement.remove();updateDoorSummary()" style="background:transparent;border:none;color:var(--red);font-size:18px;cursor:pointer;">×</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+      <div><div style="font-size:10px;color:var(--muted);">幅mm</div><input class="form-input" type="number" placeholder="800" oninput="updateDoorSummary()"></div>
+      <div><div style="font-size:10px;color:var(--muted);">高さmm</div><input class="form-input" type="number" placeholder="2000" oninput="updateDoorSummary()"></div>
+      <div><div style="font-size:10px;color:var(--muted);">数量</div><input class="form-input" type="number" placeholder="1" oninput="updateDoorSummary()"></div>
+    </div>`;
+  document.getElementById('doorItems').appendChild(div);
+}
+function updateDoorSummary() {
+  const rows = document.querySelectorAll('#doorItems > div');
+  let html='';
+  rows.forEach(row=>{
+    const type=row.querySelector('input[type="text"]')?.value||'';
+    const nums=row.querySelectorAll('input[type="number"]');
+    if(nums.length<3||!type) return;
+    const w=nums[0].value, h=nums[1].value, q=nums[2].value||1;
+    if(w&&h) html+=`<div style="font-size:12px;color:var(--text);">${type}：W${w}×H${h}mm × ${q}箇所</div>`;
+  });
+  document.getElementById('doorSummary').innerHTML = html||'<div style="font-size:11px;color:var(--muted);">建具を入力してください</div>';
+  updatePickupSummary();
+}
+
+// ===== カスタム =====
+function addCustomRow() {
+  const div = document.createElement('div');
+  div.style.cssText='display:flex;align-items:center;gap:6px;margin-bottom:8px;';
+  div.innerHTML=`
+    <input class="form-input" style="flex:3;" type="text" placeholder="材料名・工事名">
+    <input class="form-input" style="flex:1;" type="number" placeholder="数量" oninput="updatePickupSummary()">
+    <input class="form-input" style="flex:1;" type="text" placeholder="単位">
+    <button onclick="this.parentElement.remove();updatePickupSummary()" style="background:transparent;border:none;color:var(--red);font-size:18px;cursor:pointer;">×</button>`;
+  document.getElementById('customItems').appendChild(div);
+}
+
+// ===== サマリー更新 =====
+function updatePickupSummary() {
+  let lines = [];
+  const clothWall=parseFloat(document.getElementById('pu_cloth_wall')?.value)||0;
+  if(clothWall){ const loss=parseFloat(document.getElementById('pu_cloth_loss').value)||10; lines.push(`🏠 クロス：${(clothWall*(1+loss/100)).toFixed(1)}㎡`); }
+  const floorSqm=parseFloat(document.getElementById('pu_floor_sqm')?.value)||0;
+  if(floorSqm){ const loss=parseFloat(document.getElementById('pu_floor_loss').value)||8; const needed=(floorSqm*(1+loss/100)); const sheets=Math.ceil(needed/((parseFloat(document.getElementById('pu_floor_w').value)||1800)/1000*((parseFloat(document.getElementById('pu_floor_l').value)||900)/1000))); lines.push(`🪵 床材：${needed.toFixed(1)}㎡ / ${sheets}枚`); }
+  const lightRows=document.querySelectorAll('#lightItems .light-row');
+  lightRows.forEach(row=>{ const name=row.querySelector('input[type="text"]')?.value||''; const qty=parseInt(row.querySelector('input[type="number"]')?.value)||0; if(name&&qty>0) lines.push(`💡 ${name}：${qty}台`); });
+  const paintSqm=parseFloat(document.getElementById('pu_paint_sqm')?.value)||0;
+  if(paintSqm){ const liters=(paintSqm*(parseFloat(document.getElementById('pu_paint_coats').value)||2))/(parseFloat(document.getElementById('pu_paint_spread').value)||6); lines.push(`🎨 塗料：${liters.toFixed(1)}L / ${Math.ceil(liters/(parseFloat(document.getElementById('pu_paint_can').value)||15))}缶`); }
+  const woodM=document.getElementById('pu_wood_total_m')?.textContent;
+  if(woodM&&woodM!=='-') lines.push(`🪚 木材：${woodM}`);
+  document.getElementById('pickupSummary').innerHTML = lines.length ? lines.map(l=>`<div style="padding:3px 0;border-bottom:1px solid var(--border);">${l}</div>`).join('') : '<div style="font-size:11px;color:var(--muted);">各タブで数量を入力してください</div>';
+}
+
+// ===== 拾い出し→見積反映 =====
+function sendPickupToEstimate() {
+  const items = [];
+  const clothWall=parseFloat(document.getElementById('pu_cloth_wall')?.value)||0;
+  if(clothWall){const loss=parseFloat(document.getElementById('pu_cloth_loss').value)||10;const needed=Math.ceil(clothWall*(1+loss/100)*10)/10;items.push({id:Date.now()+1,name:'クロス（壁紙）',spec:document.getElementById('pu_cloth_memo')?.value||'',qty:needed,unit:'㎡',unitPrice:1200,category:'material'});}
+  const floorSqm=parseFloat(document.getElementById('pu_floor_sqm')?.value)||0;
+  if(floorSqm){const loss=parseFloat(document.getElementById('pu_floor_loss').value)||8;const needed=Math.ceil(floorSqm*(1+loss/100)*10)/10;items.push({id:Date.now()+2,name:'床材',spec:document.getElementById('pu_floor_memo')?.value||'',qty:needed,unit:'㎡',unitPrice:3500,category:'material'});}
+  if(items.length){items.forEach(item=>state.estimateItems.push(item));switchScreen('estimate');renderEstimate();showToast('拾い出しを見積に反映しました ✓');}
+  else showToast('数量を入力してから反映してください','error');
+}
+
+// ===== 部屋管理 =====
+let rooms = JSON.parse(localStorage.getItem('genba_rooms')||'[]');
+function saveRooms(){localStorage.setItem('genba_rooms',JSON.stringify(rooms));}
+function addRoom(){
+  const name=prompt('部屋名を入力（例：リビング、厨房、トイレ）');
+  if(!name)return;
+  rooms.push({id:'r'+Date.now(),name,w:0,d:0,h:0,op:0});
+  saveRooms(); renderRooms();
+}
+function renderRooms(){
+  const el=document.getElementById('roomList');
+  if(!el)return;
+  el.innerHTML=rooms.map((r,i)=>`
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="font-size:13px;font-weight:700;">🏠 ${r.name}</div>
+        <button onclick="deleteRoom(${i})" style="background:transparent;border:none;color:var(--red);font-size:16px;cursor:pointer;">×</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <div><div style="font-size:10px;color:var(--muted);">幅mm</div><input class="form-input" type="number" value="${r.w||''}" placeholder="5400" oninput="updateRoom(${i},'w',this.value)"></div>
+        <div><div style="font-size:10px;color:var(--muted);">奥行mm</div><input class="form-input" type="number" value="${r.d||''}" placeholder="7800" oninput="updateRoom(${i},'d',this.value)"></div>
+        <div><div style="font-size:10px;color:var(--muted);">天井高mm</div><input class="form-input" type="number" value="${r.h||''}" placeholder="2400" oninput="updateRoom(${i},'h',this.value)"></div>
+        <div><div style="font-size:10px;color:var(--muted);">開口部㎡</div><input class="form-input" type="number" step="0.1" value="${r.op||''}" placeholder="3.6" oninput="updateRoom(${i},'op',this.value)"></div>
+      </div>
+      ${r.w&&r.d?`<div style="font-size:11px;color:var(--green);margin-top:6px;">床: ${((r.w/1000)*(r.d/1000)).toFixed(2)}㎡ 壁: ${(((r.w/1000+r.d/1000)*2*(r.h/1000||2.4))-(r.op||0)).toFixed(1)}㎡</div>`:''}
+    </div>`).join('');
+}
+function updateRoom(i,key,val){rooms[i][key]=parseFloat(val)||0;saveRooms();renderRooms();}
+function deleteRoom(i){rooms.splice(i,1);saveRooms();renderRooms();}
+
+
+// ===== 図面保存・ギャラリー =====
+let savedSketches = JSON.parse(localStorage.getItem('genba_sketches')||'[]');
+let sketchRefZoom = 1.0;
+let pickupRefZoom = 1.0;
+let viewerZoomLevel = 1.0;
+let isFullscreen = false;
+
+function saveSketches(){ localStorage.setItem('genba_sketches', JSON.stringify(savedSketches)); }
+
+function saveSketchNamed(){
+  if(!drawCanvas || drawCanvas.width===0){ showToast('図面がありません','error'); return; }
+  const name = prompt('図面の名前を入力（例：1階平面図、厨房詳細）') || ('図面'+(savedSketches.length+1));
+  const dataUrl = drawCanvas.toDataURL('image/jpeg', 0.85);
+  const id = 'sk_'+Date.now();
+  savedSketches.push({ id, name, dataUrl, date: new Date().toLocaleDateString('ja') });
+  if(savedSketches.length > 20) savedSketches.shift(); // 最大20枚
+  saveSketches();
+  renderSketchGallery();
+  showToast('💾 「'+name+'」を保存しました');
+}
+
+function exportSketchJpeg(){
+  if(!drawCanvas || drawCanvas.width===0){ showToast('図面がありません','error'); return; }
+  // グリッドと描画を合成してJPEG出力
+  const exportCanvas = document.createElement('canvas');
+  exportCanvas.width = canvas.width;
+  exportCanvas.height = canvas.height;
+  const ectx = exportCanvas.getContext('2d');
+  ectx.fillStyle = '#ffffff';
+  ectx.fillRect(0,0,exportCanvas.width,exportCanvas.height);
+  ectx.drawImage(gridCanvas,0,0);
+  ectx.drawImage(drawCanvas,0,0);
+  const link = document.createElement('a');
+  link.download = '現場図面_'+new Date().toLocaleDateString('ja').replace(/\//g,'-')+'.jpg';
+  link.href = exportCanvas.toDataURL('image/jpeg', 0.9);
+  link.click();
+  showToast('📷 JPEGを保存しました');
+}
+
+function importSketchImage(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const name = file.name.replace(/\.[^.]+$/,'');
+    const id = 'sk_'+Date.now();
+    savedSketches.push({ id, name, dataUrl: ev.target.result, date: new Date().toLocaleDateString('ja') });
+    saveSketches();
+    renderSketchGallery();
+    showToast('📁 「'+name+'」を取り込みました');
+  };
+  reader.readAsDataURL(file);
+  e.target.value='';
+}
+
+function renderSketchGallery(){
+  const gallery = document.getElementById('sketchGallery');
+  if(!gallery) return;
+  if(savedSketches.length===0){
+    gallery.innerHTML='<div style="color:var(--muted);font-size:11px;padding:10px;">💾 保存ボタンで図面を追加</div>';
+    return;
+  }
+  gallery.innerHTML = savedSketches.map((sk,i)=>`
+    <div style="flex-shrink:0;width:90px;cursor:pointer;border-radius:8px;overflow:hidden;border:1px solid var(--border);background:var(--surface);">
+      <img src="${sk.dataUrl}" style="width:90px;height:60px;object-fit:cover;display:block;" onclick="loadSketch('${sk.id}')" title="${sk.name}">
+      <div style="padding:3px 5px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:9px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60px;">${sk.name}</div>
+        <button onclick="deleteSketch('${sk.id}')" style="background:transparent;border:none;color:var(--red);font-size:12px;cursor:pointer;padding:0;flex-shrink:0;">×</button>
+      </div>
+    </div>`).join('');
+  // 参照ギャラリーも更新
+  updateRefGalleries();
+}
+
+function loadSketch(id){
+  const sk = savedSketches.find(s=>s.id===id);
+  if(!sk) return;
+  const img = new Image();
+  img.onload = ()=>{
+    if(!drawCanvas){ initCanvas(); }
+    drawCtx.clearRect(0,0,drawCanvas.width,drawCanvas.height);
+    drawCtx.drawImage(img,0,0,drawCanvas.width,drawCanvas.height);
+    composite();
+    state.canvasHistory = [drawCanvas.toDataURL()];
+    showToast('「'+sk.name+'」を読み込みました');
+  };
+  img.src = sk.dataUrl;
+}
+
+function deleteSketch(id){
+  savedSketches = savedSketches.filter(s=>s.id!==id);
+  saveSketches();
+  renderSketchGallery();
+  showToast('削除しました');
+}
+
+// ===== フルスクリーン =====
+function toggleCanvasFullscreen(){
+  const panel = document.getElementById('spanel-sketch');
+  const btn = document.getElementById('tb-fullscreen');
+  isFullscreen = !isFullscreen;
+  if(isFullscreen){
+    panel.style.cssText='position:fixed;inset:0;z-index:400;background:var(--bg);display:flex;flex-direction:column;';
+    btn.textContent='⊠';
+    btn.style.color='var(--red)';
+  } else {
+    panel.style.cssText='display:flex;flex-direction:column;height:calc(100% - 42px);';
+    btn.textContent='⛶';
+    btn.style.color='var(--accent)';
+  }
+  setTimeout(()=>resizeCanvas(), 80);
+}
+
+// ===== 図面参照（実測パネル） =====
+function toggleSketchRef(){
+  const leftPanel = document.getElementById('sketch-left-panel');
+  const isVisible = leftPanel.style.display==='flex';
+  if(isVisible){ hideSketchRef(); return; }
+  if(savedSketches.length===0){ showToast('先に図面を保存してください','error'); return; }
+  leftPanel.style.display='flex';
+  leftPanel.style.flexDirection='column';
+  leftPanel.style.width='50%';
+  // 最新図面を表示
+  const latest = savedSketches[savedSketches.length-1];
+  document.getElementById('sketchRefImg').src = latest.dataUrl;
+  sketchRefZoom = 1.0;
+  document.getElementById('sketchRefImg').style.transform='scale(1)';
+  updateRefGalleries();
+}
+function hideSketchRef(){
+  document.getElementById('sketch-left-panel').style.display='none';
+}
+function zoomSketchRef(delta){
+  sketchRefZoom = Math.max(0.3, Math.min(4.0, sketchRefZoom+delta));
+  document.getElementById('sketchRefImg').style.transform=`scale(${sketchRefZoom})`;
+}
+function selectSketchRef(id){
+  const sk = savedSketches.find(s=>s.id===id);
+  if(sk){ document.getElementById('sketchRefImg').src=sk.dataUrl; sketchRefZoom=1.0; document.getElementById('sketchRefImg').style.transform='scale(1)'; }
+}
+
+// ===== 図面参照（拾い出しパネル） =====
+function togglePickupRef(){
+  const leftPanel = document.getElementById('pickup-left-panel');
+  const isVisible = leftPanel.style.display==='flex';
+  if(isVisible){ hidePickupRef(); return; }
+  if(savedSketches.length===0){ showToast('先に図面を保存してください','error'); return; }
+  leftPanel.style.display='flex';
+  leftPanel.style.flexDirection='column';
+  const latest = savedSketches[savedSketches.length-1];
+  document.getElementById('pickupRefImg').src = latest.dataUrl;
+  pickupRefZoom = 1.0;
+  document.getElementById('pickupRefImg').style.transform='scale(1)';
+  updateRefGalleries();
+}
+function hidePickupRef(){
+  document.getElementById('pickup-left-panel').style.display='none';
+}
+function zoomPickupRef(delta){
+  pickupRefZoom = Math.max(0.3, Math.min(4.0, pickupRefZoom+delta));
+  document.getElementById('pickupRefImg').style.transform=`scale(${pickupRefZoom})`;
+}
+function selectPickupRef(id){
+  const sk = savedSketches.find(s=>s.id===id);
+  if(sk){ document.getElementById('pickupRefImg').src=sk.dataUrl; pickupRefZoom=1.0; document.getElementById('pickupRefImg').style.transform='scale(1)'; }
+}
+
+function updateRefGalleries(){
+  ['sketchRefGallery','pickupRefGallery'].forEach(gid=>{
+    const g = document.getElementById(gid);
+    if(!g) return;
+    const isSketch = gid==='sketchRefGallery';
+    g.innerHTML = savedSketches.map(sk=>`
+      <div onclick="${isSketch?'selectSketchRef':'selectPickupRef'}('${sk.id}')" style="flex-shrink:0;cursor:pointer;border-radius:6px;overflow:hidden;border:1px solid var(--border);">
+        <img src="${sk.dataUrl}" style="width:60px;height:45px;object-fit:cover;display:block;">
+        <div style="font-size:9px;padding:2px 4px;color:var(--muted);max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${sk.name}</div>
+      </div>`).join('');
+  });
+}
+
+// ===== 拡大ビュアー =====
+function openSketchViewer(src){
+  viewerZoomLevel = 1.0;
+  document.getElementById('viewerImg').src = src;
+  document.getElementById('viewerImg').style.transform='scale(1)';
+  document.getElementById('sketchViewer').style.display='flex';
+}
+function closeSketchViewer(){
+  document.getElementById('sketchViewer').style.display='none';
+}
+function viewerZoom(delta){
+  viewerZoomLevel = Math.max(0.5, Math.min(5.0, viewerZoomLevel+delta));
+  document.getElementById('viewerImg').style.transform=`scale(${viewerZoomLevel})`;
+}
+
+// ピンチズーム対応（ビュアー）
+(function(){
+  let lastDist=0;
+  document.addEventListener('touchstart',e=>{
+    if(e.target.id==='viewerImg'&&e.touches.length===2){
+      lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    }
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{
+    if(e.target.id==='viewerImg'&&e.touches.length===2){
+      const dist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+      const delta=(dist-lastDist)*0.005;
+      viewerZoom(delta);
+      lastDist=dist;
+    }
+  },{passive:true});
+})();
+
+
+// ===== 見積・請求書・ガント タブ切替 =====
+function switchEstTab(tab){
+  ['estimate','invoice','gantt'].forEach(t=>{
+    const panel = document.getElementById('epanel-'+t);
+    if(panel) panel.style.display = t===tab ? (t==='gantt'?'flex':'block') : 'none';
+    const btn = document.getElementById('etab-'+t);
+    if(btn){
+      btn.style.borderBottomColor = t===tab ? 'var(--accent)' : 'transparent';
+      btn.style.color = t===tab ? 'var(--accent)' : 'var(--muted)';
+    }
+  });
+  if(tab==='gantt') renderGantt();
+  if(tab==='invoice') renderInvoice();
+}
+
+// ===== 見積明細インライン編集 =====
+function renderEstimate(){
+  const totals = calcEstimateTotal();
+  const eTotal = document.getElementById('estTotal');
+  if(!eTotal) return;
+  eTotal.innerHTML = '¥'+totals.total.toLocaleString()+'<span> 円</span>';
+  document.getElementById('bMaterial').textContent = '¥'+totals.material.toLocaleString();
+  document.getElementById('bLabor').textContent = '¥'+totals.labor.toLocaleString();
+  document.getElementById('bOther') && (document.getElementById('bOther').textContent = '¥'+totals.other.toLocaleString());
+  document.getElementById('bTax').textContent = '¥'+totals.tax.toLocaleString();
+
+  const tbody = document.getElementById('estItems');
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  state.estimateItems.forEach(item=>{
+    const sub = Math.round(item.qty * item.unitPrice);
+    const catColor = item.category==='material'?'var(--blue)':item.category==='labor'?'var(--green)':'var(--muted)';
+    const catLabel = item.category==='material'?'材':item.category==='labor'?'工':'他';
+    const row = document.createElement('div');
+    row.className='est-row';
+    row.style.cssText='padding:6px 4px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 60px 65px 75px 26px;gap:4px;align-items:center;';
+    row.innerHTML=`
+      <div>
+        <input value="${item.name}" oninput="updateEstItem(${item.id},'name',this.value)" style="width:100%;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:12px;font-weight:600;outline:none;font-family:var(--font);" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'">
+        <div style="display:flex;align-items:center;gap:4px;margin-top:2px;">
+          <span style="font-size:9px;background:${catColor}22;color:${catColor};padding:1px 5px;border-radius:3px;">${catLabel}</span>
+          <input value="${item.spec||''}" oninput="updateEstItem(${item.id},'spec',this.value)" placeholder="仕様" style="flex:1;background:transparent;border:none;color:var(--muted);font-size:10px;outline:none;font-family:var(--font);">
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:2px;">
+        <input type="number" value="${item.qty}" oninput="updateEstItem(${item.id},'qty',this.value)" style="width:40px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;text-align:right;padding:3px 4px;outline:none;">
+        <span style="font-size:9px;color:var(--muted);">${item.unit}</span>
+      </div>
+      <div>
+        <input type="number" value="${item.unitPrice}" oninput="updateEstItem(${item.id},'unitPrice',this.value)" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;text-align:right;padding:3px 4px;outline:none;">
+      </div>
+      <div style="font-size:12px;font-weight:700;text-align:right;color:var(--text);">¥${sub.toLocaleString()}</div>
+      <button onclick="deleteItem(${item.id})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer;padding:0;line-height:1;">×</button>
+    `;
+    tbody.appendChild(row);
+  });
+
+  // 合計行
+  const totRow = document.createElement('div');
+  totRow.style.cssText='padding:10px 4px;display:grid;grid-template-columns:1fr 60px 65px 75px 26px;gap:4px;background:rgba(245,166,35,.05);border-top:2px solid var(--accent);';
+  const taxRate = parseFloat(document.getElementById('estTaxRate')?.value||'0.1');
+  totRow.innerHTML=`
+    <div style="font-size:12px;font-weight:700;grid-column:span 3;">小計 / 消費税(${Math.round(taxRate*100)}%)</div>
+    <div style="font-size:11px;text-align:right;color:var(--muted);">¥${totals.subtotal.toLocaleString()}<br>¥${totals.tax.toLocaleString()}</div>
+    <div></div>
+    <div style="font-size:14px;font-weight:900;color:var(--accent);text-align:right;grid-column:2/-1;">合計 ¥${totals.total.toLocaleString()}</div>
+  `;
+  tbody.appendChild(totRow);
+  renderPriceMasterRef();
+}
+
+function updateEstItem(id, key, val){
+  const item = state.estimateItems.find(i=>i.id===id);
+  if(!item) return;
+  if(key==='qty'||key==='unitPrice') item[key]=parseFloat(val)||0;
+  else item[key]=val;
+  // 合計だけ再計算（カーソル位置を保持するため全再描画しない）
+  const totals = calcEstimateTotal();
+  const eTotal = document.getElementById('estTotal');
+  if(eTotal) eTotal.innerHTML='¥'+totals.total.toLocaleString()+'<span> 円</span>';
+  document.getElementById('bMaterial').textContent='¥'+totals.material.toLocaleString();
+  document.getElementById('bLabor').textContent='¥'+totals.labor.toLocaleString();
+  document.getElementById('bTax').textContent='¥'+totals.tax.toLocaleString();
+}
+
+function addEstItemInline(){
+  state.estimateItems.push({id:Date.now(),name:'新規項目',spec:'',qty:1,unit:'式',unitPrice:0,category:'labor'});
+  renderEstimate();
+}
+
+function calcEstimateTotal(){
+  let material=0,labor=0,other=0;
+  const taxRate = parseFloat(document.getElementById('estTaxRate')?.value||'0.1');
+  state.estimateItems.forEach(item=>{
+    const sub=Math.round(item.qty*item.unitPrice);
+    if(item.category==='material') material+=sub;
+    else if(item.category==='labor') labor+=sub;
+    else other+=sub;
+  });
+  const subtotal=material+labor+other;
+  const tax=Math.round(subtotal*taxRate);
+  return {material,labor,other,subtotal,tax,total:subtotal+tax};
+}
+
+function copyEstimateText(){
+  const name=document.getElementById('estProjectName')?.value||'';
+  const client=document.getElementById('estClientName')?.value||'';
+  const date=document.getElementById('estDate')?.value||'';
+  const totals=calcEstimateTotal();
+  const sep='==================';
+  let lines=['御見積書','',client+' 御中','','件名：'+name,'見積日：'+date,'',sep];
+  state.estimateItems.forEach(item=>{
+    const sub=Math.round(item.qty*item.unitPrice);
+    lines.push(item.name+(item.spec?' ('+item.spec+')':''));
+    lines.push('  '+item.qty+item.unit+' x \xa5'+item.unitPrice.toLocaleString()+' = \xa5'+sub.toLocaleString());
+  });
+  lines.push(sep,'小計  \xa5'+totals.subtotal.toLocaleString(),'消費税 \xa5'+totals.tax.toLocaleString(),'合計  \xa5'+totals.total.toLocaleString());
+  const notes=document.getElementById('estNotes')?.value||'';
+  if(notes) lines.push('','【備考】',notes);
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>showToast('\ud83d\udccb 見積書をコピーしました'));
+}
+
+// ===== 請求書 =====
+let invoiceItems = [];
+
+function convertToInvoice(){
+  // 見積から請求書に変換
+  invoiceItems = state.estimateItems.map(i=>({...i,id:Date.now()+Math.random()}));
+  document.getElementById('invClient').value = document.getElementById('estClientName')?.value||'';
+  document.getElementById('invProjectName').value = document.getElementById('estProjectName')?.value||'';
+  document.getElementById('invDate').value = new Date().toISOString().split('T')[0];
+  // 支払期日を1ヶ月後に設定
+  const due = new Date(); due.setMonth(due.getMonth()+1);
+  document.getElementById('invDueDate').value = due.toISOString().split('T')[0];
+  switchEstTab('invoice');
+  renderInvoice();
+  showToast('見積書から請求書を作成しました');
+}
+
+function syncInvoiceFromEstimate(){
+  invoiceItems = state.estimateItems.map(i=>({...i,id:Date.now()+Math.random()}));
+  renderInvoice();
+  showToast('見積から明細を同期しました');
+}
+
+function renderInvoice(){
+  let subtotal=0;
+  invoiceItems.forEach(i=>subtotal+=Math.round(i.qty*i.unitPrice));
+  const tax=Math.round(subtotal*0.1);
+  const total=subtotal+tax;
+  const invTotal=document.getElementById('invTotal');
+  if(invTotal) invTotal.textContent='¥'+total.toLocaleString();
+  const invSub=document.getElementById('invSubtotal');
+  if(invSub) invSub.textContent='¥'+subtotal.toLocaleString();
+  const invTax=document.getElementById('invTax');
+  if(invTax) invTax.textContent='¥'+tax.toLocaleString();
+
+  const el=document.getElementById('invItems');
+  if(!el) return;
+  el.innerHTML='';
+  invoiceItems.forEach(item=>{
+    const sub=Math.round(item.qty*item.unitPrice);
+    const row=document.createElement('div');
+    row.style.cssText='display:grid;grid-template-columns:1fr 55px 65px 70px 24px;gap:4px;align-items:center;padding:6px 4px;border-bottom:1px solid var(--border);';
+    row.innerHTML=`
+      <input value="${item.name}" oninput="updateInvItem(${item.id},'name',this.value)" style="background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:12px;font-weight:600;outline:none;font-family:var(--font);" onfocus="this.style.borderBottomColor='var(--red)'" onblur="this.style.borderBottomColor='transparent'">
+      <div style="display:flex;align-items:center;gap:2px;">
+        <input type="number" value="${item.qty}" oninput="updateInvItem(${item.id},'qty',this.value)" style="width:38px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;text-align:right;padding:3px;outline:none;">
+        <span style="font-size:9px;color:var(--muted);">${item.unit}</span>
+      </div>
+      <input type="number" value="${item.unitPrice}" oninput="updateInvItem(${item.id},'unitPrice',this.value)" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;text-align:right;padding:3px;outline:none;">
+      <div style="font-size:11px;font-weight:700;text-align:right;">¥${sub.toLocaleString()}</div>
+      <button onclick="deleteInvItem(${item.id})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer;padding:0;">×</button>
+    `;
+    el.appendChild(row);
+  });
+}
+
+function updateInvItem(id,key,val){
+  const item=invoiceItems.find(i=>i.id===id);
+  if(!item) return;
+  if(key==='qty'||key==='unitPrice') item[key]=parseFloat(val)||0;
+  else item[key]=val;
+  let subtotal=0;
+  invoiceItems.forEach(i=>subtotal+=Math.round(i.qty*i.unitPrice));
+  const tax=Math.round(subtotal*0.1);
+  const el=document.getElementById('invTotal');
+  if(el) el.textContent='¥'+(subtotal+tax).toLocaleString();
+  const s=document.getElementById('invSubtotal'); if(s) s.textContent='¥'+subtotal.toLocaleString();
+  const t=document.getElementById('invTax'); if(t) t.textContent='¥'+tax.toLocaleString();
+}
+
+function addInvItemInline(){
+  invoiceItems.push({id:Date.now(),name:'新規項目',spec:'',qty:1,unit:'式',unitPrice:0,category:'labor'});
+  renderInvoice();
+}
+
+function deleteInvItem(id){
+  invoiceItems=invoiceItems.filter(i=>i.id!==id);
+  renderInvoice();
+}
+
+function copyInvoiceText(){
+  const client=document.getElementById('invClient')?.value||'';
+  const pname=document.getElementById('invProjectName')?.value||'';
+  const date=document.getElementById('invDate')?.value||'';
+  const due=document.getElementById('invDueDate')?.value||'';
+  const bank=document.getElementById('invBank')?.value||'';
+  const notes=document.getElementById('invNotes')?.value||'';
+  let subtotal=0;
+  invoiceItems.forEach(i=>subtotal+=Math.round(i.qty*i.unitPrice));
+  const tax=Math.round(subtotal*0.1);
+  const sep='==================';
+  let lines=['請求書','',client+' 御中','','件名：'+pname,'請求日：'+date,'支払期日：'+due,'',sep];
+  invoiceItems.forEach(item=>{
+    const sub=Math.round(item.qty*item.unitPrice);
+    lines.push(item.name);
+    lines.push('  '+item.qty+item.unit+' x ¥'+item.unitPrice.toLocaleString()+' = ¥'+sub.toLocaleString());
+  });
+  lines.push(sep);
+  lines.push('小計  ¥'+subtotal.toLocaleString());
+  lines.push('消費税 ¥'+tax.toLocaleString());
+  lines.push('ご請求金額 ¥'+(subtotal+tax).toLocaleString());
+  if(bank){ lines.push(''); lines.push('【振込先】'); lines.push(bank); }
+  if(notes){ lines.push(''); lines.push('【備考】'); lines.push(notes); }
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>showToast('📋 請求書をコピーしました'));
+}
+
+
+// ===== ガントチャート =====
+let ganttRows = JSON.parse(localStorage.getItem('genba_gantt')||'[]');
+function saveGantt(){ localStorage.setItem('genba_gantt',JSON.stringify(ganttRows)); }
+
+const GANTT_TRADES = ['解体','電気工事','設備工事','木工事','ボード工事','クロス工事','床工事','塗装工事','建具工事','照明器具','家具設置','清掃','検査','施主確認','予備'];
+
+function addGanttRow(){
+  if(ganttRows.length>=15){ showToast('最大15工種です','error'); return; }
+  const trade = GANTT_TRADES[ganttRows.length] || '工種'+(ganttRows.length+1);
+  ganttRows.push({ id:'g'+Date.now(), trade, start:1, end:5, color:ganttColors[ganttRows.length%ganttColors.length] });
+  saveGantt(); renderGantt();
+}
+
+const ganttColors=['#f5a623','#4a9eff','#3dd68c','#b06aff','#ff5f5f','#2ac8c8','#e05c2a','#f5e642','#ff8888','#aaffaa','#88aaff','#ffaa88','#cc88ff','#88ffcc','#ffcc88'];
+
+// ===== ガントチャート 新実装 =====
+let ganttDragging = null; // {idx, type:'move'|'left'|'right', startX, origStart, origEnd}
+
+function renderGantt(){
+  const headerWrap = document.getElementById('ganttHeaderWrap');
+  const bodyWrap   = document.getElementById('ganttBodyWrap');
+  const header     = document.getElementById('ganttHeader');
+  const body       = document.getElementById('ganttBody');
+  if(!header||!body) return;
+
+  const startDateStr = document.getElementById('ganttStartDate')?.value;
+  const weeks   = parseInt(document.getElementById('ganttWeeks')?.value||'5');
+  const colW    = parseInt(document.getElementById('ganttColW')?.value||'32');
+  const showProg= document.getElementById('ganttShowProgress')?.checked||false;
+  const days    = weeks*7;
+  const labelW  = 96;
+  const rowH    = 50;
+  const startDate = startDateStr ? new Date(startDateStr) : new Date();
+  const today   = new Date();
+
+  // 日付ラベル生成
+  const dayLabels=[], weekLabels=[];
+  for(let d=0;d<days;d++){
+    const dt=new Date(startDate); dt.setDate(dt.getDate()+d);
+    const dow=dt.getDay();
+    dayLabels.push({day:dt.getDate(),mon:dt.getMonth()+1,dow:['日','月','火','水','木','金','土'][dow],isWeekend:dow===0||dow===6,date:dt});
+    if(d===0||dow===1) weekLabels.push({idx:d, label:(dt.getMonth()+1)+'/'+dt.getDate()+'〜'});
+  }
+
+  // 今日の位置
+  const todayDiff = Math.round((today-startDate)/(1000*60*60*24));
+  const todayX = labelW + todayDiff*colW + colW/2;
+
+  // ===== ヘッダー生成 =====
+  let hHtml=`<div style="display:flex;position:relative;width:${labelW+days*colW}px;">`;
+  // 週行
+  hHtml+=`<div style="display:flex;width:${labelW+days*colW}px;background:var(--surface2);border-bottom:1px solid var(--border);">`;
+  hHtml+=`<div style="width:${labelW}px;flex-shrink:0;font-size:10px;font-weight:700;color:var(--muted);padding:5px 6px;border-right:1px solid var(--border);">工種 / 進捗</div>`;
+  hHtml+=`<div style="position:relative;height:20px;flex:1;">`;
+  weekLabels.forEach(w=>{
+    hHtml+=`<div style="position:absolute;left:${w.idx*colW}px;font-size:9px;color:var(--accent);padding:3px 4px;font-weight:700;white-space:nowrap;">${w.label}</div>`;
+  });
+  hHtml+=`</div></div>`;
+  // 日付行
+  hHtml+=`<div style="display:flex;width:${labelW+days*colW}px;background:var(--surface);border-bottom:2px solid var(--border);">`;
+  hHtml+=`<div style="width:${labelW}px;flex-shrink:0;border-right:1px solid var(--border);"></div>`;
+  dayLabels.forEach((d,i)=>{
+    const isToday=i===todayDiff;
+    const bg=isToday?'rgba(245,166,35,.2)':d.isWeekend?'rgba(255,95,95,.06)':'transparent';
+    const col=isToday?'var(--accent)':d.isWeekend?'var(--red)':'var(--muted)';
+    const fw=isToday?'700':'400';
+    hHtml+=`<div style="width:${colW}px;flex-shrink:0;text-align:center;font-size:9px;color:${col};background:${bg};font-weight:${fw};padding:2px 0;border-right:1px solid rgba(255,255,255,.04);">
+      <div>${d.mon}/${d.day}</div><div style="font-size:8px;">${d.dow}</div>
+    </div>`;
+  });
+  hHtml+=`</div></div>`;
+  header.innerHTML=hHtml;
+  header.style.width=(labelW+days*colW)+'px';
+
+  // ===== ボディ生成 =====
+  let bHtml=`<div style="position:relative;width:${labelW+days*colW}px;">`;
+
+  if(ganttRows.length===0){
+    bHtml+=`<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">🤖 AI生成 または ＋工種追加 で開始</div>`;
+  }
+
+  ganttRows.forEach((row,ri)=>{
+    const barLeft=(row.start-1)*colW;
+    const barWidth=Math.max(colW-2,(row.end-row.start+1)*colW-2);
+    const prog=row.progress||0;
+    const duration=row.end-row.start+1;
+
+    bHtml+=`<div style="display:flex;align-items:center;border-bottom:1px solid var(--border);height:${rowH}px;position:relative;">`;
+    // ラベル列
+    bHtml+=`<div style="width:${labelW}px;flex-shrink:0;padding:4px 6px;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;gap:2px;">
+      <div style="display:flex;align-items:center;gap:4px;">
+        <div style="width:8px;height:8px;border-radius:2px;background:${row.color};flex-shrink:0;"></div>
+        <input value="${row.trade}" oninput="updateGanttTrade(${ri},this.value)" style="background:transparent;border:none;color:var(--text);font-size:11px;font-weight:600;outline:none;font-family:var(--font);width:100%;">
+      </div>
+      ${showProg?`<div style="display:flex;align-items:center;gap:4px;">
+        <div style="flex:1;background:var(--surface2);border-radius:3px;height:5px;overflow:hidden;">
+          <div style="width:${prog}%;height:100%;background:${row.color};"></div>
+        </div>
+        <span style="font-size:9px;color:var(--muted);">${prog}%</span>
+      </div>`:''}
+      <div style="display:flex;gap:4px;">
+        <button onclick="openGanttEdit(${ri})" style="background:transparent;border:none;color:var(--blue);font-size:9px;cursor:pointer;padding:0;">✏️編集</button>
+        <button onclick="deleteGanttRow(${ri})" style="background:transparent;border:none;color:var(--red);font-size:9px;cursor:pointer;padding:0;">削除</button>
+      </div>
+    </div>`;
+
+    // グリッドエリア
+    bHtml+=`<div style="position:relative;height:${rowH}px;width:${days*colW}px;flex-shrink:0;">`;
+    // 背景グリッド
+    dayLabels.forEach((d,i)=>{
+      const isToday=i===todayDiff;
+      const bg=isToday?'rgba(245,166,35,.08)':d.isWeekend?'rgba(255,95,95,.04)':'transparent';
+      bHtml+=`<div style="position:absolute;left:${i*colW}px;top:0;width:${colW}px;height:100%;background:${bg};border-right:1px solid rgba(255,255,255,.03);pointer-events:none;"></div>`;
+    });
+
+    // ガントバー
+    bHtml+=`<div class="gantt-bar" data-idx="${ri}"
+      style="position:absolute;left:${barLeft}px;top:8px;height:${rowH-16}px;width:${barWidth}px;background:${row.color};border-radius:5px;cursor:grab;user-select:none;box-shadow:0 2px 8px ${row.color}55;touch-action:none;"
+      onmousedown="startGanttDrag(event,${ri},'move')"
+      ontouchstart="startGanttDragTouch(event,${ri},'move')">
+      ${showProg?`<div style="position:absolute;left:0;top:0;height:100%;width:${prog}%;background:rgba(0,0,0,.2);border-radius:5px;pointer-events:none;"></div>`:''}
+      <div style="position:relative;z-index:1;display:flex;align-items:center;justify-content:center;height:100%;font-size:10px;font-weight:700;color:#000;pointer-events:none;white-space:nowrap;overflow:hidden;padding:0 6px;">
+        ${duration}日${showProg&&prog?'・'+prog+'%':''}
+      </div>
+      <div class="gantt-resize-handle" data-idx="${ri}" data-side="left"
+        style="position:absolute;left:0;top:0;width:12px;height:100%;cursor:col-resize;z-index:2;"
+        onmousedown="startGanttDrag(event,${ri},'left')"
+        ontouchstart="startGanttDragTouch(event,${ri},'left')"></div>
+      <div class="gantt-resize-handle" data-idx="${ri}" data-side="right"
+        style="position:absolute;right:0;top:0;width:12px;height:100%;cursor:col-resize;z-index:2;"
+        onmousedown="startGanttDrag(event,${ri},'right')"
+        ontouchstart="startGanttDragTouch(event,${ri},'right')"></div>
+    </div>`;
+
+    bHtml+=`</div></div>`;
+  });
+
+  // 今日ライン
+  if(todayDiff>=0&&todayDiff<days){
+    bHtml+=`<div style="position:absolute;left:${todayX}px;top:0;bottom:0;width:2px;background:var(--accent);opacity:.6;pointer-events:none;z-index:5;">
+      <div style="position:sticky;top:0;background:var(--accent);color:#000;font-size:8px;font-weight:700;padding:2px 4px;border-radius:3px;white-space:nowrap;margin-left:-14px;">TODAY</div>
+    </div>`;
+  }
+
+  bHtml+=`</div>`;
+  body.innerHTML=bHtml;
+  body.style.minWidth=(labelW+days*colW)+'px';
+
+  // ドラッグ日付更新を初期化
+  attachGanttDragEvents();
+}
+
+function syncGanttScroll(el){
+  const header = document.getElementById('ganttHeader');
+  if(header) header.scrollLeft = el.scrollLeft;
+}
+
+// ===== ドラッグ操作 =====
+function attachGanttDragEvents(){
+  window._ganttDrag = null;
+  window._ganttColW = parseInt(document.getElementById('ganttColW')?.value||'32');
+}
+
+function startGanttDrag(e, idx, type){
+  e.preventDefault(); e.stopPropagation();
+  window._ganttDrag = {idx, type, startX: e.clientX, origStart: ganttRows[idx].start, origEnd: ganttRows[idx].end};
+  window._ganttColW = parseInt(document.getElementById('ganttColW')?.value||'32');
+  document.onmousemove = onGanttDrag;
+  document.onmouseup   = endGanttDrag;
+}
+function startGanttDragTouch(e, idx, type){
+  if(e.touches.length!==1) return;
+  e.stopPropagation();
+  const t=e.touches[0];
+  window._ganttDrag = {idx, type, startX: t.clientX, origStart: ganttRows[idx].start, origEnd: ganttRows[idx].end};
+  window._ganttColW = parseInt(document.getElementById('ganttColW')?.value||'32');
+  document.ontouchmove = onGanttDragTouch;
+  document.ontouchend  = endGanttDragTouch;
+}
+
+function onGanttDrag(e){ applyGanttDrag(e.clientX); }
+function onGanttDragTouch(e){ if(e.touches.length===1) applyGanttDrag(e.touches[0].clientX); }
+
+function applyGanttDrag(clientX){
+  const d = window._ganttDrag;
+  if(!d) return;
+  const colW = window._ganttColW;
+  const weeks = parseInt(document.getElementById('ganttWeeks')?.value||'5');
+  const maxDay = weeks*7;
+  const deltaDays = Math.round((clientX - d.startX) / colW);
+  const row = ganttRows[d.idx];
+
+  if(d.type==='move'){
+    let ns = d.origStart + deltaDays;
+    let ne = d.origEnd + deltaDays;
+    const dur = d.origEnd - d.origStart;
+    ns = Math.max(1, Math.min(maxDay-dur, ns));
+    ne = ns + dur;
+    row.start=ns; row.end=ne;
+  } else if(d.type==='left'){
+    let ns = Math.max(1, Math.min(d.origEnd-1, d.origStart+deltaDays));
+    row.start=ns;
+  } else if(d.type==='right'){
+    let ne = Math.max(d.origStart+1, Math.min(maxDay, d.origEnd+deltaDays));
+    row.end=ne;
+  }
+  renderGanttBarOnly(d.idx);
+}
+
+function endGanttDrag(){ saveGantt(); renderGantt(); document.onmousemove=null; document.onmouseup=null; window._ganttDrag=null; }
+function endGanttDragTouch(){ saveGantt(); renderGantt(); document.ontouchmove=null; document.ontouchend=null; window._ganttDrag=null; }
+
+function renderGanttBarOnly(idx){
+  // ドラッグ中は全再描画の代わりにバーのみ更新
+  const colW = window._ganttColW || 32;
+  const rowH = 50;
+  const row = ganttRows[idx];
+  const bar = document.querySelector(`.gantt-bar[data-idx="${idx}"]`);
+  if(!bar) return;
+  const barLeft = (row.start-1)*colW;
+  const barWidth = Math.max(colW-2, (row.end-row.start+1)*colW-2);
+  const dur = row.end-row.start+1;
+  bar.style.left = barLeft+'px';
+  bar.style.width = barWidth+'px';
+  const label = bar.querySelector('div:last-child > div');
+  if(label) label.textContent = dur+'日間';
+}
+
+// ===== 工種追加・編集 =====
+function updateGanttTrade(idx,val){ ganttRows[idx].trade=val; saveGantt(); }
+function deleteGanttRow(idx){ ganttRows.splice(idx,1); saveGantt(); renderGantt(); }
+
+function openGanttEdit(idx){
+  const row = ganttRows[idx];
+  const weeks = parseInt(document.getElementById('ganttWeeks')?.value||'5');
+  const days = weeks*7;
+  const startDateStr = document.getElementById('ganttStartDate')?.value;
+  const startDate = startDateStr?new Date(startDateStr):new Date();
+
+  // 日付→第何日目に変換
+  const toDateStr = (dayNum) => {
+    const dt = new Date(startDate); dt.setDate(dt.getDate()+dayNum-1);
+    return dt.toISOString().split('T')[0];
+  };
+
+  document.getElementById('modalSheet').innerHTML=`
+    <div style="font-size:15px;font-weight:700;margin-bottom:14px;">📅 ${row.trade}</div>
+    <div class="form-group"><label class="form-label">工種名</label>
+      <input class="form-input" id="ge_trade" value="${row.trade}"></div>
+    <div class="form-row">
+      <div><label class="form-label">開始日</label>
+        <input class="form-input" type="date" id="ge_start_date" value="${toDateStr(row.start)}"></div>
+      <div><label class="form-label">終了日</label>
+        <input class="form-input" type="date" id="ge_end_date" value="${toDateStr(row.end)}"></div>
+    </div>
+    ${document.getElementById('ganttShowProgress')?.checked?`
+    <div class="form-group"><label class="form-label">進捗率 ${row.progress||0}%</label>
+      <input class="form-input" type="range" id="ge_prog" value="${row.progress||0}" min="0" max="100" step="5" oninput="document.querySelector('#ge_prog+span').textContent=this.value+'%'">
+      <span style="font-size:12px;color:var(--muted);">${row.progress||0}%</span>
+    </div>`:''}
+    <div class="form-group"><label class="form-label">バーの色</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        ${ganttColors.map(c=>`<div onclick="document.querySelectorAll('.gc-sel').forEach(e=>e.style.outline='none');this.style.outline='2px solid #fff';document.getElementById('ge_color').value='${c}'" class="gc-sel" style="width:28px;height:28px;background:${c};border-radius:4px;cursor:pointer;${row.color===c?'outline:2px solid #fff;':''}"></div>`).join('')}
+        <input type="hidden" id="ge_color" value="${row.color}">
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">メモ</label>
+      <input class="form-input" id="ge_memo" value="${row.memo||''}" placeholder="業者名・注意事項など"></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeModal()" style="flex:1;">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveGanttEdit(${idx})" style="flex:1;">保存</button>
+    </div>`;
+  document.getElementById('modalOverlay').style.display='flex';
+}
+
+function saveGanttEdit(idx){
+  const startDateStr = document.getElementById('ganttStartDate')?.value;
+  const startDate = startDateStr?new Date(startDateStr):new Date();
+  const toDay = (dateStr) => {
+    if(!dateStr) return ganttRows[idx].start;
+    const dt = new Date(dateStr);
+    return Math.round((dt-startDate)/(1000*60*60*24))+1;
+  };
+  ganttRows[idx].trade  = document.getElementById('ge_trade')?.value||ganttRows[idx].trade;
+  ganttRows[idx].start  = Math.max(1, toDay(document.getElementById('ge_start_date')?.value));
+  ganttRows[idx].end    = Math.max(ganttRows[idx].start, toDay(document.getElementById('ge_end_date')?.value));
+  ganttRows[idx].color  = document.getElementById('ge_color')?.value||ganttColors[0];
+  ganttRows[idx].memo   = document.getElementById('ge_memo')?.value||'';
+  ganttRows[idx].progress = parseInt(document.getElementById('ge_prog')?.value||'0');
+  saveGantt(); closeModal(); renderGantt();
+}
+
+// ===== AI工程表生成 =====
+function openAiGantt(){
+  const p = document.getElementById('ganttAiPanel');
+  p.style.display = p.style.display==='none'?'block':'none';
+}
+
+async function runAiGantt(){
+  const input = document.getElementById('ganttAiInput')?.value.trim();
+  if(!input){ showToast('工事内容を入力してください','error'); return; }
+  const key = getApiKey();
+  const status = document.getElementById('ganttAiStatus');
+  status.innerHTML='<span style="color:var(--accent);">🤖 AIが工程表を生成中...</span>';
+
+  const weeks = parseInt(document.getElementById('ganttWeeks')?.value||'5');
+
+  const prompt = `内装工事の工程管理AIです。以下の工事内容から工程表を生成してください。
+工事内容：${input}
+表示日数：${weeks*7}日間
+
+以下のJSON配列のみを返してください。前置き・説明は不要です：
+[{"trade":"工種名","start":開始日番号,"end":終了日番号,"color":"#hexcolor","progress":0,"memo":""}]
+
+ルール：
+- 内装工事の標準的な工程順序に従う（解体→躯体→設備→木工→ボード→クロス・床→照明・建具→清掃→検査）
+- 工種は5〜12種類
+- start/endは1〜${weeks*7}の整数、工程の重なりは現実的に
+- colorは見やすい色を工種ごとに変える
+- JSONのみ返す`;
+
+  try {
+    const body = { model:'claude-sonnet-4-20250514', max_tokens:1500,
+      messages:[{role:'user',content:prompt}] };
+    const headers = {'Content-Type':'application/json','anthropic-version':'2023-06-01'};
+    if(key) headers['x-api-key']=key;
+    const res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers,body:JSON.stringify(body)});
+    const data = await res.json();
+    const text = data.content?.map(c=>c.text||'').join('')||'[]';
+    const rows = JSON.parse(text.replace(/```json|```/g,'').trim());
+    if(!Array.isArray(rows)||rows.length===0){ status.innerHTML='<span style="color:var(--red);">生成できませんでした</span>'; return; }
+    ganttRows = rows;
+    saveGantt();
+    document.getElementById('ganttAiPanel').style.display='none';
+    renderGantt();
+    showToast('🤖 工程表を生成しました（'+rows.length+'工種）');
+    status.innerHTML='';
+  } catch(err){
+    status.innerHTML='<span style="color:var(--red);">エラー：'+err.message+'</span>';
+  }
+}
+
+// ===== 工程表共有 =====
+function ganttShareText(){
+  if(ganttRows.length===0){ showToast('工程がありません','error'); return; }
+  const startDateStr = document.getElementById('ganttStartDate')?.value||'';
+  const startDate = startDateStr?new Date(startDateStr):new Date();
+  const toDateStr = (dayNum) => {
+    const dt = new Date(startDate); dt.setDate(dt.getDate()+dayNum-1);
+    return (dt.getMonth()+1)+'/'+dt.getDate();
+  };
+  const lines = ['【工程表】', startDateStr?('開始日：'+startDateStr):'', ''];
+  ganttRows.forEach(r=>{
+    lines.push(`${r.trade}：${toDateStr(r.start)} 〜 ${toDateStr(r.end)}（${r.end-r.start+1}日間）${r.memo?'  '+r.memo:''}`);
+  });
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>showToast('📋 工程表をコピーしました'));
+}
+
+// ===== 見積AI読込 =====
+let estAiFiles=[];
+function openEstAiImport(){
+  const panel=document.getElementById('estAiImportPanel');
+  panel.style.display=panel.style.display==='none'?'block':'none';
+}
+function handleEstAiFiles(e){
+  estAiFiles=Array.from(e.target.files);
+  document.getElementById('estAiFilePreview').innerHTML=estAiFiles.map(f=>`<div style="display:inline-flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;margin:3px;font-size:11px;">${f.type.includes('pdf')?'📄':'🖼️'} ${f.name}</div>`).join('');
+}
+async function runEstAiImport(){
+  const key=getApiKey();
+  if(!key){showToast('APIキーを設定してください','error');return;}
+  const resultEl=document.getElementById('estAiResult');
+  resultEl.innerHTML='<div style="color:var(--accent);">🤖 AIが読み取り中...</div>';
+  try{
+    const contentParts=[];
+    const textInput=document.getElementById('estAiTextInput').value.trim();
+    for(const file of estAiFiles){
+      if(file.type.startsWith('image/')){
+        const b64=await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.readAsDataURL(file);});
+        contentParts.push({type:'image',source:{type:'base64',media_type:file.type,data:b64}});
+      }
+    }
+    const prompt=`内装工事の見積書・請求書・打ち合わせ内容から見積明細を抽出してください。
+必ずJSON配列のみで返してください。各項目は：
+{"name":"項目名","spec":"仕様","qty":数量,"unit":"単位","unitPrice":単価数字のみ,"category":"material|labor|other"}
+${textInput?'テキスト内容：'+textInput:''}
+項目が読み取れない場合は[]を返してください。JSONのみ返してください。`;
+    contentParts.push({type:'text',text:prompt});
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:contentParts}]})});
+    const data=await res.json();
+    const text=data.content?.map(c=>c.text||'').join('')||'[]';
+    const items=JSON.parse(text.replace(/```json|```/g,'').trim());
+    if(!Array.isArray(items)||items.length===0){resultEl.innerHTML='<div style="color:var(--muted);">明細を読み取れませんでした。テキストで入力してみてください。</div>';return;}
+    items.forEach(item=>state.estimateItems.push({...item,id:Date.now()+Math.random()}));
+    renderEstimate();
+    document.getElementById('estAiImportPanel').style.display='none';
+    showToast('✅ '+items.length+'件の明細を読み込みました');
+    resultEl.innerHTML='';
+  }catch(err){resultEl.innerHTML='<div style="color:var(--red);">エラー：'+err.message+'</div>';}
+}
+
+// 初期化：ガント開始日を今日に設定
+(function(){
+  const el=document.getElementById('ganttStartDate');
+  if(el&&!el.value) el.value=new Date().toISOString().split('T')[0];
+  // 既存データ読込
+  const saved=localStorage.getItem('genba_gantt');
+  if(saved) ganttRows=JSON.parse(saved);
+})();
+
+
+// ===== 音声サブタブ切替 =====
+function switchVoiceTab(tab){
+  ['memo','summary','tasks','notes'].forEach(t=>{
+    const p=document.getElementById('vpanel-'+t);
+    if(p) p.style.display=t===tab?'block':'none';
+    const b=document.getElementById('vtab-'+t);
+    if(b){ b.style.borderBottomColor=t===tab?'var(--accent)':'transparent'; b.style.color=t===tab?'var(--accent)':'var(--muted)'; }
+  });
+  if(tab==='notes'){ renderVoiceNotes(); populateNoteProjectFilter(); }
+  if(tab==='tasks') renderTaskList();
+}
+
+// ===== AI要約 =====
+async function runAiSummary(){
+  const text = document.getElementById('memoInputArea')?.value?.trim()||
+    state.voiceNotes.filter(n=>n.project===state.currentProject).map(n=>n.text).join('\n\n');
+  if(!text){ showToast('テキストがありません','error'); return; }
+  document.getElementById('summaryEmpty').style.display='none';
+  document.getElementById('summaryResult').style.display='none';
+  document.getElementById('summaryLoading').style.display='block';
+  switchVoiceTab('summary');
+  const key=getApiKey();
+  if(!key){
+    document.getElementById('summaryLoading').style.display='none';
+    showFallbackSummary(text); return;
+  }
+  try{
+    const prompt=`あなたは建設・内装工事の現場管理AIです。以下の打ち合わせ内容を構造化して要約してください。
+
+【打ち合わせ内容】
+${text}
+
+以下の形式でJSON形式のみで返してください：
+{
+  "date": "打ち合わせ日（不明なら空文字）",
+  "summary": "3〜5行の要約",
+  "requests": ["施主要望1","施主要望2",...],
+  "confirmed": ["確認済み事項1","確認済み事項2",...],
+  "budget": "予算情報（不明なら空文字）",
+  "schedule": "工期・スケジュール情報（不明なら空文字）",
+  "materials": ["材料・仕様1","材料・仕様2",...],
+  "tasks": ["次回アクション1","次回アクション2",...]
+}
+JSONのみ返してください。`;
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    const rawText=data.content?.map(c=>c.text||'').join('')||'{}';
+    const parsed=JSON.parse(rawText.replace(/```json|```/g,'').trim());
+    document.getElementById('summaryLoading').style.display='none';
+    renderSummaryResult(parsed);
+  }catch(e){
+    document.getElementById('summaryLoading').style.display='none';
+    showFallbackSummary(text);
+  }
+}
+
+function renderSummaryResult(d){
+  const el=document.getElementById('summaryResult');
+  const section=(title,items,color)=>{
+    if(!items||!items.length&&!items) return '';
+    const arr=Array.isArray(items)?items:[items];
+    if(!arr.length||!arr[0]) return '';
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid ${color};border-radius:10px;padding:12px;margin-bottom:8px;">
+      <div style="font-size:11px;font-weight:700;color:${color};margin-bottom:6px;">${title}</div>
+      ${arr.map(i=>`<div style="font-size:12px;color:var(--text);padding:3px 0;line-height:1.6;">・${i}</div>`).join('')}
+    </div>`;
+  };
+  el.innerHTML=`
+    <div style="background:linear-gradient(135deg,rgba(176,106,255,.1),rgba(74,158,255,.07));border:1px solid rgba(176,106,255,.2);border-radius:12px;padding:14px;margin-bottom:10px;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">${d.date||'　'}</div>
+      <div style="font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap;">${d.summary||''}</div>
+      ${d.budget?`<div style="font-size:12px;color:var(--accent);margin-top:8px;">💰 予算：${d.budget}</div>`:''}
+      ${d.schedule?`<div style="font-size:12px;color:var(--blue);margin-top:4px;">📅 工期：${d.schedule}</div>`:''}
+    </div>
+    ${section('📋 施主要望',d.requests,'var(--accent)')}
+    ${section('✅ 確認済み事項',d.confirmed,'var(--green)')}
+    ${section('🏠 材料・仕様',d.materials,'var(--blue)')}
+    ${section('📌 次回アクション',d.tasks,'#b06aff')}
+    <button onclick="applyTasksFromSummary(${JSON.stringify(d.tasks||[]).replace(/'/g,'\x27')})" style="width:100%;background:var(--green);border:none;color:#000;padding:12px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;margin-top:4px;">✅ アクションをタスクに追加</button>
+  `;
+  el.style.display='block';
+}
+
+function showFallbackSummary(text){
+  const el=document.getElementById('summaryResult');
+  el.innerHTML=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">テキスト内容（APIキー未設定のため要約なし）</div>
+    <div style="font-size:12px;color:var(--text);line-height:1.7;white-space:pre-wrap;">${text.substring(0,500)}${text.length>500?'…':''}</div>
+  </div>`;
+  el.style.display='block';
+}
+
+function copySummary(){
+  const el=document.getElementById('summaryResult');
+  if(!el||el.style.display==='none'){ showToast('先に要約を生成してください','error'); return; }
+  const text=el.innerText;
+  navigator.clipboard.writeText(text).then(()=>showToast('📋 要約をコピーしました'));
+}
+
+// ===== タスク管理 =====
+let tasks=JSON.parse(localStorage.getItem('genba_tasks')||'[]');
+function saveTasks(){ localStorage.setItem('genba_tasks',JSON.stringify(tasks)); }
+
+async function runAiTaskExtract(){
+  const text=document.getElementById('memoInputArea')?.value?.trim()||
+    state.voiceNotes.filter(n=>n.project===state.currentProject).map(n=>n.text).join('\n\n');
+  if(!text){ showToast('テキストがありません','error'); return; }
+  document.getElementById('taskLoading').style.display='block';
+  switchVoiceTab('tasks');
+  const key=getApiKey();
+  if(!key){
+    document.getElementById('taskLoading').style.display='none';
+    showToast('APIキー未設定。手動でタスクを追加してください');
+    return;
+  }
+  try{
+    const prompt=`以下の打ち合わせ・現場メモからToDoタスクと確認事項を抽出してください。
+必ずJSON配列のみで返してください：
+[{"text":"タスク内容","category":"todo|confirm|material|contact","priority":"high|normal","dueHint":"期限のヒント（不明なら空）"}]
+
+category: todo=やること, confirm=確認事項, material=材料手配, contact=業者連絡
+priorityはhighかnormal。
+
+【テキスト】
+${text}
+
+JSONのみ返してください。`;
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    const raw=data.content?.map(c=>c.text||'').join('')||'[]';
+    const extracted=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    const project=state.currentProject;
+    extracted.forEach(t=>tasks.push({id:'t'+Date.now()+Math.random(),text:t.text,category:t.category||'todo',priority:t.priority||'normal',dueHint:t.dueHint||'',project,done:false,created:new Date().toLocaleDateString('ja')}));
+    saveTasks(); renderTaskList();
+    document.getElementById('taskLoading').style.display='none';
+    showToast('✅ '+extracted.length+'件のタスクを抽出しました');
+  }catch(e){
+    document.getElementById('taskLoading').style.display='none';
+    showToast('エラーが発生しました','error');
+  }
+}
+
+function applyTasksFromSummary(taskTexts){
+  if(!Array.isArray(taskTexts)||!taskTexts.length) return;
+  taskTexts.forEach(t=>tasks.push({id:'t'+Date.now()+Math.random(),text:t,category:'todo',priority:'normal',dueHint:'',project:state.currentProject,done:false,created:new Date().toLocaleDateString('ja')}));
+  saveTasks(); switchVoiceTab('tasks'); renderTaskList();
+  showToast('✅ '+taskTexts.length+'件をタスクに追加しました');
+}
+
+function addManualTask(){
+  const text=prompt('タスク内容を入力：');
+  if(!text) return;
+  tasks.push({id:'t'+Date.now(),text,category:'todo',priority:'normal',dueHint:'',project:state.currentProject,done:false,created:new Date().toLocaleDateString('ja')});
+  saveTasks(); renderTaskList();
+}
+
+function renderTaskList(){
+  const catColors={todo:'var(--accent)',confirm:'var(--blue)',material:'var(--green)',contact:'#b06aff'};
+  const catLabels={todo:'ToDo',confirm:'確認',material:'材料',contact:'連絡'};
+  const projTasks=tasks.filter(t=>!t.done&&(t.project===state.currentProject||!t.project));
+  const doneTasks=tasks.filter(t=>t.done&&(t.project===state.currentProject||!t.project));
+  const el=document.getElementById('taskList');
+  if(!el) return;
+  if(!projTasks.length){
+    el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px;">タスクがありません<br>「タスクを抽出」または「手動追加」で追加してください</div>';
+  } else {
+    el.innerHTML=projTasks.map(t=>{
+      const col=catColors[t.category]||'var(--muted)';
+      const lbl=catLabels[t.category]||t.category;
+      return `<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid ${col};border-radius:10px;padding:11px 12px;margin-bottom:7px;display:flex;align-items:flex-start;gap:10px;">
+        <input type="checkbox" onchange="toggleTask('${t.id}')" style="margin-top:2px;width:16px;height:16px;accent-color:var(--green);flex-shrink:0;">
+        <div style="flex:1;">
+          <div style="font-size:12px;font-weight:600;line-height:1.5;">${t.text}</div>
+          <div style="display:flex;gap:6px;margin-top:4px;align-items:center;">
+            <span style="font-size:9px;background:${col}22;color:${col};padding:2px 6px;border-radius:3px;">${lbl}</span>
+            ${t.priority==='high'?'<span style="font-size:9px;background:rgba(255,95,95,.2);color:var(--red);padding:2px 6px;border-radius:3px;">優先</span>':''}
+            ${t.dueHint?`<span style="font-size:9px;color:var(--muted);">${t.dueHint}</span>`:''}
+            <span style="font-size:9px;color:var(--muted);">${t.created}</span>
+          </div>
+        </div>
+        <button onclick="deleteTask('${t.id}')" style="background:transparent;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0;flex-shrink:0;">×</button>
+      </div>`;
+    }).join('');
+  }
+  const doneSection=document.getElementById('doneTaskSection');
+  const doneList=document.getElementById('doneTaskList');
+  if(doneSection&&doneList){
+    doneSection.style.display=doneTasks.length?'block':'none';
+    doneList.innerHTML=doneTasks.slice(-5).reverse().map(t=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:5px;opacity:0.6;">
+        <input type="checkbox" checked onchange="toggleTask('${t.id}')" style="accent-color:var(--green);">
+        <div style="font-size:11px;text-decoration:line-through;color:var(--muted);flex:1;">${t.text}</div>
+      </div>`).join('');
+  }
+}
+
+function toggleTask(id){
+  const t=tasks.find(t=>t.id===id);
+  if(!t) return;
+  t.done=!t.done;
+  saveTasks(); renderTaskList();
+  if(t.done) showToast('✅ 完了！');
+}
+function deleteTask(id){ tasks=tasks.filter(t=>t.id!==id); saveTasks(); renderTaskList(); }
+
+function populateNoteProjectFilter(){
+  const sel=document.getElementById('noteFilterProject');
+  if(!sel) return;
+  sel.innerHTML='<option value="all">全案件</option>'+
+    Object.entries(state.projects).map(([k,v])=>`<option value="${k}">${v.name}</option>`).join('');
+}
+
+// ===== 写真タブ強化 =====
+let currentPhotoId=null;
+
+function addPhoto(e){
+  const files=Array.from(e.target.files);
+  if(!files.length) return;
+  files.forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      photos.push({id:'p'+Date.now()+Math.random(),src:ev.target.result,name:file.name,tag:'before',
+        locations:[],note:'',project:state.currentProject,time:new Date().toLocaleString('ja-JP')});
+      renderPhotos(); renderPhotoStats();
+    };
+    reader.readAsDataURL(file);
+  });
+  e.target.value='';
+  showToast('📷 写真を追加しました');
+}
+
+function renderPhotos(filter='all'){
+  const grid=document.getElementById('photoGrid');
+  if(!grid) return;
+  const pjPhotos=photos.filter(p=>p.project===state.currentProject&&(filter==='all'||p.tag===filter));
+  const noP=document.getElementById('noPhotos');
+  if(noP) noP.style.display=pjPhotos.length===0?'block':'none';
+  const tagColors={before:'#4a9eff',during:'#f5a623',after:'#3dd68c',issue:'#ff5f5f',site:'#b06aff'};
+  const tagLabels={before:'前',during:'中',after:'後',issue:'!',site:'📐'};
+  grid.innerHTML=pjPhotos.map(p=>{
+    const col=tagColors[p.tag]||'var(--muted)';
+    const lbl=tagLabels[p.tag]||p.tag;
+    const locs=p.locations?.length?p.locations.slice(0,2).join('・'):'';
+    return `<div class="photo-cell" onclick="openPhotoViewer('${p.id}')" style="position:relative;">
+      <img src="${p.src}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;">
+      <div style="position:absolute;top:4px;left:4px;background:${col};color:#000;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;">${lbl}</div>
+      ${locs?`<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);color:#fff;font-size:9px;padding:3px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${locs}</div>`:''}
+    </div>`;
+  }).join('');
+  renderPhotoStats();
+}
+
+function renderPhotoStats(){
+  const el=document.getElementById('photoStats');
+  if(!el) return;
+  const pjPhotos=photos.filter(p=>p.project===state.currentProject);
+  const counts={before:0,during:0,after:0,issue:0,site:0};
+  pjPhotos.forEach(p=>{ if(counts[p.tag]!==undefined) counts[p.tag]++; });
+  const colors={before:'#4a9eff',during:'#f5a623',after:'#3dd68c',issue:'#ff5f5f',site:'#b06aff'};
+  const labels={before:'施工前',during:'施工中',after:'施工後',issue:'要確認',site:'現況'};
+  el.innerHTML=Object.entries(counts).map(([k,v])=>`
+    <div style="flex:1;text-align:center;padding:6px 2px;border-right:1px solid var(--border);">
+      <div style="font-size:16px;font-weight:900;color:${colors[k]};">${v}</div>
+      <div style="font-size:9px;color:var(--muted);">${labels[k]}</div>
+    </div>`).join('');
+}
+
+function filterPhotos(tag,el){
+  document.querySelectorAll('.pf-btn').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  renderPhotos(tag);
+}
+
+function openPhotoViewer(id){
+  currentPhotoId=id;
+  const p=photos.find(ph=>ph.id===id);
+  if(!p) return;
+  document.getElementById('pvImg').src=p.src;
+  document.getElementById('pvTitle').value=p.note||'';
+  document.getElementById('pvNote').value=p.note||'';
+  // タグボタン更新
+  document.querySelectorAll('.ptag-btn').forEach(b=>{
+    const active=b.dataset.tag===p.tag;
+    b.style.background=active?'rgba(74,158,255,.2)':'transparent';
+    b.style.color=active?'#88aaff':'var(--muted)';
+    b.style.borderColor=active?'var(--blue)':'var(--border)';
+    if(active) b.classList.add('active'); else b.classList.remove('active');
+  });
+  // 部位タグ更新
+  document.querySelectorAll('.ploc-btn').forEach(b=>{
+    const active=p.locations?.includes(b.dataset.loc);
+    b.style.background=active?'rgba(245,166,35,.2)':'transparent';
+    b.style.color=active?'var(--accent)':'var(--muted)';
+    b.style.borderColor=active?'var(--accent)':'var(--border)';
+  });
+  document.getElementById('photoViewer').style.display='flex';
+  document.getElementById('photoViewer').style.flexDirection='column';
+}
+
+function closePhotoViewer(){
+  document.getElementById('photoViewer').style.display='none';
+  currentPhotoId=null;
+  renderPhotos();
+}
+
+function setPvTag(tag,btn){
+  const p=photos.find(ph=>ph.id===currentPhotoId);
+  if(!p) return;
+  p.tag=tag;
+  document.querySelectorAll('.ptag-btn').forEach(b=>{
+    const active=b.dataset.tag===tag;
+    b.style.background=active?'rgba(74,158,255,.2)':'transparent';
+    b.style.color=active?'#88aaff':'var(--muted)';
+    b.style.borderColor=active?'var(--blue)':'var(--border)';
+  });
+}
+
+function togglePvLoc(loc,btn){
+  const p=photos.find(ph=>ph.id===currentPhotoId);
+  if(!p) return;
+  if(!p.locations) p.locations=[];
+  const idx=p.locations.indexOf(loc);
+  if(idx>=0){ p.locations.splice(idx,1); btn.style.background='transparent'; btn.style.color='var(--muted)'; btn.style.borderColor='var(--border)'; }
+  else{ p.locations.push(loc); btn.style.background='rgba(245,166,35,.2)'; btn.style.color='var(--accent)'; btn.style.borderColor='var(--accent)'; }
+}
+
+function savePvNote(){
+  const p=photos.find(ph=>ph.id===currentPhotoId);
+  if(!p) return;
+  p.note=document.getElementById('pvNote').value;
+  document.getElementById('pvTitle').value=p.note;
+}
+
+function deleteCurrentPhoto(){
+  if(!currentPhotoId) return;
+  if(!confirm('この写真を削除しますか？')) return;
+  photos=photos.filter(p=>p.id!==currentPhotoId);
+  closePhotoViewer();
+  showToast('削除しました');
+}
+
+async function runPhotoAiDesc(){
+  const p=photos.find(ph=>ph.id===currentPhotoId);
+  if(!p){ showToast('写真が見つかりません','error'); return; }
+  const key=getApiKey();
+  if(!key){ showToast('APIキーを設定してください','error'); return; }
+  const noteEl=document.getElementById('pvNote');
+  noteEl.value='✦ AI生成中...';
+  const locs=p.locations?.length?`部位：${p.locations.join('・')}`:'';
+  const tagNames={before:'施工前',during:'施工中',after:'施工後',issue:'要確認',site:'現況'};
+  try{
+    const b64=p.src.split(',')[1];
+    const mediaType=p.src.split(';')[0].split(':')[1]||'image/jpeg';
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:[
+        {type:'image',source:{type:'base64',media_type:mediaType,data:b64}},
+        {type:'text',text:`この現場写真を50字以内で説明してください。工事管理記録として使います。${locs}（${tagNames[p.tag]||p.tag}の写真）。説明文のみ返してください。`}
+      ]}]})});
+    const data=await res.json();
+    const desc=data.content?.map(c=>c.text||'').join('')||'';
+    noteEl.value=desc;
+    p.note=desc;
+    document.getElementById('pvTitle').value=desc;
+    showToast('✦ AI説明文を生成しました');
+  }catch(e){
+    noteEl.value='';
+    showToast('エラーが発生しました','error');
+  }
+}
+
+
+// ===== 単価マスター =====
+const PRICE_MASTER_DEFAULT = [
+  // 施工費
+  {id:'pm1', name:'クロス張替え（壁・天井）', spec:'撤去・下地含む', unit:'㎡', unitPrice:1500, category:'labor'},
+  {id:'pm2', name:'フロアタイル施工', spec:'接着剤含む', unit:'㎡', unitPrice:2800, category:'labor'},
+  {id:'pm3', name:'フローリング施工', spec:'下地調整含む', unit:'㎡', unitPrice:4500, category:'labor'},
+  {id:'pm4', name:'塗装工事（壁面）', spec:'2回塗り', unit:'㎡', unitPrice:1800, category:'labor'},
+  {id:'pm5', name:'天井ボード張替え', spec:'PB12.5mm', unit:'㎡', unitPrice:3200, category:'labor'},
+  {id:'pm6', name:'軽鉄下地組み', spec:'LGS65', unit:'㎡', unitPrice:2500, category:'labor'},
+  {id:'pm7', name:'ドア取付け工事', spec:'建具・枠含む', unit:'箇所', unitPrice:85000, category:'labor'},
+  {id:'pm8', name:'電気配線工事', spec:'コンセント増設', unit:'箇所', unitPrice:25000, category:'labor'},
+  {id:'pm9', name:'照明器具取付', spec:'器具別途', unit:'台', unitPrice:8000, category:'labor'},
+  {id:'pm10', name:'解体・撤去工事', spec:'廃材処分含む', unit:'㎡', unitPrice:3500, category:'labor'},
+  {id:'pm11', name:'養生・清掃', spec:'', unit:'式', unitPrice:30000, category:'labor'},
+  // 材料費
+  {id:'pm12', name:'クロス（一般）', spec:'920mm幅', unit:'m', unitPrice:450, category:'material'},
+  {id:'pm13', name:'クロス（高機能）', spec:'消臭・抗菌', unit:'m', unitPrice:850, category:'material'},
+  {id:'pm14', name:'フロアタイル', spec:'300角', unit:'㎡', unitPrice:2200, category:'material'},
+  {id:'pm15', name:'フローリング', spec:'厚15mm', unit:'㎡', unitPrice:4800, category:'material'},
+  {id:'pm16', name:'石膏ボード PB12.5', spec:'', unit:'枚', unitPrice:850, category:'material'},
+  {id:'pm17', name:'コンパネ 12mm', spec:'', unit:'枚', unitPrice:1500, category:'material'},
+  {id:'pm18', name:'塗料（内装用）', spec:'15L/缶', unit:'缶', unitPrice:18000, category:'material'},
+  {id:'pm19', name:'蛍光灯器具', spec:'LED40W相当', unit:'台', unitPrice:12000, category:'material'},
+  {id:'pm20', name:'ダウンライト', spec:'LED', unit:'台', unitPrice:8500, category:'material'},
+  // その他
+  {id:'pm21', name:'諸経費', spec:'', unit:'式', unitPrice:50000, category:'other'},
+  {id:'pm22', name:'廃材処分費', spec:'産廃', unit:'式', unitPrice:30000, category:'other'},
+  {id:'pm23', name:'交通費・経費', spec:'', unit:'式', unitPrice:20000, category:'other'},
+  {id:'pm24', name:'設計管理費', spec:'', unit:'式', unitPrice:80000, category:'other'},
+];
+
+let priceMasterItems = JSON.parse(localStorage.getItem('genba_price_master')||'null') || PRICE_MASTER_DEFAULT;
+let pmCurrentCat = 'all';
+
+function savePriceMaster(){ localStorage.setItem('genba_price_master', JSON.stringify(priceMasterItems)); }
+
+function insertFromPriceMaster(){
+  pmCurrentCat = 'all';
+  document.getElementById('pmSearch').value='';
+  renderPMList();
+  const modal = document.getElementById('priceMasterModal');
+  modal.style.display='flex';
+}
+function closePriceMasterModal(){
+  document.getElementById('priceMasterModal').style.display='none';
+}
+function filterPMCat(cat, btn){
+  pmCurrentCat = cat;
+  document.querySelectorAll('.pm-cat').forEach(b=>{
+    b.style.background='transparent'; b.style.color='var(--muted)'; b.style.borderColor='var(--border)';
+  });
+  btn.style.background='rgba(245,166,35,.15)'; btn.style.color='var(--accent)'; btn.style.borderColor='var(--accent)';
+  renderPMList();
+}
+function renderPMList(){
+  const search = (document.getElementById('pmSearch')?.value||'').toLowerCase();
+  const filtered = priceMasterItems.filter(p=>
+    (pmCurrentCat==='all'||p.category===pmCurrentCat) &&
+    (!search || p.name.toLowerCase().includes(search) || (p.spec||'').toLowerCase().includes(search))
+  );
+  const el = document.getElementById('pmList');
+  if(!el) return;
+  el.innerHTML = filtered.map(p=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:9px 4px;border-bottom:1px solid var(--border);">
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:600;color:var(--text);">${p.name}</div>
+        <div style="font-size:10px;color:var(--muted);">${p.spec||''}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div style="font-size:12px;font-weight:700;color:var(--accent);">¥${p.unitPrice.toLocaleString()}</div>
+        <div style="font-size:10px;color:var(--muted);">/${p.unit}</div>
+      </div>
+      <button onclick="addFromPM('${p.id}')" style="background:var(--green);border:none;color:#000;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">＋追加</button>
+    </div>`).join('') || '<div style="color:var(--muted);font-size:12px;padding:16px;text-align:center;">該当なし</div>';
+}
+function addFromPM(id){
+  const p = priceMasterItems.find(x=>x.id===id);
+  if(!p) return;
+  state.estimateItems.push({id:Date.now()+Math.random(), name:p.name, spec:p.spec||'', qty:1, unit:p.unit, unitPrice:p.unitPrice, category:p.category});
+  renderEstimate();
+  showToast('「'+p.name+'」を追加しました');
+}
+function addCustomPMItem(){
+  const name=prompt('単価マスターに追加する品目名');
+  if(!name) return;
+  const price=parseInt(prompt('単価（円）'))||0;
+  const unit=prompt('単位（㎡・式・m等）')||'式';
+  const id='pm_'+Date.now();
+  priceMasterItems.push({id, name, spec:'', unit, unitPrice:price, category:'labor'});
+  savePriceMaster();
+  renderPMList();
+  showToast('単価マスターに追加しました');
+}
+
+// ===== 見積保存・読込 =====
+let savedEstimates = JSON.parse(localStorage.getItem('genba_estimates')||'[]');
+function saveEstimates(){ localStorage.setItem('genba_estimates', JSON.stringify(savedEstimates)); }
+
+function saveEstimateToStorage(){
+  const name = document.getElementById('estProjectName')?.value||'見積書';
+  const date = new Date().toLocaleDateString('ja');
+  const totals = calcEstimateTotal();
+  const id = 'est_'+Date.now();
+  const data = {
+    id, name, date,
+    total: totals.total,
+    items: [...state.estimateItems],
+    clientName: document.getElementById('estClientName')?.value||'',
+    estDate: document.getElementById('estDate')?.value||'',
+    validity: document.getElementById('estValidity')?.value||'',
+    notes: document.getElementById('estNotes')?.value||'',
+  };
+  savedEstimates.unshift(data);
+  if(savedEstimates.length>10) savedEstimates.pop();
+  saveEstimates();
+  renderSavedEstimatesBar();
+  showToast('💾 見積書を保存しました（'+date+'）');
+}
+
+function renderSavedEstimatesBar(){
+  const bar = document.getElementById('savedEstimatesBar');
+  const list = document.getElementById('savedEstimatesList');
+  if(!bar||!list) return;
+  if(savedEstimates.length===0){ bar.style.display='none'; return; }
+  bar.style.display='block';
+  list.innerHTML = savedEstimates.map(e=>`
+    <div style="flex-shrink:0;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;cursor:pointer;min-width:140px;" onclick="loadSavedEstimate('${e.id}')">
+      <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px;">${e.name}</div>
+      <div style="font-size:10px;color:var(--green);">¥${e.total.toLocaleString()}</div>
+      <div style="font-size:9px;color:var(--muted);">${e.date}</div>
+    </div>`).join('');
+}
+
+function loadSavedEstimate(id){
+  const est = savedEstimates.find(e=>e.id===id);
+  if(!est) return;
+  state.estimateItems = est.items.map(i=>({...i}));
+  document.getElementById('estProjectName').value = est.name;
+  if(document.getElementById('estClientName')) document.getElementById('estClientName').value = est.clientName||'';
+  if(document.getElementById('estDate')) document.getElementById('estDate').value = est.estDate||'';
+  if(document.getElementById('estNotes')) document.getElementById('estNotes').value = est.notes||'';
+  renderEstimate();
+  showToast('「'+est.name+'」を読み込みました');
+}
+
+// ===== 発行元情報の保存・自動入力 =====
+function saveInvCompanyInfo(){
+  const info = {
+    company: document.getElementById('invCompanyName')?.value||'',
+    person:  document.getElementById('invPersonName')?.value||'',
+    tel:     document.getElementById('invTel')?.value||'',
+    regNo:   document.getElementById('invRegNo')?.value||'',
+    bank:    document.getElementById('invBank')?.value||'',
+  };
+  localStorage.setItem('genba_company_info', JSON.stringify(info));
+  showToast('💾 発行元情報を保存しました');
+}
+function loadInvCompanyInfo(){
+  const info = JSON.parse(localStorage.getItem('genba_company_info')||'{}');
+  if(info.company && document.getElementById('invCompanyName')) document.getElementById('invCompanyName').value=info.company;
+  if(info.person  && document.getElementById('invPersonName'))  document.getElementById('invPersonName').value=info.person;
+  if(info.tel     && document.getElementById('invTel'))         document.getElementById('invTel').value=info.tel;
+  if(info.regNo   && document.getElementById('invRegNo'))       document.getElementById('invRegNo').value=info.regNo;
+  if(info.bank    && document.getElementById('invBank'))        document.getElementById('invBank').value=info.bank;
+}
+
+// ===== PDF/印刷プレビュー =====
+function printEstimate(){
+  const name    = document.getElementById('estProjectName')?.value||'御見積書';
+  const client  = document.getElementById('estClientName')?.value||'';
+  const date    = document.getElementById('estDate')?.value||new Date().toLocaleDateString('ja');
+  const validity= document.getElementById('estValidity')?.value||'';
+  const notes   = document.getElementById('estNotes')?.value||'';
+  const totals  = calcEstimateTotal();
+  const info    = JSON.parse(localStorage.getItem('genba_company_info')||'{}');
+  const taxRate = Math.round((parseFloat(document.getElementById('estTaxRate')?.value||'0.1'))*100);
+
+  let rows = state.estimateItems.map((item,i)=>{
+    const sub=Math.round(item.qty*item.unitPrice);
+    const catColor = item.category==='material'?'#2563eb':item.category==='labor'?'#16a34a':'#6b7280';
+    const catLabel = item.category==='material'?'材':item.category==='labor'?'工':'他';
+    return `<tr>
+      <td style="padding:6px 8px;border:1px solid #ddd;">${i+1}</td>
+      <td style="padding:6px 8px;border:1px solid #ddd;font-weight:600;">${item.name}${item.spec?'<br><span style="font-size:10px;color:#666;">'+item.spec+'</span>':''}</td>
+      <td style="padding:6px 8px;border:1px solid #ddd;text-align:center;">${item.qty}</td>
+      <td style="padding:6px 8px;border:1px solid #ddd;text-align:center;">${item.unit}</td>
+      <td style="padding:6px 8px;border:1px solid #ddd;text-align:right;">¥${item.unitPrice.toLocaleString()}</td>
+      <td style="padding:6px 8px;border:1px solid #ddd;text-align:right;font-weight:700;">¥${sub.toLocaleString()}</td>
+      <td style="padding:6px 8px;border:1px solid #ddd;text-align:center;"><span style="color:${catColor};font-size:10px;">${catLabel}</span></td>
+    </tr>`;
+  }).join('');
+
+  const html = `
+    <div style="padding:20px;font-family:'Hiragino Kaku Gothic Pro','Meiryo',sans-serif;color:#222;max-width:640px;margin:0 auto;">
+      <div style="text-align:center;margin-bottom:20px;">
+        <h2 style="font-size:22px;font-weight:700;letter-spacing:4px;margin:0;border-bottom:3px double #333;padding-bottom:8px;">御　見　積　書</h2>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <div style="font-size:16px;font-weight:700;border-bottom:1px solid #333;padding-bottom:4px;margin-bottom:8px;">${client?client+' 御中':'　　　　　　　　　 御中'}</div>
+          <div style="font-size:12px;color:#555;">件名：${name}</div>
+          ${validity?'<div style="font-size:11px;color:#888;margin-top:4px;">有効期限：'+validity+'</div>':''}
+        </div>
+        <div style="text-align:right;font-size:11px;color:#555;">
+          <div>見積日：${date}</div>
+          ${info.company?'<div style="font-weight:700;margin-top:6px;">'+info.company+'</div>':''}
+          ${info.person?'<div>担当：'+info.person+'</div>':''}
+          ${info.tel?'<div>TEL：'+info.tel+'</div>':''}
+          ${info.regNo?'<div style="font-size:10px;color:#888;">登録番号：'+info.regNo+'</div>':''}
+        </div>
+      </div>
+      <div style="background:#f8f9ff;border:2px solid #2563eb;border-radius:8px;padding:12px;text-align:center;margin-bottom:16px;">
+        <div style="font-size:11px;color:#666;margin-bottom:4px;">見積金額（税込）</div>
+        <div style="font-size:28px;font-weight:900;color:#2563eb;">¥${totals.total.toLocaleString()}</div>
+        <div style="font-size:11px;color:#888;margin-top:4px;">（税抜 ¥${totals.subtotal.toLocaleString()}　消費税${taxRate}% ¥${totals.tax.toLocaleString()}）</div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:12px;">
+        <thead><tr style="background:#f3f4f6;">
+          <th style="padding:7px 8px;border:1px solid #ddd;width:30px;">No</th>
+          <th style="padding:7px 8px;border:1px solid #ddd;text-align:left;">項目名</th>
+          <th style="padding:7px 8px;border:1px solid #ddd;width:45px;">数量</th>
+          <th style="padding:7px 8px;border:1px solid #ddd;width:35px;">単位</th>
+          <th style="padding:7px 8px;border:1px solid #ddd;width:70px;">単価</th>
+          <th style="padding:7px 8px;border:1px solid #ddd;width:80px;">金額</th>
+          <th style="padding:7px 8px;border:1px solid #ddd;width:30px;">区分</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot>
+          <tr><td colspan="5" style="padding:6px 8px;border:1px solid #ddd;text-align:right;font-weight:600;">小計</td><td style="padding:6px 8px;border:1px solid #ddd;text-align:right;font-weight:700;">¥${totals.subtotal.toLocaleString()}</td><td style="border:1px solid #ddd;"></td></tr>
+          <tr><td colspan="5" style="padding:6px 8px;border:1px solid #ddd;text-align:right;font-weight:600;">消費税（${taxRate}%）</td><td style="padding:6px 8px;border:1px solid #ddd;text-align:right;font-weight:700;">¥${totals.tax.toLocaleString()}</td><td style="border:1px solid #ddd;"></td></tr>
+          <tr style="background:#fffbeb;"><td colspan="5" style="padding:8px;border:1px solid #ddd;text-align:right;font-weight:700;font-size:13px;">合計金額</td><td style="padding:8px;border:1px solid #ddd;text-align:right;font-weight:900;font-size:14px;color:#2563eb;">¥${totals.total.toLocaleString()}</td><td style="border:1px solid #ddd;"></td></tr>
+        </tfoot>
+      </table>
+      ${notes?'<div style="border:1px solid #ddd;border-radius:6px;padding:10px;font-size:11px;"><strong>備考：</strong><br>'+notes.replace(/\n/g,'<br>')+'</div>':''}
+    </div>`;
+
+  document.getElementById('printPreviewContent').innerHTML = html;
+  document.getElementById('printPreviewTitle').textContent = '御見積書 - '+name;
+  document.getElementById('printPreviewModal').style.display='flex';
+}
+
+function exportEstimatePDF(){ printEstimate(); }
+
+function exportInvoicePDF(){
+  const client  = document.getElementById('invClient')?.value||'';
+  const pname   = document.getElementById('invProjectName')?.value||'';
+  const date    = document.getElementById('invDate')?.value||new Date().toLocaleDateString('ja');
+  const due     = document.getElementById('invDueDate')?.value||'';
+  const bank    = document.getElementById('invBank')?.value||'';
+  const notes   = document.getElementById('invNotes')?.value||'';
+  const info    = JSON.parse(localStorage.getItem('genba_company_info')||'{}');
+  let subtotal=0;
+  invoiceItems.forEach(i=>subtotal+=Math.round(i.qty*i.unitPrice));
+  const tax=Math.round(subtotal*0.1);
+  const total=subtotal+tax;
+
+  let rows = invoiceItems.map((item,i)=>{
+    const sub=Math.round(item.qty*item.unitPrice);
+    return `<tr>
+      <td style="padding:6px 8px;border:1px solid #ddd;">${i+1}</td>
+      <td style="padding:6px 8px;border:1px solid #ddd;font-weight:600;">${item.name}</td>
+      <td style="padding:6px 8px;border:1px solid #ddd;text-align:center;">${item.qty}</td>
+      <td style="padding:6px 8px;border:1px solid #ddd;text-align:center;">${item.unit}</td>
+      <td style="padding:6px 8px;border:1px solid #ddd;text-align:right;">¥${item.unitPrice.toLocaleString()}</td>
+      <td style="padding:6px 8px;border:1px solid #ddd;text-align:right;font-weight:700;">¥${sub.toLocaleString()}</td>
+    </tr>`;
+  }).join('');
+
+  const html = `
+    <div style="padding:20px;font-family:'Hiragino Kaku Gothic Pro','Meiryo',sans-serif;color:#222;max-width:640px;margin:0 auto;">
+      <div style="text-align:center;margin-bottom:20px;">
+        <h2 style="font-size:22px;font-weight:700;letter-spacing:4px;margin:0;border-bottom:3px double #333;padding-bottom:8px;">請　求　書</h2>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <div style="font-size:16px;font-weight:700;border-bottom:1px solid #333;padding-bottom:4px;margin-bottom:8px;">${client?client+' 御中':'　　　　　　　　　 御中'}</div>
+          <div style="font-size:12px;color:#555;">件名：${pname}</div>
+          ${due?'<div style="font-size:11px;color:#d00;margin-top:4px;font-weight:700;">支払期日：'+due+'</div>':''}
+        </div>
+        <div style="text-align:right;font-size:11px;color:#555;">
+          <div>請求日：${date}</div>
+          ${info.company?'<div style="font-weight:700;margin-top:6px;">'+info.company+'</div>':''}
+          ${info.person?'<div>担当：'+info.person+'</div>':''}
+          ${info.tel?'<div>TEL：'+info.tel+'</div>':''}
+          ${info.regNo?'<div style="font-size:10px;color:#888;">登録番号：'+info.regNo+'</div>':''}
+        </div>
+      </div>
+      <div style="background:#fff0f0;border:2px solid #dc2626;border-radius:8px;padding:12px;text-align:center;margin-bottom:16px;">
+        <div style="font-size:11px;color:#666;margin-bottom:4px;">ご請求金額（税込）</div>
+        <div style="font-size:28px;font-weight:900;color:#dc2626;">¥${total.toLocaleString()}</div>
+        <div style="font-size:11px;color:#888;margin-top:4px;">（税抜 ¥${subtotal.toLocaleString()}　消費税10% ¥${tax.toLocaleString()}）</div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:12px;">
+        <thead><tr style="background:#f3f4f6;">
+          <th style="padding:7px 8px;border:1px solid #ddd;width:30px;">No</th>
+          <th style="padding:7px 8px;border:1px solid #ddd;text-align:left;">項目名</th>
+          <th style="padding:7px 8px;border:1px solid #ddd;width:45px;">数量</th>
+          <th style="padding:7px 8px;border:1px solid #ddd;width:35px;">単位</th>
+          <th style="padding:7px 8px;border:1px solid #ddd;width:70px;">単価</th>
+          <th style="padding:7px 8px;border:1px solid #ddd;width:80px;">金額</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot>
+          <tr><td colspan="5" style="padding:6px 8px;border:1px solid #ddd;text-align:right;font-weight:600;">小計</td><td style="padding:6px 8px;border:1px solid #ddd;text-align:right;font-weight:700;">¥${subtotal.toLocaleString()}</td></tr>
+          <tr><td colspan="5" style="padding:6px 8px;border:1px solid #ddd;text-align:right;font-weight:600;">消費税（10%）</td><td style="padding:6px 8px;border:1px solid #ddd;text-align:right;font-weight:700;">¥${tax.toLocaleString()}</td></tr>
+          <tr style="background:#fff0f0;"><td colspan="5" style="padding:8px;border:1px solid #ddd;text-align:right;font-weight:700;font-size:13px;">ご請求金額</td><td style="padding:8px;border:1px solid #ddd;text-align:right;font-weight:900;font-size:14px;color:#dc2626;">¥${total.toLocaleString()}</td></tr>
+        </tfoot>
+      </table>
+      ${bank?'<div style="border:2px solid #f59e0b;border-radius:6px;padding:10px;font-size:12px;margin-bottom:8px;"><strong>【振込先】</strong><br>'+bank.replace(/\n/g,'<br>')+'</div>':''}
+      ${notes?'<div style="border:1px solid #ddd;border-radius:6px;padding:10px;font-size:11px;"><strong>備考：</strong><br>'+notes.replace(/\n/g,'<br>')+'</div>':''}
+    </div>`;
+
+  document.getElementById('printPreviewContent').innerHTML = html;
+  document.getElementById('printPreviewTitle').textContent = '請求書 - '+pname;
+  document.getElementById('printPreviewModal').style.display='flex';
+}
+
+function closePrintPreview(){
+  document.getElementById('printPreviewModal').style.display='none';
+}
+
+function shareInvoiceToLine(){
+  // テキストをコピーしてLINEを開く
+  copyInvoiceText();
+  setTimeout(()=>{
+    if(navigator.share){
+      const client=document.getElementById('invClient')?.value||'';
+      const pname=document.getElementById('invProjectName')?.value||'';
+      let subtotal=0;
+      invoiceItems.forEach(i=>subtotal+=Math.round(i.qty*i.unitPrice));
+      const total=subtotal+Math.round(subtotal*0.1);
+      navigator.share({title:'請求書', text:`${pname} ご請求金額：¥${total.toLocaleString()}\n\nクリップボードに詳細をコピーしました`}).catch(()=>{});
+    } else {
+      showToast('📋 請求書テキストをコピーしました。LINEに貼り付けてください');
+    }
+  }, 500);
+}
+
+// ===== switchEstTab時に初期化 =====
+const _origSwitchEstTab = typeof switchEstTab === 'function' ? switchEstTab : null;
+
 function showToast(msg, type='') {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -878,7 +3658,7 @@ function resizeCanvas() {
   const wrap = document.getElementById('canvasWrap') || canvas.parentElement;
   const w = wrap.offsetWidth;
   if(w === 0) return;
-  const h = Math.min(500, Math.max(320, window.innerHeight * 0.52));
+  const h = Math.max(200, wrap.offsetHeight > 50 ? wrap.offsetHeight : window.innerHeight * 0.65);
 
   // サイズ変更前に描画内容を退避
   let savedData = null;
@@ -907,7 +3687,7 @@ function resizeCanvas() {
 function buildGrid() {
   if(!gridCtx || gridCanvas.width === 0) return;
   gridCtx.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
-  '#FFD9A0';
+  gridCtx.strokeStyle = '#2e3348';
   gridCtx.lineWidth   = 0.5;
   for(let x = 0; x <= gridCanvas.width;  x += 20) {
     gridCtx.beginPath(); gridCtx.moveTo(x,0); gridCtx.lineTo(x,gridCanvas.height); gridCtx.stroke();
@@ -962,7 +3742,7 @@ function onDraw(e) {
   const p = getPos(e);
 
   if(tool === 'pen') {
-    '#E8710A';
+    drawCtx.strokeStyle = '#f5a623';
     drawCtx.lineWidth   = 2;
     drawCtx.lineCap     = 'round';
     drawCtx.lineJoin    = 'round';
@@ -989,7 +3769,7 @@ function onDraw(e) {
 
 function drawShape(ex, ey) {
   const dx = ex - startX, dy = ey - startY;
-  '#E8710A';
+  drawCtx.strokeStyle = '#f5a623';
   drawCtx.lineWidth   = 2;
   drawCtx.lineCap     = 'round';
 
@@ -1117,9 +3897,7 @@ function clearCanvas() {
   composite();
 }
 
-function saveSketch() {
-  showToast('スケッチを保存しました ✓');
-}
+function saveSketch() { saveSketchNamed(); }
 
 // 古い関数（互換）
 function drawGrid() { composite(); }
@@ -1152,8 +3930,8 @@ function goToEstimate() {
   showToast('実測値を見積に反映しました ✓');
 }
 
-// ===== ESTIMATE =====
-function calcEstimateTotal() {
+// ===== ESTIMATE (旧・互換維持) =====
+function calcEstimateTotalLegacy() {
   let material=0, labor=0, other=0;
   state.estimateItems.forEach(item=>{
     const sub = item.qty * item.unitPrice;
@@ -1908,7 +4686,7 @@ function addPhoto(e) {
   e.target.value = '';
 }
 
-function renderPhotos(filter='all') {
+function renderPhotos_OLD(filter='all') {
   const grid = document.getElementById('photoGrid');
   if(!grid) return;
   const noP = document.getElementById('noPhotos');
@@ -1930,13 +4708,13 @@ function renderPhotos(filter='all') {
   });
 }
 
-function filterPhotos(tag, el) {
+function filterPhotos_OLD(tag, el) {
   document.querySelectorAll('.pf-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
   renderPhotos(tag);
 }
 
-function openPhotoDetail(p) {
+function openPhotoDetail_OLD(p) {
   openModal('photoDetail', p);
 }
 
@@ -2399,7 +5177,7 @@ function deletePhoto(id) {
 
 // ===== INIT =====
 window.addEventListener('load', ()=>{
-  calcAuto();
+  calcAuto(); renderRooms(); renderSketchGallery(); renderSavedEstimatesBar();
   const ed = document.getElementById('estDate');
   if(ed) ed.textContent = '見積日: ' + new Date().toLocaleDateString('ja-JP');
 
@@ -2462,5 +5240,53 @@ function handleViewportResize() {
 
 window.addEventListener('resize', ()=>{ if(canvasReady) resizeCanvas(); });
 </script>
+
+<!-- 図面拡大ビュアー -->
+<div id="sketchViewer" onclick="closeSketchViewer()" style="position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:700;display:none;flex-direction:column;align-items:center;justify-content:center;">
+  <div style="position:absolute;top:16px;right:16px;display:flex;gap:8px;">
+    <button onclick="event.stopPropagation();viewerZoom(-0.3)" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:20px;cursor:pointer;">－</button>
+    <button onclick="event.stopPropagation();viewerZoom(0.3)" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:20px;cursor:pointer;">＋</button>
+    <button onclick="closeSketchViewer()" style="background:rgba(255,95,95,.5);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:18px;cursor:pointer;">✕</button>
+  </div>
+  <div style="overflow:auto;max-width:100%;max-height:90vh;padding:20px;" id="viewerScroll">
+    <img id="viewerImg" src="" style="transform-origin:top left;transition:transform .15s;display:block;" onclick="event.stopPropagation()">
+  </div>
+  <div style="position:absolute;bottom:16px;color:rgba(255,255,255,.4);font-size:11px;">タップで閉じる　　ピンチで拡大</div>
+</div>
+
+<!-- 単価マスター選択モーダル -->
+<div id="priceMasterModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:flex-end;justify-content:center;">
+  <div style="background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-width:680px;max-height:80vh;display:flex;flex-direction:column;padding:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div style="font-size:14px;font-weight:700;">📋 単価マスターから追加</div>
+      <button onclick="closePriceMasterModal()" style="background:transparent;border:none;color:var(--muted);font-size:20px;cursor:pointer;">✕</button>
+    </div>
+    <div style="display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;scrollbar-width:none;">
+      <button class="pm-cat active" onclick="filterPMCat('all',this)" style="flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid var(--accent);background:rgba(245,166,35,.15);color:var(--accent);font-size:11px;cursor:pointer;">すべて</button>
+      <button class="pm-cat" onclick="filterPMCat('labor',this)" style="flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;">🔨 施工</button>
+      <button class="pm-cat" onclick="filterPMCat('material',this)" style="flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;">📦 材料</button>
+      <button class="pm-cat" onclick="filterPMCat('other',this)" style="flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;">📎 その他</button>
+    </div>
+    <input id="pmSearch" class="form-input" placeholder="🔍 品目名で絞り込み..." oninput="renderPMList()" style="margin-bottom:10px;">
+    <div id="pmList" style="flex:1;overflow-y:auto;"></div>
+    <div style="padding-top:10px;border-top:1px solid var(--border);">
+      <button onclick="addCustomPMItem()" style="width:100%;background:transparent;border:1px dashed rgba(245,166,35,.3);color:var(--accent);padding:10px;border-radius:8px;font-size:12px;cursor:pointer;">＋ カスタム単価を追加</button>
+    </div>
+  </div>
+</div>
+
+<!-- PDF印刷用オーバーレイ -->
+<div id="printPreviewModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:600;flex-direction:column;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:12px;width:min(95vw,680px);max-height:90vh;overflow:auto;padding:0;position:relative;">
+    <div style="position:sticky;top:0;background:#fff;padding:10px 16px;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center;z-index:1;">
+      <div style="font-size:13px;font-weight:700;color:#333;" id="printPreviewTitle">プレビュー</div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="window.print()" style="background:#2563eb;border:none;color:#fff;padding:8px 16px;border-radius:8px;font-size:12px;cursor:pointer;">🖨️ 印刷</button>
+        <button onclick="closePrintPreview()" style="background:#eee;border:none;color:#333;padding:8px 12px;border-radius:8px;font-size:12px;cursor:pointer;">✕</button>
+      </div>
+    </div>
+    <div id="printPreviewContent" style="padding:20px;font-family:'Hiragino Kaku Gothic Pro','Meiryo',sans-serif;color:#222;font-size:12px;line-height:1.6;"></div>
+  </div>
+</div>
 </body>
 </html>
