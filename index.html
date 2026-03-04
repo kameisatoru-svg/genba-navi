@@ -404,7 +404,7 @@ canvas{display:block;touch-action:none;}
     </div>
     <div class="qa-card" onclick="switchScreen('voice')">
       <div class="qa-ico r"><svg width="20" height="20" fill="none" stroke="#ff5f5f" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg></div>
-      <div><div class="qa-lbl">音声メモ<br>録音</div></div>
+      <div><div class="qa-lbl">打ち合わせ<br>メモ入力</div></div>
     </div>
     <div class="qa-card" onclick="switchScreen('estimate')">
       <div class="qa-ico g"><svg width="20" height="20" fill="none" stroke="#3dd68c" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg></div>
@@ -572,8 +572,9 @@ canvas{display:block;touch-action:none;}
     </div>
   </div>
   <div class="btn-row">
-    <button class="btn btn-secondary" onclick="switchScreen('photos')" style="flex:1;">📷 写真を撮る</button>
-    <button class="btn btn-primary" onclick="goToEstimate()" style="flex:2;">この実測でAI見積作成 →</button>
+    <button class="btn btn-secondary" onclick="switchScreen('photos')" style="flex:1;">📷 写真</button>
+    <button class="btn btn-secondary" onclick="applyMeasureToPriceMaster()" style="flex:1;background:rgba(74,158,255,.15);border-color:rgba(74,158,255,.4);color:var(--blue);">📦 単価表へ</button>
+    <button class="btn btn-primary" onclick="goToEstimate()" style="flex:2;">📋 見積へ反映 →</button>
   </div>
     </div><!-- /sketch-right-panel -->
   </div><!-- /sketch-split-layout -->
@@ -1014,187 +1015,126 @@ canvas{display:block;touch-action:none;}
   </div>
 </div>
 
-<!-- VOICE / MEMO -->
+<!-- MEMO (旧VOICE) -->
 <div class="screen" id="screen-voice" style="padding:0;">
   <!-- サブタブ -->
   <div style="display:flex;background:var(--surface);border-bottom:1px solid var(--border);">
-    <button id="vtab-memo" onclick="switchVoiceTab('memo')" style="flex:1;padding:10px 4px;font-size:12px;font-weight:700;border:none;border-bottom:2px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;">🎙 録音・メモ</button>
-    <button id="vtab-summary" onclick="switchVoiceTab('summary')" style="flex:1;padding:10px 4px;font-size:12px;font-weight:700;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);cursor:pointer;">✦ AI要約</button>
-    <button id="vtab-tasks" onclick="switchVoiceTab('tasks')" style="flex:1;padding:10px 4px;font-size:12px;font-weight:700;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);cursor:pointer;">✅ タスク</button>
-    <button id="vtab-notes" onclick="switchVoiceTab('notes')" style="flex:1;padding:10px 4px;font-size:12px;font-weight:700;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);cursor:pointer;">📝 メモ一覧</button>
+    <button id="vtab-memo" onclick="switchVoiceTab('memo')" style="flex:1;padding:11px 4px;font-size:13px;font-weight:700;border:none;border-bottom:2px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;">📝 メモ入力</button>
+    <button id="vtab-summary" onclick="switchVoiceTab('summary')" style="flex:1;padding:11px 4px;font-size:13px;font-weight:700;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);cursor:pointer;">✦ AI要約</button>
+    <button id="vtab-notes" onclick="switchVoiceTab('notes')" style="flex:1;padding:11px 4px;font-size:13px;font-weight:700;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);cursor:pointer;">📋 メモ一覧</button>
   </div>
 
-  <!-- 録音・入力パネル -->
-  <div id="vpanel-memo" style="height:calc(100% - 42px);overflow-y:auto;padding:12px;">
-  <div class="section-title" style="margin-top:0;">打ち合わせメモ & AI解析</div>
+  <!-- メモ入力パネル -->
+  <div id="vpanel-memo" style="height:calc(100% - 46px);overflow-y:auto;padding:14px;padding-bottom:28px;">
 
-  <!-- マイク録音 -->
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px;text-align:center;">
-    <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:12px;">🎙 マイク録音（Chrome直接起動時）</div>
-    <div id="micRing" onclick="toggleRecord()"
-      style="width:72px;height:72px;border-radius:50%;background:var(--red);
-      display:flex;align-items:center;justify-content:center;margin:0 auto 10px;
-      cursor:pointer;transition:all .2s;box-shadow:0 0 0 0 rgba(239,68,68,.4);"
-      class="mic-ring">
-      <svg width="30" height="30" fill="white" viewBox="0 0 24 24">
-        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-        <path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke="white" stroke-width="2" fill="none"/>
-        <line x1="12" y1="19" x2="12" y2="23" stroke="white" stroke-width="2"/>
-        <line x1="8" y1="23" x2="16" y2="23" stroke="white" stroke-width="2"/>
-      </svg>
-    </div>
-    <div id="voiceSt" style="font-size:12px;color:var(--muted);">タップで録音開始</div>
-    <div id="voiceTimer" style="font-size:20px;font-weight:700;color:var(--text);margin:4px 0;font-family:var(--font-mono);">00:00</div>
-    <div id="speechStatus" style="display:none;font-size:11px;color:var(--accent);margin-top:4px;">● リアルタイム認識中</div>
-  </div>
-
-  <!-- 音声ファイルインポート -->
-  <div id="audioImportWrap" style="margin-bottom:12px;">
-    <div onclick="document.getElementById('audioFileInput').click()"
-      style="border:1.5px dashed var(--border);border-radius:10px;padding:12px 14px;
-      cursor:pointer;background:var(--surface);display:flex;align-items:center;gap:10px;">
-      <svg width="22" height="22" fill="none" stroke="var(--muted)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      <div>
-        <div style="font-size:13px;font-weight:600;color:var(--text);">音声ファイルをインポート</div>
-        <div id="importedFileName" style="font-size:10px;color:var(--muted);">m4a・mp3・wav対応（Talixレコーダー）</div>
+    <!-- 入力エリア -->
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="font-size:13px;font-weight:700;color:var(--text);">打ち合わせ内容・メモ</div>
+        <div style="display:flex;gap:6px;">
+          <button onclick="insertSampleText()" style="font-size:12px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--muted);padding:5px 10px;cursor:pointer;font-family:var(--font);">サンプル</button>
+          <button onclick="clearMemoInput()" style="font-size:12px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--muted);padding:5px 10px;cursor:pointer;font-family:var(--font);">クリア</button>
+        </div>
       </div>
-      <input type="file" id="audioFileInput" accept=".m4a,.mp3,.wav,.aac,.ogg,.opus,.webm,.weba,.3gp,.amr" style="display:none" onchange="handleAudioFile(event)">
-    </div>
-    <div id="audioPlayerWrap" style="display:none;"></div>
-  </div>
-
-  <!-- Talix連携フロー説明 -->
-  <div style="background:linear-gradient(135deg,rgba(245,166,35,.1),rgba(74,158,255,.07));border:1px solid rgba(245,166,35,.25);border-radius:12px;padding:13px 14px;margin-bottom:12px;">
-    <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px;">📱 Talix連携の流れ</div>
-    <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text);flex-wrap:wrap;">
-      <span style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;">① Talixで録音</span>
-      <span style="color:var(--muted);">→</span>
-      <span style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;">② AI文字起こし / 議事録</span>
-      <span style="color:var(--muted);">→</span>
-      <span style="background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.3);border-radius:6px;padding:4px 10px;color:var(--accent);">③ ここにペースト</span>
-      <span style="color:var(--muted);">→</span>
-      <span style="background:rgba(61,214,140,.1);border:1px solid rgba(61,214,140,.3);border-radius:6px;padding:4px 10px;color:var(--green);">④ 見積へ自動反映</span>
-    </div>
-  </div>
-
-  <!-- テキスト入力エリア -->
-  <div style="font-size:11px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;">
-    <span>Talixの文字起こし・議事録テキストをペースト</span>
-    <button onclick="clearMemoInput()" style="font-size:10px;background:none;border:none;color:var(--muted);cursor:pointer;font-family:var(--font);">クリア</button>
-  </div>
-  <textarea id="memoInputArea"
-    style="width:100%;min-height:160px;background:var(--surface);border:1px solid var(--border);
-    border-radius:12px;padding:13px 14px;color:var(--text);font-size:13px;
-    font-family:var(--font);resize:none;outline:none;line-height:1.8;
-    transition:border-color .2s;"
-    placeholder="ここにTalixの文字起こしや議事録テキストをペーストしてください。
+      <textarea id="memoInputArea"
+        style="width:100%;min-height:200px;background:var(--surface2);border:1.5px solid var(--border);
+        border-radius:12px;padding:14px;color:#fff;font-size:15px;
+        font-family:var(--font);resize:none;outline:none;line-height:1.9;
+        transition:border-color .2s;"
+        placeholder="スマホの音声入力やキーボードで入力してください。
 
 例）
 お客様：壁はブリックタイル調のクロスにしてほしいです。
 担当：承知しました。床はどうされますか？
-お客様：床はフローリングで、傷がつきにくいものをお願いします。予算は少し超えてもいいので品質重視で。
-担当：天井は白で統一しますか？
-お客様：はい、それでお願いします。"
-    oninput="onMemoInput(this)"
-    onfocus="this.style.borderColor='var(--accent)'"
-    onblur="this.style.borderColor='var(--border)'"></textarea>
-
-  <!-- 文字数・アクションバー -->
-  <div style="display:flex;align-items:center;justify-content:space-between;margin:8px 0 10px;">
-    <span id="memoCharCount" style="font-size:11px;color:var(--muted);">0 文字</span>
-    <div style="display:flex;gap:6px;">
-      <button onclick="insertSampleText()" style="font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--muted);padding:5px 10px;cursor:pointer;font-family:var(--font);">サンプル挿入</button>
+お客様：床はフローリング、傷がつきにくいものを。予算は少し超えてもOK。"
+        oninput="onMemoInput(this)"
+        onfocus="this.style.borderColor='var(--accent)'"
+        onblur="this.style.borderColor='var(--border)'"></textarea>
+      <div style="display:flex;justify-content:flex-end;margin-top:5px;">
+        <span id="memoCharCount" style="font-size:12px;color:var(--muted);">0 文字</span>
+      </div>
     </div>
-  </div>
 
-  <!-- AIアクションボタン -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
-    <button onclick="aiOrganizeMemo()" 
-      style="background:rgba(176,106,255,.12);border:1px solid rgba(176,106,255,.3);
-      border-radius:10px;padding:13px;color:#b06aff;font-size:13px;font-weight:700;
-      cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:6px;">
-      ✦ メモを整理
-    </button>
-    <button onclick="aiExtractToEstimate()"
-      style="background:var(--accent);border:none;
-      border-radius:10px;padding:13px;color:#000;font-size:13px;font-weight:700;
-      cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:6px;">
-      → 見積へ反映
-    </button>
-    <button onclick="aiSaveAsMemo()"
-      style="background:var(--surface);border:1px solid var(--border);
-      border-radius:10px;padding:13px;color:var(--text);font-size:13px;font-weight:600;
-      cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:6px;
-      grid-column:span 2;">
-      💾 整理してメモ保存
-    </button>
-  </div>
+    <!-- AIアクションボタン -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <button onclick="aiOrganizeMemo()"
+        style="background:rgba(176,106,255,.15);border:1px solid rgba(176,106,255,.35);
+        border-radius:12px;padding:15px;color:#c89aff;font-size:14px;font-weight:700;
+        cursor:pointer;font-family:var(--font);">
+        ✦ AI要約・整理
+      </button>
+      <button onclick="showReflectMenu()"
+        style="background:var(--accent);border:none;
+        border-radius:12px;padding:15px;color:#000;font-size:14px;font-weight:700;
+        cursor:pointer;font-family:var(--font);">
+        → 反映先を選択
+      </button>
+      <button onclick="aiSaveAsMemo()"
+        style="background:var(--surface);border:1px solid var(--border);
+        border-radius:12px;padding:14px;color:var(--text);font-size:14px;font-weight:600;
+        cursor:pointer;font-family:var(--font);grid-column:span 2;">
+        💾 整理してメモ保存
+      </button>
+    </div>
 
-  <!-- 整理結果プレビュー -->
-  <div id="organizedResult" style="display:none;">
-    <div style="font-size:11px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:6px;">
-      AI整理結果 <span class="ai-badge">✦ Claude AI</span>
+    <!-- 反映先選択メニュー（インライン） -->
+    <div id="reflectMenuPanel" style="display:none;background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:14px;margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;">反映先を選択</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <button onclick="aiExtractToEstimate();closeReflectMenu()"
+          style="background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.4);border-radius:10px;padding:14px;color:var(--accent);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);">
+          📋 見積へ反映
+        </button>
+        <button onclick="aiExtractToPriceMaster();closeReflectMenu()"
+          style="background:rgba(74,158,255,.12);border:1px solid rgba(74,158,255,.35);border-radius:10px;padding:14px;color:var(--blue);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);">
+          📦 単価マスターへ
+        </button>
+      </div>
+      <button onclick="closeReflectMenu()" style="width:100%;margin-top:8px;background:transparent;border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--font);">キャンセル</button>
     </div>
-    <div id="organizedText" style="background:var(--surface);border:1px solid var(--accent);border-radius:12px;
-      padding:13px 14px;font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;
-      margin-bottom:10px;"></div>
-    <div style="display:flex;gap:8px;">
-      <button onclick="saveOrganizedMemo()" class="btn btn-secondary" style="flex:1;">💾 保存</button>
-      <button onclick="applyOrganizedToEstimate()" class="btn btn-primary" style="flex:1;">見積へ反映 →</button>
+
+    <!-- 整理結果プレビュー -->
+    <div id="organizedResult" style="display:none;">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+        AI整理結果 <span class="ai-badge">✦ Claude AI</span>
+      </div>
+      <div id="organizedText" style="background:var(--surface);border:1px solid var(--accent);border-radius:12px;
+        padding:14px;font-size:14px;line-height:1.9;color:#fff;white-space:pre-wrap;
+        margin-bottom:10px;"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+        <button onclick="saveOrganizedMemo()" class="btn btn-secondary" style="font-size:13px;">💾 保存</button>
+        <button onclick="applyOrganizedToEstimate()" class="btn btn-primary" style="font-size:13px;">📋 見積へ</button>
+        <button onclick="applyOrganizedToPriceMaster()" style="background:rgba(74,158,255,.15);border:1px solid rgba(74,158,255,.35);border-radius:10px;padding:12px;color:var(--blue);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);">📦 単価表へ</button>
+      </div>
     </div>
-  </div>
 
   </div><!-- /vpanel-memo -->
 
   <!-- AI要約パネル -->
-  <div id="vpanel-summary" style="display:none;height:calc(100% - 42px);overflow-y:auto;padding:12px;">
+  <div id="vpanel-summary" style="display:none;height:calc(100% - 46px);overflow-y:auto;padding:14px;">
     <div style="background:linear-gradient(135deg,rgba(176,106,255,.12),rgba(74,158,255,.08));border:1px solid rgba(176,106,255,.25);border-radius:14px;padding:14px;margin-bottom:12px;">
-      <div style="font-size:13px;font-weight:700;color:#c89aff;margin-bottom:6px;">✦ AI打ち合わせ要約</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">録音・メモタブのテキストをAIが構造化して要約します</div>
+      <div style="font-size:14px;font-weight:700;color:#c89aff;margin-bottom:6px;">✦ AI打ち合わせ要約</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">「メモ入力」タブのテキストをAIが構造化して要約します</div>
       <div style="display:flex;gap:8px;">
-        <button onclick="runAiSummary()" style="flex:2;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;color:#fff;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">✦ 要約を生成</button>
-        <button onclick="copySummary()" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px;border-radius:10px;font-size:12px;cursor:pointer;">📋 コピー</button>
+        <button onclick="runAiSummary()" style="flex:2;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;color:#fff;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">✦ 要約を生成</button>
+        <button onclick="copySummary()" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:14px;border-radius:10px;font-size:13px;cursor:pointer;">📋 コピー</button>
       </div>
     </div>
     <div id="summaryLoading" style="display:none;text-align:center;padding:30px;">
       <div style="font-size:32px;margin-bottom:8px;">✦</div>
-      <div style="font-size:13px;color:var(--accent);">AIが要約中...</div>
+      <div style="font-size:14px;color:var(--accent);">AIが要約中...</div>
     </div>
-    <div id="summaryResult" style="display:none;">
-      <!-- 要約結果が動的に挿入される -->
-    </div>
-    <div id="summaryEmpty" style="text-align:center;padding:40px;color:var(--muted);font-size:12px;">
-      📝 録音・メモタブにテキストを入力してから<br>「要約を生成」を押してください
-    </div>
-  </div>
-
-  <!-- タスク抽出パネル -->
-  <div id="vpanel-tasks" style="display:none;height:calc(100% - 42px);overflow-y:auto;padding:12px;">
-    <div style="background:rgba(61,214,140,.08);border:1px solid rgba(61,214,140,.25);border-radius:14px;padding:14px;margin-bottom:12px;">
-      <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:6px;">✅ タスク・確認事項の自動抽出</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">打ち合わせ内容からToDoと確認事項をAIが自動抽出します</div>
-      <div style="display:flex;gap:8px;">
-        <button onclick="runAiTaskExtract()" style="flex:2;background:var(--green);border:none;color:#000;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">✅ タスクを抽出</button>
-        <button onclick="addManualTask()" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px;border-radius:10px;font-size:12px;cursor:pointer;">＋ 手動追加</button>
-      </div>
-    </div>
-    <div id="taskLoading" style="display:none;text-align:center;padding:30px;">
-      <div style="font-size:32px;margin-bottom:8px;">⚙️</div>
-      <div style="font-size:13px;color:var(--green);">タスクを抽出中...</div>
-    </div>
-    <div id="taskList" style="margin-bottom:12px;"></div>
-    <!-- 完了済み -->
-    <div id="doneTaskSection" style="display:none;">
-      <div style="font-size:11px;color:var(--muted);margin:12px 0 6px;">✓ 完了済み</div>
-      <div id="doneTaskList"></div>
+    <div id="summaryResult" style="display:none;"></div>
+    <div id="summaryEmpty" style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">
+      📝 「メモ入力」タブにテキストを入力してから<br>「要約を生成」を押してください
     </div>
   </div>
 
   <!-- メモ一覧パネル -->
-  <div id="vpanel-notes" style="display:none;height:calc(100% - 42px);overflow-y:auto;padding:12px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-      <div class="section-title" style="margin:0;">保存済みメモ一覧</div>
-      <select id="noteFilterProject" onchange="renderVoiceNotes()" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:4px 8px;font-size:11px;outline:none;">
+  <div id="vpanel-notes" style="display:none;height:calc(100% - 46px);overflow-y:auto;padding:14px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div style="font-size:14px;font-weight:700;">保存済みメモ一覧</div>
+      <select id="noteFilterProject" onchange="renderVoiceNotes()" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:5px 10px;font-size:12px;outline:none;">
         <option value="all">全案件</option>
       </select>
     </div>
@@ -1382,7 +1322,7 @@ canvas{display:block;touch-action:none;}
     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>図面
   </button>
   <button class="nav-btn" id="nav-voice" onclick="switchScreen('voice')">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>音声
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>メモ
   </button>
   <button class="nav-btn" id="nav-anken" onclick="switchScreen('anken')">
     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>案件
@@ -1509,7 +1449,7 @@ function selectProject(id) {
   const p = state.projects[id];
   if(p) {
     document.getElementById('topbarProject').innerHTML = `案件: <span>${p.name.substring(0,10)}</span>`;
-    document.getElementById('estProjectName').value = p.name;
+    document.getElementById('estProjectName').textContent = p.name;
   }
 }
 
@@ -2285,24 +2225,28 @@ function renderEstimate(){
     const catLabel = item.category==='material'?'材':item.category==='labor'?'工':'他';
     const row = document.createElement('div');
     row.className='est-row';
-    row.style.cssText='padding:6px 4px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 60px 65px 75px 26px;gap:4px;align-items:center;';
+    row.style.cssText='padding:8px 6px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 70px 75px 80px 28px;gap:4px;align-items:center;';
     row.innerHTML=`
       <div>
-        <input value="${item.name}" oninput="updateEstItem(${item.id},'name',this.value)" style="width:100%;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:12px;font-weight:600;outline:none;font-family:var(--font);" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'">
-        <div style="display:flex;align-items:center;gap:4px;margin-top:2px;">
-          <span style="font-size:9px;background:${catColor}22;color:${catColor};padding:1px 5px;border-radius:3px;">${catLabel}</span>
-          <input value="${item.spec||''}" oninput="updateEstItem(${item.id},'spec',this.value)" placeholder="仕様" style="flex:1;background:transparent;border:none;color:var(--muted);font-size:10px;outline:none;font-family:var(--font);">
+        <input value="${item.name}" oninput="updateEstItem(${item.id},'name',this.value)" style="width:100%;background:transparent;border:none;border-bottom:1px solid transparent;color:#fff;font-size:14px;font-weight:600;outline:none;font-family:var(--font);" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'">
+        <div style="display:flex;align-items:center;gap:4px;margin-top:3px;">
+          <select onchange="updateEstItem(${item.id},'category',this.value)" style="background:${catColor}22;border:1px solid ${catColor}55;color:${catColor};border-radius:4px;font-size:12px;padding:1px 4px;outline:none;font-family:var(--font);">
+            <option value="material" ${item.category==='material'?'selected':''}>材料</option>
+            <option value="labor"    ${item.category==='labor'?'selected':''}>施工</option>
+            <option value="other"    ${item.category==='other'?'selected':''}>その他</option>
+          </select>
+          <input value="${item.spec||''}" oninput="updateEstItem(${item.id},'spec',this.value)" placeholder="仕様" style="flex:1;background:transparent;border:none;color:var(--muted);font-size:12px;outline:none;font-family:var(--font);">
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:2px;">
-        <input type="number" value="${item.qty}" oninput="updateEstItem(${item.id},'qty',this.value)" style="width:40px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;text-align:right;padding:3px 4px;outline:none;">
-        <span style="font-size:9px;color:var(--muted);">${item.unit}</span>
+        <input type="number" value="${item.qty}" oninput="updateEstItem(${item.id},'qty',this.value)" style="width:44px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:#fff;font-size:13px;text-align:right;padding:4px;outline:none;">
+        <span style="font-size:11px;color:var(--muted);">${item.unit}</span>
       </div>
       <div>
-        <input type="number" value="${item.unitPrice}" oninput="updateEstItem(${item.id},'unitPrice',this.value)" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;text-align:right;padding:3px 4px;outline:none;">
+        <input type="number" value="${item.unitPrice}" oninput="updateEstItem(${item.id},'unitPrice',this.value)" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:#fff;font-size:13px;text-align:right;padding:4px;outline:none;">
       </div>
-      <div style="font-size:12px;font-weight:700;text-align:right;color:var(--text);">¥${sub.toLocaleString()}</div>
-      <button onclick="deleteItem(${item.id})" style="background:transparent;border:none;color:var(--red);font-size:14px;cursor:pointer;padding:0;line-height:1;">×</button>
+      <div style="font-size:13px;font-weight:700;text-align:right;color:var(--text);">¥${sub.toLocaleString()}</div>
+      <button onclick="deleteItem(${item.id})" style="background:transparent;border:none;color:var(--red);font-size:16px;cursor:pointer;padding:0;line-height:1;">×</button>
     `;
     tbody.appendChild(row);
   });
@@ -2398,8 +2342,7 @@ function syncInvoiceFromEstimate(){
 function renderInvoice(){
   let subtotal=0;
   invoiceItems.forEach(i=>subtotal+=Math.round(i.qty*i.unitPrice));
-  const taxRate = parseFloat(document.getElementById('estTaxRate')?.value||'0.1');
-  const tax=Math.round(subtotal*taxRate);
+  const tax=Math.round(subtotal*0.1);
   const total=subtotal+tax;
   const invTotal=document.getElementById('invTotal');
   if(invTotal) invTotal.textContent='¥'+total.toLocaleString();
@@ -2895,14 +2838,13 @@ ${textInput?'テキスト内容：'+textInput:''}
 
 // ===== 音声サブタブ切替 =====
 function switchVoiceTab(tab){
-  ['memo','summary','tasks','notes'].forEach(t=>{
+  ['memo','summary','notes'].forEach(t=>{
     const p=document.getElementById('vpanel-'+t);
     if(p) p.style.display=t===tab?'block':'none';
     const b=document.getElementById('vtab-'+t);
     if(b){ b.style.borderBottomColor=t===tab?'var(--accent)':'transparent'; b.style.color=t===tab?'var(--accent)':'var(--muted)'; }
   });
   if(tab==='notes'){ renderVoiceNotes(); populateNoteProjectFilter(); }
-  if(tab==='tasks') renderTaskList();
 }
 
 // ===== AI要約 =====
@@ -3332,17 +3274,39 @@ function renderPMList(){
   const el = document.getElementById('pmList');
   if(!el) return;
   el.innerHTML = filtered.map(p=>`
-    <div style="display:flex;align-items:center;gap:8px;padding:9px 4px;border-bottom:1px solid var(--border);">
+    <div style="display:flex;align-items:center;gap:6px;padding:10px 4px;border-bottom:1px solid var(--border);">
       <div style="flex:1;">
-        <div style="font-size:13px;font-weight:600;color:var(--text);">${p.name}</div>
-        <div style="font-size:10px;color:var(--muted);">${p.spec||''}</div>
+        <div style="font-size:14px;font-weight:600;color:#fff;">${p.name}</div>
+        <div style="font-size:12px;color:var(--muted);">${p.spec||''}</div>
       </div>
       <div style="text-align:right;flex-shrink:0;">
-        <div style="font-size:12px;font-weight:700;color:var(--accent);">¥${p.unitPrice.toLocaleString()}</div>
-        <div style="font-size:10px;color:var(--muted);">/${p.unit}</div>
+        <div style="font-size:14px;font-weight:700;color:var(--accent);">¥${p.unitPrice.toLocaleString()}</div>
+        <div style="font-size:11px;color:var(--muted);">/${p.unit}</div>
       </div>
-      <button onclick="addFromPM('${p.id}')" style="background:var(--green);border:none;color:#000;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">＋追加</button>
-    </div>`).join('') || '<div style="color:var(--muted);font-size:12px;padding:16px;text-align:center;">該当なし</div>';
+      <button onclick="addFromPM('${p.id}')" style="background:var(--green);border:none;color:#000;padding:8px 12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;">＋</button>
+      <button onclick="editPMItem('${p.id}')" style="background:rgba(74,158,255,.15);border:1px solid rgba(74,158,255,.3);color:var(--blue);padding:8px 10px;border-radius:8px;font-size:13px;cursor:pointer;flex-shrink:0;">✏️</button>
+      <button onclick="deletePMItem('${p.id}')" style="background:rgba(255,95,95,.1);border:1px solid rgba(255,95,95,.3);color:var(--red);padding:8px 10px;border-radius:8px;font-size:13px;cursor:pointer;flex-shrink:0;">🗑</button>
+    </div>`).join('') || '<div style="color:var(--muted);font-size:13px;padding:20px;text-align:center;">該当なし</div>';
+}
+
+function editPMItem(id){
+  const p = priceMasterItems.find(x=>x.id===id);
+  if(!p) return;
+  const newName  = prompt('品目名', p.name);   if(newName===null) return;
+  const newPrice = prompt('単価（円）', p.unitPrice); if(newPrice===null) return;
+  const newUnit  = prompt('単位', p.unit);    if(newUnit===null) return;
+  p.name = newName || p.name;
+  p.unitPrice = parseInt(newPrice) || p.unitPrice;
+  p.unit = newUnit || p.unit;
+  savePriceMaster();
+  renderPMList();
+  showToast('更新しました ✓');
+}
+
+function deletePMItem(id){
+  if(!confirm('この項目を削除しますか？')) return;
+  const idx = priceMasterItems.findIndex(x=>x.id===id);
+  if(idx>=0){ priceMasterItems.splice(idx,1); savePriceMaster(); renderPMList(); showToast('削除しました'); }
 }
 function addFromPM(id){
   const p = priceMasterItems.find(x=>x.id===id);
@@ -3352,15 +3316,15 @@ function addFromPM(id){
   showToast('「'+p.name+'」を追加しました');
 }
 function addCustomPMItem(){
-  const name=prompt('単価マスターに追加する品目名');
-  if(!name) return;
-  const price=parseInt(prompt('単価（円）'))||0;
-  const unit=prompt('単位（㎡・式・m等）')||'式';
-  const id='pm_'+Date.now();
-  priceMasterItems.push({id, name, spec:'', unit, unitPrice:price, category:'labor'});
+  const name  = prompt('品目名');      if(!name) return;
+  const price = prompt('単価（円）');  if(!price) return;
+  const unit  = prompt('単位（㎡・式・m等）', '式');
+  const cat   = prompt('分類 material / labor / other', 'labor') || 'labor';
+  const id    = 'pm_'+Date.now();
+  priceMasterItems.push({id, name, spec:'', unit: unit||'式', unitPrice:parseInt(price)||0, category: cat});
   savePriceMaster();
   renderPMList();
-  showToast('単価マスターに追加しました');
+  showToast('単価マスターに追加しました ✓');
 }
 
 // ===== 見積保存・読込 =====
@@ -3995,14 +3959,113 @@ function renderEstimate() {
 function renderPriceMasterRef() {
   const el = document.getElementById('priceMasterRef');
   if(!el) return;
-  el.innerHTML = state.priceMaster.map(pm=>`
-    <div class="pm-row">
-      <div class="pm-name">${pm.name}</div>
-      <div class="pm-unit">${pm.unit}</div>
-      <div class="pm-price">¥${pm.price.toLocaleString()}</div>
-      <button class="pm-add" onclick="addFromMaster('${pm.name}',${pm.price},'${pm.unit}','${pm.cat}')">＋</button>
+  const catColor = c => c==='material'?'var(--blue)':c==='labor'?'var(--green)':'var(--muted)';
+  const catLabel = c => c==='material'?'材':c==='labor'?'工':'他';
+  el.innerHTML = `
+    <div style="padding:10px 12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:12px;font-weight:700;color:var(--text);">単価マスター</div>
+      <button onclick="openAddPriceMasterForm()" style="background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.3);color:var(--accent);padding:5px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">＋ 追加</button>
     </div>
-  `).join('');
+    <div id="pmAddForm" style="display:none;padding:12px;border-bottom:1px solid var(--border);background:var(--surface2);">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <div><label class="form-label">品目名</label><input class="form-input" id="pmf-name" style="font-size:14px;color:#fff;" placeholder="例：クロス施工費"></div>
+        <div><label class="form-label">単位</label><input class="form-input" id="pmf-unit" style="font-size:14px;color:#fff;" placeholder="㎡"></div>
+        <div><label class="form-label">単価（円）</label><input class="form-input" id="pmf-price" type="number" style="font-size:14px;color:#fff;" placeholder="1500" inputmode="numeric"></div>
+        <div><label class="form-label">分類</label>
+          <select class="form-input" id="pmf-cat" style="font-size:14px;color:#fff;">
+            <option value="material">材料費</option>
+            <option value="labor" selected>施工費</option>
+            <option value="other">その他</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="savePriceMasterItem()" style="flex:2;background:var(--accent);border:none;color:#000;padding:10px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">保存</button>
+        <button onclick="closePriceMasterForm()" style="flex:1;background:transparent;border:1px solid var(--border);color:var(--muted);padding:10px;border-radius:8px;font-size:13px;cursor:pointer;">キャンセル</button>
+      </div>
+    </div>
+  ` + state.priceMaster.map((pm,idx)=>`
+    <div class="pm-row" id="pmref-row-${idx}" style="flex-wrap:wrap;gap:4px;">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:600;color:var(--text);">${pm.name}</div>
+        <div style="display:flex;gap:6px;margin-top:2px;">
+          <span style="font-size:11px;color:${catColor(pm.cat)};background:${catColor(pm.cat)}22;padding:1px 6px;border-radius:3px;">${catLabel(pm.cat)}</span>
+          <span style="font-size:11px;color:var(--muted);">${pm.unit}</span>
+        </div>
+      </div>
+      <div style="font-size:14px;font-weight:700;color:var(--accent);">¥${pm.price.toLocaleString()}</div>
+      <button onclick="addFromMaster('${pm.name}',${pm.price},'${pm.unit}','${pm.cat}')" style="background:rgba(61,214,140,.15);border:1px solid rgba(61,214,140,.3);color:var(--green);padding:5px 10px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;">＋</button>
+      <button onclick="editPriceMasterItem(${idx})" style="background:rgba(74,158,255,.12);border:1px solid rgba(74,158,255,.3);color:var(--blue);padding:5px 10px;border-radius:7px;font-size:12px;cursor:pointer;">✏️</button>
+      <button onclick="deletePriceMasterItem(${idx})" style="background:rgba(255,95,95,.1);border:1px solid rgba(255,95,95,.3);color:var(--red);padding:5px 10px;border-radius:7px;font-size:12px;cursor:pointer;">🗑</button>
+    </div>`).join('');
+}
+
+function openAddPriceMasterForm(editIdx) {
+  const form = document.getElementById('pmAddForm');
+  if(!form) return;
+  form.style.display = 'block';
+  form.dataset.editIdx = editIdx !== undefined ? editIdx : '';
+  if(editIdx !== undefined) {
+    const pm = state.priceMaster[editIdx];
+    document.getElementById('pmf-name').value = pm.name;
+    document.getElementById('pmf-unit').value = pm.unit;
+    document.getElementById('pmf-price').value = pm.price;
+    document.getElementById('pmf-cat').value = pm.cat;
+  } else {
+    ['pmf-name','pmf-unit','pmf-price'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+    document.getElementById('pmf-cat').value = 'labor';
+  }
+  document.getElementById('pmf-name').focus();
+}
+
+function closePriceMasterForm() {
+  const form = document.getElementById('pmAddForm');
+  if(form) form.style.display = 'none';
+}
+
+function savePriceMasterItem() {
+  const name = document.getElementById('pmf-name').value.trim();
+  if(!name) { showToast('品目名を入力してください','error'); return; }
+  const price = parseInt(document.getElementById('pmf-price').value) || 0;
+  const unit = document.getElementById('pmf-unit').value.trim() || '式';
+  const cat = document.getElementById('pmf-cat').value;
+  const form = document.getElementById('pmAddForm');
+  const editIdx = form.dataset.editIdx !== '' ? parseInt(form.dataset.editIdx) : undefined;
+  if(editIdx !== undefined) {
+    state.priceMaster[editIdx] = {name, price, unit, cat};
+    showToast('単価マスターを更新しました ✓');
+  } else {
+    state.priceMaster.push({name, price, unit, cat});
+    showToast('単価マスターに追加しました ✓');
+  }
+  closePriceMasterForm();
+  renderPriceMasterRef();
+}
+
+function editPriceMasterItem(idx) {
+  openAddPriceMasterForm(idx);
+  document.getElementById('pmAddForm').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function deletePriceMasterItem(idx) {
+  if(!confirm(`「${state.priceMaster[idx].name}」を削除しますか？`)) return;
+  state.priceMaster.splice(idx, 1);
+  renderPriceMasterRef();
+  showToast('削除しました');
+}
+
+function applyMeasureToPriceMaster() {
+  const floor = parseFloat(document.getElementById('calcFloor').value) || 0;
+  const wall  = parseFloat(document.getElementById('calcWall').value)  || 0;
+  const ceil  = parseFloat(document.getElementById('calcCeiling').value) || 0;
+  if(!floor && !wall) { showToast('実測値を入力してください','error'); return; }
+  // 既存の㎡系項目に面積を反映するのではなく、計算メモを単価マスターに追記
+  showToast(`床${floor}㎡ 壁${wall}㎡ 天井${ceil}㎡ を実測として記録しました`);
+  state.projects[state.currentProject].floor = floor;
+  state.projects[state.currentProject].wall  = wall;
+  state.projects[state.currentProject].ceiling = ceil;
+  switchScreen('estimate');
+  renderEstimate();
 }
 
 function deleteItem(id) {
@@ -4075,292 +4138,26 @@ ${state.priceMaster.map(pm=>`- ${pm.name}: ¥${pm.price}/${pm.unit}`).join('\n')
 }
 
 // ===== VOICE =====
+// 録音機能は削除（テキスト入力に特化）
 let mediaRecorder = null;
 let audioChunks = [];
 let speechRecognition = null;
 let realtimeText = '';
-
-async function toggleRecord() {
-  if (!state.recording) {
-    // まずWeb Speech APIを試みる（リアルタイム日本語認識）
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      startSpeechRecognition(SpeechRecognition);
-    } else {
-      // Web Speech非対応 → MediaRecorder + AI要約
-      startMediaRecorder();
-    }
-  } else {
-    stopRecording();
-  }
-}
-
-function startSpeechRecognition(SpeechRecognition) {
-  realtimeText = '';
-  state.recording = true;
-  state.recSeconds = 0;
-  clearInterval(state.timerInterval); // タイマーは最初の1回だけ起動
-  startTimer();
-
-  const mic = document.getElementById('micRing');
-  const vs  = document.getElementById('voiceSt');
-  const ss  = document.getElementById('speechStatus');
-  if(mic) mic.classList.add('recording');
-  if(vs)  { vs.textContent = '録音中… タップで停止'; vs.style.color = 'var(--red)'; }
-  if(ss)  ss.style.display = 'block';
-  const mia = document.getElementById('memoInputArea');
-  if(mia) { mia.value = ''; onMemoInput(mia); }
-
-  let lastResultIndex = 0; // 重複防止用
-
-  function createAndStart() {
-    if (!state.recording) return;
-
-    const sr = new SpeechRecognition();
-    speechRecognition = sr;
-    sr.lang = 'ja-JP';
-    sr.continuous = false;
-    sr.interimResults = true;
-    sr.maxAlternatives = 1;
-
-    sr.onresult = (event) => {
-      let interim = '', newFinal = '';
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (event.results[i].isFinal) newFinal += event.results[i][0].transcript;
-        else interim += event.results[i][0].transcript;
-      }
-      if (newFinal) realtimeText += newFinal;
-      const mia = document.getElementById('memoInputArea');
-      if(mia) { mia.value = realtimeText + interim; onMemoInput(mia); }
-    };
-
-    sr.onerror = (e) => {
-      if (e.error === 'not-allowed') {
-        showToast('マイクのアクセスが拒否されました', 'error');
-        stopRecording();
-      }
-      // no-speech / aborted は無視して継続
-    };
-
-    sr.onend = () => {
-      if (!state.recording) return;        // 停止済み → 再起動しない
-      if (speechRecognition !== sr) return; // 別インスタンス → 無視
-      setTimeout(createAndStart, 150);      // 少し待って再起動
-    };
-
-    try { sr.start(); } catch(e) {
-      setTimeout(createAndStart, 400);
-    }
-  }
-
-  createAndStart();
-}
-
-async function startMediaRecorder() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    mediaRecorder = new MediaRecorder(stream);
-    audioChunks = [];
-    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-    mediaRecorder.onstop = () => {
-      stream.getTracks().forEach(t => t.stop());
-      // MediaRecorderはブラウザ内でのみ録音できるが文字起こしAPI未接続
-      // → AIに「録音完了、内容を整理して」と依頼
-      processRecordedAudio();
-    };
-    mediaRecorder.start();
-    state.recording = true;
-    state.recSeconds = 0;
-    document.getElementById('micRing').classList.add('recording');
-    document.getElementById('voiceSt').textContent = '録音中...';
-    document.getElementById('voiceSt').style.color = 'var(--red)';
-    startTimer();
-  } catch(e) {
-    // マイク不可 → メモ入力モードに切り替え
-    showToast('マイクが使えません。テキスト入力をお試しください。', 'error');
-    openManualMemoModal();
-  }
-}
-
-function stopRecording() {
-  state.recording = false;
-  clearInterval(state.timerInterval);
-  document.getElementById('micRing').classList.remove('recording');
-  document.getElementById('speechStatus').style.display = 'none';
-
-  if (speechRecognition) {
-    const sr = speechRecognition;
-    speechRecognition = null; // nullにしてonendのガードを効かせる
-    try { sr.stop(); } catch(e) {}
-    // Web Speech結果をAIで整形
-    if (realtimeText.trim()) {
-      document.getElementById('micRing').classList.add('processing');
-      document.getElementById('voiceSt').textContent = 'AIで整理中...';
-      document.getElementById('voiceSt').style.color = 'var(--accent)';
-      polishTranscript(realtimeText);
-    } else {
-      resetMicUI();
-      showToast('音声が認識されませんでした', 'error');
-    }
-  } else if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-    mediaRecorder.stop();
-    document.getElementById('micRing').classList.add('processing');
-    document.getElementById('voiceSt').textContent = 'AI処理中...';
-    document.getElementById('voiceSt').style.color = 'var(--accent)';
-  }
-}
-
-function startTimer() {
-  state.timerInterval = setInterval(() => {
-    state.recSeconds++;
-    const m = String(Math.floor(state.recSeconds / 60)).padStart(2, '0');
-    const s = String(state.recSeconds % 60).padStart(2, '0');
-    document.getElementById('voiceTimer').textContent = m + ':' + s;
-  }, 1000);
-}
-
-async function processRecordedAudio() {
-  // MediaRecorderの音声はWhisper APIなしでは文字起こし不可
-  // → ユーザーに手動入力を促す or AIでメモテンプレを提示
-  const p = state.projects[state.currentProject];
-  const prompt = `内装工事現場の打ち合わせ後のメモテンプレートを作成してください。
-案件: ${p.name}
-以下の項目を含む、現場メモのひな形を日本語150字以内で作成してください：
-確認事項、顧客要望、材料指定、注意点。
-テキストのみ返答してください。`;
-  try {
-    const data = await callClaude([{ role: 'user', content: prompt }], 300);
-    const text = data.content?.[0]?.text || '';
-    finishTranscript('【録音完了 - 内容を編集してください】\n' + text);
-  } catch(e) {
-    finishTranscript('【録音完了】\nここに内容を入力してください。');
-  }
-}
-
-// ===== Talixファイルインポート（強化版）=====
-function handleAudioFile(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const sizeKB = (file.size / 1024).toFixed(0);
-  const sizeMB = (file.size / 1024 / 1024).toFixed(1);
-  const displaySize = file.size > 1024*1024 ? sizeMB+'MB' : sizeKB+'KB';
-
-  // ファイル名表示
-  const fn = document.getElementById('importedFileName');
-  if(fn) { fn.textContent = `📎 ${file.name} (${displaySize})`; fn.style.color = 'var(--accent)'; }
-
-  // 音声プレイヤーを表示
-  showAudioPlayer(file);
-
-  e.target.value = '';
-}
-
-function showAudioPlayer(file) {
-  const wrap = document.getElementById('audioPlayerWrap');
-  if (!wrap) return;
-
-  wrap.style.cssText = 'display:block;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-top:8px;';
-  wrap.innerHTML = `
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-      <span style="font-size:18px;">🎵</span>
-      <div>
-        <div style="font-size:12px;font-weight:600;color:var(--text);">${file.name}</div>
-        <div style="font-size:10px;color:var(--muted);">読み込み中...</div>
-      </div>
-    </div>
-    <div id="audioPlayerSlot" style="color:var(--muted);font-size:12px;text-align:center;padding:10px;">⏳ 音声を読み込んでいます...</div>
-  `;
-
-  // FileReaderでBase64変換（Blob URLはサンドボックスで使えないため）
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    const slot = document.getElementById('audioPlayerSlot');
-    if (!slot) return;
-    slot.outerHTML = `
-      <audio id="audioPlayer" controls style="width:100%;height:40px;" src="${ev.target.result}"></audio>
-      <div style="display:flex;gap:6px;margin-top:8px;">
-        <button onclick="document.getElementById('audioPlayer').playbackRate=0.75"
-          style="flex:1;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:11px;padding:5px;cursor:pointer;">🐢 0.75x</button>
-        <button onclick="document.getElementById('audioPlayer').playbackRate=1.0"
-          style="flex:1;background:var(--surface3);border:1px solid rgba(245,166,35,.4);border-radius:6px;color:var(--accent);font-size:11px;padding:5px;cursor:pointer;">▶ 1.0x</button>
-        <button onclick="document.getElementById('audioPlayer').playbackRate=1.5"
-          style="flex:1;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:11px;padding:5px;cursor:pointer;">🐇 1.5x</button>
-        <button onclick="skipAudio(-5)"
-          style="flex:1;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:11px;padding:5px;cursor:pointer;">↩ 5秒戻し</button>
-      </div>
-    `;
-    showToast('音声を再生しながらメモ欄に内容を入力してください');
-  };
-  reader.onerror = () => {
-    const slot = document.getElementById('audioPlayerSlot');
-    if(slot) slot.innerHTML = '<span style="color:var(--red);">⚠ 読み込み失敗。別のファイルをお試しください。</span>';
-  };
-  reader.readAsDataURL(file);
-
-  // ひな形を自動挿入
+function toggleRecord(){}
+function startSpeechRecognition(){}
+function stopRecording(){}
+function startTimer(){}
+function handleAudioFile(){}
+function showAudioPlayer(){}
+function skipAudio(){}
+async function polishTranscript(rawText){ finishTranscript(rawText); }
+function finishTranscript(text){
   const ta = document.getElementById('memoInputArea');
-  if (ta && !ta.value.trim()) {
-    ta.value = `【ファイル】${file.name}\n\n【顧客要望】\n\n【材料・仕様】\n\n【確認事項】\n\n【注意点】\n`;
-    ta.focus();
-    onMemoInput(ta);
-  }
-}
-
-function skipAudio(sec) {
-  const p = document.getElementById('audioPlayer');
-  if (p) p.currentTime = Math.max(0, p.currentTime + sec);
-}
-async function polishTranscript(rawText) {
-  const p = state.projects[state.currentProject];
-  const prompt = `以下は内装工事現場の打ち合わせを音声認識した生テキストです。
-案件: ${p.name}
-
-【生テキスト】
-${rawText}
-
-このテキストを読みやすい現場メモとして整理してください。
-誤認識と思われる箇所は（？）を付けてください。
-200字以内でまとめてください。テキストのみ返答してください。`;
-
-  try {
-    if(!getApiKey()) throw new Error('NO_KEY');
-    const data = await callClaude([{ role: 'user', content: prompt }], 400);
-    finishTranscript(data.content?.[0]?.text || rawText);
-  } catch(e) {
-    // APIキーなし or エラー → 生テキストをそのまま使用
-    finishTranscript(rawText);
-    if(e.message === 'NO_KEY') showToast('⚙️ APIキーを設定するとAIが音声テキストを整形します', '');
-  }
-}
-
-function finishTranscript(text) {
-  const mic = document.getElementById('micRing');
-  if(mic) mic.classList.remove('processing');
-  const vs = document.getElementById('voiceSt');
-  if(vs) { vs.textContent = '完了 ✓ メモ欄に内容が入力されました'; vs.style.color = 'var(--green)'; }
-  // memoInputAreaに書き込む
-  const ta = document.getElementById('memoInputArea');
-  if(ta) { ta.value = text; onMemoInput(ta); ta.focus(); }
+  if(ta) { ta.value = text; onMemoInput(ta); }
   state.currentTranscript = text;
 }
-
-function editTranscript() {
-  const ta = document.getElementById('memoInputArea');
-  if(ta) ta.focus();
-  showToast('メモ欄を直接編集できます ✓');
-}
-
-function resetMicUI() {
-  const mic = document.getElementById('micRing');
-  if(mic) mic.classList.remove('recording', 'processing');
-  const vs = document.getElementById('voiceSt');
-  if(vs) { vs.textContent = 'タップで録音開始'; vs.style.color = ''; }
-  const vt = document.getElementById('voiceTimer');
-  if(vt) vt.textContent = '00:00';
-  const ss = document.getElementById('speechStatus');
-  if(ss) ss.style.display = 'none';
-}
+function editTranscript(){ const ta=document.getElementById('memoInputArea'); if(ta) ta.focus(); }
+function resetMicUI(){}
 
 function openManualMemoModal() {
   openModal('manualMemo');
@@ -4381,10 +4178,6 @@ function saveVoiceNote() {
   showToast('メモを保存しました ✓');
   if(ta) { ta.value = ''; onMemoInput(ta); }
   state.currentTranscript = '';
-  const player = document.getElementById('audioPlayerWrap');
-  if(player) { player.style.display='none'; player.innerHTML=''; }
-  const fn = document.getElementById('importedFileName');
-  if(fn) { fn.textContent = 'm4a・mp3・wav対応（Talixレコーダー）'; fn.style.color = ''; }
   resetMicUI();
 }
 
@@ -4603,12 +4396,65 @@ function saveOrganizedMemo() {
 async function applyOrganizedToEstimate() {
   const text = document.getElementById('organizedText').textContent;
   if (!text) return;
-  // 元のmemoInputAreaを一時的にorganizedTextに差し替えて抽出
   const orig = document.getElementById('memoInputArea').value;
   document.getElementById('memoInputArea').value = text;
   await aiExtractToEstimate();
   document.getElementById('memoInputArea').value = orig;
 }
+
+function showReflectMenu() {
+  const text = document.getElementById('memoInputArea').value.trim();
+  if (!text) { showToast('テキストを入力してください', 'error'); return; }
+  document.getElementById('reflectMenuPanel').style.display = 'block';
+  document.getElementById('reflectMenuPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function closeReflectMenu() {
+  document.getElementById('reflectMenuPanel').style.display = 'none';
+}
+
+async function aiExtractToPriceMaster() {
+  const text = document.getElementById('memoInputArea').value.trim();
+  if (!text) { showToast('テキストを入力してください', 'error'); return; }
+  showToast('単価マスターへ抽出中...');
+  const prompt = `以下は内装工事の打ち合わせ記録です。
+【記録】
+${text}
+
+この記録から単価マスターに追加すべき材料・工事項目を抽出してください。
+JSONのみで返答（説明不要）:
+[{"name":"品目名","unit":"単位","price":単価数値,"cat":"material|labor|other"}]
+項目がなければ [] を返してください。単価は日本の内装工事相場で設定してください。`;
+
+  let items = [];
+  try {
+    if(!getApiKey()) throw new Error('NO_KEY');
+    const data = await callClaude([{role:'user',content:prompt}], 600);
+    const raw = data.content?.[0]?.text || '[]';
+    items = JSON.parse(raw.replace(/```json|```/g,'').trim());
+  } catch(e) {
+    if(e.message === 'NO_KEY') showToast('⚙️ APIキーを設定してください','error');
+    else showToast('抽出エラー','error');
+    return;
+  }
+  if(items.length > 0){
+    items.forEach(item => state.priceMaster.push({...item}));
+    renderPriceMasterRef();
+    showToast(`✓ ${items.length}件を単価マスターに追加しました`);
+  } else {
+    showToast('追加できる項目が見つかりませんでした');
+  }
+}
+
+async function applyOrganizedToPriceMaster() {
+  const text = document.getElementById('organizedText').textContent;
+  if (!text) return;
+  const orig = document.getElementById('memoInputArea').value;
+  document.getElementById('memoInputArea').value = text;
+  await aiExtractToPriceMaster();
+  document.getElementById('memoInputArea').value = orig;
+}
+
+
 
 function saveNoteText(text) {
   const now = new Date();
@@ -5159,18 +5005,6 @@ function saveSettings() {
   const addr = document.getElementById('set-addr');    if(addr)state.companyAddr = addr.value;
   const tel  = document.getElementById('set-tel');     if(tel) state.companyTel  = tel.value;
   const fax  = document.getElementById('set-fax');     if(fax) state.companyFax  = fax.value;
-  // 消費税率
-  const taxEl = document.getElementById('set-tax');
-  if(taxEl && taxEl.value) {
-    const tv = parseFloat(taxEl.value)/100;
-    const sel = document.getElementById('estTaxRate');
-    if(sel) {
-      // 既存optionに一致すれば選択、なければ10%
-      const match = [...sel.options].find(o=>Math.abs(parseFloat(o.value)-tv)<0.001);
-      if(match) sel.value = match.value;
-    }
-    localStorage.setItem('genba_tax_rate', String(tv));
-  }
   closeModal();
   const hasKey = !!getApiKey();
   showToast(hasKey ? '設定を保存しました ✓ AI機能が有効です' : '設定を保存しました（APIキー未設定）');
@@ -5192,7 +5026,7 @@ function deletePhoto(id) {
 window.addEventListener('load', ()=>{
   calcAuto(); renderRooms(); renderSketchGallery(); renderSavedEstimatesBar();
   const ed = document.getElementById('estDate');
-  if(ed) ed.value = new Date().toISOString().split('T')[0];
+  if(ed) ed.textContent = '見積日: ' + new Date().toLocaleDateString('ja-JP');
 
   if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', handleViewportResize);
@@ -5294,4 +5128,12 @@ window.addEventListener('resize', ()=>{ if(canvasReady) resizeCanvas(); });
     <div style="position:sticky;top:0;background:#fff;padding:10px 16px;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center;z-index:1;">
       <div style="font-size:13px;font-weight:700;color:#333;" id="printPreviewTitle">プレビュー</div>
       <div style="display:flex;gap:8px;">
-        <button onclick="window.print()" style="background:#2563eb;
+        <button onclick="window.print()" style="background:#2563eb;border:none;color:#fff;padding:8px 16px;border-radius:8px;font-size:12px;cursor:pointer;">🖨️ 印刷</button>
+        <button onclick="closePrintPreview()" style="background:#eee;border:none;color:#333;padding:8px 12px;border-radius:8px;font-size:12px;cursor:pointer;">✕</button>
+      </div>
+    </div>
+    <div id="printPreviewContent" style="padding:20px;font-family:'Hiragino Kaku Gothic Pro','Meiryo',sans-serif;color:#222;font-size:12px;line-height:1.6;"></div>
+  </div>
+</div>
+</body>
+</html>
