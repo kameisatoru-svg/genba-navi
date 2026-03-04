@@ -1509,7 +1509,7 @@ function selectProject(id) {
   const p = state.projects[id];
   if(p) {
     document.getElementById('topbarProject').innerHTML = `案件: <span>${p.name.substring(0,10)}</span>`;
-    document.getElementById('estProjectName').textContent = p.name;
+    document.getElementById('estProjectName').value = p.name;
   }
 }
 
@@ -2398,7 +2398,8 @@ function syncInvoiceFromEstimate(){
 function renderInvoice(){
   let subtotal=0;
   invoiceItems.forEach(i=>subtotal+=Math.round(i.qty*i.unitPrice));
-  const tax=Math.round(subtotal*0.1);
+  const taxRate = parseFloat(document.getElementById('estTaxRate')?.value||'0.1');
+  const tax=Math.round(subtotal*taxRate);
   const total=subtotal+tax;
   const invTotal=document.getElementById('invTotal');
   if(invTotal) invTotal.textContent='¥'+total.toLocaleString();
@@ -5158,6 +5159,18 @@ function saveSettings() {
   const addr = document.getElementById('set-addr');    if(addr)state.companyAddr = addr.value;
   const tel  = document.getElementById('set-tel');     if(tel) state.companyTel  = tel.value;
   const fax  = document.getElementById('set-fax');     if(fax) state.companyFax  = fax.value;
+  // 消費税率
+  const taxEl = document.getElementById('set-tax');
+  if(taxEl && taxEl.value) {
+    const tv = parseFloat(taxEl.value)/100;
+    const sel = document.getElementById('estTaxRate');
+    if(sel) {
+      // 既存optionに一致すれば選択、なければ10%
+      const match = [...sel.options].find(o=>Math.abs(parseFloat(o.value)-tv)<0.001);
+      if(match) sel.value = match.value;
+    }
+    localStorage.setItem('genba_tax_rate', String(tv));
+  }
   closeModal();
   const hasKey = !!getApiKey();
   showToast(hasKey ? '設定を保存しました ✓ AI機能が有効です' : '設定を保存しました（APIキー未設定）');
@@ -5179,7 +5192,7 @@ function deletePhoto(id) {
 window.addEventListener('load', ()=>{
   calcAuto(); renderRooms(); renderSketchGallery(); renderSavedEstimatesBar();
   const ed = document.getElementById('estDate');
-  if(ed) ed.textContent = '見積日: ' + new Date().toLocaleDateString('ja-JP');
+  if(ed) ed.value = new Date().toISOString().split('T')[0];
 
   if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', handleViewportResize);
@@ -5281,12 +5294,4 @@ window.addEventListener('resize', ()=>{ if(canvasReady) resizeCanvas(); });
     <div style="position:sticky;top:0;background:#fff;padding:10px 16px;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center;z-index:1;">
       <div style="font-size:13px;font-weight:700;color:#333;" id="printPreviewTitle">プレビュー</div>
       <div style="display:flex;gap:8px;">
-        <button onclick="window.print()" style="background:#2563eb;border:none;color:#fff;padding:8px 16px;border-radius:8px;font-size:12px;cursor:pointer;">🖨️ 印刷</button>
-        <button onclick="closePrintPreview()" style="background:#eee;border:none;color:#333;padding:8px 12px;border-radius:8px;font-size:12px;cursor:pointer;">✕</button>
-      </div>
-    </div>
-    <div id="printPreviewContent" style="padding:20px;font-family:'Hiragino Kaku Gothic Pro','Meiryo',sans-serif;color:#222;font-size:12px;line-height:1.6;"></div>
-  </div>
-</div>
-</body>
-</html>
+        <button onclick="window.print()" style="background:#2563eb;
