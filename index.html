@@ -2435,10 +2435,16 @@ function copyInvoiceText(){
 function migrateGanttRows(rows){
   // 旧データ（start/endがトップレベル）をbars[]形式に変換
   return rows.map(row => {
-    if(!row.bars){
+    if(!row.bars || !Array.isArray(row.bars) || row.bars.length===0){
       row.bars = [{ start: row.start||1, end: row.end||5, label: '' }];
-      delete row.start; delete row.end;
     }
+    // 各barにstart/endが確実にあるか保証
+    row.bars = row.bars.map(b => ({
+      start: b.start||1,
+      end: b.end||5,
+      label: b.label||''
+    }));
+    delete row.start; delete row.end;
     return row;
   });
 }
@@ -2523,10 +2529,13 @@ function renderGantt(){
   }
 
   ganttRows.forEach((row,ri)=>{
-    const bars = row.bars||[{start:1,end:5,label:''}];
+    const bars = (Array.isArray(row.bars)&&row.bars.length>0) ? row.bars : [{start:row.start||1,end:row.end||5,label:''}];
     const prog=row.progress||0;
+    const barCount = bars.length;
+    const unitH = 32;
+    const rowHeight = Math.max(rowH, barCount * unitH + 6);
 
-    bHtml+=`<div style="display:flex;align-items:center;border-bottom:1px solid var(--border);height:${rowH}px;position:relative;">`;
+    bHtml+=`<div style="display:flex;align-items:stretch;border-bottom:1px solid var(--border);height:${rowHeight}px;position:relative;">`;
     // ラベル列
     bHtml+=`<div style="width:${labelW}px;flex-shrink:0;padding:4px 6px;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;gap:2px;">
       <div style="display:flex;align-items:center;gap:4px;">
@@ -2538,38 +2547,43 @@ function renderGantt(){
           <div style="width:${prog}%;height:100%;background:${row.color};"></div>
         </div>
         <span style="font-size:9px;color:var(--muted);">${prog}%</span>
-      </div>`:''}\
-      <div style="display:flex;gap:4px;">
+      </div>`:''}      <div style="display:flex;gap:4px;">
         <button onclick="openGanttEdit(${ri})" style="background:transparent;border:none;color:var(--blue);font-size:9px;cursor:pointer;padding:0;">✏️編集</button>
         <button onclick="deleteGanttRow(${ri})" style="background:transparent;border:none;color:var(--red);font-size:9px;cursor:pointer;padding:0;">削除</button>
       </div>
     </div>`;
 
     // グリッドエリア
-    bHtml+=`<div style="position:relative;height:${rowH}px;width:${days*colW}px;flex-shrink:0;">`;
-    // 背景グリッド
+    bHtml+=`<div style="position:relative;height:${rowHeight}px;width:${days*colW}px;flex-shrink:0;">`;
     dayLabels.forEach((d,i)=>{
       const isToday=i===todayDiff;
       const bg=isToday?'rgba(245,166,35,.08)':d.isWeekend?'rgba(255,95,95,.04)':'transparent';
-      bHtml+=`<div style="position:absolute;left:${i*colW}px;top:0;width:${colW}px;height:100%;background:${bg};border-right:1px solid rgba(255,255,255,.03);pointer-events:none;"></div>`;
+      bHtml+=`<div style="position:absolute;left:${i*colW}px;top:0;width:${colW}px;height:${rowHeight}px;background:${bg};border-right:1px solid rgba(255,255,255,.03);pointer-events:none;"></div>`;
     });
 
-    // ガントバー（bars[]を全て描画）
+    // ガントバー（テキストはバーの上・右端揃え）
     bars.forEach((bar,bi)=>{
       const barLeft=(bar.start-1)*colW;
       const barWidth=Math.max(colW-2,(bar.end-bar.start+1)*colW-2);
       const duration=bar.end-bar.start+1;
-      const barTop = bars.length>1 ? 3+bi*Math.floor((rowH-6)/bars.length) : 8;
-      const barH   = bars.length>1 ? Math.floor((rowH-6)/bars.length)-2 : rowH-16;
+      const textH = 13;
+      const barH = unitH - textH - 3;
+      const slotTop = 3 + bi * unitH;
+      const textTop = slotTop;
+      const barTop = slotTop + textH + 1;
+      const labelText = bar.label || (duration+'日');
+
+      // テキストラベル（バーの上・右端揃え）
+      bHtml+=`<div style="position:absolute;left:${barLeft}px;top:${textTop}px;width:${barWidth}px;height:${textH}px;display:flex;align-items:center;justify-content:flex-end;pointer-events:none;padding-right:3px;overflow:hidden;">
+        <span style="font-size:9px;font-weight:700;color:rgba(255,255,255,.85);white-space:nowrap;">${labelText}</span>
+      </div>`;
+
+      // バー本体（タップで編集モーダル）
       bHtml+=`<div class="gantt-bar" data-idx="${ri}" data-bidx="${bi}"
-        style="position:absolute;left:${barLeft}px;top:${barTop}px;height:${barH}px;width:${barWidth}px;background:${row.color};border-radius:4px;cursor:grab;user-select:none;box-shadow:0 2px 6px ${row.color}44;touch-action:none;opacity:${bi===0?'1':'0.78'};"
+        style="position:absolute;left:${barLeft}px;top:${barTop}px;height:${barH}px;width:${barWidth}px;background:${row.color};border-radius:4px;cursor:pointer;user-select:none;box-shadow:0 2px 6px ${row.color}44;touch-action:none;"
         onmousedown="startGanttDrag(event,${ri},${bi},'move')"
         ontouchstart="startGanttDragTouch(event,${ri},${bi},'move')">
-        ${showProg&&bi===0?`<div style="position:absolute;left:0;top:0;height:100%;width:${prog}%;background:rgba(0,0,0,.2);border-radius:4px;pointer-events:none;"></div>`:''}\
-        <div style="position:relative;z-index:1;display:flex;align-items:center;justify-content:center;height:100%;font-size:10px;font-weight:700;color:#000;pointer-events:none;white-space:nowrap;overflow:hidden;padding:0 4px;">
-          ${bar.label||duration+'日'}
-        </div>
-        <div class="gantt-resize-handle" data-idx="${ri}" data-bidx="${bi}" data-side="left"
+        ${showProg&&bi===0?`<div style="position:absolute;left:0;top:0;height:100%;width:${prog}%;background:rgba(0,0,0,.2);border-radius:4px;pointer-events:none;"></div>`:''}        <div class="gantt-resize-handle" data-idx="${ri}" data-bidx="${bi}" data-side="left"
           style="position:absolute;left:0;top:0;width:10px;height:100%;cursor:col-resize;z-index:2;"
           onmousedown="startGanttDrag(event,${ri},${bi},'left')"
           ontouchstart="startGanttDragTouch(event,${ri},${bi},'left')"></div>
@@ -2610,9 +2624,13 @@ function attachGanttDragEvents(){
 }
 
 function startGanttDrag(e, idx, bidx, type){
-  e.preventDefault(); e.stopPropagation();
-  const bar = ganttRows[idx].bars[bidx];
+  e.stopPropagation();
+  const row = ganttRows[idx];
+  if(!row||!row.bars||!row.bars[bidx]) return;
+  const bar = row.bars[bidx];
   window._ganttDrag = {idx, bidx, type, startX: e.clientX, origStart: bar.start, origEnd: bar.end};
+  window._ganttDragMoved = false;
+  window._ganttDragStartTime = Date.now();
   window._ganttColW = parseInt(document.getElementById('ganttColW')?.value||'32');
   document.onmousemove = onGanttDrag;
   document.onmouseup   = endGanttDrag;
@@ -2621,7 +2639,9 @@ function startGanttDragTouch(e, idx, bidx, type){
   if(e.touches.length!==1) return;
   e.stopPropagation();
   const t=e.touches[0];
-  const bar = ganttRows[idx].bars[bidx];
+  const row = ganttRows[idx];
+  if(!row||!row.bars||!row.bars[bidx]) return;
+  const bar = row.bars[bidx];
   window._ganttDrag = {idx, bidx, type, startX: t.clientX, origStart: bar.start, origEnd: bar.end};
   window._ganttColW = parseInt(document.getElementById('ganttColW')?.value||'32');
   document.ontouchmove = onGanttDragTouch;
@@ -2634,10 +2654,12 @@ function onGanttDragTouch(e){ if(e.touches.length===1) applyGanttDrag(e.touches[
 function applyGanttDrag(clientX){
   const d = window._ganttDrag;
   if(!d) return;
+  window._ganttDragMoved = true;
   const colW = window._ganttColW;
   const weeks = parseInt(document.getElementById('ganttWeeks')?.value||'5');
   const maxDay = weeks*7;
   const deltaDays = Math.round((clientX - d.startX) / colW);
+  if(deltaDays!==0) window._ganttDragMoved = true;
   const bar = ganttRows[d.idx].bars[d.bidx];
 
   if(d.type==='move'){
@@ -2657,8 +2679,24 @@ function applyGanttDrag(clientX){
   renderGanttBarOnly(d.idx, d.bidx);
 }
 
-function endGanttDrag(){ saveGantt(); renderGantt(); document.onmousemove=null; document.onmouseup=null; window._ganttDrag=null; }
-function endGanttDragTouch(){ saveGantt(); renderGantt(); document.ontouchmove=null; document.ontouchend=null; window._ganttDrag=null; }
+function endGanttDrag(){ saveGantt(); renderGantt(); document.onmousemove=null; document.onmouseup=null; window._ganttDrag=null; setTimeout(()=>{window._ganttDragMoved=false;},100); }
+
+function handleGanttBarTouchEnd(e, idx){
+  // タッチ終了時：ドラッグでなければ編集モーダルを開く
+  if(window._ganttDragMoved) return;
+  e.preventDefault();
+  e.stopPropagation();
+  openGanttEdit(idx);
+}
+function handleGanttBarClick(e, idx){
+  // ドラッグ移動があった場合はモーダルを開かない
+  if(window._ganttDragMoved) return;
+  // mousedownからclickまでの時間が長い場合もドラッグとみなす
+  if(window._ganttDragStartTime && Date.now()-window._ganttDragStartTime > 300) return;
+  e.stopPropagation();
+  openGanttEdit(idx);
+}
+function endGanttDragTouch(){ saveGantt(); renderGantt(); document.ontouchmove=null; document.ontouchend=null; window._ganttDrag=null; window._ganttDragMoved=false; }
 
 function renderGanttBarOnly(idx, bidx){
   // ドラッグ中は全再描画の代わりにバーのみ更新
@@ -2768,7 +2806,7 @@ function saveGanttEditTemp(idx){
   ganttRows[idx].color = document.getElementById('ge_color')?.value||ganttColors[0];
   ganttRows[idx].memo  = document.getElementById('ge_memo')?.value||'';
   ganttRows[idx].progress = parseInt(document.getElementById('ge_prog')?.value||'0');
-  ganttRows[idx].bars.forEach((bar,bi)=>{
+  (ganttRows[idx].bars||[]).forEach((bar,bi)=>{
     const ls = document.getElementById('ge_bar_start_'+bi);
     const le = document.getElementById('ge_bar_end_'+bi);
     const ll = document.getElementById('ge_bar_label_'+bi);
@@ -2888,15 +2926,17 @@ function printGantt(){
 
   // 工種行生成
   let rows = ganttRows.map(row=>{
+    const bars = row.bars||[];
     let cells = '';
     for(let i=0;i<days;i++){
-      const inBar = (i+1)>=row.start && (i+1)<=row.end;
-      const isStart = (i+1)===row.start;
-      const bg = inBar ? row.color : 'transparent';
+      const day = i+1;
+      // どれかのバーに含まれているか確認
+      const matchBar = bars.find(b => day>=b.start && day<=b.end);
+      const isBarStart = bars.some(b => day===b.start);
       const dt = new Date(startDate); dt.setDate(dt.getDate()+i);
       const isWE = dt.getDay()===0||dt.getDay()===6;
-      const cellBg = inBar ? row.color : (isWE?'#fff5f5':'transparent');
-      const label = isStart ? `<span style="font-size:9px;font-weight:700;color:#000;white-space:nowrap;overflow:hidden;">${row.end-row.start+1}日</span>` : '';
+      const cellBg = matchBar ? row.color : (isWE?'#fff5f5':'transparent');
+      const label = isBarStart ? `<span style="font-size:9px;font-weight:700;color:#000;white-space:nowrap;overflow:hidden;">${(() => { const b=bars.find(b2=>day===b2.start); return b?(b.label||(b.end-b.start+1)+'日'):''; })()}</span>` : '';
       cells += `<td style="background:${cellBg};border:1px solid #eee;text-align:center;">${label}</td>`;
     }
     return `<tr>
