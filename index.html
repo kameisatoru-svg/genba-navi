@@ -2432,7 +2432,17 @@ function copyInvoiceText(){
 
 
 // ===== ガントチャート =====
-let ganttRows = JSON.parse(localStorage.getItem('genba_gantt')||'[]');
+function migrateGanttRows(rows){
+  // 旧データ（start/endがトップレベル）をbars[]形式に変換
+  return rows.map(row => {
+    if(!row.bars){
+      row.bars = [{ start: row.start||1, end: row.end||5, label: '' }];
+      delete row.start; delete row.end;
+    }
+    return row;
+  });
+}
+let ganttRows = migrateGanttRows(JSON.parse(localStorage.getItem('genba_gantt')||'[]'));
 function saveGantt(){ localStorage.setItem('genba_gantt',JSON.stringify(ganttRows)); }
 
 const GANTT_TRADES = ['解体','電気工事','設備工事','木工事','ボード工事','クロス工事','床工事','塗装工事','建具工事','照明器具','家具設置','清掃','検査','施主確認','予備'];
@@ -2440,7 +2450,7 @@ const GANTT_TRADES = ['解体','電気工事','設備工事','木工事','ボー
 function addGanttRow(){
   if(ganttRows.length>=15){ showToast('最大15工種です','error'); return; }
   const trade = GANTT_TRADES[ganttRows.length] || '工種'+(ganttRows.length+1);
-  ganttRows.push({ id:'g'+Date.now(), trade, start:1, end:5, color:ganttColors[ganttRows.length%ganttColors.length] });
+  ganttRows.push({ id:'g'+Date.now(), trade, color:ganttColors[ganttRows.length%ganttColors.length], bars:[{start:1,end:5,label:''}] });
   saveGantt(); renderGantt();
 }
 
@@ -2513,10 +2523,8 @@ function renderGantt(){
   }
 
   ganttRows.forEach((row,ri)=>{
-    const barLeft=(row.start-1)*colW;
-    const barWidth=Math.max(colW-2,(row.end-row.start+1)*colW-2);
+    const bars = row.bars||[{start:1,end:5,label:''}];
     const prog=row.progress||0;
-    const duration=row.end-row.start+1;
 
     bHtml+=`<div style="display:flex;align-items:center;border-bottom:1px solid var(--border);height:${rowH}px;position:relative;">`;
     // ラベル列
@@ -2530,7 +2538,7 @@ function renderGantt(){
           <div style="width:${prog}%;height:100%;background:${row.color};"></div>
         </div>
         <span style="font-size:9px;color:var(--muted);">${prog}%</span>
-      </div>`:''}
+      </div>`:''}\
       <div style="display:flex;gap:4px;">
         <button onclick="openGanttEdit(${ri})" style="background:transparent;border:none;color:var(--blue);font-size:9px;cursor:pointer;padding:0;">✏️編集</button>
         <button onclick="deleteGanttRow(${ri})" style="background:transparent;border:none;color:var(--red);font-size:9px;cursor:pointer;padding:0;">削除</button>
@@ -2546,24 +2554,31 @@ function renderGantt(){
       bHtml+=`<div style="position:absolute;left:${i*colW}px;top:0;width:${colW}px;height:100%;background:${bg};border-right:1px solid rgba(255,255,255,.03);pointer-events:none;"></div>`;
     });
 
-    // ガントバー
-    bHtml+=`<div class="gantt-bar" data-idx="${ri}"
-      style="position:absolute;left:${barLeft}px;top:8px;height:${rowH-16}px;width:${barWidth}px;background:${row.color};border-radius:5px;cursor:grab;user-select:none;box-shadow:0 2px 8px ${row.color}55;touch-action:none;"
-      onmousedown="startGanttDrag(event,${ri},'move')"
-      ontouchstart="startGanttDragTouch(event,${ri},'move')">
-      ${showProg?`<div style="position:absolute;left:0;top:0;height:100%;width:${prog}%;background:rgba(0,0,0,.2);border-radius:5px;pointer-events:none;"></div>`:''}
-      <div style="position:relative;z-index:1;display:flex;align-items:center;justify-content:center;height:100%;font-size:10px;font-weight:700;color:#000;pointer-events:none;white-space:nowrap;overflow:hidden;padding:0 6px;">
-        <span style="max-width:100%;overflow:hidden;text-overflow:ellipsis;">${row.trade}　${duration}日${showProg&&prog?'・'+prog+'%':''}</span>
-      </div>
-      <div class="gantt-resize-handle" data-idx="${ri}" data-side="left"
-        style="position:absolute;left:0;top:0;width:12px;height:100%;cursor:col-resize;z-index:2;"
-        onmousedown="startGanttDrag(event,${ri},'left')"
-        ontouchstart="startGanttDragTouch(event,${ri},'left')"></div>
-      <div class="gantt-resize-handle" data-idx="${ri}" data-side="right"
-        style="position:absolute;right:0;top:0;width:12px;height:100%;cursor:col-resize;z-index:2;"
-        onmousedown="startGanttDrag(event,${ri},'right')"
-        ontouchstart="startGanttDragTouch(event,${ri},'right')"></div>
-    </div>`;
+    // ガントバー（bars[]を全て描画）
+    bars.forEach((bar,bi)=>{
+      const barLeft=(bar.start-1)*colW;
+      const barWidth=Math.max(colW-2,(bar.end-bar.start+1)*colW-2);
+      const duration=bar.end-bar.start+1;
+      const barTop = bars.length>1 ? 3+bi*Math.floor((rowH-6)/bars.length) : 8;
+      const barH   = bars.length>1 ? Math.floor((rowH-6)/bars.length)-2 : rowH-16;
+      bHtml+=`<div class="gantt-bar" data-idx="${ri}" data-bidx="${bi}"
+        style="position:absolute;left:${barLeft}px;top:${barTop}px;height:${barH}px;width:${barWidth}px;background:${row.color};border-radius:4px;cursor:grab;user-select:none;box-shadow:0 2px 6px ${row.color}44;touch-action:none;opacity:${bi===0?'1':'0.78'};"
+        onmousedown="startGanttDrag(event,${ri},${bi},'move')"
+        ontouchstart="startGanttDragTouch(event,${ri},${bi},'move')">
+        ${showProg&&bi===0?`<div style="position:absolute;left:0;top:0;height:100%;width:${prog}%;background:rgba(0,0,0,.2);border-radius:4px;pointer-events:none;"></div>`:''}\
+        <div style="position:relative;z-index:1;display:flex;align-items:center;justify-content:center;height:100%;font-size:10px;font-weight:700;color:#000;pointer-events:none;white-space:nowrap;overflow:hidden;padding:0 4px;">
+          ${bar.label||duration+'日'}
+        </div>
+        <div class="gantt-resize-handle" data-idx="${ri}" data-bidx="${bi}" data-side="left"
+          style="position:absolute;left:0;top:0;width:10px;height:100%;cursor:col-resize;z-index:2;"
+          onmousedown="startGanttDrag(event,${ri},${bi},'left')"
+          ontouchstart="startGanttDragTouch(event,${ri},${bi},'left')"></div>
+        <div class="gantt-resize-handle" data-idx="${ri}" data-bidx="${bi}" data-side="right"
+          style="position:absolute;right:0;top:0;width:10px;height:100%;cursor:col-resize;z-index:2;"
+          onmousedown="startGanttDrag(event,${ri},${bi},'right')"
+          ontouchstart="startGanttDragTouch(event,${ri},${bi},'right')"></div>
+      </div>`;
+    });
 
     bHtml+=`</div></div>`;
   });
@@ -2594,18 +2609,20 @@ function attachGanttDragEvents(){
   window._ganttColW = parseInt(document.getElementById('ganttColW')?.value||'32');
 }
 
-function startGanttDrag(e, idx, type){
+function startGanttDrag(e, idx, bidx, type){
   e.preventDefault(); e.stopPropagation();
-  window._ganttDrag = {idx, type, startX: e.clientX, origStart: ganttRows[idx].start, origEnd: ganttRows[idx].end};
+  const bar = ganttRows[idx].bars[bidx];
+  window._ganttDrag = {idx, bidx, type, startX: e.clientX, origStart: bar.start, origEnd: bar.end};
   window._ganttColW = parseInt(document.getElementById('ganttColW')?.value||'32');
   document.onmousemove = onGanttDrag;
   document.onmouseup   = endGanttDrag;
 }
-function startGanttDragTouch(e, idx, type){
+function startGanttDragTouch(e, idx, bidx, type){
   if(e.touches.length!==1) return;
   e.stopPropagation();
   const t=e.touches[0];
-  window._ganttDrag = {idx, type, startX: t.clientX, origStart: ganttRows[idx].start, origEnd: ganttRows[idx].end};
+  const bar = ganttRows[idx].bars[bidx];
+  window._ganttDrag = {idx, bidx, type, startX: t.clientX, origStart: bar.start, origEnd: bar.end};
   window._ganttColW = parseInt(document.getElementById('ganttColW')?.value||'32');
   document.ontouchmove = onGanttDragTouch;
   document.ontouchend  = endGanttDragTouch;
@@ -2621,7 +2638,7 @@ function applyGanttDrag(clientX){
   const weeks = parseInt(document.getElementById('ganttWeeks')?.value||'5');
   const maxDay = weeks*7;
   const deltaDays = Math.round((clientX - d.startX) / colW);
-  const row = ganttRows[d.idx];
+  const bar = ganttRows[d.idx].bars[d.bidx];
 
   if(d.type==='move'){
     let ns = d.origStart + deltaDays;
@@ -2629,34 +2646,30 @@ function applyGanttDrag(clientX){
     const dur = d.origEnd - d.origStart;
     ns = Math.max(1, Math.min(maxDay-dur, ns));
     ne = ns + dur;
-    row.start=ns; row.end=ne;
+    bar.start=ns; bar.end=ne;
   } else if(d.type==='left'){
     let ns = Math.max(1, Math.min(d.origEnd-1, d.origStart+deltaDays));
-    row.start=ns;
+    bar.start=ns;
   } else if(d.type==='right'){
     let ne = Math.max(d.origStart+1, Math.min(maxDay, d.origEnd+deltaDays));
-    row.end=ne;
+    bar.end=ne;
   }
-  renderGanttBarOnly(d.idx);
+  renderGanttBarOnly(d.idx, d.bidx);
 }
 
 function endGanttDrag(){ saveGantt(); renderGantt(); document.onmousemove=null; document.onmouseup=null; window._ganttDrag=null; }
 function endGanttDragTouch(){ saveGantt(); renderGantt(); document.ontouchmove=null; document.ontouchend=null; window._ganttDrag=null; }
 
-function renderGanttBarOnly(idx){
+function renderGanttBarOnly(idx, bidx){
   // ドラッグ中は全再描画の代わりにバーのみ更新
   const colW = window._ganttColW || 32;
-  const rowH = 50;
-  const row = ganttRows[idx];
-  const bar = document.querySelector(`.gantt-bar[data-idx="${idx}"]`);
-  if(!bar) return;
-  const barLeft = (row.start-1)*colW;
-  const barWidth = Math.max(colW-2, (row.end-row.start+1)*colW-2);
-  const dur = row.end-row.start+1;
-  bar.style.left = barLeft+'px';
-  bar.style.width = barWidth+'px';
-  const label = bar.querySelector('div:last-child > div');
-  if(label) label.textContent = dur+'日間';
+  const barData = ganttRows[idx].bars[bidx];
+  const el = document.querySelector(`.gantt-bar[data-idx="${idx}"][data-bidx="${bidx}"]`);
+  if(!el) return;
+  el.style.left = (barData.start-1)*colW+'px';
+  el.style.width = Math.max(colW-2,(barData.end-barData.start+1)*colW-2)+'px';
+  const labelEl = el.querySelector('div[style*="z-index:1"]');
+  if(labelEl) labelEl.textContent = barData.label||(barData.end-barData.start+1)+'日';
 }
 
 // ===== 工種追加・編集 =====
@@ -2671,27 +2684,37 @@ function deleteGanttRow(idx){ ganttRows.splice(idx,1); saveGantt(); renderGantt(
 
 function openGanttEdit(idx){
   const row = ganttRows[idx];
-  const weeks = parseInt(document.getElementById('ganttWeeks')?.value||'5');
-  const days = weeks*7;
+  const bars = row.bars||[{start:1,end:5,label:''}];
   const startDateStr = document.getElementById('ganttStartDate')?.value;
   const startDate = startDateStr?new Date(startDateStr):new Date();
 
-  // 日付→第何日目に変換
   const toDateStr = (dayNum) => {
     const dt = new Date(startDate); dt.setDate(dt.getDate()+dayNum-1);
     return dt.toISOString().split('T')[0];
   };
 
+  const barsHtml = bars.map((bar,bi)=>`
+    <div id="ge_bar_${bi}" style="background:var(--surface2);border-radius:8px;padding:8px;margin-bottom:6px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:11px;font-weight:700;color:var(--muted);">バー ${bi+1}</span>
+        ${bars.length>1?`<button onclick="removeGanttBar(${idx},${bi})" style="background:transparent;border:none;color:var(--red);font-size:11px;cursor:pointer;">🗑削除</button>`:''}
+      </div>
+      <div class="form-group" style="margin-bottom:6px;">
+        <label class="form-label">バー内テキスト</label>
+        <input class="form-input" id="ge_bar_label_${bi}" value="${bar.label||''}" placeholder="例：配線・器具付など（空欄=日数表示）">
+      </div>
+      <div class="form-row">
+        <div><label class="form-label">開始日</label>
+          <input class="form-input" type="date" id="ge_bar_start_${bi}" value="${toDateStr(bar.start)}"></div>
+        <div><label class="form-label">終了日</label>
+          <input class="form-input" type="date" id="ge_bar_end_${bi}" value="${toDateStr(bar.end)}"></div>
+      </div>
+    </div>`).join('');
+
   document.getElementById('modalSheet').innerHTML=`
     <div style="font-size:15px;font-weight:700;margin-bottom:14px;">📅 ${row.trade}</div>
     <div class="form-group"><label class="form-label">工種名</label>
       <input class="form-input" id="ge_trade" value="${row.trade}"></div>
-    <div class="form-row">
-      <div><label class="form-label">開始日</label>
-        <input class="form-input" type="date" id="ge_start_date" value="${toDateStr(row.start)}"></div>
-      <div><label class="form-label">終了日</label>
-        <input class="form-input" type="date" id="ge_end_date" value="${toDateStr(row.end)}"></div>
-    </div>
     ${document.getElementById('ganttShowProgress')?.checked?`
     <div class="form-group"><label class="form-label">進捗率 ${row.progress||0}%</label>
       <input class="form-input" type="range" id="ge_prog" value="${row.progress||0}" min="0" max="100" step="5" oninput="document.querySelector('#ge_prog+span').textContent=this.value+'%'">
@@ -2703,6 +2726,9 @@ function openGanttEdit(idx){
         <input type="hidden" id="ge_color" value="${row.color}">
       </div>
     </div>
+    <div style="font-size:12px;font-weight:700;color:var(--text);margin:8px 0 6px;">📌 バー設定</div>
+    <div id="ge_bars_container">${barsHtml}</div>
+    <button onclick="addGanttBar(${idx})" style="width:100%;padding:8px;background:rgba(74,158,255,.15);border:1px dashed rgba(74,158,255,.4);color:var(--blue);border-radius:8px;font-size:12px;cursor:pointer;margin-bottom:10px;">＋ バーを追加（間隔をあけた複数バー）</button>
     <div class="form-group"><label class="form-label">メモ</label>
       <input class="form-input" id="ge_memo" value="${row.memo||''}" placeholder="業者名・注意事項など"></div>
     <div class="btn-row">
@@ -2713,22 +2739,50 @@ function openGanttEdit(idx){
   pushModalState();
 }
 
-function saveGanttEdit(idx){
+function addGanttBar(idx){
+  // モーダルを一旦保存してバーを追加し再表示
+  saveGanttEditTemp(idx);
+  const lastBar = ganttRows[idx].bars[ganttRows[idx].bars.length-1];
+  const newStart = Math.min(lastBar.end+3, 999);
+  ganttRows[idx].bars.push({start:newStart, end:newStart+4, label:''});
+  openGanttEdit(idx);
+}
+
+function removeGanttBar(idx, bi){
+  saveGanttEditTemp(idx);
+  if(ganttRows[idx].bars.length<=1){ showToast('バーは最低1つ必要です','error'); return; }
+  ganttRows[idx].bars.splice(bi,1);
+  openGanttEdit(idx);
+}
+
+function saveGanttEditTemp(idx){
+  // モーダルの現在値を一時保存（addGanttBar/removeGanttBar用）
   const startDateStr = document.getElementById('ganttStartDate')?.value;
   const startDate = startDateStr?new Date(startDateStr):new Date();
   const toDay = (dateStr) => {
-    if(!dateStr) return ganttRows[idx].start;
+    if(!dateStr) return 1;
     const dt = new Date(dateStr);
     return Math.round((dt-startDate)/(1000*60*60*24))+1;
   };
-  ganttRows[idx].trade  = document.getElementById('ge_trade')?.value||ganttRows[idx].trade;
-  ganttRows[idx].start  = Math.max(1, toDay(document.getElementById('ge_start_date')?.value));
-  ganttRows[idx].end    = Math.max(ganttRows[idx].start, toDay(document.getElementById('ge_end_date')?.value));
-  ganttRows[idx].color  = document.getElementById('ge_color')?.value||ganttColors[0];
-  ganttRows[idx].memo   = document.getElementById('ge_memo')?.value||'';
+  ganttRows[idx].trade = document.getElementById('ge_trade')?.value||ganttRows[idx].trade;
+  ganttRows[idx].color = document.getElementById('ge_color')?.value||ganttColors[0];
+  ganttRows[idx].memo  = document.getElementById('ge_memo')?.value||'';
   ganttRows[idx].progress = parseInt(document.getElementById('ge_prog')?.value||'0');
+  ganttRows[idx].bars.forEach((bar,bi)=>{
+    const ls = document.getElementById('ge_bar_start_'+bi);
+    const le = document.getElementById('ge_bar_end_'+bi);
+    const ll = document.getElementById('ge_bar_label_'+bi);
+    if(ls) bar.start = Math.max(1, toDay(ls.value));
+    if(le) bar.end   = Math.max(bar.start, toDay(le.value));
+    if(ll) bar.label = ll.value;
+  });
+}
+
+function saveGanttEdit(idx){
+  saveGanttEditTemp(idx);
   saveGantt(); closeModal(); renderGantt();
 }
+
 
 // ===== AI工程表生成 =====
 function openAiGantt(){
@@ -2769,11 +2823,18 @@ async function runAiGantt(){
     const text = data.content?.map(c=>c.text||'').join('')||'[]';
     const rows = JSON.parse(text.replace(/```json|```/g,'').trim());
     if(!Array.isArray(rows)||rows.length===0){ status.innerHTML='<span style="color:var(--red);">生成できませんでした</span>'; return; }
-    ganttRows = rows;
+    ganttRows = rows.map(r => {
+      // AI出力がstart/endトップレベルの場合はbars[]に変換
+      if(!r.bars){
+        r.bars = [{start: r.start||1, end: r.end||5, label:''}];
+        delete r.start; delete r.end;
+      }
+      return r;
+    });
     saveGantt();
     document.getElementById('ganttAiPanel').style.display='none';
     renderGantt();
-    showToast('🤖 工程表を生成しました（'+rows.length+'工種）');
+    showToast('🤖 工程表を生成しました（'+ganttRows.length+'工種）');
     status.innerHTML='';
   } catch(err){
     status.innerHTML='<span style="color:var(--red);">エラー：'+err.message+'</span>';
@@ -2791,7 +2852,9 @@ function ganttShareText(){
   };
   const lines = ['【工程表】', startDateStr?('開始日：'+startDateStr):'', ''];
   ganttRows.forEach(r=>{
-    lines.push(`${r.trade}：${toDateStr(r.start)} 〜 ${toDateStr(r.end)}（${r.end-r.start+1}日間）${r.memo?'  '+r.memo:''}`);
+    const bars = r.bars||[];
+    const barStr = bars.map(b=>`${toDateStr(b.start)}〜${toDateStr(b.end)}(${b.end-b.start+1}日${b.label?'/'+b.label:''})`).join('  ');
+    lines.push(`${r.trade}：${barStr}${r.memo?'  '+r.memo:''}`);
   });
   navigator.clipboard.writeText(lines.join('\n')).then(()=>showToast('📋 工程表をコピーしました'));
 }
@@ -5131,32 +5194,34 @@ window.addEventListener('popstate', (e) => {
   const isModalOpen = overlay && (overlay.classList.contains('show') || overlay.style.display === 'flex');
   if (isModalOpen) {
     closeModal();
+    history.pushState({ genbaModal: true }, ''); // 履歴を再補充
     return;
   }
   // 案件詳細が開いていれば一覧に戻る
   const detailView = document.getElementById('anken-detail-view');
   if (detailView && detailView.style.display !== 'none') {
     backToAnkenList();
-    history.pushState({ genbaScreen: 'anken' }, '');
+    history.pushState({ genbaNav: true }, '');
     return;
   }
   // ホーム以外のタブならホームへ
   const activeScreen = document.querySelector('.screen.active');
   if (activeScreen && activeScreen.id !== 'screen-home') {
     switchScreen('home');
-    history.pushState({ genbaScreen: 'home' }, '');
+    history.pushState({ genbaNav: true }, '');
     return;
   }
-  // ホームで戻る → 終了確認
+  // ホーム画面で戻る → 終了確認
   if (_backPressedOnce) {
+    // 2回目：フラグリセットしてそのまま何もしない（ブラウザにアプリ終了させる）
+    _backPressedOnce = false;
     clearTimeout(_backPressTimer);
-    // Android: history.back()で閉じる、iOS: メッセージのみ
-    window.history.go(-1);
-    return;
+    return; // 履歴を積まない → ブラウザがアプリを閉じる
   }
+  // 1回目：トースト表示して履歴を1つ積み直す
   _backPressedOnce = true;
   showToast('もう一度押すと終了します', '');
-  history.pushState({ genbaBack: true }, ''); // 再度戻れるよう履歴を積む
+  history.pushState({ genbaBack: true }, ''); // 再度戻れるよう履歴を補充
   _backPressTimer = setTimeout(() => {
     _backPressedOnce = false;
   }, 2500);
