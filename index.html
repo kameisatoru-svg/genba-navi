@@ -133,7 +133,7 @@ main{position:fixed;top:calc(52px + env(safe-area-inset-top,0px));bottom:calc(58
   text-transform:uppercase;margin:18px 0 10px;}
 .section-title:first-child{margin-top:6px;}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
-.btn{border:none;border-radius:10px;padding:14px 16px;font-size:15px;
+.btn{border:none;border-radius:10px;padding:14px 16px;font-size:16px;
   font-weight:600;font-family:var(--font);cursor:pointer;transition:opacity .15s;
   min-height:48px;-webkit-appearance:none;appearance:none;touch-action:manipulation;}
 .btn:active{opacity:.75;}
@@ -141,12 +141,13 @@ main{position:fixed;top:calc(52px + env(safe-area-inset-top,0px));bottom:calc(58
 .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);width:100%;}
 .btn-row{display:flex;gap:8px;margin-top:12px;}
 .form-input{width:100%;background:var(--bg);border:1px solid var(--border);
-  border-radius:8px;padding:12px 14px;color:var(--text);
+  border-radius:8px;padding:12px 14px;color:#fff;
   font-size:16px; /* iOSズーム防止：16px必須 */
   font-family:var(--font);outline:none;transition:border-color .2s;
   -webkit-appearance:none;appearance:none;}
+.form-input::placeholder{color:var(--muted);}
 .form-input:focus{border-color:var(--accent);}
-.form-label{font-size:11px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;
+.form-label{font-size:12px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;
   margin-bottom:6px;display:block;}
 .form-group{margin-bottom:12px;}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -226,9 +227,10 @@ canvas{display:block;touch-action:none;}
   border-bottom:1px solid var(--border);background:var(--surface);}
 .measure-row:last-child{border-bottom:none;}
 .measure-lbl{font-size:13px;flex:1;}
-.measure-input{font-family:var(--mono);font-size:16px;font-weight:500;color:var(--accent);
+.measure-input{font-family:var(--mono);font-size:17px;font-weight:500;color:#fff;
   background:var(--surface2);border:1px solid var(--border);border-radius:6px;
-  padding:5px 10px;width:100px;text-align:right;outline:none;}
+  padding:6px 10px;width:110px;text-align:right;outline:none;}
+.measure-input::placeholder{color:var(--muted);}
 .measure-input:focus{border-color:var(--accent);}
 .measure-input.auto{color:var(--green);pointer-events:none;}
 .measure-unit{font-size:11px;color:var(--muted);width:24px;}
@@ -537,37 +539,37 @@ canvas{display:block;touch-action:none;}
   <div class="measure-list">
     <div class="measure-row">
       <div class="measure-lbl">間口 (幅)</div>
-      <input class="measure-input" id="mWidth" type="text" value="5400" inputmode="decimal" oninput="calcAuto()">
+      <input class="measure-input" id="mWidth" type="text" placeholder="例：5400" value="" inputmode="decimal" oninput="calcAuto()">
       <div class="measure-unit">mm</div>
     </div>
     <div class="measure-row">
       <div class="measure-lbl">奥行 (深さ)</div>
-      <input class="measure-input" id="mDepth" type="text" value="7800" inputmode="decimal" oninput="calcAuto()">
+      <input class="measure-input" id="mDepth" type="text" placeholder="例：7800" value="" inputmode="decimal" oninput="calcAuto()">
       <div class="measure-unit">mm</div>
     </div>
     <div class="measure-row">
       <div class="measure-lbl">天井高</div>
-      <input class="measure-input" id="mHeight" type="text" value="2400" inputmode="decimal" oninput="calcAuto()">
+      <input class="measure-input" id="mHeight" type="text" placeholder="例：2400" value="" inputmode="decimal" oninput="calcAuto()">
       <div class="measure-unit">mm</div>
     </div>
     <div class="measure-row">
       <div class="measure-lbl">開口部(ドア等)</div>
-      <input class="measure-input" id="mOpenings" type="text" value="3.6" inputmode="decimal" oninput="calcAuto()">
+      <input class="measure-input" id="mOpenings" type="text" placeholder="例：3.6" value="" inputmode="decimal" oninput="calcAuto()">
       <div class="measure-unit">㎡</div>
     </div>
     <div class="measure-row" style="background:rgba(61,214,140,.04);">
       <div class="measure-lbl" style="font-weight:600;">床面積 <span style="font-size:10px;color:var(--green);">自動</span></div>
-      <input class="measure-input auto" id="calcFloor" readonly value="42.12">
+      <input class="measure-input auto" id="calcFloor" readonly value="" placeholder="-">
       <div class="measure-unit">㎡</div>
     </div>
     <div class="measure-row" style="background:rgba(61,214,140,.04);">
       <div class="measure-lbl" style="font-weight:600;">壁面積 <span style="font-size:10px;color:var(--green);">自動</span></div>
-      <input class="measure-input auto" id="calcWall" readonly value="125.1">
+      <input class="measure-input auto" id="calcWall" readonly value="" placeholder="-">
       <div class="measure-unit">㎡</div>
     </div>
     <div class="measure-row" style="background:rgba(61,214,140,.04);">
       <div class="measure-lbl" style="font-weight:600;">天井面積 <span style="font-size:10px;color:var(--green);">自動</span></div>
-      <input class="measure-input auto" id="calcCeiling" readonly value="42.12">
+      <input class="measure-input auto" id="calcCeiling" readonly value="" placeholder="-">
       <div class="measure-unit">㎡</div>
     </div>
   </div>
@@ -632,7 +634,7 @@ canvas{display:block;touch-action:none;}
         </div>
         <div class="form-row" style="margin-bottom:8px;">
           <div><label class="form-label">幅（mm）</label><input class="form-input" id="pu_cloth_width" type="number" value="900" oninput="calcCloth()"></div>
-          <div><label class="form-label">柄リピート（mm）</label><input class="form-input" id="pu_cloth_repeat" type="number" value="0" oninput="calcCloth()"></div>
+          <div><label class="form-label">柄リピート（mm）</label><input class="form-input" id="pu_cloth_repeat" type="number" value="" placeholder="0" oninput="calcCloth()"></div>
         </div>
         <div style="background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);border-radius:10px;padding:12px;margin-top:8px;">
           <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">📊 計算結果</div>
@@ -652,11 +654,11 @@ canvas{display:block;touch-action:none;}
         <div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:12px;">🪵 床材拾い出し</div>
         <div class="form-row" style="margin-bottom:8px;">
           <div><label class="form-label">床面積（㎡）</label><input class="form-input" id="pu_floor_sqm" type="number" step="0.1" placeholder="自動取得" oninput="calcFloorMat()"></div>
-          <div><label class="form-label">ロス率（%）</label><input class="form-input" id="pu_floor_loss" type="number" value="8" oninput="calcFloorMat()"></div>
+          <div><label class="form-label">ロス率（%）</label><input class="form-input" id="pu_floor_loss" type="number" value="" placeholder="例：8" oninput="calcFloorMat()"></div>
         </div>
         <div class="form-row" style="margin-bottom:8px;">
-          <div><label class="form-label">材料幅（mm）</label><input class="form-input" id="pu_floor_w" type="number" value="1800" oninput="calcFloorMat()"></div>
-          <div><label class="form-label">材料長さ（mm）</label><input class="form-input" id="pu_floor_l" type="number" value="900" oninput="calcFloorMat()"></div>
+          <div><label class="form-label">材料幅（mm）</label><input class="form-input" id="pu_floor_w" type="number" value="" placeholder="例：1800" oninput="calcFloorMat()"></div>
+          <div><label class="form-label">材料長さ（mm）</label><input class="form-input" id="pu_floor_l" type="number" value="" placeholder="例：900" oninput="calcFloorMat()"></div>
         </div>
         <div style="background:rgba(74,158,255,.08);border:1px solid rgba(74,158,255,.2);border-radius:10px;padding:12px;margin-top:8px;">
           <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">📊 計算結果</div>
@@ -676,22 +678,22 @@ canvas{display:block;touch-action:none;}
         <div id="lightItems">
           <div class="light-row" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
             <input class="form-input" style="flex:2;" type="text" value="蛍光灯" placeholder="器具名">
-            <input class="form-input" style="flex:1;" type="number" value="0" placeholder="台数" min="0" oninput="calcLight()">
+            <input class="form-input" style="flex:1;" type="number" value="" placeholder="台数" min="0" oninput="calcLight()">
             <span style="font-size:12px;color:var(--muted);flex-shrink:0;">台</span>
           </div>
           <div class="light-row" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
             <input class="form-input" style="flex:2;" type="text" value="ダウンライト" placeholder="器具名">
-            <input class="form-input" style="flex:1;" type="number" value="0" placeholder="台数" min="0" oninput="calcLight()">
+            <input class="form-input" style="flex:1;" type="number" value="" placeholder="台数" min="0" oninput="calcLight()">
             <span style="font-size:12px;color:var(--muted);flex-shrink:0;">台</span>
           </div>
           <div class="light-row" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
             <input class="form-input" style="flex:2;" type="text" value="スイッチ" placeholder="器具名">
-            <input class="form-input" style="flex:1;" type="number" value="0" placeholder="個数" min="0" oninput="calcLight()">
+            <input class="form-input" style="flex:1;" type="number" value="" placeholder="個数" min="0" oninput="calcLight()">
             <span style="font-size:12px;color:var(--muted);flex-shrink:0;">箇所</span>
           </div>
           <div class="light-row" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-            <input class="form-input" style="flex:2;" type="text" value="コンセント" placeholder="器具名">
-            <input class="form-input" style="flex:1;" type="number" value="0" placeholder="個数" min="0" oninput="calcLight()">
+            <input class="form-input" style="flex:2;" type="text" value="" placeholder="器具名">
+            <input class="form-input" style="flex:1;" type="number" value="" placeholder="個数" min="0" oninput="calcLight()">
             <span style="font-size:12px;color:var(--muted);flex-shrink:0;">箇所</span>
           </div>
         </div>
@@ -725,11 +727,11 @@ canvas{display:block;touch-action:none;}
         <div style="font-size:12px;font-weight:700;color:#e05c2a;margin-bottom:12px;">🎨 塗装拾い出し</div>
         <div class="form-row" style="margin-bottom:8px;">
           <div><label class="form-label">塗装面積（㎡）</label><input class="form-input" id="pu_paint_sqm" type="number" step="0.1" placeholder="㎡" oninput="calcPaint()"></div>
-          <div><label class="form-label">塗回数</label><input class="form-input" id="pu_paint_coats" type="number" value="2" oninput="calcPaint()"></div>
+          <div><label class="form-label">塗回数</label><input class="form-input" id="pu_paint_coats" type="number" value="" placeholder="例：2" oninput="calcPaint()"></div>
         </div>
         <div class="form-row" style="margin-bottom:8px;">
-          <div><label class="form-label">塗布量（m²/L）</label><input class="form-input" id="pu_paint_spread" type="number" value="6" oninput="calcPaint()"></div>
-          <div><label class="form-label">缶サイズ（L）</label><input class="form-input" id="pu_paint_can" type="number" value="15" oninput="calcPaint()"></div>
+          <div><label class="form-label">塗布量（m²/L）</label><input class="form-input" id="pu_paint_spread" type="number" value="" placeholder="例：6" oninput="calcPaint()"></div>
+          <div><label class="form-label">缶サイズ（L）</label><input class="form-input" id="pu_paint_can" type="number" value="" placeholder="例：15" oninput="calcPaint()"></div>
         </div>
         <div style="background:rgba(224,92,42,.08);border:1px solid rgba(224,92,42,.2);border-radius:10px;padding:12px;">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:center;">
@@ -960,6 +962,7 @@ canvas{display:block;touch-action:none;}
         <button onclick="openAiGantt()" style="background:linear-gradient(135deg,rgba(176,106,255,.2),rgba(74,158,255,.15));border:1px solid rgba(176,106,255,.3);color:#c89aff;padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">🤖 AI生成</button>
         <button onclick="addGanttRow()" style="background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.3);color:var(--accent);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">＋ 工種追加</button>
         <button onclick="ganttShareText()" style="background:rgba(61,214,140,.15);border:1px solid rgba(61,214,140,.3);color:var(--green);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">📋 共有</button>
+        <button onclick="printGantt()" style="background:rgba(74,158,255,.15);border:1px solid rgba(74,158,255,.3);color:var(--blue);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">🖨️ PDF</button>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <div style="display:flex;align-items:center;gap:4px;">
@@ -1156,9 +1159,13 @@ canvas{display:block;touch-action:none;}
         <button class="pf-btn" id="pfilter-site" onclick="filterPhotos('site',this)" style="flex-shrink:0;">📐 現況</button>
       </div>
     </div>
-    <label style="background:var(--accent);color:#000;font-size:11px;font-weight:700;padding:7px 12px;border-radius:8px;cursor:pointer;flex-shrink:0;white-space:nowrap;">
-      📷 撮影・追加
-      <input type="file" id="photoInput" accept="image/*" multiple style="display:none" onchange="addPhoto(event)">
+    <label style="background:var(--accent);color:#000;font-size:12px;font-weight:700;padding:8px 12px;border-radius:8px;cursor:pointer;flex-shrink:0;white-space:nowrap;">
+      📷 カメラ
+      <input type="file" accept="image/*" capture="environment" style="display:none" onchange="addPhoto(event)">
+    </label>
+    <label style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:12px;font-weight:700;padding:8px 12px;border-radius:8px;cursor:pointer;flex-shrink:0;white-space:nowrap;">
+      🖼️ ギャラリー
+      <input type="file" accept="image/*" multiple style="display:none" onchange="addPhoto(event)">
     </label>
   </div>
 
@@ -1611,6 +1618,7 @@ function openStageModal(stageId){
       <button class="btn btn-primary" onclick="saveStageData('${stageId}',true)" style="flex:2;background:${col};">✅ 完了にする</button>
     </div>`;
   document.getElementById("modalOverlay").style.display="flex";
+  pushModalState();
   if(stageId==="guide"){
     stage.fields.forEach(f=>{const el=document.getElementById("sf_"+f);if(el)el.addEventListener("input",updateGuideTmplPreview);});
     updateGuideTmplPreview();
@@ -2515,7 +2523,7 @@ function renderGantt(){
     bHtml+=`<div style="width:${labelW}px;flex-shrink:0;padding:4px 6px;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;gap:2px;">
       <div style="display:flex;align-items:center;gap:4px;">
         <div style="width:8px;height:8px;border-radius:2px;background:${row.color};flex-shrink:0;"></div>
-        <input value="${row.trade}" oninput="updateGanttTrade(${ri},this.value)" style="background:transparent;border:none;color:var(--text);font-size:11px;font-weight:600;outline:none;font-family:var(--font);width:100%;">
+        <input value="${row.trade}" oninput="updateGanttTradeDebounced(${ri},this.value)" onblur="updateGanttTrade(${ri},this.value)" style="background:transparent;border:none;color:#fff;font-size:13px;font-weight:600;outline:none;font-family:var(--font);width:100%;">
       </div>
       ${showProg?`<div style="display:flex;align-items:center;gap:4px;">
         <div style="flex:1;background:var(--surface2);border-radius:3px;height:5px;overflow:hidden;">
@@ -2653,6 +2661,12 @@ function renderGanttBarOnly(idx){
 
 // ===== 工種追加・編集 =====
 function updateGanttTrade(idx,val){ ganttRows[idx].trade=val; saveGantt(); }
+let _ganttTradeTimer = null;
+function updateGanttTradeDebounced(idx,val){
+  ganttRows[idx].trade = val;
+  clearTimeout(_ganttTradeTimer);
+  _ganttTradeTimer = setTimeout(()=>saveGantt(), 400);
+}
 function deleteGanttRow(idx){ ganttRows.splice(idx,1); saveGantt(); renderGantt(); }
 
 function openGanttEdit(idx){
@@ -2696,6 +2710,7 @@ function openGanttEdit(idx){
       <button class="btn btn-primary" onclick="saveGanttEdit(${idx})" style="flex:1;">保存</button>
     </div>`;
   document.getElementById('modalOverlay').style.display='flex';
+  pushModalState();
 }
 
 function saveGanttEdit(idx){
@@ -2779,6 +2794,75 @@ function ganttShareText(){
     lines.push(`${r.trade}：${toDateStr(r.start)} 〜 ${toDateStr(r.end)}（${r.end-r.start+1}日間）${r.memo?'  '+r.memo:''}`);
   });
   navigator.clipboard.writeText(lines.join('\n')).then(()=>showToast('📋 工程表をコピーしました'));
+}
+
+function printGantt(){
+  if(ganttRows.length===0){ showToast('工程がありません','error'); return; }
+  const startDateStr = document.getElementById('ganttStartDate')?.value||'';
+  const startDate = startDateStr ? new Date(startDateStr) : new Date();
+  const weeks = parseInt(document.getElementById('ganttWeeks')?.value||'5');
+  const days = weeks * 7;
+  const colW = 28;
+  const labelW = 100;
+  const rowH = 32;
+  const totalW = labelW + days * colW;
+
+  const toDateStr = (d) => {
+    const dt = new Date(startDate); dt.setDate(dt.getDate()+d);
+    return (dt.getMonth()+1)+'/'+(dt.getDate());
+  };
+
+  // 日付ヘッダー生成
+  let dayHeaders = '';
+  for(let i=0;i<days;i++){
+    const dt = new Date(startDate); dt.setDate(dt.getDate()+i);
+    const dow = dt.getDay();
+    const isWE = dow===0||dow===6;
+    const bg = isWE ? '#fff0f0' : '#f8f8f8';
+    const col = isWE ? '#cc0000' : '#333';
+    dayHeaders += `<td style="width:${colW}px;min-width:${colW}px;text-align:center;font-size:9px;padding:2px 0;background:${bg};color:${col};border:1px solid #ddd;">${(dt.getMonth()+1)+'/'+dt.getDate()}<br>${['日','月','火','水','木','金','土'][dow]}</td>`;
+  }
+
+  // 工種行生成
+  let rows = ganttRows.map(row=>{
+    let cells = '';
+    for(let i=0;i<days;i++){
+      const inBar = (i+1)>=row.start && (i+1)<=row.end;
+      const isStart = (i+1)===row.start;
+      const bg = inBar ? row.color : 'transparent';
+      const dt = new Date(startDate); dt.setDate(dt.getDate()+i);
+      const isWE = dt.getDay()===0||dt.getDay()===6;
+      const cellBg = inBar ? row.color : (isWE?'#fff5f5':'transparent');
+      const label = isStart ? `<span style="font-size:9px;font-weight:700;color:#000;white-space:nowrap;overflow:hidden;">${row.end-row.start+1}日</span>` : '';
+      cells += `<td style="background:${cellBg};border:1px solid #eee;text-align:center;">${label}</td>`;
+    }
+    return `<tr>
+      <td style="padding:4px 8px;font-size:11px;font-weight:600;border:1px solid #ddd;background:#f9f9f9;white-space:nowrap;">
+        <span style="display:inline-block;width:10px;height:10px;background:${row.color};border-radius:2px;margin-right:4px;vertical-align:middle;"></span>${row.trade}
+      </td>${cells}
+    </tr>`;
+  }).join('');
+
+  const html = `
+    <div style="padding:16px;font-family:'Hiragino Kaku Gothic Pro','Meiryo',sans-serif;color:#222;min-width:${totalW}px;">
+      <h2 style="font-size:18px;font-weight:700;margin-bottom:4px;border-bottom:2px solid #333;padding-bottom:6px;">工程表</h2>
+      <div style="font-size:12px;color:#666;margin-bottom:12px;">開始日：${startDateStr||'未設定'}　／　${ganttRows.length}工種　${weeks}週間</div>
+      <div style="overflow-x:auto;">
+        <table style="border-collapse:collapse;width:100%;">
+          <thead>
+            <tr>
+              <th style="width:${labelW}px;padding:4px 8px;background:#333;color:#fff;font-size:11px;border:1px solid #555;">工種</th>
+              ${dayHeaders}
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+
+  document.getElementById('printPreviewContent').innerHTML = html;
+  document.getElementById('printPreviewTitle').textContent = '工程表';
+  document.getElementById('printPreviewModal').style.display = 'flex';
 }
 
 // ===== 見積AI読込 =====
@@ -4936,7 +5020,9 @@ function openModal(type, data) {
   }
 
   sheet.innerHTML = html;
+  document.getElementById('modalOverlay').style.display = 'flex';
   document.getElementById('modalOverlay').classList.add('show');
+  pushModalState();
 }
 
 function addFromMasterModal(name, price, unit, cat) {
@@ -4948,7 +5034,11 @@ function addFromMasterModal(name, price, unit, cat) {
   showToast(`「${name}」を追加しました ✓`);
 }
 
-function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+function closeModal() {
+  const el = document.getElementById('modalOverlay');
+  el.classList.remove('show');
+  el.style.display = '';
+}
 function closeModalOutside(e) { if(e.target===document.getElementById('modalOverlay')) closeModal(); }
 
 function saveManualMemo() {
@@ -5023,7 +5113,59 @@ function deletePhoto(id) {
 }
 
 // ===== INIT =====
+// ===== 戻るボタン対応 =====
+let _backPressedOnce = false;
+let _backPressTimer = null;
+
+function pushModalState() {
+  history.pushState({ genbaModal: true }, '');
+}
+
+function pushScreenState(name) {
+  history.pushState({ genbaScreen: name }, '');
+}
+
+window.addEventListener('popstate', (e) => {
+  // モーダルが開いていれば閉じる
+  const overlay = document.getElementById('modalOverlay');
+  const isModalOpen = overlay && (overlay.classList.contains('show') || overlay.style.display === 'flex');
+  if (isModalOpen) {
+    closeModal();
+    return;
+  }
+  // 案件詳細が開いていれば一覧に戻る
+  const detailView = document.getElementById('anken-detail-view');
+  if (detailView && detailView.style.display !== 'none') {
+    backToAnkenList();
+    history.pushState({ genbaScreen: 'anken' }, '');
+    return;
+  }
+  // ホーム以外のタブならホームへ
+  const activeScreen = document.querySelector('.screen.active');
+  if (activeScreen && activeScreen.id !== 'screen-home') {
+    switchScreen('home');
+    history.pushState({ genbaScreen: 'home' }, '');
+    return;
+  }
+  // ホームで戻る → 終了確認
+  if (_backPressedOnce) {
+    clearTimeout(_backPressTimer);
+    // Android: history.back()で閉じる、iOS: メッセージのみ
+    window.history.go(-1);
+    return;
+  }
+  _backPressedOnce = true;
+  showToast('もう一度押すと終了します', '');
+  history.pushState({ genbaBack: true }, ''); // 再度戻れるよう履歴を積む
+  _backPressTimer = setTimeout(() => {
+    _backPressedOnce = false;
+  }, 2500);
+});
+
 window.addEventListener('load', ()=>{
+  // 初期履歴を積む
+  history.replaceState({ genbaScreen: 'home' }, '');
+  history.pushState({ genbaScreen: 'home' }, '');
   calcAuto(); renderRooms(); renderSketchGallery(); renderSavedEstimatesBar();
   const ed = document.getElementById('estDate');
   if(ed) ed.textContent = '見積日: ' + new Date().toLocaleDateString('ja-JP');
