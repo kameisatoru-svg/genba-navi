@@ -390,71 +390,78 @@ canvas{display:block;touch-action:none;}
 
 <main>
 <!-- HOME -->
-<div class="screen active" id="screen-home">
-  <div class="greeting">おはようございます<br><span id="greetName">山田さん</span></div>
-  <div class="stat-grid">
-    <div class="stat-box"><div class="stat-val" id="statProjects">3</div><div class="stat-lbl">進行中</div></div>
-    <div class="stat-box hl"><div class="stat-val accent" id="statAmount">2.4M</div><div class="stat-lbl">今月見積</div></div>
-    <div class="stat-box"><div class="stat-val" id="statVoice">8</div><div class="stat-lbl">音声メモ</div></div>
+<div class="screen active" id="screen-home" style="padding:0;">
+  <!-- ホームヘッダー：新規＋進行中数 -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px 10px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;">
+    <div style="font-size:13px;color:var(--muted);">進行中: <span id="homeActiveCount" style="font-size:16px;font-weight:700;color:var(--accent);">0</span> 件</div>
+    <button onclick="openNewAnken()" style="display:flex;align-items:center;gap:6px;background:var(--accent);border:none;color:#000;font-size:13px;font-weight:700;padding:9px 18px;border-radius:10px;cursor:pointer;">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      新規案件
+    </button>
   </div>
+  <!-- 案件リスト -->
+  <div id="homeAnkenList" style="padding:10px 12px;overflow-y:auto;"></div>
+</div>
 
-  <div class="section-title">クイックアクション</div>
-  <div class="qa-grid">
-    <div class="qa-card" onclick="switchScreen('sketch')">
-      <div class="qa-ico o"><svg width="20" height="20" fill="none" stroke="#f5a623" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
-      <div><div class="qa-lbl">平面図<br>スケッチ</div></div>
-    </div>
-    <div class="qa-card" onclick="switchScreen('voice')">
-      <div class="qa-ico r"><svg width="20" height="20" fill="none" stroke="#ff5f5f" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg></div>
-      <div><div class="qa-lbl">打ち合わせ<br>メモ入力</div></div>
-    </div>
-    <div class="qa-card" onclick="switchScreen('estimate')">
-      <div class="qa-ico g"><svg width="20" height="20" fill="none" stroke="#3dd68c" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg></div>
-      <div><div class="qa-lbl">AI見積<br>作成</div></div>
-    </div>
-    <div class="qa-card" onclick="switchScreen('photos')">
-      <div class="qa-ico b"><svg width="20" height="20" fill="none" stroke="#4a9eff" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
-      <div><div class="qa-lbl">現場<br>写真</div></div>
-    </div>
-    <div class="qa-card" onclick="switchScreen('anken')" style="grid-column:span 2;">
-      <div class="qa-ico p"><svg width="20" height="20" fill="none" stroke="#b06aff" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg></div>
-      <div><div class="qa-lbl">案件管理</div><div class="qa-sub">18工程の進捗管理・AIファイル読込</div></div>
-    </div>
+<!-- クイックアクション画面 -->
+<div class="screen" id="screen-quick" style="padding:0;">
+  <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;">
+    <div style="font-size:15px;font-weight:700;color:var(--text);" id="quickAnkenTitle">案件名</div>
   </div>
-
-  <div class="section-title">進行中案件</div>
-  <div id="projectList">
-    <div class="proj-card c-orange" onclick="selectProject('moku');switchScreen('estimate')">
-      <div class="pc-top">
-        <div><div class="pc-name">カフェ「MOKU」内装改装</div><div class="pc-loc">📍 大分市中央町 3-12</div></div>
-        <div class="chip orange">打合中</div>
+  <div style="padding:14px 12px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div onclick="switchScreen('sketch')" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;active:opacity:.7;">
+        <div style="width:44px;height:44px;background:rgba(245,166,35,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+          <svg width="22" height="22" fill="none" stroke="#f5a623" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);text-align:center;">平面図<br>スケッチ</div>
       </div>
-      <div class="pc-meta">
-        <div class="pc-meta-item">面積: <strong>42㎡</strong></div>
-        <div class="pc-meta-item">見積: <strong>¥1,408,000</strong></div>
-        <div class="pc-meta-item">着工: <strong>3/15</strong></div>
+      <div onclick="openMeetingMemo()" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;">
+        <div style="width:44px;height:44px;background:rgba(255,95,95,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+          <svg width="22" height="22" fill="none" stroke="#ff5f5f" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);text-align:center;">打ち合わせ<br>メモ</div>
       </div>
-    </div>
-    <div class="proj-card c-blue" onclick="selectProject('beauty');switchScreen('sketch')">
-      <div class="pc-top">
-        <div><div class="pc-name">美容室リノベーション</div><div class="pc-loc">📍 別府市北浜 1-5</div></div>
-        <div class="chip blue">現調予定</div>
+      <div onclick="switchScreen('estimate')" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;">
+        <div style="width:44px;height:44px;background:rgba(61,214,140,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+          <svg width="22" height="22" fill="none" stroke="#3dd68c" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);text-align:center;">見積</div>
       </div>
-      <div class="pc-meta">
-        <div class="pc-meta-item">面積: <strong>28㎡</strong></div>
-        <div class="pc-meta-item">見積: <strong>作成中</strong></div>
-        <div class="pc-meta-item">現調: <strong>3/5</strong></div>
+      <div onclick="switchScreen('sketch');setTimeout(()=>switchSketchTab('measure'),100)" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;">
+        <div style="width:44px;height:44px;background:rgba(74,158,255,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+          <svg width="22" height="22" fill="none" stroke="#4a9eff" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);text-align:center;">実測</div>
       </div>
-    </div>
-    <div class="proj-card c-green">
-      <div class="pc-top">
-        <div><div class="pc-name">居酒屋 壁紙張替</div><div class="pc-loc">📍 大分市春日町</div></div>
-        <div class="chip green">完了</div>
+      <div onclick="switchScreen('sketch');setTimeout(()=>switchSketchTab('pickup'),100)" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;">
+        <div style="width:44px;height:44px;background:rgba(176,106,255,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+          <svg width="22" height="22" fill="none" stroke="#b06aff" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);text-align:center;">拾い出し</div>
       </div>
-      <div class="pc-meta">
-        <div class="pc-meta-item">面積: <strong>18㎡</strong></div>
-        <div class="pc-meta-item">見積: <strong>¥374,000</strong></div>
-        <div class="pc-meta-item">完工: <strong>2/28</strong></div>
+      <div onclick="switchScreen('estimate');setTimeout(()=>switchEstTab('gantt'),100)" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;">
+        <div style="width:44px;height:44px;background:rgba(44,200,200,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+          <svg width="22" height="22" fill="none" stroke="#2ac8c8" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h4M7 12h8M7 16h5"/></svg>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);text-align:center;">工程表</div>
+      </div>
+      <div onclick="switchScreen('photos')" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;">
+        <div style="width:44px;height:44px;background:rgba(255,180,50,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+          <svg width="22" height="22" fill="none" stroke="#ffb432" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);text-align:center;">現場<br>写真</div>
+      </div>
+      <!-- 案件管理 幅全体 -->
+      <div onclick="openAnkenFromQuick()" style="grid-column:span 2;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;">
+        <div style="width:44px;height:44px;background:rgba(245,166,35,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="22" height="22" fill="none" stroke="#f5a623" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+        </div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);">案件管理</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">18工程フェーズ一覧へ</div>
+        </div>
+        <svg style="margin-left:auto;" width="18" height="18" fill="none" stroke="var(--muted)" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
     </div>
   </div>
@@ -533,8 +540,11 @@ canvas{display:block;touch-action:none;}
         <div class="section-title" style="margin:0;flex:1;">部屋別　実測入力</div>
         <button onclick="toggleSketchRef()" style="background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.3);color:var(--accent);padding:6px 10px;border-radius:8px;font-size:11px;cursor:pointer;white-space:nowrap;">📐 図面を表示</button>
       </div>
-  <div id="roomList" style="margin-bottom:10px;"></div>
-  <button onclick="addRoom()" style="width:100%;background:transparent;border:1px dashed rgba(74,158,255,.4);color:var(--blue);padding:10px;border-radius:10px;font-size:13px;cursor:pointer;margin-bottom:14px;">＋ 部屋を追加</button>
+  <div id="roomList" style="margin-bottom:6px;"></div>
+  <div style="display:flex;gap:8px;margin-bottom:14px;">
+    <button onclick="addRoom()" style="flex:1;background:transparent;border:1px dashed rgba(74,158,255,.4);color:var(--blue);padding:10px;border-radius:10px;font-size:13px;cursor:pointer;">＋ 部屋を追加</button>
+    <button onclick="sumRoomsToMeasure()" id="btnSumRooms" style="display:none;flex:1;background:rgba(61,214,140,.15);border:1px solid rgba(61,214,140,.4);color:var(--green);padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">🔢 全体に合算反映</button>
+  </div>
   <div class="section-title">全体実測（自動計算用）</div>
   <div class="measure-list">
     <div class="measure-row">
@@ -962,6 +972,8 @@ canvas{display:block;touch-action:none;}
         <button onclick="openAiGantt()" style="background:linear-gradient(135deg,rgba(176,106,255,.2),rgba(74,158,255,.15));border:1px solid rgba(176,106,255,.3);color:#c89aff;padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">🤖 AI生成</button>
         <button onclick="addGanttRow()" style="background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.3);color:var(--accent);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">＋ 工種追加</button>
         <button onclick="ganttShareText()" style="background:rgba(61,214,140,.15);border:1px solid rgba(61,214,140,.3);color:var(--green);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">📋 共有</button>
+        <button id="ganttUndoBtn" onclick="ganttUndo()" style="background:rgba(74,158,255,.15);border:1px solid rgba(74,158,255,.3);color:var(--blue);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;opacity:0.35;">↩️ 戻す</button>
+        <button onclick="if(confirm('工程表データをリセットしますか？')){localStorage.removeItem('genba_gantt');ganttRows=[];_ganttUndoStack=[];_updateGanttUndoBtn();renderGantt();showToast('リセットしました');}" style="background:rgba(255,95,95,.15);border:1px solid rgba(255,95,95,.3);color:var(--red);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">🗑 リセット</button>
         <button onclick="printGantt()" style="background:rgba(74,158,255,.15);border:1px solid rgba(74,158,255,.3);color:var(--blue);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">🖨️ PDF</button>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
@@ -1019,6 +1031,101 @@ canvas{display:block;touch-action:none;}
 </div>
 
 <!-- MEMO (旧VOICE) -->
+<!-- 打ち合わせメモ画面 -->
+<div class="screen" id="screen-memo" style="padding:0;">
+  <!-- ヘッダー -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;">
+    <div style="font-size:15px;font-weight:700;" id="memoScreenTitle">打ち合わせメモ</div>
+    <button onclick="addMeetingMemo()" style="background:var(--accent);border:none;color:#000;font-size:12px;font-weight:700;padding:7px 14px;border-radius:8px;cursor:pointer;">＋ 追加</button>
+  </div>
+
+  <div style="padding:12px;padding-bottom:80px;overflow-y:auto;">
+
+    <!-- ===== ファイルアップロード・AI要約エリア ===== -->
+    <div style="background:linear-gradient(135deg,rgba(176,106,255,.1),rgba(74,158,255,.06));border:1px solid rgba(176,106,255,.3);border-radius:14px;padding:14px;margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:700;color:#c89aff;margin-bottom:10px;">📎 ファイルAI要約 → 落とし込み</div>
+
+      <!-- ファイル選択 -->
+      <div id="memoUploadArea"
+        onclick="document.getElementById('memoFileInput').click()"
+        ondragover="event.preventDefault();this.style.borderColor='var(--accent)'"
+        ondragleave="this.style.borderColor='rgba(176,106,255,.4)'"
+        ondrop="event.preventDefault();this.style.borderColor='rgba(176,106,255,.4)';handleMemoFileDrop(event)"
+        style="border:1.5px dashed rgba(176,106,255,.4);border-radius:10px;padding:18px;text-align:center;cursor:pointer;margin-bottom:10px;transition:border-color .2s;">
+        <div style="font-size:26px;margin-bottom:6px;">📂</div>
+        <div style="font-size:13px;color:var(--muted);">タップしてファイル選択<br><span style="font-size:11px;">PDF / 画像(JPG・PNG) / テキスト / Word(.docx)</span></div>
+        <div style="font-size:11px;color:rgba(176,106,255,.7);margin-top:4px;">またはドラッグ＆ドロップ</div>
+      </div>
+      <input type="file" id="memoFileInput" accept=".txt,.pdf,.jpg,.jpeg,.png,.docx" style="display:none;" onchange="handleMemoFileSelect(event)">
+
+      <!-- Google Docs URL -->
+      <div style="display:flex;gap:6px;margin-bottom:10px;">
+        <input id="memoGdocsUrl" type="url" placeholder="Google Docs の共有URL（閲覧可能リンク）"
+          style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 10px;color:var(--text);font-size:12px;outline:none;font-family:var(--font);">
+        <button onclick="loadGdocsUrl()" style="background:rgba(74,158,255,.2);border:1px solid rgba(74,158,255,.4);border-radius:8px;padding:9px 12px;color:var(--blue);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">読込</button>
+      </div>
+
+      <!-- 読み込みファイル表示 -->
+      <div id="memoFilePreview" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div id="memoFileName" style="font-size:12px;color:var(--text);font-weight:600;"></div>
+          <button onclick="clearMemoFile()" style="background:transparent;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0 4px;">✕</button>
+        </div>
+        <div id="memoFileInfo" style="font-size:11px;color:var(--muted);margin-top:2px;"></div>
+      </div>
+
+      <!-- AI要約ボタン -->
+      <button onclick="runMemoFileAI()" id="memoAiSumBtn"
+        style="width:100%;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;color:#fff;padding:13px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">
+        ✦ AI要約して適用先を表示
+      </button>
+
+      <!-- ローディング -->
+      <div id="memoAiLoading" style="display:none;text-align:center;padding:20px;">
+        <div style="font-size:28px;animation:spin 1.2s linear infinite;display:inline-block;">✦</div>
+        <div style="font-size:13px;color:#c89aff;margin-top:6px;">AIが分析中...</div>
+      </div>
+    </div>
+
+    <!-- ===== AI要約結果＋適用先一覧 ===== -->
+    <div id="memoAiResult" style="display:none;margin-bottom:14px;">
+      <!-- 要約テキスト -->
+      <div style="background:var(--surface);border:1px solid rgba(176,106,255,.4);border-radius:12px;padding:12px;margin-bottom:10px;">
+        <div style="font-size:11px;color:#c89aff;margin-bottom:6px;">✦ AI要約</div>
+        <div id="memoAiSummaryText" style="font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap;"></div>
+      </div>
+
+      <!-- 適用先カード一覧 -->
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;">📌 適用できる項目（タップで確認 → 反映）</div>
+      <div id="memoApplyCards" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+
+    <!-- ===== 確認モーダル（インライン） ===== -->
+    <div id="memoConfirmPanel" style="display:none;background:var(--surface);border:1px solid var(--accent);border-radius:14px;padding:14px;margin-bottom:14px;position:sticky;bottom:10px;z-index:50;">
+      <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:6px;" id="memoConfirmTitle">確認</div>
+      <div id="memoConfirmBody" style="font-size:13px;color:var(--text);line-height:1.7;margin-bottom:12px;max-height:180px;overflow-y:auto;white-space:pre-wrap;background:var(--surface2);border-radius:8px;padding:10px;"></div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="closeMemoConfirm()" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--muted);font-size:13px;cursor:pointer;">キャンセル</button>
+        <button onclick="executeMemoApply()" id="memoConfirmBtn" style="flex:2;background:var(--accent);border:none;border-radius:8px;padding:10px;color:#000;font-size:13px;font-weight:700;cursor:pointer;">反映する</button>
+      </div>
+    </div>
+
+    <!-- 新規テキスト入力エリア -->
+    <div id="memoInputArea" style="display:none;background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:12px;margin-bottom:12px;">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">日時: <span id="memoDateLabel"></span></div>
+      <textarea id="memoTextInput" placeholder="打ち合わせ内容を入力..." rows="5"
+        style="width:100%;background:transparent;border:none;outline:none;color:var(--text);font-size:14px;resize:vertical;font-family:var(--font);line-height:1.6;"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button onclick="cancelMemo()" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:13px;padding:8px;cursor:pointer;">キャンセル</button>
+        <button onclick="saveMemoEntry()" style="flex:2;background:var(--accent);border:none;border-radius:8px;color:#000;font-size:13px;font-weight:700;padding:8px;cursor:pointer;">保存</button>
+      </div>
+    </div>
+
+    <!-- メモ一覧 -->
+    <div id="memoList"></div>
+  </div>
+</div>
+
 <div class="screen" id="screen-voice" style="padding:0;">
   <!-- サブタブ -->
   <div style="display:flex;background:var(--surface);border-bottom:1px solid var(--border);">
@@ -1325,17 +1432,8 @@ canvas{display:block;touch-action:none;}
   <button class="nav-btn active" id="nav-home" onclick="switchScreen('home')">
     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>ホーム
   </button>
-  <button class="nav-btn" id="nav-sketch" onclick="switchScreen('sketch')">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>図面
-  </button>
-  <button class="nav-btn" id="nav-voice" onclick="switchScreen('voice')">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>メモ
-  </button>
-  <button class="nav-btn" id="nav-anken" onclick="switchScreen('anken')">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>案件
-  </button>
-  <button class="nav-btn" id="nav-photos" onclick="switchScreen('photos')">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>写真
+  <button class="nav-btn" id="nav-back" onclick="navGoBack()">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>戻る
   </button>
 </nav>
 
@@ -1391,15 +1489,7 @@ const state = {
     beauty: { name:'美容室リノベーション', client:'Hair Studio K', addr:'別府市北浜1-5', floor:28, wall:84, ceiling:28 }
   },
   measurements: { width:5400, depth:7800, height:2400, openings:3.6 },
-  estimateItems: [
-    { id:1, name:'壁紙（クロス）張替', spec:'LW-11 ベージュ系', qty:125.1, unit:'㎡', unitPrice:2800, category:'material' },
-    { id:2, name:'フローリング施工', spec:'複合フローリング', qty:42.12, unit:'㎡', unitPrice:4500, category:'material' },
-    { id:3, name:'天井クロス張替', spec:'白系 / 42㎡', qty:42.12, unit:'㎡', unitPrice:2000, category:'material' },
-    { id:4, name:'壁紙施工費', spec:'', qty:125.1, unit:'㎡', unitPrice:1500, category:'labor' },
-    { id:5, name:'床施工費', spec:'', qty:42.12, unit:'㎡', unitPrice:3000, category:'labor' },
-    { id:6, name:'下地補修・パテ', spec:'', qty:1, unit:'式', unitPrice:85000, category:'labor' },
-    { id:7, name:'養生・廃材処分', spec:'', qty:1, unit:'式', unitPrice:33000, category:'other' },
-  ],
+  estimateItems: [],
   voiceNotes: [
     { id:1, project:'moku', text:'カウンター下の配管確認が必要。電気工事士に連絡すること。壁紙は明るめのベージュ系希望とのこと。', time:'3/3 10:42', duration:'0:38' },
     { id:2, project:'beauty', text:'美容室。シャンプー台横の壁は防水対応が必須。床はクッションフロアでよい。予算は50万以内希望。', time:'3/1 14:15', duration:'1:02' },
@@ -1430,25 +1520,561 @@ const state = {
 };
 
 // ===== NAVIGATION =====
-function switchScreen(name) {
+
+// ===== 打ち合わせメモ =====
+let meetingMemos = JSON.parse(localStorage.getItem('genba_meeting_memos')||'[]');
+let _editMemoId = null;
+
+function saveMeetingMemos(){ localStorage.setItem('genba_meeting_memos', JSON.stringify(meetingMemos)); }
+
+function openMeetingMemo(){
+  // 現在の案件IDをタイトルに反映
+  const a = currentAnkenId ? getAnken(currentAnkenId) : null;
+  const titleEl = document.getElementById('memoScreenTitle');
+  if(titleEl) titleEl.textContent = a ? a.name + ' - メモ' : '打ち合わせメモ';
+  switchScreen('memo');
+  renderMemoList();
+}
+
+function addMeetingMemo(){
+  const area = document.getElementById('memoInputArea');
+  const dateLabel = document.getElementById('memoDateLabel');
+  const input = document.getElementById('memoTextInput');
+  if(!area) return;
+  _editMemoId = null;
+  if(input) input.value = '';
+  if(dateLabel) dateLabel.textContent = new Date().toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+  area.style.display = 'block';
+  setTimeout(()=>input?.focus(), 80);
+}
+
+function cancelMemo(){
+  const area = document.getElementById('memoInputArea');
+  if(area) area.style.display = 'none';
+  _editMemoId = null;
+}
+
+function saveMemoEntry(){
+  const input = document.getElementById('memoTextInput');
+  const text = input ? input.value.trim() : '';
+  if(!text) { input?.focus(); return; }
+  if(_editMemoId){
+    const m = meetingMemos.find(m=>m.id===_editMemoId);
+    if(m){ m.text = text; m.updated = new Date().toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}); }
+  } else {
+    meetingMemos.unshift({
+      id: 'mm_'+Date.now(),
+      ankenId: currentAnkenId || '',
+      text,
+      date: new Date().toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})
+    });
+  }
+  saveMeetingMemos();
+  cancelMemo();
+  renderMemoList();
+  showToast('メモを保存しました ✓');
+}
+
+function editMemoEntry(id){
+  const m = meetingMemos.find(m=>m.id===id);
+  if(!m) return;
+  _editMemoId = id;
+  const area = document.getElementById('memoInputArea');
+  const input = document.getElementById('memoTextInput');
+  const dateLabel = document.getElementById('memoDateLabel');
+  if(input) input.value = m.text;
+  if(dateLabel) dateLabel.textContent = m.date;
+  if(area) area.style.display = 'block';
+  setTimeout(()=>input?.focus(), 80);
+}
+
+function deleteMemoEntry(id){
+  if(!confirm('このメモを削除しますか？')) return;
+  meetingMemos = meetingMemos.filter(m=>m.id!==id);
+  saveMeetingMemos();
+  renderMemoList();
+  showToast('削除しました');
+}
+
+function renderMemoList(){
+  const el = document.getElementById('memoList');
+  if(!el) return;
+  // 現在の案件のメモのみ表示
+  const list = currentAnkenId
+    ? meetingMemos.filter(m=>m.ankenId===currentAnkenId)
+    : meetingMemos;
+  if(!list.length){
+    el.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:13px;">メモがありません<br><span style="font-size:11px;">右上の「＋ 追加」から入力してください</span></div>';
+    return;
+  }
+  el.innerHTML = list.map(m=>`
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">${m.date}${m.updated?'（編集: '+m.updated+'）':''}</div>
+      <div style="font-size:14px;color:var(--text);white-space:pre-wrap;line-height:1.6;">${m.text}</div>
+      <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end;">
+        <button onclick="editMemoEntry('${m.id}')" style="font-size:11px;padding:5px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;">編集</button>
+        <button onclick="deleteMemoEntry('${m.id}')" style="font-size:11px;padding:5px 12px;background:transparent;border:1px solid #ff5f5f44;border-radius:6px;color:#ff5f5f;cursor:pointer;">削除</button>
+      </div>
+    </div>`).join('');
+}
+
+// ===== 打ち合わせメモ ファイルAI要約 =====
+let _memoFileData = null;   // { type, name, base64, text, mediaType }
+let _memoAiExtracted = [];  // AI抽出した適用候補リスト
+let _memoConfirmTarget = null; // 現在確認中の適用候補
+
+// ファイル選択（input）
+function handleMemoFileSelect(e){
+  const file = e.target.files[0];
+  if(file) loadMemoFile(file);
+}
+// ドロップ
+function handleMemoFileDrop(e){
+  const file = e.dataTransfer.files[0];
+  if(file) loadMemoFile(file);
+}
+
+function loadMemoFile(file){
+  const ext = file.name.split('.').pop().toLowerCase();
+  const allowed = ['txt','pdf','jpg','jpeg','png','docx'];
+  if(!allowed.includes(ext)){
+    showToast('対応外のファイル形式です','error'); return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    const result = ev.target.result;
+    if(ext === 'txt'){
+      _memoFileData = { type:'text', name:file.name, text:result, size:file.size };
+    } else if(['jpg','jpeg','png'].includes(ext)){
+      const b64 = result.split(',')[1];
+      const mt  = file.type || 'image/jpeg';
+      _memoFileData = { type:'image', name:file.name, base64:b64, mediaType:mt, size:file.size };
+    } else if(ext === 'pdf'){
+      const b64 = result.split(',')[1];
+      _memoFileData = { type:'pdf', name:file.name, base64:b64, mediaType:'application/pdf', size:file.size };
+    } else if(ext === 'docx'){
+      // docx はそのまま base64 で送り、Claude に解析させる
+      const b64 = result.split(',')[1];
+      _memoFileData = { type:'docx', name:file.name, base64:b64, mediaType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document', size:file.size };
+    }
+    showMemoFilePreview();
+  };
+  if(ext === 'txt'){
+    reader.readAsText(file, 'UTF-8');
+  } else {
+    reader.readAsDataURL(file);
+  }
+}
+
+async function loadGdocsUrl(){
+  const url = document.getElementById('memoGdocsUrl').value.trim();
+  if(!url){ showToast('URLを入力してください','error'); return; }
+  // Google Docs 共有URLをエクスポートURLに変換
+  let exportUrl = url;
+  const matchDoc = url.match(/\/d\/([\w-]+)\//);
+  if(matchDoc){
+    exportUrl = `https://docs.google.com/document/d/${matchDoc[1]}/export?format=txt`;
+  }
+  showToast('読み込み中...');
+  try {
+    const res = await fetch(exportUrl);
+    if(!res.ok) throw new Error('取得失敗');
+    const text = await res.text();
+    _memoFileData = { type:'text', name:'Google Docs', text, size:text.length };
+    showMemoFilePreview();
+    showToast('Google Docsを読み込みました ✓');
+  } catch(err){
+    showToast('読み込み失敗。共有設定（閲覧可）を確認してください','error');
+  }
+}
+
+function showMemoFilePreview(){
+  if(!_memoFileData) return;
+  const prev = document.getElementById('memoFilePreview');
+  const nameEl = document.getElementById('memoFileName');
+  const infoEl = document.getElementById('memoFileInfo');
+  if(prev)  prev.style.display = 'block';
+  if(nameEl) nameEl.textContent = '📎 ' + _memoFileData.name;
+  if(infoEl){
+    const sizeKB = _memoFileData.size ? Math.round(_memoFileData.size/1024) + ' KB' : '';
+    const typeLabel = {text:'テキスト',image:'画像',pdf:'PDF',docx:'Word文書',gdocs:'Google Docs'}[_memoFileData.type]||'';
+    infoEl.textContent = typeLabel + (sizeKB?' · '+sizeKB:'');
+  }
+}
+
+function clearMemoFile(){
+  _memoFileData = null;
+  document.getElementById('memoFilePreview').style.display = 'none';
+  document.getElementById('memoFileInput').value = '';
+  document.getElementById('memoGdocsUrl').value = '';
+  document.getElementById('memoAiResult').style.display = 'none';
+  _memoAiExtracted = [];
+}
+
+async function runMemoFileAI(){
+  if(!_memoFileData){ showToast('ファイルを選択してください','error'); return; }
+  const key = localStorage.getItem('genba_api_key')||'';
+  if(!key){ showToast('APIキーを設定してください','error'); return; }
+
+  document.getElementById('memoAiLoading').style.display = 'block';
+  document.getElementById('memoAiSumBtn').style.display = 'none';
+  document.getElementById('memoAiResult').style.display = 'none';
+
+  const systemPrompt = `あなたは内装建設業の現場管理AIです。
+添付されたファイル（打ち合わせメモ・仕様書・図面説明等）を分析し、以下のJSON形式のみで返答してください。
+{
+  "summary": "全体の要約（200字以内）",
+  "items": [
+    {
+      "target": "見積|工程表|単価マスター|拾い出し|現場案内|打ち合わせメモ",
+      "title": "適用項目のタイトル",
+      "content": "具体的な内容（反映に使う文字列）",
+      "detail": "ユーザーへの説明（1〜2行）"
+    }
+  ]
+}
+"items"には実際にデータが抽出できたもののみ含めてください。JSONのみ返し、前後に説明文やマークダウンは不要です。`;
+
+  // メッセージ内容を構築
+  let userContent = [];
+  if(_memoFileData.type === 'text'){
+    userContent = [{ type:'text', text: '以下のテキストを分析してください:\n\n' + _memoFileData.text }];
+  } else if(_memoFileData.type === 'image'){
+    userContent = [
+      { type:'image', source:{ type:'base64', media_type:_memoFileData.mediaType, data:_memoFileData.base64 }},
+      { type:'text', text:'この現場資料の画像を分析してください。' }
+    ];
+  } else if(_memoFileData.type === 'pdf'){
+    userContent = [
+      { type:'document', source:{ type:'base64', media_type:'application/pdf', data:_memoFileData.base64 }},
+      { type:'text', text:'このPDF文書を分析してください。' }
+    ];
+  } else if(_memoFileData.type === 'docx'){
+    userContent = [
+      { type:'document', source:{ type:'base64', media_type:_memoFileData.mediaType, data:_memoFileData.base64 }},
+      { type:'text', text:'このWord文書を分析してください。' }
+    ];
+  }
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key': key,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body: JSON.stringify({
+        model:'claude-opus-4-5',
+        max_tokens:2000,
+        system: systemPrompt,
+        messages:[{ role:'user', content: userContent }]
+      })
+    });
+    const data = await res.json();
+    const raw = data.content?.[0]?.text || '';
+    // JSON抽出
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if(!jsonMatch) throw new Error('JSON解析失敗');
+    const parsed = JSON.parse(jsonMatch[0]);
+    _memoAiExtracted = parsed.items || [];
+    renderMemoAiResult(parsed.summary, _memoAiExtracted);
+  } catch(err){
+    showToast('AI解析に失敗しました: ' + err.message, 'error');
+  } finally {
+    document.getElementById('memoAiLoading').style.display = 'none';
+    document.getElementById('memoAiSumBtn').style.display = 'block';
+  }
+}
+
+function renderMemoAiResult(summary, items){
+  document.getElementById('memoAiResult').style.display = 'block';
+  document.getElementById('memoAiSummaryText').textContent = summary || '（要約なし）';
+
+  const targetIcons = {
+    '見積':'📋', '工程表':'📅', '単価マスター':'📦',
+    '拾い出し':'🔢', '現場案内':'🗺️', '打ち合わせメモ':'📝'
+  };
+  const targetColors = {
+    '見積':'rgba(245,166,35,.15)','工程表':'rgba(44,200,200,.15)',
+    '単価マスター':'rgba(74,158,255,.15)','拾い出し':'rgba(176,106,255,.15)',
+    '現場案内':'rgba(61,214,140,.15)','打ち合わせメモ':'rgba(255,95,95,.15)'
+  };
+  const targetBorder = {
+    '見積':'rgba(245,166,35,.4)','工程表':'rgba(44,200,200,.4)',
+    '単価マスター':'rgba(74,158,255,.4)','拾い出し':'rgba(176,106,255,.4)',
+    '現場案内':'rgba(61,214,140,.4)','打ち合わせメモ':'rgba(255,95,95,.4)'
+  };
+  const targetFontColor = {
+    '見積':'var(--accent)','工程表':'#2ac8c8',
+    '単価マスター':'var(--blue)','拾い出し':'#b06aff',
+    '現場案内':'var(--green)','打ち合わせメモ':'#ff5f5f'
+  };
+
+  const container = document.getElementById('memoApplyCards');
+  if(!items.length){
+    container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">適用できる項目が見つかりませんでした</div>';
+    return;
+  }
+  container.innerHTML = items.map((item, idx) => {
+    const icon  = targetIcons[item.target] || '📌';
+    const bg    = targetColors[item.target] || 'rgba(255,255,255,.05)';
+    const bd    = targetBorder[item.target] || 'rgba(255,255,255,.2)';
+    const fc    = targetFontColor[item.target] || 'var(--text)';
+    return `
+    <div onclick="openMemoConfirm(${idx})"
+      style="background:${bg};border:1px solid ${bd};border-radius:12px;padding:14px;cursor:pointer;display:flex;align-items:flex-start;gap:12px;">
+      <div style="font-size:24px;flex-shrink:0;">${icon}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:700;color:${fc};margin-bottom:2px;">${item.target} へ反映</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">${item.title}</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.5;">${item.detail}</div>
+      </div>
+      <div style="color:var(--muted);font-size:18px;flex-shrink:0;">›</div>
+    </div>`;
+  }).join('');
+}
+
+function openMemoConfirm(idx){
+  const item = _memoAiExtracted[idx];
+  if(!item) return;
+  _memoConfirmTarget = item;
+  document.getElementById('memoConfirmTitle').textContent =
+    (({見積:'📋',工程表:'📅',単価マスター:'📦',拾い出し:'🔢',現場案内:'🗺️',打ち合わせメモ:'📝'})[item.target]||'📌') +
+    ' 「' + item.target + '」に反映しますか？';
+  document.getElementById('memoConfirmBody').textContent =
+    '【' + item.title + '】\n\n' + item.content;
+  document.getElementById('memoConfirmPanel').style.display = 'block';
+  document.getElementById('memoConfirmPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function closeMemoConfirm(){
+  document.getElementById('memoConfirmPanel').style.display = 'none';
+  _memoConfirmTarget = null;
+}
+
+function executeMemoApply(){
+  const item = _memoConfirmTarget;
+  if(!item){ closeMemoConfirm(); return; }
+  const target = item.target;
+  const content = item.content;
+  const title = item.title;
+
+  try {
+    if(target === '見積'){
+      // 見積明細に1行追加
+      const lines = content.split('\n').filter(l=>l.trim());
+      lines.forEach(line => {
+        const m = line.match(/(.+?)[：:]\s*¥?([\d,]+)/);
+        state.estimateItems.push({
+          id: 'ei_'+Date.now()+Math.random(),
+          name: m ? m[1].trim() : line.trim(),
+          qty: 1, unit: '式',
+          price: m ? parseInt(m[2].replace(/,/g,''))||0 : 0,
+          memo: 'ファイルAI自動抽出'
+        });
+      });
+      saveState();
+      showToast('見積に追加しました ✓');
+      closeMemoConfirm();
+      setTimeout(()=>{ switchScreen('estimate'); switchEstTab('estimate'); renderEstimate(); }, 400);
+
+    } else if(target === '工程表'){
+      const lines = content.split('\n').filter(l=>l.trim());
+      let start = 1;
+      lines.forEach((line, i) => {
+        const dur = 3;
+        ganttRows.push({
+          id: 'gr_'+Date.now()+i,
+          trade: line.replace(/^[\d\.\-\s]+/, '').trim() || ('工程'+(i+1)),
+          color: '#f5a623',
+          start, end: start+dur-1,
+          label:'', progress:0, memo:'AI自動抽出',
+          bars:[]
+        });
+        start += dur;
+      });
+      saveGantt();
+      showToast('工程表に追加しました ✓');
+      closeMemoConfirm();
+      setTimeout(()=>{ switchScreen('estimate'); switchEstTab('gantt'); renderGantt(); }, 400);
+
+    } else if(target === '単価マスター'){
+      const lines = content.split('\n').filter(l=>l.trim());
+      lines.forEach(line => {
+        const m = line.match(/(.+?)[：:]\s*¥?([\d,]+)/);
+        if(m){
+          const existing = priceMasterItems.find(p=>p.name===m[1].trim());
+          if(!existing){
+            priceMasterItems.push({
+              id:'pm_'+Date.now()+Math.random(),
+              name:m[1].trim(),
+              price:parseInt(m[2].replace(/,/g,''))||0,
+              unit:'式', category:'その他'
+            });
+          }
+        }
+      });
+      savePriceMaster();
+      showToast('単価マスターに追加しました ✓');
+      closeMemoConfirm();
+      setTimeout(()=>{ switchScreen('estimate'); switchEstTab('master'); renderPriceMaster?.(); }, 400);
+
+    } else if(target === '拾い出し'){
+      // カスタム拾い出しに追加（state.pickupItems）
+      if(!state.pickupItems) state.pickupItems = [];
+      const lines = content.split('\n').filter(l=>l.trim());
+      lines.forEach(line=>{
+        const m = line.match(/(.+?)[：:×x]\s*([\d\.]+)/);
+        state.pickupItems.push({
+          id:'pi_'+Date.now()+Math.random(),
+          name: m ? m[1].trim() : line.trim(),
+          qty: m ? parseFloat(m[2])||1 : 1,
+          unit:'式', memo:'AI自動抽出'
+        });
+      });
+      saveState();
+      showToast('拾い出しに追加しました ✓');
+      closeMemoConfirm();
+      setTimeout(()=>{ switchScreen('sketch'); switchSketchTab('pickup'); }, 400);
+
+    } else if(target === '現場案内'){
+      // 打ち合わせメモとして保存（現場案内情報）
+      meetingMemos.unshift({
+        id:'mm_'+Date.now(),
+        ankenId: currentAnkenId||'',
+        text: '【現場案内】\n' + content,
+        date: new Date().toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})
+      });
+      saveMeetingMemos();
+      renderMemoList();
+      showToast('現場案内をメモに保存しました ✓');
+      closeMemoConfirm();
+
+    } else if(target === '打ち合わせメモ'){
+      meetingMemos.unshift({
+        id:'mm_'+Date.now(),
+        ankenId: currentAnkenId||'',
+        text: content,
+        date: new Date().toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})
+      });
+      saveMeetingMemos();
+      renderMemoList();
+      showToast('メモに保存しました ✓');
+      closeMemoConfirm();
+    }
+  } catch(e){
+    showToast('反映中にエラーが発生しました: '+e.message, 'error');
+  }
+}
+
+// ===== 画面履歴スタック =====
+let _screenHistory = ['home'];
+let _currentScreen = 'home';
+
+function switchScreen(name, pushHistory) {
+  if(pushHistory !== false && name !== _currentScreen) {
+    _screenHistory.push(_currentScreen);
+    if(_screenHistory.length > 20) _screenHistory.shift();
+  }
+  _currentScreen = name;
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('screen-'+name).classList.add('active');
+  const scr = document.getElementById('screen-'+name);
+  if(scr) scr.classList.add('active');
   const nb = document.getElementById('nav-'+name);
   if(nb) nb.classList.add('active');
+  // ホームは常にアクティブ表示
+  if(name==='home'){
+    document.getElementById('nav-home')?.classList.add('active');
+    renderHomeAnkenList();
+  }
   if(name==='estimate'){ switchEstTab('estimate'); renderEstimate(); }
   if(name==='voice') renderVoiceNotes();
   if(name==='photos') renderPhotos();
   if(name==='anken'){renderAnkenList();}
   if(name==='sketch') {
     setTimeout(()=>{
-      if(!canvasReady) {
-        initCanvas();
-      } else {
-        resizeCanvas();
-      }
+      if(!canvasReady) { initCanvas(); } else { resizeCanvas(); }
     }, 80);
   }
+}
+
+function navGoBack(){
+  if(_screenHistory.length > 0){
+    const prev = _screenHistory.pop();
+    switchScreen(prev, false);
+  } else {
+    switchScreen('home', false);
+  }
+}
+
+// ホーム画面の案件一覧を描画
+function renderHomeAnkenList(){
+  const el = document.getElementById('homeAnkenList');
+  if(!el) return;
+  const countEl = document.getElementById('homeActiveCount');
+
+  // ankenDataをベースに表示
+  if(!ankenData || ankenData.length === 0){
+    el.innerHTML = '<div style="text-align:center;padding:50px 20px;color:var(--muted);font-size:13px;">📋 案件がありません<br><span style="font-size:11px;">右上の「＋ 新規案件」から追加してください</span></div>';
+    if(countEl) countEl.textContent = '0';
+    return;
+  }
+
+  // 進行中カウント（完了でないもの）
+  const activeCount = ankenData.filter(a => {
+    const done = STAGES_MASTER ? STAGES_MASTER.filter(s=>a.stages[s.id]&&a.stages[s.id].done).length : 0;
+    return done < (STAGES_MASTER ? STAGES_MASTER.length : 18);
+  }).length;
+  if(countEl) countEl.textContent = activeCount;
+
+  el.innerHTML = ankenData.map(a => {
+    const done = STAGES_MASTER ? STAGES_MASTER.filter(s=>a.stages[s.id]&&a.stages[s.id].done).length : 0;
+    const total = STAGES_MASTER ? STAGES_MASTER.length : 18;
+    const pct = Math.round(done/total*100);
+    const isComplete = pct === 100;
+    // 現在フェーズ（最初の未完了工程のphase）
+    const nextStage = STAGES_MASTER ? STAGES_MASTER.find(s=>!(a.stages[s.id]&&a.stages[s.id].done)) : null;
+    const curPhase = nextStage ? nextStage.phase : 5;
+    const phaseLabel = PHASE_LABELS[curPhase] || '';
+    const phaseColor = PHASE_COLORS[curPhase] || 'var(--accent)';
+    return `<div onclick="openQuickAction('${a.id}')"
+      style="background:var(--surface);border:1px solid var(--border);border-left:4px solid ${isComplete?'#3dd68c':phaseColor};border-radius:12px;padding:14px 16px;margin-bottom:8px;cursor:pointer;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+        <div style="font-size:15px;font-weight:700;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.name}</div>
+        <span style="flex-shrink:0;font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;background:${phaseColor}22;color:${phaseColor};">${isComplete?'完了':phaseLabel}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+        <div style="flex:1;background:var(--bg);border-radius:99px;height:5px;overflow:hidden;">
+          <div style="width:${pct}%;height:100%;background:${isComplete?'#3dd68c':phaseColor};border-radius:99px;transition:width .3s;"></div>
+        </div>
+        <span style="font-size:12px;font-weight:700;color:${isComplete?'#3dd68c':phaseColor};flex-shrink:0;min-width:32px;text-align:right;">${pct}%</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;">作成: ${a.created||'--'} ／ ${done}/${total} 工程完了</div>
+    </div>`;
+  }).join('');
+}
+
+// 案件タップ → クイックアクション画面へ
+function openQuickAction(ankenId){
+  currentAnkenId = ankenId;
+  const a = getAnken(ankenId);
+  if(!a) return;
+  // トップバーとクイック画面タイトルを更新
+  document.getElementById('topbarProject').innerHTML = `案件: <span>${a.name.substring(0,10)}</span>`;
+  const titleEl = document.getElementById('quickAnkenTitle');
+  if(titleEl) titleEl.textContent = a.name;
+  switchScreen('quick');
+}
+
+// クイックアクションから案件管理フェーズへ
+function openAnkenFromQuick(){
+  if(!currentAnkenId) return;
+  switchScreen('anken');
+  // anken詳細を直接開く
+  setTimeout(()=>openAnkenDetail(currentAnkenId), 50);
 }
 
 function selectProject(id) {
@@ -1485,11 +2111,12 @@ function callClaude(messages, maxTokens=800) {
 
 // ===== 案件管理 =====
 function openNewAnken(){
-  const name=prompt("案件名を入力してください（例：別府駅前カフェ改装）");
-  if(!name)return;
-  const id="anken_"+Date.now();
-  ankenData.push({id,name,stages:{},created:new Date().toLocaleDateString("ja")});
-  saveAnken(); renderAnkenList(); openAnkenDetail(id);
+  showInputModal('＋ 新規案件', '例：別府駅前カフェ改装', '', function(name){
+    if(!name) return;
+    const id = 'anken_'+Date.now();
+    ankenData.push({id, name, stages:{}, created:new Date().toLocaleDateString('ja')});
+    saveAnken(); renderHomeAnkenList(); openQuickAction(id);
+  }, {label1:'案件名', hint:'工事名・物件名を入力してください'});
 }
 
 function renderAnkenList(){
@@ -1957,15 +2584,21 @@ function sendPickupToEstimate() {
 let rooms = JSON.parse(localStorage.getItem('genba_rooms')||'[]');
 function saveRooms(){localStorage.setItem('genba_rooms',JSON.stringify(rooms));}
 function addRoom(){
-  const name=prompt('部屋名を入力（例：リビング、厨房、トイレ）');
-  if(!name)return;
-  rooms.push({id:'r'+Date.now(),name,w:0,d:0,h:0,op:0});
-  saveRooms(); renderRooms();
+  showInputModal('＋ 部屋を追加', '例：リビング、厨房、トイレ', '', function(name){
+    if(!name) return;
+    rooms.push({id:'r'+Date.now(), name, w:0, d:0, h:0, op:0});
+    saveRooms(); renderRooms();
+  }, {label1:'部屋名'});
 }
 function renderRooms(){
   const el=document.getElementById('roomList');
   if(!el)return;
-  el.innerHTML=rooms.map((r,i)=>`
+  const sumBtn=document.getElementById('btnSumRooms');
+  if(sumBtn) sumBtn.style.display=rooms.length>0?'flex':'none';
+  el.innerHTML=rooms.map((r,i)=>{
+    const floor=r.w&&r.d?((r.w/1000)*(r.d/1000)):0;
+    const wall=r.w&&r.d&&r.h?(((r.w/1000+r.d/1000)*2*(r.h/1000))-(r.op||0)):0;
+    return `
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
         <div style="font-size:13px;font-weight:700;">🏠 ${r.name}</div>
@@ -1977,11 +2610,51 @@ function renderRooms(){
         <div><div style="font-size:10px;color:var(--muted);">天井高mm</div><input class="form-input" type="number" value="${r.h||''}" placeholder="2400" oninput="updateRoom(${i},'h',this.value)"></div>
         <div><div style="font-size:10px;color:var(--muted);">開口部㎡</div><input class="form-input" type="number" step="0.1" value="${r.op||''}" placeholder="3.6" oninput="updateRoom(${i},'op',this.value)"></div>
       </div>
-      ${r.w&&r.d?`<div style="font-size:11px;color:var(--green);margin-top:6px;">床: ${((r.w/1000)*(r.d/1000)).toFixed(2)}㎡ 壁: ${(((r.w/1000+r.d/1000)*2*(r.h/1000||2.4))-(r.op||0)).toFixed(1)}㎡</div>`:''}
-    </div>`).join('');
+      ${floor>0?`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:8px;background:rgba(61,214,140,.06);border-radius:8px;padding:8px;text-align:center;">
+        <div><div style="font-size:15px;font-weight:700;color:var(--green);">${floor.toFixed(2)}</div><div style="font-size:10px;color:var(--muted);">床㎡</div></div>
+        <div><div style="font-size:15px;font-weight:700;color:var(--accent);">${Math.max(0,wall).toFixed(1)}</div><div style="font-size:10px;color:var(--muted);">壁㎡</div></div>
+        <div><div style="font-size:15px;font-weight:700;color:var(--blue);">${floor.toFixed(2)}</div><div style="font-size:10px;color:var(--muted);">天井㎡</div></div>
+      </div>`:''}
+    </div>`;
+  }).join('');
 }
 function updateRoom(i,key,val){rooms[i][key]=parseFloat(val)||0;saveRooms();renderRooms();}
 function deleteRoom(i){rooms.splice(i,1);saveRooms();renderRooms();}
+
+function sumRoomsToMeasure(){
+  if(rooms.length===0) return;
+  // 各部屋の床面積・壁面積・天井面積を合算
+  let totalFloor=0, totalWall=0, totalOp=0;
+  let maxH=0;
+  rooms.forEach(r=>{
+    if(r.w&&r.d){
+      totalFloor += (r.w/1000)*(r.d/1000);
+      totalOp   += (r.op||0);
+    }
+    if(r.w&&r.d&&r.h){
+      totalWall += ((r.w/1000+r.d/1000)*2*(r.h/1000));
+    }
+    if(r.h>maxH) maxH=r.h;
+  });
+  // 全体実測欄（開口部と天井高のみ反映、幅・奥行は合算できないので空に）
+  const op = document.getElementById('mOpenings');
+  const h  = document.getElementById('mHeight');
+  if(op) op.value = totalOp > 0 ? totalOp.toFixed(1) : '';
+  if(h && maxH > 0) h.value = maxH;
+  // 床・壁・天井を直接セット（calcAutoを迂回して直接表示）
+  const calcFloor   = document.getElementById('calcFloor');
+  const calcWall    = document.getElementById('calcWall');
+  const calcCeiling = document.getElementById('calcCeiling');
+  if(calcFloor)   calcFloor.value   = totalFloor.toFixed(2);
+  if(calcWall)    calcWall.value    = Math.max(0, totalWall - totalOp).toFixed(1);
+  if(calcCeiling) calcCeiling.value = totalFloor.toFixed(2);
+  // 拾い出しにも反映
+  const puCloth = document.getElementById('pu_cloth_wall');
+  if(puCloth) { puCloth.value = Math.max(0, totalWall - totalOp).toFixed(1); calcCloth(); }
+  const puFloor = document.getElementById('pu_floor_sqm');
+  if(puFloor) puFloor.value = totalFloor.toFixed(2);
+  showToast(`🔢 ${rooms.length}部屋を合算 → 床${totalFloor.toFixed(2)}㎡ 壁${Math.max(0,totalWall-totalOp).toFixed(1)}㎡`);
+}
 
 
 // ===== 図面保存・ギャラリー =====
@@ -1995,14 +2668,13 @@ function saveSketches(){ localStorage.setItem('genba_sketches', JSON.stringify(s
 
 function saveSketchNamed(){
   if(!drawCanvas || drawCanvas.width===0){ showToast('図面がありません','error'); return; }
-  const name = prompt('図面の名前を入力（例：1階平面図、厨房詳細）') || ('図面'+(savedSketches.length+1));
-  const dataUrl = drawCanvas.toDataURL('image/jpeg', 0.85);
-  const id = 'sk_'+Date.now();
-  savedSketches.push({ id, name, dataUrl, date: new Date().toLocaleDateString('ja') });
-  if(savedSketches.length > 20) savedSketches.shift(); // 最大20枚
-  saveSketches();
-  renderSketchGallery();
-  showToast('💾 「'+name+'」を保存しました');
+  const _defName = '図面'+(savedSketches.length+1);
+  showInputModal('図面を保存', '例：1階平面図、厨房詳細', _defName, function(name){
+    const dataUrl = drawCanvas.toDataURL('image/jpeg', 0.85);
+    savedSketches.push({id:'sk'+Date.now(), name: name||_defName, dataUrl, created:new Date().toLocaleDateString('ja')});
+    saveSketches(); renderSketchGallery();
+    showToast('図面「'+(name||_defName)+'」を保存しました ✓');
+  }, {label1:'図面名'});
 }
 
 function exportSketchJpeg(){
@@ -2432,31 +3104,35 @@ function copyInvoiceText(){
 
 
 // ===== ガントチャート =====
-function migrateGanttRows(rows){
-  // 旧データ（start/endがトップレベル）をbars[]形式に変換
-  return rows.map(row => {
-    if(!row.bars || !Array.isArray(row.bars) || row.bars.length===0){
-      row.bars = [{ start: row.start||1, end: row.end||5, label: '' }];
-    }
-    // 各barにstart/endが確実にあるか保証
-    row.bars = row.bars.map(b => ({
-      start: b.start||1,
-      end: b.end||5,
-      label: b.label||''
-    }));
-    delete row.start; delete row.end;
-    return row;
-  });
+let ganttRows = JSON.parse(localStorage.getItem('genba_gantt')||'[]');
+let _ganttUndoStack = [];
+const _GANTT_UNDO_MAX = 30;
+function saveGantt(){
+  // Undo スタックに現状を記録してから保存
+  _ganttUndoStack.push(JSON.stringify(ganttRows));
+  if(_ganttUndoStack.length > _GANTT_UNDO_MAX) _ganttUndoStack.shift();
+  _updateGanttUndoBtn();
+  localStorage.setItem('genba_gantt',JSON.stringify(ganttRows));
 }
-let ganttRows = migrateGanttRows(JSON.parse(localStorage.getItem('genba_gantt')||'[]'));
-function saveGantt(){ localStorage.setItem('genba_gantt',JSON.stringify(ganttRows)); }
+function ganttUndo(){
+  if(_ganttUndoStack.length === 0){ showToast('これ以上戻れません','error'); return; }
+  ganttRows = JSON.parse(_ganttUndoStack.pop());
+  localStorage.setItem('genba_gantt',JSON.stringify(ganttRows));
+  _updateGanttUndoBtn();
+  renderGantt();
+  showToast('↩️ 1つ戻しました');
+}
+function _updateGanttUndoBtn(){
+  const btn = document.getElementById('ganttUndoBtn');
+  if(btn) btn.style.opacity = _ganttUndoStack.length > 0 ? '1' : '0.35';
+}
 
 const GANTT_TRADES = ['解体','電気工事','設備工事','木工事','ボード工事','クロス工事','床工事','塗装工事','建具工事','照明器具','家具設置','清掃','検査','施主確認','予備'];
 
 function addGanttRow(){
   if(ganttRows.length>=15){ showToast('最大15工種です','error'); return; }
   const trade = GANTT_TRADES[ganttRows.length] || '工種'+(ganttRows.length+1);
-  ganttRows.push({ id:'g'+Date.now(), trade, color:ganttColors[ganttRows.length%ganttColors.length], bars:[{start:1,end:5,label:''}] });
+  ganttRows.push({ id:'g'+Date.now(), trade, start:1, end:5, color:ganttColors[ganttRows.length%ganttColors.length] });
   saveGantt(); renderGantt();
 }
 
@@ -2529,13 +3205,12 @@ function renderGantt(){
   }
 
   ganttRows.forEach((row,ri)=>{
-    const bars = (Array.isArray(row.bars)&&row.bars.length>0) ? row.bars : [{start:row.start||1,end:row.end||5,label:''}];
+    const barLeft=(row.start-1)*colW;
+    const barWidth=Math.max(colW-2,(row.end-row.start+1)*colW-2);
     const prog=row.progress||0;
-    const barCount = bars.length;
-    const unitH = 32;
-    const rowHeight = Math.max(rowH, barCount * unitH + 6);
+    const duration=row.end-row.start+1;
 
-    bHtml+=`<div style="display:flex;align-items:stretch;border-bottom:1px solid var(--border);height:${rowHeight}px;position:relative;">`;
+    bHtml+=`<div style="display:flex;align-items:center;border-bottom:1px solid var(--border);height:${rowH}px;position:relative;">`;
     // ラベル列
     bHtml+=`<div style="width:${labelW}px;flex-shrink:0;padding:4px 6px;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;gap:2px;">
       <div style="display:flex;align-items:center;gap:4px;">
@@ -2547,50 +3222,58 @@ function renderGantt(){
           <div style="width:${prog}%;height:100%;background:${row.color};"></div>
         </div>
         <span style="font-size:9px;color:var(--muted);">${prog}%</span>
-      </div>`:''}      <div style="display:flex;gap:4px;">
+      </div>`:''}
+      <div style="display:flex;gap:4px;">
         <button onclick="openGanttEdit(${ri})" style="background:transparent;border:none;color:var(--blue);font-size:9px;cursor:pointer;padding:0;">✏️編集</button>
         <button onclick="deleteGanttRow(${ri})" style="background:transparent;border:none;color:var(--red);font-size:9px;cursor:pointer;padding:0;">削除</button>
       </div>
     </div>`;
 
     // グリッドエリア
-    bHtml+=`<div style="position:relative;height:${rowHeight}px;width:${days*colW}px;flex-shrink:0;">`;
+    bHtml+=`<div style="position:relative;height:${rowH}px;width:${days*colW}px;flex-shrink:0;">`;
+    // 背景グリッド
     dayLabels.forEach((d,i)=>{
       const isToday=i===todayDiff;
       const bg=isToday?'rgba(245,166,35,.08)':d.isWeekend?'rgba(255,95,95,.04)':'transparent';
-      bHtml+=`<div style="position:absolute;left:${i*colW}px;top:0;width:${colW}px;height:${rowHeight}px;background:${bg};border-right:1px solid rgba(255,255,255,.03);pointer-events:none;"></div>`;
+      bHtml+=`<div style="position:absolute;left:${i*colW}px;top:0;width:${colW}px;height:100%;background:${bg};border-right:1px solid rgba(255,255,255,.03);pointer-events:none;"></div>`;
     });
 
-    // ガントバー（テキストはバーの上・右端揃え）
-    bars.forEach((bar,bi)=>{
-      const barLeft=(bar.start-1)*colW;
-      const barWidth=Math.max(colW-2,(bar.end-bar.start+1)*colW-2);
-      const duration=bar.end-bar.start+1;
-      const textH = 13;
-      const barH = unitH - textH - 3;
-      const slotTop = 3 + bi * unitH;
-      const textTop = slotTop;
-      const barTop = slotTop + textH + 1;
-      const labelText = bar.label || (duration+'日');
+    // ===== バー配置：メイン＋追加バーを上下交互に描画 =====
+    // slot 0=上半分(top:4,h:20), slot 1=下半分(top:26,h:20), 繰り返し
+    const bSlotTop  = [4, 26];
+    const bSlotH    = 20;
+    // 全バーリスト: [{isMain, start, end, color, label, bi}]
+    const allBars = [
+      {isMain:true, start:row.start, end:row.end, color:row.color, label:row.label||'', prog, bi:-1}
+    ];
+    if(Array.isArray(row.bars)) row.bars.forEach((b,bi)=>allBars.push({isMain:false,start:b.start,end:b.end,color:b.color||row.color,label:b.label||'',bi}));
 
-      // テキストラベル（バーの上・右端揃え）
-      bHtml+=`<div style="position:absolute;left:${barLeft}px;top:${textTop}px;width:${barWidth}px;height:${textH}px;display:flex;align-items:center;justify-content:flex-end;pointer-events:none;padding-right:3px;overflow:hidden;">
-        <span style="font-size:9px;font-weight:700;color:rgba(255,255,255,.85);white-space:nowrap;">${labelText}</span>
-      </div>`;
-
-      // バー本体（タップで編集モーダル）
-      bHtml+=`<div class="gantt-bar" data-idx="${ri}" data-bidx="${bi}"
-        style="position:absolute;left:${barLeft}px;top:${barTop}px;height:${barH}px;width:${barWidth}px;background:${row.color};border-radius:4px;cursor:pointer;user-select:none;box-shadow:0 2px 6px ${row.color}44;touch-action:none;"
-        onmousedown="startGanttDrag(event,${ri},${bi},'move')"
-        ontouchstart="startGanttDragTouch(event,${ri},${bi},'move')">
-        ${showProg&&bi===0?`<div style="position:absolute;left:0;top:0;height:100%;width:${prog}%;background:rgba(0,0,0,.2);border-radius:4px;pointer-events:none;"></div>`:''}        <div class="gantt-resize-handle" data-idx="${ri}" data-bidx="${bi}" data-side="left"
-          style="position:absolute;left:0;top:0;width:10px;height:100%;cursor:col-resize;z-index:2;"
-          onmousedown="startGanttDrag(event,${ri},${bi},'left')"
-          ontouchstart="startGanttDragTouch(event,${ri},${bi},'left')"></div>
-        <div class="gantt-resize-handle" data-idx="${ri}" data-bidx="${bi}" data-side="right"
-          style="position:absolute;right:0;top:0;width:10px;height:100%;cursor:col-resize;z-index:2;"
-          onmousedown="startGanttDrag(event,${ri},${bi},'right')"
-          ontouchstart="startGanttDragTouch(event,${ri},${bi},'right')"></div>
+    allBars.forEach((b,slotIdx)=>{
+      const slot   = slotIdx % 2;
+      const bTop   = bSlotTop[slot];
+      const bLeft  = (b.start-1)*colW;
+      const bWidth = Math.max(colW-2,(b.end-b.start+1)*colW-2);
+      const bDur   = b.end-b.start+1;
+      const dragType_move  = b.isMain ? `startGanttDrag(event,${ri},'move')`  : `startGanttDragSub(event,${ri},${b.bi},'move')`;
+      const dragType_left  = b.isMain ? `startGanttDrag(event,${ri},'left')`  : `startGanttDragSub(event,${ri},${b.bi},'left')`;
+      const dragType_right = b.isMain ? `startGanttDrag(event,${ri},'right')` : `startGanttDragSub(event,${ri},${b.bi},'right')`;
+      const dragTypeT_move  = b.isMain ? `startGanttDragTouch(event,${ri},'move')`  : `startGanttDragSubTouch(event,${ri},${b.bi},'move')`;
+      const dragTypeT_left  = b.isMain ? `startGanttDragTouch(event,${ri},'left')`  : `startGanttDragSubTouch(event,${ri},${b.bi},'left')`;
+      const dragTypeT_right = b.isMain ? `startGanttDragTouch(event,${ri},'right')` : `startGanttDragSubTouch(event,${ri},${b.bi},'right')`;
+      const dataAttr = b.isMain ? `data-idx="${ri}"` : `data-idx="${ri}" data-bidx="${b.bi}"`;
+      const barClass = b.isMain ? 'gantt-bar' : 'gantt-bar-sub';
+      bHtml+=`<div class="${barClass}" ${dataAttr}
+        style="position:absolute;left:${bLeft}px;top:${bTop}px;height:${bSlotH}px;width:${bWidth}px;background:${b.color};border-radius:4px;cursor:grab;user-select:none;box-shadow:0 2px 6px ${b.color}55;touch-action:none;z-index:3;"
+        onmousedown="${dragType_move}"
+        ontouchstart="${dragTypeT_move}">
+        ${b.isMain&&showProg?`<div style="position:absolute;left:0;top:0;height:100%;width:${b.prog}%;background:rgba(0,0,0,.2);border-radius:4px;pointer-events:none;"></div>`:''}
+        <div style="position:relative;z-index:1;display:flex;align-items:center;justify-content:center;height:100%;font-size:9px;font-weight:700;color:#000;pointer-events:none;white-space:nowrap;overflow:hidden;padding:0 5px;">
+          ${b.label||(bDur+'日')}${b.isMain&&showProg&&b.prog?'・'+b.prog+'%':''}
+        </div>
+        <div style="position:absolute;left:0;top:0;width:10px;height:100%;cursor:col-resize;z-index:2;"
+          onmousedown="${dragType_left}" ontouchstart="${dragTypeT_left}"></div>
+        <div style="position:absolute;right:0;top:0;width:10px;height:100%;cursor:col-resize;z-index:2;"
+          onmousedown="${dragType_right}" ontouchstart="${dragTypeT_right}"></div>
       </div>`;
     });
 
@@ -2623,26 +3306,18 @@ function attachGanttDragEvents(){
   window._ganttColW = parseInt(document.getElementById('ganttColW')?.value||'32');
 }
 
-function startGanttDrag(e, idx, bidx, type){
-  e.stopPropagation();
-  const row = ganttRows[idx];
-  if(!row||!row.bars||!row.bars[bidx]) return;
-  const bar = row.bars[bidx];
-  window._ganttDrag = {idx, bidx, type, startX: e.clientX, origStart: bar.start, origEnd: bar.end};
-  window._ganttDragMoved = false;
-  window._ganttDragStartTime = Date.now();
+function startGanttDrag(e, idx, type){
+  e.preventDefault(); e.stopPropagation();
+  window._ganttDrag = {idx, type, startX: e.clientX, origStart: ganttRows[idx].start, origEnd: ganttRows[idx].end};
   window._ganttColW = parseInt(document.getElementById('ganttColW')?.value||'32');
   document.onmousemove = onGanttDrag;
   document.onmouseup   = endGanttDrag;
 }
-function startGanttDragTouch(e, idx, bidx, type){
+function startGanttDragTouch(e, idx, type){
   if(e.touches.length!==1) return;
   e.stopPropagation();
   const t=e.touches[0];
-  const row = ganttRows[idx];
-  if(!row||!row.bars||!row.bars[bidx]) return;
-  const bar = row.bars[bidx];
-  window._ganttDrag = {idx, bidx, type, startX: t.clientX, origStart: bar.start, origEnd: bar.end};
+  window._ganttDrag = {idx, type, startX: t.clientX, origStart: ganttRows[idx].start, origEnd: ganttRows[idx].end};
   window._ganttColW = parseInt(document.getElementById('ganttColW')?.value||'32');
   document.ontouchmove = onGanttDragTouch;
   document.ontouchend  = endGanttDragTouch;
@@ -2654,13 +3329,11 @@ function onGanttDragTouch(e){ if(e.touches.length===1) applyGanttDrag(e.touches[
 function applyGanttDrag(clientX){
   const d = window._ganttDrag;
   if(!d) return;
-  window._ganttDragMoved = true;
   const colW = window._ganttColW;
   const weeks = parseInt(document.getElementById('ganttWeeks')?.value||'5');
   const maxDay = weeks*7;
   const deltaDays = Math.round((clientX - d.startX) / colW);
-  if(deltaDays!==0) window._ganttDragMoved = true;
-  const bar = ganttRows[d.idx].bars[d.bidx];
+  const row = ganttRows[d.idx];
 
   if(d.type==='move'){
     let ns = d.origStart + deltaDays;
@@ -2668,46 +3341,86 @@ function applyGanttDrag(clientX){
     const dur = d.origEnd - d.origStart;
     ns = Math.max(1, Math.min(maxDay-dur, ns));
     ne = ns + dur;
-    bar.start=ns; bar.end=ne;
+    row.start=ns; row.end=ne;
   } else if(d.type==='left'){
     let ns = Math.max(1, Math.min(d.origEnd-1, d.origStart+deltaDays));
-    bar.start=ns;
+    row.start=ns;
   } else if(d.type==='right'){
     let ne = Math.max(d.origStart+1, Math.min(maxDay, d.origEnd+deltaDays));
-    bar.end=ne;
+    row.end=ne;
   }
-  renderGanttBarOnly(d.idx, d.bidx);
+  renderGanttBarOnly(d.idx);
 }
 
-function endGanttDrag(){ saveGantt(); renderGantt(); document.onmousemove=null; document.onmouseup=null; window._ganttDrag=null; setTimeout(()=>{window._ganttDragMoved=false;},100); }
+function endGanttDrag(){ saveGantt(); renderGantt(); document.onmousemove=null; document.onmouseup=null; window._ganttDrag=null; }
+function endGanttDragTouch(){ saveGantt(); renderGantt(); document.ontouchmove=null; document.ontouchend=null; window._ganttDrag=null; }
 
-function handleGanttBarTouchEnd(e, idx){
-  // タッチ終了時：ドラッグでなければ編集モーダルを開く
-  if(window._ganttDragMoved) return;
-  e.preventDefault();
-  e.stopPropagation();
-  openGanttEdit(idx);
+// ===== 追加バー用ドラッグ =====
+function startGanttDragSub(e, rowIdx, barIdx, type){
+  e.preventDefault(); e.stopPropagation();
+  const b = ganttRows[rowIdx].bars[barIdx];
+  window._ganttDrag = {rowIdx, barIdx, type, startX:e.clientX, origStart:b.start, origEnd:b.end, isSub:true};
+  window._ganttColW = parseInt(document.getElementById('ganttColW')?.value||'32');
+  document.onmousemove = onGanttDragSub;
+  document.onmouseup   = endGanttDragSub;
 }
-function handleGanttBarClick(e, idx){
-  // ドラッグ移動があった場合はモーダルを開かない
-  if(window._ganttDragMoved) return;
-  // mousedownからclickまでの時間が長い場合もドラッグとみなす
-  if(window._ganttDragStartTime && Date.now()-window._ganttDragStartTime > 300) return;
+function startGanttDragSubTouch(e, rowIdx, barIdx, type){
+  if(e.touches.length!==1) return;
   e.stopPropagation();
-  openGanttEdit(idx);
+  const t = e.touches[0];
+  const b = ganttRows[rowIdx].bars[barIdx];
+  window._ganttDrag = {rowIdx, barIdx, type, startX:t.clientX, origStart:b.start, origEnd:b.end, isSub:true};
+  window._ganttColW = parseInt(document.getElementById('ganttColW')?.value||'32');
+  document.ontouchmove = onGanttDragSubTouch;
+  document.ontouchend  = endGanttDragSubTouch;
 }
-function endGanttDragTouch(){ saveGantt(); renderGantt(); document.ontouchmove=null; document.ontouchend=null; window._ganttDrag=null; window._ganttDragMoved=false; }
+function onGanttDragSub(e){ applyGanttDragSub(e.clientX); }
+function onGanttDragSubTouch(e){ if(e.touches.length===1) applyGanttDragSub(e.touches[0].clientX); }
+function applyGanttDragSub(clientX){
+  const d = window._ganttDrag;
+  if(!d || !d.isSub) return;
+  const colW = window._ganttColW;
+  const weeks = parseInt(document.getElementById('ganttWeeks')?.value||'5');
+  const maxDay = weeks*7;
+  const delta = Math.round((clientX - d.startX) / colW);
+  const b = ganttRows[d.rowIdx].bars[d.barIdx];
+  if(d.type==='move'){
+    const dur = d.origEnd - d.origStart;
+    let ns = Math.max(1, Math.min(maxDay-dur, d.origStart+delta));
+    b.start = ns; b.end = ns+dur;
+  } else if(d.type==='left'){
+    b.start = Math.max(1, Math.min(d.origEnd-1, d.origStart+delta));
+  } else if(d.type==='right'){
+    b.end = Math.max(d.origStart+1, Math.min(maxDay, d.origEnd+delta));
+  }
+  renderGanttBarOnly(d.rowIdx, d.barIdx);
+}
+function endGanttDragSub(){ saveGantt(); renderGantt(); document.onmousemove=null; document.onmouseup=null; window._ganttDrag=null; }
+function endGanttDragSubTouch(){ saveGantt(); renderGantt(); document.ontouchmove=null; document.ontouchend=null; window._ganttDrag=null; }
 
 function renderGanttBarOnly(idx, bidx){
-  // ドラッグ中は全再描画の代わりにバーのみ更新
+  // ドラッグ中は対象バーのみ更新
   const colW = window._ganttColW || 32;
-  const barData = ganttRows[idx].bars[bidx];
-  const el = document.querySelector(`.gantt-bar[data-idx="${idx}"][data-bidx="${bidx}"]`);
-  if(!el) return;
-  el.style.left = (barData.start-1)*colW+'px';
-  el.style.width = Math.max(colW-2,(barData.end-barData.start+1)*colW-2)+'px';
-  const labelEl = el.querySelector('div[style*="z-index:1"]');
-  if(labelEl) labelEl.textContent = barData.label||(barData.end-barData.start+1)+'日';
+  const row = ganttRows[idx];
+  let bar, start, end;
+  if(bidx === undefined || bidx < 0){
+    // メインバー
+    bar = document.querySelector(`.gantt-bar[data-idx="${idx}"]`);
+    start = row.start; end = row.end;
+  } else {
+    // 追加バー
+    bar = document.querySelector(`.gantt-bar-sub[data-idx="${idx}"][data-bidx="${bidx}"]`);
+    if(!bar || !row.bars || !row.bars[bidx]) return;
+    start = row.bars[bidx].start; end = row.bars[bidx].end;
+  }
+  if(!bar) return;
+  const barLeft = (start-1)*colW;
+  const barWidth = Math.max(colW-2,(end-start+1)*colW-2);
+  const dur = end-start+1;
+  bar.style.left = barLeft+'px';
+  bar.style.width = barWidth+'px';
+  const labelEl = bar.querySelector('div[style*="z-index:1"]');
+  if(labelEl) labelEl.textContent = dur+'日';
 }
 
 // ===== 工種追加・編集 =====
@@ -2722,37 +3435,27 @@ function deleteGanttRow(idx){ ganttRows.splice(idx,1); saveGantt(); renderGantt(
 
 function openGanttEdit(idx){
   const row = ganttRows[idx];
-  const bars = row.bars||[{start:1,end:5,label:''}];
+  const weeks = parseInt(document.getElementById('ganttWeeks')?.value||'5');
+  const days = weeks*7;
   const startDateStr = document.getElementById('ganttStartDate')?.value;
   const startDate = startDateStr?new Date(startDateStr):new Date();
 
+  // 日付→第何日目に変換
   const toDateStr = (dayNum) => {
     const dt = new Date(startDate); dt.setDate(dt.getDate()+dayNum-1);
     return dt.toISOString().split('T')[0];
   };
 
-  const barsHtml = bars.map((bar,bi)=>`
-    <div id="ge_bar_${bi}" style="background:var(--surface2);border-radius:8px;padding:8px;margin-bottom:6px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-        <span style="font-size:11px;font-weight:700;color:var(--muted);">バー ${bi+1}</span>
-        ${bars.length>1?`<button onclick="removeGanttBar(${idx},${bi})" style="background:transparent;border:none;color:var(--red);font-size:11px;cursor:pointer;">🗑削除</button>`:''}
-      </div>
-      <div class="form-group" style="margin-bottom:6px;">
-        <label class="form-label">バー内テキスト</label>
-        <input class="form-input" id="ge_bar_label_${bi}" value="${bar.label||''}" placeholder="例：配線・器具付など（空欄=日数表示）">
-      </div>
-      <div class="form-row">
-        <div><label class="form-label">開始日</label>
-          <input class="form-input" type="date" id="ge_bar_start_${bi}" value="${toDateStr(bar.start)}"></div>
-        <div><label class="form-label">終了日</label>
-          <input class="form-input" type="date" id="ge_bar_end_${bi}" value="${toDateStr(bar.end)}"></div>
-      </div>
-    </div>`).join('');
-
   document.getElementById('modalSheet').innerHTML=`
     <div style="font-size:15px;font-weight:700;margin-bottom:14px;">📅 ${row.trade}</div>
     <div class="form-group"><label class="form-label">工種名</label>
       <input class="form-input" id="ge_trade" value="${row.trade}"></div>
+    <div class="form-row">
+      <div><label class="form-label">開始日</label>
+        <input class="form-input" type="date" id="ge_start_date" value="${toDateStr(row.start)}"></div>
+      <div><label class="form-label">終了日</label>
+        <input class="form-input" type="date" id="ge_end_date" value="${toDateStr(row.end)}"></div>
+    </div>
     ${document.getElementById('ganttShowProgress')?.checked?`
     <div class="form-group"><label class="form-label">進捗率 ${row.progress||0}%</label>
       <input class="form-input" type="range" id="ge_prog" value="${row.progress||0}" min="0" max="100" step="5" oninput="document.querySelector('#ge_prog+span').textContent=this.value+'%'">
@@ -2764,11 +3467,24 @@ function openGanttEdit(idx){
         <input type="hidden" id="ge_color" value="${row.color}">
       </div>
     </div>
-    <div style="font-size:12px;font-weight:700;color:var(--text);margin:8px 0 6px;">📌 バー設定</div>
-    <div id="ge_bars_container">${barsHtml}</div>
-    <button onclick="addGanttBar(${idx})" style="width:100%;padding:8px;background:rgba(74,158,255,.15);border:1px dashed rgba(74,158,255,.4);color:var(--blue);border-radius:8px;font-size:12px;cursor:pointer;margin-bottom:10px;">＋ バーを追加（間隔をあけた複数バー）</button>
+    <div class="form-group"><label class="form-label">バー内テキスト</label>
+      <input class="form-input" id="ge_label" value="${row.label||''}" placeholder="例：配線・取付など（空欄=日数表示）"></div>
     <div class="form-group"><label class="form-label">メモ</label>
       <input class="form-input" id="ge_memo" value="${row.memo||''}" placeholder="業者名・注意事項など"></div>
+    <div class="form-group">
+      <label class="form-label" style="display:flex;align-items:center;justify-content:space-between;">
+        追加バー
+        <button onclick="addGanttBarInEdit(${idx})" style="background:rgba(74,158,255,.15);border:1px solid rgba(74,158,255,.4);color:var(--blue);padding:3px 10px;border-radius:6px;font-size:11px;cursor:pointer;">＋ バー追加</button>
+      </label>
+      <div id="ge_bars_list">${(row.bars||[]).map((b,bi)=>`
+        <div class="ge-bar-item" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--border);">
+          <div style="width:14px;height:14px;border-radius:3px;background:${b.color||row.color};flex-shrink:0;"></div>
+          <div style="flex:1;font-size:12px;color:var(--text);">${b.label||'追加バー'} (${b.start}〜${b.end}日目)</div>
+          <button onclick="editGanttBarInEdit(${idx},${bi})" style="background:rgba(74,158,255,.1);border:1px solid rgba(74,158,255,.3);color:var(--blue);padding:3px 8px;border-radius:5px;font-size:10px;cursor:pointer;">編集</button>
+          <button onclick="deleteGanttBarInEdit(${idx},${bi})" style="background:rgba(255,95,95,.1);border:1px solid rgba(255,95,95,.3);color:var(--red);padding:3px 8px;border-radius:5px;font-size:10px;cursor:pointer;">削除</button>
+        </div>`).join('')}
+      </div>
+    </div>
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="closeModal()" style="flex:1;">キャンセル</button>
       <button class="btn btn-primary" onclick="saveGanttEdit(${idx})" style="flex:1;">保存</button>
@@ -2777,50 +3493,135 @@ function openGanttEdit(idx){
   pushModalState();
 }
 
-function addGanttBar(idx){
-  // モーダルを一旦保存してバーを追加し再表示
-  saveGanttEditTemp(idx);
-  const lastBar = ganttRows[idx].bars[ganttRows[idx].bars.length-1];
-  const newStart = Math.min(lastBar.end+3, 999);
-  ganttRows[idx].bars.push({start:newStart, end:newStart+4, label:''});
-  openGanttEdit(idx);
-}
-
-function removeGanttBar(idx, bi){
-  saveGanttEditTemp(idx);
-  if(ganttRows[idx].bars.length<=1){ showToast('バーは最低1つ必要です','error'); return; }
-  ganttRows[idx].bars.splice(bi,1);
-  openGanttEdit(idx);
-}
-
-function saveGanttEditTemp(idx){
-  // モーダルの現在値を一時保存（addGanttBar/removeGanttBar用）
+function saveGanttEdit(idx){
   const startDateStr = document.getElementById('ganttStartDate')?.value;
   const startDate = startDateStr?new Date(startDateStr):new Date();
+  const toDay = (dateStr) => {
+    if(!dateStr) return ganttRows[idx].start;
+    const dt = new Date(dateStr);
+    return Math.round((dt-startDate)/(1000*60*60*24))+1;
+  };
+  ganttRows[idx].trade  = document.getElementById('ge_trade')?.value||ganttRows[idx].trade;
+  ganttRows[idx].start  = Math.max(1, toDay(document.getElementById('ge_start_date')?.value));
+  ganttRows[idx].end    = Math.max(ganttRows[idx].start, toDay(document.getElementById('ge_end_date')?.value));
+  ganttRows[idx].color  = document.getElementById('ge_color')?.value||ganttColors[0];
+  ganttRows[idx].label  = document.getElementById('ge_label')?.value||'';
+  ganttRows[idx].memo   = document.getElementById('ge_memo')?.value||'';
+  ganttRows[idx].progress = parseInt(document.getElementById('ge_prog')?.value||'0');
+  saveGantt(); closeModal(); renderGantt();
+}
+
+// ===== 追加バー管理 =====
+function addGanttBarInEdit(rowIdx){
+  const row = ganttRows[rowIdx];
+  if(!row) return;
+  if(!Array.isArray(row.bars)) row.bars = [];
+  if(row.bars.length >= 5){ showToast('1工種に追加できるバーは5本まです','error'); return; }
+  const weeks = parseInt(document.getElementById('ganttWeeks')?.value||'5');
+  const maxDay = weeks*7;
+  // 全バー（メイン＋追加）の末尾終了日を探す
+  let lastEnd = row.end;
+  row.bars.forEach(b=>{ if(b.end > lastEnd) lastEnd = b.end; });
+  const defStart = Math.min(lastEnd + 2, maxDay - 2);
+  const defEnd   = Math.min(defStart + 2, maxDay);
+  // 追加バーの色：既存と被らない色をganttColorsから選ぶ
+  const usedColors = [row.color, ...row.bars.map(b=>b.color)];
+  const nextColor = ganttColors.find(c=>!usedColors.includes(c)) || row.color;
+  row.bars.push({ start: defStart, end: defEnd, color: nextColor, label: '' });
+  saveGantt();
+  _refreshGeBarsUI(rowIdx);
+}
+
+function editGanttBarInEdit(rowIdx, barIdx){
+  const row = ganttRows[rowIdx];
+  if(!row || !row.bars || !row.bars[barIdx]) return;
+  const b = row.bars[barIdx];
+  const startDateStr = document.getElementById('ganttStartDate')?.value;
+  const startDate = startDateStr ? new Date(startDateStr) : new Date();
+  const toDateStr = (dayNum) => {
+    const dt = new Date(startDate); dt.setDate(dt.getDate()+dayNum-1);
+    return dt.toISOString().split('T')[0];
+  };
+  const toDay = (dateStr) => {
+    if(!dateStr) return b.start;
+    const dt = new Date(dateStr);
+    return Math.round((dt-startDate)/(1000*60*60*24))+1;
+  };
+  // インライン編集パネルを挿入
+  const listEl = document.getElementById('ge_bars_list');
+  if(!listEl) return;
+  const rows = listEl.querySelectorAll('.ge-bar-item');
+  const targetRow = rows[barIdx];
+  if(!targetRow) return;
+  targetRow.innerHTML = `
+    <div style="background:var(--surface2);border-radius:8px;padding:8px;margin:4px 0;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
+        <div><div style="font-size:10px;color:var(--muted);">開始日</div>
+          <input class="form-input" type="date" id="geb_start_${barIdx}" value="${toDateStr(b.start)}" style="font-size:12px;padding:4px;"></div>
+        <div><div style="font-size:10px;color:var(--muted);">終了日</div>
+          <input class="form-input" type="date" id="geb_end_${barIdx}" value="${toDateStr(b.end)}" style="font-size:12px;padding:4px;"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
+        <div><div style="font-size:10px;color:var(--muted);">バーのテキスト</div>
+          <input class="form-input" id="geb_label_${barIdx}" value="${b.label||''}" placeholder="空欄=日数" style="font-size:12px;padding:4px;"></div>
+        <div><div style="font-size:10px;color:var(--muted);">色</div>
+          <input type="color" id="geb_color_${barIdx}" value="${b.color||row.color}" style="width:100%;height:32px;border:1px solid var(--border);border-radius:6px;cursor:pointer;background:transparent;"></div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button onclick="_saveGanttBarEdit(${rowIdx},${barIdx})" style="flex:1;background:var(--accent);border:none;color:#000;padding:6px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">💾 保存</button>
+        <button onclick="_refreshGeBarsUI(${rowIdx})" style="background:transparent;border:1px solid var(--border);color:var(--muted);padding:6px 10px;border-radius:6px;font-size:12px;cursor:pointer;">✕</button>
+      </div>
+    </div>`;
+}
+
+function _saveGanttBarEdit(rowIdx, barIdx){
+  const row = ganttRows[rowIdx];
+  if(!row || !row.bars || !row.bars[barIdx]) return;
+  const startDateStr = document.getElementById('ganttStartDate')?.value;
+  const startDate = startDateStr ? new Date(startDateStr) : new Date();
   const toDay = (dateStr) => {
     if(!dateStr) return 1;
     const dt = new Date(dateStr);
     return Math.round((dt-startDate)/(1000*60*60*24))+1;
   };
-  ganttRows[idx].trade = document.getElementById('ge_trade')?.value||ganttRows[idx].trade;
-  ganttRows[idx].color = document.getElementById('ge_color')?.value||ganttColors[0];
-  ganttRows[idx].memo  = document.getElementById('ge_memo')?.value||'';
-  ganttRows[idx].progress = parseInt(document.getElementById('ge_prog')?.value||'0');
-  (ganttRows[idx].bars||[]).forEach((bar,bi)=>{
-    const ls = document.getElementById('ge_bar_start_'+bi);
-    const le = document.getElementById('ge_bar_end_'+bi);
-    const ll = document.getElementById('ge_bar_label_'+bi);
-    if(ls) bar.start = Math.max(1, toDay(ls.value));
-    if(le) bar.end   = Math.max(bar.start, toDay(le.value));
-    if(ll) bar.label = ll.value;
-  });
+  const weeks = parseInt(document.getElementById('ganttWeeks')?.value||'5');
+  const maxDay = weeks*7;
+  const ns = Math.max(1, Math.min(maxDay, toDay(document.getElementById('geb_start_'+barIdx)?.value)));
+  const ne = Math.max(ns, Math.min(maxDay, toDay(document.getElementById('geb_end_'+barIdx)?.value)));
+  row.bars[barIdx].start = ns;
+  row.bars[barIdx].end   = ne;
+  row.bars[barIdx].label = document.getElementById('geb_label_'+barIdx)?.value || '';
+  row.bars[barIdx].color = document.getElementById('geb_color_'+barIdx)?.value || row.color;
+  saveGantt();
+  _refreshGeBarsUI(rowIdx);
 }
 
-function saveGanttEdit(idx){
-  saveGanttEditTemp(idx);
-  saveGantt(); closeModal(); renderGantt();
+function deleteGanttBarInEdit(rowIdx, barIdx){
+  const row = ganttRows[rowIdx];
+  if(!row || !Array.isArray(row.bars)) return;
+  row.bars.splice(barIdx, 1);
+  saveGantt();
+  _refreshGeBarsUI(rowIdx);
 }
 
+function _refreshGeBarsUI(rowIdx){
+  const row = ganttRows[rowIdx];
+  if(!row) return;
+  const listEl = document.getElementById('ge_bars_list');
+  if(!listEl) return;
+  listEl.innerHTML = (row.bars||[]).map((b,bi)=>`
+    <div class="ge-bar-item" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--border);">
+      <div style="width:14px;height:14px;border-radius:3px;background:${b.color||row.color};flex-shrink:0;"></div>
+      <div style="flex:1;font-size:12px;color:var(--text);">${b.label||'追加バー'} (${b.start}〜${b.end}日目)</div>
+      <button onclick="editGanttBarInEdit(${rowIdx},${bi})" style="background:rgba(74,158,255,.1);border:1px solid rgba(74,158,255,.3);color:var(--blue);padding:3px 8px;border-radius:5px;font-size:10px;cursor:pointer;">編集</button>
+      <button onclick="deleteGanttBarInEdit(${rowIdx},${bi})" style="background:rgba(255,95,95,.1);border:1px solid rgba(255,95,95,.3);color:var(--red);padding:3px 8px;border-radius:5px;font-size:10px;cursor:pointer;">削除</button>
+    </div>`).join('');
+}
+
+function openGanttBarEdit(rowIdx, barIdx){
+  openGanttEdit(rowIdx);
+  setTimeout(()=>editGanttBarInEdit(rowIdx, barIdx), 150);
+}
 
 // ===== AI工程表生成 =====
 function openAiGantt(){
@@ -2861,18 +3662,11 @@ async function runAiGantt(){
     const text = data.content?.map(c=>c.text||'').join('')||'[]';
     const rows = JSON.parse(text.replace(/```json|```/g,'').trim());
     if(!Array.isArray(rows)||rows.length===0){ status.innerHTML='<span style="color:var(--red);">生成できませんでした</span>'; return; }
-    ganttRows = rows.map(r => {
-      // AI出力がstart/endトップレベルの場合はbars[]に変換
-      if(!r.bars){
-        r.bars = [{start: r.start||1, end: r.end||5, label:''}];
-        delete r.start; delete r.end;
-      }
-      return r;
-    });
+    ganttRows = rows;
     saveGantt();
     document.getElementById('ganttAiPanel').style.display='none';
     renderGantt();
-    showToast('🤖 工程表を生成しました（'+ganttRows.length+'工種）');
+    showToast('🤖 工程表を生成しました（'+rows.length+'工種）');
     status.innerHTML='';
   } catch(err){
     status.innerHTML='<span style="color:var(--red);">エラー：'+err.message+'</span>';
@@ -2890,9 +3684,7 @@ function ganttShareText(){
   };
   const lines = ['【工程表】', startDateStr?('開始日：'+startDateStr):'', ''];
   ganttRows.forEach(r=>{
-    const bars = r.bars||[];
-    const barStr = bars.map(b=>`${toDateStr(b.start)}〜${toDateStr(b.end)}(${b.end-b.start+1}日${b.label?'/'+b.label:''})`).join('  ');
-    lines.push(`${r.trade}：${barStr}${r.memo?'  '+r.memo:''}`);
+    lines.push(`${r.trade}：${toDateStr(r.start)} 〜 ${toDateStr(r.end)}（${r.end-r.start+1}日間）${r.memo?'  '+r.memo:''}`);
   });
   navigator.clipboard.writeText(lines.join('\n')).then(()=>showToast('📋 工程表をコピーしました'));
 }
@@ -2903,15 +3695,9 @@ function printGantt(){
   const startDate = startDateStr ? new Date(startDateStr) : new Date();
   const weeks = parseInt(document.getElementById('ganttWeeks')?.value||'5');
   const days = weeks * 7;
-  const colW = 28;
-  const labelW = 100;
-  const rowH = 32;
-  const totalW = labelW + days * colW;
-
-  const toDateStr = (d) => {
-    const dt = new Date(startDate); dt.setDate(dt.getDate()+d);
-    return (dt.getMonth()+1)+'/'+(dt.getDate());
-  };
+  const labelW = 80;
+  // A4横(257mm≈970px)に列幅を自動調整
+  const colW = Math.max(14, Math.min(28, Math.floor((970 - labelW) / days)));
 
   // 日付ヘッダー生成
   let dayHeaders = '';
@@ -2919,52 +3705,58 @@ function printGantt(){
     const dt = new Date(startDate); dt.setDate(dt.getDate()+i);
     const dow = dt.getDay();
     const isWE = dow===0||dow===6;
-    const bg = isWE ? '#fff0f0' : '#f8f8f8';
+    const bg = isWE ? '#ffe8e8' : '#f0f0f0';
     const col = isWE ? '#cc0000' : '#333';
-    dayHeaders += `<td style="width:${colW}px;min-width:${colW}px;text-align:center;font-size:9px;padding:2px 0;background:${bg};color:${col};border:1px solid #ddd;">${(dt.getMonth()+1)+'/'+dt.getDate()}<br>${['日','月','火','水','木','金','土'][dow]}</td>`;
+    dayHeaders += `<td style="width:${colW}px;min-width:${colW}px;text-align:center;font-size:8px;padding:1px 0;background:${bg};color:${col};border:1px solid #ccc;">${dt.getDate()}<br><span style="font-size:7px;">${['日','月','火','水','木','金','土'][dow]}</span></td>`;
   }
 
   // 工種行生成
   let rows = ganttRows.map(row=>{
-    const bars = row.bars||[];
+    const duration = row.end - row.start + 1;
+    const barLabel = row.label || (duration+'日');
     let cells = '';
     for(let i=0;i<days;i++){
-      const day = i+1;
-      // どれかのバーに含まれているか確認
-      const matchBar = bars.find(b => day>=b.start && day<=b.end);
-      const isBarStart = bars.some(b => day===b.start);
+      const inBar = (i+1)>=row.start && (i+1)<=row.end;
+      const isStart = (i+1)===row.start;
       const dt = new Date(startDate); dt.setDate(dt.getDate()+i);
       const isWE = dt.getDay()===0||dt.getDay()===6;
-      const cellBg = matchBar ? row.color : (isWE?'#fff5f5':'transparent');
-      const label = isBarStart ? `<span style="font-size:9px;font-weight:700;color:#000;white-space:nowrap;overflow:hidden;">${(() => { const b=bars.find(b2=>day===b2.start); return b?(b.label||(b.end-b.start+1)+'日'):''; })()}</span>` : '';
-      cells += `<td style="background:${cellBg};border:1px solid #eee;text-align:center;">${label}</td>`;
+      const cellBg = inBar ? row.color : (isWE?'#fff0f0':'#fff');
+      const label = isStart ? `<span style="font-size:7px;font-weight:700;color:#000;white-space:nowrap;">${barLabel}</span>` : '';
+      cells += `<td style="background:${cellBg};border:1px solid #e0e0e0;padding:0 1px;">${label}</td>`;
     }
     return `<tr>
-      <td style="padding:4px 8px;font-size:11px;font-weight:600;border:1px solid #ddd;background:#f9f9f9;white-space:nowrap;">
-        <span style="display:inline-block;width:10px;height:10px;background:${row.color};border-radius:2px;margin-right:4px;vertical-align:middle;"></span>${row.trade}
+      <td style="padding:2px 4px;font-size:10px;font-weight:600;border:1px solid #ddd;background:#fafafa;white-space:nowrap;max-width:${labelW}px;overflow:hidden;text-overflow:ellipsis;">
+        <span style="display:inline-block;width:8px;height:8px;background:${row.color};border-radius:2px;margin-right:3px;vertical-align:middle;"></span>${row.trade}
       </td>${cells}
     </tr>`;
   }).join('');
 
+  const projectName = document.getElementById('topbarProject')?.textContent||'';
   const html = `
-    <div style="padding:16px;font-family:'Hiragino Kaku Gothic Pro','Meiryo',sans-serif;color:#222;min-width:${totalW}px;">
-      <h2 style="font-size:18px;font-weight:700;margin-bottom:4px;border-bottom:2px solid #333;padding-bottom:6px;">工程表</h2>
-      <div style="font-size:12px;color:#666;margin-bottom:12px;">開始日：${startDateStr||'未設定'}　／　${ganttRows.length}工種　${weeks}週間</div>
-      <div style="overflow-x:auto;">
-        <table style="border-collapse:collapse;width:100%;">
-          <thead>
-            <tr>
-              <th style="width:${labelW}px;padding:4px 8px;background:#333;color:#fff;font-size:11px;border:1px solid #555;">工種</th>
-              ${dayHeaders}
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
+    <div style="font-family:'Hiragino Kaku Gothic Pro','Meiryo',sans-serif;color:#222;padding:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:6px;border-bottom:2px solid #333;padding-bottom:4px;">
+        <div>
+          <div style="font-size:16px;font-weight:700;">工程表</div>
+          <div style="font-size:10px;color:#666;margin-top:2px;">${projectName}　開始：${startDateStr||'未設定'}　${weeks}週間（${days}日）　${ganttRows.length}工種</div>
+        </div>
+        <div style="font-size:9px;color:#999;">作成日：${new Date().toLocaleDateString('ja-JP')}</div>
       </div>
+      <table style="border-collapse:collapse;width:100%;table-layout:fixed;">
+        <thead>
+          <tr>
+            <th style="width:${labelW}px;padding:2px 4px;background:#333;color:#fff;font-size:10px;border:1px solid #555;text-align:left;">工種</th>
+            ${dayHeaders}
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
     </div>`;
 
   document.getElementById('printPreviewContent').innerHTML = html;
   document.getElementById('printPreviewTitle').textContent = '工程表';
+  document.body.classList.add('print-landscape');
+  const hint = document.getElementById('printOrientationHint');
+  if(hint) hint.style.display = 'inline';
   document.getElementById('printPreviewModal').style.display = 'flex';
 }
 
@@ -3176,10 +3968,11 @@ function applyTasksFromSummary(taskTexts){
 }
 
 function addManualTask(){
-  const text=prompt('タスク内容を入力：');
-  if(!text) return;
-  tasks.push({id:'t'+Date.now(),text,category:'todo',priority:'normal',dueHint:'',project:state.currentProject,done:false,created:new Date().toLocaleDateString('ja')});
-  saveTasks(); renderTaskList();
+  showInputModal('タスク追加', 'タスク内容を入力...', '', function(text){
+    if(!text) return;
+    tasks.push({id:'t'+Date.now(),text,category:'todo',priority:'normal',dueHint:'',project:state.currentProject,done:false,created:new Date().toLocaleDateString('ja')});
+    saveTasks(); renderTaskList();
+  }, {label1:'タスク内容'});
 }
 
 function renderTaskList(){
@@ -3479,15 +4272,27 @@ function renderPMList(){
 function editPMItem(id){
   const p = priceMasterItems.find(x=>x.id===id);
   if(!p) return;
-  const newName  = prompt('品目名', p.name);   if(newName===null) return;
-  const newPrice = prompt('単価（円）', p.unitPrice); if(newPrice===null) return;
-  const newUnit  = prompt('単位', p.unit);    if(newUnit===null) return;
-  p.name = newName || p.name;
-  p.unitPrice = parseInt(newPrice) || p.unitPrice;
-  p.unit = newUnit || p.unit;
-  savePriceMaster();
-  renderPMList();
-  showToast('更新しました ✓');
+  document.getElementById('modalSheet').innerHTML = `
+    <div style="font-size:15px;font-weight:700;margin-bottom:14px;">✏️ 単価マスター編集</div>
+    <div class="form-group"><label class="form-label">品目名</label>
+      <input id="epm_name" class="form-input" value="${p.name}"></div>
+    <div class="form-row">
+      <div><label class="form-label">単価（円）</label>
+        <input id="epm_price" class="form-input" type="number" value="${p.unitPrice}" inputmode="numeric"></div>
+      <div><label class="form-label">単位</label>
+        <input id="epm_unit" class="form-input" value="${p.unit}"></div>
+    </div>
+    <div class="btn-row" style="margin-top:16px;">
+      <button class="btn btn-secondary" onclick="closeModal()" style="flex:1;">キャンセル</button>
+      <button class="btn btn-primary" onclick="
+        p.name=document.getElementById('epm_name').value||p.name;
+        p.unitPrice=parseInt(document.getElementById('epm_price').value)||p.unitPrice;
+        p.unit=document.getElementById('epm_unit').value||p.unit;
+        savePriceMaster(); renderPMList(); closeModal(); showToast('更新しました ✓');
+      " style="flex:1;">保存</button>
+    </div>`;
+  document.getElementById('modalOverlay').style.display='flex';
+  pushModalState();
 }
 
 function deletePMItem(id){
@@ -3503,15 +4308,35 @@ function addFromPM(id){
   showToast('「'+p.name+'」を追加しました');
 }
 function addCustomPMItem(){
-  const name  = prompt('品目名');      if(!name) return;
-  const price = prompt('単価（円）');  if(!price) return;
-  const unit  = prompt('単位（㎡・式・m等）', '式');
-  const cat   = prompt('分類 material / labor / other', 'labor') || 'labor';
-  const id    = 'pm_'+Date.now();
-  priceMasterItems.push({id, name, spec:'', unit: unit||'式', unitPrice:parseInt(price)||0, category: cat});
-  savePriceMaster();
-  renderPMList();
-  showToast('単価マスターに追加しました ✓');
+  document.getElementById('modalSheet').innerHTML = `
+    <div style="font-size:15px;font-weight:700;margin-bottom:14px;">＋ 単価マスター追加</div>
+    <div class="form-group"><label class="form-label">品目名</label>
+      <input id="apm_name" class="form-input" placeholder="例：クロス施工費"></div>
+    <div class="form-row">
+      <div><label class="form-label">単価（円）</label>
+        <input id="apm_price" class="form-input" type="number" placeholder="1500" inputmode="numeric"></div>
+      <div><label class="form-label">単位</label>
+        <input id="apm_unit" class="form-input" value="式" placeholder="㎡"></div>
+    </div>
+    <div class="form-group"><label class="form-label">分類</label>
+      <select id="apm_cat" class="form-input">
+        <option value="labor">施工費</option>
+        <option value="material">材料費</option>
+        <option value="other">その他</option>
+      </select>
+    </div>
+    <div class="btn-row" style="margin-top:16px;">
+      <button class="btn btn-secondary" onclick="closeModal()" style="flex:1;">キャンセル</button>
+      <button class="btn btn-primary" onclick="
+        const n=document.getElementById('apm_name').value.trim();
+        if(!n){document.getElementById('apm_name').focus();return;}
+        priceMasterItems.push({id:'pm_'+Date.now(),name:n,spec:'',unit:document.getElementById('apm_unit').value||'式',unitPrice:parseInt(document.getElementById('apm_price').value)||0,category:document.getElementById('apm_cat').value});
+        savePriceMaster(); renderPMList(); closeModal(); showToast('単価マスターに追加しました ✓');
+      " style="flex:1;">追加</button>
+    </div>`;
+  document.getElementById('modalOverlay').style.display='flex';
+  pushModalState();
+  setTimeout(()=>document.getElementById('apm_name')?.focus(), 80);
 }
 
 // ===== 見積保存・読込 =====
@@ -3658,6 +4483,9 @@ function printEstimate(){
 
   document.getElementById('printPreviewContent').innerHTML = html;
   document.getElementById('printPreviewTitle').textContent = '御見積書 - '+name;
+  document.body.classList.remove('print-landscape');
+  const hint = document.getElementById('printOrientationHint');
+  if(hint) hint.style.display = 'none';
   document.getElementById('printPreviewModal').style.display='flex';
 }
 
@@ -3734,11 +4562,15 @@ function exportInvoicePDF(){
 
   document.getElementById('printPreviewContent').innerHTML = html;
   document.getElementById('printPreviewTitle').textContent = '請求書 - '+pname;
+  document.body.classList.remove('print-landscape');
+  const hint2 = document.getElementById('printOrientationHint');
+  if(hint2) hint2.style.display = 'none';
   document.getElementById('printPreviewModal').style.display='flex';
 }
 
 function closePrintPreview(){
   document.getElementById('printPreviewModal').style.display='none';
+  document.body.classList.remove('print-landscape');
 }
 
 function shareInvoiceToLine(){
@@ -4262,13 +5094,11 @@ function deleteItem(id) {
 }
 
 function addFromMaster(name, price, unit, cat) {
-  const qty = prompt(`「${name}」の数量を入力:`, '1');
-  if(!qty) return;
-  state.estimateItems.push({
-    id: Date.now(), name, spec:'', qty:parseFloat(qty)||1, unit, unitPrice:price, category:cat
-  });
-  renderEstimate();
-  showToast(`「${name}」を追加しました ✓`);
+  showInputModal(`「${name}」を追加`, '数量', '1', function(qty){
+    state.estimateItems.push({id:Date.now(),name,spec:'',qty:parseFloat(qty)||1,unit,unitPrice:price,category:cat});
+    renderEstimate();
+    showToast(`「${name}」を追加しました ✓`);
+  }, {label1:'数量', inputType:'number'});
 }
 
 // ===== AI ESTIMATE =====
@@ -5011,6 +5841,46 @@ function shareEstimate() {
 }
 
 // ===== MODALS =====
+// ===== prompt()代替：インラインモーダル入力 =====
+function showInputModal(title, placeholder, defaultVal, onOk, opts){
+  // opts: { inputType, label2, placeholder2, default2, selectOpts, hint }
+  opts = opts || {};
+  const id1 = 'sim_input1';
+  const id2 = 'sim_input2';
+  let field2Html = '';
+  if(opts.label2){
+    if(opts.selectOpts){
+      field2Html = `<div style="margin-top:10px;"><label style="font-size:11px;color:var(--muted);">${opts.label2}</label>
+        <select id="${id2}" class="form-input" style="margin-top:4px;">
+          ${opts.selectOpts.map(o=>`<option value="${o.v}"${o.v===(opts.default2||'')?'selected':''}>${o.l}</option>`).join('')}
+        </select></div>`;
+    } else {
+      field2Html = `<div style="margin-top:10px;"><label style="font-size:11px;color:var(--muted);">${opts.label2}</label>
+        <input id="${id2}" class="form-input" type="${opts.inputType2||'text'}" value="${opts.default2||''}" placeholder="${opts.placeholder2||''}" style="margin-top:4px;"></div>`;
+    }
+  }
+  document.getElementById('modalSheet').innerHTML = `
+    <div style="font-size:15px;font-weight:700;margin-bottom:14px;">${title}</div>
+    ${opts.hint?`<div style="font-size:12px;color:var(--muted);margin-bottom:10px;">${opts.hint}</div>`:''}
+    <div><label style="font-size:11px;color:var(--muted);">${opts.label1||'名前'}</label>
+      <input id="${id1}" class="form-input" type="${opts.inputType||'text'}" value="${defaultVal||''}" placeholder="${placeholder||''}" style="margin-top:4px;font-size:15px;">
+    </div>
+    ${field2Html}
+    <div class="btn-row" style="margin-top:16px;">
+      <button class="btn btn-secondary" onclick="closeModal()" style="flex:1;">キャンセル</button>
+      <button class="btn btn-primary" onclick="
+        const v1=document.getElementById('${id1}').value.trim();
+        const v2=document.getElementById('${id2}')?.value||'';
+        if(!v1){document.getElementById('${id1}').focus();return;}
+        closeModal();
+        (${onOk.toString()})(v1,v2);
+      " style="flex:1;">OK</button>
+    </div>`;
+  document.getElementById('modalOverlay').style.display = 'flex';
+  pushModalState();
+  setTimeout(()=>document.getElementById(id1)?.focus(), 80);
+}
+
 function openModal(type, data) {
   const sheet = document.getElementById('modalSheet');
   let html = '';
@@ -5129,12 +5999,11 @@ function openModal(type, data) {
 }
 
 function addFromMasterModal(name, price, unit, cat) {
-  const qty = prompt(`「${name}」の数量を入力:`, '1');
-  if(!qty) return;
-  state.estimateItems.push({id:Date.now(),name,spec:'',qty:parseFloat(qty)||1,unit,unitPrice:price,category:cat});
-  closeModal();
-  renderEstimate();
-  showToast(`「${name}」を追加しました ✓`);
+  showInputModal(`「${name}」を追加`, '数量', '1', function(qty){
+    state.estimateItems.push({id:Date.now(),name,spec:'',qty:parseFloat(qty)||1,unit,unitPrice:price,category:cat});
+    renderEstimate();
+    showToast(`「${name}」を追加しました ✓`);
+  }, {label1:'数量', inputType:'number'});
 }
 
 function closeModal() {
@@ -5272,6 +6141,7 @@ window.addEventListener('load', ()=>{
   history.replaceState({ genbaScreen: 'home' }, '');
   history.pushState({ genbaScreen: 'home' }, '');
   calcAuto(); renderRooms(); renderSketchGallery(); renderSavedEstimatesBar();
+  renderHomeAnkenList();
   const ed = document.getElementById('estDate');
   if(ed) ed.textContent = '見積日: ' + new Date().toLocaleDateString('ja-JP');
 
@@ -5370,16 +6240,30 @@ window.addEventListener('resize', ()=>{ if(canvasReady) resizeCanvas(); });
 </div>
 
 <!-- PDF印刷用オーバーレイ -->
+<style>
+@media print {
+  body > *:not(#printPreviewModal) { display:none !important; }
+  #printPreviewModal { position:static !important; background:none !important; display:block !important; }
+  #printPreviewModal > div { width:100% !important; max-height:none !important; border-radius:0 !important; }
+  .print-toolbar { display:none !important; }
+  #printPreviewContent { padding:0 !important; }
+  /* 縦向き（見積書・請求書）がデフォルト */
+  @page { size:A4 portrait; margin:10mm; }
+  /* ガントチャートは横向き */
+  body.print-landscape @page { size:A4 landscape; margin:8mm; }
+}
+</style>
 <div id="printPreviewModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:600;flex-direction:column;align-items:center;justify-content:center;">
-  <div style="background:#fff;border-radius:12px;width:min(95vw,680px);max-height:90vh;overflow:auto;padding:0;position:relative;">
-    <div style="position:sticky;top:0;background:#fff;padding:10px 16px;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center;z-index:1;">
+  <div style="background:#fff;border-radius:12px;width:min(98vw,960px);max-height:92vh;overflow:auto;padding:0;position:relative;">
+    <div class="print-toolbar" style="position:sticky;top:0;background:#fff;padding:10px 16px;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center;z-index:1;">
       <div style="font-size:13px;font-weight:700;color:#333;" id="printPreviewTitle">プレビュー</div>
-      <div style="display:flex;gap:8px;">
-        <button onclick="window.print()" style="background:#2563eb;border:none;color:#fff;padding:8px 16px;border-radius:8px;font-size:12px;cursor:pointer;">🖨️ 印刷</button>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span id="printOrientationHint" style="font-size:10px;color:#888;display:none;">印刷ダイアログで「横向き」を選択してください</span>
+        <button onclick="window.print()" style="background:#2563eb;border:none;color:#fff;padding:8px 16px;border-radius:8px;font-size:12px;cursor:pointer;">🖨️ 印刷 / PDF保存</button>
         <button onclick="closePrintPreview()" style="background:#eee;border:none;color:#333;padding:8px 12px;border-radius:8px;font-size:12px;cursor:pointer;">✕</button>
       </div>
     </div>
-    <div id="printPreviewContent" style="padding:20px;font-family:'Hiragino Kaku Gothic Pro','Meiryo',sans-serif;color:#222;font-size:12px;line-height:1.6;"></div>
+    <div id="printPreviewContent" style="padding:12px;font-family:'Hiragino Kaku Gothic Pro','Meiryo',sans-serif;color:#222;font-size:12px;line-height:1.6;"></div>
   </div>
 </div>
 </body>
