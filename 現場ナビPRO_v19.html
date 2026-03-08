@@ -1810,11 +1810,14 @@ async function runMemoFileAI(){
       })
     });
     const data = await res.json();
+    if(data.error) throw new Error(data.error.message || 'APIエラー');
+    if(!res.ok) throw new Error('HTTP ' + res.status);
     const raw = data.content?.[0]?.text || '';
-    // JSON抽出
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if(!jsonMatch) throw new Error('JSON解析失敗');
-    const parsed = JSON.parse(jsonMatch[0]);
+    if(!raw) throw new Error('AIからの応答が空です（type:' + (data.type||'?') + '）');
+    // JSON抽出（コードブロックも考慮）
+    const jsonMatch = raw.match(/```json\s*([\s\S]*?)```/) || raw.match(/(\{[\s\S]*\})/);
+    if(!jsonMatch) throw new Error('JSON解析失敗: ' + raw.slice(0,80));
+    const parsed = JSON.parse(jsonMatch[1] || jsonMatch[0]);
     _memoAiExtracted = parsed.items || [];
     renderMemoAiResult(parsed.summary, _memoAiExtracted);
   } catch(err){
