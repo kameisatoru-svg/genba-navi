@@ -1915,7 +1915,6 @@ function executeMemoApply(){
           memo: 'ファイルAI自動抽出'
         });
       });
-      saveState();
       showToast('見積に追加しました ✓');
       closeMemoConfirm();
       setTimeout(()=>{ switchScreen('estimate'); switchEstTab('estimate'); renderEstimate(); }, 400);
@@ -1974,7 +1973,6 @@ function executeMemoApply(){
           unit:'式', memo:'AI自動抽出'
         });
       });
-      saveState();
       showToast('拾い出しに追加しました ✓');
       closeMemoConfirm();
       setTimeout(()=>{ switchScreen('sketch'); switchSketchTab('pickup'); }, 400);
