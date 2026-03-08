@@ -129,6 +129,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);}
 main{position:fixed;top:calc(52px + env(safe-area-inset-top,0px));bottom:calc(58px + env(safe-area-inset-bottom,0px));left:0;right:0;overflow:hidden;}
 .screen{display:none;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;padding-bottom:32px;}
 .screen.active{display:block;}
+.screen.active[style*="flex-direction"]{display:flex;}
 #screen-gantt{overflow:hidden;}
 #screen-gantt.active{display:flex !important;flex-direction:column;}
 .screen::-webkit-scrollbar{display:none;}
@@ -804,7 +805,7 @@ canvas{display:block;touch-action:none;}
 </div>
 
 <!-- ESTIMATE -->
-<div class="screen" id="screen-estimate" style="padding:0;">
+<div class="screen" id="screen-estimate" style="padding:0;display:flex;flex-direction:column;">
   <!-- サブタブ -->
   <div style="display:flex;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;">
     <button id="etab-estimate" onclick="switchEstTab('estimate')" style="flex:1;padding:10px 4px;font-size:12px;font-weight:700;border:none;border-bottom:2px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;">📋 見積書</button>
@@ -812,7 +813,7 @@ canvas{display:block;touch-action:none;}
   </div>
 
   <!-- ===== 見積書パネル ===== -->
-  <div id="epanel-estimate" style="height:calc(100% - 42px);overflow-y:auto;padding:12px;">
+  <div id="epanel-estimate" style="flex:1;overflow-y:auto;padding:12px;">
     <!-- ヘッダー -->
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;">
@@ -920,7 +921,7 @@ canvas{display:block;touch-action:none;}
   </div>
 
   <!-- ===== 請求書パネル ===== -->
-  <div id="epanel-invoice" style="display:none;height:calc(100% - 42px);overflow-y:auto;padding:12px;">
+  <div id="epanel-invoice" style="display:none;flex:1;overflow-y:auto;padding:12px;">
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;">
       <div style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:12px;">💴 請求書</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
