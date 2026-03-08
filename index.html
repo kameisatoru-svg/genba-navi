@@ -126,6 +126,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);}
 main{position:fixed;top:calc(52px + env(safe-area-inset-top,0px));bottom:calc(58px + env(safe-area-inset-bottom,0px));left:0;right:0;overflow:hidden;}
 .screen{display:none;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;padding-bottom:32px;}
 .screen.active{display:block;}
+#screen-gantt.active{display:flex;flex-direction:column;}
 .screen::-webkit-scrollbar{display:none;}
 
 /* UTILS */
@@ -218,8 +219,8 @@ main{position:fixed;top:calc(52px + env(safe-area-inset-top,0px));bottom:calc(58
 .sketch-thumb .thumb-del{position:absolute;top:4px;right:4px;background:rgba(255,95,95,.8);border:none;color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;display:none;align-items:center;justify-content:center;}
 .sketch-thumb:hover .thumb-del{display:flex;}
 /* 拡大ビュアー */
-#sketchViewer{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:600;display:none;flex-direction:column;align-items:center;justify-content:center;}
-#sketchViewer img{max-width:100%;max-height:80vh;object-fit:contain;touch-action:pinch-zoom;}
+#sketchViewer{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:700;display:none;flex-direction:column;}
+#sketchViewer img{max-width:100%;object-fit:contain;touch-action:pinch-zoom;display:block;}
 
 canvas{display:block;touch-action:none;}
 .measure-list{border:1px solid var(--border);border-radius:12px;overflow:hidden;}
@@ -478,6 +479,10 @@ canvas{display:block;touch-action:none;}
 
   <!-- ===== 図面パネル ===== -->
   <div id="spanel-sketch" style="display:flex;flex-direction:column;height:calc(100% - 42px);">
+    <!-- フルスクリーン時の閉じるボタン（通常時は非表示） -->
+    <div id="fsCloseBtn" onclick="toggleCanvasFullscreen()" style="display:none;position:absolute;top:10px;right:10px;z-index:410;background:rgba(255,95,95,.85);color:#fff;border:none;border-radius:12px;padding:10px 18px;font-size:15px;font-weight:700;cursor:pointer;align-items:center;gap:6px;">
+      ⊠ 閉じる
+    </div>
     <!-- ツールバー -->
     <div style="display:flex;align-items:center;gap:0;padding:4px 6px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;flex-shrink:0;">
       <div class="tool-btn active" id="tb-pen" onclick="setTool('pen',this)" style="min-width:44px;">✏️</div>
@@ -2772,15 +2777,18 @@ function deleteSketch(id){
 function toggleCanvasFullscreen(){
   const panel = document.getElementById('spanel-sketch');
   const btn = document.getElementById('tb-fullscreen');
+  const fsClose = document.getElementById('fsCloseBtn');
   isFullscreen = !isFullscreen;
   if(isFullscreen){
     panel.style.cssText='position:fixed;inset:0;z-index:400;background:var(--bg);display:flex;flex-direction:column;';
     btn.textContent='⊠';
     btn.style.color='var(--red)';
+    if(fsClose) fsClose.style.display='flex';
   } else {
     panel.style.cssText='display:flex;flex-direction:column;height:calc(100% - 42px);';
     btn.textContent='⛶';
     btn.style.color='var(--accent)';
+    if(fsClose) fsClose.style.display='none';
   }
   setTimeout(()=>resizeCanvas(), 80);
 }
