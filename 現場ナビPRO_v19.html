@@ -4975,51 +4975,7 @@ function calcEstimateTotalLegacy() {
   return { material, labor, other, subtotal, tax, total };
 }
 
-function renderEstimate() {
-  const totals = calcEstimateTotal();
-  const eTotal = document.getElementById('estTotal');
-  if(!eTotal) return; // 画面が表示されていない場合はスキップ
-  eTotal.innerHTML = `¥${totals.total.toLocaleString()}<span> 円</span>`;
-  document.getElementById('bMaterial').textContent = `¥${totals.material.toLocaleString()}`;
-  document.getElementById('bLabor').textContent = `¥${totals.labor.toLocaleString()}`;
-  document.getElementById('bTax').textContent = `¥${totals.tax.toLocaleString()}`;
-
-  const tbody = document.getElementById('estItems');
-  if(!tbody) return;
-  tbody.innerHTML = '';
-  state.estimateItems.forEach(item=>{
-    const sub = item.qty * item.unitPrice;
-    const tr = document.createElement('div');
-    tr.className = 'est-row';
-    tr.innerHTML = `
-      <div class="ec-name">
-        <div style="font-weight:600;">${item.name}</div>
-        ${item.spec?`<div style="font-size:10px;color:var(--muted);">${item.spec}</div>`:''}
-      </div>
-      <div class="ec-qty">${item.qty}${item.unit}</div>
-      <div class="ec-price">¥${sub.toLocaleString()}</div>
-      <button class="ec-del" onclick="deleteItem(${item.id})">✕</button>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  // Subtotal row
-  const sub = document.createElement('div');
-  sub.className = 'est-row';
-  sub.innerHTML = `<div class="ec-name" style="font-weight:700;">小計</div><div class="ec-qty"></div><div class="ec-price">¥${totals.subtotal.toLocaleString()}</div><div style="width:26px;"></div>`;
-  tbody.appendChild(sub);
-  const tax = document.createElement('div');
-  tax.className = 'est-row';
-  tax.innerHTML = `<div class="ec-name" style="color:var(--muted);">消費税（10%）</div><div class="ec-qty"></div><div class="ec-price">¥${totals.tax.toLocaleString()}</div><div style="width:26px;"></div>`;
-  tbody.appendChild(tax);
-  const tot = document.createElement('div');
-  tot.className = 'est-row total-row';
-  tot.innerHTML = `<div class="ec-name" style="font-weight:700;font-size:14px;">合計</div><div class="ec-qty"></div><div class="ec-price accent">¥${totals.total.toLocaleString()}</div><div style="width:26px;"></div>`;
-  tbody.appendChild(tot);
-
-  // Price master ref
-  renderPriceMasterRef();
-}
+// 旧renderEstimate削除済み（2877行目の新版を使用）
 
 function renderPriceMasterRef() {
   const el = document.getElementById('priceMasterRef');
