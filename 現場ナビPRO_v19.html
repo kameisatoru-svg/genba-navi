@@ -916,8 +916,7 @@ canvas{display:block;touch-action:none;}
       <div id="estAiResult" style="margin-top:10px;font-size:12px;color:var(--muted);"></div>
     </div>
 
-    <div class="section-title" style="margin-top:16px;">単価マスター（参照）</div>
-    <div class="price-master" id="priceMasterRef"></div>
+    <div id="priceMasterRef" style="display:none;"></div>
   </div>
 
   <!-- ===== 請求書パネル ===== -->
@@ -1908,11 +1907,12 @@ function executeMemoApply(){
       lines.forEach(line => {
         const m = line.match(/(.+?)[：:]\s*¥?([\d,]+)/);
         state.estimateItems.push({
-          id: 'ei_'+Date.now()+Math.random(),
+          id: Date.now()+Math.floor(Math.random()*10000),
           name: m ? m[1].trim() : line.trim(),
           qty: 1, unit: '式',
-          price: m ? parseInt(m[2].replace(/,/g,''))||0 : 0,
-          memo: 'ファイルAI自動抽出'
+          unitPrice: m ? parseInt(m[2].replace(/,/g,''))||0 : 0,
+          spec: 'AI自動抽出',
+          category: 'labor'
         });
       });
       showToast('見積に追加しました ✓');
@@ -2895,22 +2895,22 @@ function renderEstimate(){
     row.style.cssText='padding:8px 6px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 70px 75px 80px 28px;gap:4px;align-items:center;';
     row.innerHTML=`
       <div>
-        <input value="${item.name}" oninput="updateEstItem(${item.id},'name',this.value)" style="width:100%;background:transparent;border:none;border-bottom:1px solid transparent;color:#fff;font-size:14px;font-weight:600;outline:none;font-family:var(--font);" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'">
+        <input value="${item.name.replace(/"/g,'&quot;')}" oninput="updateEstItem(${item.id},'name',this.value)" tabindex="0" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:#fff;font-size:14px;font-weight:600;outline:none;font-family:var(--font);cursor:text;" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='var(--border)'">
         <div style="display:flex;align-items:center;gap:4px;margin-top:3px;">
           <select onchange="updateEstItem(${item.id},'category',this.value)" style="background:${catColor}22;border:1px solid ${catColor}55;color:${catColor};border-radius:4px;font-size:12px;padding:1px 4px;outline:none;font-family:var(--font);">
             <option value="material" ${item.category==='material'?'selected':''}>材料</option>
             <option value="labor"    ${item.category==='labor'?'selected':''}>施工</option>
             <option value="other"    ${item.category==='other'?'selected':''}>その他</option>
           </select>
-          <input value="${item.spec||''}" oninput="updateEstItem(${item.id},'spec',this.value)" placeholder="仕様" style="flex:1;background:transparent;border:none;color:var(--muted);font-size:12px;outline:none;font-family:var(--font);">
+          <input value="${(item.spec||'').replace(/"/g,'&quot;')}" oninput="updateEstItem(${item.id},'spec',this.value)" placeholder="仕様" tabindex="0" style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--muted);font-size:12px;outline:none;font-family:var(--font);cursor:text;">
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:2px;">
-        <input type="number" value="${item.qty}" oninput="updateEstItem(${item.id},'qty',this.value)" style="width:44px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:#fff;font-size:13px;text-align:right;padding:4px;outline:none;">
+        <input type="number" value="${item.qty}" oninput="updateEstItem(${item.id},'qty',this.value)" tabindex="0" style="width:44px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:#fff;font-size:13px;text-align:right;padding:4px;outline:none;cursor:text;">
         <span style="font-size:11px;color:var(--muted);">${item.unit}</span>
       </div>
       <div>
-        <input type="number" value="${item.unitPrice}" oninput="updateEstItem(${item.id},'unitPrice',this.value)" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:#fff;font-size:13px;text-align:right;padding:4px;outline:none;">
+        <input type="number" value="${item.unitPrice}" oninput="updateEstItem(${item.id},'unitPrice',this.value)" tabindex="0" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:#fff;font-size:13px;text-align:right;padding:4px;outline:none;cursor:text;">
       </div>
       <div style="font-size:13px;font-weight:700;text-align:right;color:var(--text);">¥${sub.toLocaleString()}</div>
       <button onclick="deleteItem(${item.id})" style="background:transparent;border:none;color:var(--red);font-size:16px;cursor:pointer;padding:0;line-height:1;">×</button>
@@ -2933,7 +2933,7 @@ function renderEstimate(){
 }
 
 function updateEstItem(id, key, val){
-  const item = state.estimateItems.find(i=>i.id===id);
+  const item = state.estimateItems.find(i=>String(i.id)===String(id));
   if(!item) return;
   if(key==='qty'||key==='unitPrice') item[key]=parseFloat(val)||0;
   else item[key]=val;
@@ -5133,7 +5133,7 @@ function applyMeasureToPriceMaster() {
 }
 
 function deleteItem(id) {
-  state.estimateItems = state.estimateItems.filter(i=>i.id!==id);
+  state.estimateItems = state.estimateItems.filter(i=>String(i.id)!==String(id));
   renderEstimate();
   showToast('項目を削除しました');
 }
