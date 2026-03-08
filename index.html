@@ -440,7 +440,7 @@ canvas{display:block;touch-action:none;}
         </div>
         <div style="font-size:13px;font-weight:600;color:var(--text);text-align:center;">拾い出し</div>
       </div>
-      <div onclick="switchScreen('estimate');setTimeout(()=>switchEstTab('gantt'),100)" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;">
+      <div onclick="openGanttScreen()" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;">
         <div style="width:44px;height:44px;background:rgba(44,200,200,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;">
           <svg width="22" height="22" fill="none" stroke="#2ac8c8" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h4M7 12h8M7 16h5"/></svg>
         </div>
@@ -791,7 +791,6 @@ canvas{display:block;touch-action:none;}
   <div style="display:flex;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;">
     <button id="etab-estimate" onclick="switchEstTab('estimate')" style="flex:1;padding:10px 4px;font-size:12px;font-weight:700;border:none;border-bottom:2px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;">📋 見積書</button>
     <button id="etab-invoice" onclick="switchEstTab('invoice')" style="flex:1;padding:10px 4px;font-size:12px;font-weight:700;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);cursor:pointer;">💴 請求書</button>
-    <button id="etab-gantt" onclick="switchEstTab('gantt')" style="flex:1;padding:10px 4px;font-size:12px;font-weight:700;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);cursor:pointer;">📅 工程表</button>
   </div>
 
   <!-- ===== 見積書パネル ===== -->
@@ -963,69 +962,69 @@ canvas{display:block;touch-action:none;}
     </div>
   </div>
 
-  <!-- ===== ガントチャートパネル ===== -->
-  <div id="epanel-gantt" style="display:none;height:calc(100% - 42px);overflow:hidden;flex-direction:column;">
-    <!-- ツールバー -->
-    <div style="padding:8px 10px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
-        <div style="font-size:13px;font-weight:700;flex:1;">📅 工程表</div>
-        <button onclick="openAiGantt()" style="background:linear-gradient(135deg,rgba(176,106,255,.2),rgba(74,158,255,.15));border:1px solid rgba(176,106,255,.3);color:#c89aff;padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">🤖 AI生成</button>
-        <button onclick="addGanttRow()" style="background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.3);color:var(--accent);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">＋ 工種追加</button>
-        <button onclick="ganttShareText()" style="background:rgba(61,214,140,.15);border:1px solid rgba(61,214,140,.3);color:var(--green);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">📋 共有</button>
-        <button id="ganttUndoBtn" onclick="ganttUndo()" style="background:rgba(74,158,255,.15);border:1px solid rgba(74,158,255,.3);color:var(--blue);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;opacity:0.35;">↩️ 戻す</button>
-        <button onclick="if(confirm('工程表データをリセットしますか？')){localStorage.removeItem('genba_gantt');ganttRows=[];_ganttUndoStack=[];_updateGanttUndoBtn();renderGantt();showToast('リセットしました');}" style="background:rgba(255,95,95,.15);border:1px solid rgba(255,95,95,.3);color:var(--red);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">🗑 リセット</button>
-        <button onclick="printGantt()" style="background:rgba(74,158,255,.15);border:1px solid rgba(74,158,255,.3);color:var(--blue);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">🖨️ PDF</button>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <div style="display:flex;align-items:center;gap:4px;">
-          <span style="font-size:11px;color:var(--muted);">開始</span>
-          <input id="ganttStartDate" type="date" class="form-input" style="font-size:12px;padding:4px 6px;width:130px;" onchange="renderGantt()">
-        </div>
-        <div style="display:flex;align-items:center;gap:4px;">
-          <span style="font-size:11px;color:var(--muted);">表示</span>
-          <select id="ganttWeeks" class="form-input" style="font-size:12px;padding:4px 6px;width:72px;" onchange="renderGantt()">
-            <option value="3">3週</option>
-            <option value="4">4週</option>
-            <option value="5" selected>5週</option>
-            <option value="6">6週</option>
-            <option value="8">8週</option>
-          </select>
-        </div>
-        <div style="display:flex;align-items:center;gap:4px;">
-          <span style="font-size:11px;color:var(--muted);">列幅</span>
-          <select id="ganttColW" class="form-input" style="font-size:12px;padding:4px 6px;width:68px;" onchange="renderGantt()">
-            <option value="24">小</option>
-            <option value="32" selected>中</option>
-            <option value="44">大</option>
-          </select>
-        </div>
-        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--muted);">
-          <input type="checkbox" id="ganttShowProgress" onchange="renderGantt()" style="width:14px;height:14px;">進捗表示
-        </label>
-      </div>
-    </div>
+</div>
 
-    <!-- AI生成パネル -->
-    <div id="ganttAiPanel" style="display:none;background:var(--surface);border-bottom:1px solid rgba(176,106,255,.3);padding:12px;flex-shrink:0;">
-      <div style="font-size:12px;font-weight:700;color:#c89aff;margin-bottom:8px;">🤖 AI工程表生成</div>
-      <textarea id="ganttAiInput" class="form-input" rows="3" placeholder="工事内容を入力（例：別府市内カフェ　スケルトン解体からフルリノベ　工期5週間　クロス・床材・照明・カウンター造作）" style="font-size:12px;margin-bottom:8px;"></textarea>
-      <div style="display:flex;gap:8px;">
-        <button onclick="runAiGantt()" style="flex:2;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;color:#fff;padding:10px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">🤖 工程表を生成</button>
-        <button onclick="document.getElementById('ganttAiPanel').style.display='none'" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:12px;cursor:pointer;">閉じる</button>
-      </div>
-      <div id="ganttAiStatus" style="margin-top:8px;font-size:11px;color:var(--muted);"></div>
+<!-- ===== 工程表画面（独立） ===== -->
+<div class="screen" id="screen-gantt" style="padding:0;display:none;flex-direction:column;height:100%;">
+  <!-- ヘッダー -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;">
+    <div style="font-size:15px;font-weight:700;" id="ganttScreenTitle">📅 工程表</div>
+    <div style="display:flex;gap:6px;">
+      <button onclick="openAiGantt()" style="background:linear-gradient(135deg,rgba(176,106,255,.2),rgba(74,158,255,.15));border:1px solid rgba(176,106,255,.3);color:#c89aff;padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">🤖 AI</button>
+      <button onclick="addGanttRow()" style="background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.3);color:var(--accent);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">＋ 追加</button>
+      <button onclick="ganttShareText()" style="background:rgba(61,214,140,.15);border:1px solid rgba(61,214,140,.3);color:var(--green);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">📋</button>
+      <button id="ganttUndoBtn" onclick="ganttUndo()" style="background:rgba(74,158,255,.15);border:1px solid rgba(74,158,255,.3);color:var(--blue);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;opacity:0.35;">↩️</button>
+      <button onclick="showGanttResetConfirm()" style="background:rgba(255,95,95,.15);border:1px solid rgba(255,95,95,.3);color:var(--red);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">🗑</button>
+      <button onclick="printGantt()" style="background:rgba(74,158,255,.15);border:1px solid rgba(74,158,255,.3);color:var(--blue);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">🖨️</button>
     </div>
+  </div>
+  <!-- 設定バー -->
+  <div style="padding:6px 10px;background:var(--surface2);border-bottom:1px solid var(--border);flex-shrink:0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:4px;">
+      <span style="font-size:11px;color:var(--muted);">開始</span>
+      <input id="ganttStartDate" type="date" class="form-input" style="font-size:12px;padding:4px 6px;width:130px;" onchange="renderGantt()">
+    </div>
+    <div style="display:flex;align-items:center;gap:4px;">
+      <span style="font-size:11px;color:var(--muted);">表示</span>
+      <select id="ganttWeeks" class="form-input" style="font-size:12px;padding:4px 6px;width:72px;" onchange="renderGantt()">
+        <option value="3">3週</option>
+        <option value="4">4週</option>
+        <option value="5" selected>5週</option>
+        <option value="6">6週</option>
+        <option value="8">8週</option>
+      </select>
+    </div>
+    <div style="display:flex;align-items:center;gap:4px;">
+      <span style="font-size:11px;color:var(--muted);">列幅</span>
+      <select id="ganttColW" class="form-input" style="font-size:12px;padding:4px 6px;width:68px;" onchange="renderGantt()">
+        <option value="24">小</option>
+        <option value="32" selected>中</option>
+        <option value="44">大</option>
+      </select>
+    </div>
+    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--muted);">
+      <input type="checkbox" id="ganttShowProgress" onchange="renderGantt()" style="width:14px;height:14px;">進捗表示
+    </label>
+  </div>
 
-    <!-- チャートエリア（横スクロール） -->
-    <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
-      <!-- ヘッダー固定エリア -->
-      <div id="ganttHeaderWrap" style="overflow:hidden;flex-shrink:0;background:var(--surface2);">
-        <div id="ganttHeader" style=""></div>
-      </div>
-      <!-- ボディスクロールエリア -->
-      <div id="ganttBodyWrap" style="flex:1;overflow:auto;" onscroll="syncGanttScroll(this)">
-        <div id="ganttBody" style=""></div>
-      </div>
+  <!-- AI生成パネル -->
+  <div id="ganttAiPanel" style="display:none;background:var(--surface);border-bottom:1px solid rgba(176,106,255,.3);padding:12px;flex-shrink:0;">
+    <div style="font-size:12px;font-weight:700;color:#c89aff;margin-bottom:8px;">🤖 AI工程表生成</div>
+    <textarea id="ganttAiInput" class="form-input" rows="3" placeholder="工事内容を入力（例：別府市内カフェ　スケルトン解体からフルリノベ　工期5週間　クロス・床材・照明・カウンター造作）" style="font-size:12px;margin-bottom:8px;"></textarea>
+    <div style="display:flex;gap:8px;">
+      <button onclick="runAiGantt()" style="flex:2;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;color:#fff;padding:10px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">🤖 工程表を生成</button>
+      <button onclick="document.getElementById('ganttAiPanel').style.display='none'" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:12px;cursor:pointer;">閉じる</button>
+    </div>
+    <div id="ganttAiStatus" style="margin-top:8px;font-size:11px;color:var(--muted);"></div>
+  </div>
+
+  <!-- チャートエリア -->
+  <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
+    <div id="ganttHeaderWrap" style="overflow:hidden;flex-shrink:0;background:var(--surface2);">
+      <div id="ganttHeader"></div>
+    </div>
+    <div id="ganttBodyWrap" style="flex:1;overflow:auto;" onscroll="syncGanttScroll(this)">
+      <div id="ganttBody"></div>
     </div>
   </div>
 </div>
@@ -1107,6 +1106,22 @@ canvas{display:block;touch-action:none;}
       <div style="display:flex;gap:8px;">
         <button onclick="closeMemoConfirm()" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--muted);font-size:13px;cursor:pointer;">キャンセル</button>
         <button onclick="executeMemoApply()" id="memoConfirmBtn" style="flex:2;background:var(--accent);border:none;border-radius:8px;padding:10px;color:#000;font-size:13px;font-weight:700;cursor:pointer;">反映する</button>
+      </div>
+    </div>
+
+    <!-- ===== テキスト貼り付けエリア（常時表示） ===== -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">📋 テキスト貼り付け → メモ保存</div>
+      <textarea id="memoPasteInput" placeholder="LINEのやりとり・メール本文・音声文字起こしなど&#10;テキストをここに貼り付けてください" rows="5"
+        style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;outline:none;color:var(--text);font-size:14px;resize:vertical;font-family:var(--font);line-height:1.6;padding:10px;box-sizing:border-box;"></textarea>
+      <div id="memoPasteAiLoading" style="display:none;text-align:center;padding:14px 0 4px;">
+        <div style="font-size:22px;animation:spin 1.2s linear infinite;display:inline-block;">✦</div>
+        <div style="font-size:12px;color:#c89aff;margin-top:4px;">AIが整形中...</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button onclick="clearPasteInput()" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;padding:9px;cursor:pointer;">クリア</button>
+        <button onclick="savePasteAsAiMemo()" style="flex:2;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;padding:9px;cursor:pointer;">✦ AI整形して保存</button>
+        <button onclick="savePasteAsRawMemo()" style="flex:2;background:var(--accent);border:none;border-radius:8px;color:#000;font-size:12px;font-weight:700;padding:9px;cursor:pointer;">そのまま保存</button>
       </div>
     </div>
 
@@ -1898,7 +1913,7 @@ function executeMemoApply(){
       saveGantt();
       showToast('工程表に追加しました ✓');
       closeMemoConfirm();
-      setTimeout(()=>{ switchScreen('estimate'); switchEstTab('gantt'); renderGantt(); }, 400);
+      setTimeout(()=>{ openGanttScreen(); }, 400);
 
     } else if(target === '単価マスター'){
       const lines = content.split('\n').filter(l=>l.trim());
@@ -1991,6 +2006,7 @@ function switchScreen(name, pushHistory) {
     renderHomeAnkenList();
   }
   if(name==='estimate'){ switchEstTab('estimate'); renderEstimate(); }
+  if(name==='gantt'){ renderGantt(); }
   if(name==='voice') renderVoiceNotes();
   if(name==='photos') renderPhotos();
   if(name==='anken'){renderAnkenList();}
@@ -2870,18 +2886,17 @@ function viewerZoom(delta){
 })();
 
 
-// ===== 見積・請求書・ガント タブ切替 =====
+// ===== 見積・請求書 タブ切替（工程表タブは廃止・工程表はクイックアクションから独立アクセス） =====
 function switchEstTab(tab){
-  ['estimate','invoice','gantt'].forEach(t=>{
+  ['estimate','invoice'].forEach(t=>{
     const panel = document.getElementById('epanel-'+t);
-    if(panel) panel.style.display = t===tab ? (t==='gantt'?'flex':'block') : 'none';
+    if(panel) panel.style.display = t===tab ? 'block' : 'none';
     const btn = document.getElementById('etab-'+t);
     if(btn){
       btn.style.borderBottomColor = t===tab ? 'var(--accent)' : 'transparent';
       btn.style.color = t===tab ? 'var(--accent)' : 'var(--muted)';
     }
   });
-  if(tab==='gantt') renderGantt();
   if(tab==='invoice') renderInvoice();
 }
 
@@ -6203,19 +6218,124 @@ function handleViewportResize() {
 }
 
 window.addEventListener('resize', ()=>{ if(canvasReady) resizeCanvas(); });
+
+// ===== 工程表画面を開く =====
+function openGanttScreen(){
+  const a = currentAnkenId ? getAnken(currentAnkenId) : null;
+  const titleEl = document.getElementById('ganttScreenTitle');
+  if(titleEl) titleEl.textContent = a ? a.name + ' - 工程表' : '📅 工程表';
+  switchScreen('gantt');
+}
+
+// 工程表リセット確認（confirm廃止対応）
+function showGanttResetConfirm(){
+  document.getElementById('modalSheet').innerHTML = `
+    <div style="font-size:15px;font-weight:700;margin-bottom:10px;">🗑 工程表をリセット</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.6;">工程表データをすべて削除します。<br>この操作は取り消せません。よろしいですか？</div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeModal()" style="flex:1;">キャンセル</button>
+      <button class="btn btn-primary" onclick="closeModal();localStorage.removeItem('genba_gantt');ganttRows=[];_ganttUndoStack=[];_updateGanttUndoBtn();renderGantt();showToast('リセットしました');"
+        style="flex:1;background:var(--red);border-color:var(--red);">リセット</button>
+    </div>`;
+  document.getElementById('modalOverlay').style.display='flex';
+  pushModalState();
+}
+
+// ===== 打ち合わせメモ テキスト貼り付け =====
+function clearPasteInput(){
+  const el = document.getElementById('memoPasteInput');
+  if(el){ el.value = ''; el.focus(); }
+}
+
+function savePasteAsRawMemo(){
+  const el = document.getElementById('memoPasteInput');
+  const text = el ? el.value.trim() : '';
+  if(!text){ showToast('テキストを貼り付けてください','error'); return; }
+  meetingMemos.unshift({
+    id: 'mm_'+Date.now(),
+    ankenId: currentAnkenId||'',
+    text,
+    date: new Date().toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})
+  });
+  saveMeetingMemos();
+  renderMemoList();
+  el.value = '';
+  showToast('メモに保存しました ✓');
+}
+
+async function savePasteAsAiMemo(){
+  const el = document.getElementById('memoPasteInput');
+  const text = el ? el.value.trim() : '';
+  if(!text){ showToast('テキストを貼り付けてください','error'); return; }
+  const key = localStorage.getItem('genba_api_key')||'';
+  if(!key){ showToast('APIキーを設定してください','error'); return; }
+
+  const loadEl = document.getElementById('memoPasteAiLoading');
+  if(loadEl) loadEl.style.display='block';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key': key,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body: JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:1000,
+        system:`あなたは内装建設業の現場管理アシスタントです。
+入力されたテキスト（LINEやりとり・メール・音声文字起こし等）を、現場メモとして見やすく整形してください。
+・箇条書きや見出しを使って要点を整理する
+・確認事項・決定事項・次回アクションを明確にする
+・不要な挨拶文や冗長な表現は省く
+・日本語で出力する
+整形されたメモテキストのみを返してください。前置きや説明は不要です。`,
+        messages:[{ role:'user', content: text }]
+      })
+    });
+    const data = await res.json();
+    const formatted = data.content?.[0]?.text || text;
+    meetingMemos.unshift({
+      id: 'mm_'+Date.now(),
+      ankenId: currentAnkenId||'',
+      text: formatted,
+      date: new Date().toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})
+    });
+    saveMeetingMemos();
+    renderMemoList();
+    el.value = '';
+    showToast('AI整形して保存しました ✓');
+  } catch(err){
+    showToast('AI整形に失敗しました: '+err.message,'error');
+  } finally {
+    if(loadEl) loadEl.style.display='none';
+  }
+}
 </script>
 
 <!-- 図面拡大ビュアー -->
-<div id="sketchViewer" onclick="closeSketchViewer()" style="position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:700;display:none;flex-direction:column;align-items:center;justify-content:center;">
-  <div style="position:absolute;top:16px;right:16px;display:flex;gap:8px;">
-    <button onclick="event.stopPropagation();viewerZoom(-0.3)" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:20px;cursor:pointer;">－</button>
-    <button onclick="event.stopPropagation();viewerZoom(0.3)" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:20px;cursor:pointer;">＋</button>
-    <button onclick="closeSketchViewer()" style="background:rgba(255,95,95,.5);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:18px;cursor:pointer;">✕</button>
+<div id="sketchViewer" style="position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:700;display:none;flex-direction:column;">
+  <!-- 上部バー：閉じるボタンを大きく左端に配置 -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(0,0,0,.5);flex-shrink:0;">
+    <button onclick="closeSketchViewer()" style="display:flex;align-items:center;gap:8px;background:rgba(255,95,95,.7);border:none;color:#fff;padding:10px 20px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">
+      ← 閉じる
+    </button>
+    <div style="display:flex;gap:8px;">
+      <button onclick="viewerZoom(-0.3)" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:20px;cursor:pointer;">－</button>
+      <button onclick="viewerZoom(0.3)" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:20px;cursor:pointer;">＋</button>
+    </div>
   </div>
-  <div style="overflow:auto;max-width:100%;max-height:90vh;padding:20px;" id="viewerScroll">
-    <img id="viewerImg" src="" style="transform-origin:top left;transition:transform .15s;display:block;" onclick="event.stopPropagation()">
+  <!-- 画像エリア -->
+  <div style="flex:1;overflow:auto;" id="viewerScroll">
+    <img id="viewerImg" src="" style="transform-origin:top left;transition:transform .15s;display:block;max-width:100%;">
   </div>
-  <div style="position:absolute;bottom:16px;color:rgba(255,255,255,.4);font-size:11px;">タップで閉じる　　ピンチで拡大</div>
+  <!-- 下部ヒント＋閉じるボタン -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(0,0,0,.5);flex-shrink:0;">
+    <div style="color:rgba(255,255,255,.4);font-size:11px;">ピンチで拡大 ／ スクロールで移動</div>
+    <button onclick="closeSketchViewer()" style="background:rgba(255,95,95,.7);border:none;color:#fff;padding:10px 24px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">✕ 閉じる</button>
+  </div>
 </div>
 
 <!-- 単価マスター選択モーダル -->
