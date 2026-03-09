@@ -2110,6 +2110,18 @@ function openQuickAction(ankenId){
   const titleEl = document.getElementById('quickAnkenTitle');
   if(titleEl) titleEl.textContent = a.name;
   switchScreen('quick');
+  // デバッグ：タップ座標を表示
+  setTimeout(()=>{
+    const scr = document.getElementById('screen-quick');
+    if(scr){
+      scr.addEventListener('touchend', function dbg(e){
+        const t = e.changedTouches[0];
+        const el = document.elementFromPoint(t.clientX, t.clientY);
+        showToast(`x:${Math.round(t.clientX)} y:${Math.round(t.clientY)} → ${el ? el.tagName+' '+el.className.substring(0,20) : 'null'}`);
+        scr.removeEventListener('touchend', dbg);
+      });
+    }
+  }, 300);
 }
 
 // クイックアクションから案件管理フェーズへ
