@@ -2110,18 +2110,6 @@ function openQuickAction(ankenId){
   const titleEl = document.getElementById('quickAnkenTitle');
   if(titleEl) titleEl.textContent = a.name;
   switchScreen('quick');
-  // デバッグ：タップ座標を表示
-  setTimeout(()=>{
-    const scr = document.getElementById('screen-quick');
-    if(scr){
-      scr.addEventListener('touchend', function dbg(e){
-        const t = e.changedTouches[0];
-        const el = document.elementFromPoint(t.clientX, t.clientY);
-        showToast(`x:${Math.round(t.clientX)} y:${Math.round(t.clientY)} → ${el ? el.tagName+' '+el.className.substring(0,20) : 'null'}`);
-        scr.removeEventListener('touchend', dbg);
-      });
-    }
-  }, 300);
 }
 
 // クイックアクションから案件管理フェーズへ
@@ -6166,6 +6154,14 @@ window.addEventListener('load', ()=>{
     window.visualViewport.addEventListener('resize', handleViewportResize);
     window.visualViewport.addEventListener('scroll', handleViewportResize);
   }
+  // 初期のmain位置をトップバー実寸で調整
+  setTimeout(()=>{
+    const topbarEl = document.querySelector('.topbar');
+    const mainEl = document.querySelector('main');
+    if(topbarEl && mainEl){
+      mainEl.style.top = topbarEl.getBoundingClientRect().height + 'px';
+    }
+  }, 100);
 
   // スタンドアロン（ホーム画面から起動）かどうか確認
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches
@@ -6205,16 +6201,20 @@ function handleViewportResize() {
   const mainEl = document.querySelector('main');
   if (!mainEl) return;
 
+  const topbarEl = document.querySelector('.topbar');
+  const topbarH = topbarEl ? topbarEl.getBoundingClientRect().height : 52;
+
   // キーボード表示でviewportが縮んだ場合、mainのbottomをキーボード高さ分調整
   const keyboardHeight = window.innerHeight - vv.height - vv.offsetTop;
-  const navHeight = 58 + (parseInt(getComputedStyle(document.documentElement)
-    .getPropertyValue('--safe-bottom') || '0') || 0);
+  const navHeight = 58;
 
   if (keyboardHeight > 50) {
     // キーボード表示中
+    mainEl.style.top = topbarH + 'px';
     mainEl.style.bottom = keyboardHeight + 'px';
   } else {
     // キーボード非表示
+    mainEl.style.top = topbarH + 'px';
     mainEl.style.bottom = '';
   }
 }
