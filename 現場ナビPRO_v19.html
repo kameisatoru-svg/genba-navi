@@ -130,6 +130,7 @@ main{position:fixed;top:calc(52px + env(safe-area-inset-top,0px));bottom:calc(58
 .screen{display:none;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;padding-bottom:32px;}
 .screen.active{display:block;}
 .screen.active[style*="flex-direction"]{display:flex;}
+#screen-estimate.active{display:flex !important;flex-direction:column;}
 #screen-gantt{overflow:hidden;}
 #screen-gantt.active{display:flex !important;flex-direction:column;}
 .screen::-webkit-scrollbar{display:none;}
@@ -805,7 +806,7 @@ canvas{display:block;touch-action:none;}
 </div>
 
 <!-- ESTIMATE -->
-<div class="screen" id="screen-estimate" style="padding:0;display:flex;flex-direction:column;">
+<div class="screen" id="screen-estimate" style="padding:0;">
   <!-- サブタブ -->
   <div style="display:flex;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;">
     <button id="etab-estimate" onclick="switchEstTab('estimate')" style="flex:1;padding:10px 4px;font-size:12px;font-weight:700;border:none;border-bottom:2px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;">📋 見積書</button>
@@ -1463,13 +1464,11 @@ canvas{display:block;touch-action:none;}
 <!-- BOTTOM NAV -->
 <nav class="bottomnav">
   <button class="nav-btn active" id="nav-home"
-    onclick="switchScreen('home')"
-    ontouchend="event.preventDefault();switchScreen('home')">
+    onclick="switchScreen('home')">
     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>ホーム
   </button>
   <button class="nav-btn" id="nav-back"
-    onclick="navGoBack()"
-    ontouchend="event.preventDefault();navGoBack()">
+    onclick="navGoBack()">
     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>戻る
   </button>
 </nav>
