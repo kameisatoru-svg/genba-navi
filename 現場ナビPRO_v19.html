@@ -2105,11 +2105,24 @@ function openQuickAction(ankenId){
   currentAnkenId = ankenId;
   const a = getAnken(ankenId);
   if(!a) return;
-  // トップバーとクイック画面タイトルを更新
   document.getElementById('topbarProject').innerHTML = `案件: <span>${a.name.substring(0,10)}</span>`;
   const titleEl = document.getElementById('quickAnkenTitle');
   if(titleEl) titleEl.textContent = a.name;
   switchScreen('quick');
+  // デバッグ：タップした要素のIDと親IDを表示
+  setTimeout(()=>{
+    const scr = document.getElementById('screen-quick');
+    if(scr){
+      scr.addEventListener('touchend', function dbg(e){
+        const t = e.changedTouches[0];
+        const el = document.elementFromPoint(t.clientX, t.clientY);
+        const id = el ? (el.id || el.className.substring(0,15)) : 'null';
+        const pid = el && el.parentElement ? (el.parentElement.id || el.parentElement.className.substring(0,15)) : '';
+        showToast(`y:${Math.round(t.clientY)} el:${id} par:${pid}`);
+        scr.removeEventListener('touchend', dbg);
+      });
+    }
+  }, 300);
 }
 
 // クイックアクションから案件管理フェーズへ
