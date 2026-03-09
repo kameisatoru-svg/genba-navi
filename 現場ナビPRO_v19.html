@@ -427,50 +427,50 @@ canvas{display:block;touch-action:none;}
   </div>
   <div style="padding:14px 12px;">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <div ontouchend="event.preventDefault();event.stopPropagation();switchScreen('sketch');" onclick="switchScreen('sketch')" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
+      <div onclick="switchScreen('sketch')" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
         <div style="width:44px;height:44px;background:rgba(245,166,35,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;">
           <svg width="22" height="22" fill="none" stroke="#f5a623" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
         </div>
         <div style="font-size:13px;font-weight:600;color:var(--text);text-align:center;">平面図<br>スケッチ</div>
       </div>
-      <div ontouchend="event.preventDefault();event.stopPropagation();openMeetingMemo();" onclick="openMeetingMemo()" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
+      <div onclick="openMeetingMemo()" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
         <div style="width:44px;height:44px;background:rgba(255,95,95,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;">
           <svg width="22" height="22" fill="none" stroke="#ff5f5f" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </div>
         <div style="font-size:13px;font-weight:600;color:var(--text);text-align:center;">打ち合わせ<br>メモ</div>
       </div>
-      <div ontouchend="event.preventDefault();event.stopPropagation();switchScreen('estimate');" onclick="switchScreen('estimate')" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
+      <div onclick="switchScreen('estimate')" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
         <div style="width:44px;height:44px;background:rgba(61,214,140,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;">
           <svg width="22" height="22" fill="none" stroke="#3dd68c" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
         </div>
         <div style="font-size:13px;font-weight:600;color:var(--text);text-align:center;">見積</div>
       </div>
-      <div ontouchend="event.preventDefault();event.stopPropagation();switchScreen('sketch');setTimeout(()=>switchSketchTab('measure'),100);" onclick="switchScreen('sketch');setTimeout(()=>switchSketchTab('measure'),100)" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
+      <div onclick="switchScreen('sketch');setTimeout(()=>switchSketchTab('measure'),100)" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
         <div style="width:44px;height:44px;background:rgba(74,158,255,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;">
           <svg width="22" height="22" fill="none" stroke="#4a9eff" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
         </div>
         <div style="font-size:13px;font-weight:600;color:var(--text);text-align:center;">実測</div>
       </div>
-      <div ontouchend="event.preventDefault();event.stopPropagation();switchScreen('sketch');setTimeout(()=>switchSketchTab('pickup'),100);" onclick="switchScreen('sketch');setTimeout(()=>switchSketchTab('pickup'),100)" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
+      <div onclick="switchScreen('sketch');setTimeout(()=>switchSketchTab('pickup'),100)" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
         <div style="width:44px;height:44px;background:rgba(176,106,255,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;">
           <svg width="22" height="22" fill="none" stroke="#b06aff" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         </div>
         <div style="font-size:13px;font-weight:600;color:var(--text);text-align:center;">拾い出し</div>
       </div>
-      <div ontouchend="event.preventDefault();event.stopPropagation();openGanttScreen();" onclick="openGanttScreen()" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
+      <div onclick="openGanttScreen()" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
         <div style="width:44px;height:44px;background:rgba(44,200,200,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;">
           <svg width="22" height="22" fill="none" stroke="#2ac8c8" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h4M7 12h8M7 16h5"/></svg>
         </div>
         <div style="font-size:13px;font-weight:600;color:var(--text);text-align:center;">工程表</div>
       </div>
-      <div ontouchend="event.preventDefault();event.stopPropagation();switchScreen('photos');" onclick="switchScreen('photos')" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
+      <div onclick="switchScreen('photos')" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
         <div style="width:44px;height:44px;background:rgba(255,180,50,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;">
           <svg width="22" height="22" fill="none" stroke="#ffb432" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
         </div>
         <div style="font-size:13px;font-weight:600;color:var(--text);text-align:center;">現場<br>写真</div>
       </div>
       <!-- 案件管理 幅全体 -->
-      <div ontouchend="event.preventDefault();event.stopPropagation();openAnkenFromQuick();" onclick="openAnkenFromQuick()" style="grid-column:span 2;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
+      <div onclick="openAnkenFromQuick()" style="grid-column:span 2;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
         <div style="width:44px;height:44px;background:rgba(245,166,35,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
           <svg width="22" height="22" fill="none" stroke="#f5a623" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
         </div>
@@ -2109,17 +2109,6 @@ function openQuickAction(ankenId){
   const titleEl = document.getElementById('quickAnkenTitle');
   if(titleEl) titleEl.textContent = a.name;
   switchScreen('quick');
-  // デバッグ：document全体でタップ要素を表示
-  setTimeout(()=>{
-    function dbg(e){
-      const t = e.changedTouches[0];
-      const el = document.elementFromPoint(t.clientX, t.clientY);
-      const id = el ? (el.id || el.tagName+'.'+el.className.substring(0,20)) : 'null';
-      showToast(`y:${Math.round(t.clientY)} → ${id}`);
-      document.removeEventListener('touchend', dbg);
-    }
-    document.addEventListener('touchend', dbg);
-  }, 500);
 }
 
 // クイックアクションから案件管理フェーズへ
