@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>現場ナビ PRO v20</title>
+<!-- キャッシュ無効化：常に最新版を取得 -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 
 <!-- PWA: スタンドアロン全画面 -->
 <meta name="mobile-web-app-capable" content="yes">
@@ -6109,21 +6113,24 @@ function addItemFromModal() {
 
 // ===== Chromeで開く（ホーム画面アプリからブラウザへ） =====
 function openInChrome() {
-  const url = location.href;
-  // Android: intent scheme でChromeを指定して開く
-  const intentUrl = `intent:${url}#Intent;package=com.android.chrome;scheme=https;end`;
-  // まずintentを試し、失敗したらwindow.openにフォールバック
-  try {
+  // タイムスタンプをクエリに付けてキャッシュを完全バイパス
+  const base = location.href.split('?')[0].split('#')[0];
+  const url = base + '?v=' + Date.now();
+
+  // Android: intent schemeでChromeを指定
+  const intentUrl = 'intent:' + url + '#Intent;package=com.android.chrome;scheme=https;end';
+
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  if(isAndroid) {
     location.href = intentUrl;
-    // intentが効かない場合（iOS等）は少し待ってからwindow.openで開く
-    setTimeout(() => {
-      window.open(url, '_blank');
-    }, 800);
-  } catch(e) {
+    // intent失敗時フォールバック
+    setTimeout(() => { window.open(url, '_blank'); }, 1000);
+  } else {
+    // iOS・その他
     window.open(url, '_blank');
   }
   closeModal();
-  showToast('Chromeで開いています...', '');
+  showToast('Chromeで最新版を開いています...', '');
 }
 
 function saveSettings() {
@@ -6262,7 +6269,63 @@ window.addEventListener('load', ()=>{
       setTimeout(() => { if(banner.parentNode) banner.remove(); }, 8000);
     }, 1500);
   }
+
+  // ===== スタンドアロン起動時：自動バージョンチェック =====
+  if(isStandalone) {
+    setTimeout(() => checkForUpdate(), 2000);
+  }
 });
+
+// 現在のHTMLファイルを fetch して、バージョン番号が変わっていたら更新バナーを表示
+async function checkForUpdate() {
+  try {
+    const base = location.href.split('?')[0].split('#')[0];
+    const res = await fetch(base + '?_=' + Date.now(), {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' }
+    });
+    if(!res.ok) return;
+    const text = await res.text();
+    // 取得したHTMLのバージョン番号を抽出
+    const remoteMatch = text.match(/現場ナビ PRO<\/title>|<title>現場ナビ PRO (v[\d]+)<\/title>/);
+    const remoteVer = text.match(/<title>現場ナビ PRO (v[\d]+)<\/title>/);
+    const localVer  = document.title.match(/v(\d+)/);
+    if(!remoteVer || !localVer) return;
+    if(parseInt(remoteVer[1].replace('v','')) > parseInt(localVer[1])) {
+      showUpdateBanner(remoteVer[1]);
+      return;
+    }
+    // バージョン同じでもファイルサイズが変わっていたら更新あり
+    const remoteSize = text.length;
+    const localSize  = document.documentElement.outerHTML.length;
+    if(Math.abs(remoteSize - localSize) > 100) {
+      showUpdateBanner('最新版');
+    }
+  } catch(e) { /* オフライン等は無視 */ }
+}
+
+function showUpdateBanner(ver) {
+  if(document.getElementById('updateBanner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'updateBanner';
+  banner.style.cssText = `
+    position:fixed;bottom:70px;left:12px;right:12px;z-index:9000;
+    background:linear-gradient(135deg,#1a3a1a,#1e4a1e);
+    border:1.5px solid #3dd68c;border-radius:14px;
+    padding:13px 14px;display:flex;align-items:center;gap:12px;
+    box-shadow:0 4px 24px rgba(0,0,0,.6);
+    animation:slideUp .3s ease;
+  `;
+  banner.innerHTML = `
+    <div style="font-size:26px;line-height:1;">🆕</div>
+    <div style="flex:1;">
+      <div style="font-size:13px;font-weight:700;color:#3dd68c;margin-bottom:2px;">${ver} に更新があります</div>
+      <div style="font-size:11px;color:#aaa;line-height:1.5;">設定 ⚙️ →「Chromeで開く」でリロードしてください</div>
+    </div>
+    <div onclick="this.parentElement.remove()" style="color:#666;font-size:20px;padding:4px;cursor:pointer;line-height:1;">✕</div>
+  `;
+  document.body.appendChild(banner);
+}
 
 function handleViewportResize() {
   const vv = window.visualViewport;
