@@ -2109,20 +2109,17 @@ function openQuickAction(ankenId){
   const titleEl = document.getElementById('quickAnkenTitle');
   if(titleEl) titleEl.textContent = a.name;
   switchScreen('quick');
-  // デバッグ：タップした要素のIDと親IDを表示
+  // デバッグ：document全体でタップ要素を表示
   setTimeout(()=>{
-    const scr = document.getElementById('screen-quick');
-    if(scr){
-      scr.addEventListener('touchend', function dbg(e){
-        const t = e.changedTouches[0];
-        const el = document.elementFromPoint(t.clientX, t.clientY);
-        const id = el ? (el.id || el.className.substring(0,15)) : 'null';
-        const pid = el && el.parentElement ? (el.parentElement.id || el.parentElement.className.substring(0,15)) : '';
-        showToast(`y:${Math.round(t.clientY)} el:${id} par:${pid}`);
-        scr.removeEventListener('touchend', dbg);
-      });
+    function dbg(e){
+      const t = e.changedTouches[0];
+      const el = document.elementFromPoint(t.clientX, t.clientY);
+      const id = el ? (el.id || el.tagName+'.'+el.className.substring(0,20)) : 'null';
+      showToast(`y:${Math.round(t.clientY)} → ${id}`);
+      document.removeEventListener('touchend', dbg);
     }
-  }, 300);
+    document.addEventListener('touchend', dbg);
+  }, 500);
 }
 
 // クイックアクションから案件管理フェーズへ
