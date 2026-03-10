@@ -6578,8 +6578,13 @@ function addItemFromModal() {
 
 // ===== 最新版に強制更新 =====
 function openInChrome() {
-  // タイムスタンプ付きURLで現在のウィンドウごと強制リロード
-  // → スタンドアロンモードのキャッシュを完全バイパス
+  // 現在のバージョンを「更新済み」としてlocalStorageに記録
+  // → リロード後のバージョンチェックでバナーを再表示しないようにする
+  const localVer = document.title.match(/v(\d+)/);
+  if(localVer) {
+    localStorage.setItem('genba_last_updated_ver', localVer[1]);
+  }
+  // タイムスタンプ付きURLで強制リロード（キャッシュバイパス）
   const base = location.href.split('?')[0].split('#')[0];
   const url = base + '?reload=' + Date.now();
   location.replace(url);
@@ -6670,6 +6675,14 @@ window.addEventListener('popstate', (e) => {
 });
 
 window.addEventListener('load', ()=>{
+  // reload= クエリが残っている場合はクリーンなURLに書き換える
+  // （openInChrome()でリロードした後の再起動時に不要なクエリを消す）
+  if(location.search.includes('reload=')) {
+    const cleanUrl = location.href.split('?')[0].split('#')[0];
+    history.replaceState(null, '', cleanUrl);
+    // 更新完了トースト（初回のみ）
+    setTimeout(() => showToast('✅ 最新版に更新しました'), 1200);
+  }
   // 初期履歴を積む
   history.replaceState({ genbaScreen: 'home' }, '');
   history.pushState({ genbaScreen: 'home' }, '');
@@ -6728,7 +6741,7 @@ window.addEventListener('load', ()=>{
   }
 });
 
-// 現在のHTMLファイルを fetch して、バージョン番号が変わっていたら更新バナーを表示
+// 現在のHTMLファイルを fetch して、バージョン番号が上がっていたら更新バナーを表示
 async function checkForUpdate() {
   try {
     const base = location.href.split('?')[0].split('#')[0];
@@ -6738,21 +6751,21 @@ async function checkForUpdate() {
     });
     if(!res.ok) return;
     const text = await res.text();
-    // 取得したHTMLのバージョン番号を抽出
-    const remoteMatch = text.match(/現場ナビ PRO<\/title>|<title>現場ナビ PRO (v[\d]+)<\/title>/);
     const remoteVer = text.match(/<title>現場ナビ PRO (v[\d]+)<\/title>/);
     const localVer  = document.title.match(/v(\d+)/);
     if(!remoteVer || !localVer) return;
-    if(parseInt(remoteVer[1].replace('v','')) > parseInt(localVer[1])) {
+
+    const remoteNum = parseInt(remoteVer[1].replace('v',''));
+    const localNum  = parseInt(localVer[1]);
+
+    // バージョンが上がっている場合のみバナー表示
+    if(remoteNum > localNum) {
+      // 直前に「このバージョンへ更新」ボタンを押していたら抑制
+      const lastUpdated = parseInt(localStorage.getItem('genba_last_updated_ver') || '0');
+      if(lastUpdated >= remoteNum) return;
       showUpdateBanner(remoteVer[1]);
-      return;
     }
-    // バージョン同じでもファイルサイズが変わっていたら更新あり
-    const remoteSize = text.length;
-    const localSize  = document.documentElement.outerHTML.length;
-    if(Math.abs(remoteSize - localSize) > 100) {
-      showUpdateBanner('最新版');
-    }
+    // ※バージョン番号が同じ場合はバナーを出さない（サイズ比較による誤検知を廃止）
   } catch(e) { /* オフライン等は無視 */ }
 }
 
@@ -6908,7 +6921,7 @@ function exportAllData(e) {
     'genba_gantt','genba_tasks','genba_estimates',
     'genba_price_master','genba_api_key'
   ];
-  const backup = { version: 'v19', date: new Date().toISOString(), data: {} };
+  const backup = { version: 'v20', date: new Date().toISOString(), data: {} };
   keys.forEach(k => {
     const v = localStorage.getItem(k);
     if(v) backup.data[k] = v;
