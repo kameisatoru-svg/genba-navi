@@ -6977,12 +6977,12 @@ function importAllData(e) {
 
 <!-- 単価マスター選択モーダル -->
 <div id="priceMasterModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:flex-end;justify-content:center;">
-  <div style="background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-width:680px;max-height:80vh;display:flex;flex-direction:column;padding:16px;">
+  <div style="background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-width:100%;box-sizing:border-box;max-height:80vh;display:flex;flex-direction:column;padding:16px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
       <div style="font-size:14px;font-weight:700;">📋 単価マスターから追加</div>
       <button onclick="closePriceMasterModal()" style="background:transparent;border:none;color:var(--muted);font-size:20px;cursor:pointer;">✕</button>
     </div>
-    <div style="display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;scrollbar-width:none;">
+    <div style="display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;scrollbar-width:none;white-space:nowrap;min-width:0;flex-shrink:0;-webkit-overflow-scrolling:touch;">
       <button class="pm-cat active" onclick="filterPMCat('all',this)" style="flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid var(--accent);background:rgba(245,166,35,.15);color:var(--accent);font-size:11px;cursor:pointer;">すべて</button>
       <button class="pm-cat" onclick="filterPMCat('labor',this)" style="flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;">🔨 施工</button>
       <button class="pm-cat" onclick="filterPMCat('material',this)" style="flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;">📦 材料</button>
