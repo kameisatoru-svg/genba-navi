@@ -1228,17 +1228,57 @@ canvas{display:block;touch-action:none;}
     <!-- 反映先選択メニュー（インライン） -->
     <div id="reflectMenuPanel" style="display:none;background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:14px;margin-bottom:14px;">
       <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;">反映先を選択</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
         <button onclick="aiExtractToEstimate();closeReflectMenu()"
-          style="background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.4);border-radius:10px;padding:14px;color:var(--accent);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);">
+          style="background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.4);border-radius:10px;padding:12px;color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);">
           📋 見積へ反映
         </button>
         <button onclick="aiExtractToPriceMaster();closeReflectMenu()"
-          style="background:rgba(74,158,255,.12);border:1px solid rgba(74,158,255,.35);border-radius:10px;padding:14px;color:var(--blue);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);">
+          style="background:rgba(74,158,255,.12);border:1px solid rgba(74,158,255,.35);border-radius:10px;padding:12px;color:var(--blue);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);">
           📦 単価マスターへ
         </button>
+        <button onclick="aiExtractToGantt();closeReflectMenu()"
+          style="background:rgba(44,200,200,.12);border:1px solid rgba(44,200,200,.35);border-radius:10px;padding:12px;color:#2ac8c8;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);">
+          📅 工程表へ
+        </button>
+        <button onclick="aiExtractToPickup();closeReflectMenu()"
+          style="background:rgba(176,106,255,.12);border:1px solid rgba(176,106,255,.35);border-radius:10px;padding:12px;color:#b06aff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);">
+          🔢 拾い出しへ
+        </button>
+        <button onclick="aiExtractToGenbaAnnai();closeReflectMenu()"
+          style="background:rgba(61,214,140,.12);border:1px solid rgba(61,214,140,.35);border-radius:10px;padding:12px;color:var(--green);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);">
+          🗺️ 現場案内へ
+        </button>
+        <button onclick="aiExtractToMemo();closeReflectMenu()"
+          style="background:rgba(255,95,95,.12);border:1px solid rgba(255,95,95,.35);border-radius:10px;padding:12px;color:#ff5f5f;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);">
+          📝 メモへ保存
+        </button>
       </div>
-      <button onclick="closeReflectMenu()" style="width:100%;margin-top:8px;background:transparent;border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--font);">キャンセル</button>
+      <!-- 案件管理フェーズ -->
+      <div style="font-size:11px;font-weight:700;color:var(--muted);margin:8px 0 6px;">📁 案件管理フェーズへ反映</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+        <button onclick="aiExtractToAnkenPhase(1);closeReflectMenu()"
+          style="background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);border-radius:8px;padding:9px;color:#f5a623;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);">
+          📞 受注前
+        </button>
+        <button onclick="aiExtractToAnkenPhase(2);closeReflectMenu()"
+          style="background:rgba(74,158,255,.1);border:1px solid rgba(74,158,255,.3);border-radius:8px;padding:9px;color:var(--blue);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);">
+          📐 現場調査
+        </button>
+        <button onclick="aiExtractToAnkenPhase(3);closeReflectMenu()"
+          style="background:rgba(61,214,140,.1);border:1px solid rgba(61,214,140,.3);border-radius:8px;padding:9px;color:var(--green);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);">
+          📋 見積・契約
+        </button>
+        <button onclick="aiExtractToAnkenPhase(4);closeReflectMenu()"
+          style="background:rgba(176,106,255,.1);border:1px solid rgba(176,106,255,.3);border-radius:8px;padding:9px;color:#b06aff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);">
+          🏗️ 施工準備・着工
+        </button>
+        <button onclick="aiExtractToAnkenPhase(5);closeReflectMenu()"
+          style="background:rgba(255,95,95,.1);border:1px solid rgba(255,95,95,.3);border-radius:8px;padding:9px;color:#ff5f5f;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);grid-column:span 2;">
+          ✅ 完了・請求
+        </button>
+      </div>
+      <button onclick="closeReflectMenu()" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--font);">キャンセル</button>
     </div>
 
     <!-- 整理結果プレビュー -->
@@ -1249,10 +1289,21 @@ canvas{display:block;touch-action:none;}
       <div id="organizedText" style="background:var(--surface);border:1px solid var(--accent);border-radius:12px;
         padding:14px;font-size:14px;line-height:1.9;color:#fff;white-space:pre-wrap;
         margin-bottom:10px;"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;">
         <button onclick="saveOrganizedMemo()" class="btn btn-secondary" style="font-size:13px;">💾 保存</button>
         <button onclick="applyOrganizedToEstimate()" class="btn btn-primary" style="font-size:13px;">📋 見積へ</button>
         <button onclick="applyOrganizedToPriceMaster()" style="background:rgba(74,158,255,.15);border:1px solid rgba(74,158,255,.35);border-radius:10px;padding:12px;color:var(--blue);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);">📦 単価表へ</button>
+        <button onclick="applyOrganizedToGantt()" style="background:rgba(44,200,200,.12);border:1px solid rgba(44,200,200,.35);border-radius:10px;padding:12px;color:#2ac8c8;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);">📅 工程表へ</button>
+        <button onclick="applyOrganizedToPickup()" style="background:rgba(176,106,255,.12);border:1px solid rgba(176,106,255,.35);border-radius:10px;padding:12px;color:#b06aff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);">🔢 拾い出し</button>
+        <button onclick="applyOrganizedToMemo()" style="background:rgba(255,95,95,.12);border:1px solid rgba(255,95,95,.35);border-radius:10px;padding:12px;color:#ff5f5f;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);">📝 メモ保存</button>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:var(--muted);margin:4px 0 6px;">📁 案件管理フェーズへ反映</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <button onclick="applyOrganizedToAnkenPhase(1)" style="background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);border-radius:8px;padding:9px;color:#f5a623;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);">📞 受注前</button>
+        <button onclick="applyOrganizedToAnkenPhase(2)" style="background:rgba(74,158,255,.1);border:1px solid rgba(74,158,255,.3);border-radius:8px;padding:9px;color:var(--blue);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);">📐 現場調査</button>
+        <button onclick="applyOrganizedToAnkenPhase(3)" style="background:rgba(61,214,140,.1);border:1px solid rgba(61,214,140,.3);border-radius:8px;padding:9px;color:var(--green);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);">📋 見積・契約</button>
+        <button onclick="applyOrganizedToAnkenPhase(4)" style="background:rgba(176,106,255,.1);border:1px solid rgba(176,106,255,.3);border-radius:8px;padding:9px;color:#b06aff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);">🏗️ 施工準備</button>
+        <button onclick="applyOrganizedToAnkenPhase(5)" style="background:rgba(255,95,95,.1);border:1px solid rgba(255,95,95,.3);border-radius:8px;padding:9px;color:#ff5f5f;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);grid-column:span 2;">✅ 完了・請求</button>
       </div>
     </div>
 
@@ -1783,13 +1834,24 @@ async function runMemoFileAI(){
   "summary": "全体の要約（200字以内）",
   "items": [
     {
-      "target": "見積|工程表|単価マスター|拾い出し|現場案内|打ち合わせメモ",
+      "target": "見積|工程表|単価マスター|拾い出し|現場案内|打ち合わせメモ|案件管理_受注前|案件管理_現場調査|案件管理_見積契約|案件管理_施工準備|案件管理_完了請求",
       "title": "適用項目のタイトル",
       "content": "具体的な内容（反映に使う文字列）",
       "detail": "ユーザーへの説明（1〜2行）"
     }
   ]
 }
+targetの選び方：
+- 金額・数量・材料が含まれる → 見積 または 単価マスター
+- 工事手順・日程・工期 → 工程表
+- 面積・数量の計算 → 拾い出し
+- 集合場所・駐車場・地図 → 現場案内
+- 問合せ・名刺・打ち合わせ記録 → 案件管理_受注前
+- 実測・スケッチ・写真 → 案件管理_現場調査
+- 見積提出・契約内容 → 案件管理_見積契約
+- 工程表・業者連絡・着工 → 案件管理_施工準備
+- 完了確認・請求・クローズ → 案件管理_完了請求
+- その他メモ・要望 → 打ち合わせメモ
 "items"には実際にデータが抽出できたもののみ含めてください。JSONのみ返し、前後に説明文やマークダウンは不要です。`;
 
   // メッセージ内容を構築
@@ -1854,22 +1916,33 @@ function renderMemoAiResult(summary, items){
 
   const targetIcons = {
     '見積':'📋', '工程表':'📅', '単価マスター':'📦',
-    '拾い出し':'🔢', '現場案内':'🗺️', '打ち合わせメモ':'📝'
+    '拾い出し':'🔢', '現場案内':'🗺️', '打ち合わせメモ':'📝',
+    '案件管理_受注前':'📞', '案件管理_現場調査':'📐',
+    '案件管理_見積契約':'✍️', '案件管理_施工準備':'🏗️', '案件管理_完了請求':'✅'
   };
   const targetColors = {
     '見積':'rgba(245,166,35,.15)','工程表':'rgba(44,200,200,.15)',
     '単価マスター':'rgba(74,158,255,.15)','拾い出し':'rgba(176,106,255,.15)',
-    '現場案内':'rgba(61,214,140,.15)','打ち合わせメモ':'rgba(255,95,95,.15)'
+    '現場案内':'rgba(61,214,140,.15)','打ち合わせメモ':'rgba(255,95,95,.15)',
+    '案件管理_受注前':'rgba(245,166,35,.1)','案件管理_現場調査':'rgba(74,158,255,.1)',
+    '案件管理_見積契約':'rgba(61,214,140,.1)','案件管理_施工準備':'rgba(176,106,255,.1)',
+    '案件管理_完了請求':'rgba(255,95,95,.1)'
   };
   const targetBorder = {
     '見積':'rgba(245,166,35,.4)','工程表':'rgba(44,200,200,.4)',
     '単価マスター':'rgba(74,158,255,.4)','拾い出し':'rgba(176,106,255,.4)',
-    '現場案内':'rgba(61,214,140,.4)','打ち合わせメモ':'rgba(255,95,95,.4)'
+    '現場案内':'rgba(61,214,140,.4)','打ち合わせメモ':'rgba(255,95,95,.4)',
+    '案件管理_受注前':'rgba(245,166,35,.3)','案件管理_現場調査':'rgba(74,158,255,.3)',
+    '案件管理_見積契約':'rgba(61,214,140,.3)','案件管理_施工準備':'rgba(176,106,255,.3)',
+    '案件管理_完了請求':'rgba(255,95,95,.3)'
   };
   const targetFontColor = {
     '見積':'var(--accent)','工程表':'#2ac8c8',
     '単価マスター':'var(--blue)','拾い出し':'#b06aff',
-    '現場案内':'var(--green)','打ち合わせメモ':'#ff5f5f'
+    '現場案内':'var(--green)','打ち合わせメモ':'#ff5f5f',
+    '案件管理_受注前':'#f5a623','案件管理_現場調査':'var(--blue)',
+    '案件管理_見積契約':'var(--green)','案件管理_施工準備':'#b06aff',
+    '案件管理_完了請求':'#ff5f5f'
   };
 
   const container = document.getElementById('memoApplyCards');
@@ -2022,10 +2095,151 @@ function executeMemoApply(){
       renderMemoList();
       showToast('メモに保存しました ✓');
       closeMemoConfirm();
+
+    } else if(target && target.startsWith('案件管理_')){
+      // 案件管理フェーズへ反映
+      const phaseMap = {
+        '案件管理_受注前':1, '案件管理_現場調査':2,
+        '案件管理_見積契約':3, '案件管理_施工準備':4, '案件管理_完了請求':5
+      };
+      const phase = phaseMap[target];
+      applyContentToAnkenPhase(phase, title, content);
+      closeMemoConfirm();
     }
   } catch(e){
     showToast('反映中にエラーが発生しました: '+e.message, 'error');
   }
+}
+
+
+// ===== 打ち合わせメモ画面の反映関数群（整理結果・反映先メニュー用） =====
+
+// 案件管理フェーズへの反映共通処理
+function applyContentToAnkenPhase(phase, title, content) {
+  if(!currentAnkenId){ showToast('案件を選択してください','error'); return; }
+  const a = getAnken(currentAnkenId);
+  if(!a){ showToast('案件が見つかりません','error'); return; }
+  // 対象フェーズのステージを取得
+  const stages = STAGES_MASTER.filter(s => s.phase === phase);
+  if(!stages.length) return;
+  // 最初のステージのnotesフィールドにAI内容を追記
+  const stageId = stages[0].id;
+  if(!a.stages[stageId]) a.stages[stageId] = {};
+  if(!a.stages[stageId].data) a.stages[stageId].data = {};
+  const existing = a.stages[stageId].data.notes || a.stages[stageId].data.memo || a.stages[stageId].data.content || '';
+  const newText = existing ? existing + '\n\n【AI抽出】' + title + '\n' + content : '【AI抽出】' + title + '\n' + content;
+  // notesがあればnotes、なければmemo、なければcontentフィールドを使う
+  const targetField = stages[0].fields.includes('notes') ? 'notes'
+    : stages[0].fields.includes('memo') ? 'memo'
+    : stages[0].fields.includes('content') ? 'content' : 'memo';
+  a.stages[stageId].data[targetField] = newText;
+  saveAnken();
+  const phaseLabels = {1:'受注前',2:'現場調査',3:'見積・契約',4:'施工準備・着工',5:'完了・請求'};
+  showToast(`案件管理「${phaseLabels[phase]}」に反映しました ✓`);
+  setTimeout(()=>{ switchScreen('anken'); setTimeout(()=>openAnkenDetail(currentAnkenId),50); }, 400);
+}
+
+// 反映先メニューから直接呼ぶ関数（テキストエリアの内容をAI解析して反映）
+function aiExtractToGantt() {
+  const text = document.getElementById('memoInputArea').value.trim();
+  if(!text){ showToast('テキストを入力してください','error'); return; }
+  const lines = text.split('\n').filter(l=>l.trim());
+  let start = 1;
+  lines.slice(0,8).forEach((line,i)=>{
+    ganttRows.push({ id:'gr_'+Date.now()+i, trade:line.replace(/^[\d\.\-・\s]+/,'').trim()||('工程'+(i+1)),
+      color:'#f5a623', start, end:start+2, label:'', progress:0, memo:'メモより抽出', bars:[] });
+    start += 3;
+  });
+  saveGantt();
+  showToast('工程表に追加しました ✓');
+  setTimeout(()=>openGanttScreen(), 400);
+}
+
+function aiExtractToPickup() {
+  const text = document.getElementById('memoInputArea').value.trim();
+  if(!text){ showToast('テキストを入力してください','error'); return; }
+  if(!state.pickupItems) state.pickupItems = [];
+  const lines = text.split('\n').filter(l=>l.trim());
+  lines.forEach(line=>{
+    const m = line.match(/(.+?)[：:×x]\s*([\d\.]+)/);
+    state.pickupItems.push({ id:'pi_'+Date.now()+Math.random(),
+      name: m ? m[1].trim() : line.trim(), qty: m ? parseFloat(m[2])||1 : 1, unit:'式', memo:'メモより抽出' });
+  });
+  showToast('拾い出しに追加しました ✓');
+  setTimeout(()=>{ switchScreen('sketch'); switchSketchTab('pickup'); }, 400);
+}
+
+function aiExtractToGenbaAnnai() {
+  const text = document.getElementById('memoInputArea').value.trim();
+  if(!text){ showToast('テキストを入力してください','error'); return; }
+  meetingMemos.unshift({ id:'mm_'+Date.now(), ankenId:currentAnkenId||'',
+    text:'【現場案内】\n'+text,
+    date:new Date().toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) });
+  saveMeetingMemos(); renderMemoList();
+  showToast('現場案内をメモに保存しました ✓');
+}
+
+function aiExtractToMemo() {
+  const text = document.getElementById('memoInputArea').value.trim();
+  if(!text){ showToast('テキストを入力してください','error'); return; }
+  meetingMemos.unshift({ id:'mm_'+Date.now(), ankenId:currentAnkenId||'',
+    text,
+    date:new Date().toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) });
+  saveMeetingMemos(); renderMemoList();
+  showToast('メモに保存しました ✓');
+}
+
+function aiExtractToAnkenPhase(phase) {
+  const text = document.getElementById('memoInputArea').value.trim();
+  if(!text){ showToast('テキストを入力してください','error'); return; }
+  applyContentToAnkenPhase(phase, 'メモより抽出', text);
+}
+
+// 整理結果（organizedText）から各反映先へ
+function applyOrganizedToGantt() {
+  const text = document.getElementById('organizedText').textContent;
+  if(!text){ showToast('まず整理を実行してください','error'); return; }
+  const lines = text.split('\n').filter(l=>l.trim() && !l.startsWith('【'));
+  let start = 1;
+  lines.slice(0,8).forEach((line,i)=>{
+    ganttRows.push({ id:'gr_'+Date.now()+i, trade:line.replace(/^[・\-\s]+/,'').trim()||('工程'+(i+1)),
+      color:'#f5a623', start, end:start+2, label:'', progress:0, memo:'AI整理より抽出', bars:[] });
+    start += 3;
+  });
+  saveGantt();
+  showToast('工程表に追加しました ✓');
+  setTimeout(()=>openGanttScreen(), 400);
+}
+
+function applyOrganizedToPickup() {
+  const text = document.getElementById('organizedText').textContent;
+  if(!text){ showToast('まず整理を実行してください','error'); return; }
+  if(!state.pickupItems) state.pickupItems = [];
+  const lines = text.split('\n').filter(l=>l.trim() && !l.startsWith('【'));
+  lines.forEach(line=>{
+    const m = line.match(/(.+?)[：:×x]\s*([\d\.]+)/);
+    state.pickupItems.push({ id:'pi_'+Date.now()+Math.random(),
+      name: m ? m[1].replace(/^[・\-\s]+/,'').trim() : line.replace(/^[・\-\s]+/,'').trim(),
+      qty: m ? parseFloat(m[2])||1 : 1, unit:'式', memo:'AI整理より抽出' });
+  });
+  showToast('拾い出しに追加しました ✓');
+  setTimeout(()=>{ switchScreen('sketch'); switchSketchTab('pickup'); }, 400);
+}
+
+function applyOrganizedToMemo() {
+  const text = document.getElementById('organizedText').textContent;
+  if(!text){ showToast('まず整理を実行してください','error'); return; }
+  meetingMemos.unshift({ id:'mm_'+Date.now(), ankenId:currentAnkenId||'',
+    text,
+    date:new Date().toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) });
+  saveMeetingMemos(); renderMemoList();
+  showToast('メモに保存しました ✓');
+}
+
+function applyOrganizedToAnkenPhase(phase) {
+  const text = document.getElementById('organizedText').textContent;
+  if(!text){ showToast('まず整理を実行してください','error'); return; }
+  applyContentToAnkenPhase(phase, 'AI整理結果', text);
 }
 
 // ===== 画面履歴スタック =====
