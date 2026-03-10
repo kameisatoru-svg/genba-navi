@@ -401,28 +401,101 @@ canvas{display:block;touch-action:none;}
 <main>
 <!-- HOME -->
 <div class="screen active" id="screen-home" style="padding:0;">
-  <!-- ホームヘッダー：新規＋進行中数＋バックアップ -->
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px 10px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;">
-    <div style="font-size:13px;color:var(--muted);">進行中: <span id="homeActiveCount" style="font-size:16px;font-weight:700;color:var(--accent);">0</span> 件</div>
-    <div style="display:flex;align-items:center;gap:8px;">
-      <button onclick="exportAllData(event)" style="display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:12px;font-weight:600;padding:8px 12px;border-radius:10px;cursor:pointer;touch-action:manipulation;">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        バックアップ
-      </button>
-      <button onclick="triggerImportData(event)" style="display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:12px;font-weight:600;padding:8px 12px;border-radius:10px;cursor:pointer;touch-action:manipulation;">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        復元
-      </button>
-      <button onclick="openNewAnken()" style="display:flex;align-items:center;gap:6px;background:var(--accent);border:none;color:#000;font-size:13px;font-weight:700;padding:9px 18px;border-radius:10px;cursor:pointer;touch-action:manipulation;">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        新規案件
-      </button>
+
+  <!-- ===== 案件一覧ビュー ===== -->
+  <div id="anken-list-view">
+    <!-- ヘッダー -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px 10px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;">
+      <div style="font-size:13px;color:var(--muted);">進行中: <span id="homeActiveCount" style="font-size:16px;font-weight:700;color:var(--accent);">0</span> 件</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button onclick="exportAllData(event)" style="display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:12px;font-weight:600;padding:8px 12px;border-radius:10px;cursor:pointer;touch-action:manipulation;">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          バックアップ
+        </button>
+        <button onclick="triggerImportData(event)" style="display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:12px;font-weight:600;padding:8px 12px;border-radius:10px;cursor:pointer;touch-action:manipulation;">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          復元
+        </button>
+        <button onclick="openNewAnken()" style="display:flex;align-items:center;gap:6px;background:var(--accent);border:none;color:#000;font-size:13px;font-weight:700;padding:9px 18px;border-radius:10px;cursor:pointer;touch-action:manipulation;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          新規案件
+        </button>
+      </div>
+    </div>
+
+    <!-- AIファイル読込バナー -->
+    <div style="margin:10px 12px 0;background:linear-gradient(135deg,rgba(176,106,255,.15),rgba(74,158,255,.1));border:1px solid rgba(176,106,255,.3);border-radius:12px;padding:14px;cursor:pointer;" onclick="openAiImport()">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="font-size:24px;">🤖</div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#c89aff;">AIファイル読込</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">名刺・見積書・図面・PDFを撮影/添付 → 案件情報を自動入力</div>
+        </div>
+        <div style="margin-left:auto;color:var(--muted);">›</div>
+      </div>
+    </div>
+
+    <!-- インポート用隠しinput -->
+    <input type="file" id="importFileInput" accept=".json" style="display:none;" onchange="importAllData(event)">
+    <!-- 案件リスト -->
+    <div id="homeAnkenList" style="padding:10px 12px;overflow-y:auto;"></div>
+  </div>
+
+  <!-- ===== 案件詳細ビュー ===== -->
+  <div id="anken-detail-view" style="display:none;padding:14px 12px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+      <button onclick="backToAnkenList()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;">← 戻る</button>
+      <div style="font-size:15px;font-weight:700;" id="ankenDetailTitle"></div>
+    </div>
+    <!-- 進捗バー -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <span style="font-size:12px;color:var(--muted);">工程進捗</span>
+        <span style="font-size:18px;font-weight:900;color:var(--accent);" id="ankenProgress">0%</span>
+      </div>
+      <div style="background:var(--bg);border-radius:99px;height:6px;overflow:hidden;">
+        <div id="ankenProgressBar" style="background:linear-gradient(90deg,var(--accent),#f0b55a);height:100%;border-radius:99px;transition:width .4s;width:0%;"></div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;" id="ankenProgressLabel"></div>
+    </div>
+    <!-- 18工程リスト -->
+    <div id="ankenStages"></div>
+    <!-- 現場案内テンプレートセクション -->
+    <div id="genbaAnnaiBanner" style="display:none;background:rgba(61,214,140,.08);border:1px solid rgba(61,214,140,.3);border-radius:12px;padding:14px;margin-top:8px;">
+      <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:10px;">🗺️ 現場案内テンプレート</div>
+      <div id="genbaAnnaiContent" style="font-size:12px;color:var(--muted);white-space:pre-wrap;line-height:1.8;background:var(--bg);border-radius:8px;padding:12px;"></div>
+      <button onclick="copyGenbaTmpl()" style="margin-top:10px;background:var(--green);border:none;color:#000;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;width:100%;">📋 コピーしてLINE/メールで送る</button>
     </div>
   </div>
-  <!-- インポート用隠しinput -->
-  <input type="file" id="importFileInput" accept=".json" style="display:none;" onchange="importAllData(event)">
-  <!-- 案件リスト -->
-  <div id="homeAnkenList" style="padding:10px 12px;overflow-y:auto;"></div>
+
+  <!-- AIファイル読込モーダル -->
+  <div id="aiImportPanel" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;overflow-y:auto;padding:20px;">
+    <div style="background:var(--surface);border-radius:16px;padding:20px;max-width:480px;margin:0 auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div style="font-size:16px;font-weight:700;">🤖 AIファイル読込</div>
+        <button onclick="closeAiImport()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:8px;cursor:pointer;">✕</button>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">名刺・見積書・図面・PDFを添付するとAIが自動で読み取ります</div>
+      <div onclick="document.getElementById('aiFileInput').click()" style="border:2px dashed rgba(176,106,255,.4);border-radius:12px;padding:24px;text-align:center;cursor:pointer;margin-bottom:14px;background:rgba(176,106,255,.05);">
+        <div style="font-size:32px;margin-bottom:8px;">📎</div>
+        <div style="font-size:13px;font-weight:600;color:#c89aff;">ファイルを添付 / カメラで撮影</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">PDF・JPEG・PNG対応</div>
+        <input type="file" id="aiFileInput" accept="image/*,application/pdf" multiple style="display:none" onchange="handleAiFiles(event)">
+      </div>
+      <div id="aiFilePreview" style="margin-bottom:14px;"></div>
+      <div style="margin-bottom:14px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">またはテキストで情報を入力</div>
+        <textarea id="aiTextInput" rows="4" placeholder="例：施主は山田太郎様、住所は別府市北浜1-2-3、工事内容はクロス張替え、予算は80万円程度..." style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px;font-size:14px;font-family:var(--font);resize:vertical;outline:none;"></textarea>
+      </div>
+      <div style="margin-bottom:16px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">読込先案件</div>
+        <select id="aiTargetAnken" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px;font-size:14px;outline:none;"></select>
+      </div>
+      <button onclick="runAiImport()" style="width:100%;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;color:#fff;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">🤖 AIで自動入力する</button>
+      <div id="aiImportResult" style="margin-top:14px;font-size:12px;color:var(--muted);line-height:1.7;"></div>
+    </div>
+  </div>
+
 </div>
 
 <!-- クイックアクション画面 -->
@@ -1429,96 +1502,6 @@ canvas{display:block;touch-action:none;}
   </div>
 </div>
 <!-- 案件管理画面 -->
-<div class="screen" id="screen-anken">
-  <div id="anken-list-view">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-      <div class="section-title" style="margin:0;">案件一覧</div>
-      <button onclick="openNewAnken()" style="background:var(--accent);border:none;color:#000;font-size:12px;font-weight:700;padding:7px 14px;border-radius:8px;cursor:pointer;">＋ 新規案件</button>
-    </div>
-
-    <!-- AIファイル読込バナー -->
-    <div style="background:linear-gradient(135deg,rgba(176,106,255,.15),rgba(74,158,255,.1));border:1px solid rgba(176,106,255,.3);border-radius:12px;padding:14px;margin:12px 0;cursor:pointer;" onclick="openAiImport()">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div style="font-size:24px;">🤖</div>
-        <div>
-          <div style="font-size:13px;font-weight:700;color:#c89aff;">AIファイル読込</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px;">名刺・見積書・図面・PDFを撮影/添付 → 案件情報を自動入力</div>
-        </div>
-        <div style="margin-left:auto;color:var(--muted);">›</div>
-      </div>
-    </div>
-
-    <!-- 案件リスト -->
-    <div id="ankenList"></div>
-  </div>
-
-  <!-- 案件詳細ビュー -->
-  <div id="anken-detail-view" style="display:none;">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-      <button onclick="backToAnkenList()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;">← 戻る</button>
-      <div style="font-size:15px;font-weight:700;" id="ankenDetailTitle"></div>
-    </div>
-
-    <!-- 進捗バー -->
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px;">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-        <span style="font-size:12px;color:var(--muted);">工程進捗</span>
-        <span style="font-size:18px;font-weight:900;color:var(--accent);" id="ankenProgress">0%</span>
-      </div>
-      <div style="background:var(--bg);border-radius:99px;height:6px;overflow:hidden;">
-        <div id="ankenProgressBar" style="background:linear-gradient(90deg,var(--accent),#f0b55a);height:100%;border-radius:99px;transition:width .4s;width:0%;"></div>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:6px;" id="ankenProgressLabel"></div>
-    </div>
-
-    <!-- 18工程リスト -->
-    <div id="ankenStages"></div>
-
-    <!-- 現場案内テンプレートセクション -->
-    <div id="genbaAnnaiBanner" style="display:none;background:rgba(61,214,140,.08);border:1px solid rgba(61,214,140,.3);border-radius:12px;padding:14px;margin-top:8px;">
-      <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:10px;">🗺️ 現場案内テンプレート</div>
-      <div id="genbaAnnaiContent" style="font-size:12px;color:var(--muted);white-space:pre-wrap;line-height:1.8;background:var(--bg);border-radius:8px;padding:12px;"></div>
-      <button onclick="copyGenbaTmpl()" style="margin-top:10px;background:var(--green);border:none;color:#000;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;width:100%;">📋 コピーしてLINE/メールで送る</button>
-    </div>
-  </div>
-
-  <!-- AIファイル読込モーダル -->
-  <div id="aiImportPanel" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;overflow-y:auto;padding:20px;">
-    <div style="background:var(--surface);border-radius:16px;padding:20px;max-width:480px;margin:0 auto;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <div style="font-size:16px;font-weight:700;">🤖 AIファイル読込</div>
-        <button onclick="closeAiImport()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:8px;cursor:pointer;">✕</button>
-      </div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">名刺・見積書・図面・PDFを添付するとAIが自動で読み取ります</div>
-
-      <!-- ファイル添付エリア -->
-      <div onclick="document.getElementById('aiFileInput').click()" style="border:2px dashed rgba(176,106,255,.4);border-radius:12px;padding:24px;text-align:center;cursor:pointer;margin-bottom:14px;background:rgba(176,106,255,.05);">
-        <div style="font-size:32px;margin-bottom:8px;">📎</div>
-        <div style="font-size:13px;font-weight:600;color:#c89aff;">ファイルを添付 / カメラで撮影</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px;">PDF・JPEG・PNG対応</div>
-        <input type="file" id="aiFileInput" accept="image/*,application/pdf" multiple style="display:none" onchange="handleAiFiles(event)">
-      </div>
-
-      <!-- プレビュー -->
-      <div id="aiFilePreview" style="margin-bottom:14px;"></div>
-
-      <!-- テキスト入力 -->
-      <div style="margin-bottom:14px;">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">またはテキストで情報を入力</div>
-        <textarea id="aiTextInput" rows="4" placeholder="例：施主は山田太郎様、住所は別府市北浜1-2-3、工事内容はクロス張替え、予算は80万円程度..." style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px;font-size:14px;font-family:var(--font);resize:vertical;outline:none;"></textarea>
-      </div>
-
-      <!-- 読込先案件 -->
-      <div style="margin-bottom:16px;">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">読込先案件</div>
-        <select id="aiTargetAnken" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px;font-size:14px;outline:none;"></select>
-      </div>
-
-      <button onclick="runAiImport()" style="width:100%;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;color:#fff;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">🤖 AIで自動入力する</button>
-      <div id="aiImportResult" style="margin-top:14px;font-size:12px;color:var(--muted);line-height:1.7;"></div>
-    </div>
-  </div>
-</div>
 
 <!-- ===== 名刺読込モーダル ===== -->
 <div id="meishiModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:600;overflow-y:auto;padding:16px;">
@@ -2198,7 +2181,7 @@ function applyContentToAnkenPhase(phase, title, content) {
   saveAnken();
   const phaseLabels = {1:'受注前',2:'現場調査',3:'見積・契約',4:'施工準備・着工',5:'完了・請求'};
   showToast(`案件管理「${phaseLabels[phase]}」に反映しました ✓`);
-  setTimeout(()=>{ switchScreen('anken'); setTimeout(()=>openAnkenDetail(currentAnkenId),50); }, 400);
+  setTimeout(()=>{ switchScreen('home'); setTimeout(()=>openAnkenDetail(currentAnkenId),50); }, 400);
 }
 
 // 反映先メニューから直接呼ぶ関数（テキストエリアの内容をAI解析して反映）
@@ -2487,7 +2470,7 @@ function applyMeishiData() {
   showToast('名刺交換・登録に反映しました ✓');
   closeMeishiModal();
   setTimeout(() => {
-    switchScreen('anken');
+    switchScreen('home');
     setTimeout(() => openAnkenDetail(anken.id), 50);
   }, 300);
 }
@@ -2514,13 +2497,18 @@ function switchScreen(name, pushHistory) {
   // ホームは常にアクティブ表示
   if(name==='home'){
     document.getElementById('nav-home')?.classList.add('active');
+    // 詳細ビューが開いていたら一覧に戻す
+    const dv = document.getElementById('anken-detail-view');
+    const lv = document.getElementById('anken-list-view');
+    if(dv) dv.style.display = 'none';
+    if(lv) lv.style.display = '';
     renderHomeAnkenList();
   }
   if(name==='estimate'){ switchEstTab('estimate'); renderEstimate(); }
   if(name==='gantt'){ renderGantt(); }
   if(name==='voice') renderVoiceNotes();
   if(name==='photos') renderPhotos();
-  if(name==='anken'){renderAnkenList();}
+  
   if(name==='sketch') {
     setTimeout(()=>{
       if(!canvasReady) { initCanvas(); } else { resizeCanvas(); }
@@ -2608,7 +2596,7 @@ function openQuickAction(ankenId){
 // クイックアクションから案件管理フェーズへ
 function openAnkenFromQuick(){
   if(!currentAnkenId) return;
-  switchScreen('anken');
+  switchScreen('home');
   // anken詳細を直接開く
   setTimeout(()=>openAnkenDetail(currentAnkenId), 50);
 }
@@ -2658,34 +2646,7 @@ function openNewAnken(){
   }, {label1:'案件名', hint:'工事名・物件名を入力してください'});
 }
 
-function renderAnkenList(){
-  const el=document.getElementById("ankenList");
-  if(!el)return;
-  if(ankenData.length===0){
-    el.innerHTML="<div style='text-align:center;padding:40px;color:var(--muted);font-size:13px;'>📋 案件がありません<br>右上の「＋ 新規案件」から追加</div>";
-    return;
-  }
-  el.innerHTML=ankenData.map(a=>{
-    const done=STAGES_MASTER.filter(s=>a.stages[s.id]&&a.stages[s.id].done).length;
-    const pct=Math.round(done/STAGES_MASTER.length*100);
-    const next=STAGES_MASTER.find(s=>!(a.stages[s.id]&&a.stages[s.id].done));
-    const col=next?PHASE_COLORS[next.phase]:"#3dd68c";
-    const lbl=next?PHASE_LABELS[next.phase]:"完了";
-    return `<div onclick="openAnkenDetail('${a.id}')" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid ${col};border-radius:12px;padding:13px 14px;margin-bottom:9px;cursor:pointer;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-        <div style="font-size:14px;font-weight:700;">${a.name}</div>
-        <div style="font-size:10px;color:${col};background:${col}22;padding:3px 8px;border-radius:99px;">${lbl}</div>
-      </div>
-      <div style="background:var(--bg);border-radius:99px;height:4px;overflow:hidden;">
-        <div style="background:${col};width:${pct}%;height:100%;border-radius:99px;"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-top:5px;">
-        <div style="font-size:10px;color:var(--muted);">${a.created}</div>
-        <div style="font-size:10px;color:var(--muted);">${done}/${STAGES_MASTER.length}工程 ${pct}%</div>
-      </div>
-    </div>`;
-  }).join("");
-}
+function renderAnkenList(){ renderHomeAnkenList(); }
 
 function openAnkenDetail(id){
   currentAnkenId=id;
@@ -2698,9 +2659,9 @@ function openAnkenDetail(id){
 }
 
 function backToAnkenList(){
-  document.getElementById("anken-list-view").style.display="block";
+  document.getElementById("anken-list-view").style.display="";
   document.getElementById("anken-detail-view").style.display="none";
-  renderAnkenList();
+  renderHomeAnkenList();
 }
 
 function renderAnkenDetail(){
@@ -3619,7 +3580,7 @@ const GANTT_TRADES = ['解体','電気工事','設備工事','木工事','ボー
 function addGanttRow(){
   if(ganttRows.length>=15){ showToast('最大15工種です','error'); return; }
   const trade = GANTT_TRADES[ganttRows.length] || '工種'+(ganttRows.length+1);
-  ganttRows.push({ id:'g'+Date.now(), trade, start:1, end:5, color:ganttColors[ganttRows.length%ganttColors.length] });
+  ganttRows.push({ id:'g'+Date.now(), trade, start:1, end:1.5, color:ganttColors[ganttRows.length%ganttColors.length] });
   saveGantt(); renderGantt();
 }
 
@@ -3693,7 +3654,7 @@ function renderGantt(){
 
   ganttRows.forEach((row,ri)=>{
     const barLeft=(row.start-1)*colW;
-    const barWidth=Math.max(colW-2,(row.end-row.start+1)*colW-2);
+    const barWidth=Math.max(colW*0.5-2,(row.end-row.start)*colW-2);
     const prog=row.progress||0;
     const duration=row.end-row.start+1;
 
@@ -3739,8 +3700,8 @@ function renderGantt(){
       const slot   = slotIdx % 2;
       const bTop   = bSlotTop[slot];
       const bLeft  = (b.start-1)*colW;
-      const bWidth = Math.max(colW-2,(b.end-b.start+1)*colW-2);
-      const bDur   = b.end-b.start+1;
+      const bWidth = Math.max(colW*0.5-2,(b.end-b.start)*colW-2);
+      const bDur   = b.end-b.start;
       const dragType_move  = b.isMain ? `startGanttDrag(event,${ri},'move')`  : `startGanttDragSub(event,${ri},${b.bi},'move')`;
       const dragType_left  = b.isMain ? `startGanttDrag(event,${ri},'left')`  : `startGanttDragSub(event,${ri},${b.bi},'left')`;
       const dragType_right = b.isMain ? `startGanttDrag(event,${ri},'right')` : `startGanttDragSub(event,${ri},${b.bi},'right')`;
@@ -3754,8 +3715,8 @@ function renderGantt(){
         onmousedown="${dragType_move}"
         ontouchstart="${dragTypeT_move}">
         ${b.isMain&&showProg?`<div style="position:absolute;left:0;top:0;height:100%;width:${b.prog}%;background:rgba(0,0,0,.2);border-radius:4px;pointer-events:none;"></div>`:''}
-        <div style="position:relative;z-index:1;display:flex;align-items:center;justify-content:center;height:100%;font-size:9px;font-weight:700;color:#000;pointer-events:none;white-space:nowrap;overflow:hidden;padding:0 5px;">
-          ${b.label||(bDur+'日')}${b.isMain&&showProg&&b.prog?'・'+b.prog+'%':''}
+        <div style="position:absolute;left:${bWidth+4}px;top:50%;transform:translateY(-50%);z-index:1;font-size:9px;font-weight:700;color:var(--text);pointer-events:none;white-space:nowrap;">
+          ${b.label||(bDur%1===0?bDur+'日':bDur*2+'半日')}${b.isMain&&showProg&&b.prog?'・'+b.prog+'%':''}
         </div>
         <div style="position:absolute;left:0;top:0;width:10px;height:100%;cursor:col-resize;z-index:2;"
           onmousedown="${dragType_left}" ontouchstart="${dragTypeT_left}"></div>
@@ -3819,22 +3780,30 @@ function applyGanttDrag(clientX){
   const colW = window._ganttColW;
   const weeks = parseInt(document.getElementById('ganttWeeks')?.value||'5');
   const maxDay = weeks*7;
-  const deltaDays = Math.round((clientX - d.startX) / colW);
+  // 半日単位でスナップ
+  const halfW = colW * 0.5;
+  const deltaHalf = Math.round((clientX - d.startX) / halfW);
+  const deltaDays = deltaHalf * 0.5;
   const row = ganttRows[d.idx];
 
   if(d.type==='move'){
-    let ns = d.origStart + deltaDays;
-    let ne = d.origEnd + deltaDays;
     const dur = d.origEnd - d.origStart;
-    ns = Math.max(1, Math.min(maxDay-dur, ns));
-    ne = ns + dur;
-    row.start=ns; row.end=ne;
+    let ns = d.origStart + deltaDays;
+    ns = Math.max(0.5, Math.min(maxDay - dur, ns));
+    // 0.5刻みに丸める
+    ns = Math.round(ns * 2) / 2;
+    row.start = ns;
+    row.end   = Math.round((ns + dur) * 2) / 2;
   } else if(d.type==='left'){
-    let ns = Math.max(1, Math.min(d.origEnd-1, d.origStart+deltaDays));
-    row.start=ns;
+    let ns = d.origStart + deltaDays;
+    ns = Math.max(0.5, Math.min(d.origEnd - 0.5, ns));
+    ns = Math.round(ns * 2) / 2;
+    row.start = ns;
   } else if(d.type==='right'){
-    let ne = Math.max(d.origStart+1, Math.min(maxDay, d.origEnd+deltaDays));
-    row.end=ne;
+    let ne = d.origEnd + deltaDays;
+    ne = Math.max(d.origStart + 0.5, Math.min(maxDay, ne));
+    ne = Math.round(ne * 2) / 2;
+    row.end = ne;
   }
   renderGanttBarOnly(d.idx);
 }
@@ -3869,16 +3838,21 @@ function applyGanttDragSub(clientX){
   const colW = window._ganttColW;
   const weeks = parseInt(document.getElementById('ganttWeeks')?.value||'5');
   const maxDay = weeks*7;
-  const delta = Math.round((clientX - d.startX) / colW);
+  const halfW = colW * 0.5;
+  const deltaHalf = Math.round((clientX - d.startX) / halfW);
+  const delta = deltaHalf * 0.5;
   const b = ganttRows[d.rowIdx].bars[d.barIdx];
   if(d.type==='move'){
     const dur = d.origEnd - d.origStart;
-    let ns = Math.max(1, Math.min(maxDay-dur, d.origStart+delta));
-    b.start = ns; b.end = ns+dur;
+    let ns = Math.max(0.5, Math.min(maxDay-dur, d.origStart+delta));
+    ns = Math.round(ns * 2) / 2;
+    b.start = ns; b.end = Math.round((ns+dur)*2)/2;
   } else if(d.type==='left'){
-    b.start = Math.max(1, Math.min(d.origEnd-1, d.origStart+delta));
+    let ns = Math.max(0.5, Math.min(d.origEnd-0.5, d.origStart+delta));
+    b.start = Math.round(ns*2)/2;
   } else if(d.type==='right'){
-    b.end = Math.max(d.origStart+1, Math.min(maxDay, d.origEnd+delta));
+    let ne = Math.max(d.origStart+0.5, Math.min(maxDay, d.origEnd+delta));
+    b.end = Math.round(ne*2)/2;
   }
   renderGanttBarOnly(d.rowIdx, d.barIdx);
 }
@@ -3891,23 +3865,25 @@ function renderGanttBarOnly(idx, bidx){
   const row = ganttRows[idx];
   let bar, start, end;
   if(bidx === undefined || bidx < 0){
-    // メインバー
     bar = document.querySelector(`.gantt-bar[data-idx="${idx}"]`);
     start = row.start; end = row.end;
   } else {
-    // 追加バー
     bar = document.querySelector(`.gantt-bar-sub[data-idx="${idx}"][data-bidx="${bidx}"]`);
     if(!bar || !row.bars || !row.bars[bidx]) return;
     start = row.bars[bidx].start; end = row.bars[bidx].end;
   }
   if(!bar) return;
-  const barLeft = (start-1)*colW;
-  const barWidth = Math.max(colW-2,(end-start+1)*colW-2);
-  const dur = end-start+1;
-  bar.style.left = barLeft+'px';
-  bar.style.width = barWidth+'px';
+  const barLeft  = (start - 1) * colW;
+  const dur      = end - start;                          // 半日=0.5, 1日=1...
+  const barWidth = Math.max(colW * 0.5 - 2, dur * colW - 2);
+  bar.style.left  = barLeft + 'px';
+  bar.style.width = barWidth + 'px';
   const labelEl = bar.querySelector('div[style*="z-index:1"]');
-  if(labelEl) labelEl.textContent = dur+'日';
+  if(labelEl){
+    labelEl.style.left = (barWidth + 4) + 'px';
+    const durLabel = dur % 1 === 0 ? dur + '日' : (dur * 2) + '半日';
+    labelEl.textContent = durLabel;
+  }
 }
 
 // ===== 工種追加・編集 =====
@@ -3983,14 +3959,18 @@ function openGanttEdit(idx){
 function saveGanttEdit(idx){
   const startDateStr = document.getElementById('ganttStartDate')?.value;
   const startDate = startDateStr?new Date(startDateStr):new Date();
-  const toDay = (dateStr) => {
-    if(!dateStr) return ganttRows[idx].start;
+  const toDay = (dateStr, fallback) => {
+    if(!dateStr) return fallback;
     const dt = new Date(dateStr);
-    return Math.round((dt-startDate)/(1000*60*60*24))+1;
+    // 半日単位で丸める
+    const raw = (dt-startDate)/(1000*60*60*24)+1;
+    return Math.max(0.5, Math.round(raw * 2) / 2);
   };
   ganttRows[idx].trade  = document.getElementById('ge_trade')?.value||ganttRows[idx].trade;
-  ganttRows[idx].start  = Math.max(1, toDay(document.getElementById('ge_start_date')?.value));
-  ganttRows[idx].end    = Math.max(ganttRows[idx].start, toDay(document.getElementById('ge_end_date')?.value));
+  const newStart = toDay(document.getElementById('ge_start_date')?.value, ganttRows[idx].start);
+  const newEnd   = toDay(document.getElementById('ge_end_date')?.value,   ganttRows[idx].end);
+  ganttRows[idx].start  = Math.max(0.5, newStart);
+  ganttRows[idx].end    = Math.max(ganttRows[idx].start + 0.5, newEnd);
   ganttRows[idx].color  = document.getElementById('ge_color')?.value||ganttColors[0];
   ganttRows[idx].label  = document.getElementById('ge_label')?.value||'';
   ganttRows[idx].memo   = document.getElementById('ge_memo')?.value||'';
@@ -4199,15 +4179,35 @@ function printGantt(){
 
   // 工種行生成
   let rows = ganttRows.map(row=>{
-    const duration = row.end - row.start + 1;
-    const barLabel = row.label || (duration+'日');
+    const duration = row.end - row.start;  // 半日=0.5, 1日=1...
+    const barLabel = row.label || (duration % 1 === 0 ? duration+'日' : (duration*2)+'半日');
     let cells = '';
     for(let i=0;i<days;i++){
-      const inBar = (i+1)>=row.start && (i+1)<=row.end;
-      const isStart = (i+1)===row.start;
+      const cellStart = i + 1;        // このセルの開始（整数）
+      const cellEnd   = i + 1 + 1;    // このセルの終了（次のセル開始）
+      // バーがこのセルに少しでも重なるか
+      const inBar  = row.start < cellEnd && row.end > cellStart;
+      // バー開始セル（ラベル表示用）
+      const isStart = row.start >= cellStart && row.start < cellEnd;
       const dt = new Date(startDate); dt.setDate(dt.getDate()+i);
       const isWE = dt.getDay()===0||dt.getDay()===6;
-      const cellBg = inBar ? row.color : (isWE?'#fff0f0':'#fff');
+      // 半日開始・半日終了でのグラデーション判定
+      let cellBg;
+      if(!inBar){
+        cellBg = isWE ? '#fff0f0' : '#fff';
+      } else {
+        // 開始セルに半日だけかかる場合は左半分だけ色を付ける
+        const startInCell = row.start > cellStart; // セルの途中から始まる
+        const endInCell   = row.end < cellEnd;     // セルの途中で終わる
+        if(startInCell || endInCell){
+          // 半日セルはグラデーションで表現
+          const startPct = startInCell ? 50 : 0;
+          const endPct   = endInCell   ? 50 : 100;
+          cellBg = `linear-gradient(90deg, #fff ${startPct}%, ${row.color} ${startPct}%, ${row.color} ${endPct}%, #fff ${endPct}%)`;
+        } else {
+          cellBg = row.color;
+        }
+      }
       const label = isStart ? `<span style="font-size:7px;font-weight:700;color:#000;white-space:nowrap;">${barLabel}</span>` : '';
       cells += `<td style="background:${cellBg};border:1px solid #e0e0e0;padding:0 1px;">${label}</td>`;
     }
