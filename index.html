@@ -362,8 +362,8 @@ canvas{display:block;touch-action:none;}
 /* TOAST */
 .toast{position:fixed;top:calc(60px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%) translateY(-80px);
   background:var(--green);color:#000;padding:10px 20px;border-radius:20px;
-  font-size:13px;font-weight:700;z-index:400;transition:transform .3s;
-  white-space:nowrap;max-width:90vw;text-align:center;}
+  font-size:13px;font-weight:700;z-index:99999;transition:transform .3s;
+  white-space:nowrap;max-width:90vw;text-align:center;pointer-events:none;}
 .toast.show{transform:translateX(-50%) translateY(0);}
 /* 横向き対応 */
 @media (orientation: landscape) {
@@ -5080,11 +5080,13 @@ function shareInvoiceToLine(){
 // ===== switchEstTab時に初期化 =====
 const _origSwitchEstTab = typeof switchEstTab === 'function' ? switchEstTab : null;
 
+let _toastTimer = null;
 function showToast(msg, type='') {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = 'toast show ' + type;
-  setTimeout(()=>t.className='toast',2200);
+  if(_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(()=>{ t.className='toast'; _toastTimer=null; }, 2500);
 }
 
 // ===== CANVAS =====
