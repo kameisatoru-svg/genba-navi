@@ -1672,6 +1672,185 @@ const state = {
   currentTranscript: '',
 };
 
+// ===== 案件別データ管理（v22）=====
+// 案件切替時に estimateItems / ganttRows を案件別に保存・復元する
+
+function saveAnkenData(){
+  if(!currentAnkenId) return;
+  const a = getAnken(currentAnkenId);
+  if(!a) return;
+
+  // 見積
+  a._estimateItems = state.estimateItems.map(i=>({...i}));
+
+  // 工程表
+  a._ganttRows = ganttRows.map(r=>({...r, bars:(r.bars||[]).map(b=>({...b}))}));
+  const gw = document.getElementById('ganttWeeks');
+  const gs = document.getElementById('ganttStartDate');
+  const gc = document.getElementById('ganttColW');
+  if(gw) a._ganttWeeks = gw.value;
+  if(gs) a._ganttStartDate = gs.value;
+  if(gc) a._ganttColW = gc.value;
+
+  // 見積ヘッダー
+  const epn = document.getElementById('estProjectName');
+  const ecn = document.getElementById('estClientName');
+  const etd = document.getElementById('estDate');
+  const etv = document.getElementById('estValidity');
+  const etn = document.getElementById('estNotes');
+  a._estHeader = {
+    projectName: epn?.value||'',
+    clientName:  ecn?.value||'',
+    date:        etd?.value||'',
+    validity:    etv?.value||'',
+    notes:       etn?.value||''
+  };
+
+  // 図面（スケッチ）
+  a._sketches = savedSketches.map(s=>({...s}));
+  // 作図中の下書き（未保存のcanvas内容）
+  if(typeof drawCanvas !== 'undefined' && drawCanvas && drawCanvas.width > 0 && state.canvasHistory.length > 0){
+    a._canvasDraft = state.canvasHistory[state.canvasHistory.length - 1];
+  } else {
+    a._canvasDraft = null;
+  }
+
+  // 拾い出し（入力フィールドの値を全保存）
+  const pickupFields = [
+    'pu_cloth_wall','pu_cloth_loss','pu_cloth_width','pu_cloth_repeat','pu_cloth_memo',
+    'pu_floor_sqm','pu_floor_loss','pu_floor_w','pu_floor_l','pu_floor_memo',
+    'pu_paint_sqm','pu_paint_coats','pu_paint_spread','pu_paint_can','pu_paint_memo',
+    'pu_light_memo'
+  ];
+  const pickup = {};
+  pickupFields.forEach(id=>{ const el=document.getElementById(id); if(el) pickup[id]=el.value; });
+  // 木材リスト（動的行）
+  const woodRows = [];
+  document.querySelectorAll('#woodItems > div').forEach(row=>{
+    const inputs = row.querySelectorAll('input');
+    if(inputs.length>=5) woodRows.push({
+      name: inputs[0].value||'',
+      w: inputs[1].value||'', t: inputs[2].value||'',
+      l: inputs[3].value||'', n: inputs[4].value||''
+    });
+  });
+  pickup._woodRows = woodRows;
+  a._pickup = pickup;
+
+  saveAnken();
+}
+
+function loadAnkenData(ankenId){
+  const a = getAnken(ankenId);
+  if(!a) return;
+
+  // 見積
+  state.estimateItems = a._estimateItems ? a._estimateItems.map(i=>({...i})) : [];
+
+  // 工程表
+  ganttRows = a._ganttRows ? a._ganttRows.map(r=>({...r, bars:(r.bars||[]).map(b=>({...b}))})) : [];
+  _ganttUndoStack = [];
+  if(typeof _updateGanttUndoBtn === 'function') _updateGanttUndoBtn();
+
+  // 図面（スケッチ）
+  savedSketches = a._sketches ? a._sketches.map(s=>({...s})) : [];
+
+  setTimeout(()=>{
+    // 工程表設定
+    const gw = document.getElementById('ganttWeeks');
+    const gs = document.getElementById('ganttStartDate');
+    const gc = document.getElementById('ganttColW');
+    if(gw && a._ganttWeeks) gw.value = a._ganttWeeks;
+    if(gc && a._ganttColW)  gc.value = a._ganttColW;
+    if(gs){
+      if(a._ganttStartDate) gs.value = a._ganttStartDate;
+      else { const today=new Date(); gs.value=today.toISOString().split('T')[0]; }
+    }
+
+    // 見積ヘッダー
+    const h = a._estHeader || {};
+    const epn = document.getElementById('estProjectName');
+    const ecn = document.getElementById('estClientName');
+    const etd = document.getElementById('estDate');
+    const etv = document.getElementById('estValidity');
+    const etn = document.getElementById('estNotes');
+    if(epn) epn.value = h.projectName !== undefined ? h.projectName : (a.name||'');
+    if(ecn) ecn.value = h.clientName  || a.client || '';
+    if(etd) etd.value = h.date        || new Date().toISOString().split('T')[0];
+    if(etv) etv.value = h.validity    || '';
+    if(etn) etn.value = h.notes       || '';
+
+    // 拾い出しフィールド復元
+    const pickup = a._pickup || {};
+    const pickupFields = [
+      'pu_cloth_wall','pu_cloth_loss','pu_cloth_width','pu_cloth_repeat','pu_cloth_memo',
+      'pu_floor_sqm','pu_floor_loss','pu_floor_w','pu_floor_l','pu_floor_memo',
+      'pu_paint_sqm','pu_paint_coats','pu_paint_spread','pu_paint_can','pu_paint_memo',
+      'pu_light_memo'
+    ];
+    pickupFields.forEach(id=>{ const el=document.getElementById(id); if(el) el.value=pickup[id]||''; });
+
+    // 木材リスト復元
+    const woodContainer = document.getElementById('woodItems');
+    if(woodContainer){
+      woodContainer.innerHTML = '';
+      const woodRows = pickup._woodRows || [];
+      woodRows.forEach(row=>{
+        const div = document.createElement('div');
+        div.style.cssText='background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;';
+        div.innerHTML=`
+          <div style="display:flex;gap:6px;margin-bottom:6px;align-items:center;">
+            <input class="form-input" style="flex:3;" type="text" placeholder="材料名（例：垂木）" value="${row.name||''}">
+            <button onclick="this.closest('div').parentElement.remove();calcWood()" style="background:transparent;border:none;color:var(--red);font-size:18px;cursor:pointer;">×</button>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;">
+            <div><div style="font-size:10px;color:var(--muted);">幅mm</div><input class="form-input" type="number" placeholder="30" value="${row.w||''}" oninput="calcWood()"></div>
+            <div><div style="font-size:10px;color:var(--muted);">厚mm</div><input class="form-input" type="number" placeholder="45" value="${row.t||''}" oninput="calcWood()"></div>
+            <div><div style="font-size:10px;color:var(--muted);">長さm</div><input class="form-input" type="number" step="0.1" placeholder="2.0" value="${row.l||''}" oninput="calcWood()"></div>
+            <div><div style="font-size:10px;color:var(--muted);">本数</div><input class="form-input" type="number" placeholder="2" value="${row.n||''}" oninput="calcWood()"></div>
+          </div>`;
+        woodContainer.appendChild(div);
+      });
+      if(woodRows.length > 0) calcWood();
+    }
+
+    // 計算結果を更新
+    if(pickup['pu_cloth_wall']) calcCloth?.();
+    if(pickup['pu_floor_sqm'])  calcFloorMat?.();
+    if(pickup['pu_paint_sqm'])  calcPaint?.();
+
+    // スケッチギャラリーを更新
+    if(typeof renderSketchGallery === 'function') renderSketchGallery();
+
+    // 作図中の下書きを復元
+    if(a._canvasDraft){
+      const restoreDraft = () => {
+        if(!drawCanvas || drawCanvas.width === 0){
+          // canvasがまだ初期化されていない場合は少し待つ
+          setTimeout(restoreDraft, 200);
+          return;
+        }
+        const img = new Image();
+        img.onload = () => {
+          drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+          drawCtx.drawImage(img, 0, 0, drawCanvas.width, drawCanvas.height);
+          composite();
+          state.canvasHistory = [drawCanvas.toDataURL()];
+        };
+        img.src = a._canvasDraft;
+      };
+      restoreDraft();
+    } else {
+      // 下書きなし → キャンバスをクリア
+      if(typeof drawCtx !== 'undefined' && drawCtx && drawCanvas){
+        drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+        composite?.();
+        state.canvasHistory = [];
+      }
+    }
+  }, 0);
+}
+
 // ===== NAVIGATION =====
 
 // ===== 打ち合わせメモ =====
@@ -2496,6 +2675,7 @@ function switchScreen(name, pushHistory) {
   if(nb) nb.classList.add('active');
   // ホームは常にアクティブ表示
   if(name==='home'){
+    saveAnkenData(); // 現在の案件データを保存してからホームへ
     document.getElementById('nav-home')?.classList.add('active');
     // 詳細ビューが開いていたら一覧に戻す
     const dv = document.getElementById('anken-detail-view');
@@ -2504,15 +2684,17 @@ function switchScreen(name, pushHistory) {
     if(lv) lv.style.display = '';
     renderHomeAnkenList();
   }
-  if(name==='estimate'){ switchEstTab('estimate'); renderEstimate(); }
-  if(name==='gantt'){ renderGantt(); }
+  if(name==='estimate'){ loadAnkenData(currentAnkenId); switchEstTab('estimate'); renderEstimate(); }
+  if(name==='gantt'){ loadAnkenData(currentAnkenId); renderGantt(); }
   if(name==='voice') renderVoiceNotes();
   if(name==='photos') renderPhotos();
   
   if(name==='sketch') {
+    loadAnkenData(currentAnkenId);  // v22: 図面・拾い出しを案件別に復元
     setTimeout(()=>{
       if(!canvasReady) { initCanvas(); } else { resizeCanvas(); }
-      // v20: ankenDataから実測値を復元
+      renderSketchGallery();
+      // 実測値を復元
       const m = getCurrentMeasurements();
       if(m.floor || m.wall || m.ceiling) {
         const ef = document.getElementById('calcFloor');
@@ -2584,9 +2766,13 @@ function renderHomeAnkenList(){
 
 // 案件タップ → クイックアクション画面へ
 function openQuickAction(ankenId){
+  // 前の案件データを保存してから切替
+  if(currentAnkenId && currentAnkenId !== ankenId) saveAnkenData();
   currentAnkenId = ankenId;
   const a = getAnken(ankenId);
   if(!a) return;
+  // 新しい案件のデータをロード
+  loadAnkenData(ankenId);
   document.getElementById('topbarProject').innerHTML = `案件: <span>${a.name.substring(0,10)}</span>`;
   const titleEl = document.getElementById('quickAnkenTitle');
   if(titleEl) titleEl.textContent = a.name;
@@ -3067,6 +3253,14 @@ function updatePickupSummary() {
   const woodM=document.getElementById('pu_wood_total_m')?.textContent;
   if(woodM&&woodM!=='-') lines.push(`🪚 木材：${woodM}`);
   document.getElementById('pickupSummary').innerHTML = lines.length ? lines.map(l=>`<div style="padding:3px 0;border-bottom:1px solid var(--border);">${l}</div>`).join('') : '<div style="font-size:11px;color:var(--muted);">各タブで数量を入力してください</div>';
+  // v22: デバウンスで案件別保存
+  _schedulePickupSave();
+}
+
+let _pickupSaveTimer = null;
+function _schedulePickupSave(){
+  clearTimeout(_pickupSaveTimer);
+  _pickupSaveTimer = setTimeout(()=>saveAnkenData(), 800);
 }
 
 // ===== 拾い出し→見積反映 =====
@@ -3076,7 +3270,7 @@ function sendPickupToEstimate() {
   if(clothWall){const loss=parseFloat(document.getElementById('pu_cloth_loss').value)||10;const needed=Math.ceil(clothWall*(1+loss/100)*10)/10;items.push({id:Date.now()+1,name:'クロス（壁紙）',spec:document.getElementById('pu_cloth_memo')?.value||'',qty:needed,unit:'㎡',unitPrice:1200,category:'material'});}
   const floorSqm=parseFloat(document.getElementById('pu_floor_sqm')?.value)||0;
   if(floorSqm){const loss=parseFloat(document.getElementById('pu_floor_loss').value)||8;const needed=Math.ceil(floorSqm*(1+loss/100)*10)/10;items.push({id:Date.now()+2,name:'床材',spec:document.getElementById('pu_floor_memo')?.value||'',qty:needed,unit:'㎡',unitPrice:3500,category:'material'});}
-  if(items.length){items.forEach(item=>state.estimateItems.push(item));switchScreen('estimate');renderEstimate();showToast('拾い出しを見積に反映しました ✓');}
+  if(items.length){items.forEach(item=>state.estimateItems.push(item));saveAnkenData();switchScreen('estimate');renderEstimate();showToast('拾い出しを見積に反映しました ✓');}
   else showToast('数量を入力してから反映してください','error');
 }
 
@@ -3158,12 +3352,15 @@ function sumRoomsToMeasure(){
 
 
 // ===== 図面保存・ギャラリー =====
-let savedSketches = JSON.parse(localStorage.getItem('genba_sketches')||'[]');
+// v22: スケッチは案件別管理（ankenDataに保存）。起動時は空で初期化
+let savedSketches = [];
 let sketchRefZoom = 1.0;
 let pickupRefZoom = 1.0;
 
-
-function saveSketches(){ localStorage.setItem('genba_sketches', JSON.stringify(savedSketches)); }
+function saveSketches(){
+  // v22: ankenDataに書き込んで永続化
+  saveAnkenData();
+}
 
 function saveSketchNamed(){
   if(!drawCanvas || drawCanvas.width===0){ showToast('図面がありません','error'); return; }
@@ -3393,6 +3590,7 @@ function renderEstimate(){
   renderPriceMasterRef();
 }
 
+let _estSaveTimer = null;
 function updateEstItem(id, key, val){
   const item = state.estimateItems.find(i=>String(i.id)===String(id));
   if(!item) return;
@@ -3405,10 +3603,14 @@ function updateEstItem(id, key, val){
   document.getElementById('bMaterial').textContent='¥'+totals.material.toLocaleString();
   document.getElementById('bLabor').textContent='¥'+totals.labor.toLocaleString();
   document.getElementById('bTax').textContent='¥'+totals.tax.toLocaleString();
+  // v22: デバウンスで案件別保存
+  clearTimeout(_estSaveTimer);
+  _estSaveTimer = setTimeout(()=>saveAnkenData(), 600);
 }
 
 function addEstItemInline(){
   state.estimateItems.push({id:Date.now(),name:'新規項目',spec:'',qty:1,unit:'式',unitPrice:0,category:'labor'});
+  saveAnkenData();
   renderEstimate();
 }
 
@@ -3552,37 +3754,53 @@ function copyInvoiceText(){
 
 
 // ===== ガントチャート =====
-let ganttRows = JSON.parse(localStorage.getItem('genba_gantt')||'[]');
-// ===== データマイグレーション（一度だけ実行）=====
-// 旧設計: start=1,end=5 → 5日間（end=最終日番号）
-// 新設計: start=1,end=6 → 5日間（end=終端位置=最終日+1）
-if(!localStorage.getItem('genba_gantt_migrated_v21')){
-  ganttRows.forEach(row=>{
-    if(typeof row.start==='number' && typeof row.end==='number'){
-      row.end = row.end + 1;
-    }
-    if(Array.isArray(row.bars)) row.bars.forEach(b=>{
-      if(typeof b.start==='number' && typeof b.end==='number'){
-        b.end = b.end + 1;
+// v22: ganttRowsはankenData案件別管理。起動時は空で初期化し、案件選択時にloadAnkenData()で復元
+let ganttRows = [];
+
+// genba_sketchesの旧データを最初の案件にマイグレーション（一度だけ）
+if(!localStorage.getItem('genba_sketches_migrated_v22')){
+  const oldSketches = JSON.parse(localStorage.getItem('genba_sketches')||'[]');
+  if(oldSketches.length > 0 && ankenData.length > 0){
+    if(!ankenData[0]._sketches) ankenData[0]._sketches = oldSketches;
+    localStorage.setItem('genba_anken', JSON.stringify(ankenData));
+  }
+  localStorage.setItem('genba_sketches_migrated_v22', '1');
+}
+// ===== 旧genba_ganttデータのマイグレーション（v21→v22：一度だけ実行）=====
+if(!localStorage.getItem('genba_gantt_migrated_v22')){
+  const oldGantt = JSON.parse(localStorage.getItem('genba_gantt')||'[]');
+  if(oldGantt.length > 0 && ankenData.length > 0){
+    // 旧工程表を最初の案件に紐付け
+    oldGantt.forEach(row=>{
+      if(typeof row.start==='number' && typeof row.end==='number' && !localStorage.getItem('genba_gantt_migrated_v21')){
+        row.end = row.end + 1;
       }
+      if(Array.isArray(row.bars)) row.bars.forEach(b=>{
+        if(typeof b.start==='number' && typeof b.end==='number' && !localStorage.getItem('genba_gantt_migrated_v21')){
+          b.end = b.end + 1;
+        }
+      });
     });
-  });
-  localStorage.setItem('genba_gantt', JSON.stringify(ganttRows));
+    if(!ankenData[0]._ganttRows) ankenData[0]._ganttRows = oldGantt;
+    localStorage.setItem('genba_anken', JSON.stringify(ankenData));
+  }
   localStorage.setItem('genba_gantt_migrated_v21', '1');
+  localStorage.setItem('genba_gantt_migrated_v22', '1');
 }
 let _ganttUndoStack = [];
 const _GANTT_UNDO_MAX = 30;
 function saveGantt(){
-  // Undo スタックに現状を記録してから保存
+  // Undo スタックに現状を記録
   _ganttUndoStack.push(JSON.stringify(ganttRows));
   if(_ganttUndoStack.length > _GANTT_UNDO_MAX) _ganttUndoStack.shift();
   _updateGanttUndoBtn();
-  localStorage.setItem('genba_gantt',JSON.stringify(ganttRows));
+  // v22: 案件別保存（ankenDataに書き込み）
+  saveAnkenData();
 }
 function ganttUndo(){
   if(_ganttUndoStack.length === 0){ showToast('これ以上戻れません','error'); return; }
   ganttRows = JSON.parse(_ganttUndoStack.pop());
-  localStorage.setItem('genba_gantt',JSON.stringify(ganttRows));
+  saveAnkenData();
   _updateGanttUndoBtn();
   renderGantt();
   showToast('↩️ 1つ戻しました');
@@ -4331,6 +4549,7 @@ ${textInput?'テキスト内容：'+textInput:''}
     const items=JSON.parse(text.replace(/```json|```/g,'').trim());
     if(!Array.isArray(items)||items.length===0){resultEl.innerHTML='<div style="color:var(--muted);">明細を読み取れませんでした。テキストで入力してみてください。</div>';return;}
     items.forEach(item=>state.estimateItems.push({...item,id:Date.now()+Math.random()}));
+    saveAnkenData();
     renderEstimate();
     document.getElementById('estAiImportPanel').style.display='none';
     showToast('✅ '+items.length+'件の明細を読み込みました');
@@ -4575,6 +4794,7 @@ function addPhoto(e){
     reader.onload=ev=>{
       photos.push({id:'p'+Date.now()+Math.random(),src:ev.target.result,name:file.name,tag:'before',
         locations:[],note:'',project:currentAnkenId,time:new Date().toLocaleString('ja-JP')});
+      savePhotos();
       renderPhotos(); renderPhotoStats();
     };
     reader.readAsDataURL(file);
@@ -4667,6 +4887,7 @@ function setPvTag(tag,btn){
     b.style.color=active?'#88aaff':'var(--muted)';
     b.style.borderColor=active?'var(--blue)':'var(--border)';
   });
+  savePhotos();
 }
 
 function togglePvLoc(loc,btn){
@@ -4676,6 +4897,7 @@ function togglePvLoc(loc,btn){
   const idx=p.locations.indexOf(loc);
   if(idx>=0){ p.locations.splice(idx,1); btn.style.background='transparent'; btn.style.color='var(--muted)'; btn.style.borderColor='var(--border)'; }
   else{ p.locations.push(loc); btn.style.background='rgba(245,166,35,.2)'; btn.style.color='var(--accent)'; btn.style.borderColor='var(--accent)'; }
+  savePhotos();
 }
 
 function savePvNote(){
@@ -4683,12 +4905,14 @@ function savePvNote(){
   if(!p) return;
   p.note=document.getElementById('pvNote').value;
   document.getElementById('pvTitle').value=p.note;
+  savePhotos();
 }
 
 function deleteCurrentPhoto(){
   if(!currentPhotoId) return;
   if(!confirm('この写真を削除しますか？')) return;
   photos=photos.filter(p=>p.id!==currentPhotoId);
+  savePhotos();
   closePhotoViewer();
   showToast('削除しました');
 }
@@ -4915,6 +5139,7 @@ function loadSavedEstimate(id){
   const est = savedEstimates.find(e=>e.id===id);
   if(!est) return;
   state.estimateItems = est.items.map(i=>({...i}));
+  saveAnkenData();
   document.getElementById('estProjectName').value = est.name;
   if(document.getElementById('estClientName')) document.getElementById('estClientName').value = est.clientName||'';
   if(document.getElementById('estDate')) document.getElementById('estDate').value = est.estDate||'';
@@ -5432,7 +5657,11 @@ function endDraw() {
   if(state.canvasHistory.length > 30) state.canvasHistory.shift();
   state.canvasRedo = []; // 新規描画でRedoスタッククリア
   _updateRedoBtn();
+  // v22: 案件別に下書きを自動保存（デバウンス）
+  clearTimeout(_canvasSaveTimer);
+  _canvasSaveTimer = setTimeout(()=>saveAnkenData(), 1000);
 }
+let _canvasSaveTimer = null;
 
 function undoDraw() {
   if(state.canvasHistory.length === 0) return;
@@ -5449,6 +5678,8 @@ function undoDraw() {
   } else {
     composite();
   }
+  clearTimeout(_canvasSaveTimer);
+  _canvasSaveTimer = setTimeout(()=>saveAnkenData(), 1000);
 }
 
 function redoDraw() {
@@ -5459,6 +5690,8 @@ function redoDraw() {
   const img = new Image();
   img.onload = () => { drawCtx.drawImage(img, 0, 0); composite(); };
   img.src = next;
+  clearTimeout(_canvasSaveTimer);
+  _canvasSaveTimer = setTimeout(()=>saveAnkenData(), 1000);
 }
 
 function _updateRedoBtn() {
@@ -5472,6 +5705,7 @@ function clearCanvas() {
   state.canvasRedo = [];
   _updateRedoBtn();
   composite();
+  saveAnkenData(); // クリアも即保存
 }
 
 function saveSketch() { saveSketchNamed(); }
@@ -5636,6 +5870,7 @@ function applyMeasureToPriceMaster() {
 
 function deleteItem(id) {
   state.estimateItems = state.estimateItems.filter(i=>String(i.id)!==String(id));
+  saveAnkenData();
   renderEstimate();
   showToast('項目を削除しました');
 }
@@ -5643,6 +5878,7 @@ function deleteItem(id) {
 function addFromMaster(name, price, unit, cat) {
   showInputModal(`「${name}」を追加`, '数量', '1', function(qty){
     state.estimateItems.push({id:Date.now(),name,spec:'',qty:parseFloat(qty)||1,unit,unitPrice:price,category:cat});
+    saveAnkenData();
     renderEstimate();
     showToast(`「${name}」を追加しました ✓`);
   }, {label1:'数量', inputType:'number'});
@@ -6076,27 +6312,10 @@ async function applyNoteToEstimate(id) {
 }
 
 // ===== PHOTOS =====
-let photos = [];
+let photos = JSON.parse(localStorage.getItem('genba_photos')||'[]');
+function savePhotos(){ localStorage.setItem('genba_photos', JSON.stringify(photos)); }
 
-function addPhoto(e) {
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    photos.push({
-      id: Date.now(),
-      src: ev.target.result,
-      name: file.name,
-      tag: 'before',
-      project: currentAnkenId,
-      time: new Date().toLocaleString('ja-JP')
-    });
-    renderPhotos();
-    showToast('写真を追加しました ✓');
-  };
-  reader.readAsDataURL(file);
-  e.target.value = '';
-}
+// addPhoto は上部で定義済み（重複削除）
 
 function renderPhotos_OLD(filter='all') {
   const grid = document.getElementById('photoGrid');
@@ -6666,6 +6885,7 @@ function setPhotoTag(id, tag) {
 
 function deletePhoto(id) {
   photos = photos.filter(p=>p.id!==id);
+  savePhotos();
   renderPhotos();
   showToast('写真を削除しました');
 }
@@ -6884,7 +7104,7 @@ function showGanttResetConfirm(){
     <div style="font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.6;">工程表データをすべて削除します。<br>この操作は取り消せません。よろしいですか？</div>
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="closeModal()" style="flex:1;">キャンセル</button>
-      <button class="btn btn-primary" onclick="closeModal();localStorage.removeItem('genba_gantt');ganttRows=[];_ganttUndoStack=[];_updateGanttUndoBtn();renderGantt();showToast('リセットしました');"
+      <button class="btn btn-primary" onclick="closeModal();ganttRows=[];_ganttUndoStack=[];_updateGanttUndoBtn();saveAnkenData();renderGantt();showToast('リセットしました');"
         style="flex:1;background:var(--red);border-color:var(--red);">リセット</button>
     </div>`;
   document.getElementById('modalOverlay').style.display='flex';
@@ -6969,7 +7189,7 @@ function exportAllData(e) {
   if(e) e.stopPropagation();
   const keys = [
     'genba_anken','genba_meeting_memos','genba_sketches',
-    'genba_gantt','genba_tasks','genba_estimates',
+    'genba_tasks','genba_estimates', // genba_ganttはankenDataに統合済み
     'genba_price_master','genba_api_key'
   ];
   const backup = { version: 'v20', date: new Date().toISOString(), data: {} };
