@@ -405,15 +405,15 @@ canvas{display:block;touch-action:none;}
   <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px 10px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;">
     <div style="font-size:13px;color:var(--muted);">進行中: <span id="homeActiveCount" style="font-size:16px;font-weight:700;color:var(--accent);">0</span> 件</div>
     <div style="display:flex;align-items:center;gap:8px;">
-      <button ontouchend="exportAllData(event)" onclick="exportAllData(event)" style="display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:12px;font-weight:600;padding:8px 12px;border-radius:10px;cursor:pointer;touch-action:manipulation;">
+      <button onclick="exportAllData(event)" style="display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:12px;font-weight:600;padding:8px 12px;border-radius:10px;cursor:pointer;touch-action:manipulation;">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         バックアップ
       </button>
-      <button ontouchend="triggerImportData(event)" onclick="triggerImportData(event)" style="display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:12px;font-weight:600;padding:8px 12px;border-radius:10px;cursor:pointer;touch-action:manipulation;">
+      <button onclick="triggerImportData(event)" style="display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:12px;font-weight:600;padding:8px 12px;border-radius:10px;cursor:pointer;touch-action:manipulation;">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         復元
       </button>
-      <button ontouchend="openNewAnken(event)" onclick="openNewAnken()" style="display:flex;align-items:center;gap:6px;background:var(--accent);border:none;color:#000;font-size:13px;font-weight:700;padding:9px 18px;border-radius:10px;cursor:pointer;touch-action:manipulation;">
+      <button onclick="openNewAnken()" style="display:flex;align-items:center;gap:6px;background:var(--accent);border:none;color:#000;font-size:13px;font-weight:700;padding:9px 18px;border-radius:10px;cursor:pointer;touch-action:manipulation;">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         新規案件
       </button>
@@ -2577,7 +2577,7 @@ function renderHomeAnkenList(){
     const curPhase = nextStage ? nextStage.phase : 5;
     const phaseLabel = PHASE_LABELS[curPhase] || '';
     const phaseColor = PHASE_COLORS[curPhase] || 'var(--accent)';
-    return `<div ontouchend="event.preventDefault();event.stopPropagation();openQuickAction('${a.id}');" onclick="openQuickAction('${a.id}')"
+    return `<div onclick="openQuickAction('${a.id}')"
       style="background:var(--surface);border:1px solid var(--border);border-left:4px solid ${isComplete?'#3dd68c':phaseColor};border-radius:12px;padding:14px 16px;margin-bottom:8px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
         <div style="font-size:15px;font-weight:700;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.name}</div>
