@@ -6675,12 +6675,14 @@ window.addEventListener('popstate', (e) => {
 });
 
 window.addEventListener('load', ()=>{
+  // ★ クエリ確認は最初に行う（後でURLを書き換えてしまうため）
+  const wasJustUpdated = location.search.includes('reload=');
+
   // reload= クエリが残っている場合はクリーンなURLに書き換える
-  // （openInChrome()でリロードした後の再起動時に不要なクエリを消す）
-  if(location.search.includes('reload=')) {
+  if(wasJustUpdated) {
     const cleanUrl = location.href.split('?')[0].split('#')[0];
     history.replaceState(null, '', cleanUrl);
-    // 更新完了トースト（初回のみ）
+    // 更新完了トースト
     setTimeout(() => showToast('✅ 最新版に更新しました'), 1200);
   }
   // 初期履歴を積む
@@ -6736,8 +6738,7 @@ window.addEventListener('load', ()=>{
   }
 
   // ===== スタンドアロン起動時：自動バージョンチェック =====
-  // ※「最新版に更新する」ボタン直後のリロードはスキップ（更新完了直後なので不要）
-  const wasJustUpdated = location.search.includes('reload=');
+  // ※「最新版に更新する」ボタン直後のリロードはスキップ
   if(isStandalone && !wasJustUpdated) {
     setTimeout(() => checkForUpdate(), 2000);
   }
