@@ -1097,10 +1097,16 @@ canvas{display:block;touch-action:none;}
       </div>
 
       <!-- AI要約ボタン -->
-      <button onclick="runMemoFileAI()" id="memoAiSumBtn"
-        style="width:100%;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;color:#fff;padding:13px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">
-        ✦ AI要約して適用先を表示
-      </button>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:0;">
+        <button onclick="runMemoFileAI()" id="memoAiSumBtn"
+          style="background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;color:#fff;padding:13px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">
+          ✦ AI要約して適用先を表示
+        </button>
+        <button onclick="openMeishiModal()"
+          style="background:linear-gradient(135deg,rgba(245,166,35,.3),rgba(245,166,35,.15));border:1px solid rgba(245,166,35,.5);color:var(--accent);padding:13px 14px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">
+          📇 名刺<br>読込
+        </button>
+      </div>
 
       <!-- ローディング -->
       <div id="memoAiLoading" style="display:none;text-align:center;padding:20px;">
@@ -1511,6 +1517,62 @@ canvas{display:block;touch-action:none;}
       <button onclick="runAiImport()" style="width:100%;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;color:#fff;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">🤖 AIで自動入力する</button>
       <div id="aiImportResult" style="margin-top:14px;font-size:12px;color:var(--muted);line-height:1.7;"></div>
     </div>
+  </div>
+</div>
+
+<!-- ===== 名刺読込モーダル ===== -->
+<div id="meishiModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:600;overflow-y:auto;padding:16px;">
+  <div style="background:var(--surface);border-radius:18px;padding:20px;max-width:480px;margin:0 auto;">
+
+    <!-- ヘッダー -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <div style="font-size:17px;font-weight:700;">📇 名刺読込</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">名刺を撮影またはアップロード → 名刺交換・登録に自動反映</div>
+      </div>
+      <button onclick="closeMeishiModal()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:13px;">✕</button>
+    </div>
+
+    <!-- 撮影・アップロードエリア -->
+    <div id="meishiUploadArea" onclick="document.getElementById('meishiFileInput').click()"
+      style="border:2px dashed rgba(245,166,35,.5);border-radius:14px;padding:28px;text-align:center;cursor:pointer;margin-bottom:14px;background:rgba(245,166,35,.04);transition:background .2s;">
+      <div id="meishiPreviewWrap">
+        <div style="font-size:38px;margin-bottom:8px;">📷</div>
+        <div style="font-size:14px;font-weight:700;color:var(--accent);">名刺を撮影 / 画像を選択</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">JPG・PNG・PDF 対応</div>
+      </div>
+      <img id="meishiPreviewImg" style="display:none;max-width:100%;border-radius:8px;margin-top:8px;" />
+    </div>
+    <input type="file" id="meishiFileInput" accept="image/*,application/pdf" capture="environment" style="display:none;" onchange="handleMeishiFile(event)">
+
+    <!-- 読込先案件 -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">反映先の案件</div>
+      <select id="meishiTargetAnken" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px;font-size:14px;outline:none;"></select>
+    </div>
+
+    <!-- AI読取ボタン -->
+    <button id="meishiRunBtn" onclick="runMeishiAI()" disabled
+      style="width:100%;background:linear-gradient(135deg,#f5a623,#f0c060);border:none;color:#000;padding:15px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;opacity:.4;transition:opacity .2s;">
+      📇 名刺を読み取って登録
+    </button>
+
+    <!-- ローディング -->
+    <div id="meishiLoading" style="display:none;text-align:center;padding:20px;">
+      <div style="font-size:30px;animation:spin 1.2s linear infinite;display:inline-block;">✦</div>
+      <div style="font-size:13px;color:var(--accent);margin-top:6px;">名刺を読み取り中...</div>
+    </div>
+
+    <!-- 結果プレビュー -->
+    <div id="meishiResult" style="display:none;margin-top:16px;">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;">📋 読取結果（タップで修正できます）</div>
+      <div style="display:flex;flex-direction:column;gap:8px;" id="meishiFieldList"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;">
+        <button onclick="closeMeishiModal()" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--muted);font-size:13px;cursor:pointer;">キャンセル</button>
+        <button onclick="applyMeishiData()" style="background:var(--accent);border:none;border-radius:10px;padding:12px;color:#000;font-size:14px;font-weight:700;cursor:pointer;">✅ 名刺交換・登録に反映</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -2240,6 +2302,194 @@ function applyOrganizedToAnkenPhase(phase) {
   const text = document.getElementById('organizedText').textContent;
   if(!text){ showToast('まず整理を実行してください','error'); return; }
   applyContentToAnkenPhase(phase, 'AI整理結果', text);
+}
+
+// ===== 名刺読込 =====
+let _meishiFileData = null;   // { base64, mediaType }
+let _meishiParsed   = null;   // AI読取結果オブジェクト
+
+const MEISHI_FIELDS = [
+  { key:'company',  label:'会社名',    placeholder:'株式会社○○' },
+  { key:'contact',  label:'担当者名',  placeholder:'山田 太郎' },
+  { key:'title',    label:'役職',      placeholder:'営業部長' },
+  { key:'tel',      label:'電話番号',  placeholder:'090-0000-0000' },
+  { key:'email',    label:'メール',    placeholder:'example@mail.com' },
+  { key:'address',  label:'住所',      placeholder:'大分県別府市...' },
+  { key:'url',      label:'URL',       placeholder:'https://...' },
+];
+
+function openMeishiModal() {
+  // 案件リストをセレクトに反映
+  const sel = document.getElementById('meishiTargetAnken');
+  sel.innerHTML = '<option value="new">＋ 新規案件として登録</option>'
+    + ankenData.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+  if(currentAnkenId) sel.value = currentAnkenId;
+
+  // リセット
+  _meishiFileData = null;
+  _meishiParsed   = null;
+  document.getElementById('meishiPreviewImg').style.display = 'none';
+  document.getElementById('meishiPreviewWrap').style.display = 'block';
+  document.getElementById('meishiResult').style.display = 'none';
+  document.getElementById('meishiLoading').style.display = 'none';
+  document.getElementById('meishiRunBtn').style.display = 'block';
+  document.getElementById('meishiRunBtn').disabled = true;
+  document.getElementById('meishiRunBtn').style.opacity = '.4';
+  document.getElementById('meishiFileInput').value = '';
+
+  document.getElementById('meishiModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMeishiModal() {
+  document.getElementById('meishiModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function handleMeishiFile(e) {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const dataUrl = ev.target.result;
+    _meishiFileData = {
+      base64: dataUrl.split(',')[1],
+      mediaType: file.type.startsWith('image/') ? file.type : 'image/jpeg'
+    };
+    // プレビュー表示
+    if(file.type.startsWith('image/')) {
+      const img = document.getElementById('meishiPreviewImg');
+      img.src = dataUrl;
+      img.style.display = 'block';
+      document.getElementById('meishiPreviewWrap').style.display = 'none';
+    }
+    // ボタン有効化
+    const btn = document.getElementById('meishiRunBtn');
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function runMeishiAI() {
+  if(!_meishiFileData) { showToast('名刺画像を選択してください', 'error'); return; }
+  const key = getApiKey();
+  if(!key) { showToast('APIキーを設定してください', 'error'); return; }
+
+  document.getElementById('meishiRunBtn').style.display = 'none';
+  document.getElementById('meishiLoading').style.display = 'block';
+  document.getElementById('meishiResult').style.display = 'none';
+
+  const prompt = `この名刺画像から情報を読み取り、必ずJSONのみで返してください。前後に説明文やコードブロックは不要です。
+{
+  "company": "会社名",
+  "contact": "担当者名（フルネーム）",
+  "title": "役職",
+  "tel": "電話番号（携帯優先）",
+  "email": "メールアドレス",
+  "address": "住所（〒含む）",
+  "url": "WebサイトURL"
+}
+読み取れない項目は空文字にしてください。`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 800,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: _meishiFileData.mediaType, data: _meishiFileData.base64 }},
+            { type: 'text', text: prompt }
+          ]
+        }]
+      })
+    });
+    const data = await res.json();
+    if(data.error) throw new Error(data.error.message);
+    const raw = data.content?.[0]?.text || '';
+    const jsonMatch = raw.match(/```json\s*([\s\S]*?)```/) || raw.match(/(\{[\s\S]*\})/);
+    if(!jsonMatch) throw new Error('JSON解析失敗');
+    _meishiParsed = JSON.parse(jsonMatch[1] || jsonMatch[0]);
+    renderMeishiResult(_meishiParsed);
+  } catch(err) {
+    showToast('読み取りに失敗しました: ' + err.message, 'error');
+    document.getElementById('meishiRunBtn').style.display = 'block';
+    document.getElementById('meishiRunBtn').style.opacity = '1';
+  } finally {
+    document.getElementById('meishiLoading').style.display = 'none';
+  }
+}
+
+function renderMeishiResult(parsed) {
+  const list = document.getElementById('meishiFieldList');
+  list.innerHTML = MEISHI_FIELDS.map(f => `
+    <div style="display:flex;flex-direction:column;gap:3px;">
+      <label style="font-size:11px;color:var(--muted);font-weight:600;">${f.label}</label>
+      <input id="mf_${f.key}" value="${(parsed[f.key]||'').replace(/"/g,'&quot;')}"
+        placeholder="${f.placeholder}"
+        style="background:var(--bg);border:1px solid var(--border);border-radius:8px;
+               padding:10px 12px;color:var(--text);font-size:13px;font-family:var(--font);outline:none;
+               border-color:${parsed[f.key] ? 'rgba(245,166,35,.5)' : 'var(--border)'};">
+    </div>`).join('');
+  document.getElementById('meishiResult').style.display = 'block';
+}
+
+function applyMeishiData() {
+  // フォームから最新値を取得
+  const data = {};
+  MEISHI_FIELDS.forEach(f => {
+    data[f.key] = (document.getElementById('mf_'+f.key)?.value || '').trim();
+  });
+
+  const sel = document.getElementById('meishiTargetAnken');
+  const targetId = sel.value;
+  let anken;
+
+  if(targetId === 'new') {
+    const id = 'anken_' + Date.now();
+    anken = { id, name: data.company || '新規案件', stages: {}, created: new Date().toLocaleDateString('ja') };
+    ankenData.push(anken);
+  } else {
+    anken = getAnken(targetId);
+  }
+  if(!anken) { showToast('案件が見つかりません', 'error'); return; }
+
+  // 名刺交換・登録ステージに反映（company / contact / address / email / tel）
+  anken.stages.meishi = {
+    data: {
+      company: data.company,
+      contact: data.contact,
+      address: data.address,
+      email:   data.email,
+      tel:     data.tel
+    },
+    done: false
+  };
+  // 問合せ受付にも名前・TEL・メールを反映（既存データがなければ）
+  if(!anken.stages.inquiry?.data?.client) {
+    anken.stages.inquiry = {
+      data: { client: data.contact || data.company, tel: data.tel, email: data.email, memo: data.title || '' },
+      done: false
+    };
+  }
+
+  saveAnken();
+  renderAnkenList?.();
+  showToast('名刺交換・登録に反映しました ✓');
+  closeMeishiModal();
+  setTimeout(() => {
+    switchScreen('anken');
+    setTimeout(() => openAnkenDetail(anken.id), 50);
+  }, 300);
 }
 
 // ===== 画面履歴スタック =====
