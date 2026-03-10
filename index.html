@@ -6736,7 +6736,9 @@ window.addEventListener('load', ()=>{
   }
 
   // ===== スタンドアロン起動時：自動バージョンチェック =====
-  if(isStandalone) {
+  // ※「最新版に更新する」ボタン直後のリロードはスキップ（更新完了直後なので不要）
+  const wasJustUpdated = location.search.includes('reload=');
+  if(isStandalone && !wasJustUpdated) {
     setTimeout(() => checkForUpdate(), 2000);
   }
 });
