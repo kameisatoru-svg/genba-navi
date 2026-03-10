@@ -3553,6 +3553,23 @@ function copyInvoiceText(){
 
 // ===== ガントチャート =====
 let ganttRows = JSON.parse(localStorage.getItem('genba_gantt')||'[]');
+// ===== データマイグレーション（一度だけ実行）=====
+// 旧設計: start=1,end=5 → 5日間（end=最終日番号）
+// 新設計: start=1,end=6 → 5日間（end=終端位置=最終日+1）
+if(!localStorage.getItem('genba_gantt_migrated_v21')){
+  ganttRows.forEach(row=>{
+    if(typeof row.start==='number' && typeof row.end==='number'){
+      row.end = row.end + 1;
+    }
+    if(Array.isArray(row.bars)) row.bars.forEach(b=>{
+      if(typeof b.start==='number' && typeof b.end==='number'){
+        b.end = b.end + 1;
+      }
+    });
+  });
+  localStorage.setItem('genba_gantt', JSON.stringify(ganttRows));
+  localStorage.setItem('genba_gantt_migrated_v21', '1');
+}
 let _ganttUndoStack = [];
 const _GANTT_UNDO_MAX = 30;
 function saveGantt(){
@@ -3656,7 +3673,7 @@ function renderGantt(){
     const barLeft=(row.start-1)*colW;
     const barWidth=Math.max(colW*0.5-2,(row.end-row.start)*colW-2);
     const prog=row.progress||0;
-    const duration=row.end-row.start+1;
+    const duration=row.end-row.start;  // 期間（半日=0.5, 1日=1...）
 
     bHtml+=`<div style="display:flex;align-items:center;border-bottom:1px solid var(--border);height:${rowH}px;position:relative;">`;
     // ラベル列
@@ -3731,7 +3748,7 @@ function renderGantt(){
   // 今日ライン
   if(todayDiff>=0&&todayDiff<days){
     bHtml+=`<div style="position:absolute;left:${todayX}px;top:0;bottom:0;width:2px;background:var(--accent);opacity:.6;pointer-events:none;z-index:5;">
-      <div style="position:sticky;top:0;background:var(--accent);color:#000;font-size:8px;font-weight:700;padding:2px 4px;border-radius:3px;white-space:nowrap;margin-left:-14px;">TODAY</div>
+      <div style="position:sticky;top:0;background:var(--accent);color:#000;font-size:8px;font-weight:700;padding:2px 4px;border-radius:3px;white-space:nowrap;margin-left:-14px;">今日</div>
     </div>`;
   }
 
@@ -4151,7 +4168,7 @@ function ganttShareText(){
   };
   const lines = ['【工程表】', startDateStr?('開始日：'+startDateStr):'', ''];
   ganttRows.forEach(r=>{
-    lines.push(`${r.trade}：${toDateStr(r.start)} 〜 ${toDateStr(r.end)}（${r.end-r.start+1}日間）${r.memo?'  '+r.memo:''}`);
+    lines.push(`${r.trade}：${toDateStr(r.start)} 〜 ${toDateStr(r.end)}（${r.end-r.start}日間）${r.memo?'  '+r.memo:''}`);
   });
   navigator.clipboard.writeText(lines.join('\n')).then(()=>showToast('📋 工程表をコピーしました'));
 }
@@ -4177,46 +4194,75 @@ function printGantt(){
     dayHeaders += `<td style="width:${colW}px;min-width:${colW}px;text-align:center;font-size:8px;padding:1px 0;background:${bg};color:${col};border:1px solid #ccc;">${dt.getDate()}<br><span style="font-size:7px;">${['日','月','火','水','木','金','土'][dow]}</span></td>`;
   }
 
-  // 工種行生成
-  let rows = ganttRows.map(row=>{
-    const duration = row.end - row.start;  // 半日=0.5, 1日=1...
-    const barLabel = row.label || (duration % 1 === 0 ? duration+'日' : (duration*2)+'半日');
-    let cells = '';
+  // 工種行生成（SVGバー方式 - 画面と同じ見た目）
+  const rowH = 28;  // 1行の高さ
+  const headerH = 28;
+  const totalW = labelW + days * colW;
+  const totalH = headerH + ganttRows.length * rowH;
+
+  // SVGヘッダー（日付）
+  let svgHeader = '';
+  for(let i=0;i<days;i++){
+    const dt = new Date(startDate); dt.setDate(dt.getDate()+i);
+    const dow = dt.getDay();
+    const isWE = dow===0||dow===6;
+    const bg = isWE ? '#ffe0e0' : '#f0f0f0';
+    const col = isWE ? '#cc0000' : '#333';
+    const x = labelW + i * colW;
+    svgHeader += `<rect x="${x}" y="0" width="${colW}" height="${headerH}" fill="${bg}" stroke="#ccc" stroke-width="0.5"/>`;
+    svgHeader += `<text x="${x + colW/2}" y="12" text-anchor="middle" font-size="7" fill="${col}">${dt.getDate()}</text>`;
+    svgHeader += `<text x="${x + colW/2}" y="22" text-anchor="middle" font-size="6" fill="${col}">${['日','月','火','水','木','金','土'][dow]}</text>`;
+  }
+
+  // 工種行
+  let svgRows = '';
+  ganttRows.forEach((row, ri) => {
+    const y = headerH + ri * rowH;
+    // 背景
+    svgRows += `<rect x="0" y="${y}" width="${totalW}" height="${rowH}" fill="${ri%2===0?'#fafafa':'#f5f5f5'}" stroke="#ddd" stroke-width="0.5"/>`;
+    // 工種名ラベル
+    svgRows += `<rect x="0" y="${y}" width="${labelW}" height="${rowH}" fill="#f0f0f0" stroke="#ccc" stroke-width="0.5"/>`;
+    svgRows += `<rect x="4" y="${y+rowH/2-4}" width="8" height="8" rx="2" fill="${row.color}"/>`;
+    svgRows += `<text x="16" y="${y+rowH/2+4}" font-size="9" font-weight="600" fill="#222">${row.trade}</text>`;
+    // 週末カラム薄色
     for(let i=0;i<days;i++){
-      const cellStart = i + 1;        // このセルの開始（整数）
-      const cellEnd   = i + 1 + 1;    // このセルの終了（次のセル開始）
-      // バーがこのセルに少しでも重なるか
-      const inBar  = row.start < cellEnd && row.end > cellStart;
-      // バー開始セル（ラベル表示用）
-      const isStart = row.start >= cellStart && row.start < cellEnd;
-      const dt = new Date(startDate); dt.setDate(dt.getDate()+i);
-      const isWE = dt.getDay()===0||dt.getDay()===6;
-      // 半日開始・半日終了でのグラデーション判定
-      let cellBg;
-      if(!inBar){
-        cellBg = isWE ? '#fff0f0' : '#fff';
-      } else {
-        // 開始セルに半日だけかかる場合は左半分だけ色を付ける
-        const startInCell = row.start > cellStart; // セルの途中から始まる
-        const endInCell   = row.end < cellEnd;     // セルの途中で終わる
-        if(startInCell || endInCell){
-          // 半日セルはグラデーションで表現
-          const startPct = startInCell ? 50 : 0;
-          const endPct   = endInCell   ? 50 : 100;
-          cellBg = `linear-gradient(90deg, #fff ${startPct}%, ${row.color} ${startPct}%, ${row.color} ${endPct}%, #fff ${endPct}%)`;
-        } else {
-          cellBg = row.color;
-        }
+      const dt2 = new Date(startDate); dt2.setDate(dt2.getDate()+i);
+      if(dt2.getDay()===0||dt2.getDay()===6){
+        svgRows += `<rect x="${labelW+i*colW}" y="${y}" width="${colW}" height="${rowH}" fill="rgba(255,0,0,0.04)" stroke="none"/>`;
       }
-      const label = isStart ? `<span style="font-size:7px;font-weight:700;color:#000;white-space:nowrap;">${barLabel}</span>` : '';
-      cells += `<td style="background:${cellBg};border:1px solid #e0e0e0;padding:0 1px;">${label}</td>`;
     }
-    return `<tr>
-      <td style="padding:2px 4px;font-size:10px;font-weight:600;border:1px solid #ddd;background:#fafafa;white-space:nowrap;max-width:${labelW}px;overflow:hidden;text-overflow:ellipsis;">
-        <span style="display:inline-block;width:8px;height:8px;background:${row.color};border-radius:2px;margin-right:3px;vertical-align:middle;"></span>${row.trade}
-      </td>${cells}
-    </tr>`;
-  }).join('');
+
+    // 全バー（メイン＋追加）を描画
+    const allBars = [
+      { start:row.start, end:row.end, color:row.color, label:row.label||'' }
+    ];
+    if(Array.isArray(row.bars)) row.bars.forEach(b => allBars.push({ start:b.start, end:b.end, color:b.color||row.color, label:b.label||'' }));
+
+    const slotTops = [4, 16];  // 複数バーは上下に配置
+    allBars.forEach((b, bi) => {
+      const dur = b.end - b.start;
+      if(dur <= 0) return;
+      const bx = labelW + (b.start - 1) * colW;
+      const bw = Math.max(colW * 0.5, dur * colW) - 2;
+      const bh = allBars.length > 1 ? 10 : 18;
+      const by = y + slotTops[Math.min(bi, slotTops.length-1)];
+      const durLabel = b.label || (dur % 1 === 0 ? dur+'日' : (dur*2)+'半日');
+
+      svgRows += `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="3" fill="${b.color}" opacity="0.9"/>`;
+      // ラベルをバーの右外に表示
+      const labelX = bx + bw + 3;
+      svgRows += `<text x="${labelX}" y="${by + bh/2 + 3}" font-size="7" font-weight="700" fill="#333">${durLabel}</text>`;
+    });
+  });
+
+  // 今日ライン
+  const todayDiff2 = Math.round((new Date() - startDate) / (1000*60*60*24));
+  let svgToday = '';
+  if(todayDiff2 >= 0 && todayDiff2 < days){
+    const tx = labelW + todayDiff2 * colW + colW/2;
+    svgToday = `<line x1="${tx}" y1="0" x2="${tx}" y2="${totalH}" stroke="#f5a623" stroke-width="1.5" opacity="0.7"/>
+      <text x="${tx+2}" y="10" font-size="7" font-weight="700" fill="#f5a623">今日</text>`;
+  }
 
   const projectName = document.getElementById('topbarProject')?.textContent||'';
   const html = `
@@ -4228,15 +4274,15 @@ function printGantt(){
         </div>
         <div style="font-size:9px;color:#999;">作成日：${new Date().toLocaleDateString('ja-JP')}</div>
       </div>
-      <table style="border-collapse:collapse;width:100%;table-layout:fixed;">
-        <thead>
-          <tr>
-            <th style="width:${labelW}px;padding:2px 4px;background:#333;color:#fff;font-size:10px;border:1px solid #555;text-align:left;">工種</th>
-            ${dayHeaders}
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
+      <div style="overflow-x:auto;">
+        <svg width="${totalW}" height="${totalH}" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+          ${svgHeader}
+          ${svgRows}
+          ${svgToday}
+          <!-- 外枠 -->
+          <rect x="0" y="0" width="${totalW}" height="${totalH}" fill="none" stroke="#999" stroke-width="1"/>
+        </svg>
+      </div>
     </div>`;
 
   document.getElementById('printPreviewContent').innerHTML = html;
