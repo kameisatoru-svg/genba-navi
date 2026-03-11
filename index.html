@@ -7748,35 +7748,38 @@ function renderAiHubResult(d, ankenId){
   html += `</div>`;
   resultEl.innerHTML = html;
 
-  // 最初のカードを自動展開
+  // 最初のアイコンをハイライト
   const firstKey = ICONS.find(ic=>ic.has)?.key;
-  if(firstKey) _aiHubOpenCard(firstKey);
+  if(firstKey) setTimeout(()=>_aiHubOpenCard(firstKey), 50);
 }
 
-// アイコンタップでカードを開閉
+// アイコンタップ → 該当カードへスクロール＆ハイライト
 function _aiHubOpenCard(key){
-  // 全カードを非表示
+  const colors = {'anken':'#f5a623','memo':'#4a9eff','estimate':'#3dd68c','gantt':'#b06aff','partners':'#ff8888'};
+  // 全アイコンをリセット
   ['anken','memo','estimate','gantt','partners'].forEach(k=>{
-    const card = document.getElementById('aihub-card-area-'+k);
     const icon = document.getElementById('aihub-icon-'+k);
-    if(card) card.style.display = 'none';
     if(icon){
-      const t = ['anken','memo','estimate','gantt','partners'];
-      const colors = {'anken':'#f5a623','memo':'#4a9eff','estimate':'#3dd68c','gantt':'#b06aff','partners':'#ff8888'};
       const c = colors[k]||'#888';
       icon.style.background = c+'22';
       icon.style.transform = 'scale(1)';
+      icon.style.boxShadow = 'none';
     }
   });
-  // 選択カードを表示
-  const card = document.getElementById('aihub-card-area-'+key);
+  // 選択アイコンをハイライト
   const icon = document.getElementById('aihub-icon-'+key);
-  const colors = {'anken':'#f5a623','memo':'#4a9eff','estimate':'#3dd68c','gantt':'#b06aff','partners':'#ff8888'};
-  const c = colors[key]||'#888';
-  if(card) card.style.display = 'block';
   if(icon){
+    const c = colors[key]||'#888';
     icon.style.background = c+'44';
     icon.style.transform = 'scale(1.06)';
+    icon.style.boxShadow = '0 0 0 2px '+c;
+  }
+  // 該当カードへスクロール
+  const card = document.getElementById('aihub-card-area-'+key);
+  if(card){
+    setTimeout(()=>{
+      card.scrollIntoView({behavior:'smooth', block:'nearest'});
+    }, 50);
   }
 }
 
@@ -7794,7 +7797,7 @@ let _aiHubCardState = {};
 function renderAiHubCard(title, lines, color, fnName, key){
   const cardId = 'aihub-card-'+fnName;
   const wrapId = key ? 'aihub-card-area-'+key : cardId+'-wrap';
-  return `<div id="${wrapId}" style="display:none;">
+  return `<div id="${wrapId}">
     <div id="${cardId}" style="background:var(--surface);border:1px solid ${color}44;border-left:4px solid ${color};border-radius:12px;padding:12px;margin-bottom:10px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
         <div style="font-size:13px;font-weight:700;color:${color};">${title}</div>
