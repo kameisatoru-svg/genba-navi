@@ -4788,9 +4788,7 @@ ${textInput?'テキスト内容：'+textInput:''}
 (function(){
   const el=document.getElementById('ganttStartDate');
   if(el&&!el.value) el.value=new Date().toISOString().split('T')[0];
-  // 既存データ読込
-  const saved=localStorage.getItem('genba_gantt');
-  if(saved) ganttRows=JSON.parse(saved);
+  // 旧genba_ganttの直接ロードは廃止（v22以降はankenData._ganttRowsで管理）
 })();
 
 
