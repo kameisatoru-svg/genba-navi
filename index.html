@@ -7319,16 +7319,27 @@ function _buildAiHubInputHTML(ankenOpts){
       </div>
     </div>
 
-    <!-- 対象案件 -->
+    <!-- 対象案件（必須） -->
     <div class="form-group">
-      <label class="form-label" style="font-size:11px;letter-spacing:.5px;">📁 対象案件</label>
-      <select class="form-input" id="aihub-anken" style="font-size:13px;" onchange="onAiHubAnkenChange(this)">
-        <option value="">-- 案件を選択 --</option>
+      <label class="form-label" style="font-size:11px;letter-spacing:.5px;">📁 対象案件 <span style="color:#ff5f5f;">※必須</span></label>
+      <select class="form-input" id="aihub-anken" style="font-size:13px;border:1.5px solid rgba(176,106,255,.5);" onchange="onAiHubAnkenChange(this)">
+        <option value="">-- まず案件を選択してください --</option>
         <option value="__new__">＋ 新規案件として登録</option>
         ${ankenOpts}
       </select>
       <div id="aihub-new-name-wrap" style="display:none;margin-top:8px;">
         <input class="form-input" id="aihub-new-name" placeholder="案件名（例：別府市内カフェ改装）">
+      </div>
+    </div>
+
+    <!-- 案件補足指示（案件選択後に出現） -->
+    <div id="aihub-anken-hint-wrap" style="display:none;margin-bottom:14px;">
+      <div style="background:rgba(176,106,255,.07);border:1px solid rgba(176,106,255,.2);border-radius:10px;padding:10px 12px;">
+        <div style="font-size:11px;color:#b06aff;font-weight:700;margin-bottom:6px;">💡 AIへの補足指示（任意）</div>
+        <textarea id="aihub-hint" rows="2" class="form-input"
+          style="font-size:12px;background:transparent;border-color:rgba(176,106,255,.3);resize:none;"
+          placeholder="例：外構工事も含む／関西相場で見積を／丁寧な文体で／公共工事書式で"></textarea>
+        <div id="aihub-hint-saved" style="font-size:10px;color:var(--muted);margin-top:4px;display:none;">💾 この案件の補足として保存済み</div>
       </div>
     </div>
 
@@ -7465,8 +7476,30 @@ function _aiHubClearDrive(){
 }
 
 function onAiHubAnkenChange(sel){
-  const wrap = document.getElementById('aihub-new-name-wrap');
-  if(wrap) wrap.style.display = sel.value === '__new__' ? 'block' : 'none';
+  const newNameWrap = document.getElementById('aihub-new-name-wrap');
+  if(newNameWrap) newNameWrap.style.display = sel.value === '__new__' ? 'block' : 'none';
+
+  const hintWrap = document.getElementById('aihub-anken-hint-wrap');
+  const hintEl   = document.getElementById('aihub-hint');
+  const savedEl  = document.getElementById('aihub-hint-saved');
+
+  if(!sel.value || sel.value === '__new__'){
+    if(hintWrap) hintWrap.style.display = 'none';
+    return;
+  }
+
+  // 案件が選択された → 補足欄を表示
+  if(hintWrap) hintWrap.style.display = 'block';
+
+  // 保存済み補足があれば読み込む
+  const a = getAnken(sel.value);
+  if(a && a._aiHint && hintEl){
+    hintEl.value = a._aiHint;
+    if(savedEl) savedEl.style.display = 'block';
+  } else {
+    if(hintEl) hintEl.value = '';
+    if(savedEl) savedEl.style.display = 'none';
+  }
 }
 
 // 旧互換
@@ -7477,6 +7510,10 @@ function onAiHubFileSelect(e){
 async function runAiHub(){
   const text = document.getElementById('aihub-text')?.value.trim()||'';
   let ankenId = document.getElementById('aihub-anken')?.value||'';
+  const hint  = document.getElementById('aihub-hint')?.value.trim()||'';
+
+  // ─ ガード：案件未選択 ─
+  if(!ankenId){ showToast('案件を選択してください','error'); return; }
 
   // 新規案件登録
   if(ankenId === '__new__'){
@@ -7484,13 +7521,22 @@ async function runAiHub(){
     if(!newName){ showToast('案件名を入力してください','error'); return; }
     const id = 'anken_'+Date.now();
     const newAnken = {id, name:newName, stages:{}, measurements:{floor:0,wall:0,ceiling:0},
-      created:new Date().toLocaleDateString('ja-JP')};
+      created:new Date().toLocaleDateString('ja-JP'), _aiHint: hint};
     ankenData.unshift(newAnken);
     saveAnken();
     currentAnkenId = id;
     renderHomeAnkenList();
     ankenId = id;
     showToast(`「${newName}」を作成しました`);
+  } else {
+    // 補足指示を案件データに保存
+    const a = getAnken(ankenId);
+    if(a && hint !== (a._aiHint||'')){
+      a._aiHint = hint;
+      saveAnken();
+      const savedEl = document.getElementById('aihub-hint-saved');
+      if(savedEl) savedEl.style.display = 'block';
+    }
   }
 
   const combinedText = [text, _aiHubDriveUrl].filter(Boolean).join('\n\n---\n\n');
@@ -7530,11 +7576,12 @@ async function runAiHub(){
     : '';
 
   // 全カテゴリを1回のAPIで解析（高速・低コスト）
+  const hintSection = hint ? `\n\n【補足指示】\n${hint}` : '';
   const prompt = `あなたは内装工事の現場管理AIです。以下の入力から情報を読み取り、各ツールへの反映内容をJSONのみで返してください。
 
 【入力内容】
 ${allText}
-${partnerInfo}
+${partnerInfo}${hintSection}
 
 以下のJSONフォーマットのみで返してください（該当情報がない項目は空配列・空文字・nullにする）：
 {
