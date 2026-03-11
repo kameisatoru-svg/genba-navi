@@ -2663,12 +2663,17 @@ function applyMeishiData() {
     };
   }
 
+  console.log('[名刺] 保存前 anken.stages.meishi=', JSON.stringify(anken.stages.meishi));
   saveAnken();
+  console.log('[名刺] saveAnken後 ankenData中のmeishi=', JSON.stringify(getAnken(anken.id)?.stages?.meishi));
   renderAnkenList?.();
   showToast('名刺交換・登録に反映しました ✓');
   closeMeishiModal();
   setTimeout(() => {
-    switchScreen('home');
+    currentAnkenId = anken.id;
+    console.log('[名刺] switchScreen前 currentAnkenId=', currentAnkenId);
+    switchScreen('home', false);
+    console.log('[名刺] switchScreen後 meishi=', JSON.stringify(getAnken(anken.id)?.stages?.meishi));
     setTimeout(() => openAnkenDetail(anken.id), 50);
   }, 300);
 }
@@ -7279,25 +7284,106 @@ function applyPartnerSuggestion(partnerId, workType){
   event.currentTarget.style.pointerEvents='none';
 }
 
-// ===== AI ハブ v2 =====
-let _aiHubFiles = [];
-let _aiHubDriveUrl = '';
+// ===== AI ハブ v3 =====
+let _aiHubFiles    = [];
+let _aiHubAllText  = '';   // 解析に使う全入力テキスト（runAiHub後に保持）
+let _aiHubImgParts = [];   // 画像parts（専用プロンプト再解析時も使う）
 
-// 反映先定義（解析後のカード表示に使用）
+// ─── 反映先定義（全9カテゴリ） ───
 const AI_HUB_TARGETS = [
   { key:'anken',    icon:'🏠', label:'案件情報',   color:'#f5a623' },
+  { key:'meishi',   icon:'💼', label:'名刺交換',   color:'#fd9644' },
   { key:'memo',     icon:'💬', label:'打合せメモ', color:'#4a9eff' },
   { key:'estimate', icon:'📋', label:'見積',       color:'#3dd68c' },
   { key:'gantt',    icon:'📅', label:'工程表',     color:'#b06aff' },
   { key:'partners', icon:'🤝', label:'協力業者',   color:'#ff8888' },
-  { key:'sketch',   icon:'✏️',  label:'図面メモ',  color:'#aaa'    },
+  { key:'sketch',   icon:'✏️',  label:'図面メモ',  color:'#a29bfe' },
   { key:'photos',   icon:'📷', label:'写真タグ',   color:'#ff9f43' },
   { key:'voice',    icon:'🎙️', label:'音声メモ',   color:'#ee5a24' },
 ];
 
+// ─── カテゴリ別専用プロンプト ───
+const AI_HUB_PROMPTS = {
+  anken: `あなたは内装工事の現場管理AIです。
+以下の入力から【案件基本情報】を抽出し、JSONのみで返してください。
+JSONフォーマット：
+{"anken":{"name":"案件名","client":"施主名","tel":"電話番号","address":"住所","memo":"備考"},"summary":"要約（50字以内）"}
+- 読み取れない項目は空文字
+- JSONのみ返す（説明不要）`,
+
+  meishi: `あなたは内装工事の現場管理AIです。
+以下の入力（名刺画像・テキスト）から【名刺情報】を抽出し、JSONのみで返してください。
+JSONフォーマット：
+{"meishi":{"company":"会社名","contact":"担当者名（フルネーム）","title":"役職","tel":"電話番号（携帯優先）","email":"メールアドレス","address":"住所"},"summary":"要約（50字以内）"}
+- 電話番号が複数ある場合は携帯を優先
+- 読み取れない項目は空文字
+- JSONのみ返す（説明不要）`,
+
+  memo: `あなたは内装工事の現場管理AIです。
+以下の入力から【打ち合わせメモ】として記録すべき内容を整理し、JSONのみで返してください。
+JSONフォーマット：
+{"memo":{"text":"整理されたメモ（改行区切りの箇条書き）"},"summary":"要約（50字以内）"}
+- 決定事項・確認事項・次回アクションを優先して抽出
+- 各項目は「・」で始める
+- 冗長な表現は省いてコンパクトに
+- JSONのみ返す（説明不要）`,
+
+  estimate: `あなたは内装工事の現場管理AIです。
+以下の入力から【見積項目】を抽出し、JSONのみで返してください。
+JSONフォーマット：
+{"estimate":[{"name":"項目名","qty":1,"unit":"㎡","unitPrice":0,"category":"material"}],"summary":"要約（50字以内）"}
+- categoryはmaterial（材料費）/ labor（労務費）/ other（諸経費）のみ
+- 数量は「式」より個別数量（㎡・m・枚・箇所等）を優先
+- 単価は内装工事の一般的な相場を参考に現実的な値を設定
+- 材料費・労務費・諸経費の順に並べる
+- JSONのみ返す（説明不要）`,
+
+  gantt: `あなたは内装工事の現場管理AIです。
+以下の入力から【工程表】の工種と工期を抽出し、JSONのみで返してください。
+JSONフォーマット：
+{"gantt":[{"trade":"工種名","duration":3}],"summary":"要約（50字以内）"}
+- 内装工事の施工順序（養生→解体→下地→設備→仕上げ→清掃）を考慮して並べる
+- durationは日数（整数）、現実的な工期を設定
+- 前工程が完了しないと始められない依存関係を意識する
+- JSONのみ返す（説明不要）`,
+
+  partners: `あなたは内装工事の現場管理AIです。
+以下の入力と登録業者リストから【協力業者の割り当て】を提案し、JSONのみで返してください。
+JSONフォーマット：
+{"partners":[{"partnerId":0,"workType":"工種名","reason":"選定理由（30字以内）"}],"summary":"要約（50字以内）"}
+- partnerIdは必ず登録業者リストに存在するIDのみ使用
+- 入力から必要な工種を読み取り、対応できる業者を選定
+- JSONのみ返す（説明不要）`,
+
+  sketch: `あなたは内装工事の現場管理AIです。
+以下の入力（図面画像・メモ・テキスト）から【図面・実測メモ】として有用な情報を抽出し、JSONのみで返してください。
+JSONフォーマット：
+{"sketch":{"rooms":[{"name":"部屋名","width":"","depth":"","memo":"仕上げ材・備考"}],"notes":"全体的な特記事項"},"summary":"要約（50字以内）"}
+- 部屋名・寸法・仕上げ材・特記事項を抽出
+- 寸法はmm単位で統一
+- JSONのみ返す（説明不要）`,
+
+  photos: `あなたは内装工事の現場管理AIです。
+以下の入力（写真・テキスト）から【写真タグ情報】を生成し、JSONのみで返してください。
+JSONフォーマット：
+{"photos":{"tag":"場所タグ（例：LDK・洗面・外壁）","description":"写真の説明文（30字以内）","phase":"施工フェーズ（着工前/施工中/完成）"},"summary":"要約（50字以内）"}
+- 写真が示す場所・状態・工事フェーズを読み取る
+- タグは簡潔に（スペース区切りで複数可）
+- JSONのみ返す（説明不要）`,
+
+  voice: `あなたは内装工事の現場管理AIです。
+以下の入力（音声書き起こし・テキスト）を【音声メモ】として整理し、JSONのみで返してください。
+JSONフォーマット：
+{"voice":{"title":"メモタイトル（20字以内）","text":"整理・要約されたメモ内容（改行区切り）","keywords":["キーワード1","キーワード2"]},"summary":"要約（50字以内）"}
+- 口語・曖昧な表現を整理して簡潔にまとめる
+- 重要なキーワードを3〜5個抽出
+- JSONのみ返す（説明不要）`,
+};
+
 function openAiHub(){
-  _aiHubFiles = [];
-  _aiHubDriveUrl = '';
+  _aiHubFiles    = [];
+  _aiHubAllText  = '';
+  _aiHubImgParts = [];
   const ankenOpts = ankenData.map(x=>`<option value="${x.id}"${x.id===currentAnkenId?' selected':''}>${x.name}</option>`).join('');
   const sheet = document.getElementById('modalSheet');
   sheet.innerHTML = _buildAiHubInputHTML(ankenOpts);
@@ -7309,13 +7395,11 @@ function openAiHub(){
 function _buildAiHubInputHTML(ankenOpts){
   return `
     <div class="modal-handle"></div>
-
-    <!-- ヘッダー -->
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
       <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#b06aff,#4a9eff);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;">🤖</div>
       <div>
         <div style="font-size:16px;font-weight:700;">AI 入力ハブ</div>
-        <div style="font-size:11px;color:var(--muted);">① 入力 → ② 解析 → ③ 反映先を選んで適用</div>
+        <div style="font-size:11px;color:var(--muted);">① 入力 → ② 解析 → ③ アイコンタップで専用解析 → ④ 反映</div>
       </div>
     </div>
 
@@ -7332,7 +7416,7 @@ function _buildAiHubInputHTML(ankenOpts){
       </div>
     </div>
 
-    <!-- 案件補足指示（案件選択後に出現） -->
+    <!-- 補足指示（案件選択後に出現） -->
     <div id="aihub-anken-hint-wrap" style="display:none;margin-bottom:14px;">
       <div style="background:rgba(176,106,255,.07);border:1px solid rgba(176,106,255,.2);border-radius:10px;padding:10px 12px;">
         <div style="font-size:11px;color:#b06aff;font-weight:700;margin-bottom:6px;">💡 AIへの補足指示（任意）</div>
@@ -7350,27 +7434,23 @@ function _buildAiHubInputHTML(ankenOpts){
         placeholder="打ち合わせ内容・音声メモ・工事概要など何でも&#10;例：カフェ内装工事。壁クロス貼り替え、床フロアタイル。工期3週間。施主は山田様。予算150万。"></textarea>
     </div>
 
-    <!-- ファイル入力エリア（タップでそれぞれ選択） -->
+    <!-- ファイル添付（3種） -->
     <div class="form-group">
       <label class="form-label" style="font-size:11px;letter-spacing:.5px;">📎 ファイル添付</label>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px;">
         <div onclick="document.getElementById('aihub-img-input').click()"
           style="text-align:center;padding:14px 4px;border-radius:12px;border:1.5px dashed rgba(176,106,255,.4);background:rgba(176,106,255,.05);cursor:pointer;touch-action:manipulation;">
-          <div style="font-size:26px;">🖼️</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px;">写真</div>
+          <div style="font-size:26px;">🖼️</div><div style="font-size:11px;color:var(--muted);margin-top:4px;">写真</div>
         </div>
         <div onclick="document.getElementById('aihub-pdf-input').click()"
           style="text-align:center;padding:14px 4px;border-radius:12px;border:1.5px dashed rgba(176,106,255,.4);background:rgba(176,106,255,.05);cursor:pointer;touch-action:manipulation;">
-          <div style="font-size:26px;">📄</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px;">PDF</div>
+          <div style="font-size:26px;">📄</div><div style="font-size:11px;color:var(--muted);margin-top:4px;">PDF</div>
         </div>
         <div onclick="document.getElementById('aihub-doc-input').click()"
           style="text-align:center;padding:14px 4px;border-radius:12px;border:1.5px dashed rgba(176,106,255,.4);background:rgba(176,106,255,.05);cursor:pointer;touch-action:manipulation;">
-          <div style="font-size:26px;">📝</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px;">文書</div>
+          <div style="font-size:26px;">📝</div><div style="font-size:11px;color:var(--muted);margin-top:4px;">文書</div>
         </div>
       </div>
-      <!-- 添付済みファイル一覧 -->
       <div id="aihub-file-list"></div>
       <input type="file" id="aihub-img-input" accept="image/*" multiple style="display:none;">
       <input type="file" id="aihub-pdf-input" accept="application/pdf" multiple style="display:none;">
@@ -7383,7 +7463,7 @@ function _buildAiHubInputHTML(ankenOpts){
       🤖 解析する
     </button>
 
-    <!-- 解析結果エリア（解析後にカードが出る） -->
+    <!-- 結果エリア -->
     <div id="aihub-result" style="margin-top:14px;"></div>
   `;
 }
@@ -7395,14 +7475,44 @@ function _bindAiHubFileEvents(){
   if(imgInput) imgInput.addEventListener('change', e=>_aiHubAddFiles(Array.from(e.target.files)));
   if(pdfInput) pdfInput.addEventListener('change', e=>_aiHubAddFiles(Array.from(e.target.files)));
   if(docInput) docInput.addEventListener('change', e=>_aiHubAddFiles(Array.from(e.target.files)));
-  // Galaxy Chrome対策：セレクトのchangeをJSでも確実にバインド
   const ankenSel = document.getElementById('aihub-anken');
   if(ankenSel){
     ankenSel.addEventListener('change', function(){ onAiHubAnkenChange(this); });
-    // 初期値が既に選択されている場合（currentAnkenIdがある場合）は即時発火
     if(ankenSel.value && ankenSel.value !== '' && ankenSel.value !== '__new__'){
       onAiHubAnkenChange(ankenSel);
     }
+  }
+}
+
+function _aiHubNewNameKeydown(e){
+  if(e.key !== 'Enter') return;
+  e.preventDefault();
+  const name = document.getElementById('aihub-new-name')?.value.trim();
+  if(!name) return;
+  const hintWrap = document.getElementById('aihub-anken-hint-wrap');
+  const hintEl   = document.getElementById('aihub-hint');
+  if(hintWrap) hintWrap.style.display = 'block';
+  if(hintEl)   hintEl.focus();
+}
+
+function onAiHubAnkenChange(sel){
+  const newNameWrap = document.getElementById('aihub-new-name-wrap');
+  if(newNameWrap) newNameWrap.style.display = sel.value === '__new__' ? 'block' : 'none';
+  const hintWrap = document.getElementById('aihub-anken-hint-wrap');
+  const hintEl   = document.getElementById('aihub-hint');
+  const savedEl  = document.getElementById('aihub-hint-saved');
+  if(!sel.value || sel.value === '__new__'){
+    if(hintWrap) hintWrap.style.display = 'none';
+    return;
+  }
+  if(hintWrap) hintWrap.style.display = 'block';
+  const a = getAnken(sel.value);
+  if(a && a._aiHint && hintEl){
+    hintEl.value = a._aiHint;
+    if(savedEl) savedEl.style.display = 'block';
+  } else {
+    if(hintEl) hintEl.value = '';
+    if(savedEl) savedEl.style.display = 'none';
   }
 }
 
@@ -7414,21 +7524,15 @@ function _aiHubAddFiles(newFiles){
 function _renderAiHubFileList(){
   const el = document.getElementById('aihub-file-list');
   if(!el) return;
-  if(_aiHubFiles.length === 0 && !_aiHubDriveUrl){ el.innerHTML=''; return; }
+  if(_aiHubFiles.length === 0){ el.innerHTML=''; return; }
   let html = '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">';
   _aiHubFiles.forEach((f,i)=>{
     const icon = f.type.startsWith('image/') ? '🖼️' : f.type==='application/pdf' ? '📄' : '📝';
     html += `<div style="display:flex;align-items:center;gap:4px;background:rgba(176,106,255,.12);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--accent);">
       ${icon} ${f.name.length>16?f.name.substring(0,16)+'…':f.name}
-      <span onclick="_aiHubRemoveFile(${i})" style="cursor:pointer;color:var(--muted);margin-left:2px;touch-action:manipulation;font-size:13px;">✕</span>
+      <span onclick="_aiHubRemoveFile(${i})" style="cursor:pointer;color:var(--muted);margin-left:2px;touch-action:manipulation;">✕</span>
     </div>`;
   });
-  if(_aiHubDriveUrl){
-    html += `<div style="display:flex;align-items:center;gap:4px;background:rgba(74,158,255,.15);border-radius:6px;padding:4px 8px;font-size:11px;color:#4a9eff;">
-      ☁️ Gドライブ読込済
-      <span onclick="_aiHubClearDrive()" style="cursor:pointer;color:var(--muted);margin-left:2px;touch-action:manipulation;font-size:13px;">✕</span>
-    </div>`;
-  }
   html += '</div>';
   el.innerHTML = html;
 }
@@ -7438,399 +7542,254 @@ function _aiHubRemoveFile(i){
   _renderAiHubFileList();
 }
 
-function _aiHubToggleDriveInput(){
-  const wrap = document.getElementById('aihub-drive-input-wrap');
-  if(wrap) wrap.style.display = wrap.style.display==='none' ? 'block' : 'none';
-}
+function onAiHubFileSelect(e){ _aiHubAddFiles(Array.from(e.target.files)); }
 
-async function _aiHubFetchDrive(){
-  const urlEl = document.getElementById('aihub-drive-url');
-  const url = urlEl?.value.trim();
-  if(!url){ showToast('URLを入力してください','error'); return; }
-  showToast('☁️ 読み込み中...');
-  try{
-    let fetchUrl = url;
-    const docMatch = url.match(/\/document\/d\/([a-zA-Z0-9_-]+)/);
-    const sheetMatch = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
-    if(docMatch) fetchUrl = `https://docs.google.com/document/d/${docMatch[1]}/export?format=txt`;
-    else if(sheetMatch) fetchUrl = `https://docs.google.com/spreadsheets/d/${sheetMatch[1]}/export?format=csv`;
-    const res = await fetch(fetchUrl);
-    const text = await res.text();
-    _aiHubDriveUrl = text.substring(0, 4000);
-    _renderAiHubFileList();
-    const wrap = document.getElementById('aihub-drive-input-wrap');
-    if(wrap) wrap.style.display = 'none';
-    showToast('✅ Googleドライブから読み込みました');
-  }catch(e){
-    showToast('⚠️ 読み込み失敗。共有設定を確認してください','error');
-  }
-}
-
-function _aiHubClearDrive(){
-  _aiHubDriveUrl = '';
-  _renderAiHubFileList();
-}
-
-function _aiHubNewNameKeydown(e){
-  if(e.key !== 'Enter') return;
-  e.preventDefault();
-  const name = document.getElementById('aihub-new-name')?.value.trim();
-  if(!name) return;
-  // 補足欄を表示
-  const hintWrap = document.getElementById('aihub-anken-hint-wrap');
-  const hintEl   = document.getElementById('aihub-hint');
-  if(hintWrap) hintWrap.style.display = 'block';
-  if(hintEl)   hintEl.focus();
-}
-
-function onAiHubAnkenChange(sel){
-  const newNameWrap = document.getElementById('aihub-new-name-wrap');
-  if(newNameWrap) newNameWrap.style.display = sel.value === '__new__' ? 'block' : 'none';
-
-  const hintWrap = document.getElementById('aihub-anken-hint-wrap');
-  const hintEl   = document.getElementById('aihub-hint');
-  const savedEl  = document.getElementById('aihub-hint-saved');
-
-  if(!sel.value || sel.value === '__new__'){
-    if(hintWrap) hintWrap.style.display = 'none';
-    return;
-  }
-
-  // 案件が選択された → 補足欄を表示
-  if(hintWrap) hintWrap.style.display = 'block';
-
-  // 保存済み補足があれば読み込む
-  const a = getAnken(sel.value);
-  if(a && a._aiHint && hintEl){
-    hintEl.value = a._aiHint;
-    if(savedEl) savedEl.style.display = 'block';
-  } else {
-    if(hintEl) hintEl.value = '';
-    if(savedEl) savedEl.style.display = 'none';
-  }
-}
-
-// 旧互換
-function onAiHubFileSelect(e){
-  _aiHubAddFiles(Array.from(e.target.files));
-}
-
+// ─── STEP②：解析ボタン → 軽量1回API（全体把握のみ） ───
 async function runAiHub(){
   const text = document.getElementById('aihub-text')?.value.trim()||'';
   let ankenId = document.getElementById('aihub-anken')?.value||'';
   const hint  = document.getElementById('aihub-hint')?.value.trim()||'';
 
-  // ─ ガード：案件未選択 ─
   if(!ankenId){ showToast('案件を選択してください','error'); return; }
 
-  // 新規案件登録
   if(ankenId === '__new__'){
     const newName = document.getElementById('aihub-new-name')?.value.trim();
     if(!newName){ showToast('案件名を入力してください','error'); return; }
     const id = 'anken_'+Date.now();
-    const newAnken = {id, name:newName, stages:{}, measurements:{floor:0,wall:0,ceiling:0},
-      created:new Date().toLocaleDateString('ja-JP'), _aiHint: hint};
-    ankenData.unshift(newAnken);
-    saveAnken();
-    currentAnkenId = id;
-    renderHomeAnkenList();
-    ankenId = id;
+    ankenData.unshift({id, name:newName, stages:{}, measurements:{floor:0,wall:0,ceiling:0},
+      created:new Date().toLocaleDateString('ja-JP'), _aiHint:hint});
+    saveAnken(); currentAnkenId=id; renderHomeAnkenList(); ankenId=id;
     showToast(`「${newName}」を作成しました`);
   } else {
-    // 補足指示を案件データに保存
     const a = getAnken(ankenId);
-    if(a && hint !== (a._aiHint||'')){
-      a._aiHint = hint;
-      saveAnken();
-      const savedEl = document.getElementById('aihub-hint-saved');
-      if(savedEl) savedEl.style.display = 'block';
-    }
+    if(a && hint !== (a._aiHint||'')){ a._aiHint=hint; saveAnken(); }
   }
 
-  const combinedText = [text, _aiHubDriveUrl].filter(Boolean).join('\n\n---\n\n');
+  const combinedText = text;
   if(!combinedText && _aiHubFiles.length===0){ showToast('テキストかファイルを入力してください','error'); return; }
-
   const key = getApiKey();
   if(!key){ showToast('APIキーを設定してください','error'); return; }
 
-  const resultEl = document.getElementById('aihub-result');
   const btn = document.getElementById('aihub-run-btn');
+  const resultEl = document.getElementById('aihub-result');
   if(btn){ btn.disabled=true; btn.textContent='🤖 解析中...'; btn.style.opacity='0.7'; }
-  resultEl.innerHTML = `
-    <div style="text-align:center;padding:24px 16px;">
-      <div style="font-size:32px;animation:spin 1.2s linear infinite;display:inline-block;">⚙️</div>
-      <div style="font-size:14px;color:var(--accent);margin-top:10px;font-weight:700;">AIが解析しています…</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px;">テキスト・画像・ファイルをまとめて処理中</div>
-    </div>`;
+  resultEl.innerHTML = `<div style="text-align:center;padding:24px 16px;">
+    <div style="font-size:32px;animation:spin 1.2s linear infinite;display:inline-block;">⚙️</div>
+    <div style="font-size:14px;color:var(--accent);margin-top:10px;font-weight:700;">入力内容を読み取り中…</div>
+  </div>`;
 
-  // ファイルをbase64・テキスト変換
-  const imageParts = [];
+  // ファイルをbase64・テキスト変換（グローバルに保持）
+  _aiHubImgParts = [];
   const textFileParts = [];
   for(const file of _aiHubFiles){
     if(file.type.startsWith('image/')){
       const b64 = await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.readAsDataURL(file);});
-      imageParts.push({type:'image',source:{type:'base64',media_type:file.type,data:b64}});
+      _aiHubImgParts.push({type:'image',source:{type:'base64',media_type:file.type,data:b64}});
     } else {
       try{
         const ftxt = await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsText(file);});
-        textFileParts.push(`【添付ファイル: ${file.name}】\n${ftxt.substring(0,3000)}`);
-      }catch(e){ /* 読めないファイルはスキップ */ }
+        textFileParts.push(`【ファイル:${file.name}】\n${ftxt.substring(0,3000)}`);
+      }catch(e){}
     }
   }
-
-  const allText = [combinedText, ...textFileParts].filter(Boolean).join('\n\n');
-  const partnerInfo = partnerMaster.length>0
-    ? '\n\n【登録協力業者】\n'+partnerMaster.map((p,i)=>`ID:${i} ${p.name} [${(p.workTypes||[]).join(',')}]`).join('\n')
-    : '';
-
-  // 全カテゴリを1回のAPIで解析（高速・低コスト）
+  _aiHubAllText = [combinedText, ...textFileParts].filter(Boolean).join('\n\n');
   const hintSection = hint ? `\n\n【補足指示】\n${hint}` : '';
-  const prompt = `あなたは内装工事の現場管理AIです。以下の入力から情報を読み取り、各ツールへの反映内容をJSONのみで返してください。
 
-【入力内容】
-${allText}
-${partnerInfo}${hintSection}
-
-以下のJSONフォーマットのみで返してください（該当情報がない項目は空配列・空文字・nullにする）：
-{
-  "anken": {"name":"","client":"","tel":"","address":"","memo":""},
-  "memo": {"text":"打ち合わせ内容を整理した箇条書き（改行区切り）"},
-  "estimate": [{"name":"項目名","qty":1,"unit":"式","unitPrice":0,"category":"labor"}],
-  "gantt": [{"trade":"工種名","duration":3}],
-  "partners": [{"partnerId":0,"workType":"塗装","reason":"選定理由"}],
-  "summary": "全体要約（80字以内）"
-}
-ルール：
-- estimateのcategoryはmaterial/labor/otherのみ
-- ganttのdurationは日数（整数）、施工順序を考慮して並べる
-- partnersはpartnerIdが登録業者に存在する場合のみ
-- memoは重要事項・決定事項・確認事項を改行区切りで整理
-- JSONのみ返す（前置き・説明不要）`;
-
-  const contentParts = [...imageParts, {type:'text', text:prompt}];
+  // 軽量1回API：どのカテゴリが該当するか判定だけ
+  const partnerInfo = partnerMaster.length>0
+    ? '\n\n【登録協力業者】\n'+partnerMaster.map((p,i)=>`ID:${i} ${p.name}`).join('\n') : '';
+  const scanPrompt = `内装工事現場管理AIです。以下の入力がどのカテゴリに該当するか判定し、JSONのみで返してください。
+【入力】\n${_aiHubAllText}${partnerInfo}${hintSection}
+フォーマット：{"hits":["anken","meishi","memo","estimate","gantt","partners","sketch","photos","voice"],"summary":"全体要約（60字以内）"}
+hitsには該当するカテゴリキーのみ含める。JSONのみ返す。`;
 
   try{
-    const res = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
+    const res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:3000,messages:[{role:'user',content:contentParts}]})
-    });
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,
+        messages:[{role:'user',content:[..._aiHubImgParts,{type:'text',text:scanPrompt}]}]})});
     const data = await res.json();
-    const rawText = data.content?.map(c=>c.text||'').join('')||'';
-    const parsed = JSON.parse(rawText.replace(/```json|```/g,'').trim());
+    const raw = data.content?.map(c=>c.text||'').join('')||'';
+    const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
     if(btn){ btn.disabled=false; btn.textContent='🔄 再解析'; btn.style.opacity='1'; }
-    renderAiHubResult(parsed, ankenId);
+    _renderAiHubIcons(parsed.hits||[], parsed.summary||'', ankenId);
   }catch(err){
     if(btn){ btn.disabled=false; btn.textContent='🤖 解析する'; btn.style.opacity='1'; }
     resultEl.innerHTML = `<div style="color:var(--red);padding:10px;font-size:12px;">⚠️ エラー：${err.message}</div>`;
   }
 }
 
-// AIハブ結果をグローバルに保持（onclickのJSON埋め込みを避けるため）
-let _aiHubResultData = null;
+// ─── STEP③：判定結果のアイコングリッドを表示 ───
 let _aiHubResultAnkenId = null;
+let _aiHubCardState     = {};
+let _aiHubResultData    = {};
 
-function renderAiHubResult(d, ankenId){
-  const resultEl = document.getElementById('aihub-result');
-  if(!resultEl) return;
-  _aiHubResultData = d;
+function _renderAiHubIcons(hits, summary, ankenId){
   _aiHubResultAnkenId = ankenId;
-  _aiHubCardState = {};
+  _aiHubResultData    = {};
+  _aiHubCardState     = {};
+  const resultEl = document.getElementById('aihub-result');
+  const colors = {anken:'#f5a623',meishi:'#fd9644',memo:'#4a9eff',estimate:'#3dd68c',
+                  gantt:'#b06aff',partners:'#ff8888',sketch:'#a29bfe',photos:'#ff9f43',voice:'#ee5a24'};
 
-  // 反映可能カテゴリを判定
-  const hasAnken   = !!(d.anken && (d.anken.name||d.anken.client||d.anken.tel));
-  const hasMemo    = !!(d.memo && d.memo.text);
-  const hasEst     = !!(d.estimate && d.estimate.length);
-  const hasGantt   = !!(d.gantt && d.gantt.length);
-  const hasPartner = !!(d.partners && d.partners.length && partnerMaster.length && d.partners.some(p=>partnerMaster[p.partnerId]));
-
-  if(hasAnken)   _aiHubCardState['applyAiHubAnken']    = 'pending';
-  if(hasMemo)    _aiHubCardState['applyAiHubMemo']     = 'pending';
-  if(hasEst)     _aiHubCardState['applyAiHubEstimate'] = 'pending';
-  if(hasGantt)   _aiHubCardState['applyAiHubGantt']   = 'pending';
-  if(hasPartner) _aiHubCardState['applyAiHubPartners'] = 'pending';
-
-  const pendingCount = Object.keys(_aiHubCardState).length;
-
-  // アイコン定義（解析結果ありの場合だけ光る）
-  const ICONS = [
-    { key:'anken',    fn:'applyAiHubAnken',    icon:'🏠', label:'案件情報',   color:'#f5a623', has:hasAnken   },
-    { key:'memo',     fn:'applyAiHubMemo',     icon:'💬', label:'打合せメモ', color:'#4a9eff', has:hasMemo    },
-    { key:'estimate', fn:'applyAiHubEstimate', icon:'📋', label:'見積',       color:'#3dd68c', has:hasEst     },
-    { key:'gantt',    fn:'applyAiHubGantt',    icon:'📅', label:'工程表',     color:'#b06aff', has:hasGantt   },
-    { key:'partners', fn:'applyAiHubPartners', icon:'🤝', label:'協力業者',   color:'#ff8888', has:hasPartner },
-  ];
-
-  let html = '';
-
-  // ── 解析完了バナー ──
-  html += `
-  <div style="background:linear-gradient(135deg,rgba(176,106,255,.12),rgba(74,158,255,.12));border:1px solid rgba(176,106,255,.25);border-radius:14px;padding:14px 14px 10px;margin-bottom:12px;">
+  let html = `
+  <div style="background:linear-gradient(135deg,rgba(176,106,255,.12),rgba(74,158,255,.12));border:1px solid rgba(176,106,255,.25);border-radius:14px;padding:14px;margin-bottom:12px;">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-      <div style="font-size:20px;">✅</div>
+      <div style="font-size:18px;">✅</div>
       <div>
-        <div style="font-size:14px;font-weight:700;">解析完了</div>
-        <div style="font-size:11px;color:var(--muted);">${pendingCount > 0 ? pendingCount+'件の反映先が見つかりました' : '反映できる情報が見つかりませんでした'}</div>
+        <div style="font-size:14px;font-weight:700;">読み取り完了</div>
+        <div style="font-size:11px;color:var(--muted);">${hits.length}件の反映先が見つかりました</div>
       </div>
     </div>
-    ${d.summary ? `<div style="font-size:11px;color:var(--text);line-height:1.65;padding:8px 10px;background:rgba(0,0,0,.12);border-radius:8px;">${d.summary}</div>` : ''}
-  </div>`;
+    ${summary ? `<div style="font-size:11px;color:var(--text);line-height:1.65;padding:8px 10px;background:rgba(0,0,0,.12);border-radius:8px;">${summary}</div>` : ''}
+  </div>
+  <div style="font-size:11px;color:var(--muted);margin-bottom:8px;text-align:center;">▼ アイコンをタップして専用解析・反映</div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px;">`;
 
-  if(pendingCount === 0){
-    resultEl.innerHTML = html;
-    return;
-  }
-
-  // ── 反映先アイコングリッド（タップで詳細カードが開く） ──
-  html += `<div style="margin-bottom:10px;">
-    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;text-align:center;">▼ 反映先をタップして内容確認・適用</div>
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;">`;
-
-  ICONS.forEach(ic=>{
-    if(ic.has){
-      html += `<div id="aihub-icon-${ic.key}" onclick="_aiHubOpenCard('${ic.key}')"
-        style="text-align:center;padding:10px 4px;border-radius:12px;border:2px solid ${ic.color};background:${ic.color}22;cursor:pointer;touch-action:manipulation;transition:all .15s;position:relative;">
-        <div style="font-size:22px;">${ic.icon}</div>
-        <div style="font-size:9px;color:${ic.color};font-weight:700;margin-top:3px;line-height:1.2;">${ic.label}</div>
-        <div id="aihub-icon-badge-${ic.key}" style="position:absolute;top:-4px;right:-4px;width:10px;height:10px;border-radius:50%;background:${ic.color};border:2px solid var(--bg);"></div>
+  AI_HUB_TARGETS.forEach(t=>{
+    const active = hits.includes(t.key);
+    if(active){
+      html += `<div id="aihub-icon-${t.key}" onclick="_aiHubAnalyze('${t.key}')"
+        style="text-align:center;padding:10px 4px;border-radius:12px;border:2px solid ${t.color};background:${t.color}22;cursor:pointer;touch-action:manipulation;position:relative;transition:all .15s;">
+        <div style="font-size:22px;">${t.icon}</div>
+        <div style="font-size:9px;color:${t.color};font-weight:700;margin-top:3px;line-height:1.2;">${t.label}</div>
+        <div id="aihub-badge-${t.key}" style="position:absolute;top:-4px;right:-4px;width:10px;height:10px;border-radius:50%;background:${t.color};border:2px solid var(--bg);"></div>
       </div>`;
     } else {
-      html += `<div style="text-align:center;padding:10px 4px;border-radius:12px;border:2px solid var(--border);background:transparent;opacity:0.25;">
-        <div style="font-size:22px;">${ic.icon}</div>
-        <div style="font-size:9px;color:var(--muted);margin-top:3px;line-height:1.2;">${ic.label}</div>
+      html += `<div style="text-align:center;padding:10px 4px;border-radius:12px;border:2px solid var(--border);opacity:0.2;">
+        <div style="font-size:22px;">${t.icon}</div>
+        <div style="font-size:9px;color:var(--muted);margin-top:3px;line-height:1.2;">${t.label}</div>
       </div>`;
     }
   });
 
-  html += `</div></div>`;
-
-  // ── 一括反映ボタン ──
-  if(pendingCount > 1){
-    html += `<button id="aihub-apply-all-btn" onclick="_applyAllAiHub()"
-      style="width:100%;background:linear-gradient(135deg,#3dd68c,#4a9eff);border:none;color:#fff;padding:13px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation;margin-bottom:12px;">
-      ⚡ すべて反映する（${pendingCount}件）
-    </button>`;
-  }
-
-  // ── カード詳細エリア（初期は非表示、タップで展開） ──
-  html += `<div id="aihub-cards-area">`;
-
-  if(hasAnken){
-    html += renderAiHubCard('🏠 案件情報', [
-      d.anken.name    && `案件名：${d.anken.name}`,
-      d.anken.client  && `施主：${d.anken.client}`,
-      d.anken.tel     && `TEL：${d.anken.tel}`,
-      d.anken.address && `住所：${d.anken.address}`,
-    ].filter(Boolean), '#f5a623', 'applyAiHubAnken', 'anken');
-  }
-  if(hasMemo){
-    const lines = d.memo.text.split('\n').filter(Boolean).slice(0,6);
-    html += renderAiHubCard('💬 打ち合わせメモ',
-      lines.length ? lines : [d.memo.text.substring(0,120)],
-      '#4a9eff', 'applyAiHubMemo', 'memo');
-  }
-  if(hasEst){
-    const total = d.estimate.reduce((s,i)=>s+(i.unitPrice||0)*(i.qty||1),0);
-    html += renderAiHubCard('📋 見積項目',
-      [...d.estimate.slice(0,5).map(i=>`${i.name}　${i.qty}${i.unit}　¥${(i.unitPrice||0).toLocaleString()}`),
-       d.estimate.length>5 ? `…他${d.estimate.length-5}件` : null,
-       `合計 ¥${total.toLocaleString()}`].filter(Boolean),
-      '#3dd68c', 'applyAiHubEstimate', 'estimate');
-  }
-  if(hasGantt){
-    const totalDays = d.gantt.reduce((s,g)=>s+(g.duration||0),0);
-    html += renderAiHubCard('📅 工程表',
-      [...d.gantt.slice(0,5).map((g,i)=>`${i+1}. ${g.trade}　${g.duration}日`),
-       d.gantt.length>5 ? `…他${d.gantt.length-5}工種` : null,
-       `合計 ${totalDays}日`].filter(Boolean),
-      '#b06aff', 'applyAiHubGantt', 'gantt');
-  }
-  if(hasPartner){
-    const lines = d.partners.map(p=>{
-      const pm = partnerMaster[p.partnerId];
-      return pm ? `${p.workType}：${pm.name}（${p.reason}）` : null;
-    }).filter(Boolean);
-    html += renderAiHubCard('🤝 協力業者', lines, '#ff8888', 'applyAiHubPartners', 'partners');
-  }
-
-  html += `</div>`;
+  html += `</div><div id="aihub-cards-area"></div>`;
   resultEl.innerHTML = html;
-
-  // 最初のアイコンをハイライト
-  const firstKey = ICONS.find(ic=>ic.has)?.key;
-  if(firstKey) setTimeout(()=>_aiHubOpenCard(firstKey), 50);
 }
 
-// アイコンタップ → 該当カードへスクロール＆ハイライト
-function _aiHubOpenCard(key){
-  const colors = {'anken':'#f5a623','memo':'#4a9eff','estimate':'#3dd68c','gantt':'#b06aff','partners':'#ff8888'};
-  // 全アイコンをリセット
-  ['anken','memo','estimate','gantt','partners'].forEach(k=>{
-    const icon = document.getElementById('aihub-icon-'+k);
-    if(icon){
-      const c = colors[k]||'#888';
-      icon.style.background = c+'22';
-      icon.style.transform = 'scale(1)';
-      icon.style.boxShadow = 'none';
-    }
-  });
-  // 選択アイコンをハイライト
-  const icon = document.getElementById('aihub-icon-'+key);
-  if(icon){
-    const c = colors[key]||'#888';
-    icon.style.background = c+'44';
-    icon.style.transform = 'scale(1.06)';
-    icon.style.boxShadow = '0 0 0 2px '+c;
+// ─── STEP④：アイコンタップ → 専用プロンプトで再解析 → カード表示 ───
+async function _aiHubAnalyze(key){
+  const t = AI_HUB_TARGETS.find(x=>x.key===key);
+  if(!t) return;
+  const apiKey = getApiKey();
+  if(!apiKey){ showToast('APIキーを設定してください','error'); return; }
+
+  // アイコンをローディング状態に
+  const iconEl = document.getElementById('aihub-icon-'+key);
+  if(iconEl){ iconEl.style.opacity='0.5'; iconEl.style.pointerEvents='none'; }
+
+  const cardsArea = document.getElementById('aihub-cards-area');
+  const loadId = 'aihub-loading-'+key;
+  let existing = document.getElementById(loadId);
+  if(!existing){
+    const div = document.createElement('div');
+    div.id = loadId;
+    div.style.cssText = 'text-align:center;padding:14px;';
+    div.innerHTML = `<div style="font-size:18px;">${t.icon}</div><div style="font-size:12px;color:var(--accent);margin-top:4px;">${t.label}を専用解析中…</div>`;
+    cardsArea.appendChild(div);
+    cardsArea.scrollIntoView({behavior:'smooth',block:'nearest'});
   }
-  // 該当カードへスクロール
-  const card = document.getElementById('aihub-card-area-'+key);
-  if(card){
-    setTimeout(()=>{
-      card.scrollIntoView({behavior:'smooth', block:'nearest'});
-    }, 50);
+
+  const hint = getAnken(_aiHubResultAnkenId)?._aiHint||'';
+  const hintSection = hint ? `\n\n【補足指示】\n${hint}` : '';
+  const partnerInfo = key==='partners' && partnerMaster.length>0
+    ? '\n\n【登録協力業者】\n'+partnerMaster.map((p,i)=>`ID:${i} ${p.name} [${(p.workTypes||[]).join(',')}]`).join('\n') : '';
+  const prompt = AI_HUB_PROMPTS[key] + `\n\n【入力内容】\n${_aiHubAllText}${partnerInfo}${hintSection}`;
+
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,
+        messages:[{role:'user',content:[..._aiHubImgParts,{type:'text',text:prompt}]}]})});
+    const data = await res.json();
+    const raw = data.content?.map(c=>c.text||'').join('')||'';
+    const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    _aiHubResultData[key] = parsed[key];
+
+    // ローディング削除
+    document.getElementById(loadId)?.remove();
+    if(iconEl){ iconEl.style.opacity='1'; iconEl.style.pointerEvents='auto'; }
+
+    // カード描画
+    _renderAiHubCard(key, parsed[key], t);
+  }catch(err){
+    document.getElementById(loadId)?.remove();
+    if(iconEl){ iconEl.style.opacity='1'; iconEl.style.pointerEvents='auto'; }
+    showToast(`${t.label}の解析に失敗しました`,'error');
   }
 }
 
-// 一括反映
-function _applyAllAiHub(){
-  const fns = Object.keys(_aiHubCardState).filter(k=>_aiHubCardState[k]==='pending');
-  fns.forEach(fn=>{ if(typeof window[fn]==='function') window[fn](); });
-  const btn = document.getElementById('aihub-apply-all-btn');
-  if(btn){ btn.textContent='✅ 全て反映しました'; btn.disabled=true; btn.style.background='rgba(61,214,140,.25)'; btn.style.color='var(--green)'; }
-}
+// ─── カード描画（カテゴリ別） ───
+function _renderAiHubCard(key, d, t){
+  if(!d) return;
+  const cardsArea = document.getElementById('aihub-cards-area');
+  if(!cardsArea) return;
 
-// カードの状態管理（'pending' / 'applied' / 'dismissed'）
-let _aiHubCardState = {};
+  // 既存カードがあれば更新、なければ追加
+  let existing = document.getElementById('aihub-card-wrap-'+key);
+  if(!existing){
+    existing = document.createElement('div');
+    existing.id = 'aihub-card-wrap-'+key;
+    cardsArea.appendChild(existing);
+  }
 
-function renderAiHubCard(title, lines, color, fnName, key){
-  const cardId = 'aihub-card-'+fnName;
-  const wrapId = key ? 'aihub-card-area-'+key : cardId+'-wrap';
-  return `<div id="${wrapId}">
-    <div id="${cardId}" style="background:var(--surface);border:1px solid ${color}44;border-left:4px solid ${color};border-radius:12px;padding:12px;margin-bottom:10px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-        <div style="font-size:13px;font-weight:700;color:${color};">${title}</div>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <button id="${cardId}-dismiss" onclick="dismissAiHubCard('${fnName}')"
-            style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;width:30px;height:30px;font-size:14px;cursor:pointer;touch-action:manipulation;display:flex;align-items:center;justify-content:center;">✕</button>
-          <button id="${cardId}-btn" onclick="${fnName}()"
-            style="background:${color};border:none;color:#fff;border-radius:8px;padding:6px 18px;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;min-height:30px;">反映</button>
-        </div>
-      </div>
-      <div style="background:rgba(0,0,0,.08);border-radius:8px;padding:8px 10px;">
-        ${lines.map(l=>`<div style="font-size:11px;color:var(--text);padding:2px 0;line-height:1.7;">・${l}</div>`).join('')}
+  // カテゴリ別プレビュー行生成
+  let lines = [];
+  const fnName = _aiHubApplyFnName(key);
+
+  if(key==='anken')    lines = [d.name&&`案件名：${d.name}`,d.client&&`施主：${d.client}`,d.tel&&`TEL：${d.tel}`,d.address&&`住所：${d.address}`].filter(Boolean);
+  if(key==='meishi')   lines = [d.company&&`会社：${d.company}`,d.contact&&`担当：${d.contact}`,d.title&&`役職：${d.title}`,d.tel&&`TEL：${d.tel}`,d.email&&`Mail：${d.email}`].filter(Boolean);
+  if(key==='memo')     lines = (d.text||'').split('\n').filter(Boolean).slice(0,6);
+  if(key==='estimate'){
+    const total = Array.isArray(d)?d.reduce((s,i)=>s+(i.unitPrice||0)*(i.qty||1),0):0;
+    lines = [...(Array.isArray(d)?d:[]).slice(0,4).map(i=>`${i.name} ${i.qty}${i.unit} ¥${(i.unitPrice||0).toLocaleString()}`), `合計 ¥${total.toLocaleString()}`];
+  }
+  if(key==='gantt'){
+    const total = Array.isArray(d)?d.reduce((s,g)=>s+(g.duration||0),0):0;
+    lines = [...(Array.isArray(d)?d:[]).slice(0,5).map((g,i)=>`${i+1}. ${g.trade} ${g.duration}日`), `合計 ${total}日`];
+  }
+  if(key==='partners') lines = (Array.isArray(d)?d:[]).map(p=>{const pm=partnerMaster[p.partnerId];return pm?`${p.workType}：${pm.name}（${p.reason}）`:null;}).filter(Boolean);
+  if(key==='sketch')   lines = [...(d.rooms||[]).slice(0,4).map(r=>`${r.name}　${r.width||'?'}×${r.depth||'?'}mm　${r.memo||''}`), d.notes&&`備考：${d.notes}`].filter(Boolean);
+  if(key==='photos')   lines = [d.tag&&`タグ：${d.tag}`,d.description&&`説明：${d.description}`,d.phase&&`フェーズ：${d.phase}`].filter(Boolean);
+  if(key==='voice')    lines = [d.title&&`タイトル：${d.title}`, ...(d.text||'').split('\n').filter(Boolean).slice(0,4), d.keywords?.length&&`キーワード：${d.keywords.join('・')}`].filter(Boolean);
+
+  if(!lines.length){ lines = ['（該当情報なし）']; }
+
+  _aiHubCardState[fnName] = 'pending';
+
+  existing.innerHTML = `
+  <div id="aihub-card-${fnName}" style="background:var(--surface);border:1px solid ${t.color}44;border-left:4px solid ${t.color};border-radius:12px;padding:12px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div style="font-size:13px;font-weight:700;color:${t.color};">${t.icon} ${t.label}</div>
+      <div style="display:flex;gap:6px;">
+        <button id="aihub-card-${fnName}-dismiss" onclick="dismissAiHubCard('${fnName}')"
+          style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;width:30px;height:30px;font-size:14px;cursor:pointer;touch-action:manipulation;">✕</button>
+        <button id="aihub-card-${fnName}-btn" onclick="${fnName}()"
+          style="background:${t.color};border:none;color:#fff;border-radius:8px;padding:6px 18px;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;">反映</button>
       </div>
     </div>
+    <div style="background:rgba(0,0,0,.08);border-radius:8px;padding:8px 10px;">
+      ${lines.map(l=>`<div style="font-size:11px;color:var(--text);padding:2px 0;line-height:1.7;">・${l}</div>`).join('')}
+    </div>
   </div>`;
+
+  existing.scrollIntoView({behavior:'smooth',block:'nearest'});
+
+  // アイコンバッジをハイライト
+  const badge = document.getElementById('aihub-badge-'+key);
+  if(badge){ badge.style.background='var(--green)'; }
+}
+
+function _aiHubApplyFnName(key){
+  const map = {anken:'applyAiHubAnken',meishi:'applyAiHubMeishi',memo:'applyAiHubMemo',
+    estimate:'applyAiHubEstimate',gantt:'applyAiHubGantt',partners:'applyAiHubPartners',
+    sketch:'applyAiHubSketch',photos:'applyAiHubPhotos',voice:'applyAiHubVoice'};
+  return map[key]||'';
 }
 
 function dismissAiHubCard(fnName){
   const card = document.getElementById('aihub-card-'+fnName);
-  if(card){
-    card.style.opacity = '0.4';
-    card.style.pointerEvents = 'none';
-    const btn = document.getElementById('aihub-card-'+fnName+'-dismiss');
-    if(btn) btn.textContent = '✕';
-  }
+  if(card){ card.style.opacity='0.4'; card.style.pointerEvents='none'; }
   _aiHubCardState[fnName] = 'dismissed';
   _checkAiHubAllDone();
 }
@@ -7840,51 +7799,49 @@ function _markApplied(fnName){
   if(btn){ btn.textContent='✅ 反映済'; btn.style.background='rgba(61,214,140,.2)'; btn.style.color='var(--green)'; btn.disabled=true; }
   const dismiss = document.getElementById('aihub-card-'+fnName+'-dismiss');
   if(dismiss) dismiss.style.display='none';
-  // アイコンのバッジを消してチェックマークに
-  const keyMap = {'applyAiHubAnken':'anken','applyAiHubMemo':'memo','applyAiHubEstimate':'estimate','applyAiHubGantt':'gantt','applyAiHubPartners':'partners'};
+  const keyMap = {applyAiHubAnken:'anken',applyAiHubMeishi:'meishi',applyAiHubMemo:'memo',
+    applyAiHubEstimate:'estimate',applyAiHubGantt:'gantt',applyAiHubPartners:'partners',
+    applyAiHubSketch:'sketch',applyAiHubPhotos:'photos',applyAiHubVoice:'voice'};
   const k = keyMap[fnName];
   if(k){
-    const badge = document.getElementById('aihub-icon-badge-'+k);
-    if(badge){ badge.textContent='✓'; badge.style.background='var(--green)'; badge.style.fontSize='7px'; badge.style.color='#fff'; badge.style.width='14px'; badge.style.height='14px'; badge.style.display='flex'; badge.style.alignItems='center'; badge.style.justifyContent='center'; }
+    const badge = document.getElementById('aihub-badge-'+k);
+    if(badge){ badge.style.width='14px'; badge.style.height='14px'; badge.style.fontSize='8px';
+      badge.style.color='#fff'; badge.style.display='flex'; badge.style.alignItems='center';
+      badge.style.justifyContent='center'; badge.textContent='✓'; }
   }
   _aiHubCardState[fnName] = 'applied';
   _checkAiHubAllDone();
 }
 
 function _checkAiHubAllDone(){
-  // 全カードが applied か dismissed になったらクイックアクション画面へ
   const keys = Object.keys(_aiHubCardState);
-  if(keys.length === 0) return;
-  const allDone = keys.every(k => _aiHubCardState[k] === 'applied' || _aiHubCardState[k] === 'dismissed');
+  if(!keys.length) return;
+  const allDone = keys.every(k=>_aiHubCardState[k]==='applied'||_aiHubCardState[k]==='dismissed');
   if(!allDone) return;
-
-  const ankenId = _aiHubResultAnkenId;
-  showToast('✅ 全て完了！案件画面へ移動します');
+  showToast('✅ 全て完了！');
   setTimeout(()=>{
     closeModal();
-    if(ankenId){
-      currentAnkenId = ankenId;
-      const a = getAnken(ankenId);
-      if(a){
-        document.getElementById('topbarProject').innerHTML = `案件: <span>${a.name.substring(0,10)}</span>`;
-      }
-      openQuickAction(ankenId);
+    if(_aiHubResultAnkenId){
+      currentAnkenId = _aiHubResultAnkenId;
+      const a = getAnken(_aiHubResultAnkenId);
+      if(a) document.getElementById('topbarProject').innerHTML=`案件: <span>${a.name.substring(0,10)}</span>`;
+      openQuickAction(_aiHubResultAnkenId);
     }
   }, 800);
 }
 
-// ===== AI ハブ 反映関数群 =====
+// ─── 反映関数群 ───
 function applyAiHubAnken(){
   const d = _aiHubResultData?.anken;
   const ankenId = _aiHubResultAnkenId;
   if(!d) return;
-  let a = ankenId ? getAnken(ankenId) : null;
+  const a = ankenId ? getAnken(ankenId) : null;
   if(!a){ showToast('対象案件を選択してください','error'); return; }
   if(!a.stages.inquiry) a.stages.inquiry = {data:{}};
   Object.assign(a.stages.inquiry.data, {
-    client: d.client || d.name || a.stages.inquiry.data.client || '',
-    tel:    d.tel    || a.stages.inquiry.data.tel || '',
-    memo:   d.memo   || a.stages.inquiry.data.memo || ''
+    client: d.client || a.stages.inquiry.data.client || '',
+    tel:    d.tel    || a.stages.inquiry.data.tel    || '',
+    memo:   d.memo   || a.stages.inquiry.data.memo   || ''
   });
   if(!a.name && d.name) a.name = d.name;
   saveAnken(); renderHomeAnkenList();
@@ -7892,18 +7849,33 @@ function applyAiHubAnken(){
   showToast('✅ 案件情報を反映しました');
 }
 
-function applyAiHubMemo(){
-  const text = _aiHubResultData?.memo?.text;
+function applyAiHubMeishi(){
+  const d = _aiHubResultData?.meishi;
   const ankenId = _aiHubResultAnkenId;
-  if(!text){ showToast('メモ内容がありません','error'); return; }
-  if(!ankenId){ showToast('対象案件を選択してください','error'); return; }
-  const memo = {
-    id: 'm'+Date.now(), ankenId, text,
-    date: new Date().toLocaleDateString('ja-JP'),
-    time: new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),
-    source: 'ai-hub'
+  if(!d) return;
+  const a = ankenId ? getAnken(ankenId) : null;
+  if(!a){ showToast('対象案件を選択してください','error'); return; }
+  a.stages.meishi = {
+    data:{ company:d.company||'', contact:d.contact||'', address:d.address||'', email:d.email||'', tel:d.tel||'' },
+    done:false
   };
-  meetingMemos.unshift(memo);
+  if(!a.stages.inquiry?.data?.client){
+    a.stages.inquiry = {data:{client:d.contact||d.company, tel:d.tel, email:d.email, memo:d.title||''},done:false};
+  }
+  saveAnken(); renderAnkenList?.();
+  _markApplied('applyAiHubMeishi');
+  showToast('✅ 名刺交換に反映しました');
+}
+
+function applyAiHubMemo(){
+  const d = _aiHubResultData?.memo;
+  const ankenId = _aiHubResultAnkenId;
+  if(!d?.text){ showToast('メモ内容がありません','error'); return; }
+  if(!ankenId){ showToast('対象案件を選択してください','error'); return; }
+  meetingMemos.unshift({id:'m'+Date.now(), ankenId, text:d.text,
+    date:new Date().toLocaleDateString('ja-JP'),
+    time:new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),
+    source:'ai-hub'});
   saveMeetingMemos();
   _markApplied('applyAiHubMemo');
   showToast('✅ 打ち合わせメモに追加しました');
@@ -7912,10 +7884,8 @@ function applyAiHubMemo(){
 function applyAiHubEstimate(){
   const items = _aiHubResultData?.estimate;
   const ankenId = _aiHubResultAnkenId;
-  if(!items || !items.length) return;
-  if(ankenId && ankenId !== currentAnkenId){
-    saveAnkenData(); currentAnkenId = ankenId; loadAnkenData(ankenId);
-  }
+  if(!items||!items.length) return;
+  if(ankenId && ankenId !== currentAnkenId){ saveAnkenData(); currentAnkenId=ankenId; loadAnkenData(ankenId); }
   if(!currentAnkenId){ showToast('対象案件を選択してください','error'); return; }
   items.forEach(item=>{
     state.estimateItems.push({id:Date.now()+Math.random(), name:item.name, spec:'',
@@ -7929,19 +7899,14 @@ function applyAiHubEstimate(){
 function applyAiHubGantt(){
   const rows = _aiHubResultData?.gantt;
   const ankenId = _aiHubResultAnkenId;
-  if(!rows || !rows.length) return;
-  if(ankenId && ankenId !== currentAnkenId){
-    saveAnkenData(); currentAnkenId = ankenId; loadAnkenData(ankenId);
-  }
+  if(!rows||!rows.length) return;
+  if(ankenId && ankenId !== currentAnkenId){ saveAnkenData(); currentAnkenId=ankenId; loadAnkenData(ankenId); }
   if(!currentAnkenId){ showToast('対象案件を選択してください','error'); return; }
-  let start = ganttRows.length ? Math.max(...ganttRows.map(r=>r.end)) + 1 : 1;
+  let start = ganttRows.length ? Math.max(...ganttRows.map(r=>r.end))+1 : 1;
   rows.forEach((g,i)=>{
-    const dur = g.duration || 3;
-    ganttRows.push({
-      id:'g'+Date.now()+i, trade:g.trade, start, end:start+dur,
-      color:ganttColors[ganttRows.length % ganttColors.length],
-      label:'', progress:0, memo:'', bars:[]
-    });
+    const dur = g.duration||3;
+    ganttRows.push({id:'g'+Date.now()+i, trade:g.trade, start, end:start+dur,
+      color:ganttColors[ganttRows.length%ganttColors.length], label:'', progress:0, memo:'', bars:[]});
     start += dur;
   });
   saveAnkenData();
@@ -7952,7 +7917,7 @@ function applyAiHubGantt(){
 function applyAiHubPartners(){
   const suggestions = _aiHubResultData?.partners;
   const ankenId = _aiHubResultAnkenId;
-  if(!suggestions || !suggestions.length) return;
+  if(!suggestions||!suggestions.length) return;
   if(!ankenId){ showToast('対象案件を選択してください','error'); return; }
   const a = getAnken(ankenId);
   if(!a) return;
@@ -7964,14 +7929,58 @@ function applyAiHubPartners(){
     const names = (d.company||'').split('\n').filter(Boolean);
     if(!names.includes(p.name)){
       d.company = names.concat(p.name).join('\n');
-      const works = (d.work||'').split('\n').filter(Boolean);
-      d.work = works.concat(s.workType).join('\n');
+      d.work = (d.work||'').split('\n').filter(Boolean).concat(s.workType).join('\n');
     }
   });
   saveAnken();
   _markApplied('applyAiHubPartners');
   showToast('✅ 協力業者に追加しました');
 }
+
+function applyAiHubSketch(){
+  const d = _aiHubResultData?.sketch;
+  const ankenId = _aiHubResultAnkenId;
+  if(!d) return;
+  if(!ankenId){ showToast('対象案件を選択してください','error'); return; }
+  const a = getAnken(ankenId);
+  if(!a) return;
+  // 図面メモはmeasurementsのmemoとして保存
+  if(!a.stages.measure) a.stages.measure = {data:{}};
+  const notes = (d.rooms||[]).map(r=>`${r.name}：${r.width||'?'}×${r.depth||'?'}mm ${r.memo||''}`).join('\n');
+  a.stages.measure.data.notes = [a.stages.measure.data.notes, notes, d.notes].filter(Boolean).join('\n');
+  saveAnken();
+  _markApplied('applyAiHubSketch');
+  showToast('✅ 図面メモを反映しました');
+}
+
+function applyAiHubPhotos(){
+  const d = _aiHubResultData?.photos;
+  const ankenId = _aiHubResultAnkenId;
+  if(!d) return;
+  if(!ankenId){ showToast('対象案件を選択してください','error'); return; }
+  // 写真タグ・説明をクリップボードにコピー（写真画面で貼り付け用）
+  const text = [d.tag, d.description, d.phase].filter(Boolean).join('　');
+  navigator.clipboard?.writeText(text).catch(()=>{});
+  _markApplied('applyAiHubPhotos');
+  showToast('✅ タグ情報をコピーしました（写真画面で貼り付け）');
+}
+
+function applyAiHubVoice(){
+  const d = _aiHubResultData?.voice;
+  const ankenId = _aiHubResultAnkenId;
+  if(!d) return;
+  if(!ankenId){ showToast('対象案件を選択してください','error'); return; }
+  // 音声メモ整理結果を打ち合わせメモに追加
+  const text = [d.title&&`【${d.title}】`, d.text, d.keywords?.length&&`キーワード：${d.keywords.join('・')}`].filter(Boolean).join('\n');
+  meetingMemos.unshift({id:'m'+Date.now(), ankenId, text,
+    date:new Date().toLocaleDateString('ja-JP'),
+    time:new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),
+    source:'ai-hub-voice'});
+  saveMeetingMemos();
+  _markApplied('applyAiHubVoice');
+  showToast('✅ 音声メモを打合せメモに追加しました');
+}
+
 
 function saveSettings() {
   // APIキー
