@@ -7322,7 +7322,7 @@ function _buildAiHubInputHTML(ankenOpts){
     <!-- 対象案件（必須） -->
     <div class="form-group">
       <label class="form-label" style="font-size:11px;letter-spacing:.5px;">📁 対象案件 <span style="color:#ff5f5f;">※必須</span></label>
-      <select class="form-input" id="aihub-anken" style="font-size:13px;border:1.5px solid rgba(176,106,255,.5);" onchange="onAiHubAnkenChange(this)">
+      <select class="form-input" id="aihub-anken" style="font-size:13px;border:1.5px solid rgba(176,106,255,.5);" onchange="onAiHubAnkenChange(this)" oninput="onAiHubAnkenChange(this)">
         <option value="">-- まず案件を選択してください --</option>
         <option value="__new__">＋ 新規案件として登録</option>
         ${ankenOpts}
@@ -7408,6 +7408,15 @@ function _bindAiHubFileEvents(){
   if(imgInput) imgInput.addEventListener('change', e=>_aiHubAddFiles(Array.from(e.target.files)));
   if(pdfInput) pdfInput.addEventListener('change', e=>_aiHubAddFiles(Array.from(e.target.files)));
   if(docInput) docInput.addEventListener('change', e=>_aiHubAddFiles(Array.from(e.target.files)));
+  // Galaxy Chrome対策：セレクトのchangeをJSでも確実にバインド
+  const ankenSel = document.getElementById('aihub-anken');
+  if(ankenSel){
+    ankenSel.addEventListener('change', function(){ onAiHubAnkenChange(this); });
+    // 初期値が既に選択されている場合（currentAnkenIdがある場合）は即時発火
+    if(ankenSel.value && ankenSel.value !== '' && ankenSel.value !== '__new__'){
+      onAiHubAnkenChange(ankenSel);
+    }
+  }
 }
 
 function _aiHubAddFiles(newFiles){
