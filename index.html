@@ -2814,7 +2814,7 @@ function callClaude(messages, maxTokens=800) {
   if(!key) return Promise.reject(new Error('NO_KEY'));
   return fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+    headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
     body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens, messages })
   }).then(r => {
     if(!r.ok) return r.json().then(e => { throw new Error(e.error?.message || 'API Error ' + r.status); });
@@ -3037,7 +3037,7 @@ ${textInput?"テキスト情報：\n"+textInput:""}
 必ずJSONのみ返してください。例：{"ankenName":"","client":"","tel":"","email":"","address":"","contact":"","estimateAmount":"","notes":""}`;
     contentParts.push({type:"text",text:prompt});
     const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",
-      headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01"},
+      headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
       body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:contentParts}]})});
     const data=await res.json();
     const text=data.content?.map(c=>c.text||"").join("")||"";
@@ -4357,7 +4357,7 @@ async function runAiGantt(){
   try {
     const body = { model:'claude-sonnet-4-20250514', max_tokens:1500,
       messages:[{role:'user',content:prompt}] };
-    const headers = {'Content-Type':'application/json','anthropic-version':'2023-06-01'};
+    const headers = {'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'};
     if(key) headers['x-api-key']=key;
     const res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers,body:JSON.stringify(body)});
     const data = await res.json();
@@ -4542,7 +4542,7 @@ ${textInput?'テキスト内容：'+textInput:''}
 項目が読み取れない場合は[]を返してください。JSONのみ返してください。`;
     contentParts.push({type:'text',text:prompt});
     const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:contentParts}]})});
     const data=await res.json();
     const text=data.content?.map(c=>c.text||'').join('')||'[]';
@@ -4611,7 +4611,7 @@ ${text}
 }
 JSONのみ返してください。`;
     const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
     const rawText=data.content?.map(c=>c.text||'').join('')||'{}';
@@ -4696,7 +4696,7 @@ ${text}
 
 JSONのみ返してください。`;
     const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
     const raw=data.content?.map(c=>c.text||'').join('')||'[]';
@@ -4930,7 +4930,7 @@ async function runPhotoAiDesc(){
     const b64=p.src.split(',')[1];
     const mediaType=p.src.split(';')[0].split(':')[1]||'image/jpeg';
     const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:[
         {type:'image',source:{type:'base64',media_type:mediaType,data:b64}},
         {type:'text',text:`この現場写真を50字以内で説明してください。工事管理記録として使います。${locs}（${tagNames[p.tag]||p.tag}の写真）。説明文のみ返してください。`}
