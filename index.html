@@ -7188,10 +7188,14 @@ function openAiHub(){
 
     <div class="form-group">
       <label class="form-label">対象案件</label>
-      <select class="form-input" id="aihub-anken" style="font-size:13px;">
+      <select class="form-input" id="aihub-anken" style="font-size:13px;" onchange="onAiHubAnkenChange(this)">
         <option value="">-- 案件を選択 --</option>
+        <option value="__new__">＋ 新規案件として登録</option>
         ${ankenOpts}
       </select>
+      <div id="aihub-new-name-wrap" style="display:none;margin-top:8px;">
+        <input class="form-input" id="aihub-new-name" placeholder="案件名を入力（例：別府市内カフェ改装）">
+      </div>
     </div>
 
     <div class="form-group">
@@ -7218,6 +7222,11 @@ function openAiHub(){
   pushModalState();
 }
 
+function onAiHubAnkenChange(sel){
+  const wrap = document.getElementById('aihub-new-name-wrap');
+  if(wrap) wrap.style.display = sel.value === '__new__' ? 'block' : 'none';
+}
+
 function onAiHubFileSelect(e){
   _aiHubFiles = Array.from(e.target.files);
   const names = _aiHubFiles.map(f=>f.name).join('、');
@@ -7227,7 +7236,22 @@ function onAiHubFileSelect(e){
 
 async function runAiHub(){
   const text = document.getElementById('aihub-text')?.value.trim()||'';
-  const ankenId = document.getElementById('aihub-anken')?.value||'';
+  let ankenId = document.getElementById('aihub-anken')?.value||'';
+
+  // 新規案件として登録
+  if(ankenId === '__new__'){
+    const newName = document.getElementById('aihub-new-name')?.value.trim();
+    if(!newName){ showToast('案件名を入力してください','error'); return; }
+    const id = 'anken_'+Date.now();
+    const newAnken = {id, name:newName, stages:{}, measurements:{floor:0,wall:0,ceiling:0},
+      created:new Date().toLocaleDateString('ja-JP')};
+    ankenData.unshift(newAnken);
+    saveAnken();
+    currentAnkenId = id;
+    renderHomeAnkenList();
+    ankenId = id;
+    showToast(`「${newName}」を作成しました`);
+  }
   if(!text && _aiHubFiles.length===0){ showToast('テキストか画像を入力してください','error'); return; }
 
   const key = getApiKey();
