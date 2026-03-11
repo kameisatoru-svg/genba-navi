@@ -7317,6 +7317,17 @@ function renderAiHubResult(d, ankenId){
   if(!resultEl) return;
   _aiHubResultData = d;
   _aiHubResultAnkenId = ankenId;
+  _aiHubCardState = {};  // カード状態リセット
+
+  // 表示されるカードを事前登録
+  if(d.anken && (d.anken.name||d.anken.client||d.anken.tel)) _aiHubCardState['applyAiHubAnken'] = 'pending';
+  if(d.memo && d.memo.text) _aiHubCardState['applyAiHubMemo'] = 'pending';
+  if(d.estimate && d.estimate.length) _aiHubCardState['applyAiHubEstimate'] = 'pending';
+  if(d.gantt && d.gantt.length) _aiHubCardState['applyAiHubGantt'] = 'pending';
+  if(d.partners && d.partners.length && partnerMaster.length){
+    const hasValid = d.partners.some(p=>partnerMaster[p.partnerId]);
+    if(hasValid) _aiHubCardState['applyAiHubPartners'] = 'pending';
+  }
 
   let html = '';
 
@@ -7373,21 +7384,66 @@ function renderAiHubResult(d, ankenId){
   resultEl.innerHTML = html || '<div style="font-size:12px;color:var(--muted);text-align:center;padding:10px;">反映できる情報が見つかりませんでした</div>';
 }
 
+// カードの状態管理（'pending' / 'applied' / 'dismissed'）
+let _aiHubCardState = {};
+
 function renderAiHubCard(title, lines, color, fnName){
   const cardId = 'aihub-card-'+fnName;
   return `<div id="${cardId}" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid ${color};border-radius:10px;padding:12px;margin-bottom:8px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
       <div style="font-size:12px;font-weight:700;color:${color};">${title}</div>
-      <button id="${cardId}-btn" onclick="${fnName}()"
-        style="background:${color}22;border:1px solid ${color}55;color:${color};border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;min-height:36px;">反映</button>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button id="${cardId}-dismiss" onclick="dismissAiHubCard('${fnName}')"
+          style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;width:32px;height:32px;font-size:16px;cursor:pointer;touch-action:manipulation;display:flex;align-items:center;justify-content:center;">✕</button>
+        <button id="${cardId}-btn" onclick="${fnName}()"
+          style="background:${color}22;border:1px solid ${color}55;color:${color};border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;min-height:32px;">反映</button>
+      </div>
     </div>
     ${lines.map(l=>`<div style="font-size:12px;color:var(--text);padding:2px 0;line-height:1.5;">・${l}</div>`).join('')}
   </div>`;
 }
 
+function dismissAiHubCard(fnName){
+  const card = document.getElementById('aihub-card-'+fnName);
+  if(card){
+    card.style.opacity = '0.4';
+    card.style.pointerEvents = 'none';
+    const btn = document.getElementById('aihub-card-'+fnName+'-dismiss');
+    if(btn) btn.textContent = '✕';
+  }
+  _aiHubCardState[fnName] = 'dismissed';
+  _checkAiHubAllDone();
+}
+
 function _markApplied(fnName){
   const btn = document.getElementById('aihub-card-'+fnName+'-btn');
   if(btn){ btn.textContent='✅ 反映済'; btn.style.background='rgba(61,214,140,.2)'; btn.style.color='var(--green)'; btn.disabled=true; }
+  const dismiss = document.getElementById('aihub-card-'+fnName+'-dismiss');
+  if(dismiss) dismiss.style.display='none';
+  _aiHubCardState[fnName] = 'applied';
+  _checkAiHubAllDone();
+}
+
+function _checkAiHubAllDone(){
+  // 全カードが applied か dismissed になったらクイックアクション画面へ
+  const keys = Object.keys(_aiHubCardState);
+  if(keys.length === 0) return;
+  const allDone = keys.every(k => _aiHubCardState[k] === 'applied' || _aiHubCardState[k] === 'dismissed');
+  if(!allDone) return;
+
+  const ankenId = _aiHubResultAnkenId;
+  showToast('✅ 全て完了！案件画面へ移動します');
+  setTimeout(()=>{
+    closeModal();
+    if(ankenId){
+      currentAnkenId = ankenId;
+      const a = getAnken(ankenId);
+      if(a){
+        document.getElementById('topbarProject').innerHTML = `案件: <span>${a.name.substring(0,10)}</span>`;
+      }
+      openQuickAction(ankenId);
+    }
+  }, 800);
 }
 
 // ===== AI ハブ 反映関数群 =====
@@ -7397,14 +7453,12 @@ function applyAiHubAnken(){
   if(!d) return;
   let a = ankenId ? getAnken(ankenId) : null;
   if(!a){ showToast('対象案件を選択してください','error'); return; }
-  // 手動入力の案件名を優先（AIの案件名は施主名として扱う）
   if(!a.stages.inquiry) a.stages.inquiry = {data:{}};
   Object.assign(a.stages.inquiry.data, {
     client: d.client || d.name || a.stages.inquiry.data.client || '',
     tel:    d.tel    || a.stages.inquiry.data.tel || '',
     memo:   d.memo   || a.stages.inquiry.data.memo || ''
   });
-  // 案件名は空のときだけAIの提案を使う
   if(!a.name && d.name) a.name = d.name;
   saveAnken(); renderHomeAnkenList();
   _markApplied('applyAiHubAnken');
@@ -7426,9 +7480,6 @@ function applyAiHubMemo(){
   saveMeetingMemos();
   _markApplied('applyAiHubMemo');
   showToast('✅ 打ち合わせメモに追加しました');
-  // 打ち合わせメモ画面へ遷移
-  closeModal();
-  setTimeout(()=>{ switchScreen('memo'); }, 200);
 }
 
 function applyAiHubEstimate(){
@@ -7446,9 +7497,6 @@ function applyAiHubEstimate(){
   saveAnkenData();
   _markApplied('applyAiHubEstimate');
   showToast(`✅ 見積に${items.length}件追加しました`);
-  // 見積画面へ遷移
-  closeModal();
-  setTimeout(()=>{ switchScreen('estimate'); renderEstimate(); }, 200);
 }
 
 function applyAiHubGantt(){
@@ -7472,9 +7520,6 @@ function applyAiHubGantt(){
   saveAnkenData();
   _markApplied('applyAiHubGantt');
   showToast(`✅ 工程表に${rows.length}工種を追加しました`);
-  // 工程表画面へ遷移
-  closeModal();
-  setTimeout(()=>{ openGanttScreen(); }, 200);
 }
 
 function applyAiHubPartners(){
@@ -7498,7 +7543,7 @@ function applyAiHubPartners(){
   });
   saveAnken();
   _markApplied('applyAiHubPartners');
-  showToast(`✅ 協力業者に追加しました`);
+  showToast('✅ 協力業者に追加しました');
 }
 
 function saveSettings() {
