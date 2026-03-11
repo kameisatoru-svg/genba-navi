@@ -289,6 +289,7 @@ canvas{display:block;touch-action:none;}
 .mic-ring.processing{border-color:var(--accent);background:rgba(245,166,35,.1);
   animation:spin-glow 1s infinite;}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,95,95,.4);}50%{box-shadow:0 0 0 18px rgba(255,95,95,0);}}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 @keyframes spin-glow{0%,100%{box-shadow:0 0 8px rgba(245,166,35,.5);}50%{box-shadow:0 0 18px rgba(245,166,35,.8);}}
 .voice-st{margin:12px 0 4px;font-size:14px;font-weight:600;}
 .voice-timer{font-family:var(--mono);color:var(--muted);font-size:20px;}
@@ -7278,59 +7279,217 @@ function applyPartnerSuggestion(partnerId, workType){
   event.currentTarget.style.pointerEvents='none';
 }
 
-// ===== AI ハブ =====
+// ===== AI ハブ v2 =====
 let _aiHubFiles = [];
+let _aiHubDriveUrl = '';
+let _aiHubStep = 'input'; // 'input' | 'targets' | 'results'
+let _aiHubRawInput = '';  // 解析に使う入力テキスト（Driveテキスト含む）
+let _aiHubSelectedTargets = new Set();
+
+// 反映先定義
+const AI_HUB_TARGETS = [
+  { key:'anken',    icon:'🏠', label:'案件情報',   color:'#f5a623', desc:'施主・住所・電話番号' },
+  { key:'memo',     icon:'💬', label:'打合せメモ', color:'#4a9eff', desc:'打ち合わせ内容のテキスト' },
+  { key:'estimate', icon:'📋', label:'見積',       color:'#3dd68c', desc:'品目・数量・単価' },
+  { key:'gantt',    icon:'📅', label:'工程表',     color:'#b06aff', desc:'工種・工期・スケジュール' },
+  { key:'partners', icon:'🤝', label:'協力業者',   color:'#ff8888', desc:'担当業者の割り当て' },
+];
 
 function openAiHub(){
-  const a = currentAnkenId ? getAnken(currentAnkenId) : null;
+  _aiHubFiles = [];
+  _aiHubDriveUrl = '';
+  _aiHubStep = 'input';
+  _aiHubSelectedTargets = new Set(['memo','estimate','gantt']);
   const ankenOpts = ankenData.map(x=>`<option value="${x.id}"${x.id===currentAnkenId?' selected':''}>${x.name}</option>`).join('');
   const sheet = document.getElementById('modalSheet');
-  sheet.innerHTML = `
+  sheet.innerHTML = _buildAiHubInputHTML(ankenOpts);
+  document.getElementById('modalOverlay').style.display = 'flex';
+  pushModalState();
+  _bindAiHubFileEvents();
+}
+
+function _buildAiHubInputHTML(ankenOpts){
+  return `
     <div class="modal-handle"></div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#b06aff,#4a9eff);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
-      </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+      <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#b06aff,#4a9eff);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;">🤖</div>
       <div>
         <div style="font-size:16px;font-weight:700;">AI 入力ハブ</div>
-        <div style="font-size:11px;color:var(--muted);">入力内容をAIが解析して各ツールに反映</div>
+        <div style="font-size:11px;color:var(--muted);">情報を入力 → 反映先を選んで解析</div>
       </div>
     </div>
 
+    <!-- STEP 1: 対象案件 -->
     <div class="form-group">
-      <label class="form-label">対象案件</label>
+      <label class="form-label" style="font-size:11px;letter-spacing:.5px;">📁 対象案件</label>
       <select class="form-input" id="aihub-anken" style="font-size:13px;" onchange="onAiHubAnkenChange(this)">
         <option value="">-- 案件を選択 --</option>
         <option value="__new__">＋ 新規案件として登録</option>
         ${ankenOpts}
       </select>
       <div id="aihub-new-name-wrap" style="display:none;margin-top:8px;">
-        <input class="form-input" id="aihub-new-name" placeholder="案件名を入力（例：別府市内カフェ改装）">
+        <input class="form-input" id="aihub-new-name" placeholder="案件名（例：別府市内カフェ改装）">
       </div>
     </div>
 
+    <!-- STEP 2: テキスト入力 -->
     <div class="form-group">
-      <label class="form-label">テキスト入力（音声メモ・打ち合わせ内容など）</label>
-      <textarea class="form-input" id="aihub-text" rows="5" placeholder="例：カフェ内装工事。壁はクロス貼り替え、床はフロアタイル。塗装は一部あり。工期は3週間。施主は山田様、予算150万円。"></textarea>
+      <label class="form-label" style="font-size:11px;letter-spacing:.5px;">✏️ テキスト入力</label>
+      <textarea class="form-input" id="aihub-text" rows="4" placeholder="打ち合わせ内容・音声メモ・工事概要など&#10;例：カフェ内装工事。壁はクロス貼り替え、床はフロアタイル。工期3週間。施主は山田様。"></textarea>
     </div>
 
+    <!-- STEP 3: ファイル添付 -->
     <div class="form-group">
-      <label class="form-label">写真・PDF（任意）</label>
-      <div onclick="document.getElementById('aihub-file-input').click()" style="border:1px dashed rgba(176,106,255,.4);border-radius:10px;padding:14px;text-align:center;cursor:pointer;background:rgba(176,106,255,.05);">
-        <div style="font-size:20px;">📎</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:4px;">タップして添付</div>
-        <div id="aihub-file-names" style="font-size:11px;color:var(--accent);margin-top:6px;"></div>
+      <label class="form-label" style="font-size:11px;letter-spacing:.5px;">📎 写真・PDF・ドキュメント</label>
+      <div id="aihub-drop-zone" style="border:1.5px dashed rgba(176,106,255,.4);border-radius:12px;padding:12px;background:rgba(176,106,255,.04);cursor:pointer;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+          <div onclick="document.getElementById('aihub-img-input').click()" style="flex:1;min-width:80px;text-align:center;padding:10px 6px;border-radius:10px;background:rgba(255,255,255,.06);cursor:pointer;touch-action:manipulation;">
+            <div style="font-size:22px;">🖼️</div><div style="font-size:10px;color:var(--muted);margin-top:3px;">写真</div>
+          </div>
+          <div onclick="document.getElementById('aihub-pdf-input').click()" style="flex:1;min-width:80px;text-align:center;padding:10px 6px;border-radius:10px;background:rgba(255,255,255,.06);cursor:pointer;touch-action:manipulation;">
+            <div style="font-size:22px;">📄</div><div style="font-size:10px;color:var(--muted);margin-top:3px;">PDF</div>
+          </div>
+          <div onclick="document.getElementById('aihub-doc-input').click()" style="flex:1;min-width:80px;text-align:center;padding:10px 6px;border-radius:10px;background:rgba(255,255,255,.06);cursor:pointer;touch-action:manipulation;">
+            <div style="font-size:22px;">📝</div><div style="font-size:10px;color:var(--muted);margin-top:3px;">文書</div>
+          </div>
+          <div onclick="_aiHubShowDriveInput()" style="flex:1;min-width:80px;text-align:center;padding:10px 6px;border-radius:10px;background:rgba(255,255,255,.06);cursor:pointer;touch-action:manipulation;">
+            <div style="font-size:22px;">☁️</div><div style="font-size:10px;color:var(--muted);margin-top:3px;">Gドライブ</div>
+          </div>
+        </div>
+        <div id="aihub-drive-input-wrap" style="display:none;margin-top:10px;">
+          <input class="form-input" id="aihub-drive-url" placeholder="Google Drive 共有URLを貼り付け" style="font-size:12px;">
+          <button onclick="_aiHubFetchDrive()" style="margin-top:6px;width:100%;background:rgba(74,158,255,.15);border:1px solid rgba(74,158,255,.3);color:#4a9eff;padding:8px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;">URLから読み込む</button>
+        </div>
+        <div id="aihub-file-list" style="margin-top:8px;"></div>
       </div>
-      <input type="file" id="aihub-file-input" accept="image/*,application/pdf" multiple style="display:none;" onchange="onAiHubFileSelect(event)">
+      <input type="file" id="aihub-img-input" accept="image/*" multiple style="display:none;">
+      <input type="file" id="aihub-pdf-input" accept="application/pdf" multiple style="display:none;">
+      <input type="file" id="aihub-doc-input" accept=".txt,.md,.csv,text/*" multiple style="display:none;">
     </div>
 
-    <button onclick="runAiHub()" style="width:100%;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;color:#fff;padding:14px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;touch-action:manipulation;">🤖 AIで解析する</button>
+    <!-- STEP 4: 反映先選択 -->
+    <div class="form-group">
+      <label class="form-label" style="font-size:11px;letter-spacing:.5px;">🎯 反映先を選択</label>
+      <div id="aihub-target-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;">
+        ${AI_HUB_TARGETS.map(t=>`
+          <div id="aihub-target-${t.key}" data-target="${t.key}" onclick="_toggleAiHubTarget('${t.key}')"
+            style="text-align:center;padding:10px 4px;border-radius:10px;border:2px solid ${t.color}55;background:${t.color}22;cursor:pointer;touch-action:manipulation;transition:all .15s;">
+            <div style="font-size:20px;">${t.icon}</div>
+            <div style="font-size:9px;color:${t.color};font-weight:700;margin-top:3px;line-height:1.2;">${t.label}</div>
+          </div>
+        `).join('')}
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:6px;text-align:center;">タップして選択（複数可）</div>
+    </div>
 
+    <!-- 解析ボタン -->
+    <button id="aihub-run-btn" onclick="runAiHub()" style="width:100%;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;color:#fff;padding:15px;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;touch-action:manipulation;margin-top:4px;letter-spacing:.5px;">
+      🤖 解析スタート
+    </button>
     <div id="aihub-result" style="margin-top:12px;"></div>
   `;
-  _aiHubFiles = [];
-  document.getElementById('modalOverlay').style.display = 'flex';
-  pushModalState();
+}
+
+function _bindAiHubFileEvents(){
+  const imgInput = document.getElementById('aihub-img-input');
+  const pdfInput = document.getElementById('aihub-pdf-input');
+  const docInput = document.getElementById('aihub-doc-input');
+  if(imgInput) imgInput.addEventListener('change', e=>_aiHubAddFiles(Array.from(e.target.files)));
+  if(pdfInput) pdfInput.addEventListener('change', e=>_aiHubAddFiles(Array.from(e.target.files)));
+  if(docInput) docInput.addEventListener('change', e=>_aiHubAddFiles(Array.from(e.target.files)));
+  // デフォルト選択状態を反映
+  _aiHubSelectedTargets.forEach(k=>_setAiHubTargetActive(k, true));
+}
+
+function _aiHubAddFiles(newFiles){
+  _aiHubFiles = [..._aiHubFiles, ...newFiles];
+  _renderAiHubFileList();
+}
+
+function _renderAiHubFileList(){
+  const el = document.getElementById('aihub-file-list');
+  if(!el) return;
+  if(_aiHubFiles.length === 0 && !_aiHubDriveUrl){ el.innerHTML=''; return; }
+  let html = '<div style="display:flex;flex-wrap:wrap;gap:4px;">';
+  _aiHubFiles.forEach((f,i)=>{
+    const icon = f.type.startsWith('image/') ? '🖼️' : f.type==='application/pdf' ? '📄' : '📝';
+    html += `<div style="display:flex;align-items:center;gap:4px;background:rgba(176,106,255,.12);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--accent);">
+      ${icon} ${f.name.length>14?f.name.substring(0,14)+'…':f.name}
+      <span onclick="_aiHubRemoveFile(${i})" style="cursor:pointer;color:var(--muted);margin-left:2px;touch-action:manipulation;">✕</span>
+    </div>`;
+  });
+  if(_aiHubDriveUrl){
+    html += `<div style="display:flex;align-items:center;gap:4px;background:rgba(74,158,255,.12);border-radius:6px;padding:3px 8px;font-size:11px;color:#4a9eff;">
+      ☁️ Gドライブ読込済
+      <span onclick="_aiHubClearDrive()" style="cursor:pointer;color:var(--muted);margin-left:2px;touch-action:manipulation;">✕</span>
+    </div>`;
+  }
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function _aiHubRemoveFile(i){
+  _aiHubFiles.splice(i,1);
+  _renderAiHubFileList();
+}
+
+function _aiHubShowDriveInput(){
+  const wrap = document.getElementById('aihub-drive-input-wrap');
+  if(wrap) wrap.style.display = wrap.style.display==='none' ? 'block' : 'none';
+}
+
+async function _aiHubFetchDrive(){
+  const urlEl = document.getElementById('aihub-drive-url');
+  const url = urlEl?.value.trim();
+  if(!url){ showToast('URLを入力してください','error'); return; }
+  showToast('☁️ 読み込み中...');
+  try{
+    // Google DriveのエクスポートURLに変換（テキスト抽出）
+    let fetchUrl = url;
+    const docMatch = url.match(/\/document\/d\/([a-zA-Z0-9_-]+)/);
+    const sheetMatch = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+    if(docMatch) fetchUrl = `https://docs.google.com/document/d/${docMatch[1]}/export?format=txt`;
+    else if(sheetMatch) fetchUrl = `https://docs.google.com/spreadsheets/d/${sheetMatch[1]}/export?format=csv`;
+    const res = await fetch(fetchUrl);
+    const text = await res.text();
+    _aiHubDriveUrl = text.substring(0,4000); // 最大4000文字
+    _renderAiHubFileList();
+    const wrap = document.getElementById('aihub-drive-input-wrap');
+    if(wrap) wrap.style.display = 'none';
+    showToast('✅ Googleドライブから読み込みました');
+  }catch(e){
+    showToast('⚠️ 読み込み失敗。共有設定を確認してください','error');
+  }
+}
+
+function _aiHubClearDrive(){
+  _aiHubDriveUrl = '';
+  _renderAiHubFileList();
+}
+
+function _toggleAiHubTarget(key){
+  if(_aiHubSelectedTargets.has(key)){
+    _aiHubSelectedTargets.delete(key);
+    _setAiHubTargetActive(key, false);
+  } else {
+    _aiHubSelectedTargets.add(key);
+    _setAiHubTargetActive(key, true);
+  }
+}
+
+function _setAiHubTargetActive(key, active){
+  const el = document.getElementById('aihub-target-'+key);
+  const t = AI_HUB_TARGETS.find(x=>x.key===key);
+  if(!el||!t) return;
+  if(active){
+    el.style.background = t.color+'44';
+    el.style.border = `2px solid ${t.color}`;
+    el.style.transform = 'scale(1.05)';
+  } else {
+    el.style.background = t.color+'11';
+    el.style.border = `2px solid ${t.color}33`;
+    el.style.transform = 'scale(1)';
+  }
 }
 
 function onAiHubAnkenChange(sel){
@@ -7338,11 +7497,10 @@ function onAiHubAnkenChange(sel){
   if(wrap) wrap.style.display = sel.value === '__new__' ? 'block' : 'none';
 }
 
+// 旧関数（互換性のため残す）
 function onAiHubFileSelect(e){
   _aiHubFiles = Array.from(e.target.files);
-  const names = _aiHubFiles.map(f=>f.name).join('、');
-  const el = document.getElementById('aihub-file-names');
-  if(el) el.textContent = names;
+  _renderAiHubFileList();
 }
 
 async function runAiHub(){
@@ -7363,60 +7521,104 @@ async function runAiHub(){
     ankenId = id;
     showToast(`「${newName}」を作成しました`);
   }
-  if(!text && _aiHubFiles.length===0){ showToast('テキストか画像を入力してください','error'); return; }
+
+  const combinedText = [text, _aiHubDriveUrl].filter(Boolean).join('\n\n---\n\n');
+  if(!combinedText && _aiHubFiles.length===0){ showToast('テキストかファイルを入力してください','error'); return; }
+  if(_aiHubSelectedTargets.size===0){ showToast('反映先を1つ以上選択してください','error'); return; }
 
   const key = getApiKey();
   if(!key){ showToast('APIキーを設定してください','error'); return; }
 
   const resultEl = document.getElementById('aihub-result');
-  resultEl.innerHTML = '<div style="color:var(--accent);text-align:center;padding:16px;">🤖 解析中...</div>';
+  const btn = document.getElementById('aihub-run-btn');
+  if(btn){ btn.disabled=true; btn.textContent='🤖 解析中...'; }
+  resultEl.innerHTML = `
+    <div style="text-align:center;padding:20px;">
+      <div style="font-size:28px;animation:spin 1.2s linear infinite;display:inline-block;">⚙️</div>
+      <div style="font-size:13px;color:var(--accent);margin-top:8px;font-weight:600;">AIが解析しています…</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;">選択した反映先を順番に処理します</div>
+    </div>`;
 
   // ファイルをbase64変換
-  const contentParts = [];
+  const imageParts = [];
+  const textFileParts = [];
   for(const file of _aiHubFiles){
     if(file.type.startsWith('image/')){
       const b64 = await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.readAsDataURL(file);});
-      contentParts.push({type:'image',source:{type:'base64',media_type:file.type,data:b64}});
+      imageParts.push({type:'image',source:{type:'base64',media_type:file.type,data:b64}});
+    } else {
+      // テキスト系ファイル（PDF・txt・csv等）
+      const ftxt = await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsText(file);});
+      textFileParts.push(`【ファイル: ${file.name}】\n${ftxt.substring(0,3000)}`);
     }
   }
 
+  const allText = [combinedText, ...textFileParts].filter(Boolean).join('\n\n');
   const partnerInfo = partnerMaster.length>0
     ? '\n\n【登録協力業者】\n'+partnerMaster.map((p,i)=>`ID:${i} ${p.name} [${(p.workTypes||[]).join(',')}]`).join('\n')
     : '';
 
-  const prompt = `あなたは内装工事の現場管理AIです。以下のテキスト・画像から情報を読み取り、各ツールへの反映内容をJSONのみで返してください。
+  // 反映先ごとのプロンプト定義
+  const TARGET_PROMPTS = {
+    anken: `内装工事現場管理AIです。入力から案件基本情報を抽出しJSONで返してください。
+フォーマット: {"anken":{"name":"","client":"","tel":"","address":"","memo":""},"summary":""}
+JSONのみ返してください。`,
+    memo: `内装工事現場管理AIです。入力から打ち合わせメモとして記録すべき内容を整理しJSONで返してください。
+重要事項・決定事項・確認事項を箇条書きにまとめてください。
+フォーマット: {"memo":{"text":"整理されたメモ内容"},"summary":""}
+JSONのみ返してください。`,
+    estimate: `内装工事現場管理AIです。入力から見積項目を抽出しJSONで返してください。
+材料費・労務費・諸経費を分けて、現実的な単価で項目化してください。
+フォーマット: {"estimate":[{"name":"項目名","qty":1,"unit":"式","unitPrice":0,"category":"labor"}],"summary":""}
+categoryはmaterial/labor/otherのみ。JSONのみ返してください。`,
+    gantt: `内装工事現場管理AIです。入力から工程表の工種と工期を抽出しJSONで返してください。
+内装工事の一般的な施工順序（解体→下地→設備→仕上げ等）を考慮して並べてください。
+フォーマット: {"gantt":[{"trade":"工種名","duration":3}],"summary":""}
+durationは日数（整数）。JSONのみ返してください。`,
+    partners: `内装工事現場管理AIです。入力から必要な協力業者の工種を判断しJSONで返してください。
+登録業者の中から最適な業者を提案してください。
+フォーマット: {"partners":[{"partnerId":0,"workType":"工種","reason":"選定理由"}],"summary":""}
+partnerIdは登録業者のIDのみ使用。JSONのみ返してください。`,
+  };
 
-【入力内容】
-${text}
-${partnerInfo}
+  const targets = [..._aiHubSelectedTargets];
+  const results = {};
+  let lastSummary = '';
 
-以下のJSONフォーマットのみで返してください（不要な項目は空配列や空文字）：
-{
-  "anken": {"name":"","client":"","tel":"","address":"","memo":""},
-  "memo": {"text":""},
-  "estimate": [{"name":"項目名","qty":1,"unit":"式","unitPrice":0,"category":"labor"}],
-  "gantt": [{"trade":"工種名","duration":3}],
-  "partners": [{"partnerId":0,"workType":"塗装","reason":"理由"}],
-  "summary": "全体要約（100字以内）"
-}
-estimateのcategoryはmaterial/labor/otherのみ。
-ganttのdurationは日数（整数）。
-partnersはpartnerIdが登録業者に存在する場合のみ。
-JSONのみ返してください。`;
+  // 反映先ごとに順番に解析
+  for(const target of targets){
+    const targetDef = AI_HUB_TARGETS.find(t=>t.key===target);
+    if(!targetDef) continue;
 
-  contentParts.push({type:'text',text:prompt});
+    // 進捗表示更新
+    resultEl.innerHTML = `
+      <div style="text-align:center;padding:16px;">
+        <div style="font-size:22px;">${targetDef.icon}</div>
+        <div style="font-size:13px;color:var(--accent);margin-top:6px;font-weight:600;">${targetDef.label}を解析中…</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px;">${targets.indexOf(target)+1} / ${targets.length}</div>
+      </div>`;
 
-  try{
-    const res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:contentParts}]})});
-    const data = await res.json();
-    const rawText = data.content?.map(c=>c.text||'').join('')||'';
-    const parsed = JSON.parse(rawText.replace(/```json|```/g,'').trim());
-    renderAiHubResult(parsed, ankenId);
-  }catch(err){
-    resultEl.innerHTML = `<div style="color:var(--red);padding:8px;">⚠️ エラー：${err.message}</div>`;
+    const sysPrompt = TARGET_PROMPTS[target];
+    const userMsg = `【入力内容】\n${allText}${partnerInfo}`;
+    const contentParts = [...imageParts, {type:'text',text:sysPrompt+'\n\n'+userMsg}];
+
+    try{
+      const res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:contentParts}]})});
+      const data = await res.json();
+      const rawText = data.content?.map(c=>c.text||'').join('')||'';
+      const parsed = JSON.parse(rawText.replace(/```json|```/g,'').trim());
+      Object.assign(results, parsed);
+      if(parsed.summary) lastSummary = parsed.summary;
+    }catch(e){
+      results[target] = null; // エラーの場合はスキップ
+    }
   }
+
+  if(!results.summary) results.summary = lastSummary;
+  if(btn){ btn.disabled=false; btn.textContent='🤖 再解析'; }
+  renderAiHubResult(results, ankenId);
 }
 
 // AIハブ結果をグローバルに保持（onclickのJSON埋め込みを避けるため）
@@ -7428,7 +7630,7 @@ function renderAiHubResult(d, ankenId){
   if(!resultEl) return;
   _aiHubResultData = d;
   _aiHubResultAnkenId = ankenId;
-  _aiHubCardState = {};  // カード状態リセット
+  _aiHubCardState = {};
 
   // 表示されるカードを事前登録
   if(d.anken && (d.anken.name||d.anken.client||d.anken.tel)) _aiHubCardState['applyAiHubAnken'] = 'pending';
@@ -7440,19 +7642,29 @@ function renderAiHubResult(d, ankenId){
     if(hasValid) _aiHubCardState['applyAiHubPartners'] = 'pending';
   }
 
+  const pendingCount = Object.keys(_aiHubCardState).length;
+
   let html = '';
 
-  // 要約
-  if(d.summary){
-    html += `<div style="background:rgba(176,106,255,.08);border:1px solid rgba(176,106,255,.2);border-radius:10px;padding:12px;margin-bottom:10px;">
-      <div style="font-size:11px;color:#b06aff;font-weight:700;margin-bottom:4px;">🤖 AI解析サマリー</div>
-      <div style="font-size:12px;color:var(--text);line-height:1.6;">${d.summary}</div>
-    </div>`;
+  // ===== 解析完了バナー =====
+  html += `<div style="background:linear-gradient(135deg,rgba(176,106,255,.15),rgba(74,158,255,.15));border:1px solid rgba(176,106,255,.3);border-radius:14px;padding:14px;margin-bottom:12px;text-align:center;">
+    <div style="font-size:22px;">✅</div>
+    <div style="font-size:14px;font-weight:700;color:var(--text);margin-top:4px;">解析完了</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:2px;">${pendingCount}件の反映候補が見つかりました</div>
+    ${d.summary ? `<div style="font-size:12px;color:var(--text);margin-top:8px;padding:8px;background:rgba(0,0,0,.15);border-radius:8px;line-height:1.6;text-align:left;">${d.summary}</div>` : ''}
+  </div>`;
+
+  // ===== 一括反映ボタン =====
+  if(pendingCount > 1){
+    html += `<button id="aihub-apply-all-btn" onclick="_applyAllAiHub()"
+      style="width:100%;background:linear-gradient(135deg,#3dd68c,#4a9eff);border:none;color:#fff;padding:12px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation;margin-bottom:10px;">
+      ⚡ すべて反映する（${pendingCount}件）
+    </button>`;
   }
 
-  // 案件情報
+  // ===== 各カード =====
   if(d.anken && (d.anken.name||d.anken.client||d.anken.tel)){
-    html += renderAiHubCard('📋 案件情報', [
+    html += renderAiHubCard('🏠 案件情報', [
       d.anken.name && `案件名：${d.anken.name}`,
       d.anken.client && `施主：${d.anken.client}`,
       d.anken.tel && `TEL：${d.anken.tel}`,
@@ -7460,39 +7672,44 @@ function renderAiHubResult(d, ankenId){
     ].filter(Boolean), '#f5a623', 'applyAiHubAnken');
   }
 
-  // 打ち合わせメモ
   if(d.memo && d.memo.text){
-    html += renderAiHubCard('💬 打ち合わせメモ',
-      [d.memo.text.substring(0,80)+(d.memo.text.length>80?'…':'')],
-      '#4a9eff', 'applyAiHubMemo');
+    const lines = d.memo.text.split('\n').filter(Boolean).slice(0,5);
+    html += renderAiHubCard('💬 打ち合わせメモ', lines.length ? lines : [d.memo.text.substring(0,100)], '#4a9eff', 'applyAiHubMemo');
   }
 
-  // 見積
   if(d.estimate && d.estimate.length){
+    const total = d.estimate.reduce((s,i)=>s+(i.unitPrice||0)*(i.qty||1),0);
     html += renderAiHubCard('📋 見積項目',
-      d.estimate.map(i=>`${i.name}　${i.qty}${i.unit}　¥${(i.unitPrice||0).toLocaleString()}`),
+      [...d.estimate.slice(0,4).map(i=>`${i.name}　${i.qty}${i.unit}　¥${(i.unitPrice||0).toLocaleString()}`),
+       d.estimate.length>4 ? `…他${d.estimate.length-4}件　合計¥${total.toLocaleString()}` : `合計 ¥${total.toLocaleString()}`],
       '#3dd68c', 'applyAiHubEstimate');
   }
 
-  // 工程表
   if(d.gantt && d.gantt.length){
+    const totalDays = d.gantt.reduce((s,g)=>s+(g.duration||0),0);
     html += renderAiHubCard('📅 工程表',
-      d.gantt.map(g=>`${g.trade}　${g.duration}日`),
+      [...d.gantt.slice(0,4).map((g,i)=>`${i+1}. ${g.trade}　${g.duration}日`),
+       d.gantt.length>4 ? `…他${d.gantt.length-4}工種　合計${totalDays}日` : `合計 ${totalDays}日`],
       '#b06aff', 'applyAiHubGantt');
   }
 
-  // 協力業者
   if(d.partners && d.partners.length && partnerMaster.length){
     const lines = d.partners.map(p=>{
       const pm = partnerMaster[p.partnerId];
       return pm ? `${p.workType}：${pm.name}（${p.reason}）` : null;
     }).filter(Boolean);
-    if(lines.length){
-      html += renderAiHubCard('🤝 協力業者', lines, '#ff8888', 'applyAiHubPartners');
-    }
+    if(lines.length) html += renderAiHubCard('🤝 協力業者', lines, '#ff8888', 'applyAiHubPartners');
   }
 
-  resultEl.innerHTML = html || '<div style="font-size:12px;color:var(--muted);text-align:center;padding:10px;">反映できる情報が見つかりませんでした</div>';
+  resultEl.innerHTML = html || '<div style="font-size:12px;color:var(--muted);text-align:center;padding:16px;">反映できる情報が見つかりませんでした</div>';
+}
+
+// 一括反映
+function _applyAllAiHub(){
+  const fns = Object.keys(_aiHubCardState).filter(k=>_aiHubCardState[k]==='pending');
+  fns.forEach(fn=>{ if(typeof window[fn]==='function') window[fn](); });
+  const btn = document.getElementById('aihub-apply-all-btn');
+  if(btn){ btn.textContent='✅ 全て反映しました'; btn.disabled=true; btn.style.background='rgba(61,214,140,.3)'; }
 }
 
 // カードの状態管理（'pending' / 'applied' / 'dismissed'）
@@ -7500,17 +7717,19 @@ let _aiHubCardState = {};
 
 function renderAiHubCard(title, lines, color, fnName){
   const cardId = 'aihub-card-'+fnName;
-  return `<div id="${cardId}" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid ${color};border-radius:10px;padding:12px;margin-bottom:8px;">
+  return `<div id="${cardId}" style="background:var(--surface);border:1px solid ${color}44;border-left:4px solid ${color};border-radius:12px;padding:12px;margin-bottom:10px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-      <div style="font-size:12px;font-weight:700;color:${color};">${title}</div>
+      <div style="font-size:13px;font-weight:700;color:${color};">${title}</div>
       <div style="display:flex;gap:6px;align-items:center;">
         <button id="${cardId}-dismiss" onclick="dismissAiHubCard('${fnName}')"
-          style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;width:32px;height:32px;font-size:16px;cursor:pointer;touch-action:manipulation;display:flex;align-items:center;justify-content:center;">✕</button>
+          style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;width:30px;height:30px;font-size:14px;cursor:pointer;touch-action:manipulation;display:flex;align-items:center;justify-content:center;">✕</button>
         <button id="${cardId}-btn" onclick="${fnName}()"
-          style="background:${color}22;border:1px solid ${color}55;color:${color};border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;min-height:32px;">反映</button>
+          style="background:${color};border:none;color:#fff;border-radius:8px;padding:5px 16px;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;min-height:30px;">反映</button>
       </div>
     </div>
-    ${lines.map(l=>`<div style="font-size:12px;color:var(--text);padding:2px 0;line-height:1.5;">・${l}</div>`).join('')}
+    <div style="background:rgba(0,0,0,.08);border-radius:8px;padding:8px;">
+      ${lines.map(l=>`<div style="font-size:11px;color:var(--text);padding:2px 0;line-height:1.6;">・${l}</div>`).join('')}
+    </div>
   </div>`;
 }
 
