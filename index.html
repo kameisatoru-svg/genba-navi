@@ -7289,7 +7289,7 @@ function applyPartnerSuggestion(partnerId, workType){
 function openMeasureAiModal() {
   const anken = getAnken(currentAnkenId);
   const ankenName = anken ? anken.name : '';
-  showModal(`
+  document.getElementById('modalSheet').innerHTML=`
     <div style="padding:4px 0 8px;">
       <div style="font-size:15px;font-weight:700;color:#b06aff;margin-bottom:12px;">🤖 AIで寸法を自動入力</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">現場メモや会話をそのまま貼り付けてください。AIが寸法を読み取ります。</div>
@@ -7304,7 +7304,8 @@ function openMeasureAiModal() {
       <button onclick="closeModal()" class="btn btn-secondary" style="flex:1;">キャンセル</button>
       <button onclick="runMeasureAi()" class="btn btn-primary" style="flex:2;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;">🤖 解析して入力</button>
     </div>
-  `);
+  `;
+  document.getElementById('modalOverlay').style.display='flex';
 }
 
 async function runMeasureAi() {
@@ -7376,7 +7377,7 @@ function openPickupAiModal() {
   const anken = getAnken(currentAnkenId);
   const ankenName = anken ? anken.name : '';
 
-  showModal(`
+  document.getElementById('modalSheet').innerHTML=`
     <div style="padding:4px 0 8px;">
       <div style="font-size:15px;font-weight:700;color:#b06aff;margin-bottom:10px;">🤖 AI材料提案</div>
       ${(floor||wall) ? `<div style="background:rgba(61,214,140,.08);border:1px solid rgba(61,214,140,.2);border-radius:10px;padding:10px;margin-bottom:12px;font-size:12px;">
@@ -7390,7 +7391,8 @@ function openPickupAiModal() {
       <button onclick="closeModal()" class="btn btn-secondary" style="flex:1;">キャンセル</button>
       <button onclick="runPickupAi('${floor}','${wall}','${ceiling}')" class="btn btn-primary" style="flex:2;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;">🤖 材料を提案する</button>
     </div>
-  `);
+  `;
+  document.getElementById('modalOverlay').style.display='flex';
 }
 
 async function runPickupAi(floor, wall, ceiling) {
@@ -7508,7 +7510,7 @@ function openSketchAiModal() {
   const h = document.getElementById('mHeight')?.value || '';
   const dimHint = (w && d) ? `幅${w}mm × 奥行${d}mm${h ? ` × 天井高${h}mm` : ''}` : '';
 
-  showModal(`
+  document.getElementById('modalSheet').innerHTML=`
     <div style="padding:4px 0 8px;">
       <div style="font-size:15px;font-weight:700;color:#b06aff;margin-bottom:10px;">🤖 AI清書図面を生成</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">スケッチを送信してClaudeがSVGの清書図面を生成します。</div>
@@ -7523,7 +7525,8 @@ function openSketchAiModal() {
       <button onclick="closeModal()" class="btn btn-secondary" style="flex:1;">キャンセル</button>
       <button onclick="runSketchAi()" class="btn btn-primary" style="flex:2;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;">🤖 清書図面を生成</button>
     </div>
-  `);
+  `;
+  document.getElementById('modalOverlay').style.display='flex';
 }
 
 async function runSketchAi() {
@@ -7620,7 +7623,7 @@ function _showSketchAiResult(svgText) {
     URL.revokeObjectURL(svgUrl);
 
     // プレビューモーダル表示
-    showModal(`
+    document.getElementById('modalSheet').innerHTML=`
       <div style="padding:4px 0 8px;">
         <div style="font-size:14px;font-weight:700;color:#b06aff;margin-bottom:10px;">✅ AI清書図面が完成しました</div>
         <div style="background:#fff;border-radius:10px;overflow:hidden;margin-bottom:12px;border:1px solid var(--border);">
@@ -7635,11 +7638,12 @@ function _showSketchAiResult(svgText) {
         <button onclick="_saveSketchAiAsJpeg('${jpegUrl.replace(/'/g,"\\'")}');closeModal();" class="btn btn-secondary" style="flex:1;color:var(--blue);border-color:rgba(74,158,255,.4);">📷 JPEG保存</button>
         <button onclick="_saveSketchAiToGallery('${jpegUrl.replace(/'/g,"\\'")}');closeModal();" class="btn btn-primary" style="flex:2;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;">💾 図面ギャラリーへ</button>
       </div>
-    `);
+    `;
+  document.getElementById('modalOverlay').style.display='flex';
   };
   img.onerror = () => {
     // SVGレンダリング失敗時はSVGをそのままプレビュー
-    showModal(`
+    document.getElementById('modalSheet').innerHTML=`
       <div style="padding:4px 0 8px;">
         <div style="font-size:14px;font-weight:700;color:#b06aff;margin-bottom:10px;">✅ AI清書図面が完成しました</div>
         <div style="background:#fff;border-radius:10px;overflow:hidden;margin-bottom:12px;border:1px solid var(--border);padding:8px;">
@@ -7650,7 +7654,8 @@ function _showSketchAiResult(svgText) {
         <button onclick="closeModal()" class="btn btn-secondary" style="flex:1;">閉じる</button>
         <button onclick="_saveSketchAiToGalleryFromSvg()" class="btn btn-primary" style="flex:2;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;">💾 図面ギャラリーへ</button>
       </div>
-    `);
+    `;
+  document.getElementById('modalOverlay').style.display='flex';
     window._lastSketchAiSvg = svgText;
   };
   img.src = svgUrl;
