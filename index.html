@@ -6882,7 +6882,6 @@ function openModal(type, data) {
     <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.6;">工事区分ごとに業者を登録。AIが打ち合わせ内容から必要な業者を自動提案します。</div>
     <div id="partnerMasterList" style="margin-bottom:10px;"></div>
     <button onclick="addPartnerModal()" style="width:100%;background:var(--surface2);border:1px dashed rgba(74,158,255,.4);color:var(--blue);padding:10px;border-radius:10px;font-size:13px;cursor:pointer;touch-action:manipulation;">＋ 業者を追加</button>
-    <script>renderPartnerMasterList();</script>
 
     <div class="section-title" style="margin-top:18px;">🔄 アップデート</div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.7;">
@@ -6905,6 +6904,8 @@ function openModal(type, data) {
   document.getElementById('modalOverlay').style.display = 'flex';
   document.getElementById('modalOverlay').classList.add('show');
   pushModalState();
+  // 設定モーダルは業者リストを描画
+  if(type === 'settings') renderPartnerMasterList();
 }
 
 function addFromMasterModal(name, price, unit, cat) {
