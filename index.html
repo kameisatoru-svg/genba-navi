@@ -2913,10 +2913,8 @@ function openPartnerStageModal(){
   const col = PHASE_COLORS[3];
 
   // 登録済み業者の表示
-  const appliedNames = (d.company||'').split('
-').filter(Boolean);
-  const appliedWorks = (d.work||'').split('
-').filter(Boolean);
+  const appliedNames = (d.company||'').split('\n').filter(Boolean);
+  const appliedWorks = (d.work||'').split('\n').filter(Boolean);
   const appliedHtml = appliedNames.length ? appliedNames.map((name,i)=>`
     <div style="display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:6px;">
       <span style="background:rgba(61,214,140,.15);color:var(--green);border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;">${appliedWorks[i]||'未設定'}</span>
@@ -2975,16 +2973,12 @@ function removeAppliedPartner(idx){
   const a = getAnken(currentAnkenId);
   if(!a || !a.stages.partner) return;
   const d = a.stages.partner.data || {};
-  const names = (d.company||'').split('
-').filter(Boolean);
-  const works = (d.work||'').split('
-').filter(Boolean);
+  const names = (d.company||'').split('\n').filter(Boolean);
+  const works = (d.work||'').split('\n').filter(Boolean);
   names.splice(idx,1);
   works.splice(idx,1);
-  d.company = names.join('
-');
-  d.work    = works.join('
-');
+  d.company = names.join('\n');
+  d.work    = works.join('\n');
   saveAnken();
   // リスト部分だけ再描画
   const appliedHtml = names.length ? names.map((name,i)=>`
@@ -7100,19 +7094,15 @@ async function runAiPartnerSuggest(){
   if(resultEl) resultEl.innerHTML = '<div style="color:var(--accent);font-size:12px;padding:8px 0;">🤖 AIが工事内容を解析中...</div>';
 
   // 打ち合わせメモ・案件情報を収集
-  const memos = meetingMemos.filter(m=>m.ankenId===currentAnkenId).map(m=>m.text).join('
-');
-  const stageNotes = Object.entries(a.stages||{}).map(([k,v])=>v.data?.content||v.data?.memo||v.data?.notes||'').filter(Boolean).join('
-');
-  const context = [memos, stageNotes, a.stages?.inquiry?.data?.memo||''].filter(Boolean).join('
-');
+  const memos = meetingMemos.filter(m=>m.ankenId===currentAnkenId).map(m=>m.text).join('\n');
+  const stageNotes = Object.entries(a.stages||{}).map(([k,v])=>v.data?.content||v.data?.memo||v.data?.notes||'').filter(Boolean).join('\n');
+  const context = [memos, stageNotes, a.stages?.inquiry?.data?.memo||''].filter(Boolean).join('\n');
 
   if(!context.trim()){ showToast('打ち合わせメモか案件情報を入力してください','error'); return; }
 
   const partnerList = partnerMaster.map((p,i)=>
     `ID:${i} 会社名:${p.name} 工事区分:[${(p.workTypes||[]).join(',')}] 担当:${p.contact||'-'} TEL:${p.tel||'-'}`
-  ).join('
-');
+  ).join('\n');
 
   const prompt = `内装工事の案件情報から、必要な工事区分を判断して、登録されている協力業者の中から適切な業者を選んでください。
 
@@ -7167,10 +7157,8 @@ function applyPartnerSuggestion(partnerId, workType){
   if(!a.stages.partner) a.stages.partner = {data:{}};
   const d = a.stages.partner.data;
   // 既存の値に追記
-  d.company = d.company ? d.company+'
-'+p.name : p.name;
-  d.work    = d.work    ? d.work+'
-'+workType  : workType;
+  d.company = d.company ? d.company+'\n'+p.name : p.name;
+  d.work    = d.work    ? d.work+'\n'+workType  : workType;
   if(p.tel)  d.price = d.price||'';
   saveAnken();
   showToast(`「${p.name}」を協力業者に追加しました ✓`);
@@ -7258,11 +7246,7 @@ async function runAiHub(){
   }
 
   const partnerInfo = partnerMaster.length>0
-    ? '
-
-【登録協力業者】
-'+partnerMaster.map((p,i)=>`ID:${i} ${p.name} [${(p.workTypes||[]).join(',')}]`).join('
-')
+    ? '\n\n【登録協力業者】\n'+partnerMaster.map((p,i)=>`ID:${i} ${p.name} [${(p.workTypes||[]).join(',')}]`).join('\n')
     : '';
 
   const prompt = `あなたは内装工事の現場管理AIです。以下のテキスト・画像から情報を読み取り、各ツールへの反映内容をJSONのみで返してください。
@@ -7458,15 +7442,11 @@ function applyAiHubPartners(jsonStr, ankenId){
   suggestions.forEach(s=>{
     const p = partnerMaster[s.partnerId];
     if(!p) return;
-    const names = (d.company||'').split('
-').filter(Boolean);
+    const names = (d.company||'').split('\n').filter(Boolean);
     if(!names.includes(p.name)){
-      d.company = names.concat(p.name).join('
-');
-      const works = (d.work||'').split('
-').filter(Boolean);
-      d.work = works.concat(s.workType).join('
-');
+      d.company = names.concat(p.name).join('\n');
+      const works = (d.work||'').split('\n').filter(Boolean);
+      d.work = works.concat(s.workType).join('\n');
     }
   });
   saveAnken();
