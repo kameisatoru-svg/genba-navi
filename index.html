@@ -7328,7 +7328,7 @@ function _buildAiHubInputHTML(ankenOpts){
         ${ankenOpts}
       </select>
       <div id="aihub-new-name-wrap" style="display:none;margin-top:8px;">
-        <input class="form-input" id="aihub-new-name" placeholder="案件名（例：別府市内カフェ改装）">
+        <input class="form-input" id="aihub-new-name" placeholder="案件名（例：別府市内カフェ改装）" onkeydown="_aiHubNewNameKeydown(event)">
       </div>
     </div>
 
@@ -7353,35 +7353,22 @@ function _buildAiHubInputHTML(ankenOpts){
     <!-- ファイル入力エリア（タップでそれぞれ選択） -->
     <div class="form-group">
       <label class="form-label" style="font-size:11px;letter-spacing:.5px;">📎 ファイル添付</label>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px;">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px;">
         <div onclick="document.getElementById('aihub-img-input').click()"
-          style="text-align:center;padding:12px 4px;border-radius:12px;border:1.5px dashed rgba(176,106,255,.4);background:rgba(176,106,255,.05);cursor:pointer;touch-action:manipulation;">
-          <div style="font-size:24px;">🖼️</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:4px;">写真</div>
+          style="text-align:center;padding:14px 4px;border-radius:12px;border:1.5px dashed rgba(176,106,255,.4);background:rgba(176,106,255,.05);cursor:pointer;touch-action:manipulation;">
+          <div style="font-size:26px;">🖼️</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">写真</div>
         </div>
         <div onclick="document.getElementById('aihub-pdf-input').click()"
-          style="text-align:center;padding:12px 4px;border-radius:12px;border:1.5px dashed rgba(176,106,255,.4);background:rgba(176,106,255,.05);cursor:pointer;touch-action:manipulation;">
-          <div style="font-size:24px;">📄</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:4px;">PDF</div>
+          style="text-align:center;padding:14px 4px;border-radius:12px;border:1.5px dashed rgba(176,106,255,.4);background:rgba(176,106,255,.05);cursor:pointer;touch-action:manipulation;">
+          <div style="font-size:26px;">📄</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">PDF</div>
         </div>
         <div onclick="document.getElementById('aihub-doc-input').click()"
-          style="text-align:center;padding:12px 4px;border-radius:12px;border:1.5px dashed rgba(176,106,255,.4);background:rgba(176,106,255,.05);cursor:pointer;touch-action:manipulation;">
-          <div style="font-size:24px;">📝</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:4px;">文書</div>
+          style="text-align:center;padding:14px 4px;border-radius:12px;border:1.5px dashed rgba(176,106,255,.4);background:rgba(176,106,255,.05);cursor:pointer;touch-action:manipulation;">
+          <div style="font-size:26px;">📝</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">文書</div>
         </div>
-        <div onclick="_aiHubToggleDriveInput()"
-          style="text-align:center;padding:12px 4px;border-radius:12px;border:1.5px dashed rgba(74,158,255,.4);background:rgba(74,158,255,.05);cursor:pointer;touch-action:manipulation;">
-          <div style="font-size:24px;">☁️</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:4px;">Gドライブ</div>
-        </div>
-      </div>
-      <!-- Gドライブ URL 入力（トグル） -->
-      <div id="aihub-drive-input-wrap" style="display:none;margin-bottom:8px;">
-        <input class="form-input" id="aihub-drive-url" placeholder="Google Drive 共有URL（Docs / Sheets）" style="font-size:12px;">
-        <button onclick="_aiHubFetchDrive()"
-          style="margin-top:6px;width:100%;background:rgba(74,158,255,.15);border:1px solid rgba(74,158,255,.4);color:#4a9eff;padding:9px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;">
-          ☁️ URLから読み込む
-        </button>
       </div>
       <!-- 添付済みファイル一覧 -->
       <div id="aihub-file-list"></div>
@@ -7482,6 +7469,18 @@ async function _aiHubFetchDrive(){
 function _aiHubClearDrive(){
   _aiHubDriveUrl = '';
   _renderAiHubFileList();
+}
+
+function _aiHubNewNameKeydown(e){
+  if(e.key !== 'Enter') return;
+  e.preventDefault();
+  const name = document.getElementById('aihub-new-name')?.value.trim();
+  if(!name) return;
+  // 補足欄を表示
+  const hintWrap = document.getElementById('aihub-anken-hint-wrap');
+  const hintEl   = document.getElementById('aihub-hint');
+  if(hintWrap) hintWrap.style.display = 'block';
+  if(hintEl)   hintEl.focus();
 }
 
 function onAiHubAnkenChange(sel){
