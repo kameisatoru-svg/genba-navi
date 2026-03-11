@@ -1567,6 +1567,13 @@ canvas{display:block;touch-action:none;}
     onclick="switchScreen('home')">
     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>ホーム
   </button>
+  <!-- AI ハブボタン（中央・常時表示） -->
+  <button onclick="openAiHub()" style="flex:1.4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border:none;background:transparent;font-size:9px;font-family:var(--font);touch-action:manipulation;-webkit-tap-highlight-color:rgba(176,106,255,.2);position:relative;padding:0;">
+    <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#b06aff,#4a9eff);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(176,106,255,.5);margin-bottom:1px;">
+      <svg width="22" height="22" fill="none" stroke="#fff" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+    </div>
+    <span style="color:#b06aff;font-weight:700;">AI入力</span>
+  </button>
   <button class="nav-btn" id="nav-back"
     onclick="navGoBack()">
     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>戻る
@@ -1610,6 +1617,11 @@ let ankenData = JSON.parse(localStorage.getItem("genba_anken")||"[]");
 let currentAnkenId = null;
 function saveAnken(){localStorage.setItem("genba_anken",JSON.stringify(ankenData));}
 function getAnken(id){return ankenData.find(a=>a.id===id);}
+
+// ===== 協力業者マスター（v22）=====
+const PARTNER_WORK_TYPES = ['解体','大工','木工','ボード','クロス','床','タイル','塗装','電気','設備','建具','左官','防水','清掃','その他'];
+let partnerMaster = JSON.parse(localStorage.getItem('genba_partners')||'[]');
+function savePartnerMaster(){ localStorage.setItem('genba_partners', JSON.stringify(partnerMaster)); }
 
 // ===== 実測値ヘルパー (v20: state.projects廃止 → ankenDataに統合) =====
 // 現在案件の実測値を取得（なければデフォルト値）
@@ -2894,7 +2906,115 @@ function toggleStageDone(stageId){
   saveAnken(); renderAnkenDetail();
 }
 
+function openPartnerStageModal(){
+  const a = getAnken(currentAnkenId);
+  if(!a) return;
+  const d = (a.stages.partner && a.stages.partner.data) || {};
+  const col = PHASE_COLORS[3];
+
+  // 登録済み業者の表示
+  const appliedNames = (d.company||'').split('
+').filter(Boolean);
+  const appliedWorks = (d.work||'').split('
+').filter(Boolean);
+  const appliedHtml = appliedNames.length ? appliedNames.map((name,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:6px;">
+      <span style="background:rgba(61,214,140,.15);color:var(--green);border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;">${appliedWorks[i]||'未設定'}</span>
+      <span style="font-size:13px;font-weight:700;flex:1;">${name}</span>
+      <button onclick="removeAppliedPartner(${i})" style="background:transparent;border:none;color:var(--red);font-size:16px;cursor:pointer;">×</button>
+    </div>`).join('') :
+    '<div style="font-size:12px;color:var(--muted);text-align:center;padding:10px;">まだ業者が割り当てられていません</div>';
+
+  const sheet = document.getElementById('modalSheet');
+  sheet.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+      <span style="font-size:20px;">🤝</span>
+      <div><div style="font-size:10px;color:${col};letter-spacing:1px;">STEP ${STAGES_MASTER.findIndex(s=>s.id==='partner')+1}</div>
+      <div style="font-size:16px;font-weight:700;">協力業者連携</div></div>
+    </div>
+
+    <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;">📋 割り当て済み業者</div>
+    <div id="appliedPartnerList">${appliedHtml}</div>
+
+    <button onclick="runAiPartnerSuggest()" style="width:100%;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;color:#fff;padding:12px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;margin-top:10px;touch-action:manipulation;">🤖 AIで業者を提案</button>
+    <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:4px;">打ち合わせメモ・案件情報から自動で候補を抽出します</div>
+
+    <div id="partnerSuggestResult"></div>
+
+    <div style="margin-top:14px;">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;">📒 登録業者から手動で選択</div>
+      ${partnerMaster.length===0?
+        '<div style="font-size:12px;color:var(--muted);text-align:center;padding:10px;">業者が登録されていません<br><span style="color:var(--accent);">設定 ⚙️ → 協力業者マスターで追加</span></div>' :
+        partnerMaster.map((p,i)=>`
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:6px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+              <div style="font-size:13px;font-weight:700;flex:1;">${p.name}</div>
+            </div>
+            <div style="font-size:11px;color:var(--muted);">${p.contact||''}${p.tel?' ／ '+p.tel:''}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin:6px 0;">
+              ${(p.workTypes||[]).map(w=>`<span onclick="applyPartnerSuggestion(${i},'${w}')" style="cursor:pointer;padding:4px 8px;border-radius:14px;font-size:11px;font-weight:700;background:rgba(74,158,255,.15);color:var(--blue);border:1px solid rgba(74,158,255,.3);touch-action:manipulation;">${w}</span>`).join('')}
+            </div>
+          </div>`).join('')
+      }
+    </div>
+
+    <div style="margin-top:12px;">
+      <div class="form-group"><label class="form-label">金額・条件メモ</label><input class="form-input" id="sf_price" type="number" value="${d.price||''}" placeholder="円"></div>
+      <div class="form-group"><label class="form-label">発注予定日</label><input class="form-input" id="sf_date" type="date" value="${d.date||''}"></div>
+    </div>
+
+    <div class="btn-row" style="margin-top:10px;">
+      <button class="btn btn-secondary" onclick="savePartnerStageData(false)" style="flex:1;">💾 保存</button>
+      <button class="btn btn-primary" onclick="savePartnerStageData(true)" style="flex:2;background:${col};">✅ 完了にする</button>
+    </div>`;
+  document.getElementById('modalOverlay').style.display = 'flex';
+  pushModalState();
+}
+
+function removeAppliedPartner(idx){
+  const a = getAnken(currentAnkenId);
+  if(!a || !a.stages.partner) return;
+  const d = a.stages.partner.data || {};
+  const names = (d.company||'').split('
+').filter(Boolean);
+  const works = (d.work||'').split('
+').filter(Boolean);
+  names.splice(idx,1);
+  works.splice(idx,1);
+  d.company = names.join('
+');
+  d.work    = works.join('
+');
+  saveAnken();
+  // リスト部分だけ再描画
+  const appliedHtml = names.length ? names.map((name,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:6px;">
+      <span style="background:rgba(61,214,140,.15);color:var(--green);border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;">${works[i]||'未設定'}</span>
+      <span style="font-size:13px;font-weight:700;flex:1;">${name}</span>
+      <button onclick="removeAppliedPartner(${i})" style="background:transparent;border:none;color:var(--red);font-size:16px;cursor:pointer;">×</button>
+    </div>`).join('') :
+    '<div style="font-size:12px;color:var(--muted);text-align:center;padding:10px;">まだ業者が割り当てられていません</div>';
+  const el = document.getElementById('appliedPartnerList');
+  if(el) el.innerHTML = appliedHtml;
+  showToast('削除しました');
+}
+
+function savePartnerStageData(markDone){
+  const a = getAnken(currentAnkenId);
+  if(!a) return;
+  if(!a.stages.partner) a.stages.partner = {};
+  const d = a.stages.partner.data || {};
+  d.price = document.getElementById('sf_price')?.value||'';
+  d.date  = document.getElementById('sf_date')?.value||'';
+  a.stages.partner.data = d;
+  if(markDone) a.stages.partner.done = true;
+  saveAnken(); closeModal(); renderAnkenDetail();
+  showToast(markDone?'✅ 完了しました！':'💾 保存しました');
+}
+
 function openStageModal(stageId){
+  // partner（協力業者連携）は専用モーダル
+  if(stageId === 'partner'){ openPartnerStageModal(); return; }
   const stage=STAGES_MASTER.find(s=>s.id===stageId);
   const a=getAnken(currentAnkenId);
   if(!stage||!a)return;
@@ -6758,6 +6878,12 @@ function openModal(type, data) {
     <div class="form-group"><label class="form-label">消費税率（%）</label><input class="form-input" id="set-tax" value="10" type="number" inputmode="numeric"></div>
     <button class="btn btn-primary" onclick="saveSettings()">保存</button>
 
+    <div class="section-title" style="margin-top:18px;">🤝 協力業者マスター</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.6;">工事区分ごとに業者を登録。AIが打ち合わせ内容から必要な業者を自動提案します。</div>
+    <div id="partnerMasterList" style="margin-bottom:10px;"></div>
+    <button onclick="addPartnerModal()" style="width:100%;background:var(--surface2);border:1px dashed rgba(74,158,255,.4);color:var(--blue);padding:10px;border-radius:10px;font-size:13px;cursor:pointer;touch-action:manipulation;">＋ 業者を追加</button>
+    <script>renderPartnerMasterList();</script>
+
     <div class="section-title" style="margin-top:18px;">🔄 アップデート</div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.7;">
       GitHubにPush後、このボタンをタップすると<br>
@@ -6855,6 +6981,495 @@ function openInChrome() {
   const base = location.href.split('?')[0].split('#')[0];
   const url = base + '?reload=' + Date.now();
   location.replace(url);
+}
+
+// ===== 協力業者マスター管理 =====
+function renderPartnerMasterList(){
+  const el = document.getElementById('partnerMasterList');
+  if(!el) return;
+  if(partnerMaster.length === 0){
+    el.innerHTML = '<div style="font-size:11px;color:var(--muted);text-align:center;padding:12px;">業者が登録されていません</div>';
+    return;
+  }
+  el.innerHTML = partnerMaster.map((p,i)=>`
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px;">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:700;color:var(--text);">${p.name}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">${p.contact||''}${p.tel?' ／ '+p.tel:''}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;">
+          ${(p.workTypes||[]).map(w=>`<span style="background:rgba(74,158,255,.15);color:var(--blue);border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;">${w}</span>`).join('')}
+        </div>
+        ${p.memo?`<div style="font-size:11px;color:var(--muted);margin-top:4px;">${p.memo}</div>`:''}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+        <button onclick="editPartnerModal(${i})" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;">編集</button>
+        <button onclick="deletePartner(${i})" style="background:transparent;border:1px solid rgba(255,95,95,.3);color:var(--red);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;">削除</button>
+      </div>
+    </div>`).join('');
+}
+
+function addPartnerModal(){
+  showPartnerEditModal(-1, {name:'',contact:'',tel:'',email:'',workTypes:[],memo:''});
+}
+function editPartnerModal(i){
+  showPartnerEditModal(i, partnerMaster[i]);
+}
+function deletePartner(i){
+  partnerMaster.splice(i,1);
+  savePartnerMaster();
+  renderPartnerMasterList();
+  showToast('削除しました');
+}
+
+function showPartnerEditModal(idx, data){
+  const isNew = idx < 0;
+  const wtHtml = PARTNER_WORK_TYPES.map(w=>{
+    const sel = (data.workTypes||[]).includes(w);
+    return `<span onclick="togglePartnerWT(this,'${w}')" data-wt="${w}" style="display:inline-block;cursor:pointer;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid ${sel?'var(--blue)':'var(--border)'};background:${sel?'rgba(74,158,255,.2)':'transparent'};color:${sel?'var(--blue)':'var(--muted)'};margin:3px;touch-action:manipulation;">${w}</span>`;
+  }).join('');
+  const sheet = document.getElementById('modalSheet');
+  sheet.innerHTML = `
+    <div class="modal-handle"></div>
+    <div class="modal-title">${isNew?'＋ 業者を追加':'業者を編集'}</div>
+    <div class="form-group"><label class="form-label">会社名 *</label><input class="form-input" id="pm-name" value="${data.name||''}" placeholder="例：大分塗装工業"></div>
+    <div class="form-group"><label class="form-label">担当者名</label><input class="form-input" id="pm-contact" value="${data.contact||''}" placeholder="例：田中 一郎"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">電話番号</label><input class="form-input" id="pm-tel" type="tel" value="${data.tel||''}" placeholder="090-xxxx-xxxx"></div>
+      <div class="form-group"><label class="form-label">メール</label><input class="form-input" id="pm-email" type="email" value="${data.email||''}" placeholder="info@example.com"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">工事区分（複数選択可）</label>
+      <div style="margin-top:6px;" id="pm-wt-area">${wtHtml}</div>
+    </div>
+    <div class="form-group"><label class="form-label">メモ・単価条件など</label><textarea class="form-input" id="pm-memo" rows="2" placeholder="単価・支払条件・特記事項など">${data.memo||''}</textarea></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeModal()" style="flex:1;">キャンセル</button>
+      <button class="btn btn-primary" onclick="savePartnerFromModal(${idx})" style="flex:2;">💾 保存</button>
+    </div>`;
+  document.getElementById('modalOverlay').style.display = 'flex';
+  pushModalState();
+}
+
+function togglePartnerWT(el, wt){
+  const area = document.getElementById('pm-wt-area');
+  const isActive = el.style.background.includes('rgba(74,158,255');
+  if(isActive){
+    el.style.background = 'transparent';
+    el.style.color = 'var(--muted)';
+    el.style.borderColor = 'var(--border)';
+  } else {
+    el.style.background = 'rgba(74,158,255,.2)';
+    el.style.color = 'var(--blue)';
+    el.style.borderColor = 'var(--blue)';
+  }
+}
+
+function savePartnerFromModal(idx){
+  const name = document.getElementById('pm-name').value.trim();
+  if(!name){ showToast('会社名を入力してください','error'); return; }
+  const workTypes = Array.from(document.querySelectorAll('#pm-wt-area span'))
+    .filter(el=>el.style.background.includes('rgba(74,158,255'))
+    .map(el=>el.dataset.wt);
+  const partner = {
+    name,
+    contact: document.getElementById('pm-contact').value.trim(),
+    tel:     document.getElementById('pm-tel').value.trim(),
+    email:   document.getElementById('pm-email').value.trim(),
+    workTypes,
+    memo:    document.getElementById('pm-memo').value.trim()
+  };
+  if(idx < 0) partnerMaster.push(partner);
+  else partnerMaster[idx] = partner;
+  savePartnerMaster();
+  closeModal();
+  // 設定モーダルを再表示してリストを更新
+  setTimeout(()=>{ openModal('settings'); }, 100);
+  showToast(idx<0?'業者を追加しました ✓':'業者情報を更新しました ✓');
+}
+
+// ===== partnerステージ用 AI業者提案 =====
+async function runAiPartnerSuggest(){
+  const a = getAnken(currentAnkenId);
+  if(!a){ showToast('案件が選択されていません','error'); return; }
+  const key = getApiKey();
+  if(!key){ showToast('APIキーを設定してください','error'); return; }
+  if(partnerMaster.length === 0){ showToast('先に設定から協力業者を登録してください','error'); return; }
+
+  const resultEl = document.getElementById('partnerSuggestResult');
+  if(resultEl) resultEl.innerHTML = '<div style="color:var(--accent);font-size:12px;padding:8px 0;">🤖 AIが工事内容を解析中...</div>';
+
+  // 打ち合わせメモ・案件情報を収集
+  const memos = meetingMemos.filter(m=>m.ankenId===currentAnkenId).map(m=>m.text).join('
+');
+  const stageNotes = Object.entries(a.stages||{}).map(([k,v])=>v.data?.content||v.data?.memo||v.data?.notes||'').filter(Boolean).join('
+');
+  const context = [memos, stageNotes, a.stages?.inquiry?.data?.memo||''].filter(Boolean).join('
+');
+
+  if(!context.trim()){ showToast('打ち合わせメモか案件情報を入力してください','error'); return; }
+
+  const partnerList = partnerMaster.map((p,i)=>
+    `ID:${i} 会社名:${p.name} 工事区分:[${(p.workTypes||[]).join(',')}] 担当:${p.contact||'-'} TEL:${p.tel||'-'}`
+  ).join('
+');
+
+  const prompt = `内装工事の案件情報から、必要な工事区分を判断して、登録されている協力業者の中から適切な業者を選んでください。
+
+【案件情報・打ち合わせ内容】
+${context}
+
+【登録協力業者一覧】
+${partnerList}
+
+必ずJSON配列のみで返してください：
+[{"partnerId":0,"workType":"塗装","reason":"壁の塗装工事が必要なため"},...]
+workTypeは案件で必要な工事区分、reasonは選定理由を20字以内で。
+同じ業者が複数の区分に対応する場合は1件にまとめてください。`;
+
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data = await res.json();
+    const text = data.content?.map(c=>c.text||'').join('')||'';
+    const suggestions = JSON.parse(text.replace(/```json|```/g,'').trim());
+
+    if(!resultEl) return;
+    if(!suggestions.length){
+      resultEl.innerHTML='<div style="font-size:12px;color:var(--muted);padding:8px 0;">登録業者の中に適合する業者が見つかりませんでした</div>';
+      return;
+    }
+    resultEl.innerHTML = `
+      <div style="font-size:11px;color:var(--accent);font-weight:700;margin:10px 0 6px;">🤖 AIが提案する業者（タップで反映）</div>
+      ${suggestions.map(s=>{
+        const p = partnerMaster[s.partnerId];
+        if(!p) return '';
+        return `<div onclick="applyPartnerSuggestion(${s.partnerId},'${s.workType}')" style="background:rgba(74,158,255,.08);border:1px solid rgba(74,158,255,.2);border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer;touch-action:manipulation;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="background:rgba(74,158,255,.2);color:var(--blue);border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;">${s.workType}</span>
+            <div style="font-size:13px;font-weight:700;">${p.name}</div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">${p.contact||''}${p.tel?' ／ '+p.tel:''}</div>
+          <div style="font-size:11px;color:var(--accent);margin-top:3px;">💡 ${s.reason}</div>
+        </div>`;
+      }).join('')}`;
+  }catch(err){
+    if(resultEl) resultEl.innerHTML=`<div style="color:var(--red);font-size:12px;">エラー：${err.message}</div>`;
+  }
+}
+
+function applyPartnerSuggestion(partnerId, workType){
+  const p = partnerMaster[partnerId];
+  if(!p) return;
+  const a = getAnken(currentAnkenId);
+  if(!a) return;
+  if(!a.stages.partner) a.stages.partner = {data:{}};
+  const d = a.stages.partner.data;
+  // 既存の値に追記
+  d.company = d.company ? d.company+'
+'+p.name : p.name;
+  d.work    = d.work    ? d.work+'
+'+workType  : workType;
+  if(p.tel)  d.price = d.price||'';
+  saveAnken();
+  showToast(`「${p.name}」を協力業者に追加しました ✓`);
+  // ボタンをグレーアウト
+  event.currentTarget.style.opacity='0.4';
+  event.currentTarget.style.pointerEvents='none';
+}
+
+// ===== AI ハブ =====
+let _aiHubFiles = [];
+
+function openAiHub(){
+  const a = currentAnkenId ? getAnken(currentAnkenId) : null;
+  const ankenOpts = ankenData.map(x=>`<option value="${x.id}"${x.id===currentAnkenId?' selected':''}>${x.name}</option>`).join('');
+  const sheet = document.getElementById('modalSheet');
+  sheet.innerHTML = `
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#b06aff,#4a9eff);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+      </div>
+      <div>
+        <div style="font-size:16px;font-weight:700;">AI 入力ハブ</div>
+        <div style="font-size:11px;color:var(--muted);">入力内容をAIが解析して各ツールに反映</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">対象案件</label>
+      <select class="form-input" id="aihub-anken" style="font-size:13px;">
+        <option value="">-- 案件を選択 --</option>
+        ${ankenOpts}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">テキスト入力（音声メモ・打ち合わせ内容など）</label>
+      <textarea class="form-input" id="aihub-text" rows="5" placeholder="例：カフェ内装工事。壁はクロス貼り替え、床はフロアタイル。塗装は一部あり。工期は3週間。施主は山田様、予算150万円。"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">写真・PDF（任意）</label>
+      <div onclick="document.getElementById('aihub-file-input').click()" style="border:1px dashed rgba(176,106,255,.4);border-radius:10px;padding:14px;text-align:center;cursor:pointer;background:rgba(176,106,255,.05);">
+        <div style="font-size:20px;">📎</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">タップして添付</div>
+        <div id="aihub-file-names" style="font-size:11px;color:var(--accent);margin-top:6px;"></div>
+      </div>
+      <input type="file" id="aihub-file-input" accept="image/*,application/pdf" multiple style="display:none;" onchange="onAiHubFileSelect(event)">
+    </div>
+
+    <button onclick="runAiHub()" style="width:100%;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;color:#fff;padding:14px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;touch-action:manipulation;">🤖 AIで解析する</button>
+
+    <div id="aihub-result" style="margin-top:12px;"></div>
+  `;
+  _aiHubFiles = [];
+  document.getElementById('modalOverlay').style.display = 'flex';
+  pushModalState();
+}
+
+function onAiHubFileSelect(e){
+  _aiHubFiles = Array.from(e.target.files);
+  const names = _aiHubFiles.map(f=>f.name).join('、');
+  const el = document.getElementById('aihub-file-names');
+  if(el) el.textContent = names;
+}
+
+async function runAiHub(){
+  const text = document.getElementById('aihub-text')?.value.trim()||'';
+  const ankenId = document.getElementById('aihub-anken')?.value||'';
+  if(!text && _aiHubFiles.length===0){ showToast('テキストか画像を入力してください','error'); return; }
+
+  const key = getApiKey();
+  if(!key){ showToast('APIキーを設定してください','error'); return; }
+
+  const resultEl = document.getElementById('aihub-result');
+  resultEl.innerHTML = '<div style="color:var(--accent);text-align:center;padding:16px;">🤖 解析中...</div>';
+
+  // ファイルをbase64変換
+  const contentParts = [];
+  for(const file of _aiHubFiles){
+    if(file.type.startsWith('image/')){
+      const b64 = await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.readAsDataURL(file);});
+      contentParts.push({type:'image',source:{type:'base64',media_type:file.type,data:b64}});
+    }
+  }
+
+  const partnerInfo = partnerMaster.length>0
+    ? '
+
+【登録協力業者】
+'+partnerMaster.map((p,i)=>`ID:${i} ${p.name} [${(p.workTypes||[]).join(',')}]`).join('
+')
+    : '';
+
+  const prompt = `あなたは内装工事の現場管理AIです。以下のテキスト・画像から情報を読み取り、各ツールへの反映内容をJSONのみで返してください。
+
+【入力内容】
+${text}
+${partnerInfo}
+
+以下のJSONフォーマットのみで返してください（不要な項目は空配列や空文字）：
+{
+  "anken": {"name":"","client":"","tel":"","address":"","memo":""},
+  "memo": {"text":""},
+  "estimate": [{"name":"項目名","qty":1,"unit":"式","unitPrice":0,"category":"labor"}],
+  "gantt": [{"trade":"工種名","duration":3}],
+  "partners": [{"partnerId":0,"workType":"塗装","reason":"理由"}],
+  "summary": "全体要約（100字以内）"
+}
+estimateのcategoryはmaterial/labor/otherのみ。
+ganttのdurationは日数（整数）。
+partnersはpartnerIdが登録業者に存在する場合のみ。
+JSONのみ返してください。`;
+
+  contentParts.push({type:'text',text:prompt});
+
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:contentParts}]})});
+    const data = await res.json();
+    const rawText = data.content?.map(c=>c.text||'').join('')||'';
+    const parsed = JSON.parse(rawText.replace(/```json|```/g,'').trim());
+    renderAiHubResult(parsed, ankenId);
+  }catch(err){
+    resultEl.innerHTML = `<div style="color:var(--red);padding:8px;">⚠️ エラー：${err.message}</div>`;
+  }
+}
+
+function renderAiHubResult(d, ankenId){
+  const resultEl = document.getElementById('aihub-result');
+  if(!resultEl) return;
+
+  let html = '';
+
+  // 要約
+  if(d.summary){
+    html += `<div style="background:rgba(176,106,255,.08);border:1px solid rgba(176,106,255,.2);border-radius:10px;padding:12px;margin-bottom:10px;">
+      <div style="font-size:11px;color:#b06aff;font-weight:700;margin-bottom:4px;">🤖 AI解析サマリー</div>
+      <div style="font-size:12px;color:var(--text);line-height:1.6;">${d.summary}</div>
+    </div>`;
+  }
+
+  // 案件情報
+  if(d.anken && (d.anken.name||d.anken.client||d.anken.tel)){
+    html += renderAiHubCard('📋 案件情報', [
+      d.anken.name && `案件名：${d.anken.name}`,
+      d.anken.client && `施主：${d.anken.client}`,
+      d.anken.tel && `TEL：${d.anken.tel}`,
+      d.anken.address && `住所：${d.anken.address}`,
+    ].filter(Boolean), '#f5a623',
+    `applyAiHubAnken(${JSON.stringify(JSON.stringify(d.anken))}, '${ankenId}')`);
+  }
+
+  // 打ち合わせメモ
+  if(d.memo && d.memo.text){
+    html += renderAiHubCard('💬 打ち合わせメモ', [d.memo.text.substring(0,80)+(d.memo.text.length>80?'…':'')], '#4a9eff',
+    `applyAiHubMemo(${JSON.stringify(JSON.stringify(d.memo.text))}, '${ankenId}')`);
+  }
+
+  // 見積
+  if(d.estimate && d.estimate.length){
+    html += renderAiHubCard('📋 見積項目', d.estimate.map(i=>`${i.name}　${i.qty}${i.unit}　¥${(i.unitPrice||0).toLocaleString()}`), '#3dd68c',
+    `applyAiHubEstimate(${JSON.stringify(JSON.stringify(d.estimate))}, '${ankenId}')`);
+  }
+
+  // 工程表
+  if(d.gantt && d.gantt.length){
+    html += renderAiHubCard('📅 工程表', d.gantt.map(g=>`${g.trade}　${g.duration}日`), '#b06aff',
+    `applyAiHubGantt(${JSON.stringify(JSON.stringify(d.gantt))}, '${ankenId}')`);
+  }
+
+  // 協力業者
+  if(d.partners && d.partners.length && partnerMaster.length){
+    const lines = d.partners.map(p=>{
+      const pm = partnerMaster[p.partnerId];
+      return pm ? `${p.workType}：${pm.name}（${p.reason}）` : null;
+    }).filter(Boolean);
+    if(lines.length){
+      html += renderAiHubCard('🤝 協力業者', lines, '#ff8888',
+      `applyAiHubPartners(${JSON.stringify(JSON.stringify(d.partners))}, '${ankenId}')`);
+    }
+  }
+
+  resultEl.innerHTML = html || '<div style="font-size:12px;color:var(--muted);text-align:center;padding:10px;">反映できる情報が見つかりませんでした</div>';
+}
+
+function renderAiHubCard(title, lines, color, onApply){
+  return `<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid ${color};border-radius:10px;padding:12px;margin-bottom:8px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div style="font-size:12px;font-weight:700;color:${color};">${title}</div>
+      <button onclick="${onApply};this.textContent='✅ 反映済';this.style.background='rgba(61,214,140,.2)';this.style.color='var(--green)';this.disabled=true;"
+        style="background:${color}22;border:1px solid ${color}55;color:${color};border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;">反映</button>
+    </div>
+    ${lines.map(l=>`<div style="font-size:12px;color:var(--text);padding:2px 0;line-height:1.5;">・${l}</div>`).join('')}
+  </div>`;
+}
+
+// ===== AI ハブ 反映関数群 =====
+function applyAiHubAnken(jsonStr, ankenId){
+  const d = JSON.parse(jsonStr);
+  let a = ankenId ? getAnken(ankenId) : null;
+  if(!a && d.name){
+    // 新規案件として登録
+    const id = 'anken_'+Date.now();
+    a = {id, name:d.name, stages:{}, measurements:{floor:0,wall:0,ceiling:0}, created:new Date().toLocaleDateString('ja-JP')};
+    ankenData.unshift(a);
+    currentAnkenId = id;
+  }
+  if(!a){ showToast('対象案件を選択してください','error'); return; }
+  if(!a.stages.inquiry) a.stages.inquiry = {data:{}};
+  Object.assign(a.stages.inquiry.data, {
+    client: d.client||a.stages.inquiry.data.client||'',
+    tel:    d.tel   ||a.stages.inquiry.data.tel||'',
+    memo:   d.memo  ||a.stages.inquiry.data.memo||''
+  });
+  if(d.name) a.name = d.name;
+  saveAnken(); renderHomeAnkenList();
+  showToast('✅ 案件情報を反映しました');
+}
+
+function applyAiHubMemo(jsonStr, ankenId){
+  const text = JSON.parse(jsonStr);
+  if(!ankenId){ showToast('対象案件を選択してください','error'); return; }
+  const memo = {
+    id: 'm'+Date.now(),
+    ankenId,
+    text,
+    date: new Date().toLocaleDateString('ja-JP'),
+    time: new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),
+    source: 'ai-hub'
+  };
+  meetingMemos.unshift(memo);
+  saveMeetingMemos();
+  showToast('✅ 打ち合わせメモに追加しました');
+}
+
+function applyAiHubEstimate(jsonStr, ankenId){
+  const items = JSON.parse(jsonStr);
+  if(ankenId && ankenId !== currentAnkenId){
+    saveAnkenData();
+    currentAnkenId = ankenId;
+    loadAnkenData(ankenId);
+  }
+  if(!currentAnkenId){ showToast('対象案件を選択してください','error'); return; }
+  items.forEach(item=>{
+    state.estimateItems.push({id:Date.now()+Math.random(), name:item.name, spec:'', qty:item.qty||1, unit:item.unit||'式', unitPrice:item.unitPrice||0, category:item.category||'labor'});
+  });
+  saveAnkenData();
+  showToast(`✅ 見積に${items.length}件追加しました`);
+}
+
+function applyAiHubGantt(jsonStr, ankenId){
+  const rows = JSON.parse(jsonStr);
+  if(ankenId && ankenId !== currentAnkenId){
+    saveAnkenData();
+    currentAnkenId = ankenId;
+    loadAnkenData(ankenId);
+  }
+  if(!currentAnkenId){ showToast('対象案件を選択してください','error'); return; }
+  let start = 1;
+  rows.forEach((g,i)=>{
+    const dur = g.duration || 3;
+    ganttRows.push({
+      id:'g'+Date.now()+i,
+      trade: g.trade,
+      start,
+      end: start + dur,
+      color: ganttColors[ganttRows.length % ganttColors.length],
+      label:'', progress:0, memo:'', bars:[]
+    });
+    start += dur;
+  });
+  saveAnkenData();
+  showToast(`✅ 工程表に${rows.length}工種を追加しました`);
+}
+
+function applyAiHubPartners(jsonStr, ankenId){
+  const suggestions = JSON.parse(jsonStr);
+  if(!ankenId){ showToast('対象案件を選択してください','error'); return; }
+  const a = getAnken(ankenId);
+  if(!a) return;
+  if(!a.stages.partner) a.stages.partner = {data:{}};
+  const d = a.stages.partner.data;
+  suggestions.forEach(s=>{
+    const p = partnerMaster[s.partnerId];
+    if(!p) return;
+    const names = (d.company||'').split('
+').filter(Boolean);
+    if(!names.includes(p.name)){
+      d.company = names.concat(p.name).join('
+');
+      const works = (d.work||'').split('
+').filter(Boolean);
+      d.work = works.concat(s.workType).join('
+');
+    }
+  });
+  saveAnken();
+  showToast(`✅ 協力業者に${suggestions.length}件追加しました`);
 }
 
 function saveSettings() {
