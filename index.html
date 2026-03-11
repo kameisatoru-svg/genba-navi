@@ -547,6 +547,12 @@ canvas{display:block;touch-action:none;}
         </div>
         <div style="font-size:13px;font-weight:600;color:var(--text);text-align:center;">現場<br>写真</div>
       </div>
+      <div onclick="openPriceMasterScreen()" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;width:calc(50% - 5px);box-sizing:border-box;">
+        <div style="width:44px;height:44px;background:rgba(74,158,255,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+          <svg width="22" height="22" fill="none" stroke="#4a9eff" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 7h2m2 0h6M7 11h10"/></svg>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);text-align:center;">単価<br>マスター</div>
+      </div>
       <!-- 案件管理 幅全体 -->
       <div onclick="openAnkenFromQuick()" style="width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
         <div style="width:44px;height:44px;background:rgba(245,166,35,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
@@ -2718,6 +2724,9 @@ function switchScreen(name, pushHistory) {
       }
     }, 80);
   }
+  // アクションナビバーを更新
+  const _actionNavScreens = ['sketch','estimate','gantt','memo','voice','photos'];
+  if(_actionNavScreens.includes(name)) setTimeout(()=>renderActionNavBar(name), 50);
 }
 
 function navGoBack(){
@@ -2777,6 +2786,96 @@ function renderHomeAnkenList(){
 }
 
 // 案件タップ → クイックアクション画面へ
+// ===== アクションナビバー（各画面下部） =====
+// クイックアクションの全ボタン定義
+const ACTION_NAV_ITEMS = [
+  { key:'sketch',   icon:'✏️', label:'図面'    },
+  { key:'measure',  icon:'📐', label:'実測'    },
+  { key:'pickup',   icon:'📦', label:'拾い出し'},
+  { key:'memo',     icon:'💬', label:'メモ'    },
+  { key:'estimate', icon:'📋', label:'見積'    },
+  { key:'master',   icon:'💰', label:'単価'    },
+  { key:'gantt',    icon:'📅', label:'工程表'  },
+  { key:'photos',   icon:'📷', label:'写真'    },
+  { key:'voice',    icon:'🎙️', label:'音声'    },
+];
+
+function doActionNavItem(key){
+  if(key==='sketch')   { switchScreen('sketch'); }
+  else if(key==='measure')  { switchScreen('sketch'); setTimeout(function(){ switchSketchTab('measure'); }, 100); }
+  else if(key==='pickup')   { switchScreen('sketch'); setTimeout(function(){ switchSketchTab('pickup'); }, 100); }
+  else if(key==='memo')     { openMeetingMemo(); }
+  else if(key==='estimate') { switchScreen('estimate'); }
+  else if(key==='master')   { openPriceMasterScreen(); }
+  else if(key==='gantt')    { openGanttScreen(); }
+  else if(key==='photos')   { switchScreen('photos'); }
+  else if(key==='voice')    { switchScreen('voice'); }
+  else if(key==='quick')    { switchScreen('quick'); }
+}
+
+// 画面→ハイライトするキーのマッピング
+const _SCREEN_ACTIVE_KEY = {
+  sketch:'sketch', estimate:'estimate', gantt:'gantt',
+  memo:'memo', photos:'photos', voice:'voice'
+};
+
+function renderActionNavBar(screenName){
+  const scr = document.getElementById('screen-' + screenName);
+  if(!scr) return;
+
+  // バーコンテナ：なければ作成、あれば再描画
+  let bar = document.getElementById('action-nav-bar-' + screenName);
+  if(!bar){
+    bar = document.createElement('div');
+    bar.id = 'action-nav-bar-' + screenName;
+    bar.style.cssText = 'position:fixed;bottom:calc(58px + var(--safe-bottom));left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:6px 4px 4px;z-index:299;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;box-shadow:0 -2px 8px rgba(0,0,0,.3);';
+    scr.appendChild(bar);
+    // バー分のpadding-bottomを追加してコンテンツが隠れないように
+    scr.style.paddingBottom = 'calc(58px + var(--safe-bottom) + 60px)';
+  }
+
+  const activeKey = _SCREEN_ACTIVE_KEY[screenName] || '';
+  // measure/pickup はsketch画面内なのでsubタブ状態で判定
+  let finalActive = activeKey;
+  if(screenName === 'sketch'){
+    const measureTab = document.getElementById('stab-measure');
+    const pickupTab = document.getElementById('stab-pickup');
+    if(measureTab && measureTab.style.color === 'var(--accent)') finalActive = 'measure';
+    else if(pickupTab && pickupTab.style.color === 'var(--accent)') finalActive = 'pickup';
+    else finalActive = 'sketch';
+  }
+  if(screenName === 'estimate'){
+    const masterTab = document.getElementById('etab-master');
+    if(masterTab && masterTab.style.color === 'var(--accent)') finalActive = 'master';
+    else finalActive = 'estimate';
+  }
+
+  // innerHTML用にdata-navkey属性でボタンを生成（onclick属性にJS式を埋めない）
+  let html = '<div style="display:flex;gap:3px;min-width:max-content;padding:0 2px;">';
+  ACTION_NAV_ITEMS.forEach(function(item){
+    const isActive = item.key === finalActive;
+    const border = isActive ? '2px solid #f5a623' : '1px solid var(--border)';
+    const bg     = isActive ? 'rgba(245,166,35,.12)' : 'transparent';
+    const textC  = isActive ? '#f5a623' : 'var(--muted)';
+    html += '<div data-navkey="' + item.key + '" style="border:' + border + ';background:' + bg + ';border-radius:10px;padding:5px 6px;min-width:48px;text-align:center;cursor:pointer;touch-action:manipulation;flex-shrink:0;">';
+    html += '<div style="font-size:18px;line-height:1.2;">' + item.icon + '</div>';
+    html += '<div style="font-size:9px;font-weight:700;color:' + textC + ';margin-top:1px;white-space:nowrap;">' + item.label + '</div>';
+    html += '</div>';
+  });
+  // 一覧ボタン
+  html += '<div data-navkey="quick" style="border:1px solid var(--border);background:transparent;border-radius:10px;padding:5px 6px;min-width:48px;text-align:center;cursor:pointer;touch-action:manipulation;flex-shrink:0;">';
+  html += '<div style="font-size:18px;line-height:1.2;">🏠</div>';
+  html += '<div style="font-size:9px;font-weight:700;color:var(--muted);margin-top:1px;white-space:nowrap;">一覧</div>';
+  html += '</div>';
+  html += '</div>';
+  bar.innerHTML = html;
+
+  // クリックイベントをまとめて登録（onclick属性を使わない）
+  bar.querySelectorAll('[data-navkey]').forEach(function(el){
+    el.addEventListener('click', function(){ doActionNavItem(el.getAttribute('data-navkey')); });
+  });
+}
+
 function openQuickAction(ankenId){
   // 前の案件データを保存してから切替
   if(currentAnkenId && currentAnkenId !== ankenId) saveAnkenData();
@@ -3631,6 +3730,20 @@ function updateRefGalleries(){
 
 
 // ===== 見積・請求書 タブ切替（工程表タブは廃止・工程表はクイックアクションから独立アクセス） =====
+function openPriceMasterScreen(){
+  switchScreen('estimate');
+  setTimeout(function(){
+    // priceMasterRefを表示してrenderPriceMasterRef実行
+    const ref = document.getElementById('priceMasterRef');
+    if(ref){
+      ref.style.display = 'block';
+      renderPriceMasterRef();
+      // スクロールして見せる
+      setTimeout(function(){ ref.scrollIntoView({behavior:'smooth', block:'start'}); }, 150);
+    }
+  }, 120);
+}
+
 function switchEstTab(tab){
   ['estimate','invoice'].forEach(t=>{
     const panel = document.getElementById('epanel-'+t);
