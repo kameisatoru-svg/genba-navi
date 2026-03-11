@@ -597,6 +597,7 @@ canvas{display:block;touch-action:none;}
       <div class="tool-btn" onclick="clearCanvas()" style="min-width:44px;">🗑</div>
       <div class="tool-btn" onclick="saveSketchNamed()" style="min-width:44px;color:var(--green);">💾</div>
       <div class="tool-btn" onclick="exportSketchJpeg()" style="min-width:44px;color:var(--blue);">📷</div>
+      <div class="tool-btn" onclick="openSketchAiModal()" title="AI清書図面生成" style="min-width:44px;background:linear-gradient(135deg,rgba(176,106,255,.2),rgba(74,158,255,.2));border-color:rgba(176,106,255,.5);color:#b06aff;font-weight:700;">🤖</div>
     </div>
 
     <!-- キャンバス本体（最大化） -->
@@ -687,6 +688,10 @@ canvas{display:block;touch-action:none;}
       <div class="measure-unit">㎡</div>
     </div>
   </div>
+  <!-- AI寸法入力ボタン -->
+  <div style="padding:8px 0 4px;">
+    <button onclick="openMeasureAiModal()" style="width:100%;background:linear-gradient(135deg,rgba(176,106,255,.15),rgba(74,158,255,.15));border:1.5px solid rgba(176,106,255,.4);color:#b06aff;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation;">🤖 AIで寸法を自動入力</button>
+  </div>
   <div class="btn-row">
     <button class="btn btn-secondary" onclick="switchScreen('photos')" style="flex:1;">📷 写真</button>
     <button class="btn btn-secondary" onclick="applyMeasureToPriceMaster()" style="flex:1;background:rgba(74,158,255,.15);border-color:rgba(74,158,255,.4);color:var(--blue);">📦 単価表へ</button>
@@ -722,6 +727,7 @@ canvas{display:block;touch-action:none;}
       <div class="section-title" style="margin:0;">材料拾い出し</div>
       <div style="display:flex;gap:6px;">
         <button onclick="togglePickupRef()" style="background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.3);color:var(--accent);padding:6px 8px;border-radius:8px;font-size:11px;cursor:pointer;">📐 図面</button>
+        <button onclick="openPickupAiModal()" style="background:linear-gradient(135deg,rgba(176,106,255,.2),rgba(74,158,255,.2));border:1px solid rgba(176,106,255,.4);color:#b06aff;padding:6px 8px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">🤖 AI提案</button>
         <button onclick="sendPickupToEstimate()" style="background:var(--green);border:none;color:#000;padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">→ 見積反映</button>
       </div>
     </div>
@@ -7275,6 +7281,407 @@ function applyPartnerSuggestion(partnerId, workType){
   // ボタンをグレーアウト
   event.currentTarget.style.opacity='0.4';
   event.currentTarget.style.pointerEvents='none';
+}
+
+// ===== AI機能：実測タブ・拾い出しタブ・図面タブ =====
+
+// ─── 実測タブ：テキスト→寸法自動入力 ───
+function openMeasureAiModal() {
+  const anken = getAnken(currentAnkenId);
+  const ankenName = anken ? anken.name : '';
+  showModal(`
+    <div style="padding:4px 0 8px;">
+      <div style="font-size:15px;font-weight:700;color:#b06aff;margin-bottom:12px;">🤖 AIで寸法を自動入力</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">現場メモや会話をそのまま貼り付けてください。AIが寸法を読み取ります。</div>
+      <div style="background:rgba(176,106,255,.08);border:1px solid rgba(176,106,255,.2);border-radius:10px;padding:10px;margin-bottom:12px;font-size:11px;color:var(--muted);">
+        例：「リビング 幅5.4m 奥行7.8m 天井2400 ドア2箇所」<br>
+        例：「間口5400 奥行7800 高さ2400 開口部3.6㎡」<br>
+        例：「54×78の部屋、天井244、窓3つドア1つ」
+      </div>
+      <textarea id="measure-ai-text" class="form-input" rows="4" placeholder="寸法メモをここに入力..." style="width:100%;box-sizing:border-box;font-size:13px;"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button onclick="closeModal()" class="btn btn-secondary" style="flex:1;">キャンセル</button>
+      <button onclick="runMeasureAi()" class="btn btn-primary" style="flex:2;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;">🤖 解析して入力</button>
+    </div>
+  `);
+}
+
+async function runMeasureAi() {
+  const text = document.getElementById('measure-ai-text')?.value.trim();
+  if(!text) { showToast('テキストを入力してください', 'error'); return; }
+  const key = getApiKey();
+  if(!key) { noKeyFallback(); return; }
+
+  const btn = document.querySelector('#modalSheet .btn-primary');
+  if(btn) { btn.textContent = '⏳ 解析中...'; btn.disabled = true; }
+
+  const prompt = `あなたは建築・内装工事の現場管理AIです。
+以下のテキストから寸法情報を抽出し、JSONで返してください。
+
+【抽出ルール】
+- width: 間口・幅（mm単位に変換。m表記は×1000、cm表記は×10）
+- depth: 奥行き・深さ（mm単位）
+- height: 天井高（mm単位。一般的な天井高は2400mm前後）
+- openings: 開口部面積（㎡。ドア・窓の合計。個数のみの場合は1個=1.8㎡で計算）
+- notes: 読み取れたその他メモ（部屋名・特記事項など）
+
+【注意】
+- 数値が読み取れない項目はnullにする
+- 単位変換は必ず行う（m→mm、cm→mm）
+- 返答はJSONのみ。説明文不要。
+
+【入力テキスト】
+${text}
+
+【出力形式】
+{"width":5400,"depth":7800,"height":2400,"openings":3.6,"notes":"リビング"}`;
+
+  try {
+    const data = await callClaude([{role:'user', content: prompt}], 300);
+    const raw = data.content?.[0]?.text || '';
+    const clean = raw.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(clean);
+
+    closeModal();
+
+    // フォームに反映
+    let filled = [];
+    if(parsed.width  != null){ const el=document.getElementById('mWidth');  if(el){el.value=parsed.width;  filled.push('間口');} }
+    if(parsed.depth  != null){ const el=document.getElementById('mDepth');  if(el){el.value=parsed.depth;  filled.push('奥行');} }
+    if(parsed.height != null){ const el=document.getElementById('mHeight'); if(el){el.value=parsed.height; filled.push('天井高');} }
+    if(parsed.openings != null){ const el=document.getElementById('mOpenings'); if(el){el.value=parsed.openings; filled.push('開口部');} }
+    calcAuto();
+
+    const msg = filled.length > 0
+      ? `✅ ${filled.join('・')}を自動入力しました` + (parsed.notes ? `（${parsed.notes}）` : '')
+      : '読み取れる寸法がありませんでした';
+    showToast(msg, filled.length > 0 ? 'success' : 'error');
+  } catch(e) {
+    if(btn) { btn.textContent = '🤖 解析して入力'; btn.disabled = false; }
+    showToast('解析エラー: ' + e.message, 'error');
+  }
+}
+
+// ─── 拾い出しタブ：実測値からAI材料提案 ───
+function openPickupAiModal() {
+  // 現在の実測値を取得
+  const floor   = document.getElementById('calcFloor')?.value   || '';
+  const wall    = document.getElementById('calcWall')?.value    || '';
+  const ceiling = document.getElementById('calcCeiling')?.value || '';
+  const width   = document.getElementById('mWidth')?.value  || '';
+  const depth   = document.getElementById('mDepth')?.value  || '';
+  const height  = document.getElementById('mHeight')?.value || '';
+
+  const anken = getAnken(currentAnkenId);
+  const ankenName = anken ? anken.name : '';
+
+  showModal(`
+    <div style="padding:4px 0 8px;">
+      <div style="font-size:15px;font-weight:700;color:#b06aff;margin-bottom:10px;">🤖 AI材料提案</div>
+      ${(floor||wall) ? `<div style="background:rgba(61,214,140,.08);border:1px solid rgba(61,214,140,.2);border-radius:10px;padding:10px;margin-bottom:12px;font-size:12px;">
+        <div style="font-weight:700;color:var(--green);margin-bottom:6px;">📐 実測データ（自動取得）</div>
+        ${floor ? `床面積: <b>${floor}㎡</b>　` : ''}${wall ? `壁面積: <b>${wall}㎡</b>　` : ''}${ceiling ? `天井: <b>${ceiling}㎡</b>` : ''}
+      </div>` : `<div style="font-size:12px;color:var(--muted);margin-bottom:10px;">⚠️ 実測タブで寸法を入力すると自動取得できます</div>`}
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">工事内容・使用材料の希望を入力（省略可）</div>
+      <textarea id="pickup-ai-text" class="form-input" rows="3" placeholder="例：クロス張替えと床フローリング化。照明はダウンライト4灯。壁は塗装仕上げ。" style="width:100%;box-sizing:border-box;font-size:13px;"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button onclick="closeModal()" class="btn btn-secondary" style="flex:1;">キャンセル</button>
+      <button onclick="runPickupAi('${floor}','${wall}','${ceiling}')" class="btn btn-primary" style="flex:2;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;">🤖 材料を提案する</button>
+    </div>
+  `);
+}
+
+async function runPickupAi(floor, wall, ceiling) {
+  const memo = document.getElementById('pickup-ai-text')?.value.trim() || '';
+  const key = getApiKey();
+  if(!key) { noKeyFallback(); return; }
+
+  const btn = document.querySelector('#modalSheet .btn-primary');
+  if(btn) { btn.textContent = '⏳ 提案中...'; btn.disabled = true; }
+
+  const anken = getAnken(currentAnkenId);
+  const ankenName = anken?.name || '';
+
+  const prompt = `あなたは内装工事の積算・材料拾い出し専門AIです。
+以下の現場情報から各工種の拾い出し数量を提案してください。
+
+【現場情報】
+案件名: ${ankenName}
+床面積: ${floor || '不明'}㎡
+壁面積: ${wall || '不明'}㎡
+天井面積: ${ceiling || floor || '不明'}㎡
+工事内容メモ: ${memo || '指定なし'}
+
+【出力ルール】
+- 工事内容メモに記載のある工種を優先
+- 記載がない場合は面積から標準的な内装工事として提案
+- ロス率は業界標準値を使用
+- JSONのみ返す。説明文不要
+
+【出力形式（数値はすべて数値型）】
+{
+  "cloth": {"wall": 壁面積数値, "loss": 15, "memo": "クロス品番・備考"},
+  "floor": {"sqm": 床面積数値, "loss": 8, "memo": "フローリング材"},
+  "paint": {"sqm": 塗装面積数値または0, "coats": 2, "spread": 6, "can": 15, "memo": "塗料名"},
+  "lights": [{"name":"ダウンライト","qty":4},{"name":"スイッチ","qty":2}],
+  "summary": "提案内容の一言コメント（30字以内）"
+}`;
+
+  try {
+    const data = await callClaude([{role:'user', content: prompt}], 600);
+    const raw = data.content?.[0]?.text || '';
+    const clean = raw.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(clean);
+
+    closeModal();
+    _applyPickupAiResult(parsed);
+  } catch(e) {
+    if(btn) { btn.textContent = '🤖 材料を提案する'; btn.disabled = false; }
+    showToast('解析エラー: ' + e.message, 'error');
+  }
+}
+
+function _applyPickupAiResult(d) {
+  let filled = [];
+
+  // クロス
+  if(d.cloth?.wall > 0) {
+    const el = document.getElementById('pu_cloth_wall'); if(el) el.value = d.cloth.wall;
+    const loss = document.getElementById('pu_cloth_loss'); if(loss && d.cloth.loss) loss.value = d.cloth.loss;
+    const memo = document.getElementById('pu_cloth_memo'); if(memo && d.cloth.memo) memo.value = d.cloth.memo;
+    calcCloth?.(); filled.push('クロス');
+  }
+  // 床材
+  if(d.floor?.sqm > 0) {
+    const el = document.getElementById('pu_floor_sqm'); if(el) el.value = d.floor.sqm;
+    const loss = document.getElementById('pu_floor_loss'); if(loss && d.floor.loss) loss.value = d.floor.loss;
+    const memo = document.getElementById('pu_floor_memo'); if(memo && d.floor.memo) memo.value = d.floor.memo;
+    calcFloorMat?.(); filled.push('床材');
+  }
+  // 塗装
+  if(d.paint?.sqm > 0) {
+    const sqm   = document.getElementById('pu_paint_sqm');    if(sqm)    sqm.value    = d.paint.sqm;
+    const coats = document.getElementById('pu_paint_coats');  if(coats)  coats.value  = d.paint.coats || 2;
+    const spread= document.getElementById('pu_paint_spread'); if(spread) spread.value = d.paint.spread || 6;
+    const can   = document.getElementById('pu_paint_can');    if(can)    can.value    = d.paint.can || 15;
+    const memo  = document.getElementById('pu_paint_memo');   if(memo && d.paint.memo) memo.value = d.paint.memo;
+    calcPaint?.(); filled.push('塗装');
+  }
+  // 照明
+  if(d.lights?.length > 0) {
+    const lightItems = document.getElementById('lightItems');
+    if(lightItems) {
+      // 既存行をクリアして新規追加
+      lightItems.innerHTML = '';
+      d.lights.forEach(item => {
+        const unit = item.name.includes('スイッチ')||item.name.includes('コンセント') ? '箇所' : '台';
+        const div = document.createElement('div');
+        div.className = 'light-row';
+        div.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px;';
+        div.innerHTML = `<input class="form-input" style="flex:2;" type="text" value="${item.name}" placeholder="器具名">
+          <input class="form-input" style="flex:1;" type="number" value="${item.qty}" min="0" oninput="calcLight()">
+          <span style="font-size:12px;color:var(--muted);flex-shrink:0;">${unit}</span>`;
+        lightItems.appendChild(div);
+      });
+      calcLight?.(); filled.push('照明');
+    }
+  }
+
+  const summary = d.summary || '';
+  showToast(`✅ ${filled.join('・')}を提案しました${summary ? '。' + summary : ''}`);
+
+  // 最初の入力済みタブに切り替え
+  if(filled.includes('クロス')) switchPickupTab?.('cloth', document.querySelector('.ptab'));
+}
+
+// ─── 図面タブ：スケッチ + メモ → Claude SVG清書図面 ───
+function openSketchAiModal() {
+  if(!drawCanvas || drawCanvas.width === 0) {
+    showToast('先に図面を描いてください', 'error'); return;
+  }
+  const anken = getAnken(currentAnkenId);
+  const ankenName = anken?.name || '';
+  const w = document.getElementById('mWidth')?.value  || '';
+  const d = document.getElementById('mDepth')?.value  || '';
+  const h = document.getElementById('mHeight')?.value || '';
+  const dimHint = (w && d) ? `幅${w}mm × 奥行${d}mm${h ? ` × 天井高${h}mm` : ''}` : '';
+
+  showModal(`
+    <div style="padding:4px 0 8px;">
+      <div style="font-size:15px;font-weight:700;color:#b06aff;margin-bottom:10px;">🤖 AI清書図面を生成</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">スケッチを送信してClaudeがSVGの清書図面を生成します。</div>
+      ${dimHint ? `<div style="background:rgba(61,214,140,.08);border:1px solid rgba(61,214,140,.2);border-radius:8px;padding:8px;margin-bottom:10px;font-size:12px;color:var(--green);">📐 実測データ自動取得: ${dimHint}</div>` : ''}
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">間取りメモ・特記事項（省略可）</div>
+      <textarea id="sketch-ai-memo" class="form-input" rows="3" placeholder="例：南側に掃き出し窓2箇所、北側に勝手口、キッチンは東側、リビング天井に梁あり" style="width:100%;box-sizing:border-box;font-size:13px;">${anken?.stages?.measure?.data?.notes || ''}</textarea>
+      <div style="margin-top:10px;font-size:11px;color:var(--muted);">
+        ⚡ 生成された清書図面はアプリ内でプレビューでき、保存またはJPEG出力できます
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button onclick="closeModal()" class="btn btn-secondary" style="flex:1;">キャンセル</button>
+      <button onclick="runSketchAi()" class="btn btn-primary" style="flex:2;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;">🤖 清書図面を生成</button>
+    </div>
+  `);
+}
+
+async function runSketchAi() {
+  const key = getApiKey();
+  if(!key) { noKeyFallback(); return; }
+
+  const memo  = document.getElementById('sketch-ai-memo')?.value.trim() || '';
+  const anken = getAnken(currentAnkenId);
+  const w     = document.getElementById('mWidth')?.value  || '';
+  const d     = document.getElementById('mDepth')?.value  || '';
+  const h     = document.getElementById('mHeight')?.value || '';
+
+  const btn = document.querySelector('#modalSheet .btn-primary');
+  if(btn) { btn.textContent = '⏳ 生成中（15〜30秒）...'; btn.disabled = true; }
+
+  // スケッチをJPEG base64に変換
+  const exportCanvas = document.createElement('canvas');
+  exportCanvas.width  = drawCanvas.width;
+  exportCanvas.height = drawCanvas.height;
+  const ectx = exportCanvas.getContext('2d');
+  ectx.fillStyle = '#ffffff';
+  ectx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+  ectx.drawImage(gridCanvas, 0, 0);
+  ectx.drawImage(drawCanvas, 0, 0);
+  const jpegB64 = exportCanvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+
+  const dimInfo = [
+    w ? `間口(幅): ${w}mm` : '',
+    d ? `奥行: ${d}mm` : '',
+    h ? `天井高: ${h}mm` : ''
+  ].filter(Boolean).join('、');
+
+  const prompt = `あなたは建築・内装工事の平面図を描くCAD専門AIです。
+添付のフリーハンドスケッチを元に、清書されたSVG平面図を生成してください。
+
+【現場情報】
+案件名: ${anken?.name || ''}
+${dimInfo ? `実測寸法: ${dimInfo}` : ''}
+${memo ? `間取りメモ: ${memo}` : ''}
+
+【SVG生成ルール】
+1. viewBox="0 0 800 600" で生成
+2. 背景は白（#ffffff）
+3. 壁は黒（#1a1a1a）、線幅8px（外壁）/ 4px（間仕切り）
+4. 実測寸法がある場合は正確な縮尺で描く（縮尺を明記）
+5. 寸法線は青（#2563eb）、矢印付き、寸法値を記載（mm単位）
+6. ドアは弧付きの建築図面標準記号
+7. 窓はサッシ記号（二重線）
+8. 各部屋名をテキストで記載
+9. タイトル（案件名・縮尺・作成日）を図面右下に記載
+10. スケッチの形状・配置をできる限り忠実に再現
+11. SVGタグのみ返す。説明文・コードブロック記号不要
+
+スケッチ画像を分析して、清書平面図SVGを生成してください。`;
+
+  try {
+    const data = await callClaude([{
+      role: 'user',
+      content: [
+        { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: jpegB64 } },
+        { type: 'text', text: prompt }
+      ]
+    }], 4000);
+
+    const raw = data.content?.[0]?.text || '';
+    // SVGタグを抽出
+    const svgMatch = raw.match(/<svg[\s\S]*<\/svg>/i);
+    if(!svgMatch) throw new Error('SVGが生成されませんでした');
+    const svgText = svgMatch[0];
+
+    closeModal();
+    _showSketchAiResult(svgText);
+  } catch(e) {
+    if(btn) { btn.textContent = '🤖 清書図面を生成'; btn.disabled = false; }
+    showToast('生成エラー: ' + e.message, 'error');
+  }
+}
+
+function _showSketchAiResult(svgText) {
+  // SVGをbase64 data URLに変換してギャラリーに保存できるようにする
+  const svgBlob = new Blob([svgText], {type:'image/svg+xml'});
+  const svgUrl  = URL.createObjectURL(svgBlob);
+
+  // SVGをcanvasにレンダリングしてJPEG保存できるようにする
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement('canvas');
+    c.width = 800; c.height = 600;
+    const cx = c.getContext('2d');
+    cx.fillStyle = '#ffffff';
+    cx.fillRect(0, 0, 800, 600);
+    cx.drawImage(img, 0, 0, 800, 600);
+    const jpegUrl = c.toDataURL('image/jpeg', 0.92);
+    URL.revokeObjectURL(svgUrl);
+
+    // プレビューモーダル表示
+    showModal(`
+      <div style="padding:4px 0 8px;">
+        <div style="font-size:14px;font-weight:700;color:#b06aff;margin-bottom:10px;">✅ AI清書図面が完成しました</div>
+        <div style="background:#fff;border-radius:10px;overflow:hidden;margin-bottom:12px;border:1px solid var(--border);">
+          <img src="${jpegUrl}" style="width:100%;display:block;">
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">
+          ※ AIによる自動生成です。寸法・配置を必ず現場で確認してください
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="closeModal()" class="btn btn-secondary" style="flex:1;">閉じる</button>
+        <button onclick="_saveSketchAiAsJpeg('${jpegUrl.replace(/'/g,"\\'")}');closeModal();" class="btn btn-secondary" style="flex:1;color:var(--blue);border-color:rgba(74,158,255,.4);">📷 JPEG保存</button>
+        <button onclick="_saveSketchAiToGallery('${jpegUrl.replace(/'/g,"\\'")}');closeModal();" class="btn btn-primary" style="flex:2;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;">💾 図面ギャラリーへ</button>
+      </div>
+    `);
+  };
+  img.onerror = () => {
+    // SVGレンダリング失敗時はSVGをそのままプレビュー
+    showModal(`
+      <div style="padding:4px 0 8px;">
+        <div style="font-size:14px;font-weight:700;color:#b06aff;margin-bottom:10px;">✅ AI清書図面が完成しました</div>
+        <div style="background:#fff;border-radius:10px;overflow:hidden;margin-bottom:12px;border:1px solid var(--border);padding:8px;">
+          ${svgText}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="closeModal()" class="btn btn-secondary" style="flex:1;">閉じる</button>
+        <button onclick="_saveSketchAiToGalleryFromSvg()" class="btn btn-primary" style="flex:2;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;">💾 図面ギャラリーへ</button>
+      </div>
+    `);
+    window._lastSketchAiSvg = svgText;
+  };
+  img.src = svgUrl;
+}
+
+function _saveSketchAiAsJpeg(jpegUrl) {
+  const link = document.createElement('a');
+  link.download = 'AI清書図面_' + new Date().toLocaleDateString('ja').replace(/\//g,'-') + '.jpg';
+  link.href = jpegUrl;
+  link.click();
+  showToast('📷 AI清書図面をJPEGで保存しました');
+}
+
+function _saveSketchAiToGallery(jpegUrl) {
+  const name = 'AI清書図面_' + new Date().toLocaleDateString('ja');
+  savedSketches.push({ id:'sk_ai_'+Date.now(), name, dataUrl: jpegUrl, created: new Date().toLocaleDateString('ja') });
+  saveSketches();
+  renderSketchGallery();
+  showToast('💾 「' + name + '」を図面ギャラリーに保存しました');
+}
+
+function _saveSketchAiToGalleryFromSvg() {
+  const svg = window._lastSketchAiSvg;
+  if(!svg) return;
+  const name = 'AI清書図面_' + new Date().toLocaleDateString('ja');
+  const dataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
+  savedSketches.push({ id:'sk_ai_'+Date.now(), name, dataUrl, created: new Date().toLocaleDateString('ja') });
+  saveSketches();
+  renderSketchGallery();
+  closeModal();
+  showToast('💾 「' + name + '」を図面ギャラリーに保存しました');
 }
 
 function saveSettings() {
