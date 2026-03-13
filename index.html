@@ -392,6 +392,9 @@ canvas{display:block;touch-action:none;}
   <div class="logo">現場ナビ<span style="font-weight:300;font-size:12px;margin-left:4px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">PRO</span><span style="font-size:9px;color:#3dd68c;margin-left:5px;font-weight:700;">v20</span></div>
   <div class="topbar-right">
     <div class="topbar-project" id="topbarProject">案件: <span>MOKU 内装</span></div>
+    <div class="icon-btn" onclick="window.open('書類管理アプリ_アートレイズ.html','_blank')" title="書類管理アプリを開く" style="background:#d4600a;border-color:#b84d00;color:#fff;flex-shrink:0;">
+      <svg width="15" height="15" fill="none" stroke="#fff" stroke-width="2.2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    </div>
     <div class="icon-btn" onclick="openModal('settings')">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </div>
@@ -1234,7 +1237,7 @@ canvas{display:block;touch-action:none;}
       </div>
       <div style="display:flex;gap:8px;margin-top:8px;">
         <button onclick="clearPasteInput()" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;padding:9px;cursor:pointer;">クリア</button>
-        <button onclick="savePasteAsAiMemo()" style="flex:2;background:#d4600a;border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;padding:9px;cursor:pointer;">✦ AI整形して保存</button>
+        <button onclick="savePasteAsAiMemo()" style="flex:2;background:linear-gradient(135deg,#b06aff,#4a9eff);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;padding:9px;cursor:pointer;">✦ AI整形して保存</button>
         <button onclick="savePasteAsRawMemo()" style="flex:2;background:var(--accent);border:none;border-radius:8px;color:#000;font-size:12px;font-weight:700;padding:9px;cursor:pointer;">そのまま保存</button>
       </div>
     </div>

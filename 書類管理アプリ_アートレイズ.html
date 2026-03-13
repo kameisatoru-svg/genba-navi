@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>書類管理システム｜株式会社アート・レイズ</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Shippori+Mincho:wght@400;600;700&display=swap');
+
+:root {
+  --ink:     #1a1a1a;
+  --dark:    #2c2c2c;
+  --mid:     #4a4a4a;
+  --sub:     #6b6b6b;
+  --border:  #d0d0d0;
+  --light:   #f2f2f0;
+  --white:   #ffffff;
+  --accent:  #2a5298;
+  --accent2: #1a3a6e;
+  --green:   #1a7a4a;
+  --red:     #c0392b;
+  --yellow:  #b8860b;
+  --even:    #f7f7f5;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: #e8e6e0;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+/* ===== ヘッダー ===== */
+.app-header {
+  background: var(--dark);
+  color: var(--white);
+  padding: 0 20px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+.header-left { display:flex; align-items:center; gap:14px; }
+.app-logo {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  white-space: nowrap;
+}
+.app-logo span { color: #aab4c8; font-size:11px; font-weight:400; margin-left:8px; font-family:'Noto Sans JP',sans-serif; }
+.header-nav { display:flex; gap:2px; }
+.nav-btn {
+  background: none;
+  border: none;
+  color: #ccc;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: 'Noto Sans JP', sans-serif;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.nav-btn:hover { background: rgba(255,255,255,.1); color:#fff; }
+.nav-btn.active { background: var(--accent); color:#fff; }
+.header-right { display:flex; gap:8px; align-items:center; }
+.navi-link-btn {
+  background: #1a5276;
+  color: #fff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: 'Noto Sans JP', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background .15s;
+}
+.navi-link-btn:hover { background: #2471a3; }
+.backup-btn {
+  background: none;
+  border: 1px solid #666;
+  color: #ccc;
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: 'Noto Sans JP', sans-serif;
+  transition: all .15s;
+}
+.backup-btn:hover { border-color:#aaa; color:#fff; }
+
+/* ===== メインレイアウト ===== */
+.app-body { display:flex; height:calc(100vh - 52px); }
+
+/* ===== サイドバー ===== */
+.sidebar {
+  width: 260px;
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+.sidebar-section { padding: 12px; border-bottom: 1px solid var(--border); }
+.sidebar-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--sub);
+  letter-spacing: .1em;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+.search-box {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: 'Noto Sans JP', sans-serif;
+  background: var(--light);
+  outline: none;
+  transition: border-color .15s;
+}
+.search-box:focus { border-color: var(--accent); }
+.filter-btns { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
+.filter-btn {
+  padding: 3px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--white);
+  font-size: 11px;
+  cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+  color: var(--mid);
+  transition: all .15s;
+}
+.filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+.filter-btn.active { background: var(--accent); color:#fff; border-color:var(--accent); }
+
+.customer-list { flex:1; overflow-y:auto; }
+.customer-item {
+  padding: 10px 14px;
+  border-bottom: 1px solid #ebebeb;
+  cursor: pointer;
+  transition: background .1s;
+}
+.customer-item:hover { background: var(--even); }
+.customer-item.active { background: #eaf0fb; border-left: 3px solid var(--accent); }
+.customer-name { font-weight:700; font-size:13px; }
+.customer-meta { font-size:11px; color:var(--sub); margin-top:2px; }
+.customer-badge {
+  display:inline-block;
+  background: var(--accent);
+  color:#fff;
+  font-size:9px;
+  padding:1px 6px;
+  border-radius:8px;
+  margin-left:5px;
+  vertical-align:middle;
+}
+
+.sidebar-add-btn {
+  margin: 10px 12px;
+  width: calc(100% - 24px);
+  padding: 9px;
+  background: var(--dark);
+  color: var(--white);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-weight: 700;
+  transition: background .15s;
+}
+.sidebar-add-btn:hover { background: var(--mid); }
+
+/* ===== メインコンテンツ ===== */
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background: #e8e6e0;
+}
+
+/* ===== ダッシュボード ===== */
+.dashboard { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
+.dash-card {
+  background: var(--white);
+  border-radius: 6px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+}
+.dash-label { font-size:11px; color:var(--sub); margin-bottom:4px; }
+.dash-value { font-family:'Shippori Mincho',serif; font-size:26px; font-weight:700; color:var(--ink); }
+.dash-value.green { color:var(--green); }
+.dash-value.red { color:var(--red); }
+.dash-sub { font-size:11px; color:var(--sub); margin-top:4px; }
+
+/* ===== セクションカード ===== */
+.section-card {
+  background: var(--white);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.section-head {
+  background: var(--dark);
+  color: var(--white);
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.section-head h2 { font-size:13px; font-weight:700; letter-spacing:.05em; }
+.section-actions { display:flex; gap:6px; }
+.btn-sm {
+  padding: 4px 12px;
+  border-radius: 3px;
+  border: 1px solid rgba(255,255,255,.3);
+  background: rgba(255,255,255,.1);
+  color: #fff;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+  transition: background .15s;
+}
+.btn-sm:hover { background: rgba(255,255,255,.25); }
+.btn-sm.primary { background: var(--accent); border-color:var(--accent); }
+.btn-sm.primary:hover { background: var(--accent2); }
+
+/* ===== テーブル ===== */
+.data-table { width:100%; border-collapse:collapse; font-size:12px; }
+.data-table th {
+  background: #4a4a4a;
+  color: #fff;
+  padding: 8px 12px;
+  text-align:left;
+  font-size:11px;
+  font-weight:700;
+  white-space: nowrap;
+}
+.data-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #ebebeb;
+  vertical-align: middle;
+}
+.data-table tr:nth-child(even) td { background: var(--even); }
+.data-table tr:hover td { background: #eaf0fb; }
+.data-table tr.subtotal td { background:#d8d8d8; font-weight:700; }
+
+.status-badge {
+  display:inline-block;
+  padding:2px 9px;
+  border-radius:10px;
+  font-size:10px;
+  font-weight:700;
+  white-space:nowrap;
+}
+.s-estimate  { background:#ddeeff; color:#1a4a8a; }
+.s-ordered   { background:#e0f4e0; color:#1a6a1a; }
+.s-working   { background:#fff3cc; color:#8a6000; }
+.s-invoiced  { background:#ffe0cc; color:#8a3000; }
+.s-paid      { background:#ccf0cc; color:#0a5a0a; }
+.s-unpaid    { background:#ffcccc; color:#8a0000; }
+.s-cancel    { background:#eeeeee; color:#666666; }
+
+.amount-cell { text-align:right; font-family:'Shippori Mincho',serif; }
+.link-btn {
+  background:none; border:none; color:var(--accent);
+  cursor:pointer; font-size:11px; text-decoration:underline;
+  font-family:'Noto Sans JP',sans-serif;
+  padding:0;
+}
+.action-btn {
+  padding:3px 9px; border-radius:3px; border:1px solid var(--border);
+  background:var(--white); font-size:11px; cursor:pointer;
+  font-family:'Noto Sans JP',sans-serif; color:var(--mid);
+  transition:all .15s; margin-right:3px;
+}
+.action-btn:hover { background:var(--dark); color:#fff; border-color:var(--dark); }
+.action-btn.danger:hover { background:var(--red); border-color:var(--red); color:#fff; }
+
+/* ===== モーダル ===== */
+.modal-overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,.5); z-index:200;
+  align-items:center; justify-content:center;
+}
+.modal-overlay.show { display:flex; }
+.modal {
+  background:var(--white);
+  border-radius:6px;
+  width: 560px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 40px rgba(0,0,0,.3);
+}
+.modal-head {
+  background: var(--dark);
+  color: var(--white);
+  padding: 14px 18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  position: sticky;
+  top: 0;
+}
+.modal-head h3 { font-size:14px; font-weight:700; }
+.modal-close { background:none; border:none; color:#ccc; font-size:20px; cursor:pointer; line-height:1; }
+.modal-body { padding:20px; }
+.form-row { margin-bottom:14px; }
+.form-label { display:block; font-size:11px; font-weight:700; color:var(--mid); margin-bottom:5px; }
+.form-input, .form-select, .form-textarea {
+  width:100%; padding:8px 10px;
+  border:1px solid var(--border); border-radius:4px;
+  font-size:13px; font-family:'Noto Sans JP',sans-serif;
+  background:var(--light); outline:none;
+  transition:border-color .15s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color:var(--accent); }
+.form-textarea { min-height:80px; resize:vertical; }
+.form-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.modal-foot {
+  padding:14px 20px;
+  border-top:1px solid var(--border);
+  display:flex; justify-content:flex-end; gap:8px;
+  background: var(--light);
+}
+.btn-cancel {
+  padding:8px 20px; border-radius:4px; border:1px solid var(--border);
+  background:var(--white); cursor:pointer; font-size:13px;
+  font-family:'Noto Sans JP',sans-serif; color:var(--mid);
+}
+.btn-save {
+  padding:8px 24px; border-radius:4px; border:none;
+  background:var(--dark); color:#fff; cursor:pointer; font-size:13px;
+  font-family:'Noto Sans JP',sans-serif; font-weight:700;
+  transition:background .15s;
+}
+.btn-save:hover { background:var(--accent); }
+
+/* ===== 書類プレビューエリア ===== */
+.doc-preview-area { padding:16px; }
+.doc-type-tabs { display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; }
+.doc-tab {
+  padding:6px 16px; border-radius:4px; border:1px solid var(--border);
+  background:var(--white); cursor:pointer; font-size:12px;
+  font-family:'Noto Sans JP',sans-serif; color:var(--mid);
+  transition:all .15s;
+}
+.doc-tab.active { background:var(--dark); color:#fff; border-color:var(--dark); }
+.doc-list { display:grid; gap:10px; }
+.doc-item {
+  background:var(--white); border:1px solid var(--border);
+  border-radius:4px; padding:12px 16px;
+  display:flex; align-items:center; justify-content:space-between;
+  transition:box-shadow .15s;
+}
+.doc-item:hover { box-shadow:0 2px 8px rgba(0,0,0,.1); }
+.doc-item-info { flex:1; }
+.doc-item-title { font-weight:700; font-size:13px; }
+.doc-item-meta { font-size:11px; color:var(--sub); margin-top:3px; }
+.doc-item-actions { display:flex; gap:6px; }
+
+/* ===== 工事台帳タブ ===== */
+.ledger-tabs { display:flex; border-bottom:2px solid var(--border); margin-bottom:0; }
+.ledger-tab {
+  padding:10px 20px; cursor:pointer; font-size:12px; font-weight:700;
+  color:var(--sub); border-bottom:2px solid transparent; margin-bottom:-2px;
+  transition:all .15s;
+}
+.ledger-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+.ledger-panel { display:none; }
+.ledger-panel.active { display:block; }
+
+/* ===== 入金管理カラー ===== */
+.income-row td:nth-child(3) { color:var(--green); font-weight:700; }
+.expense-row td:nth-child(3) { color:var(--red); font-weight:700; }
+
+/* ===== 空状態 ===== */
+.empty-state {
+  text-align:center; padding:60px 20px;
+  color:var(--sub);
+}
+.empty-state .empty-icon { font-size:48px; margin-bottom:12px; opacity:.4; }
+.empty-state p { font-size:13px; }
+
+/* ===== トースト通知 ===== */
+.toast {
+  position:fixed; bottom:24px; right:24px;
+  background:var(--dark); color:#fff;
+  padding:12px 20px; border-radius:6px;
+  font-size:13px; z-index:300;
+  transform:translateY(80px); opacity:0;
+  transition:all .3s; pointer-events:none;
+}
+.toast.show { transform:translateY(0); opacity:1; }
+
+/* ===== レスポンシブ ===== */
+@media(max-width:900px){
+  .sidebar { width:200px; }
+  .dashboard { grid-template-columns:1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<header class="app-header">
+  <div class="header-left">
+    <div class="app-logo">株式会社アート・レイズ <span>書類管理システム v1.0</span></div>
+    <nav class="header-nav">
+      <button class="nav-btn active" onclick="showView('dashboard')">🏠 ホーム</button>
+      <button class="nav-btn" onclick="showView('customers')">👥 顧客台帳</button>
+      <button class="nav-btn" onclick="showView('projects')">📋 案件一覧</button>
+      <button class="nav-btn" onclick="showView('documents')">📄 書類管理</button>
+      <button class="nav-btn" onclick="showView('ledger')">📒 工事台帳</button>
+      <button class="nav-btn" onclick="showView('payment')">💴 入金管理</button>
+    </nav>
+  </div>
+  <div class="header-right">
+    <button class="navi-link-btn" onclick="openNaviPro()">🔗 現場ナビPRO</button>
+    <button class="backup-btn" onclick="exportJSON()">💾 バックアップ</button>
+    <button class="backup-btn" onclick="importJSON()">📂 復元</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
+  </div>
+</header>
+
+<div class="app-body">
+<!-- サイドバー -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-title">検索・絞り込み</div>
+    <input class="search-box" type="text" placeholder="顧客名・案件番号で検索..." id="globalSearch" oninput="globalSearchFn()">
+    <div class="filter-btns">
+      <button class="filter-btn active" onclick="filterStatus('all',this)">全て</button>
+      <button class="filter-btn" onclick="filterStatus('見積提示中',this)">見積中</button>
+      <button class="filter-btn" onclick="filterStatus('工事中',this)">工事中</button>
+      <button class="filter-btn" onclick="filterStatus('未入金',this)">未入金</button>
+      <button class="filter-btn" onclick="filterStatus('入金済み',this)">完了</button>
+    </div>
+  </div>
+  <div class="sidebar-title" style="padding:10px 14px 4px; font-size:10px; color:var(--sub);">顧客一覧</div>
+  <div class="customer-list" id="customerList"></div>
+  <button class="sidebar-add-btn" onclick="openCustomerModal()">＋ 新規顧客登録</button>
+</aside>
+
+<!-- メインコンテンツ -->
+<main class="main-content" id="mainContent">
+
+  <!-- ===== ホーム（ダッシュボード）===== -->
+  <div id="view-dashboard">
+    <div style="margin-bottom:16px;">
+      <h1 style="font-family:'Shippori Mincho',serif; font-size:20px; font-weight:700;">ダッシュボード</h1>
+      <p style="font-size:11px; color:var(--sub); margin-top:2px;" id="dashDate"></p>
+    </div>
+    <div class="dashboard">
+      <div class="dash-card">
+        <div class="dash-label">登録顧客数</div>
+        <div class="dash-value" id="d-customers">0</div>
+        <div class="dash-sub">顧客</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-label">進行中案件</div>
+        <div class="dash-value" id="d-active">0</div>
+        <div class="dash-sub">件</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-label">未入金合計</div>
+        <div class="dash-value red" id="d-unpaid">¥0</div>
+        <div class="dash-sub">要フォロー</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-label">今月入金済み</div>
+        <div class="dash-value green" id="d-paid">¥0</div>
+        <div class="dash-sub">今月</div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-head">
+        <h2>📌 直近の案件（ステータス要確認）</h2>
+      </div>
+      <table class="data-table" id="recentProjectsTable">
+        <thead><tr>
+          <th>案件番号</th><th>顧客名</th><th>工事種別</th>
+          <th>見積金額</th><th>ステータス</th><th>更新日</th>
+        </tr></thead>
+        <tbody id="recentProjectsBody"></tbody>
+      </table>
+    </div>
+
+    <div class="section-card">
+      <div class="section-head"><h2>💴 未入金一覧</h2></div>
+      <table class="data-table">
+        <thead><tr>
+          <th>案件番号</th><th>顧客名</th><th>請求金額</th><th>請求日</th><th>経過日数</th>
+        </tr></thead>
+        <tbody id="unpaidBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== 顧客台帳 ===== -->
+  <div id="view-customers" style="display:none">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h1 style="font-family:'Shippori Mincho',serif; font-size:20px; font-weight:700;">👥 顧客台帳</h1>
+      <button class="btn-sm primary" onclick="openCustomerModal()" style="padding:8px 18px; border-radius:4px; font-size:13px;">＋ 新規顧客登録</button>
+    </div>
+    <div class="section-card">
+      <table class="data-table" id="customerTable">
+        <thead><tr>
+          <th>顧客ID</th><th>顧客名</th><th>電話番号</th><th>住所</th>
+          <th>案件数</th><th>最終工事</th><th>備考</th><th>操作</th>
+        </tr></thead>
+        <tbody id="customerBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== 案件一覧 ===== -->
+  <div id="view-projects" style="display:none">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h1 style="font-family:'Shippori Mincho',serif; font-size:20px; font-weight:700;">📋 案件一覧</h1>
+      <button class="btn-sm primary" onclick="openProjectModal()" style="padding:8px 18px; border-radius:4px; font-size:13px;">＋ 新規案件登録</button>
+    </div>
+    <div class="section-card">
+      <table class="data-table">
+        <thead><tr>
+          <th>案件番号</th><th>顧客名</th><th>工事種別</th><th>施工場所</th>
+          <th>見積金額</th><th>請求金額</th><th>ステータス</th><th>見積日</th><th>操作</th>
+        </tr></thead>
+        <tbody id="projectBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== 書類管理 ===== -->
+  <div id="view-documents" style="display:none">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h1 style="font-family:'Shippori Mincho',serif; font-size:20px; font-weight:700;">📄 書類管理</h1>
+    </div>
+    <div class="section-card">
+      <div class="section-head"><h2>書類一覧</h2>
+        <div class="section-actions">
+          <button class="btn-sm" onclick="openDocModal('見積書')">＋ 見積書</button>
+          <button class="btn-sm" onclick="openDocModal('注文書')">＋ 注文書</button>
+          <button class="btn-sm" onclick="openDocModal('請求書')">＋ 請求書</button>
+        </div>
+      </div>
+      <div class="doc-preview-area">
+        <div class="doc-type-tabs">
+          <button class="doc-tab active" onclick="filterDocs('all',this)">すべて</button>
+          <button class="doc-tab" onclick="filterDocs('見積書',this)">見積書</button>
+          <button class="doc-tab" onclick="filterDocs('注文書',this)">注文書</button>
+          <button class="doc-tab" onclick="filterDocs('請求書',this)">請求書</button>
+        </div>
+        <div class="doc-list" id="docList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 工事台帳 ===== -->
+  <div id="view-ledger" style="display:none">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h1 style="font-family:'Shippori Mincho',serif; font-size:20px; font-weight:700;">📒 工事台帳</h1>
+      <select class="form-select" style="width:220px;" id="ledgerProjectSelect" onchange="loadLedger()">
+        <option value="">案件を選択してください</option>
+      </select>
+    </div>
+    <div class="section-card">
+      <div class="ledger-tabs">
+        <div class="ledger-tab active" onclick="showLedgerTab('material',this)">▼ 使用材料・数量</div>
+        <div class="ledger-tab" onclick="showLedgerTab('worker',this)">▼ 職人・作業記録</div>
+        <div class="ledger-tab" onclick="showLedgerTab('payment',this)">▼ 支払・入金履歴</div>
+      </div>
+
+      <!-- 材料 -->
+      <div class="ledger-panel active" id="panel-material">
+        <div style="padding:12px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:flex-end;">
+          <button class="action-btn" onclick="addLedgerRow('material')">＋ 材料追加</button>
+        </div>
+        <table class="data-table">
+          <thead><tr>
+            <th>材料名</th><th>数量</th><th>単位</th><th>単価</th><th>金額</th><th>仕入日</th><th>仕入先</th><th>備考</th><th>削除</th>
+          </tr></thead>
+          <tbody id="materialBody"></tbody>
+        </table>
+        <div style="padding:12px 16px; background:var(--even); border-top:1px solid var(--border); text-align:right; font-weight:700;">
+          材料費合計：<span id="materialTotal" style="font-family:'Shippori Mincho',serif; font-size:16px;">¥0</span>
+        </div>
+      </div>
+
+      <!-- 職人 -->
+      <div class="ledger-panel" id="panel-worker">
+        <div style="padding:12px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:flex-end;">
+          <button class="action-btn" onclick="addLedgerRow('worker')">＋ 作業追加</button>
+        </div>
+        <table class="data-table">
+          <thead><tr>
+            <th>作業日</th><th>職人名</th><th>作業内容</th><th>人工数</th><th>単価(見積)</th><th>労務費</th><th>備考</th><th>削除</th>
+          </tr></thead>
+          <tbody id="workerBody"></tbody>
+        </table>
+        <div style="padding:12px 16px; background:var(--even); border-top:1px solid var(--border); text-align:right; font-weight:700;">
+          労務費合計：<span id="workerTotal" style="font-family:'Shippori Mincho',serif; font-size:16px;">¥0</span>
+        </div>
+      </div>
+
+      <!-- 入金 -->
+      <div class="ledger-panel" id="panel-payment">
+        <div style="padding:12px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:flex-end;">
+          <button class="action-btn" onclick="addLedgerRow('payment')">＋ 取引追加</button>
+        </div>
+        <table class="data-table">
+          <thead><tr>
+            <th>取引日</th><th>区分</th><th>相手先</th><th>金額</th><th>支払方法</th><th>確認日</th><th>備考</th><th>削除</th>
+          </tr></thead>
+          <tbody id="paymentBody"></tbody>
+        </table>
+        <div style="padding:12px 16px; background:var(--even); border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:30px; font-weight:700;">
+          <span>入金合計：<span id="incomeTotal" style="font-family:'Shippori Mincho',serif; font-size:16px; color:var(--green);">¥0</span></span>
+          <span>支出合計：<span id="expenseTotal" style="font-family:'Shippori Mincho',serif; font-size:16px; color:var(--red);">¥0</span></span>
+          <span>差引：<span id="balanceTotal" style="font-family:'Shippori Mincho',serif; font-size:16px;">¥0</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 入金管理 ===== -->
+  <div id="view-payment" style="display:none">
+    <div style="margin-bottom:16px;">
+      <h1 style="font-family:'Shippori Mincho',serif; font-size:20px; font-weight:700;">💴 入金管理</h1>
+    </div>
+    <div class="dashboard" style="grid-template-columns:repeat(3,1fr);">
+      <div class="dash-card">
+        <div class="dash-label">未入金件数</div>
+        <div class="dash-value red" id="pm-count">0</div>
+        <div class="dash-sub">件</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-label">未入金合計</div>
+        <div class="dash-value red" id="pm-amount">¥0</div>
+        <div class="dash-sub">要フォロー</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-label">今月入金済み</div>
+        <div class="dash-value green" id="pm-paid">¥0</div>
+        <div class="dash-sub">今月</div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-head"><h2>未入金案件一覧</h2></div>
+      <table class="data-table">
+        <thead><tr>
+          <th>案件番号</th><th>顧客名</th><th>工事種別</th>
+          <th>請求金額</th><th>請求日</th><th>経過日数</th><th>操作</th>
+        </tr></thead>
+        <tbody id="unpaidFullBody"></tbody>
+      </table>
+    </div>
+    <div class="section-card">
+      <div class="section-head"><h2>入金済み案件（直近20件）</h2></div>
+      <table class="data-table">
+        <thead><tr>
+          <th>案件番号</th><th>顧客名</th><th>請求金額</th><th>入金日</th>
+        </tr></thead>
+        <tbody id="paidBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<!-- ===== モーダル群 ===== -->
+
+<!-- 顧客モーダル -->
+<div class="modal-overlay" id="customerModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="customerModalTitle">顧客登録</h3>
+      <button class="modal-close" onclick="closeModal('customerModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="c-edit-id">
+      <div class="form-row-2">
+        <div class="form-row"><label class="form-label">顧客ID <span style="color:red">*</span></label>
+          <input class="form-input" id="c-id" placeholder="C-001"></div>
+        <div class="form-row"><label class="form-label">顧客名 <span style="color:red">*</span></label>
+          <input class="form-input" id="c-name" placeholder="山田 太郎"></div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-row"><label class="form-label">電話番号</label>
+          <input class="form-input" id="c-tel" placeholder="090-0000-0000"></div>
+        <div class="form-row"><label class="form-label">メール</label>
+          <input class="form-input" id="c-email" placeholder="example@email.com"></div>
+      </div>
+      <div class="form-row"><label class="form-label">住所</label>
+        <input class="form-input" id="c-addr" placeholder="大分県別府市〇〇"></div>
+      <div class="form-row"><label class="form-label">備考</label>
+        <textarea class="form-textarea" id="c-note" placeholder="紹介元・特記事項など"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeModal('customerModal')">キャンセル</button>
+      <button class="btn-save" onclick="saveCustomer()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 案件モーダル -->
+<div class="modal-overlay" id="projectModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="projectModalTitle">案件登録</h3>
+      <button class="modal-close" onclick="closeModal('projectModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="p-edit-id">
+      <div class="form-row-2">
+        <div class="form-row"><label class="form-label">案件番号 <span style="color:red">*</span></label>
+          <input class="form-input" id="p-no" placeholder="AR-2026-0001"></div>
+        <div class="form-row"><label class="form-label">顧客 <span style="color:red">*</span></label>
+          <select class="form-select" id="p-cid"></select></div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-row"><label class="form-label">工事種別</label>
+          <input class="form-input" id="p-type" placeholder="外壁塗装・内装クロスなど"></div>
+        <div class="form-row"><label class="form-label">施工場所</label>
+          <input class="form-input" id="p-place" placeholder="別府市〇〇町"></div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-row"><label class="form-label">見積金額（税込）</label>
+          <input class="form-input" id="p-est" type="number" placeholder="0"></div>
+        <div class="form-row"><label class="form-label">請求金額（税込）</label>
+          <input class="form-input" id="p-inv" type="number" placeholder="0"></div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-row"><label class="form-label">見積日</label>
+          <input class="form-input" id="p-edate" type="date"></div>
+        <div class="form-row"><label class="form-label">受注日</label>
+          <input class="form-input" id="p-odate" type="date"></div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-row"><label class="form-label">完了日</label>
+          <input class="form-input" id="p-cdate" type="date"></div>
+        <div class="form-row"><label class="form-label">入金日</label>
+          <input class="form-input" id="p-idate" type="date"></div>
+      </div>
+      <div class="form-row"><label class="form-label">ステータス</label>
+        <select class="form-select" id="p-stat">
+          <option>見積提示中</option><option>受注済み</option><option>工事中</option>
+          <option>請求済み</option><option>入金済み</option><option>未入金</option><option>キャンセル</option>
+        </select></div>
+      <div class="form-row"><label class="form-label">備考</label>
+        <textarea class="form-textarea" id="p-note"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeModal('projectModal')">キャンセル</button>
+      <button class="btn-save" onclick="saveProject()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 書類登録モーダル -->
+<div class="modal-overlay" id="docModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="docModalTitle">書類登録</h3>
+      <button class="modal-close" onclick="closeModal('docModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row-2">
+        <div class="form-row"><label class="form-label">書類番号</label>
+          <input class="form-input" id="d-no" placeholder="AR-EST-2026-0001"></div>
+        <div class="form-row"><label class="form-label">種別</label>
+          <select class="form-select" id="d-type">
+            <option>見積書</option><option>注文書</option><option>請求書</option>
+          </select></div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-row"><label class="form-label">関連案件</label>
+          <select class="form-select" id="d-pid"></select></div>
+        <div class="form-row"><label class="form-label">発行日</label>
+          <input class="form-input" id="d-date" type="date"></div>
+      </div>
+      <div class="form-row"><label class="form-label">金額（税込）</label>
+        <input class="form-input" id="d-amount" type="number" placeholder="0"></div>
+      <div class="form-row"><label class="form-label">備考</label>
+        <textarea class="form-textarea" id="d-note" placeholder="Claudeで生成済み・PDF保存済みなど"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeModal('docModal')">キャンセル</button>
+      <button class="btn-save" onclick="saveDoc()">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== データ管理 =====
+let DB = {
+  customers: [],
+  projects:  [],
+  documents: [],
+  ledger: { material:{}, worker:{}, payment:{} }
+};
+
+function loadDB() {
+  const saved = localStorage.getItem('artRaiseDB');
+  if (saved) {
+    try { DB = JSON.parse(saved); } catch(e){}
+  } else { seedData(); }
+}
+
+function saveDB() {
+  localStorage.setItem('artRaiseDB', JSON.stringify(DB));
+}
+
+function seedData() {
+  DB.customers = [
+    {id:'C-001', name:'山田 太郎', tel:'090-1234-5678', email:'', addr:'大分県別府市上原町〇〇', note:'常連客'},
+    {id:'C-002', name:'鈴木 花子', tel:'080-9876-5432', email:'', addr:'大分県別府市〇〇町', note:'紹介経由'},
+    {id:'C-003', name:'田中 建設', tel:'0977-00-0000', email:'', addr:'大分県別府市〇〇', note:'法人'},
+  ];
+  DB.projects = [
+    {id:'p1', no:'AR-2026-0001', cid:'C-001', type:'外壁塗装', place:'別府市上原町〇〇', est:550000, inv:550000, edate:'2026-03-01', odate:'2026-03-05', cdate:'2026-03-20', idate:'2026-03-31', stat:'入金済み', note:'次回：屋根塗装の相談あり', updated:'2026-03-31'},
+    {id:'p2', no:'AR-2026-0002', cid:'C-002', type:'内装クロス', place:'別府市〇〇町', est:280000, inv:280000, edate:'2026-03-03', odate:'2026-03-06', cdate:'2026-03-15', idate:'', stat:'未入金', note:'', updated:'2026-03-15'},
+    {id:'p3', no:'AR-2026-0003', cid:'C-001', type:'屋根塗装', place:'別府市上原町〇〇', est:380000, inv:0, edate:'2026-03-10', odate:'', cdate:'', idate:'', stat:'見積提示中', note:'', updated:'2026-03-10'},
+  ];
+  DB.documents = [
+    {id:'d1', no:'AR-EST-2026-0001', type:'見積書', pid:'p1', date:'2026-03-01', amount:550000, note:'PDF保存済み'},
+    {id:'d2', no:'AR-IN-2026-0001',  type:'請求書', pid:'p1', date:'2026-03-21', amount:550000, note:'PDF保存済み'},
+    {id:'d3', no:'AR-EST-2026-0002', type:'見積書', pid:'p2', date:'2026-03-03', amount:280000, note:''},
+  ];
+  DB.ledger = {
+    material:{ 'p1':[
+      {name:'シリコン外壁塗料（白）', qty:15, unit:'缶', price:8500, date:'2026-03-10', supplier:'〇〇塗料店', note:''},
+      {name:'養生テープ', qty:10, unit:'巻', price:250, date:'2026-03-10', supplier:'〇〇塗料店', note:''},
+    ]},
+    worker:{ 'p1':[
+      {date:'2026-03-12', name:'田中 誠', work:'外壁塗装（下塗り）', ninku:1, price:24000, note:''},
+      {date:'2026-03-13', name:'田中 誠', work:'外壁塗装（中塗り）', ninku:1, price:24000, note:''},
+    ]},
+    payment:{ 'p1':[
+      {date:'2026-03-21', cat:'入金', partner:'山田 太郎', amount:550000, method:'銀行振込', confirmed:'2026-03-22', note:''},
+      {date:'2026-03-10', cat:'材料費', partner:'〇〇塗料店', amount:127500, method:'銀行振込', confirmed:'2026-03-10', note:''},
+    ]}
+  };
+  saveDB();
+}
+
+// ===== ユーティリティ =====
+const fmt = n => '¥' + Number(n||0).toLocaleString();
+const uid = () => 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+const today = () => new Date().toISOString().slice(0,10);
+
+function getCustomer(cid) { return DB.customers.find(c=>c.id===cid)||{}; }
+function getProject(pid)  { return DB.projects.find(p=>p.id===pid)||{}; }
+
+function statusBadge(s) {
+  const m = {'見積提示中':'s-estimate','受注済み':'s-ordered','工事中':'s-working',
+             '請求済み':'s-invoiced','入金済み':'s-paid','未入金':'s-unpaid','キャンセル':'s-cancel'};
+  return `<span class="status-badge ${m[s]||''}">${s||'—'}</span>`;
+}
+
+function daysSince(dateStr) {
+  if(!dateStr) return '—';
+  const d = Math.floor((Date.now() - new Date(dateStr))/(1000*60*60*24));
+  return d + '日';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+// ===== ビュー切替 =====
+let currentView = 'dashboard';
+function showView(v) {
+  document.querySelectorAll('[id^="view-"]').forEach(el=>el.style.display='none');
+  document.getElementById('view-'+v).style.display='block';
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  currentView = v;
+  renderView(v);
+}
+
+function renderView(v) {
+  if(v==='dashboard')  renderDashboard();
+  if(v==='customers')  renderCustomers();
+  if(v==='projects')   renderProjects();
+  if(v==='documents')  renderDocuments();
+  if(v==='ledger')     renderLedgerSelect();
+  if(v==='payment')    renderPayment();
+}
+
+// ===== サイドバー =====
+let currentFilter = 'all';
+let searchTerm = '';
+
+function renderSidebar() {
+  const list = document.getElementById('customerList');
+  let customers = DB.customers;
+  if(searchTerm) customers = customers.filter(c=>c.name.includes(searchTerm)||c.id.includes(searchTerm));
+  list.innerHTML = customers.map(c=>{
+    const projs = DB.projects.filter(p=>p.cid===c.id);
+    const active = projs.filter(p=>!['入金済み','キャンセル'].includes(p.stat)).length;
+    return `<div class="customer-item" onclick="selectCustomer('${c.id}')">
+      <div class="customer-name">${c.name}${active>0?`<span class="customer-badge">${active}</span>`:''}</div>
+      <div class="customer-meta">${c.id}　${projs.length}件</div>
+    </div>`;
+  }).join('');
+}
+
+function selectCustomer(cid) {
+  document.querySelectorAll('.customer-item').forEach(el=>el.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  showViewProjects(cid);
+}
+
+function showViewProjects(cid) {
+  document.querySelectorAll('[id^="view-"]').forEach(el=>el.style.display='none');
+  document.getElementById('view-projects').style.display='block';
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  renderProjects(cid);
+}
+
+function globalSearchFn() {
+  searchTerm = document.getElementById('globalSearch').value;
+  renderSidebar();
+}
+
+function filterStatus(s, btn) {
+  currentFilter = s;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProjects();
+}
+
+// ===== ダッシュボード =====
+function renderDashboard() {
+  document.getElementById('dashDate').textContent =
+    new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+
+  const activeP = DB.projects.filter(p=>!['入金済み','キャンセル'].includes(p.stat));
+  const unpaid  = DB.projects.filter(p=>p.stat==='未入金');
+  const now = new Date();
+  const thisMonth = DB.projects.filter(p=>p.idate&&p.stat==='入金済み'&&new Date(p.idate).getMonth()===now.getMonth());
+
+  document.getElementById('d-customers').textContent = DB.customers.length;
+  document.getElementById('d-active').textContent    = activeP.length;
+  document.getElementById('d-unpaid').textContent    = fmt(unpaid.reduce((a,p)=>a+(p.inv||0),0));
+  document.getElementById('d-paid').textContent      = fmt(thisMonth.reduce((a,p)=>a+(p.inv||0),0));
+
+  const recent = [...DB.projects].sort((a,b)=>(b.updated||'').localeCompare(a.updated||'')).slice(0,8);
+  document.getElementById('recentProjectsBody').innerHTML = recent.map(p=>{
+    const c = getCustomer(p.cid);
+    return `<tr>
+      <td><button class="link-btn" onclick="goToProject('${p.id}')">${p.no}</button></td>
+      <td>${c.name||'—'}</td><td>${p.type||'—'}</td>
+      <td class="amount-cell">${fmt(p.est)}</td>
+      <td>${statusBadge(p.stat)}</td><td>${p.updated||'—'}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('unpaidBody').innerHTML = unpaid.map(p=>{
+    const c = getCustomer(p.cid);
+    return `<tr>
+      <td>${p.no}</td><td>${c.name||'—'}</td>
+      <td class="amount-cell" style="color:var(--red);font-weight:700;">${fmt(p.inv)}</td>
+      <td>${p.edate||'—'}</td><td>${daysSince(p.cdate)}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--sub);padding:20px;">未入金案件はありません ✓</td></tr>';
+}
+
+// ===== 顧客台帳 =====
+function renderCustomers() {
+  document.getElementById('customerBody').innerHTML = DB.customers.map(c=>{
+    const projs = DB.projects.filter(p=>p.cid===c.id);
+    const last  = projs.filter(p=>p.cdate).sort((a,b)=>b.cdate.localeCompare(a.cdate))[0];
+    return `<tr>
+      <td>${c.id}</td><td><strong>${c.name}</strong></td>
+      <td>${c.tel||'—'}</td><td>${c.addr||'—'}</td>
+      <td style="text-align:center;">${projs.length}</td>
+      <td>${last?last.cdate:'—'}</td><td>${c.note||''}</td>
+      <td>
+        <button class="action-btn" onclick="openCustomerModal('${c.id}')">編集</button>
+        <button class="action-btn danger" onclick="deleteCustomer('${c.id}')">削除</button>
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--sub);">顧客が登録されていません</td></tr>';
+}
+
+// ===== 案件一覧 =====
+function renderProjects(filterCid=null) {
+  let projs = DB.projects;
+  if(filterCid) projs = projs.filter(p=>p.cid===filterCid);
+  if(currentFilter !== 'all') projs = projs.filter(p=>p.stat===currentFilter);
+  if(searchTerm) projs = projs.filter(p=>p.no.includes(searchTerm)||getCustomer(p.cid).name?.includes(searchTerm));
+
+  document.getElementById('projectBody').innerHTML = projs.map(p=>{
+    const c = getCustomer(p.cid);
+    return `<tr>
+      <td><button class="link-btn" onclick="goToProject('${p.id}')">${p.no}</button></td>
+      <td>${c.name||'—'}</td><td>${p.type||'—'}</td><td>${p.place||'—'}</td>
+      <td class="amount-cell">${fmt(p.est)}</td>
+      <td class="amount-cell">${p.inv?fmt(p.inv):'—'}</td>
+      <td>${statusBadge(p.stat)}</td><td>${p.edate||'—'}</td>
+      <td>
+        <button class="action-btn" onclick="openProjectModal('${p.id}')">編集</button>
+        <button class="action-btn" onclick="goToLedger('${p.id}')">台帳</button>
+        <button class="action-btn danger" onclick="deleteProject('${p.id}')">削除</button>
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--sub);">案件が登録されていません</td></tr>';
+}
+
+function goToProject(pid) {
+  openProjectModal(pid);
+}
+
+function goToLedger(pid) {
+  document.querySelectorAll('[id^="view-"]').forEach(el=>el.style.display='none');
+  document.getElementById('view-ledger').style.display='block';
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  renderLedgerSelect(pid);
+}
+
+// ===== 書類管理 =====
+let docFilter = 'all';
+function filterDocs(type, btn) {
+  docFilter = type;
+  document.querySelectorAll('.doc-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderDocuments();
+}
+
+function renderDocuments() {
+  let docs = DB.documents;
+  if(docFilter !== 'all') docs = docs.filter(d=>d.type===docFilter);
+  const list = document.getElementById('docList');
+  list.innerHTML = docs.map(d=>{
+    const p = getProject(d.pid);
+    const c = getCustomer(p.cid);
+    return `<div class="doc-item">
+      <div class="doc-item-info">
+        <div class="doc-item-title">${d.type}　${d.no}</div>
+        <div class="doc-item-meta">${c.name||'—'}　｜　${p.type||'—'}　｜　${d.date}　｜　${fmt(d.amount)}</div>
+        ${d.note?`<div class="doc-item-meta" style="color:var(--sub);">${d.note}</div>`:''}
+      </div>
+      <div class="doc-item-actions">
+        <button class="action-btn" onclick="deleteDoc('${d.id}')">削除</button>
+      </div>
+    </div>`;
+  }).join('') || '<div class="empty-state"><div class="empty-icon">📄</div><p>書類が登録されていません</p></div>';
+}
+
+// ===== 工事台帳 =====
+function renderLedgerSelect(selectPid=null) {
+  const sel = document.getElementById('ledgerProjectSelect');
+  sel.innerHTML = '<option value="">案件を選択してください</option>' +
+    DB.projects.map(p=>{
+      const c = getCustomer(p.cid);
+      return `<option value="${p.id}">${p.no}　${c.name||''}</option>`;
+    }).join('');
+  if(selectPid) { sel.value = selectPid; loadLedger(); }
+}
+
+function loadLedger() {
+  const pid = document.getElementById('ledgerProjectSelect').value;
+  renderMaterial(pid); renderWorker(pid); renderPayment(pid);
+}
+
+function showLedgerTab(tab, el) {
+  document.querySelectorAll('.ledger-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.ledger-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-'+tab).classList.add('active');
+}
+
+function renderMaterial(pid) {
+  const rows = (DB.ledger.material[pid]||[]);
+  let total = 0;
+  document.getElementById('materialBody').innerHTML = rows.map((r,i)=>{
+    const amt = (r.qty||0)*(r.price||0);
+    total += amt;
+    return `<tr>
+      <td><input style="width:100%;border:none;background:transparent;font-family:'Noto Sans JP',sans-serif;font-size:12px;" value="${r.name||''}" onchange="updateLedger('material','${pid}',${i},'name',this.value)"></td>
+      <td><input type="number" style="width:60px;border:none;background:transparent;text-align:right;" value="${r.qty||''}" onchange="updateLedger('material','${pid}',${i},'qty',+this.value)"></td>
+      <td><input style="width:40px;border:none;background:transparent;text-align:center;" value="${r.unit||''}" onchange="updateLedger('material','${pid}',${i},'unit',this.value)"></td>
+      <td class="amount-cell"><input type="number" style="width:80px;border:none;background:transparent;text-align:right;" value="${r.price||''}" onchange="updateLedger('material','${pid}',${i},'price',+this.value)"></td>
+      <td class="amount-cell">${fmt(amt)}</td>
+      <td><input type="date" style="border:none;background:transparent;font-size:11px;" value="${r.date||''}" onchange="updateLedger('material','${pid}',${i},'date',this.value)"></td>
+      <td><input style="width:100%;border:none;background:transparent;font-size:12px;" value="${r.supplier||''}" onchange="updateLedger('material','${pid}',${i},'supplier',this.value)"></td>
+      <td><input style="width:100%;border:none;background:transparent;font-size:12px;" value="${r.note||''}" onchange="updateLedger('material','${pid}',${i},'note',this.value)"></td>
+      <td><button class="action-btn danger" onclick="deleteLedgerRow('material','${pid}',${i})">✕</button></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--sub);">材料を追加してください</td></tr>';
+  document.getElementById('materialTotal').textContent = fmt(total);
+}
+
+function renderWorker(pid) {
+  const rows = (DB.ledger.worker[pid]||[]);
+  let total = 0;
+  document.getElementById('workerBody').innerHTML = rows.map((r,i)=>{
+    const amt = (r.ninku||0)*(r.price||0);
+    total += amt;
+    return `<tr>
+      <td><input type="date" style="border:none;background:transparent;font-size:11px;" value="${r.date||''}" onchange="updateLedger('worker','${pid}',${i},'date',this.value)"></td>
+      <td><input style="width:80px;border:none;background:transparent;font-size:12px;" value="${r.name||''}" onchange="updateLedger('worker','${pid}',${i},'name',this.value)"></td>
+      <td><input style="width:100%;border:none;background:transparent;font-size:12px;" value="${r.work||''}" onchange="updateLedger('worker','${pid}',${i},'work',this.value)"></td>
+      <td><input type="number" step="0.5" style="width:55px;border:none;background:transparent;text-align:right;" value="${r.ninku||''}" onchange="updateLedger('worker','${pid}',${i},'ninku',+this.value)"></td>
+      <td class="amount-cell"><input type="number" style="width:80px;border:none;background:transparent;text-align:right;" value="${r.price||24000}" onchange="updateLedger('worker','${pid}',${i},'price',+this.value)"></td>
+      <td class="amount-cell">${fmt(amt)}</td>
+      <td><input style="width:100%;border:none;background:transparent;font-size:12px;" value="${r.note||''}" onchange="updateLedger('worker','${pid}',${i},'note',this.value)"></td>
+      <td><button class="action-btn danger" onclick="deleteLedgerRow('worker','${pid}',${i})">✕</button></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--sub);">作業記録を追加してください</td></tr>';
+  document.getElementById('workerTotal').textContent = fmt(total);
+}
+
+function renderPayment(pid) {
+  const rows = (DB.ledger.payment[pid]||[]);
+  let income=0, expense=0;
+  document.getElementById('paymentBody').innerHTML = rows.map((r,i)=>{
+    const isIncome = r.cat==='入金';
+    if(isIncome) income += (r.amount||0); else expense += (r.amount||0);
+    return `<tr class="${isIncome?'income-row':'expense-row'}">
+      <td><input type="date" style="border:none;background:transparent;font-size:11px;" value="${r.date||''}" onchange="updateLedger('payment','${pid}',${i},'date',this.value)"></td>
+      <td><select style="border:none;background:transparent;font-size:12px;" onchange="updateLedger('payment','${pid}',${i},'cat',this.value)">
+        ${['入金','支払','材料費','外注費','立替'].map(o=>`<option ${o===r.cat?'selected':''}>${o}</option>`).join('')}
+      </select></td>
+      <td><input style="width:100%;border:none;background:transparent;font-size:12px;" value="${r.partner||''}" onchange="updateLedger('payment','${pid}',${i},'partner',this.value)"></td>
+      <td class="amount-cell"><input type="number" style="width:90px;border:none;background:transparent;text-align:right;" value="${r.amount||''}" onchange="updateLedger('payment','${pid}',${i},'amount',+this.value)"></td>
+      <td><select style="border:none;background:transparent;font-size:12px;" onchange="updateLedger('payment','${pid}',${i},'method',this.value)">
+        ${['銀行振込','現金','小切手','クレジット'].map(o=>`<option ${o===r.method?'selected':''}>${o}</option>`).join('')}
+      </select></td>
+      <td><input type="date" style="border:none;background:transparent;font-size:11px;" value="${r.confirmed||''}" onchange="updateLedger('payment','${pid}',${i},'confirmed',this.value)"></td>
+      <td><input style="width:100%;border:none;background:transparent;font-size:12px;" value="${r.note||''}" onchange="updateLedger('payment','${pid}',${i},'note',this.value)"></td>
+      <td><button class="action-btn danger" onclick="deleteLedgerRow('payment','${pid}',${i})">✕</button></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--sub);">取引を追加してください</td></tr>';
+  const balance = income - expense;
+  document.getElementById('incomeTotal').textContent  = fmt(income);
+  document.getElementById('expenseTotal').textContent = fmt(expense);
+  document.getElementById('balanceTotal').textContent = fmt(balance);
+  document.getElementById('balanceTotal').style.color = balance>=0?'var(--green)':'var(--red)';
+}
+
+function addLedgerRow(type) {
+  const pid = document.getElementById('ledgerProjectSelect').value;
+  if(!pid) { showToast('案件を選択してください'); return; }
+  if(!DB.ledger[type][pid]) DB.ledger[type][pid]=[];
+  const defaults = {
+    material:{name:'',qty:0,unit:'',price:0,date:today(),supplier:'',note:''},
+    worker:  {date:today(),name:'',work:'',ninku:1,price:24000,note:''},
+    payment: {date:today(),cat:'入金',partner:'',amount:0,method:'銀行振込',confirmed:'',note:''}
+  };
+  DB.ledger[type][pid].push({...defaults[type]});
+  saveDB();
+  if(type==='material') renderMaterial(pid);
+  if(type==='worker')   renderWorker(pid);
+  if(type==='payment')  renderPayment(pid);
+}
+
+function updateLedger(type, pid, idx, key, val) {
+  if(!DB.ledger[type][pid]) return;
+  DB.ledger[type][pid][idx][key] = val;
+  saveDB();
+  if(type==='material') renderMaterial(pid);
+  if(type==='worker')   renderWorker(pid);
+  if(type==='payment')  renderPayment(pid);
+}
+
+function deleteLedgerRow(type, pid, idx) {
+  DB.ledger[type][pid].splice(idx,1);
+  saveDB();
+  if(type==='material') renderMaterial(pid);
+  if(type==='worker')   renderWorker(pid);
+  if(type==='payment')  renderPayment(pid);
+}
+
+// ===== 入金管理 =====
+function renderPayment() {
+  const unpaid = DB.projects.filter(p=>p.stat==='未入金');
+  const now = new Date();
+  const paid = DB.projects.filter(p=>p.stat==='入金済み'&&p.idate&&new Date(p.idate).getMonth()===now.getMonth());
+
+  document.getElementById('pm-count').textContent  = unpaid.length;
+  document.getElementById('pm-amount').textContent = fmt(unpaid.reduce((a,p)=>a+(p.inv||0),0));
+  document.getElementById('pm-paid').textContent   = fmt(paid.reduce((a,p)=>a+(p.inv||0),0));
+
+  document.getElementById('unpaidFullBody').innerHTML = unpaid.map(p=>{
+    const c = getCustomer(p.cid);
+    return `<tr>
+      <td>${p.no}</td><td>${c.name||'—'}</td><td>${p.type||'—'}</td>
+      <td class="amount-cell" style="color:var(--red);font-weight:700;">${fmt(p.inv)}</td>
+      <td>${p.edate||'—'}</td><td>${daysSince(p.cdate)}</td>
+      <td><button class="action-btn" onclick="markPaid('${p.id}')">入金済みにする</button></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--sub);">未入金案件はありません ✓</td></tr>';
+
+  const paidAll = DB.projects.filter(p=>p.stat==='入金済み'&&p.idate).sort((a,b)=>b.idate.localeCompare(a.idate)).slice(0,20);
+  document.getElementById('paidBody').innerHTML = paidAll.map(p=>{
+    const c = getCustomer(p.cid);
+    return `<tr>
+      <td>${p.no}</td><td>${c.name||'—'}</td>
+      <td class="amount-cell">${fmt(p.inv)}</td><td>${p.idate}</td>
+    </tr>`;
+  }).join('');
+}
+
+function markPaid(pid) {
+  const p = DB.projects.find(q=>q.id===pid);
+  if(!p) return;
+  p.stat = '入金済み';
+  p.idate = today();
+  p.updated = today();
+  saveDB();
+  renderPayment();
+  showToast('入金済みに更新しました');
+}
+
+// ===== モーダル操作 =====
+function openModal(id)  { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+function openCustomerModal(cid=null) {
+  document.getElementById('customerModalTitle').textContent = cid ? '顧客編集' : '顧客登録';
+  document.getElementById('c-edit-id').value = cid||'';
+  const c = cid ? getCustomer(cid) : {};
+  ['id','name','tel','email','addr','note'].forEach(k=>{
+    document.getElementById('c-'+k).value = c[k]||'';
+  });
+  if(cid) document.getElementById('c-id').disabled = true;
+  else    document.getElementById('c-id').disabled = false;
+  openModal('customerModal');
+}
+
+function saveCustomer() {
+  const editId = document.getElementById('c-edit-id').value;
+  const id   = document.getElementById('c-id').value.trim();
+  const name = document.getElementById('c-name').value.trim();
+  if(!id||!name) { showToast('顧客IDと顧客名は必須です'); return; }
+
+  if(editId) {
+    const c = DB.customers.find(x=>x.id===editId);
+    if(c) { c.name=name; c.tel=document.getElementById('c-tel').value; c.email=document.getElementById('c-email').value; c.addr=document.getElementById('c-addr').value; c.note=document.getElementById('c-note').value; }
+  } else {
+    if(DB.customers.find(c=>c.id===id)) { showToast('この顧客IDは既に使われています'); return; }
+    DB.customers.push({id, name, tel:document.getElementById('c-tel').value, email:document.getElementById('c-email').value, addr:document.getElementById('c-addr').value, note:document.getElementById('c-note').value});
+  }
+  saveDB(); closeModal('customerModal');
+  renderSidebar(); renderCustomers();
+  showToast('顧客情報を保存しました');
+}
+
+function deleteCustomer(cid) {
+  if(!confirm('この顧客を削除しますか？')) return;
+  DB.customers = DB.customers.filter(c=>c.id!==cid);
+  saveDB(); renderSidebar(); renderCustomers();
+  showToast('削除しました');
+}
+
+function openProjectModal(pid=null) {
+  document.getElementById('projectModalTitle').textContent = pid ? '案件編集' : '案件登録';
+  document.getElementById('p-edit-id').value = pid||'';
+  const p = pid ? getProject(pid) : {};
+
+  const sel = document.getElementById('p-cid');
+  sel.innerHTML = DB.customers.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+
+  const fields = ['no','type','place','edate','odate','cdate','idate','note'];
+  fields.forEach(k=>{ document.getElementById('p-'+k).value = p[k]||''; });
+  document.getElementById('p-est').value = p.est||'';
+  document.getElementById('p-inv').value = p.inv||'';
+  document.getElementById('p-cid').value = p.cid||'';
+  document.getElementById('p-stat').value = p.stat||'見積提示中';
+  openModal('projectModal');
+}
+
+function saveProject() {
+  const editId = document.getElementById('p-edit-id').value;
+  const no  = document.getElementById('p-no').value.trim();
+  const cid = document.getElementById('p-cid').value;
+  if(!no||!cid) { showToast('案件番号と顧客は必須です'); return; }
+
+  const data = {
+    no, cid, type:document.getElementById('p-type').value,
+    place:document.getElementById('p-place').value,
+    est:+document.getElementById('p-est').value||0,
+    inv:+document.getElementById('p-inv').value||0,
+    edate:document.getElementById('p-edate').value,
+    odate:document.getElementById('p-odate').value,
+    cdate:document.getElementById('p-cdate').value,
+    idate:document.getElementById('p-idate').value,
+    stat:document.getElementById('p-stat').value,
+    note:document.getElementById('p-note').value,
+    updated:today()
+  };
+
+  if(editId) {
+    const p = DB.projects.find(x=>x.id===editId);
+    if(p) Object.assign(p, data);
+  } else {
+    DB.projects.push({id:uid(), ...data});
+  }
+  saveDB(); closeModal('projectModal');
+  renderProjects(); renderDashboard(); renderSidebar();
+  showToast('案件情報を保存しました');
+}
+
+function deleteProject(pid) {
+  if(!confirm('この案件を削除しますか？')) return;
+  DB.projects = DB.projects.filter(p=>p.id!==pid);
+  saveDB(); renderProjects(); renderDashboard(); renderSidebar();
+  showToast('削除しました');
+}
+
+function openDocModal(type='見積書') {
+  document.getElementById('d-type').value = type;
+  document.getElementById('d-date').value = today();
+  document.getElementById('d-no').value = '';
+  document.getElementById('d-amount').value = '';
+  document.getElementById('d-note').value = '';
+  const sel = document.getElementById('d-pid');
+  sel.innerHTML = DB.projects.map(p=>{
+    const c = getCustomer(p.cid);
+    return `<option value="${p.id}">${p.no}　${c.name||''}</option>`;
+  }).join('');
+  openModal('docModal');
+}
+
+function saveDoc() {
+  const no   = document.getElementById('d-no').value.trim();
+  const pid  = document.getElementById('d-pid').value;
+  if(!no) { showToast('書類番号を入力してください'); return; }
+  DB.documents.push({
+    id:uid(), no, type:document.getElementById('d-type').value,
+    pid, date:document.getElementById('d-date').value,
+    amount:+document.getElementById('d-amount').value||0,
+    note:document.getElementById('d-note').value
+  });
+  saveDB(); closeModal('docModal'); renderDocuments();
+  showToast('書類を登録しました');
+}
+
+function deleteDoc(did) {
+  if(!confirm('この書類を削除しますか？')) return;
+  DB.documents = DB.documents.filter(d=>d.id!==did);
+  saveDB(); renderDocuments(); showToast('削除しました');
+}
+
+// ===== 現場ナビPRO連携 =====
+function openNaviPro() {
+  // 同じフォルダに index.html として置く想定
+  window.open('index.html', '_blank');
+}
+
+// ===== バックアップ =====
+function exportJSON() {
+  const json = JSON.stringify(DB, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `アートレイズ_バックアップ_${today()}.json`;
+  a.click();
+  showToast('バックアップを保存しました');
+}
+
+function importJSON() { document.getElementById('importFile').click(); }
+
+function handleImport(e) {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      DB = JSON.parse(ev.target.result);
+      saveDB();
+      renderSidebar(); renderDashboard();
+      showToast('データを復元しました');
+    } catch(err) { showToast('ファイルの読み込みに失敗しました'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ===== 初期化 =====
+loadDB();
+renderSidebar();
+renderDashboard();
+document.getElementById('dashDate');
+</script>
+</body>
+</html>
