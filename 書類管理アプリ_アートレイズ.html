@@ -580,6 +580,37 @@ html, body {
   display: flex;
   justify-content: flex-end;
 }
+
+/* ===== プレビューモーダル（全画面） ===== */
+#previewModal {
+  align-items: stretch !important;
+}
+#previewModal .modal {
+  border-radius: 0 !important;
+  max-height: 100vh !important;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+#previewModal .modal-head {
+  border-radius: 0 !important;
+  flex-shrink: 0;
+}
+#previewFrame {
+  flex: 1;
+  height: 0;
+  min-height: 0;
+}
+
+/* ===== AI生成バッジ ===== */
+.ai-badge {
+  font-size: 10px;
+  background: #e8f5e8;
+  color: #1a6a1a;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-weight: 700;
+}
 </style>
 </head>
 <body>
@@ -591,8 +622,11 @@ html, body {
   </div>
   <div class="header-right">
     <button class="header-btn navi" onclick="openNaviPro()">🔗 現場ナビ</button>
-    <button class="header-btn" onclick="exportJSON()">💾</button>
-    <button class="header-btn" onclick="importJSON()">📂</button>
+    <button class="header-btn" onclick="exportJSON()" title="バックアップ">💾</button>
+    <button class="header-btn" onclick="importJSON()" title="復元">📂</button>
+    <button class="header-btn" onclick="openSettingsModal()" title="設定" style="padding:0 10px;font-size:18px;">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
   </div>
 </header>
@@ -665,6 +699,14 @@ html, body {
   <!-- ===== 書類管理 ===== -->
   <div id="view-documents" style="display:none">
     <div class="page-title">📄 書類管理</div>
+
+    <!-- AI書類作成ボタン -->
+    <div style="margin-bottom:14px;">
+      <button class="btn btn-primary" style="width:100%;height:50px;font-size:15px;gap:8px;" onclick="openAiDocModal()">
+        🤖 AI書類作成（Claudeテキスト→HTML自動生成）
+      </button>
+    </div>
+
     <div class="filter-chips">
       <button class="chip active" onclick="setDocFilter('all',this)">すべて</button>
       <button class="chip" onclick="setDocFilter('見積書',this)">見積書</button>
@@ -673,9 +715,9 @@ html, body {
     </div>
     <div id="docList"></div>
     <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;">
-      <button class="btn btn-dark" style="flex:1;" onclick="openDocModal('見積書')">＋ 見積書</button>
-      <button class="btn btn-dark" style="flex:1;" onclick="openDocModal('注文書')">＋ 注文書</button>
-      <button class="btn btn-dark" style="flex:1;" onclick="openDocModal('請求書')">＋ 請求書</button>
+      <button class="btn btn-dark" style="flex:1;" onclick="openDocModal('見積書')">＋ 見積書（手動）</button>
+      <button class="btn btn-dark" style="flex:1;" onclick="openDocModal('注文書')">＋ 注文書（手動）</button>
+      <button class="btn btn-dark" style="flex:1;" onclick="openDocModal('請求書')">＋ 請求書（手動）</button>
     </div>
   </div>
 
@@ -882,6 +924,110 @@ html, body {
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- ===== 設定モーダル ===== -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>⚙️ 設定</h3>
+      <button class="modal-close" onclick="closeModal('settingsModal')">×</button>
+    </div>
+    <div class="modal-body">
+
+      <div style="font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.06em;margin-bottom:10px;">🔑 CLAUDE APIキー</div>
+      <div class="form-row">
+        <label class="form-label">APIキー（sk-ant-...）</label>
+        <input class="form-input" id="set-apikey" type="password" placeholder="sk-ant-api03-..." autocomplete="off" spellcheck="false" style="font-family:monospace;font-size:14px;">
+      </div>
+      <div style="background:#f0f4ff;border:1px solid #c8d8f0;border-radius:8px;padding:12px;margin-bottom:20px;font-size:12px;color:#2a4a8a;line-height:1.9;">
+        ・<a href="https://console.anthropic.com/" target="_blank" style="color:var(--accent);">console.anthropic.com</a> で取得できます<br>
+        ・このブラウザ内にのみ保存されます<br>
+        ・設定するとAI書類作成が利用できます
+      </div>
+
+      <div style="font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.06em;margin-bottom:10px;">💾 データ管理</div>
+      <div style="display:flex;gap:10px;margin-bottom:20px;">
+        <button class="btn btn-dark" style="flex:1;height:44px;" onclick="exportJSON();closeModal('settingsModal');">💾 バックアップ</button>
+        <button class="btn btn-dark" style="flex:1;height:44px;" onclick="closeModal('settingsModal');importJSON();">📂 復元</button>
+      </div>
+
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('settingsModal')">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveSettings()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== AI書類作成モーダル ===== -->
+<div class="modal-overlay" id="aiDocModal">
+  <div class="modal" style="max-height:96vh;">
+    <div class="modal-head">
+      <h3>🤖 AI書類作成</h3>
+      <button class="modal-close" onclick="closeModal('aiDocModal')">×</button>
+    </div>
+    <div class="modal-body" style="padding-bottom:0;">
+
+      <!-- ステップ1：書類種別と関連案件 -->
+      <div id="aiStep1">
+        <div style="font-size:13px;font-weight:700;color:var(--mid);margin-bottom:12px;">STEP 1 ── 書類の種別と案件を選択</div>
+        <div class="form-row-2" style="margin-bottom:12px;">
+          <div class="form-row">
+            <label class="form-label">書類種別 <span style="color:red">*</span></label>
+            <select class="form-select" id="ai-doc-type">
+              <option value="見積書">見積書</option>
+              <option value="注文書">注文書</option>
+              <option value="請求書">請求書</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label class="form-label">関連案件</label>
+            <select class="form-select" id="ai-doc-pid">
+              <option value="">選択しない</option>
+            </select>
+          </div>
+        </div>
+        <div style="font-size:13px;font-weight:700;color:var(--mid);margin-bottom:8px;">STEP 2 ── Claudeテキストを貼り付け</div>
+        <div style="background:#f0f4ff;border:1px solid #c0cce8;border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:#2a4a8a;line-height:1.8;">
+          Claudeに現場情報を渡して生成したテキストをそのまま貼り付けてください。<br>
+          「=== 見積書 ===」から始まるフォーマットに対応しています。
+        </div>
+        <div class="form-row">
+          <label class="form-label">Claudeテキスト出力 <span style="color:red">*</span></label>
+          <textarea class="form-textarea" id="ai-doc-text" placeholder="=== 見積書 ===&#10;顧客名：山田 太郎&#10;案件番号：AR-2026-0001&#10;..." style="min-height:200px;font-size:13px;font-family:monospace;line-height:1.7;"></textarea>
+        </div>
+      </div>
+
+      <!-- 生成中インジケーター -->
+      <div id="aiGenerating" style="display:none;text-align:center;padding:40px 20px;">
+        <div style="font-size:36px;margin-bottom:16px;">⚙️</div>
+        <div style="font-size:15px;font-weight:700;color:var(--mid);">AIが書類を生成中...</div>
+        <div style="font-size:13px;color:var(--sub);margin-top:8px;">しばらくお待ちください</div>
+      </div>
+
+    </div>
+    <div class="modal-foot" id="aiDocFoot">
+      <button class="btn btn-ghost" onclick="closeModal('aiDocModal')">キャンセル</button>
+      <button class="btn btn-primary" onclick="generateAiDoc()">🤖 書類を生成</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== プレビューモーダル ===== -->
+<div class="modal-overlay" id="previewModal" style="align-items:center;">
+  <div class="modal" style="border-radius:12px;max-height:96vh;max-width:100%;width:100%;">
+    <div class="modal-head" style="border-radius:12px 12px 0 0;">
+      <h3 id="previewModalTitle">📄 書類プレビュー</h3>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn-sm primary" onclick="printCurrentDoc()" style="height:36px;">🖨 印刷・PDF保存</button>
+        <button class="modal-close" onclick="closeModal('previewModal')">×</button>
+      </div>
+    </div>
+    <div style="padding:0;overflow:hidden;flex:1;">
+      <iframe id="previewFrame" style="width:100%;height:calc(96vh - 60px);border:none;display:block;"></iframe>
+    </div>
+  </div>
+</div>
 
 <script>
 // ===== データ管理 =====
@@ -1161,22 +1307,30 @@ function renderDocuments() {
   if(docFilter!=='all') docs = docs.filter(d=>d.type===docFilter);
   const el = document.getElementById('docList');
   if(docs.length===0) {
-    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📄</div><div class="empty-text">書類が登録されていません</div></div>';
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📄</div><div class="empty-text">書類が登録されていません<br><span style="font-size:12px;margin-top:6px;display:block;">「AI書類作成」ボタンから書類を生成できます</span></div></div>';
     return;
   }
   el.innerHTML = docs.map(d=>{
     const p = getProject(d.pid);
     const c = getCustomer(p.cid);
+    const hasHtml = !!d.html;
     return `<div class="doc-card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
-        <div>
-          <span class="doc-type-badge dt-${d.type}">${d.type}</span>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span class="doc-type-badge dt-${d.type}">${d.type}</span>
+            ${hasHtml?'<span style="font-size:10px;background:#e8f5e8;color:#1a6a1a;padding:2px 8px;border-radius:8px;font-weight:700;">AI生成済み</span>':''}
+          </div>
           <div class="doc-card-title" style="margin-top:6px;">${d.no}</div>
           <div class="doc-card-meta">${c.name||'—'}　/　${p.type||'—'}</div>
           <div class="doc-card-meta">発行日：${d.date}　　${fmt(d.amount)}</div>
           ${d.note?`<div class="doc-card-meta" style="color:var(--accent);">📝 ${d.note}</div>`:''}
         </div>
-        <button class="btn-danger" onclick="deleteDoc('${d.id}')" style="flex-shrink:0;">削除</button>
+        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+          ${hasHtml?`<button class="btn-ghost" onclick="previewDoc('${d.id}')" style="height:36px;padding:0 12px;font-size:13px;">👁 プレビュー</button>`:''}
+          ${hasHtml?`<button class="btn-ghost" onclick="printDoc('${d.id}')" style="height:36px;padding:0 12px;font-size:13px;">🖨 印刷</button>`:''}
+          <button class="btn-danger" onclick="deleteDoc('${d.id}')">削除</button>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -1551,6 +1705,309 @@ function handleImport(e) {
   };
   reader.readAsText(file);
   e.target.value = '';
+}
+
+// ===== APIキー管理 =====
+function getApiKey() { return localStorage.getItem('artRaiseApiKey')||''; }
+
+function openSettingsModal() {
+  document.getElementById('set-apikey').value = getApiKey();
+  openModal('settingsModal');
+}
+
+function saveSettings() {
+  const k = document.getElementById('set-apikey').value.trim();
+  if(k && !k.startsWith('sk-ant')) { showToast('APIキーはsk-ant...で始まります'); return; }
+  if(k) localStorage.setItem('artRaiseApiKey', k);
+  else localStorage.removeItem('artRaiseApiKey');
+  closeModal('settingsModal');
+  showToast(k ? '設定を保存しました ✓ AI機能が有効です' : '設定を保存しました（APIキー未設定）');
+}
+
+// ===== AI書類作成 =====
+function openAiDocModal(skipKeyCheck=false) {
+  if(!getApiKey()) {
+    openSettingsModal();
+    showToast('先にAPIキーを設定してください');
+    return;
+  }
+  // 案件セレクト更新
+  const sel = document.getElementById('ai-doc-pid');
+  sel.innerHTML = '<option value="">選択しない</option>' +
+    DB.projects.map(p=>{
+      const c = getCustomer(p.cid);
+      return `<option value="${p.id}">${p.no}　${c.name||''}</option>`;
+    }).join('');
+  document.getElementById('ai-doc-text').value = '';
+  document.getElementById('aiStep1').style.display = 'block';
+  document.getElementById('aiGenerating').style.display = 'none';
+  document.getElementById('aiDocFoot').style.display = 'flex';
+  openModal('aiDocModal');
+}
+
+async function generateAiDoc() {
+  const apiKey  = getApiKey();
+  if(!apiKey) { openSettingsModal(); showToast('先にAPIキーを設定してください'); return; }
+  const docType = document.getElementById('ai-doc-type').value;
+  const pid     = document.getElementById('ai-doc-pid').value;
+  const rawText = document.getElementById('ai-doc-text').value.trim();
+  if(!rawText) { showToast('Claudeテキストを貼り付けてください'); return; }
+
+  // UI：生成中へ
+  document.getElementById('aiStep1').style.display = 'none';
+  document.getElementById('aiGenerating').style.display = 'block';
+  document.getElementById('aiDocFoot').style.display = 'none';
+
+  try {
+    const html = await callAiDocGen(apiKey, docType, rawText);
+    // DBに保存
+    const parsed = parseDocText(rawText, docType);
+    const docNo  = parsed.docNo || autoDocNo(docType);
+    const amount = parsed.taxIncTotal || 0;
+    const date   = parsed.issueDate   || today();
+
+    DB.documents.push({
+      id: uid(), no: docNo, type: docType,
+      pid: pid||'', date, amount,
+      html, note: 'AI生成'
+    });
+    saveDB();
+    closeModal('aiDocModal');
+    renderDocuments();
+    showToast(`${docType}を生成・保存しました`);
+
+    // 生成後すぐプレビュー表示
+    const newDoc = DB.documents[DB.documents.length-1];
+    previewDoc(newDoc.id);
+
+  } catch(err) {
+    console.error(err);
+    document.getElementById('aiStep1').style.display = 'block';
+    document.getElementById('aiGenerating').style.display = 'none';
+    document.getElementById('aiDocFoot').style.display = 'flex';
+    showToast('生成に失敗しました：' + (err.message||'不明なエラー'));
+  }
+}
+
+function autoDocNo(type) {
+  const prefix = type==='見積書'?'EST':type==='注文書'?'ORD':'INV';
+  return `AR-${prefix}-${new Date().getFullYear()}-${String(DB.documents.length+1).padStart(4,'0')}`;
+}
+
+// テキストから基本情報を抽出
+function parseDocText(text, docType) {
+  const get = (pattern) => { const m = text.match(pattern); return m ? m[1].trim() : ''; };
+  return {
+    clientName:   get(/顧客名[：:]\s*(.+)/),
+    projectNo:    get(/案件番号[：:]\s*(.+)/),
+    projectName:  get(/工事件名[：:]\s*(.+)/),
+    sitePlace:    get(/施工場所[：:]\s*(.+)/),
+    issueDate:    get(/発行日[：:]\s*(.+)/),
+    expireDate:   get(/有効期限[：:]\s*(.+)/),
+    docNo:        get(/書類番号[：:]\s*(.+)/),
+    recipientName:get(/宛先[：:]\s*(.+)/),
+    workerName:   get(/職人名[：:]\s*(.+)/),
+    taxIncTotal:  (() => {
+      const m = text.match(/税込合計[：:]\s*([0-9,]+)/);
+      return m ? parseInt(m[1].replace(/,/g,'')) : 0;
+    })()
+  };
+}
+
+// Claude API呼び出し → HTML生成
+async function callAiDocGen(apiKey, docType, rawText) {
+  const systemPrompt = buildSystemPrompt(docType);
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 8000,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: `以下のテキストから${docType}のHTMLを生成してください：\n\n${rawText}` }]
+    })
+  });
+  if(!res.ok) {
+    const err = await res.json().catch(()=>({}));
+    throw new Error(err.error?.message || `HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  const html = data.content.map(b=>b.text||'').join('');
+  // コードブロックを取り除く
+  return html.replace(/^```html?\s*/i,'').replace(/```\s*$/,'').trim();
+}
+
+// 書類種別ごとのシステムプロンプト
+function buildSystemPrompt(docType) {
+  const COMMON_CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Shippori+Mincho:wght@400;600;700&display=swap');
+:root{--text:#111111;--text-sub:#444444;--white:#ffffff;--band:#555555;--band-dark:#444444;--band-mid:#666666;--subtotal-bg:#e8e8e8;--even:#f4f4f4;--border:#bbbbbb;--border-dark:#888888;--light:#f8f8f8;}
+@page{margin:0;size:A4;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+body{font-family:'Noto Sans JP',sans-serif;background:#e0e0e0;color:var(--text);font-size:14px;line-height:1.65;}
+.page{width:210mm;min-height:297mm;margin:0 auto;background:var(--white);padding:13mm 15mm;page-break-after:always;}
+.page:last-child{page-break-after:auto;}
+@media screen{.page{margin-bottom:24px;box-shadow:0 2px 16px rgba(0,0,0,.18);}}
+@media print{body{background:#fff;}.page{margin:0;padding:11mm 13mm;box-shadow:none;}}
+.header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid var(--text);padding-bottom:10px;margin-bottom:14px;}
+.company-name{font-family:'Shippori Mincho',serif;font-size:20px;font-weight:700;letter-spacing:.06em;}
+.co-prefix{font-size:15px;font-weight:400;margin-right:2px;}
+.company-info{font-size:11.5px;color:var(--text-sub);margin-top:5px;line-height:1.9;}
+.doc-title{font-family:'Shippori Mincho',serif;font-size:28px;font-weight:700;letter-spacing:.18em;text-align:right;}
+.doc-meta{font-size:11.5px;color:var(--text-sub);text-align:right;margin-top:6px;line-height:2;}
+.amount-box{background:var(--band-dark)!important;color:var(--white)!important;padding:12px 22px;border-radius:3px;display:flex;justify-content:space-between;align-items:center;gap:20px;}
+.amount-box .a-label{font-size:12px;color:#e0e0e0!important;white-space:nowrap;}
+.amount-box .a-value{font-family:'Shippori Mincho',serif;font-size:26px;font-weight:700;color:var(--white)!important;}
+.project-band{background:var(--band)!important;border-left:5px solid var(--text);padding:8px 14px;margin-bottom:16px;font-size:12.5px;color:var(--white)!important;display:flex;flex-wrap:wrap;gap:4px 28px;}
+.band-label{color:#ddd!important;margin-right:4px;}
+.section-title{font-family:'Shippori Mincho',serif;font-size:14px;font-weight:600;border-bottom:2px solid var(--text);padding-bottom:4px;margin-bottom:10px;letter-spacing:.08em;}
+table{width:100%;border-collapse:collapse;margin-bottom:8px;border:1px solid var(--border-dark);}
+thead th{background:var(--band)!important;color:var(--white)!important;padding:9px 12px;font-weight:700;font-size:12.5px;border-right:1px solid var(--band-mid);}
+tbody tr{border-bottom:1px solid var(--border);}
+tbody tr:nth-child(even){background:var(--even)!important;}
+tbody td{padding:9px 12px;vertical-align:middle;border-right:1px solid var(--border);}
+tbody td:not(:first-child){text-align:right;}
+.totals-wrap{display:flex;justify-content:flex-end;margin-top:14px;margin-bottom:20px;}
+.totals-table{width:320px;border-collapse:collapse;font-size:13px;border:1px solid var(--border-dark);}
+.totals-table td{padding:7px 14px;border-bottom:1px solid var(--border);}
+.totals-table td:last-child{text-align:right;}
+.t-final{background:var(--band-dark)!important;}
+.t-final td{padding:11px 14px;font-family:'Shippori Mincho',serif;font-size:15px;font-weight:700;color:var(--white)!important;border-bottom:none!important;}
+.koumoku-row td{background:var(--band-mid)!important;color:var(--white)!important;font-weight:700;font-size:13px;padding:8px 10px!important;border-right:1px solid var(--band)!important;}
+.subtotal-row td{background:var(--subtotal-bg)!important;font-weight:700;font-size:13px;color:var(--text)!important;border-top:1.5px solid var(--border-dark)!important;}
+.remarks{border:1px solid var(--border-dark);border-radius:3px;padding:10px 14px;margin-bottom:18px;background:var(--light);}
+.remarks-title{font-size:12.5px;font-weight:700;margin-bottom:5px;}
+.remarks ul{list-style:none;font-size:12px;color:var(--text-sub);line-height:2.1;}
+.remarks ul li::before{content:"・";}
+.footer{border-top:1px solid var(--border-dark);padding-top:8px;display:flex;justify-content:space-between;font-size:11px;color:var(--text-sub);}
+.conditions{border:1px solid var(--border);border-radius:3px;padding:10px 14px;background:var(--light);font-size:12px;color:var(--text-sub);margin-bottom:18px;line-height:2;}
+.bank-info{border:1px solid var(--border-dark);border-radius:3px;padding:10px 14px;background:var(--light);font-size:12px;margin-bottom:18px;line-height:2;}
+`;
+
+  if(docType==='見積書') return `あなたは建設業の書類作成AIです。入力されたテキストから御見積書のHTMLを生成してください。
+
+## 出力ルール
+- 完全なHTMLファイル（<!DOCTYPE html>から</html>まで）を出力
+- コードブロック（\`\`\`）なし、説明なし、HTMLのみ出力
+- 2枚構成（1枚目：工事項目一覧、2枚目：内訳明細書）
+
+## CSS（必ずこのまま使用）
+<style>${COMMON_CSS}
+.summary-box{background:var(--band)!important;color:var(--white)!important;padding:12px 22px;border-radius:3px;text-align:right;}
+.summary-box .s-label{font-size:11px;color:#e0e0e0!important;}
+.summary-box .total-amount{font-family:'Shippori Mincho',serif;font-size:28px;font-weight:700;color:var(--white)!important;margin-top:2px;}
+.summary-box .tax-note{font-size:11px;color:#e0e0e0!important;margin-top:3px;}
+.client-name{font-family:'Shippori Mincho',serif;font-size:23px;font-weight:600;border-bottom:2px solid var(--text);padding-bottom:4px;padding-right:50px;min-width:200px;}
+.site-name{font-size:12px;color:var(--text-sub);margin-top:6px;}
+.info-section{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px;}
+.page-badge{float:right;font-family:'Noto Sans JP',sans-serif;font-size:11px;font-weight:400;color:var(--text-sub);margin-top:2px;}
+</style>
+
+## 会社情報（固定）
+- 社名表示：<div class="company-name"><span class="co-prefix">株式会社</span>アート・レイズ</div>
+- 住所：〒874-0829　大分県別府市上原町13番25号
+- TEL：0977-21-0603　担当：亀井
+
+## 1枚目の構成
+1. ヘッダー（社名＋住所TEL担当 ／ 「御 見 積 書」タイトル＋見積番号・発行日・有効期限）
+2. 顧客名（〇〇様）＋御見積金額ボックス（summary-boxクラス・グレー帯）
+3. 工事帯（project-band：工事件名・施工場所）
+4. 工事項目テーブル（工事種別・数量・単位・金額・備考）
+5. 合計ブロック（小計→諸経費15%→税抜合計→消費税10%→税込合計）
+6. 備考欄
+7. フッター
+
+## 2枚目の構成
+1. ヘッダー（社名のみ ／ 「内 訳 明 細 書」タイトル）
+2. 内訳テーブル（工事種別見出しkoumorku-row→明細行→subtotal-rowの繰り返し）
+3. 工事費合計テーブル（各小計→工事費合計）
+4. フッター
+
+各工事種別は【１．外壁塗装工事】のようなブロックで区切られています。koumoku-rowで見出し行を作り、明細行を続け、最後にsubtotal-rowで小計を表示してください。`;
+
+  if(docType==='注文書') return `あなたは建設業の書類作成AIです。入力されたテキストから注文書のHTMLを生成してください。
+
+## 出力ルール
+- 完全なHTMLファイル（<!DOCTYPE html>から</html>まで）を出力
+- コードブロック（\`\`\`）なし、説明なし、HTMLのみ出力
+- 1枚構成
+
+## CSS（必ずこのまま使用）
+<style>${COMMON_CSS}</style>
+
+## 会社情報（固定）
+- 発注者：<div class="company-name"><span class="co-prefix">株式会社</span>アート・レイズ</div>
+- 住所：〒874-0829　大分県別府市上原町13番25号
+- TEL：0977-21-0603
+
+## 構成
+1. ヘッダー（社名＋住所TEL ／ 「注 文 書」タイトル＋書類番号・発行日）
+2. 宛先（職人名〇〇殿）
+3. 発注金額ボックス（amount-boxクラス・#444帯・横長・左にラベル右に金額）
+4. 工事帯（project-band：工事件名・施工場所・工期）
+5. 発注明細テーブル（工事内容・数量・単位・単価・金額）
+6. 合計ブロック（小計→消費税10%→税込合計）
+7. 支払条件（月末締め・翌月末払い・銀行振込）
+8. フッター`;
+
+  // 請求書
+  return `あなたは建設業の書類作成AIです。入力されたテキストから請求書のHTMLを生成してください。
+
+## 出力ルール
+- 完全なHTMLファイル（<!DOCTYPE html>から</html>まで）を出力
+- コードブロック（\`\`\`）なし、説明なし、HTMLのみ出力
+- 1枚構成
+
+## CSS（必ずこのまま使用）
+<style>${COMMON_CSS}</style>
+
+## 会社情報（固定）
+- 社名：<div class="company-name"><span class="co-prefix">株式会社</span>アート・レイズ</div>
+- 住所：〒874-0829　大分県別府市上原町13番25号
+- TEL：0977-21-0603
+- 担当者表記なし
+
+## 構成
+1. ヘッダー（「御 請 求 書」タイトル＋書類番号・発行日 ／ 社名＋住所TEL）
+2. 宛先（顧客名〇〇様）
+3. 請求金額ボックス（amount-boxクラス・#444帯・横長・左に「御請求金額（税込）」右に金額）
+4. 工事帯（project-band：工事件名・施工場所）
+5. 請求明細テーブル（列名「工事件名」・工事内容・数量・単位・金額）
+6. 合計ブロック（小計→消費税10%→税込合計）
+7. 振込先情報（bank-infoクラス・口座情報の欄を空白で用意）
+8. フッター`;
+}
+
+// ===== プレビュー・印刷 =====
+let currentPreviewDocId = null;
+
+function previewDoc(did) {
+  const d = DB.documents.find(x=>x.id===did);
+  if(!d||!d.html) { showToast('プレビューできる書類がありません'); return; }
+  currentPreviewDocId = did;
+  document.getElementById('previewModalTitle').textContent = `📄 ${d.type}　${d.no}`;
+  const frame = document.getElementById('previewFrame');
+  frame.srcdoc = d.html;
+  openModal('previewModal');
+}
+
+function printCurrentDoc() {
+  if(!currentPreviewDocId) return;
+  const d = DB.documents.find(x=>x.id===currentPreviewDocId);
+  if(!d||!d.html) return;
+  const win = window.open('','_blank');
+  win.document.write(d.html);
+  win.document.close();
+  win.onload = ()=>{ win.print(); };
+}
+
+function printDoc(did) {
+  const d = DB.documents.find(x=>x.id===did);
+  if(!d||!d.html) { showToast('HTMLデータがありません'); return; }
+  const win = window.open('','_blank');
+  win.document.write(d.html);
+  win.document.close();
+  win.onload = ()=>{ win.print(); };
 }
 
 // ===== 初期化 =====
