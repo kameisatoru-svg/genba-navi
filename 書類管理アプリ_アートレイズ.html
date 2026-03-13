@@ -1794,7 +1794,7 @@ function handleImport(e) {
 }
 
 // ===== APIキー管理 =====
-function getApiKey() { return localStorage.getItem('artRaiseApiKey')||''; }
+function getApiKey() { return localStorage.getItem('genba_api_key')||''; }
 
 function openSettingsModal() {
   document.getElementById('set-apikey').value = getApiKey();
@@ -1804,8 +1804,8 @@ function openSettingsModal() {
 function saveSettings() {
   const k = document.getElementById('set-apikey').value.trim();
   if(k && !k.startsWith('sk-ant')) { showToast('APIキーはsk-ant...で始まります'); return; }
-  if(k) localStorage.setItem('artRaiseApiKey', k);
-  else localStorage.removeItem('artRaiseApiKey');
+  if(k) localStorage.setItem('genba_api_key', k);
+  else localStorage.removeItem('genba_api_key');
   closeModal('settingsModal');
   showToast(k ? '設定を保存しました ✓ AI機能が有効です' : '設定を保存しました（APIキー未設定）');
 }
