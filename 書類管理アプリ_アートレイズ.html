@@ -650,7 +650,8 @@ html, body {
   justify-content: flex-end;
 }
 
-/* ===== プレビューモーダル（全画面） ===== */
+/* ===== スピンアニメーション ===== */
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 #previewModal {
   align-items: stretch !important;
 }
@@ -1054,9 +1055,14 @@ html, body {
     </div>
     <div class="modal-body" style="padding-bottom:0;">
 
-      <!-- ステップ1：書類種別と関連案件 -->
-      <div id="aiStep1">
-        <div style="font-size:13px;font-weight:700;color:var(--mid);margin-bottom:12px;">STEP 1 ── 書類の種別と案件を選択</div>
+      <!-- モード切替タブ -->
+      <div id="aiModeArea">
+        <div style="display:flex;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;">
+          <button id="tabText" onclick="switchAiMode('text')" style="flex:1;padding:10px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;">📝 テキストから</button>
+          <button id="tabPhoto" onclick="switchAiMode('photo')" style="flex:1;padding:10px;border:none;background:var(--white);color:var(--mid);font-size:13px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;border-left:1px solid var(--border);">📷 写真・メモから</button>
+        </div>
+
+        <!-- 共通：書類種別・案件選択 -->
         <div class="form-row-2" style="margin-bottom:12px;">
           <div class="form-row">
             <label class="form-label">書類種別 <span style="color:red">*</span></label>
@@ -1073,28 +1079,61 @@ html, body {
             </select>
           </div>
         </div>
-        <div style="font-size:13px;font-weight:700;color:var(--mid);margin-bottom:8px;">STEP 2 ── Claudeテキストを貼り付け</div>
-        <div style="background:#f0f4ff;border:1px solid #c0cce8;border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:#2a4a8a;line-height:1.8;">
-          Claudeに現場情報を渡して生成したテキストをそのまま貼り付けてください。<br>
-          「=== 見積書 ===」から始まるフォーマットに対応しています。
+
+        <!-- テキストモード -->
+        <div id="aiModeText">
+          <div style="background:#f0f4ff;border:1px solid #c0cce8;border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:#2a4a8a;line-height:1.8;">
+            Claudeに現場情報を渡して生成したテキストをそのまま貼り付けてください。<br>「=== 見積書 ===」から始まるフォーマットに対応しています。
+          </div>
+          <div class="form-row">
+            <label class="form-label">Claudeテキスト出力 <span style="color:red">*</span></label>
+            <textarea class="form-textarea" id="ai-doc-text" placeholder="=== 見積書 ===&#10;顧客名：山田 太郎&#10;案件番号：AR-2026-0001&#10;..." style="min-height:180px;font-size:13px;font-family:monospace;line-height:1.7;"></textarea>
+          </div>
         </div>
-        <div class="form-row">
-          <label class="form-label">Claudeテキスト出力 <span style="color:red">*</span></label>
-          <textarea class="form-textarea" id="ai-doc-text" placeholder="=== 見積書 ===&#10;顧客名：山田 太郎&#10;案件番号：AR-2026-0001&#10;..." style="min-height:200px;font-size:13px;font-family:monospace;line-height:1.7;"></textarea>
+
+        <!-- 写真・メモモード -->
+        <div id="aiModePhoto" style="display:none;">
+          <div style="background:#f0fff4;border:1px solid #a0d8b0;border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:#1a5a2a;line-height:1.8;">
+            現場写真や手書きメモの写真を選択してください。AIが内容を読み取り、単価マスターを適用して見積テキストを自動生成します。
+          </div>
+          <div class="form-row">
+            <label class="form-label">現場写真・メモ（複数選択可）</label>
+            <div id="photoDropArea" style="border:2px dashed var(--border);border-radius:8px;padding:24px;text-align:center;cursor:pointer;background:var(--light);" onclick="document.getElementById('photoInput').click()">
+              <div style="font-size:32px;margin-bottom:8px;">📷</div>
+              <div style="font-size:14px;color:var(--mid);font-weight:700;">タップして写真を選択</div>
+              <div style="font-size:12px;color:var(--sub);margin-top:4px;">JPG・PNG・HEIC対応</div>
+            </div>
+            <input type="file" id="photoInput" accept="image/*" multiple style="display:none" onchange="handlePhotoSelect(event)">
+            <div id="photoPreviewList" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;"></div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">補足メモ（任意）</label>
+            <textarea class="form-textarea" id="ai-doc-memo" placeholder="例：リビング壁・天井クロス張替え。床はCF。築20年。顧客：山田様　別府市上原町" style="min-height:80px;font-size:14px;"></textarea>
+          </div>
+          <div class="form-row">
+            <label class="form-label">顧客名</label>
+            <input class="form-input" id="ai-doc-client" placeholder="山田 太郎">
+          </div>
         </div>
       </div>
 
       <!-- 生成中インジケーター -->
       <div id="aiGenerating" style="display:none;text-align:center;padding:40px 20px;">
-        <div style="font-size:36px;margin-bottom:16px;">⚙️</div>
-        <div style="font-size:15px;font-weight:700;color:var(--mid);">AIが書類を生成中...</div>
+        <div style="font-size:36px;margin-bottom:16px;animation:spin 1.5s linear infinite;display:inline-block;">⚙️</div>
+        <div style="font-size:15px;font-weight:700;color:var(--mid);" id="aiGenMsg">AIが書類を生成中...</div>
         <div style="font-size:13px;color:var(--sub);margin-top:8px;">しばらくお待ちください</div>
+      </div>
+
+      <!-- 生成テキスト確認（写真モード中間ステップ） -->
+      <div id="aiTextConfirm" style="display:none;">
+        <div style="font-size:13px;font-weight:700;color:var(--mid);margin-bottom:8px;">✅ 見積テキストが生成されました　─ 確認・修正してから書類を生成</div>
+        <textarea class="form-textarea" id="ai-generated-text" style="min-height:200px;font-size:12px;font-family:monospace;line-height:1.7;"></textarea>
       </div>
 
     </div>
     <div class="modal-foot" id="aiDocFoot">
       <button class="btn btn-ghost" onclick="closeModal('aiDocModal')">キャンセル</button>
-      <button class="btn btn-primary" onclick="generateAiDoc()">🤖 書類を生成</button>
+      <button class="btn btn-primary" id="aiDocBtn" onclick="generateAiDoc()">🤖 書類を生成</button>
     </div>
   </div>
 </div>
@@ -1105,12 +1144,38 @@ html, body {
     <div class="modal-head" style="border-radius:12px 12px 0 0;">
       <h3 id="previewModalTitle">📄 書類プレビュー</h3>
       <div style="display:flex;gap:8px;align-items:center;">
-        <button class="btn-sm primary" onclick="printCurrentDoc()" style="height:36px;">🖨 印刷・PDF保存</button>
+        <button class="btn-sm" onclick="aiCheckDoc()" style="height:36px;background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);">🔍 AIチェック</button>
+        <button class="btn-sm primary" onclick="printCurrentDoc()" style="height:36px;">🖨 印刷</button>
         <button class="modal-close" onclick="closeModal('previewModal')">×</button>
       </div>
     </div>
+    <!-- AIチェック結果パネル -->
+    <div id="aiCheckPanel" style="display:none;background:#fffbe8;border-bottom:2px solid #f0d060;padding:14px 16px;max-height:220px;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div style="font-size:13px;font-weight:700;color:#7a5a00;">🔍 AIチェック結果</div>
+        <button onclick="document.getElementById('aiCheckPanel').style.display='none'" style="background:none;border:none;font-size:18px;cursor:pointer;color:#999;padding:0 4px;">×</button>
+      </div>
+      <div id="aiCheckResult" style="font-size:13px;color:#333;line-height:1.9;"></div>
+    </div>
     <div style="padding:0;overflow:hidden;flex:1;">
       <iframe id="previewFrame" style="width:100%;height:calc(96vh - 60px);border:none;display:block;"></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- ===== AI提案モーダル ===== -->
+<div class="modal-overlay" id="aiSuggestModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>🤖 AI案件分析</h3>
+      <button class="modal-close" onclick="closeModal('aiSuggestModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="aiSuggestContent" style="min-height:100px;"></div>
+    </div>
+    <div class="modal-foot" id="aiSuggestFoot" style="display:none;">
+      <button class="btn btn-ghost" onclick="closeModal('aiSuggestModal')">閉じる</button>
+      <button class="btn btn-primary" id="aiSuggestApplyBtn" onclick="applyAiSuggest()">✅ 適用する</button>
     </div>
   </div>
 </div>
@@ -1366,6 +1431,7 @@ function renderProjects() {
       <div class="item-card-actions">
         <button class="btn-ghost" onclick="openProjectModal('${p.id}')">✏️ 編集</button>
         <button class="btn-ghost" onclick="goToLedger('${p.id}')">📒 台帳</button>
+        <button class="btn-ghost" style="color:var(--accent);border-color:var(--accent);" onclick="openAiSuggest('${p.id}')">🤖 AI提案</button>
         <button class="btn-danger" onclick="deleteProject('${p.id}')">削除</button>
       </div>
     </div>`;
@@ -1810,70 +1876,374 @@ function saveSettings() {
   showToast(k ? '設定を保存しました ✓ AI機能が有効です' : '設定を保存しました（APIキー未設定）');
 }
 
+// ===== AI書類作成：モード切替 =====
+let aiCurrentMode = 'text';
+let aiSelectedPhotos = []; // {base64, mediaType, name}
+
+function switchAiMode(mode) {
+  aiCurrentMode = mode;
+  const isText = mode === 'text';
+  document.getElementById('aiModeText').style.display  = isText ? 'block' : 'none';
+  document.getElementById('aiModePhoto').style.display = isText ? 'none'  : 'block';
+  document.getElementById('tabText').style.background  = isText ? 'var(--accent)' : 'var(--white)';
+  document.getElementById('tabText').style.color       = isText ? '#fff' : 'var(--mid)';
+  document.getElementById('tabPhoto').style.background = isText ? 'var(--white)' : 'var(--accent)';
+  document.getElementById('tabPhoto').style.color      = isText ? 'var(--mid)' : '#fff';
+  document.getElementById('aiDocBtn').textContent      = isText ? '🤖 書類を生成' : '📷 見積テキストを生成';
+  document.getElementById('aiTextConfirm').style.display = 'none';
+}
+
+function handlePhotoSelect(e) {
+  const files = Array.from(e.target.files);
+  aiSelectedPhotos = [];
+  const list = document.getElementById('photoPreviewList');
+  list.innerHTML = '';
+  let loaded = 0;
+  files.forEach((file, i) => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const b64 = ev.target.result.split(',')[1];
+      const mtype = file.type || 'image/jpeg';
+      aiSelectedPhotos.push({ base64: b64, mediaType: mtype, name: file.name });
+      // サムネイル表示
+      const img = document.createElement('img');
+      img.src = ev.target.result;
+      img.style.cssText = 'width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid var(--border);';
+      list.appendChild(img);
+      loaded++;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 // ===== AI書類作成 =====
-function openAiDocModal(skipKeyCheck=false) {
-  if(!getApiKey()) {
-    openSettingsModal();
-    showToast('先にAPIキーを設定してください');
-    return;
-  }
-  // 案件セレクト更新
+function openAiDocModal() {
+  if(!getApiKey()) { openSettingsModal(); showToast('先にAPIキーを設定してください'); return; }
   const sel = document.getElementById('ai-doc-pid');
   sel.innerHTML = '<option value="">選択しない</option>' +
-    DB.projects.map(p=>{
-      const c = getCustomer(p.cid);
-      return `<option value="${p.id}">${p.no}　${c.name||''}</option>`;
-    }).join('');
+    DB.projects.map(p=>{ const c=getCustomer(p.cid); return `<option value="${p.id}">${p.no}　${c.name||''}</option>`; }).join('');
   document.getElementById('ai-doc-text').value = '';
-  document.getElementById('aiStep1').style.display = 'block';
+  document.getElementById('ai-doc-memo').value = '';
+  document.getElementById('ai-doc-client').value = '';
+  document.getElementById('photoPreviewList').innerHTML = '';
+  aiSelectedPhotos = [];
+  document.getElementById('aiModeArea').style.display = 'block';
   document.getElementById('aiGenerating').style.display = 'none';
+  document.getElementById('aiTextConfirm').style.display = 'none';
   document.getElementById('aiDocFoot').style.display = 'flex';
+  switchAiMode('text');
   openModal('aiDocModal');
 }
 
 async function generateAiDoc() {
-  const apiKey  = getApiKey();
+  const apiKey = getApiKey();
   if(!apiKey) { openSettingsModal(); showToast('先にAPIキーを設定してください'); return; }
+
+  // 写真モード：STEP1 テキスト生成
+  if(aiCurrentMode === 'photo') {
+    const confirmArea = document.getElementById('aiTextConfirm');
+    if(confirmArea.style.display === 'none') {
+      // まだテキスト未生成 → 写真→テキスト生成
+      if(aiSelectedPhotos.length === 0 && !document.getElementById('ai-doc-memo').value.trim()) {
+        showToast('写真またはメモを入力してください'); return;
+      }
+      document.getElementById('aiModeArea').style.display = 'none';
+      document.getElementById('aiGenerating').style.display = 'block';
+      document.getElementById('aiDocFoot').style.display = 'none';
+      document.getElementById('aiGenMsg').textContent = '写真を分析して見積テキストを生成中...';
+      try {
+        const text = await generateEstimateText(apiKey);
+        document.getElementById('ai-generated-text').value = text;
+        document.getElementById('aiGenerating').style.display = 'none';
+        document.getElementById('aiTextConfirm').style.display = 'block';
+        document.getElementById('aiDocFoot').style.display = 'flex';
+        document.getElementById('aiDocBtn').textContent = '🤖 書類HTMLを生成';
+      } catch(err) {
+        document.getElementById('aiModeArea').style.display = 'block';
+        document.getElementById('aiGenerating').style.display = 'none';
+        document.getElementById('aiDocFoot').style.display = 'flex';
+        showToast('テキスト生成失敗：' + (err.message||'不明'));
+      }
+      return;
+    }
+    // STEP2: 確認済みテキスト → HTML生成
+    document.getElementById('ai-doc-text').value = document.getElementById('ai-generated-text').value;
+  }
+
   const docType = document.getElementById('ai-doc-type').value;
   const pid     = document.getElementById('ai-doc-pid').value;
   const rawText = document.getElementById('ai-doc-text').value.trim();
-  if(!rawText) { showToast('Claudeテキストを貼り付けてください'); return; }
+  if(!rawText) { showToast('テキストを入力してください'); return; }
 
-  // UI：生成中へ
-  document.getElementById('aiStep1').style.display = 'none';
+  document.getElementById('aiTextConfirm').style.display = 'none';
+  document.getElementById('aiModeArea').style.display = 'none';
   document.getElementById('aiGenerating').style.display = 'block';
   document.getElementById('aiDocFoot').style.display = 'none';
+  document.getElementById('aiGenMsg').textContent = 'AIが書類HTMLを生成中...';
 
   try {
     const html = await callAiDocGen(apiKey, docType, rawText);
-    // DBに保存
     const parsed = parseDocText(rawText, docType);
     const docNo  = parsed.docNo || autoDocNo(docType);
     const amount = parsed.taxIncTotal || 0;
     const date   = parsed.issueDate   || today();
-
-    DB.documents.push({
-      id: uid(), no: docNo, type: docType,
-      pid: pid||'', date, amount,
-      html, note: 'AI生成'
-    });
+    DB.documents.push({ id:uid(), no:docNo, type:docType, pid:pid||'', date, amount, html, note:'AI生成' });
     saveDB();
     closeModal('aiDocModal');
     renderDocuments();
     showToast(`${docType}を生成・保存しました`);
-
-    // 生成後すぐプレビュー表示
     const newDoc = DB.documents[DB.documents.length-1];
     previewDoc(newDoc.id);
-
   } catch(err) {
-    console.error(err);
-    document.getElementById('aiStep1').style.display = 'block';
+    document.getElementById('aiModeArea').style.display = 'block';
     document.getElementById('aiGenerating').style.display = 'none';
     document.getElementById('aiDocFoot').style.display = 'flex';
     showToast('生成に失敗しました：' + (err.message||'不明なエラー'));
   }
 }
+
+// 写真・メモ → 見積テキスト生成
+async function generateEstimateText(apiKey) {
+  const memo   = document.getElementById('ai-doc-memo').value.trim();
+  const client = document.getElementById('ai-doc-client').value.trim();
+  const today_ = today();
+
+  const content = [];
+  aiSelectedPhotos.forEach(p => {
+    content.push({ type:'image', source:{ type:'base64', media_type:p.mediaType, data:p.base64 } });
+  });
+  content.push({ type:'text', text: `
+以下の写真・メモをもとに見積テキストを生成してください。
+
+【補足メモ】${memo||'（なし）'}
+【顧客名】${client||'（未記入）'}
+【発行日】${today_}
+【有効期限】${addDays(today_, 30)}
+
+# 単価マスター
+- 職人日当（見積単価）：24,000円/人工
+- 外壁塗装（シリコン・3回塗り）：材工2,200円/㎡
+- 内装クロス（量産品・撤去込み）：1,100円/㎡
+- フローリング（複合・撤去込み）：6,000円/㎡
+- クッションフロア：3,000円/㎡
+
+# 出力フォーマット（このフォーマットで出力してください）
+=== 見積書 ===
+顧客名：${client||'　　　'}
+案件番号：
+工事件名：
+施工場所：
+発行日：${today_}
+有効期限：${addDays(today_, 30)}
+
+--- 工事項目（1枚目）---
+（工事種別）｜1｜式｜（金額）
+
+--- 内訳明細（2枚目）---
+【（工事種別）】
+（明細）｜（数量）｜（単位）｜（単価）｜（金額）｜（材工/労務）
+小計：（金額）
+
+--- 合計 ---
+小計：
+諸経費（15%）：
+税抜合計：
+消費税（10%）：
+税込合計：
+
+備考：
+` });
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:3000, messages:[{role:'user',content}] })
+  });
+  if(!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e.error?.message||`HTTP ${res.status}`); }
+  const data = await res.json();
+  return data.content.map(b=>b.text||'').join('').trim();
+}
+
+function addDays(dateStr, days) {
+  const d = new Date(dateStr); d.setDate(d.getDate()+days);
+  return d.toISOString().slice(0,10);
+}
+
+// ===== ② AI案件分析・ステータス提案 =====
+let _aiSuggestPid = null;
+let _aiSuggestData = null;
+
+async function openAiSuggest(pid) {
+  if(!getApiKey()) { openSettingsModal(); showToast('先にAPIキーを設定してください'); return; }
+  _aiSuggestPid = pid;
+  _aiSuggestData = null;
+  const content = document.getElementById('aiSuggestContent');
+  const foot    = document.getElementById('aiSuggestFoot');
+  content.innerHTML = '<div style="text-align:center;padding:30px;"><div style="font-size:28px;animation:spin 1.5s linear infinite;display:inline-block;">⚙️</div><div style="margin-top:12px;color:var(--sub);">AIが案件を分析中...</div></div>';
+  foot.style.display = 'none';
+  openModal('aiSuggestModal');
+
+  try {
+    const p = getProject(pid);
+    const c = getCustomer(p.cid);
+    const docs = DB.documents.filter(d=>d.pid===pid);
+    const prompt = `以下の建設案件を分析して、ステータス提案とアドバイスをJSON形式で返してください。
+
+# 案件情報
+- 案件番号：${p.no}
+- 顧客名：${c.name||'不明'}
+- 工事種別：${p.type||'不明'}
+- 現在のステータス：${p.stat}
+- 見積日：${p.edate||'未設定'}
+- 受注日：${p.odate||'未設定'}
+- 完了日：${p.cdate||'未設定'}
+- 請求日（edate）：${p.edate||'未設定'}
+- 入金日：${p.idate||'未設定'}
+- 見積金額：${p.est||0}円
+- 請求金額：${p.inv||0}円
+- 書類登録数：${docs.length}件（${docs.map(d=>d.type).join('、')||'なし'}）
+- 今日の日付：${today()}
+- 備考：${p.note||'なし'}
+
+JSONのみ返してください（説明不要）：
+{
+  "currentStatus": "現在のステータス",
+  "suggestedStatus": "推奨ステータス（変更不要な場合は現在と同じ）",
+  "shouldChange": true/false,
+  "reason": "提案理由（1〜2文）",
+  "advice": ["アドバイス1", "アドバイス2"],
+  "urgency": "high/medium/low"
+}`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:800, messages:[{role:'user',content:prompt}] })
+    });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const raw = data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
+    _aiSuggestData = JSON.parse(raw);
+
+    const urgencyColor = {'high':'#c0392b','medium':'#b8860b','low':'#1a7a4a'}[_aiSuggestData.urgency]||'#444';
+    const urgencyLabel = {'high':'⚠️ 要対応','medium':'📌 確認推奨','low':'✅ 問題なし'}[_aiSuggestData.urgency]||'';
+
+    content.innerHTML = `
+      <div style="margin-bottom:14px;">
+        <div style="font-size:12px;color:var(--sub);margin-bottom:6px;">現在のステータス</div>
+        <div style="font-size:16px;font-weight:700;">${_aiSuggestData.currentStatus}</div>
+      </div>
+      ${_aiSuggestData.shouldChange ? `
+      <div style="background:#fff8e8;border:1px solid #f0d060;border-radius:8px;padding:14px;margin-bottom:14px;">
+        <div style="font-size:12px;color:#7a5a00;font-weight:700;margin-bottom:6px;">💡 推奨ステータス</div>
+        <div style="font-size:18px;font-weight:700;color:#5a3a00;">${_aiSuggestData.suggestedStatus}</div>
+        <div style="font-size:13px;color:#6a4a00;margin-top:6px;">${_aiSuggestData.reason}</div>
+      </div>` : `
+      <div style="background:#f0fff4;border:1px solid #a0d8b0;border-radius:8px;padding:14px;margin-bottom:14px;">
+        <div style="font-size:13px;color:#1a5a2a;">${_aiSuggestData.reason}</div>
+      </div>`}
+      <div style="margin-bottom:10px;">
+        <div style="font-size:12px;color:var(--sub);font-weight:700;margin-bottom:8px;">📋 アドバイス</div>
+        ${(_aiSuggestData.advice||[]).map(a=>`<div style="font-size:13px;padding:6px 0;border-bottom:1px solid var(--border);color:var(--ink);">・${a}</div>`).join('')}
+      </div>
+      <div style="text-align:right;"><span style="font-size:12px;font-weight:700;color:${urgencyColor};">${urgencyLabel}</span></div>
+    `;
+    foot.style.display = _aiSuggestData.shouldChange ? 'flex' : 'none';
+    if(_aiSuggestData.shouldChange) {
+      document.getElementById('aiSuggestApplyBtn').textContent = `✅ 「${_aiSuggestData.suggestedStatus}」に更新`;
+    }
+  } catch(err) {
+    content.innerHTML = `<div style="text-align:center;padding:20px;color:var(--red);">分析に失敗しました<br><span style="font-size:12px;">${err.message}</span></div>`;
+  }
+}
+
+function applyAiSuggest() {
+  if(!_aiSuggestPid || !_aiSuggestData?.suggestedStatus) return;
+  const p = DB.projects.find(x=>x.id===_aiSuggestPid);
+  if(!p) return;
+  p.stat    = _aiSuggestData.suggestedStatus;
+  p.updated = today();
+  saveDB(); renderProjects(); renderDashboard();
+  closeModal('aiSuggestModal');
+  showToast(`ステータスを「${p.stat}」に更新しました`);
+}
+
+// ===== ③ 書類AIチェック =====
+async function aiCheckDoc() {
+  if(!currentPreviewDocId) return;
+  const d = DB.documents.find(x=>x.id===currentPreviewDocId);
+  if(!d||!d.html) { showToast('チェックする書類がありません'); return; }
+  if(!getApiKey()) { showToast('APIキーを設定してください'); return; }
+
+  const panel  = document.getElementById('aiCheckPanel');
+  const result = document.getElementById('aiCheckResult');
+  panel.style.display = 'block';
+  result.innerHTML = '<div style="text-align:center;padding:10px;"><span style="animation:spin 1.5s linear infinite;display:inline-block;">⚙️</span> AIが書類をチェック中...</div>';
+
+  try {
+    // HTMLからテキスト抽出（タグ除去）
+    const tmp = document.createElement('div');
+    tmp.innerHTML = d.html;
+    const text = tmp.innerText || tmp.textContent || '';
+
+    const prompt = `以下は建設業の${d.type}です。内容を確認して問題点・ミスを指摘してください。
+
+【書類種別】${d.type}
+【書類内容】
+${text.slice(0,3000)}
+
+以下の観点でチェックしてJSON形式で返してください（説明不要・JSONのみ）：
+{
+  "ok": true/false,
+  "score": 0〜100（問題なし=100）,
+  "issues": [
+    {"level": "error/warning/info", "item": "項目名", "detail": "詳細"}
+  ],
+  "summary": "総評（1文）"
+}
+
+チェック観点：
+- 金額計算（小計・諸経費15%・消費税10%・税込合計の整合性）
+- 顧客名・施工場所・工事件名・発行日の記載漏れ
+- 見積番号・書類番号の記載
+- 合計行の金額が御見積金額ボックスと一致しているか
+- 単価×数量=金額の正確性`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1000, messages:[{role:'user',content:prompt}] })
+    });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const raw  = data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
+    const chk  = JSON.parse(raw);
+
+    const scoreColor = chk.score>=90?'#1a7a4a':chk.score>=70?'#b8860b':'#c0392b';
+    const levelIcon  = {'error':'❌','warning':'⚠️','info':'ℹ️'};
+
+    result.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+        <div style="font-size:28px;font-weight:700;font-family:'Shippori Mincho',serif;color:${scoreColor};">${chk.score}</div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:${scoreColor};">${chk.ok?'✅ 問題なし':'⚠️ 要確認'}</div>
+          <div style="font-size:12px;color:#666;">${chk.summary||''}</div>
+        </div>
+      </div>
+      ${(chk.issues||[]).length===0
+        ? '<div style="font-size:13px;color:#1a7a4a;">指摘事項はありません ✅</div>'
+        : (chk.issues||[]).map(i=>`
+          <div style="padding:6px 0;border-bottom:1px solid #eee;font-size:13px;">
+            ${levelIcon[i.level]||'•'} <strong>${i.item}</strong>　${i.detail}
+          </div>`).join('')
+      }
+    `;
+  } catch(err) {
+    result.innerHTML = `<div style="color:var(--red);font-size:13px;">チェック失敗：${err.message}</div>`;
+  }
+}
+
+
 
 function autoDocNo(type) {
   const prefix = type==='見積書'?'EST':type==='注文書'?'ORD':'INV';
@@ -1905,7 +2275,7 @@ async function callAiDocGen(apiKey, docType, rawText) {
   const systemPrompt = buildSystemPrompt(docType);
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 8000,
