@@ -3,7 +3,76 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>書類管理システム｜株式会社アート・レイズ</title>
+<title>書類管理｜株式会社アート・レイズ</title>
+
+<!-- キャッシュ無効化：常に最新版を取得 -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+<!-- PWA: スタンドアロン全画面 -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="書類管理">
+<meta name="theme-color" content="#2c2c2c">
+<meta name="application-name" content="書類管理">
+
+<!-- PWA マニフェスト（インライン Blob） -->
+<script>
+(function(){
+  const icon = `<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+    <rect width="192" height="192" rx="36" fill="#2c2c2c"/>
+    <rect x="20" y="20" width="152" height="152" rx="24" fill="#3a3a3a"/>
+    <rect x="52" y="44" width="88" height="10" rx="4" fill="#ffffff" opacity="0.9"/>
+    <rect x="52" y="64" width="88" height="106" rx="6" fill="#ffffff"/>
+    <rect x="60" y="76" width="72" height="4" rx="2" fill="#2a5298" opacity="0.8"/>
+    <rect x="60" y="88" width="72" height="3" rx="1.5" fill="#bbbbbb"/>
+    <rect x="60" y="98" width="56" height="3" rx="1.5" fill="#bbbbbb"/>
+    <rect x="60" y="112" width="72" height="3" rx="1.5" fill="#bbbbbb"/>
+    <rect x="60" y="122" width="48" height="3" rx="1.5" fill="#bbbbbb"/>
+    <rect x="60" y="136" width="72" height="3" rx="1.5" fill="#e8e8e8"/>
+    <rect x="60" y="146" width="72" height="8" rx="2" fill="#2a5298" opacity="0.7"/>
+    <text x="96" y="153" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="5" fill="#ffffff">¥000,000</text>
+  </svg>`;
+  const svgBlob = new Blob([icon], {type:'image/svg+xml'});
+  const iconUrl = URL.createObjectURL(svgBlob);
+
+  const manifest = {
+    name: '書類管理｜アート・レイズ',
+    short_name: '書類管理',
+    description: '株式会社アート・レイズ 書類管理システム',
+    start_url: './書類管理アプリ_アートレイズ.html',
+    display: 'standalone',
+    orientation: 'any',
+    background_color: '#2c2c2c',
+    theme_color: '#2c2c2c',
+    icons: [
+      { src: iconUrl, sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
+      { src: iconUrl, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }
+    ]
+  };
+  const mBlob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+  const mUrl = URL.createObjectURL(mBlob);
+  const link = document.createElement('link');
+  link.rel = 'manifest'; link.href = mUrl;
+  document.head.appendChild(link);
+
+  // Apple touch icon
+  const aLink = document.createElement('link');
+  aLink.rel = 'apple-touch-icon'; aLink.href = iconUrl;
+  document.head.appendChild(aLink);
+})();
+</script>
+
+<!-- Service Worker 無効化（常に最新版を取得） -->
+<script>
+if('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(r => r.unregister());
+  });
+}
+</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Shippori+Mincho:wght@400;600;700&display=swap');
 
@@ -950,6 +1019,23 @@ html, body {
         <button class="btn btn-dark" style="flex:1;height:44px;" onclick="exportJSON();closeModal('settingsModal');">💾 バックアップ</button>
         <button class="btn btn-dark" style="flex:1;height:44px;" onclick="closeModal('settingsModal');importJSON();">📂 復元</button>
       </div>
+
+      <div style="font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.06em;margin-bottom:10px;">🔄 アップデート</div>
+      <div style="font-size:12px;color:var(--sub);margin-bottom:10px;line-height:1.7;">
+        GitHubにPush後、このボタンをタップすると<br>キャッシュを無視して最新版を読み込みます。
+      </div>
+      <button onclick="forceReload()" style="
+        width:100%;padding:14px;border:none;border-radius:12px;
+        background:linear-gradient(135deg,#3dd68c,#4a9eff);
+        color:#111;font-size:14px;font-weight:700;cursor:pointer;
+        font-family:var(--font, 'Noto Sans JP', sans-serif);
+        display:flex;align-items:center;justify-content:center;gap:8px;
+        touch-action:manipulation;
+      ">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+        最新版に更新する
+      </button>
+      <div style="height:8px;"></div>
 
     </div>
     <div class="modal-foot">
@@ -2010,13 +2096,29 @@ function printDoc(did) {
   win.onload = ()=>{ win.print(); };
 }
 
+// ===== 最新版に強制更新 =====
+function forceReload() {
+  const base = location.href.split('?')[0].split('#')[0];
+  const url = base + '?reload=' + Date.now();
+  location.replace(url);
+}
+
 // ===== 初期化 =====
 loadDB();
-// FABは最初は非表示（dashboardから始まるため）
 document.getElementById('fabBtn').style.display = 'none';
 renderDashboard();
 document.getElementById('dashDate').textContent =
   new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+
+// reload= クエリ検知：更新完了トースト＆URLクリーン
+(function(){
+  const wasUpdated = location.search.includes('reload=');
+  if(wasUpdated) {
+    const cleanUrl = location.href.split('?')[0].split('#')[0];
+    history.replaceState(null, '', cleanUrl);
+    setTimeout(() => showToast('✅ 最新版に更新しました'), 1000);
+  }
+})();
 </script>
 </body>
 </html>
