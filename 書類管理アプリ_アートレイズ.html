@@ -2474,9 +2474,13 @@ function printDoc(did) {
 
 // ===== 最新版に強制更新 =====
 function forceReload() {
-  const base = location.href.split('?')[0].split('#')[0];
-  const url = base + '?reload=' + Date.now();
-  location.replace(url);
+  try {
+    const base = location.href.split('?')[0].split('#')[0];
+    const url = base + '?reload=' + Date.now();
+    location.replace(url);
+  } catch(e) {
+    showToast('⚠️ ブラウザで直接開いてから更新してください');
+  }
 }
 
 // ===== 初期化 =====
@@ -2490,8 +2494,10 @@ document.getElementById('dashDate').textContent =
 (function(){
   const wasUpdated = location.search.includes('reload=');
   if(wasUpdated) {
-    const cleanUrl = location.href.split('?')[0].split('#')[0];
-    history.replaceState(null, '', cleanUrl);
+    try {
+      const cleanUrl = location.href.split('?')[0].split('#')[0];
+      history.replaceState(null, '', cleanUrl);
+    } catch(e) { /* iframe内など replaceState 不可環境では無視 */ }
     setTimeout(() => showToast('✅ 最新版に更新しました'), 1000);
   }
 })();
