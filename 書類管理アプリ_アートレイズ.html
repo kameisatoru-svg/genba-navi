@@ -863,22 +863,6 @@ html, body {
 
 </main>
 
-<!-- ===== AIチャットパネル（フローティング） ===== -->
-<div id="aiChatPanel" style="display:none;position:fixed;bottom:72px;left:0;right:0;z-index:900;background:#fff;border-top:2px solid var(--accent);box-shadow:0 -4px 20px rgba(0,0,0,.18);max-height:52vh;display:none;flex-direction:column;">
-  <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--accent);color:#fff;">
-    <div style="font-size:13px;font-weight:700;" id="aiChatTitle">🤖 AIアシスタント</div>
-    <button onclick="closeAiChat()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:0 4px;line-height:1;">×</button>
-  </div>
-  <div id="aiChatLog" style="flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;min-height:80px;max-height:calc(52vh - 110px);"></div>
-  <div style="padding:8px 10px;border-top:1px solid var(--border);display:flex;gap:8px;background:#f8f8f8;">
-    <textarea id="aiChatInput" placeholder="質問・依頼を入力..." style="flex:1;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:14px;font-family:'Noto Sans JP',sans-serif;resize:none;height:44px;line-height:1.5;outline:none;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAiChat();}"></textarea>
-    <button onclick="sendAiChat()" id="aiChatSendBtn" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:0 16px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;min-width:56px;">送信</button>
-  </div>
-</div>
-
-<!-- ===== AIチャットFABボタン ===== -->
-<button id="aiChatFab" onclick="toggleAiChat()" style="display:none;position:fixed;bottom:80px;right:16px;z-index:850;width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:22px;box-shadow:0 4px 16px rgba(42,82,152,.45);cursor:pointer;align-items:center;justify-content:center;">🤖</button>
-
 <!-- ボトムナビ -->
 <nav class="bottom-nav">
   <button class="bnav-btn active" id="bnav-dashboard" onclick="showView('dashboard',this)"><span class="bnav-icon">🏠</span>ホーム</button>
@@ -915,13 +899,8 @@ html, body {
         <input class="form-input" id="c-email" type="email" placeholder="example@email.com"></div>
       <div class="form-row"><label class="form-label">住所</label>
         <input class="form-input" id="c-addr" placeholder="大分県別府市〇〇"></div>
-      <div class="form-row">
-        <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
-          備考
-          <button type="button" onclick="aiSuggestField('c-note','customer-note')" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;">✨ AI補完</button>
-        </label>
-        <textarea class="form-textarea" id="c-note" placeholder="紹介元・特記事項など"></textarea>
-      </div>
+      <div class="form-row"><label class="form-label">備考</label>
+        <textarea class="form-textarea" id="c-note" placeholder="紹介元・特記事項など"></textarea></div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeModal('customerModal')">キャンセル</button>
@@ -945,13 +924,8 @@ html, body {
         <div class="form-row"><label class="form-label">顧客 <span style="color:red">*</span></label>
           <select class="form-select" id="p-cid"></select></div>
       </div>
-      <div class="form-row">
-        <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
-          工事種別
-          <button type="button" onclick="aiSuggestField('p-type','project-type')" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;">✨ AI補完</button>
-        </label>
-        <input class="form-input" id="p-type" placeholder="外壁塗装・内装クロスなど">
-      </div>
+      <div class="form-row"><label class="form-label">工事種別</label>
+        <input class="form-input" id="p-type" placeholder="外壁塗装・内装クロスなど"></div>
       <div class="form-row"><label class="form-label">施工場所</label>
         <input class="form-input" id="p-place" placeholder="別府市〇〇町"></div>
       <div class="form-row-2">
@@ -977,13 +951,8 @@ html, body {
           <option>見積提示中</option><option>受注済み</option><option>工事中</option>
           <option>請求済み</option><option>入金済み</option><option>未入金</option><option>キャンセル</option>
         </select></div>
-      <div class="form-row">
-        <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
-          備考
-          <button type="button" onclick="aiSuggestField('p-note','project-note')" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;">✨ AI補完</button>
-        </label>
-        <textarea class="form-textarea" id="p-note"></textarea>
-      </div>
+      <div class="form-row"><label class="form-label">備考</label>
+        <textarea class="form-textarea" id="p-note"></textarea></div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeModal('projectModal')">キャンセル</button>
@@ -1194,30 +1163,6 @@ html, body {
   </div>
 </div>
 
-<!-- ===== AIミニモーダル（入力補完・フォロー文） ===== -->
-<div class="modal-overlay" id="aiMiniModal">
-  <div class="modal" style="max-width:480px;">
-    <div class="modal-head">
-      <h3 id="aiMiniTitle">🤖 AI補完</h3>
-      <button class="modal-close" onclick="closeModal('aiMiniModal')">×</button>
-    </div>
-    <div class="modal-body" style="min-height:80px;">
-      <div id="aiMiniLoading" style="text-align:center;padding:30px;">
-        <div style="font-size:28px;animation:spin 1.5s linear infinite;display:inline-block;">⚙️</div>
-        <div style="margin-top:10px;color:var(--sub);font-size:13px;">AIが生成中...</div>
-      </div>
-      <div id="aiMiniResult" style="display:none;">
-        <div style="font-size:12px;color:var(--sub);margin-bottom:8px;" id="aiMiniLabel">生成された内容</div>
-        <div id="aiMiniContent" style="background:#f0f4ff;border:1px solid #c0cce8;border-radius:8px;padding:14px;font-size:13px;line-height:1.8;white-space:pre-wrap;max-height:300px;overflow-y:auto;"></div>
-      </div>
-    </div>
-    <div class="modal-foot" id="aiMiniFoot" style="display:none;">
-      <button class="btn btn-ghost" onclick="closeModal('aiMiniModal')">閉じる</button>
-      <button class="btn btn-primary" id="aiMiniApplyBtn" onclick="applyAiMini()">✅ 入力欄に反映</button>
-    </div>
-  </div>
-</div>
-
 <!-- ===== AI提案モーダル ===== -->
 <div class="modal-overlay" id="aiSuggestModal">
   <div class="modal">
@@ -1314,17 +1259,6 @@ function showView(v, btn) {
   // FAB表示制御
   const fab = document.getElementById('fabBtn');
   fab.style.display = (v==='customers'||v==='projects') ? 'flex' : 'none';
-  // AIチャットFAB表示（顧客・案件以外で表示）
-  const aiChatFab = document.getElementById('aiChatFab');
-  if(aiChatFab) aiChatFab.style.display = (v==='customers'||v==='projects') ? 'none' : 'flex';
-  // AIチャットコンテキスト更新
-  aiChatContext.view = v;
-  aiChatHistory = [];
-  const panel = document.getElementById('aiChatPanel');
-  if(panel && panel.style.display === 'flex') {
-    document.getElementById('aiChatLog').innerHTML = '';
-    buildAiChatContext();
-  }
   renderView(v);
   window.scrollTo(0,0);
 }
@@ -1591,11 +1525,7 @@ function renderMaterial(pid) {
     total += amt;
     return `<div class="ledger-card" style="margin:10px;">
       <div class="ledger-card-head">材料 ${i+1}</div>
-      <div class="ledger-field" style="flex-wrap:wrap;gap:4px;">
-        <span class="ledger-field-label">材料名</span>
-        <input value="${r.name||''}" placeholder="シリコン塗料など" onchange="updateLedger('material','${pid}',${i},'name',this.value)" style="flex:1;">
-        <button type="button" onclick="aiLedgerSuggest('material','${pid}',${i})" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;white-space:nowrap;">✨ AI</button>
-      </div>
+      <div class="ledger-field"><span class="ledger-field-label">材料名</span><input value="${r.name||''}" placeholder="シリコン塗料など" onchange="updateLedger('material','${pid}',${i},'name',this.value)"></div>
       <div class="ledger-field"><span class="ledger-field-label">数量</span><input type="number" inputmode="numeric" value="${r.qty||''}" onchange="updateLedger('material','${pid}',${i},'qty',+this.value)"><input value="${r.unit||''}" placeholder="缶・本・㎡" style="max-width:70px;" onchange="updateLedger('material','${pid}',${i},'unit',this.value)"></div>
       <div class="ledger-field"><span class="ledger-field-label">単価</span><input type="number" inputmode="numeric" value="${r.price||''}" onchange="updateLedger('material','${pid}',${i},'price',+this.value)"><span style="font-size:13px;color:var(--sub);flex-shrink:0;">= ${fmt(amt)}</span></div>
       <div class="ledger-field"><span class="ledger-field-label">仕入日</span><input type="date" value="${r.date||''}" onchange="updateLedger('material','${pid}',${i},'date',this.value)"></div>
@@ -1622,11 +1552,7 @@ function renderWorker(pid) {
     return `<div class="ledger-card" style="margin:10px;">
       <div class="ledger-card-head">作業 ${i+1}</div>
       <div class="ledger-field"><span class="ledger-field-label">作業日</span><input type="date" value="${r.date||''}" onchange="updateLedger('worker','${pid}',${i},'date',this.value)"></div>
-      <div class="ledger-field" style="flex-wrap:wrap;gap:4px;">
-        <span class="ledger-field-label">職人名</span>
-        <input value="${r.name||''}" onchange="updateLedger('worker','${pid}',${i},'name',this.value)" style="flex:1;">
-        <button type="button" onclick="aiLedgerSuggest('worker','${pid}',${i})" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;white-space:nowrap;">✨ AI</button>
-      </div>
+      <div class="ledger-field"><span class="ledger-field-label">職人名</span><input value="${r.name||''}" onchange="updateLedger('worker','${pid}',${i},'name',this.value)"></div>
       <div class="ledger-field"><span class="ledger-field-label">作業内容</span><input value="${r.work||''}" onchange="updateLedger('worker','${pid}',${i},'work',this.value)"></div>
       <div class="ledger-field"><span class="ledger-field-label">人工数</span><input type="number" inputmode="decimal" step="0.5" value="${r.ninku||''}" onchange="updateLedger('worker','${pid}',${i},'ninku',+this.value)"><span style="font-size:13px;color:var(--sub);flex-shrink:0;">人工</span></div>
       <div class="ledger-field"><span class="ledger-field-label">単価(見積)</span><input type="number" inputmode="numeric" value="${r.price||24000}" onchange="updateLedger('worker','${pid}',${i},'price',+this.value)"><span style="font-size:13px;color:var(--sub);flex-shrink:0;">= ${fmt(amt)}</span></div>
@@ -1736,8 +1662,7 @@ function renderPaymentView() {
             <div class="amount red">${fmt(p.inv)}</div>
           </div>
         </div>
-        <div style="margin-top:10px;display:flex;gap:8px;justify-content:flex-end;">
-          <button class="btn btn-dark" style="height:40px;padding:0 14px;font-size:13px;" onclick="genFollowMsg('${p.id}')">📩 フォロー文</button>
+        <div style="margin-top:10px;text-align:right;">
           <button class="btn btn-primary" style="height:40px;padding:0 20px;" onclick="markPaid('${p.id}')">✓ 入金済みにする</button>
         </div>
       </div>`;
@@ -2242,288 +2167,6 @@ function applyAiSuggest() {
   closeModal('aiSuggestModal');
   showToast(`ステータスを「${p.stat}」に更新しました`);
 }
-// ===== 入力欄AI補完・フォロー文生成 =====
-let _aiMiniTargetId = null;
-let _aiMiniType = null;
-let _aiMiniExtra = null; // 台帳用 {type,pid,idx}
-let _aiMiniText = '';
-
-function _showAiMini(title, labelText) {
-  document.getElementById('aiMiniTitle').textContent = '🤖 ' + title;
-  document.getElementById('aiMiniLabel').textContent = labelText;
-  document.getElementById('aiMiniLoading').style.display = 'block';
-  document.getElementById('aiMiniResult').style.display = 'none';
-  document.getElementById('aiMiniFoot').style.display = 'none';
-  openModal('aiMiniModal');
-}
-
-function _showAiMiniResult(text, showApply=true) {
-  _aiMiniText = text;
-  document.getElementById('aiMiniLoading').style.display = 'none';
-  document.getElementById('aiMiniContent').textContent = text;
-  document.getElementById('aiMiniResult').style.display = 'block';
-  document.getElementById('aiMiniFoot').style.display = showApply ? 'flex' : 'none';
-  if(!showApply) {
-    // フォロー文はコピーボタンに変える
-    document.getElementById('aiMiniFoot').style.display = 'flex';
-    document.getElementById('aiMiniApplyBtn').textContent = '📋 コピー';
-  }
-}
-
-function _showAiMiniError(msg) {
-  document.getElementById('aiMiniLoading').style.display = 'none';
-  document.getElementById('aiMiniContent').textContent = 'エラー: ' + msg;
-  document.getElementById('aiMiniResult').style.display = 'block';
-  document.getElementById('aiMiniResult').querySelector('#aiMiniContent').style.background = '#fff0f0';
-  document.getElementById('aiMiniFoot').style.display = 'none';
-}
-
-function applyAiMini() {
-  if(_aiMiniType === 'follow') {
-    // フォロー文はコピー
-    navigator.clipboard.writeText(_aiMiniText).then(()=>showToast('クリップボードにコピーしました')).catch(()=>showToast('テキストをコピーしてください'));
-    return;
-  }
-  if(_aiMiniType === 'ledger-material') {
-    const {pid, idx, fields} = _aiMiniExtra;
-    // JSON形式で返ってきた場合はパース、テキストならそのまま
-    try {
-      const obj = JSON.parse(_aiMiniText);
-      if(obj.name) updateLedger('material', pid, idx, 'name', obj.name);
-      if(obj.unit) updateLedger('material', pid, idx, 'unit', obj.unit);
-      if(obj.price) updateLedger('material', pid, idx, 'price', Number(obj.price));
-    } catch(e) {
-      // テキストの場合は材料名のみに入れる
-      updateLedger('material', pid, idx, 'name', _aiMiniText.split('\n')[0].trim());
-    }
-    closeModal('aiMiniModal');
-    showToast('材料情報を反映しました');
-    return;
-  }
-  if(_aiMiniType === 'ledger-worker') {
-    const {pid, idx} = _aiMiniExtra;
-    try {
-      const obj = JSON.parse(_aiMiniText);
-      if(obj.work) updateLedger('worker', pid, idx, 'work', obj.work);
-      if(obj.ninku) updateLedger('worker', pid, idx, 'ninku', Number(obj.ninku));
-    } catch(e) {
-      updateLedger('worker', pid, idx, 'work', _aiMiniText.split('\n')[0].trim());
-    }
-    closeModal('aiMiniModal');
-    showToast('作業情報を反映しました');
-    return;
-  }
-  // テキスト入力欄への反映
-  if(_aiMiniTargetId) {
-    const el = document.getElementById(_aiMiniTargetId);
-    if(el) { el.value = _aiMiniText; el.dispatchEvent(new Event('change')); }
-    closeModal('aiMiniModal');
-    showToast('入力欄に反映しました');
-  }
-}
-
-// 顧客備考・案件備考・工事種別の補完
-async function aiSuggestField(targetId, fieldType) {
-  if(!getApiKey()) { showToast('APIキーを設定してください'); openSettingsModal(); return; }
-  _aiMiniTargetId = targetId;
-  _aiMiniType = fieldType;
-
-  const titles = {
-    'customer-note': '顧客備考を補完',
-    'project-type': '工事種別を提案',
-    'project-note': '案件備考を補完'
-  };
-  const labels = {
-    'customer-note': '顧客の特記事項・サジェスト',
-    'project-type': '工事種別の候補',
-    'project-note': '案件備考・次のアクション'
-  };
-  _showAiMini(titles[fieldType]||'AI補完', labels[fieldType]||'');
-
-  try {
-    let prompt = '';
-    const currentVal = document.getElementById(targetId)?.value || '';
-
-    if(fieldType === 'customer-note') {
-      const cName = document.getElementById('c-name')?.value || '';
-      const cTel  = document.getElementById('c-tel')?.value || '';
-      const cAddr = document.getElementById('c-addr')?.value || '';
-      // 過去の案件履歴を参照
-      const editId = document.getElementById('c-edit-id')?.value || '';
-      const pastProjects = editId ? DB.projects.filter(p=>p.cid===editId).map(p=>`・${p.no} ${p.type||''} [${p.stat}] ${p.est?Number(p.est).toLocaleString()+'円':''}`).join('\n') : '';
-      prompt = `建設業（株式会社アート・レイズ）の顧客管理システムの備考欄を補完してください。
-
-顧客名：${cName}
-電話：${cTel}
-住所：${cAddr}
-現在の備考：${currentVal || '（空欄）'}
-過去の案件履歴：
-${pastProjects || '（新規顧客）'}
-
-顧客の特記事項・注意点・次回提案のヒントなど、営業・管理に役立つ備考を2〜4行で提案してください。過去履歴がある場合は次の提案を含めてください。テキストのみ出力してください。`;
-
-    } else if(fieldType === 'project-type') {
-      const place  = document.getElementById('p-place')?.value || '';
-      const note   = document.getElementById('p-note')?.value || '';
-      const cid    = document.getElementById('p-cid')?.value || '';
-      const c      = DB.customers.find(x=>x.id===cid);
-      prompt = `建設業（株式会社アート・レイズ）の案件管理システムで工事種別を提案してください。
-
-施工場所：${place}
-顧客備考：${c?.note||''}
-現在の入力値：${currentVal || '（空欄）'}
-案件備考：${note}
-
-適切な工事種別を3〜5個、改行で提案してください。例：外壁塗装工事、内装クロス張替工事、床面リフォーム工事（塩ビタイル貼り）など。テキストのみ出力してください。`;
-
-    } else if(fieldType === 'project-note') {
-      const pNo   = document.getElementById('p-no')?.value || '';
-      const pType = document.getElementById('p-type')?.value || '';
-      const pStat = document.getElementById('p-stat')?.value || '';
-      const pEst  = document.getElementById('p-est')?.value || '';
-      const cid   = document.getElementById('p-cid')?.value || '';
-      const c     = DB.customers.find(x=>x.id===cid);
-      prompt = `建設業（株式会社アート・レイズ）の案件備考欄を補完してください。
-
-案件番号：${pNo}
-顧客名：${c?.name||''}
-工事種別：${pType}
-ステータス：${pStat}
-見積金額：${pEst ? Number(pEst).toLocaleString()+'円' : '未設定'}
-現在の備考：${currentVal || '（空欄）'}
-
-ステータスに応じた次のアクション・特記事項・注意点を2〜3行で提案してください。テキストのみ出力してください。`;
-    }
-
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:400, messages:[{role:'user',content:prompt}] })
-    });
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const reply = data.content.map(b=>b.text||'').join('').trim();
-    _showAiMiniResult(reply, true);
-
-  } catch(err) {
-    _showAiMiniError(err.message);
-  }
-}
-
-// 工事台帳 材料・職人のAIサジェスト
-async function aiLedgerSuggest(type, pid, idx) {
-  if(!getApiKey()) { showToast('APIキーを設定してください'); openSettingsModal(); return; }
-  _aiMiniType = 'ledger-' + type;
-  _aiMiniExtra = { pid, idx };
-
-  const p = DB.projects.find(x=>x.id===pid);
-  const row = DB.ledger[type][pid]?.[idx] || {};
-
-  if(type === 'material') {
-    _showAiMini('材料情報を提案', '材料名・単位・単価の提案');
-    const prompt = `建設業（アート・レイズ）の工事台帳の材料を提案してください。
-
-工事種別：${p?.type||'不明'}
-現在の材料名：${row.name||'（空欄）'}
-数量：${row.qty||''}${row.unit||''}
-
-この工事で使う材料として適切な情報をJSON形式のみで返してください：
-{"name":"材料名","unit":"単位（缶・本・㎡・袋など）","price":単価数値}
-
-市場相場の単価を入れてください。JSONのみ出力、説明不要。`;
-
-    try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method:'POST',
-        headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-        body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:200, messages:[{role:'user',content:prompt}] })
-      });
-      if(!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      const raw = data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
-      const obj = JSON.parse(raw);
-      _aiMiniText = raw;
-      document.getElementById('aiMiniLoading').style.display = 'none';
-      document.getElementById('aiMiniContent').textContent =
-        `材料名：${obj.name}\n単位：${obj.unit}\n単価：${Number(obj.price).toLocaleString()}円`;
-      document.getElementById('aiMiniResult').style.display = 'block';
-      document.getElementById('aiMiniFoot').style.display = 'flex';
-      document.getElementById('aiMiniApplyBtn').textContent = '✅ 台帳に反映';
-    } catch(err) { _showAiMiniError(err.message); }
-
-  } else if(type === 'worker') {
-    _showAiMini('作業内容を提案', '作業内容・人工数の提案');
-    const prompt = `建設業（アート・レイズ）の工事台帳の職人作業を提案してください。
-
-工事種別：${p?.type||'不明'}
-職人名：${row.name||''}
-現在の作業内容：${row.work||'（空欄）'}
-
-適切な作業内容と標準的な人工数をJSON形式のみで返してください：
-{"work":"作業内容（例：外壁塗装・下地処理）","ninku":人工数（数値）}
-
-JSONのみ出力、説明不要。`;
-
-    try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method:'POST',
-        headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-        body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:200, messages:[{role:'user',content:prompt}] })
-      });
-      if(!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      const raw = data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
-      const obj = JSON.parse(raw);
-      _aiMiniText = raw;
-      document.getElementById('aiMiniLoading').style.display = 'none';
-      document.getElementById('aiMiniContent').textContent =
-        `作業内容：${obj.work}\n人工数：${obj.ninku}人工`;
-      document.getElementById('aiMiniResult').style.display = 'block';
-      document.getElementById('aiMiniFoot').style.display = 'flex';
-      document.getElementById('aiMiniApplyBtn').textContent = '✅ 台帳に反映';
-    } catch(err) { _showAiMiniError(err.message); }
-  }
-}
-
-// 入金フォロー文生成
-async function genFollowMsg(pid) {
-  if(!getApiKey()) { showToast('APIキーを設定してください'); openSettingsModal(); return; }
-  _aiMiniType = 'follow';
-  _aiMiniTargetId = null;
-  _showAiMini('未入金フォロー文を生成', '送付用メッセージ');
-
-  try {
-    const p = DB.projects.find(x=>x.id===pid);
-    const c = DB.customers.find(x=>x.id===p.cid);
-    const days = daysSince(p.cdate);
-
-    const prompt = `建設業（株式会社アート・レイズ、担当：亀井）の未入金フォロー連絡文を生成してください。
-
-顧客名：${c?.name||''}様
-工事件名：${p.type||''}
-案件番号：${p.no}
-工事完了日：${p.cdate||'不明'}
-請求金額：${p.inv ? Number(p.inv).toLocaleString()+'円（税込）' : '未設定'}
-経過日数：${days}
-顧客連絡先：${c?.tel||''} ${c?.email||''}
-
-丁寧・簡潔な入金確認のお願い文を生成してください。SMS・電話前確認に使えるシンプルな文面で。`;
-
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:500, messages:[{role:'user',content:prompt}] })
-    });
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const reply = data.content.map(b=>b.text||'').join('').trim();
-    _showAiMiniResult(reply, false);
-    document.getElementById('aiMiniApplyBtn').textContent = '📋 コピー';
-
-  } catch(err) { _showAiMiniError(err.message); }
-}
-
-
 
 // ===== ③ 書類AIチェック =====
 async function aiCheckDoc() {
@@ -2538,45 +2181,16 @@ async function aiCheckDoc() {
   result.innerHTML = '<div style="text-align:center;padding:10px;"><span style="animation:spin 1.5s linear infinite;display:inline-block;">⚙️</span> AIが書類をチェック中...</div>';
 
   try {
-    // iframeのHTMLからテキストのみ抽出（スクリプト・スタイル除去）
+    // HTMLからテキスト抽出（タグ除去）
     const tmp = document.createElement('div');
-    // script・styleタグを除去してからテキスト取得
-    const cleanHtml = d.html
-      .replace(/<script[\s\S]*?<\/script>/gi, '')
-      .replace(/<style[\s\S]*?<\/style>/gi, '')
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/\s{2,}/g, ' ')
-      .trim();
+    tmp.innerHTML = d.html;
+    const text = tmp.innerText || tmp.textContent || '';
 
-    // 関連案件・顧客情報も付加
-    const p = d.pid ? DB.projects.find(x=>x.id===d.pid) : null;
-    const c = p ? DB.customers.find(x=>x.id===p.cid) : null;
+    const prompt = `以下は建設業の${d.type}です。内容を確認して問題点・ミスを指摘してください。
 
-    const metaInfo = p ? `
-【登録情報】
-- 書類番号：${d.no||'未設定'}
-- 書類種別：${d.type}
-- 発行日：${d.date||'未設定'}
-- 登録金額（税込）：${d.amount ? Number(d.amount).toLocaleString()+'円' : '未設定'}
-- 関連案件番号：${p.no||''}
-- 顧客名：${c?.name||''}
-- 工事件名：${p.type||''}
-- 施工場所：${p.place||''}
-- 見積金額（案件登録値）：${p.est ? Number(p.est).toLocaleString()+'円' : '未設定'}
-` : `
-【登録情報】
-- 書類番号：${d.no||'未設定'}
-- 書類種別：${d.type}
-- 発行日：${d.date||'未設定'}
-- 登録金額（税込）：${d.amount ? Number(d.amount).toLocaleString()+'円' : '未設定'}
-`;
-
-    const prompt = `以下は建設業の${d.type}です。書類テキストと登録情報を確認して問題点・ミスを指摘してください。
-
-${metaInfo}
-
-【書類本文テキスト】
-${cleanHtml.slice(0, 4000)}
+【書類種別】${d.type}
+【書類内容】
+${text.slice(0,3000)}
 
 以下の観点でチェックしてJSON形式で返してください（説明不要・JSONのみ）：
 {
@@ -2591,10 +2205,9 @@ ${cleanHtml.slice(0, 4000)}
 チェック観点：
 - 金額計算（小計・諸経費15%・消費税10%・税込合計の整合性）
 - 顧客名・施工場所・工事件名・発行日の記載漏れ
-- 書類番号の記載
-- 合計金額と登録金額の一致
-- 単価×数量=金額の正確性
-- 見積書の場合：諸経費15%・消費税10%の計算正確性`;
+- 見積番号・書類番号の記載
+- 合計行の金額が御見積金額ボックスと一致しているか
+- 単価×数量=金額の正確性`;
 
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
@@ -2691,7 +2304,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:#e0e0e0;color:var(--text);
 .page{width:210mm;min-height:297mm;margin:0 auto;background:var(--white);padding:13mm 15mm;page-break-after:always;}
 .page:last-child{page-break-after:auto;}
 @media screen{.page{margin-bottom:24px;box-shadow:0 2px 16px rgba(0,0,0,.18);}}
-@media print{body{background:#fff;}.page{margin:0;padding:11mm 13mm;box-shadow:none;}}
+@media print{body{background:#fff;}.page{margin:0;padding:11mm 13mm;box-shadow:none;height:297mm;max-height:297mm;overflow:hidden;page-break-after:always;page-break-inside:avoid;}}
 .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid var(--text);padding-bottom:10px;margin-bottom:14px;}
 .company-name{font-family:'Shippori Mincho',serif;font-size:20px;font-weight:700;letter-spacing:.06em;}
 .co-prefix{font-size:15px;font-weight:400;margin-right:2px;}
@@ -2738,9 +2351,9 @@ tbody td:not(:first-child){text-align:right;}
 <style>${COMMON_CSS}
 .summary-box{background:var(--band)!important;color:var(--white)!important;padding:12px 22px;border-radius:3px;text-align:right;}
 .summary-box .s-label{font-size:11px;color:#e0e0e0!important;}
-.summary-box .total-amount{font-family:'Shippori Mincho',serif;font-size:28px;font-weight:700;color:var(--white)!important;margin-top:2px;}
+.summary-box .total-amount{font-family:'Shippori Mincho',serif;font-size:24px;font-weight:700;color:var(--white)!important;margin-top:2px;}
 .summary-box .tax-note{font-size:11px;color:#e0e0e0!important;margin-top:3px;}
-.client-name{font-family:'Shippori Mincho',serif;font-size:23px;font-weight:600;border-bottom:2px solid var(--text);padding-bottom:4px;padding-right:50px;min-width:200px;}
+.client-name{font-family:'Shippori Mincho',serif;font-size:20px;font-weight:600;border-bottom:2px solid var(--text);padding-bottom:4px;padding-right:50px;min-width:200px;}
 .site-name{font-size:12px;color:var(--text-sub);margin-top:6px;}
 .info-section{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px;}
 .page-badge{float:right;font-family:'Noto Sans JP',sans-serif;font-size:11px;font-weight:400;color:var(--text-sub);margin-top:2px;}
@@ -2755,7 +2368,7 @@ tbody td:not(:first-child){text-align:right;}
 1. ヘッダー（社名＋住所TEL担当 ／ 「御 見 積 書」タイトル＋見積番号・発行日・有効期限）
 2. 顧客名（〇〇様）＋御見積金額ボックス（summary-boxクラス・グレー帯）
 3. 工事帯（project-band：工事件名・施工場所）
-4. 工事項目テーブル（工事種別・数量・単位・金額・備考）
+4. 工事項目テーブル（工事種別・数量・単位・金額・備考）※各工事の金額は必ず内訳明細の小計と一致させること
 5. 合計ブロック（小計→諸経費15%→税抜合計→消費税10%→税込合計）
 6. 備考欄
 7. フッター
@@ -2766,7 +2379,13 @@ tbody td:not(:first-child){text-align:right;}
 3. 工事費合計テーブル（各小計→工事費合計）
 4. フッター
 
-各工事種別は【１．外壁塗装工事】のようなブロックで区切られています。koumoku-rowで見出し行を作り、明細行を続け、最後にsubtotal-rowで小計を表示してください。`;
+各工事種別は【１．外壁塗装工事】のようなブロックで区切られています。koumoku-rowで見出し行を作り、明細行を続け、最後にsubtotal-rowで小計を表示してください。
+
+## 重要：印刷レイアウト
+- 各ページは必ずA4（297mm）に収めること
+- 2枚目が多い場合はtbody tdのpaddingを6px 10pxに縮小し、font-sizeを11.5pxに下げて収める
+- テーブルがはみ出る場合はfont-sizeを段階的に小さくして対応（最小10.5px）
+- 工事費合計テーブルは2枚目の末尾・フッター直前に配置すること`;
 
   if(docType==='注文書') return `あなたは建設業の書類作成AIです。入力されたテキストから注文書のHTMLを生成してください。
 
@@ -2819,169 +2438,6 @@ tbody td:not(:first-child){text-align:right;}
 6. 合計ブロック（小計→消費税10%→税込合計）
 7. 振込先情報（bank-infoクラス・口座情報の欄を空白で用意）
 8. フッター`;
-}
-
-// ===== AIチャット機能 =====
-let aiChatContext = { view: 'dashboard', data: null };
-let aiChatHistory = [];
-
-const AI_CHAT_VIEWS = {
-  customers:  '顧客台帳',
-  projects:   '案件一覧',
-  documents:  '書類管理',
-  ledger:     '工事台帳',
-  payment:    '入金管理',
-  dashboard:  'ダッシュボード'
-};
-
-function toggleAiChat() {
-  const panel = document.getElementById('aiChatPanel');
-  const isOpen = panel.style.display === 'flex';
-  if(isOpen) { closeAiChat(); } else { openAiChat(); }
-}
-
-function openAiChat() {
-  const panel = document.getElementById('aiChatPanel');
-  panel.style.display = 'flex';
-  buildAiChatContext();
-  document.getElementById('aiChatInput').focus();
-}
-
-function closeAiChat() {
-  document.getElementById('aiChatPanel').style.display = 'none';
-}
-
-function buildAiChatContext() {
-  // 現在のビューに応じてコンテキストを構築
-  const view = aiChatContext.view;
-  const title = AI_CHAT_VIEWS[view] || 'アシスタント';
-  document.getElementById('aiChatTitle').textContent = `🤖 AIアシスタント（${title}）`;
-
-  // ウェルカムメッセージがない場合のみ表示
-  const log = document.getElementById('aiChatLog');
-  if(log.children.length === 0) {
-    const contextTips = {
-      customers: '顧客の検索・登録アドバイス、顧客情報の確認など何でも聞いてください。',
-      projects:  '案件のステータス確認・次のアクション提案・フォローアップ文案など。',
-      documents: '見積書の確認・書類チェック・Claude見積テキストの生成など。',
-      ledger:    '材料費・労務費の集計確認・原価管理のアドバイスなど。',
-      payment:   '未入金フォロー文の作成・入金状況の整理など。',
-      dashboard: '全体の状況確認・今日のToDoアドバイスなど。'
-    };
-    addAiChatBubble('ai', `こんにちは！${title}について何でも聞いてください。\n${contextTips[view]||''}`);
-  }
-}
-
-function addAiChatBubble(role, text) {
-  const log = document.getElementById('aiChatLog');
-  const div = document.createElement('div');
-  div.style.cssText = role==='user'
-    ? 'align-self:flex-end;background:var(--accent);color:#fff;border-radius:12px 12px 2px 12px;padding:9px 13px;max-width:85%;font-size:13px;line-height:1.7;white-space:pre-wrap;'
-    : 'align-self:flex-start;background:#f0f4ff;border:1px solid #c0cce8;border-radius:12px 12px 12px 2px;padding:9px 13px;max-width:92%;font-size:13px;line-height:1.7;white-space:pre-wrap;color:#1a1a1a;';
-  div.textContent = text;
-  log.appendChild(div);
-  log.scrollTop = log.scrollHeight;
-  return div;
-}
-
-function buildAiChatSystemPrompt() {
-  const view = aiChatContext.view;
-  // 現在のデータをコンテキストとして構築
-  let dataContext = '';
-
-  if(view === 'customers') {
-    const list = DB.customers.slice(0,20).map(c=>`・${c.id} ${c.name}（${c.tel||'TEL未登録'}）${c.note?'　備考:'+c.note:''}`).join('\n');
-    dataContext = `\n【顧客台帳（最大20件）】\n${list||'登録なし'}`;
-  } else if(view === 'projects') {
-    const list = DB.projects.slice(0,20).map(p=>{
-      const c = DB.customers.find(x=>x.id===p.cid);
-      return `・${p.no} ${c?.name||''} [${p.stat}] ${p.type||''} 見積:${p.est?Number(p.est).toLocaleString()+'円':'未設定'} ${p.note?'備考:'+p.note:''}`;
-    }).join('\n');
-    dataContext = `\n【案件一覧（最大20件）】\n${list||'登録なし'}\n今日：${today()}`;
-  } else if(view === 'documents') {
-    const list = DB.documents.slice(0,15).map(d=>`・${d.no} ${d.type} ${d.date||''} ${d.amount?Number(d.amount).toLocaleString()+'円':''}`).join('\n');
-    dataContext = `\n【書類一覧（最大15件）】\n${list||'登録なし'}`;
-  } else if(view === 'ledger') {
-    const pid = document.getElementById('ledgerProjectSelect')?.value;
-    const p = pid ? DB.projects.find(x=>x.id===pid) : null;
-    if(p) {
-      const mat = (DB.ledger.material[pid]||[]).map(r=>`・${r.name} ${r.qty}${r.unit} @${r.price} =${r.qty*r.price}円`).join('\n');
-      const wrk = (DB.ledger.worker[pid]||[]).map(r=>`・${r.name} ${r.qty}人工 @${r.price} =${r.qty*r.price}円`).join('\n');
-      dataContext = `\n【工事台帳：${p.no}】\n材料：\n${mat||'なし'}\n職人：\n${wrk||'なし'}`;
-    }
-  } else if(view === 'payment') {
-    const unpaid = DB.projects.filter(p=>p.stat==='未入金'||p.stat==='請求済み');
-    const list = unpaid.map(p=>{
-      const c = DB.customers.find(x=>x.id===p.cid);
-      return `・${p.no} ${c?.name||''} [${p.stat}] 請求:${p.inv?Number(p.inv).toLocaleString()+'円':''} 完了:${p.cdate||'未設定'}`;
-    }).join('\n');
-    dataContext = `\n【未入金・請求済み案件】\n${list||'なし'}\n今日：${today()}`;
-  }
-
-  return `あなたは株式会社アート・レイズ（大分県別府市・建設業）の業務アシスタントです。担当：亀井。
-現在画面：${AI_CHAT_VIEWS[view]||''}
-${dataContext}
-
-【単価マスター】職人24,000円/人工、時間3,000円/h。見積：材料費+労務費→小計→諸経費15%→税抜合計→消費税10%→税込合計。注文書・請求書は諸経費なし。
-【案件番号】AR-YYYY-XXXX形式
-
-簡潔・実用的に回答してください。書類テキストの生成を求められた場合は引き継ぎメモのフォーマットで出力してください。`;
-}
-
-async function sendAiChat() {
-  const input = document.getElementById('aiChatInput');
-  const msg = input.value.trim();
-  if(!msg) return;
-  if(!getApiKey()) { showToast('APIキーを設定してください'); openSettingsModal(); return; }
-
-  input.value = '';
-  input.style.height = '44px';
-  addAiChatBubble('user', msg);
-
-  // 送信ボタン無効化
-  const btn = document.getElementById('aiChatSendBtn');
-  btn.disabled = true;
-  btn.textContent = '⚙️';
-
-  // thinking表示
-  const thinking = addAiChatBubble('ai', '考え中...');
-  thinking.style.color = '#888';
-  thinking.style.fontStyle = 'italic';
-
-  // 会話履歴に追加
-  aiChatHistory.push({ role:'user', content: msg });
-  // 履歴は最大10往復
-  if(aiChatHistory.length > 20) aiChatHistory = aiChatHistory.slice(-20);
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1500,
-        system: buildAiChatSystemPrompt(),
-        messages: aiChatHistory
-      })
-    });
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const reply = data.content.map(b=>b.text||'').join('').trim();
-
-    // thinking削除→返答表示
-    thinking.remove();
-    addAiChatBubble('ai', reply);
-
-    // 履歴に追加
-    aiChatHistory.push({ role:'assistant', content: reply });
-
-  } catch(err) {
-    thinking.remove();
-    addAiChatBubble('ai', `エラーが発生しました: ${err.message}`);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '送信';
-  }
 }
 
 // ===== プレビュー・印刷 =====
