@@ -318,6 +318,9 @@ function savePhoto(){
   resizeImage(pendingDataURL,400).then(dataURL=>{
     photos.push({id,anken:currentAnken,place,phase:currentPhase,comment,date:dateStr,dataURL});
     saveData('arPhotos',photos);
+    if(photos.length>80){
+      alert('写真が80枚を超えました。古い写真を削除してください。');
+    }
     pendingDataURL=null;
     closeAddModal();
     renderPhotos();
