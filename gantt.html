@@ -98,13 +98,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);display:flex
   border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center;}
 .print-content{padding:12px;}
 
-@media print {
-  body > *:not(#printModal) { display:none !important; }
-  #printModal { position:static !important; background:none !important; display:block !important; }
-  .print-inner { width:100% !important; max-height:none !important; border-radius:0 !important; }
-  .print-toolbar { display:none !important; }
-  @page { size:A4 landscape; margin:8mm; }
-}
+
 </style>
 </head>
 <body>
@@ -177,20 +171,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);display:flex
   <div class="modal-sheet" id="modalSheet"></div>
 </div>
 
-<!-- 印刷プレビュー -->
-<div class="print-modal" id="printModal">
-  <div class="print-inner">
-    <div class="print-toolbar">
-      <div style="font-size:13px;font-weight:700;color:#333;">工程表プレビュー</div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <span style="font-size:10px;color:#888;">印刷ダイアログで「横向き」を選択してください</span>
-        <button onclick="window.print()" style="background:#1e2d40;border:none;color:#fff;padding:8px 16px;border-radius:8px;font-size:12px;cursor:pointer;">🖨️ 印刷 / PDF保存</button>
-        <button onclick="document.getElementById('printModal').classList.remove('show')" style="background:#eee;border:none;color:#333;padding:8px 12px;border-radius:8px;font-size:12px;cursor:pointer;">✕</button>
-      </div>
-    </div>
-    <div class="print-content" id="printContent"></div>
-  </div>
-</div>
+
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
@@ -917,31 +898,58 @@ function printGantt(){
   }
 
   const printDate = new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'});
-  const html = `
-    <div style="font-family:'Noto Sans JP','Hiragino Kaku Gothic Pro','Meiryo',sans-serif;color:#1e2d40;padding:8px;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px;border-bottom:2px solid #1e2d40;padding-bottom:6px;">
-        <div>
-          <div style="font-size:18px;font-weight:700;letter-spacing:2px;">工　程　表</div>
-          ${projectName ? `<div style="font-size:11px;margin-top:2px;">${projectName}${projectClient?' ／ '+projectClient:''}</div>` : ''}
-          <div style="font-size:10px;color:#666;margin-top:2px;">開始：${startDateStr||'未設定'}　${weeks}週間（${days}日）　${ganttRows.length}工種</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:11px;font-weight:700;">株式会社アート・レイズ</div>
-          <div style="font-size:9px;color:#666;">作成日：${printDate}</div>
-        </div>
-      </div>
-      <div style="overflow-x:auto;">
-        <svg width="${totalW}" height="${totalH}" xmlns="http://www.w3.org/2000/svg" style="display:block;">
-          ${svgHdr}
-          ${svgRows}
-          ${svgToday}
-          <rect x="0" y="0" width="${totalW}" height="${totalH}" fill="none" stroke="#999" stroke-width="1"/>
-        </svg>
-      </div>
-    </div>`;
 
-  document.getElementById('printContent').innerHTML = html;
-  document.getElementById('printModal').classList.add('show');
+  // ファイル名生成
+  const now = new Date();
+  const fname = `工程表_${projectName||'アートレイズ'}_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.html`;
+
+  // 印刷用HTMLを生成してダウンロード
+  const fullHtml = `<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>工程表 - ${projectName||'アートレイズ'}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&family=Shippori+Mincho:wght@600;700&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+  body { font-family:'Noto Sans JP','Hiragino Kaku Gothic Pro','Meiryo',sans-serif; background:#e0e0e0; }
+  .page { width:297mm; min-height:210mm; margin:0 auto; background:#fff; padding:12mm; }
+  @page { size:A4 landscape; margin:0; }
+  @media print { body { background:#fff; } .page { margin:0; box-shadow:none; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px;border-bottom:2px solid #1e2d40;padding-bottom:6px;">
+    <div>
+      <div style="font-family:'Shippori Mincho',serif;font-size:22px;font-weight:700;letter-spacing:4px;color:#1e2d40;">工　程　表</div>
+      ${projectName ? `<div style="font-size:12px;margin-top:3px;color:#333;">${projectName}${projectClient?' ／ '+projectClient:''}</div>` : ''}
+      <div style="font-size:10px;color:#666;margin-top:2px;">開始：${startDateStr||'未設定'}　${weeks}週間（${days}日）　${ganttRows.length}工種</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:12px;font-weight:700;color:#1e2d40;">株式会社アート・レイズ</div>
+      <div style="font-size:10px;color:#666;">〒874-0000　大分県別府市上原町13番25号</div>
+      <div style="font-size:10px;color:#666;">作成日：${printDate}</div>
+    </div>
+  </div>
+  <div>
+    <svg width="${totalW}" height="${totalH}" xmlns="http://www.w3.org/2000/svg" style="display:block;max-width:100%;">
+      ${svgHdr}
+      ${svgRows}
+      ${svgToday}
+      <rect x="0" y="0" width="${totalW}" height="${totalH}" fill="none" stroke="#999" stroke-width="1"/>
+    </svg>
+  </div>
+</div>
+</body>
+</html>`;
+
+  const blob = new Blob([fullHtml], {type:'text/html;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = fname; a.click();
+  URL.revokeObjectURL(url);
+  showToast('📥 ダウンロードしました！Chromeで開いて印刷してください');
 }
 
 // ===== TOAST =====
