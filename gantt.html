@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>工程表 | アート・レイズ</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1e2d40">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#eeebe5; --navy:#1e2d40; --navy2:#2a3f5a;
+  --accent:#c8a96e; --text:#1e2d40; --text2:#5a6a7a;
+  --white:#ffffff; --border:#d0ccc4; --surface:#ffffff;
+  --surface2:#f5f2ed; --red:#c0392b; --green:#1a7a30;
+  --blue:#1a5fb4; --muted:#8a9aaa;
+  --font:'Noto Sans JP',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);display:flex;flex-direction:column;}
+
+/* TOPBAR */
+.topbar{height:52px;background:var(--navy);display:flex;align-items:center;
+  justify-content:space-between;padding:0 14px;flex-shrink:0;
+  padding-top:env(safe-area-inset-top,0px);}
+.topbar-title{font-size:15px;font-weight:700;color:var(--white);}
+.topbar-back{color:var(--accent);font-size:13px;font-weight:700;
+  background:transparent;border:none;cursor:pointer;padding:6px 0;}
+
+/* TOOLBAR */
+.toolbar{background:var(--surface);border-bottom:1px solid var(--border);
+  padding:8px 12px;flex-shrink:0;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.toolbar-group{display:flex;align-items:center;gap:4px;}
+.toolbar-label{font-size:10px;color:var(--muted);white-space:nowrap;}
+.tb-input{background:var(--bg);border:1px solid var(--border);border-radius:6px;
+  padding:5px 8px;font-size:12px;color:var(--text);font-family:var(--font);outline:none;}
+.tb-input:focus{border-color:var(--accent);}
+.tb-btn{border:none;border-radius:8px;padding:7px 11px;font-size:11px;font-weight:700;
+  cursor:pointer;font-family:var(--font);white-space:nowrap;touch-action:manipulation;}
+.tb-btn:active{opacity:.75;}
+.tb-btn-add{background:rgba(200,169,110,.15);border:1px solid rgba(200,169,110,.4);color:#8a6a20;}
+.tb-btn-undo{background:rgba(26,91,180,.12);border:1px solid rgba(26,91,180,.3);color:var(--blue);}
+.tb-btn-reset{background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.3);color:var(--red);}
+.tb-btn-send{background:var(--navy);border:none;color:var(--white);}
+.tb-btn-print{background:rgba(26,122,48,.12);border:1px solid rgba(26,122,48,.3);color:var(--green);}
+
+/* 案件情報バー */
+.info-bar{background:var(--surface2);border-bottom:1px solid var(--border);
+  padding:6px 12px;flex-shrink:0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.info-input{background:var(--white);border:1px solid var(--border);border-radius:6px;
+  padding:5px 10px;font-size:12px;color:var(--text);font-family:var(--font);outline:none;flex:1;min-width:120px;}
+.info-input:focus{border-color:var(--accent);}
+.info-label{font-size:10px;color:var(--muted);white-space:nowrap;}
+
+/* CHART */
+.chart-wrap{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.chart-header-wrap{overflow:hidden;flex-shrink:0;background:var(--surface2);}
+.chart-body-wrap{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);
+  z-index:400;align-items:flex-end;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal-sheet{background:var(--surface);border-radius:18px 18px 0 0;
+  padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));
+  width:100%;max-height:85vh;overflow-y:auto;}
+.modal-title{font-size:15px;font-weight:700;margin-bottom:14px;color:var(--navy);}
+.form-label{font-size:11px;color:var(--muted);margin-bottom:4px;display:block;letter-spacing:.5px;}
+.form-input{width:100%;background:var(--bg);border:1px solid var(--border);
+  border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;
+  font-family:var(--font);outline:none;}
+.form-input:focus{border-color:var(--accent);}
+.form-group{margin-bottom:12px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.btn-row{display:flex;gap:8px;margin-top:14px;}
+.btn{border:none;border-radius:10px;padding:12px 16px;font-size:14px;font-weight:700;
+  font-family:var(--font);cursor:pointer;flex:1;touch-action:manipulation;}
+.btn-primary{background:var(--navy);color:var(--white);}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+
+/* TOAST */
+.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-80px);
+  background:var(--navy);color:var(--white);padding:10px 20px;border-radius:20px;
+  font-size:13px;font-weight:700;z-index:9999;transition:transform .3s;
+  white-space:nowrap;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* 印刷プレビュー */
+.print-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);
+  z-index:500;flex-direction:column;align-items:center;justify-content:center;}
+.print-modal.show{display:flex;}
+.print-inner{background:#fff;border-radius:12px;width:min(98vw,1000px);
+  max-height:92vh;overflow:auto;position:relative;}
+.print-toolbar{position:sticky;top:0;background:#fff;padding:10px 16px;
+  border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center;}
+.print-content{padding:12px;}
+
+@media print {
+  body > *:not(#printModal) { display:none !important; }
+  #printModal { position:static !important; background:none !important; display:block !important; }
+  .print-inner { width:100% !important; max-height:none !important; border-radius:0 !important; }
+  .print-toolbar { display:none !important; }
+  @page { size:A4 landscape; margin:8mm; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar" style="padding-top:calc(8px + env(safe-area-inset-top,0px));">
+  <button class="topbar-back" onclick="history.back()">← 戻る</button>
+  <div class="topbar-title">📅 工程表</div>
+  <div style="width:60px;"></div>
+</div>
+
+<!-- 案件情報バー -->
+<div class="info-bar">
+  <span class="info-label">案件名</span>
+  <input class="info-input" id="projectName" placeholder="例：さくら苑 床リフォーム工事" style="max-width:220px;">
+  <span class="info-label">担当者</span>
+  <input class="info-input" id="projectClient" placeholder="例：西 俊至 様" style="max-width:150px;">
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="toolbar-group">
+    <span class="toolbar-label">開始日</span>
+    <input type="date" id="ganttStartDate" class="tb-input" style="width:130px;" onchange="renderGantt()">
+  </div>
+  <div class="toolbar-group">
+    <span class="toolbar-label">表示</span>
+    <select id="ganttWeeks" class="tb-input" style="width:68px;" onchange="renderGantt()">
+      <option value="2">2週</option>
+      <option value="3">3週</option>
+      <option value="4">4週</option>
+      <option value="5" selected>5週</option>
+      <option value="6">6週</option>
+      <option value="8">8週</option>
+    </select>
+  </div>
+  <div class="toolbar-group">
+    <span class="toolbar-label">列幅</span>
+    <select id="ganttColW" class="tb-input" style="width:60px;" onchange="renderGantt()">
+      <option value="24">小</option>
+      <option value="32" selected>中</option>
+      <option value="44">大</option>
+    </select>
+  </div>
+  <label class="toolbar-group" style="cursor:pointer;">
+    <input type="checkbox" id="ganttShowProgress" onchange="renderGantt()" style="width:14px;height:14px;">
+    <span class="toolbar-label" style="margin-left:3px;">進捗</span>
+  </label>
+  <div style="flex:1;"></div>
+  <button class="tb-btn tb-btn-add" onclick="addGanttRow()">＋ 追加</button>
+  <button class="tb-btn tb-btn-undo" id="ganttUndoBtn" onclick="ganttUndo()" style="opacity:.35;">↩️</button>
+  <button class="tb-btn tb-btn-reset" onclick="showResetConfirm()">🗑</button>
+  <button class="tb-btn tb-btn-send" onclick="sendToClaude()">📋 Claudeに送る</button>
+  <button class="tb-btn tb-btn-print" onclick="printGantt()">🖨️ 印刷</button>
+</div>
+
+<!-- CHART -->
+<div class="chart-wrap">
+  <div class="chart-header-wrap" id="ganttHeaderWrap">
+    <div id="ganttHeader"></div>
+  </div>
+  <div class="chart-body-wrap" id="ganttBodyWrap" onscroll="syncGanttScroll(this)">
+    <div id="ganttBody"></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal-sheet" id="modalSheet"></div>
+</div>
+
+<!-- 印刷プレビュー -->
+<div class="print-modal" id="printModal">
+  <div class="print-inner">
+    <div class="print-toolbar">
+      <div style="font-size:13px;font-weight:700;color:#333;">工程表プレビュー</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span style="font-size:10px;color:#888;">印刷ダイアログで「横向き」を選択してください</span>
+        <button onclick="window.print()" style="background:#1e2d40;border:none;color:#fff;padding:8px 16px;border-radius:8px;font-size:12px;cursor:pointer;">🖨️ 印刷 / PDF保存</button>
+        <button onclick="document.getElementById('printModal').classList.remove('show')" style="background:#eee;border:none;color:#333;padding:8px 12px;border-radius:8px;font-size:12px;cursor:pointer;">✕</button>
+      </div>
+    </div>
+    <div class="print-content" id="printContent"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== データ =====
+let ganttRows = [];
+let _ganttUndoStack = [];
+const _GANTT_UNDO_MAX = 30;
+const STORAGE_KEY = 'artRaise_gantt';
+
+const ganttColors = [
+  '#c8a96e','#1a5fb4','#1a7a30','#8a3db8','#c0392b',
+  '#2a8a8a','#e05c2a','#5a8a20','#884488','#2a6a9a',
+  '#aa6622','#446688','#228844','#664488','#886622'
+];
+
+const GANTT_TRADES = [
+  '解体工事','電気工事','設備工事','木工事','ボード工事',
+  'クロス工事','床工事','塗装工事','建具工事','照明器具',
+  '家具設置','清掃','検査','施主確認','予備'
+];
+
+// ===== 保存・読込 =====
+function saveGantt(){
+  _ganttUndoStack.push(JSON.stringify(ganttRows));
+  if(_ganttUndoStack.length > _GANTT_UNDO_MAX) _ganttUndoStack.shift();
+  updateUndoBtn();
+  const data = {
+    rows: ganttRows,
+    startDate: document.getElementById('ganttStartDate')?.value,
+    weeks: document.getElementById('ganttWeeks')?.value,
+    colW: document.getElementById('ganttColW')?.value,
+    projectName: document.getElementById('projectName')?.value,
+    projectClient: document.getElementById('projectClient')?.value,
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function loadGantt(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw) return;
+  try {
+    const data = JSON.parse(raw);
+    ganttRows = data.rows || [];
+    if(data.startDate) document.getElementById('ganttStartDate').value = data.startDate;
+    if(data.weeks)     document.getElementById('ganttWeeks').value     = data.weeks;
+    if(data.colW)      document.getElementById('ganttColW').value      = data.colW;
+    if(data.projectName)   document.getElementById('projectName').value   = data.projectName;
+    if(data.projectClient) document.getElementById('projectClient').value = data.projectClient;
+  } catch(e){}
+}
+
+function updateUndoBtn(){
+  const btn = document.getElementById('ganttUndoBtn');
+  if(btn) btn.style.opacity = _ganttUndoStack.length > 0 ? '1' : '0.35';
+}
+
+function ganttUndo(){
+  if(_ganttUndoStack.length === 0){ showToast('これ以上戻れません'); return; }
+  ganttRows = JSON.parse(_ganttUndoStack.pop());
+  updateUndoBtn();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ rows:ganttRows,
+    startDate:document.getElementById('ganttStartDate')?.value,
+    weeks:document.getElementById('ganttWeeks')?.value,
+    colW:document.getElementById('ganttColW')?.value,
+    projectName:document.getElementById('projectName')?.value,
+    projectClient:document.getElementById('projectClient')?.value,
+  }));
+  renderGantt();
+  showToast('↩️ 1つ戻しました');
+}
+
+// ===== 工種追加・編集・削除 =====
+function addGanttRow(){
+  if(ganttRows.length >= 15){ showToast('最大15工種です'); return; }
+  const trade = GANTT_TRADES[ganttRows.length] || '工種'+(ganttRows.length+1);
+  ganttRows.push({ id:'g'+Date.now(), trade, start:1, end:3,
+    color:ganttColors[ganttRows.length % ganttColors.length], progress:0, memo:'', bars:[] });
+  saveGantt(); renderGantt();
+}
+
+function deleteGanttRow(idx){
+  ganttRows.splice(idx, 1);
+  saveGantt(); renderGantt();
+}
+
+function updateGanttTrade(idx, val){
+  ganttRows[idx].trade = val; saveGantt();
+}
+let _tradeTimer = null;
+function updateGanttTradeDebounced(idx, val){
+  ganttRows[idx].trade = val;
+  clearTimeout(_tradeTimer);
+  _tradeTimer = setTimeout(() => saveGantt(), 400);
+}
+
+// ===== レンダリング =====
+function renderGantt(){
+  const header = document.getElementById('ganttHeader');
+  const body   = document.getElementById('ganttBody');
+  if(!header || !body) return;
+
+  const startDateStr = document.getElementById('ganttStartDate')?.value;
+  const weeks   = parseInt(document.getElementById('ganttWeeks')?.value || '5');
+  const colW    = parseInt(document.getElementById('ganttColW')?.value || '32');
+  const showProg= document.getElementById('ganttShowProgress')?.checked || false;
+  const days    = weeks * 7;
+  const labelW  = 100;
+  const rowH    = 52;
+  const startDate = startDateStr ? new Date(startDateStr) : new Date();
+  const today   = new Date();
+
+  // 日付ラベル生成
+  const dayLabels = [];
+  const weekLabels = [];
+  for(let d = 0; d < days; d++){
+    const dt = new Date(startDate); dt.setDate(dt.getDate() + d);
+    const dow = dt.getDay();
+    dayLabels.push({
+      day:dt.getDate(), mon:dt.getMonth()+1,
+      dow:['日','月','火','水','木','金','土'][dow],
+      isWeekend:dow===0||dow===6, date:dt
+    });
+    if(d===0 || dow===1) weekLabels.push({idx:d, label:(dt.getMonth()+1)+'/'+dt.getDate()+'〜'});
+  }
+
+  const todayDiff = Math.round((today - startDate) / (1000*60*60*24));
+  const todayX = labelW + todayDiff * colW + colW/2;
+
+  // ===== ヘッダー =====
+  let hHtml = `<div style="display:flex;position:relative;width:${labelW+days*colW}px;">`;
+  // 週行
+  hHtml += `<div style="display:flex;width:${labelW+days*colW}px;background:#f0ede8;border-bottom:1px solid var(--border);">`;
+  hHtml += `<div style="width:${labelW}px;flex-shrink:0;font-size:10px;font-weight:700;color:var(--muted);padding:5px 8px;border-right:1px solid var(--border);">工種</div>`;
+  hHtml += `<div style="position:relative;height:20px;flex:1;">`;
+  weekLabels.forEach(w=>{
+    hHtml += `<div style="position:absolute;left:${w.idx*colW}px;font-size:9px;color:var(--accent);padding:3px 4px;font-weight:700;white-space:nowrap;">${w.label}</div>`;
+  });
+  hHtml += `</div></div>`;
+  // 日付行
+  hHtml += `<div style="display:flex;width:${labelW+days*colW}px;background:var(--surface);border-bottom:2px solid var(--navy);">`;
+  hHtml += `<div style="width:${labelW}px;flex-shrink:0;border-right:1px solid var(--border);"></div>`;
+  dayLabels.forEach((d,i)=>{
+    const isToday = i === todayDiff;
+    const bg  = isToday ? 'rgba(200,169,110,.25)' : d.isWeekend ? 'rgba(192,57,43,.06)' : 'transparent';
+    const col = isToday ? '#8a6a20' : d.isWeekend ? '#c0392b' : 'var(--muted)';
+    const fw  = isToday ? '700' : '400';
+    hHtml += `<div style="width:${colW}px;flex-shrink:0;text-align:center;font-size:9px;
+      color:${isToday?'#8a6a20':d.isWeekend?'#c0392b':'var(--muted)'};
+      background:${bg};font-weight:${fw};padding:2px 0;border-right:1px solid var(--border);">
+      <div>${d.mon}/${d.day}</div><div style="font-size:8px;">${d.dow}</div>
+    </div>`;
+  });
+  hHtml += `</div></div>`;
+  header.innerHTML = hHtml;
+  header.style.width = (labelW + days * colW) + 'px';
+
+  // ===== ボディ =====
+  let bHtml = `<div style="position:relative;width:${labelW+days*colW}px;">`;
+
+  if(ganttRows.length === 0){
+    bHtml += `<div style="text-align:center;padding:50px 20px;color:var(--muted);font-size:13px;">
+      ＋ 追加 ボタンで工程を追加してください<br>
+      <span style="font-size:11px;">Claudeから工程データを貼り付けることもできます</span>
+    </div>`;
+  }
+
+  ganttRows.forEach((row, ri)=>{
+    const allBars = [
+      {isMain:true, start:row.start, end:row.end, color:row.color, label:row.label||'', prog:row.progress||0, bi:-1}
+    ];
+    if(Array.isArray(row.bars)) row.bars.forEach((b,bi)=>allBars.push({
+      isMain:false, start:b.start, end:b.end, color:b.color||row.color, label:b.label||'', bi
+    }));
+
+    bHtml += `<div style="display:flex;align-items:center;border-bottom:1px solid var(--border);height:${rowH}px;position:relative;background:${ri%2===0?'#fff':'#faf8f5'};">`;
+    // ラベル列
+    bHtml += `<div style="width:${labelW}px;flex-shrink:0;padding:4px 8px;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;gap:2px;">
+      <div style="display:flex;align-items:center;gap:5px;">
+        <div style="width:8px;height:8px;border-radius:2px;background:${row.color};flex-shrink:0;"></div>
+        <input value="${row.trade}"
+          oninput="updateGanttTradeDebounced(${ri},this.value)"
+          onblur="updateGanttTrade(${ri},this.value)"
+          style="background:transparent;border:none;color:var(--text);font-size:12px;font-weight:600;outline:none;font-family:var(--font);width:100%;">
+      </div>
+      ${showProg ? `<div style="display:flex;align-items:center;gap:4px;">
+        <div style="flex:1;background:var(--border);border-radius:3px;height:4px;overflow:hidden;">
+          <div style="width:${row.progress||0}%;height:100%;background:${row.color};"></div>
+        </div>
+        <span style="font-size:9px;color:var(--muted);">${row.progress||0}%</span>
+      </div>` : ''}
+      <div style="display:flex;gap:4px;">
+        <button onclick="openGanttEdit(${ri})" style="background:transparent;border:none;color:var(--blue);font-size:9px;cursor:pointer;padding:0;">✏️編集</button>
+        <button onclick="deleteGanttRow(${ri})" style="background:transparent;border:none;color:var(--red);font-size:9px;cursor:pointer;padding:0;">削除</button>
+      </div>
+    </div>`;
+
+    // グリッドエリア
+    bHtml += `<div style="position:relative;height:${rowH}px;width:${days*colW}px;flex-shrink:0;">`;
+    dayLabels.forEach((d,i)=>{
+      const isToday = i === todayDiff;
+      const bg = isToday ? 'rgba(200,169,110,.1)' : d.isWeekend ? 'rgba(192,57,43,.04)' : 'transparent';
+      bHtml += `<div style="position:absolute;left:${i*colW}px;top:0;width:${colW}px;height:100%;background:${bg};border-right:1px solid rgba(0,0,0,.04);pointer-events:none;"></div>`;
+    });
+
+    const bSlotTop = [6, 28];
+    const bSlotH   = 18;
+    allBars.forEach((b, slotIdx)=>{
+      const slot   = slotIdx % 2;
+      const bTop   = bSlotTop[slot];
+      const bLeft  = (b.start - 1) * colW;
+      const bWidth = Math.max(colW * 0.5 - 2, (b.end - b.start) * colW - 2);
+      const dur    = b.end - b.start;
+      const dm = b.isMain ? `startGanttDrag(event,${ri},'move')` : `startGanttDragSub(event,${ri},${b.bi},'move')`;
+      const dl = b.isMain ? `startGanttDrag(event,${ri},'left')` : `startGanttDragSub(event,${ri},${b.bi},'left')`;
+      const dr = b.isMain ? `startGanttDrag(event,${ri},'right')` : `startGanttDragSub(event,${ri},${b.bi},'right')`;
+      const dmt = b.isMain ? `startGanttDragTouch(event,${ri},'move')` : `startGanttDragSubTouch(event,${ri},${b.bi},'move')`;
+      const dlt = b.isMain ? `startGanttDragTouch(event,${ri},'left')` : `startGanttDragSubTouch(event,${ri},${b.bi},'left')`;
+      const drt = b.isMain ? `startGanttDragTouch(event,${ri},'right')` : `startGanttDragSubTouch(event,${ri},${b.bi},'right')`;
+      const da  = b.isMain ? `data-idx="${ri}"` : `data-idx="${ri}" data-bidx="${b.bi}"`;
+      const bc  = b.isMain ? 'gantt-bar' : 'gantt-bar-sub';
+      bHtml += `<div class="${bc}" ${da}
+        style="position:absolute;left:${bLeft}px;top:${bTop}px;height:${bSlotH}px;width:${bWidth}px;
+          background:${b.color};border-radius:4px;cursor:grab;user-select:none;touch-action:none;z-index:3;
+          box-shadow:0 1px 4px rgba(0,0,0,.15);"
+        onmousedown="${dm}" ontouchstart="${dmt}">
+        ${b.isMain && showProg ? `<div style="position:absolute;left:0;top:0;height:100%;width:${b.prog}%;background:rgba(0,0,0,.15);border-radius:4px;pointer-events:none;"></div>` : ''}
+        <div style="position:absolute;left:${bWidth+4}px;top:50%;transform:translateY(-50%);
+          font-size:9px;font-weight:700;color:var(--text);white-space:nowrap;pointer-events:none;z-index:1;">
+          ${b.label || (dur%1===0 ? dur+'日' : dur*2+'半日')}
+        </div>
+        <div style="position:absolute;left:0;top:0;width:10px;height:100%;cursor:col-resize;z-index:2;"
+          onmousedown="${dl}" ontouchstart="${dlt}"></div>
+        <div style="position:absolute;right:0;top:0;width:10px;height:100%;cursor:col-resize;z-index:2;"
+          onmousedown="${dr}" ontouchstart="${drt}"></div>
+      </div>`;
+    });
+    bHtml += `</div></div>`;
+  });
+
+  // 今日ライン
+  if(todayDiff >= 0 && todayDiff < days){
+    bHtml += `<div style="position:absolute;left:${todayX}px;top:0;bottom:0;width:2px;background:var(--accent);opacity:.7;pointer-events:none;z-index:5;">
+      <div style="position:sticky;top:0;background:var(--accent);color:#fff;font-size:8px;font-weight:700;padding:2px 4px;border-radius:3px;white-space:nowrap;margin-left:-12px;">今日</div>
+    </div>`;
+  }
+
+  bHtml += `</div>`;
+  body.innerHTML = bHtml;
+  body.style.minWidth = (labelW + days * colW) + 'px';
+  attachGanttDragEvents();
+}
+
+function syncGanttScroll(el){
+  const header = document.getElementById('ganttHeader');
+  if(header) header.scrollLeft = el.scrollLeft;
+}
+
+// ===== ドラッグ =====
+function attachGanttDragEvents(){
+  window._ganttDrag = null;
+  window._ganttColW = parseInt(document.getElementById('ganttColW')?.value || '32');
+}
+
+function startGanttDrag(e, idx, type){
+  e.preventDefault(); e.stopPropagation();
+  window._ganttDrag = {idx, type, startX:e.clientX, origStart:ganttRows[idx].start, origEnd:ganttRows[idx].end};
+  window._ganttColW = parseInt(document.getElementById('ganttColW')?.value || '32');
+  document.onmousemove = onGanttDrag;
+  document.onmouseup   = endGanttDrag;
+}
+function startGanttDragTouch(e, idx, type){
+  if(e.touches.length !== 1) return;
+  e.stopPropagation();
+  const t = e.touches[0];
+  window._ganttDrag = {idx, type, startX:t.clientX, origStart:ganttRows[idx].start, origEnd:ganttRows[idx].end};
+  window._ganttColW = parseInt(document.getElementById('ganttColW')?.value || '32');
+  document.ontouchmove = onGanttDragTouch;
+  document.ontouchend  = endGanttDragTouch;
+}
+function onGanttDrag(e){ applyGanttDrag(e.clientX); }
+function onGanttDragTouch(e){ if(e.touches.length===1) applyGanttDrag(e.touches[0].clientX); }
+
+function applyGanttDrag(clientX){
+  const d = window._ganttDrag;
+  if(!d) return;
+  const colW  = window._ganttColW;
+  const weeks = parseInt(document.getElementById('ganttWeeks')?.value || '5');
+  const maxDay = weeks * 7;
+  const halfW = colW * 0.5;
+  const deltaHalf = Math.round((clientX - d.startX) / halfW);
+  const delta = deltaHalf * 0.5;
+  const row = ganttRows[d.idx];
+  if(d.type === 'move'){
+    const dur = d.origEnd - d.origStart;
+    let ns = Math.max(0.5, Math.min(maxDay - dur, d.origStart + delta));
+    ns = Math.round(ns * 2) / 2;
+    row.start = ns; row.end = Math.round((ns + dur) * 2) / 2;
+  } else if(d.type === 'left'){
+    let ns = Math.max(0.5, Math.min(d.origEnd - 0.5, d.origStart + delta));
+    row.start = Math.round(ns * 2) / 2;
+  } else if(d.type === 'right'){
+    let ne = Math.max(d.origStart + 0.5, Math.min(maxDay, d.origEnd + delta));
+    row.end = Math.round(ne * 2) / 2;
+  }
+  renderGanttBarOnly(d.idx);
+}
+function endGanttDrag(){ saveGantt(); renderGantt(); document.onmousemove=null; document.onmouseup=null; window._ganttDrag=null; }
+function endGanttDragTouch(){ saveGantt(); renderGantt(); document.ontouchmove=null; document.ontouchend=null; window._ganttDrag=null; }
+
+function startGanttDragSub(e, rowIdx, barIdx, type){
+  e.preventDefault(); e.stopPropagation();
+  const b = ganttRows[rowIdx].bars[barIdx];
+  window._ganttDrag = {rowIdx, barIdx, type, startX:e.clientX, origStart:b.start, origEnd:b.end, isSub:true};
+  window._ganttColW = parseInt(document.getElementById('ganttColW')?.value || '32');
+  document.onmousemove = onGanttDragSub;
+  document.onmouseup   = endGanttDragSub;
+}
+function startGanttDragSubTouch(e, rowIdx, barIdx, type){
+  if(e.touches.length !== 1) return;
+  e.stopPropagation();
+  const t = e.touches[0];
+  const b = ganttRows[rowIdx].bars[barIdx];
+  window._ganttDrag = {rowIdx, barIdx, type, startX:t.clientX, origStart:b.start, origEnd:b.end, isSub:true};
+  window._ganttColW = parseInt(document.getElementById('ganttColW')?.value || '32');
+  document.ontouchmove = onGanttDragSubTouch;
+  document.ontouchend  = endGanttDragSubTouch;
+}
+function onGanttDragSub(e){ applyGanttDragSub(e.clientX); }
+function onGanttDragSubTouch(e){ if(e.touches.length===1) applyGanttDragSub(e.touches[0].clientX); }
+function applyGanttDragSub(clientX){
+  const d = window._ganttDrag;
+  if(!d || !d.isSub) return;
+  const colW = window._ganttColW;
+  const weeks = parseInt(document.getElementById('ganttWeeks')?.value || '5');
+  const maxDay = weeks * 7;
+  const delta = Math.round((clientX - d.startX) / (colW * 0.5)) * 0.5;
+  const b = ganttRows[d.rowIdx].bars[d.barIdx];
+  if(d.type === 'move'){
+    const dur = d.origEnd - d.origStart;
+    let ns = Math.max(0.5, Math.min(maxDay - dur, d.origStart + delta));
+    ns = Math.round(ns * 2) / 2;
+    b.start = ns; b.end = Math.round((ns + dur) * 2) / 2;
+  } else if(d.type === 'left'){
+    b.start = Math.round(Math.max(0.5, Math.min(d.origEnd - 0.5, d.origStart + delta)) * 2) / 2;
+  } else if(d.type === 'right'){
+    b.end = Math.round(Math.max(d.origStart + 0.5, Math.min(maxDay, d.origEnd + delta)) * 2) / 2;
+  }
+  renderGanttBarOnly(d.rowIdx, d.barIdx);
+}
+function endGanttDragSub(){ saveGantt(); renderGantt(); document.onmousemove=null; document.onmouseup=null; window._ganttDrag=null; }
+function endGanttDragSubTouch(){ saveGantt(); renderGantt(); document.ontouchmove=null; document.ontouchend=null; window._ganttDrag=null; }
+
+function renderGanttBarOnly(idx, bidx){
+  const colW = window._ganttColW || 32;
+  const row  = ganttRows[idx];
+  let bar, start, end;
+  if(bidx === undefined || bidx < 0){
+    bar = document.querySelector(`.gantt-bar[data-idx="${idx}"]`);
+    start = row.start; end = row.end;
+  } else {
+    bar = document.querySelector(`.gantt-bar-sub[data-idx="${idx}"][data-bidx="${bidx}"]`);
+    if(!bar || !row.bars || !row.bars[bidx]) return;
+    start = row.bars[bidx].start; end = row.bars[bidx].end;
+  }
+  if(!bar) return;
+  const bWidth = Math.max(colW * 0.5 - 2, (end - start) * colW - 2);
+  bar.style.left  = ((start - 1) * colW) + 'px';
+  bar.style.width = bWidth + 'px';
+  const lbl = bar.querySelector('div[style*="z-index:1"]');
+  if(lbl){
+    lbl.style.left = (bWidth + 4) + 'px';
+    const dur = end - start;
+    lbl.textContent = dur%1===0 ? dur+'日' : (dur*2)+'半日';
+  }
+}
+
+// ===== 編集モーダル =====
+function openGanttEdit(idx){
+  const row = ganttRows[idx];
+  const startDateStr = document.getElementById('ganttStartDate')?.value;
+  const startDate = startDateStr ? new Date(startDateStr) : new Date();
+  const toDateStr = (dayNum) => {
+    const dt = new Date(startDate); dt.setDate(dt.getDate() + dayNum - 1);
+    return dt.toISOString().split('T')[0];
+  };
+
+  document.getElementById('modalSheet').innerHTML = `
+    <div class="modal-title">📅 ${row.trade}</div>
+    <div class="form-group"><label class="form-label">工種名</label>
+      <input class="form-input" id="ge_trade" value="${row.trade}"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">開始日</label>
+        <input class="form-input" type="date" id="ge_start" value="${toDateStr(row.start)}"></div>
+      <div class="form-group"><label class="form-label">終了日</label>
+        <input class="form-input" type="date" id="ge_end" value="${toDateStr(row.end)}"></div>
+    </div>
+    <div class="form-group"><label class="form-label">進捗率（${row.progress||0}%）</label>
+      <input class="form-input" type="range" id="ge_prog" value="${row.progress||0}" min="0" max="100" step="5"
+        oninput="this.previousElementSibling.textContent='進捗率（'+this.value+'%）'">
+    </div>
+    <div class="form-group"><label class="form-label">バーの色</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        ${ganttColors.map(c=>`<div onclick="document.querySelectorAll('.gc-sel').forEach(e=>e.style.outline='none');this.style.outline='2px solid var(--navy)';document.getElementById('ge_color').value='${c}'"
+          class="gc-sel" style="width:28px;height:28px;background:${c};border-radius:4px;cursor:pointer;${row.color===c?'outline:2px solid var(--navy);':''}"></div>`).join('')}
+        <input type="hidden" id="ge_color" value="${row.color}">
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">バー内テキスト</label>
+      <input class="form-input" id="ge_label" value="${row.label||''}" placeholder="空欄=日数表示"></div>
+    <div class="form-group"><label class="form-label">メモ（業者名・注意事項など）</label>
+      <input class="form-input" id="ge_memo" value="${row.memo||''}" placeholder="例：○○設備工業　要事前確認"></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeModal()">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveGanttEdit(${idx})">保存</button>
+    </div>`;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function saveGanttEdit(idx){
+  const startDateStr = document.getElementById('ganttStartDate')?.value;
+  const startDate = startDateStr ? new Date(startDateStr) : new Date();
+  const toDay = (dateStr, fallback) => {
+    if(!dateStr) return fallback;
+    const dt = new Date(dateStr);
+    return Math.max(0.5, Math.round(((dt - startDate)/(1000*60*60*24) + 1) * 2) / 2);
+  };
+  ganttRows[idx].trade    = document.getElementById('ge_trade')?.value || ganttRows[idx].trade;
+  const ns = toDay(document.getElementById('ge_start')?.value, ganttRows[idx].start);
+  const ne = toDay(document.getElementById('ge_end')?.value,   ganttRows[idx].end);
+  ganttRows[idx].start    = ns;
+  ganttRows[idx].end      = Math.max(ns + 0.5, ne);
+  ganttRows[idx].color    = document.getElementById('ge_color')?.value || ganttColors[0];
+  ganttRows[idx].label    = document.getElementById('ge_label')?.value || '';
+  ganttRows[idx].memo     = document.getElementById('ge_memo')?.value || '';
+  ganttRows[idx].progress = parseInt(document.getElementById('ge_prog')?.value || '0');
+  saveGantt(); closeModal(); renderGantt();
+}
+
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+function closeModalOutside(e){
+  if(e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+// ===== リセット確認 =====
+function showResetConfirm(){
+  document.getElementById('modalSheet').innerHTML = `
+    <div class="modal-title">⚠️ 工程表をリセット</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">全工程データを削除します。この操作は取り消せません。</p>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeModal()">キャンセル</button>
+      <button class="btn" style="background:var(--red);color:#fff;flex:1;" onclick="resetGantt()">削除する</button>
+    </div>`;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function resetGantt(){
+  ganttRows = []; _ganttUndoStack = [];
+  saveGantt(); closeModal(); renderGantt();
+  showToast('工程表をリセットしました');
+}
+
+// ===== Claudeに送る =====
+function sendToClaude(){
+  if(ganttRows.length === 0){ showToast('工程がありません'); return; }
+  const startDateStr = document.getElementById('ganttStartDate')?.value || '';
+  const startDate = startDateStr ? new Date(startDateStr) : new Date();
+  const projectName   = document.getElementById('projectName')?.value || '';
+  const projectClient = document.getElementById('projectClient')?.value || '';
+  const weeks = document.getElementById('ganttWeeks')?.value || '5';
+
+  const toDateStr = (dayNum) => {
+    const dt = new Date(startDate); dt.setDate(dt.getDate() + dayNum - 1);
+    return (dt.getMonth()+1) + '/' + dt.getDate();
+  };
+  const toFullDateStr = (dayNum) => {
+    const dt = new Date(startDate); dt.setDate(dt.getDate() + dayNum - 1);
+    return dt.toISOString().split('T')[0];
+  };
+
+  const lines = [
+    '【工程表確認済み】',
+    `案件名：${projectName}`,
+    `担当者：${projectClient}`,
+    `開始日：${startDateStr}`,
+    `工期：${weeks}週間`,
+    '',
+    '--- 工程一覧 ---',
+  ];
+  ganttRows.forEach((r, i) => {
+    const dur = r.end - r.start;
+    lines.push(`${i+1}. ${r.trade}：${toDateStr(r.start)} 〜 ${toDateStr(r.end)}（${dur}日間）${r.memo ? '　※' + r.memo : ''}`);
+  });
+  lines.push('');
+  lines.push('--- JSON（カレンダー登録用） ---');
+  lines.push(JSON.stringify({
+    projectName, projectClient, startDate: startDateStr, weeks,
+    rows: ganttRows.map(r => ({
+      trade: r.trade,
+      startDate: toFullDateStr(r.start),
+      endDate:   toFullDateStr(r.end),
+      days: r.end - r.start,
+      memo: r.memo || '',
+      progress: r.progress || 0,
+    }))
+  }, null, 2));
+
+  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+    showToast('📋 コピーしました！Claudeに貼り付けてください');
+  }).catch(() => {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = lines.join('\n');
+    document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('📋 コピーしました！Claudeに貼り付けてください');
+  });
+}
+
+// ===== 印刷 =====
+function printGantt(){
+  if(ganttRows.length === 0){ showToast('工程がありません'); return; }
+  const startDateStr = document.getElementById('ganttStartDate')?.value || '';
+  const startDate = startDateStr ? new Date(startDateStr) : new Date();
+  const weeks  = parseInt(document.getElementById('ganttWeeks')?.value || '5');
+  const days   = weeks * 7;
+  const labelW = 90;
+  const colW   = Math.max(14, Math.min(28, Math.floor((970 - labelW) / days)));
+  const rowH   = 30;
+  const hdrH   = 36;
+  const totalW = labelW + days * colW;
+  const totalH = hdrH + ganttRows.length * rowH;
+
+  const projectName   = document.getElementById('projectName')?.value || '';
+  const projectClient = document.getElementById('projectClient')?.value || '';
+
+  // SVGヘッダー
+  let svgHdr = '';
+  // 週ラベル行
+  svgHdr += `<rect x="0" y="0" width="${totalW}" height="16" fill="#e8e4de" stroke="#ccc" stroke-width="0.5"/>`;
+  svgHdr += `<rect x="0" y="0" width="${labelW}" height="16" fill="#d0ccc4" stroke="#ccc" stroke-width="0.5"/>`;
+  for(let i = 0; i < days; i++){
+    const dt = new Date(startDate); dt.setDate(dt.getDate() + i);
+    if(i === 0 || dt.getDay() === 1){
+      svgHdr += `<text x="${labelW + i*colW + 3}" y="11" font-size="7" fill="#8a6a20" font-weight="700">${(dt.getMonth()+1)+'/'+dt.getDate()}〜</text>`;
+    }
+  }
+  // 日付行
+  svgHdr += `<rect x="0" y="16" width="${totalW}" height="20" fill="#f0ede8" stroke="#ccc" stroke-width="0.5"/>`;
+  svgHdr += `<rect x="0" y="16" width="${labelW}" height="20" fill="#d8d4cc" stroke="#ccc" stroke-width="0.5"/>`;
+  svgHdr += `<text x="${labelW/2}" y="29" text-anchor="middle" font-size="8" font-weight="700" fill="#333">工種</text>`;
+  for(let i = 0; i < days; i++){
+    const dt = new Date(startDate); dt.setDate(dt.getDate() + i);
+    const dow = dt.getDay();
+    const isWE = dow === 0 || dow === 6;
+    const bg  = isWE ? '#ffe0d8' : '#f0ede8';
+    const col = isWE ? '#c0392b' : '#555';
+    svgHdr += `<rect x="${labelW+i*colW}" y="16" width="${colW}" height="20" fill="${bg}" stroke="#ddd" stroke-width="0.5"/>`;
+    svgHdr += `<text x="${labelW+i*colW+colW/2}" y="26" text-anchor="middle" font-size="7" fill="${col}">${dt.getDate()}</text>`;
+    svgHdr += `<text x="${labelW+i*colW+colW/2}" y="33" text-anchor="middle" font-size="6" fill="${col}">${['日','月','火','水','木','金','土'][dow]}</text>`;
+  }
+
+  // SVG工種行
+  let svgRows = '';
+  ganttRows.forEach((row, ri) => {
+    const y = hdrH + ri * rowH;
+    const bg = ri%2===0 ? '#fff' : '#faf8f5';
+    svgRows += `<rect x="0" y="${y}" width="${totalW}" height="${rowH}" fill="${bg}" stroke="#ddd" stroke-width="0.5"/>`;
+    svgRows += `<rect x="0" y="${y}" width="${labelW}" height="${rowH}" fill="${ri%2===0?'#f5f2ed':'#eee9e2'}" stroke="#ccc" stroke-width="0.5"/>`;
+    svgRows += `<rect x="4" y="${y+rowH/2-5}" width="8" height="8" rx="2" fill="${row.color}"/>`;
+    const tradeName = row.trade.length > 8 ? row.trade.substring(0,8)+'…' : row.trade;
+    svgRows += `<text x="16" y="${y+rowH/2+4}" font-size="9" font-weight="600" fill="#1e2d40">${tradeName}</text>`;
+    if(row.memo){
+      const memoName = row.memo.length > 8 ? row.memo.substring(0,8)+'…' : row.memo;
+      svgRows += `<text x="16" y="${y+rowH/2+14}" font-size="7" fill="#8a9aaa">${memoName}</text>`;
+    }
+    // 週末色
+    for(let i = 0; i < days; i++){
+      const dt2 = new Date(startDate); dt2.setDate(dt2.getDate() + i);
+      if(dt2.getDay()===0 || dt2.getDay()===6){
+        svgRows += `<rect x="${labelW+i*colW}" y="${y}" width="${colW}" height="${rowH}" fill="rgba(192,57,43,0.04)"/>`;
+      }
+    }
+    // バー描画
+    const allBars = [{start:row.start, end:row.end, color:row.color, label:row.label||''}];
+    if(Array.isArray(row.bars)) row.bars.forEach(b => allBars.push({start:b.start, end:b.end, color:b.color||row.color, label:b.label||''}));
+    const slotTops = [5, 17];
+    allBars.forEach((b, bi) => {
+      const dur = b.end - b.start;
+      if(dur <= 0) return;
+      const bx = labelW + (b.start - 1) * colW;
+      const bw = Math.max(colW*0.5, dur*colW) - 2;
+      const bh = allBars.length > 1 ? 11 : 20;
+      const by = y + slotTops[Math.min(bi, 1)];
+      svgRows += `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="3" fill="${b.color}" opacity="0.9"/>`;
+      const durLabel = b.label || (dur%1===0 ? dur+'日' : (dur*2)+'半日');
+      svgRows += `<text x="${bx+bw+3}" y="${by+bh/2+3}" font-size="7" font-weight="700" fill="#333">${durLabel}</text>`;
+    });
+  });
+
+  // 今日ライン
+  const todayDiff2 = Math.round((new Date() - startDate) / (1000*60*60*24));
+  let svgToday = '';
+  if(todayDiff2 >= 0 && todayDiff2 < days){
+    const tx = labelW + todayDiff2 * colW + colW/2;
+    svgToday = `<line x1="${tx}" y1="0" x2="${tx}" y2="${totalH}" stroke="#c8a96e" stroke-width="1.5" opacity="0.7"/>
+      <text x="${tx+2}" y="10" font-size="7" font-weight="700" fill="#8a6a20">今日</text>`;
+  }
+
+  const printDate = new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'});
+  const html = `
+    <div style="font-family:'Noto Sans JP','Hiragino Kaku Gothic Pro','Meiryo',sans-serif;color:#1e2d40;padding:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px;border-bottom:2px solid #1e2d40;padding-bottom:6px;">
+        <div>
+          <div style="font-size:18px;font-weight:700;letter-spacing:2px;">工　程　表</div>
+          ${projectName ? `<div style="font-size:11px;margin-top:2px;">${projectName}${projectClient?' ／ '+projectClient:''}</div>` : ''}
+          <div style="font-size:10px;color:#666;margin-top:2px;">開始：${startDateStr||'未設定'}　${weeks}週間（${days}日）　${ganttRows.length}工種</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:11px;font-weight:700;">株式会社アート・レイズ</div>
+          <div style="font-size:9px;color:#666;">作成日：${printDate}</div>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <svg width="${totalW}" height="${totalH}" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+          ${svgHdr}
+          ${svgRows}
+          ${svgToday}
+          <rect x="0" y="0" width="${totalW}" height="${totalH}" fill="none" stroke="#999" stroke-width="1"/>
+        </svg>
+      </div>
+    </div>`;
+
+  document.getElementById('printContent').innerHTML = html;
+  document.getElementById('printModal').classList.add('show');
+}
+
+// ===== TOAST =====
+let _toastTimer = null;
+function showToast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ===== 初期化 =====
+(function(){
+  // 開始日を今日に設定
+  const el = document.getElementById('ganttStartDate');
+  if(el && !el.value) el.value = new Date().toISOString().split('T')[0];
+  // localStorageから読込
+  loadGantt();
+  renderGantt();
+})();
+</script>
+</body>
+</html>
