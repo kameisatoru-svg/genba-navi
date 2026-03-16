@@ -183,9 +183,14 @@ window.addEventListener('load',()=>{
 // アプリ更新
 function updateApp(){
   if(!confirm('アプリを最新版に更新しますか？\n（ページがリロードされます）'))return;
-  // Service Worker削除＋タイムスタンプ付きリダイレクト（Chromeキャッシュ回避）
+  // Service Worker削除＋全ページキャッシュクリア＋index.htmlにリダイレクト
   const reload = () => {
-    location.href = location.pathname + '?v=' + Date.now();
+    // キャッシュAPIも全削除
+    if('caches' in window){
+      caches.keys().then(keys=>keys.forEach(k=>caches.delete(k)));
+    }
+    // index.htmlにタイムスタンプ付きでリダイレクト
+    location.href = 'index.html?v=' + Date.now();
   };
   if('serviceWorker' in navigator){
     navigator.serviceWorker.getRegistrations().then(regs=>{
