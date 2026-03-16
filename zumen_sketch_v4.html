@@ -487,13 +487,13 @@ function onDown(e){
 
   isDrawing=true;startX=sx;startY=sy;
   if(tool==='pen'){
-    penPoints=[{x:sx,y:sy}];
-    setupCtx(dCtx);dCtx.beginPath();dCtx.moveTo(sx,sy);
+    penPoints=[{x:p.x,y:p.y}];
+    setupCtx(dCtx);dCtx.beginPath();dCtx.moveTo(p.x,p.y);
   }
   if(tool==='erase'){
     dCtx.globalCompositeOperation='destination-out';
     dCtx.lineWidth=28;dCtx.lineCap='round';
-    dCtx.beginPath();dCtx.moveTo(sx,sy);
+    dCtx.beginPath();dCtx.moveTo(p.x,p.y);
   }
 }
 
@@ -503,16 +503,16 @@ function onMove(e){
   const p=getPos(e);
   const sx=snap(p.x),sy=snap(p.y);
   if(tool==='pen'){
-    penPoints.push({x:sx,y:sy});
+    penPoints.push({x:p.x,y:p.y});
     if(penPoints.length>=3){
       const len=penPoints.length;
       const p1=penPoints[len-2],p2=penPoints[len-1];
       const mx=(p1.x+p2.x)/2,my=(p1.y+p2.y)/2;
       setupCtx(dCtx);dCtx.quadraticCurveTo(p1.x,p1.y,mx,my);dCtx.stroke();
       dCtx.beginPath();dCtx.moveTo(mx,my);
-    }else{dCtx.lineTo(sx,sy);dCtx.stroke();}
+    }else{dCtx.lineTo(p.x,p.y);dCtx.stroke();}
   }
-  if(tool==='erase'){dCtx.lineTo(sx,sy);dCtx.stroke();}
+  if(tool==='erase'){dCtx.lineTo(p.x,p.y);dCtx.stroke();}
   if(['line','rect','dim','door','sash','circle'].includes(tool)){
     oCtx.clearRect(0,0,overlayC.width,overlayC.height);
     const dx=sx-startX,dy=sy-startY;
