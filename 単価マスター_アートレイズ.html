@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>工種別単価マスター｜株式会社アート・レイズ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --band: #555;
+    --band-mid: #777;
+    --light: #f8f8f8;
+    --border: #ddd;
+    --border-dark: #aaa;
+    --text: #333;
+    --text-sub: #666;
+    --white: #fff;
+    --accent: #2563eb;
+    --even: #f5f5f5;
+    --gaichuu: #fef3c7;
+    --gaichuu-text: #92400e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #eee;
+    color: var(--text);
+    font-size: 14px;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+  .page-header {
+    background: var(--band);
+    color: var(--white);
+    padding: 18px 24px;
+    border-radius: 6px 6px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .page-header h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.05em; }
+  .page-header .meta { font-size: 12px; opacity: 0.8; text-align: right; }
+
+  /* 基本ルール */
+  .basic-rules {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 16px 24px;
+  }
+  .rules-title { font-size: 13px; font-weight: 700; color: var(--band); margin-bottom: 10px; letter-spacing: 0.04em; }
+  .rules-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .rule-item {
+    background: var(--light);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 14px;
+  }
+  .rule-label { font-size: 11px; color: var(--text-sub); font-weight: 700; margin-bottom: 4px; }
+  .rule-value { font-size: 15px; font-weight: 700; color: var(--band); }
+  .rule-note { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+
+  /* 検索 */
+  .search-bar {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 12px 24px;
+    border-radius: 0 0 6px 6px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .search-bar input {
+    flex: 1;
+    min-width: 200px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-dark);
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .search-bar input:focus { outline: none; border-color: var(--accent); }
+  .filter-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filter-btn {
+    padding: 6px 12px;
+    border: 1px solid var(--border-dark);
+    border-radius: 4px;
+    background: var(--white);
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .filter-btn:hover { background: var(--light); }
+  .filter-btn.active { background: var(--band); color: var(--white); border-color: var(--band); }
+
+  /* 工種セクション */
+  .section-wrap {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .section-header {
+    background: var(--band);
+    color: var(--white);
+    padding: 10px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  .section-header:hover { background: var(--band-mid); }
+  .section-title-text { font-size: 14px; font-weight: 700; letter-spacing: 0.04em; }
+  .section-toggle { font-size: 18px; transition: transform 0.2s; }
+  .section-toggle.open { transform: rotate(90deg); }
+  .section-body { display: none; padding: 0; }
+  .section-body.open { display: block; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead th {
+    background: var(--light);
+    color: var(--text-sub);
+    padding: 8px 14px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--border-dark);
+  }
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:nth-child(even) { background: var(--even); }
+  tbody tr.gaichuu { background: var(--gaichuu); }
+  tbody td { padding: 10px 14px; vertical-align: middle; }
+  .price-range { font-weight: 700; color: var(--band); text-align: right; white-space: nowrap; }
+  .unit { color: var(--text-sub); text-align: center; }
+  .kubun { font-size: 11px; color: var(--text-sub); }
+  .note { font-size: 11px; color: var(--text-sub); }
+  .gaichuu-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    background: var(--gaichuu-text);
+    color: var(--white);
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-left: 6px;
+  }
+  .markup-note {
+    font-size: 11px;
+    color: #16a34a;
+    font-weight: 700;
+  }
+
+  /* 作業量目安行 */
+  tbody tr.meansure { background: #f0fdf4; }
+  tbody tr.meansure td { font-size: 12px; color: #166534; }
+
+  .page-footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-sub);
+    margin-top: 24px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .version-tag {
+    display: inline-block;
+    background: var(--band-mid);
+    color: var(--white);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-left: 8px;
+  }
+
+  @media (max-width: 700px) {
+    .rules-grid { grid-template-columns: 1fr 1fr; }
+    .section-body { overflow-x: auto; }
+    table { min-width: 600px; }
+    .page-header { flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="page-header">
+    <h1>📐 工種別単価マスター <span class="version-tag">ver.1</span></h1>
+    <div class="meta">株式会社アート・レイズ<br>作成：2026-03-15</div>
+  </div>
+
+  <!-- 基本ルール -->
+  <div class="basic-rules">
+    <div class="rules-title">■ 基本ルール（全工種共通）</div>
+    <div class="rules-grid">
+      <div class="rule-item">
+        <div class="rule-label">職人日当（原価）</div>
+        <div class="rule-value">20,000円／人工</div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-label">職人日当（見積単価）</div>
+        <div class="rule-value" style="color:#16a34a;">24,000円／人工</div>
+        <div class="rule-note">原価×1.2（20%マークアップ）</div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-label">時間単価（見積）</div>
+        <div class="rule-value">3,000円／h</div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-label">短時間最低保障</div>
+        <div class="rule-value">12,000円</div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-label">材料費</div>
+        <div class="rule-value">原価のまま</div>
+        <div class="rule-note">乗せなし</div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-label">諸経費</div>
+        <div class="rule-value">小計の15%</div>
+        <div class="rule-note">見積書のみ。注文書・請求書はなし</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="🔍 工種・材料名で絞り込み..." oninput="filterSections()">
+    <div class="filter-btns">
+      <button class="filter-btn active" onclick="filterAll(this)">全て</button>
+      <button class="filter-btn" onclick="filterGaichuu(this)">外注のみ</button>
+    </div>
+  </div>
+
+  <!-- 01 仮設工事 -->
+  <div class="section-wrap" data-section="01 仮設工事 足場 養生">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-title-text">01｜仮設工事</span>
+      <span class="section-toggle open">▶</span>
+    </div>
+    <div class="section-body open">
+      <table>
+        <thead><tr><th style="width:40%">作業内容</th><th style="width:8%">単位</th><th style="width:22%">単価（見積）</th><th style="width:10%">区分</th><th>備考</th></tr></thead>
+        <tbody>
+          <tr><td>足場設置・解体（外部）</td><td class="unit">㎡</td><td class="price-range">700〜900円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>養生シート張り</td><td class="unit">㎡</td><td class="price-range">200〜400円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>養生テープ・資材一式</td><td class="unit">式</td><td class="price-range">実費</td><td class="kubun">材工共</td><td class="note">現場規模による</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 02 解体工事 -->
+  <div class="section-wrap" data-section="02 解体工事 撤去 廃材">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-title-text">02｜解体工事</span>
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-body">
+      <table>
+        <thead><tr><th style="width:40%">作業内容</th><th style="width:8%">単位</th><th style="width:22%">単価（見積）</th><th style="width:10%">区分</th><th>備考</th></tr></thead>
+        <tbody>
+          <tr><td>内装解体（天井・壁・床）</td><td class="unit">㎡</td><td class="price-range">1,500〜3,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>間仕切り撤去</td><td class="unit">㎡</td><td class="price-range">3,000〜6,000円</td><td class="kubun">材工共</td><td class="note">LGS含む</td></tr>
+          <tr><td>建具撤去（ドア1枚）</td><td class="unit">箇所</td><td class="price-range">5,000〜10,000円</td><td class="kubun">材工共</td><td class="note">枠込み</td></tr>
+          <tr><td>廃材処分費</td><td class="unit">式</td><td class="price-range">実費</td><td class="kubun">材工共</td><td class="note">産廃マニフェスト別途</td></tr>
+          <tr><td>天井開口</td><td class="unit">箇所</td><td class="price-range">8,000〜15,000円</td><td class="kubun">材工共</td><td class="note">点検口含む</td></tr>
+          <tr><td>壁開口</td><td class="unit">箇所</td><td class="price-range">10,000〜20,000円</td><td class="kubun">材工共</td><td class="note">規模による</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 06 内装仕上工事 -->
+  <div class="section-wrap" data-section="06 内装仕上工事 クロス CF 塩ビタイル ワックス">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-title-text">06｜内装仕上工事</span>
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-body">
+      <table>
+        <thead><tr><th style="width:40%">作業内容</th><th style="width:8%">単位</th><th style="width:22%">単価（見積）</th><th style="width:10%">区分</th><th>備考</th></tr></thead>
+        <tbody>
+          <tr><td>クロス張替（量産品・撤去込み）</td><td class="unit">㎡</td><td class="price-range">1,200〜1,800円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>クロス張替（1000番台・撤去込み）</td><td class="unit">㎡</td><td class="price-range">1,800〜2,500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>クロス張替（新規のみ）</td><td class="unit">㎡</td><td class="price-range">900〜1,500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>クッションフロア（撤去込み）</td><td class="unit">㎡</td><td class="price-range">3,000〜5,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>クッションフロア（上貼り）</td><td class="unit">㎡</td><td class="price-range">2,000〜3,500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>塩ビタイル（上貼り）</td><td class="unit">㎡</td><td class="price-range">5,000〜7,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>塩ビタイル（撤去込み）</td><td class="unit">㎡</td><td class="price-range">6,000〜9,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>ワックス剥離・清掃</td><td class="unit">㎡</td><td class="price-range">300〜600円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr class="meansure"><td colspan="5">📊 目安：クロス 60〜80㎡／人工（撤去込み）　CF 40〜60㎡／人工（上貼り）　塩ビタイル 50㎡前後／人工（上貼り）</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 09 塗装工事 -->
+  <div class="section-wrap" data-section="09 塗装工事 外壁 屋根 鉄部 木部 内部">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-title-text">09｜塗装工事</span>
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-body">
+      <table>
+        <thead><tr><th style="width:40%">作業内容</th><th style="width:8%">単位</th><th style="width:22%">単価（見積）</th><th style="width:10%">区分</th><th>備考</th></tr></thead>
+        <tbody>
+          <tr><td>外壁塗装（シリコン・3回塗り）</td><td class="unit">㎡</td><td class="price-range">1,800〜2,500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>外壁塗装（フッ素・3回塗り）</td><td class="unit">㎡</td><td class="price-range">2,500〜3,500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>屋根塗装（シリコン）</td><td class="unit">㎡</td><td class="price-range">2,000〜3,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>鉄部塗装（さび止め込み）</td><td class="unit">㎡</td><td class="price-range">1,500〜2,500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>木部塗装</td><td class="unit">㎡</td><td class="price-range">1,200〜2,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>内部壁塗装（AEP）</td><td class="unit">㎡</td><td class="price-range">800〜1,500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr class="meansure"><td colspan="5">📊 目安：外壁3回塗り 40〜55㎡／人工　外壁2回塗り 50〜70㎡／人工　鉄部 30〜40㎡／人工</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 11 電気設備（外注） -->
+  <div class="section-wrap gaichuu-section" data-section="11 電気設備工事 コンセント 照明 分電盤 LAN 外注">
+    <div class="section-header" onclick="toggleSection(this)" style="background:#92400e;">
+      <span class="section-title-text">11｜電気設備工事 <span style="font-size:11px; background:rgba(255,255,255,0.2); padding:2px 6px; border-radius:3px; margin-left:6px;">※外注</span></span>
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-body">
+      <table>
+        <thead><tr><th style="width:40%">作業内容</th><th style="width:8%">単位</th><th style="width:22%">単価（見積）</th><th style="width:10%">区分</th><th>備考</th></tr></thead>
+        <tbody>
+          <tr class="gaichuu"><td>コンセント増設</td><td class="unit">箇所</td><td class="price-range">15,000〜30,000円</td><td class="kubun">材工共</td><td class="note">電気工事士資格要</td></tr>
+          <tr class="gaichuu"><td>照明器具交換</td><td class="unit">箇所</td><td class="price-range">5,000〜20,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr class="gaichuu"><td>分電盤交換</td><td class="unit">式</td><td class="price-range">80,000〜200,000円</td><td class="kubun">材工共</td><td class="note">外注対応</td></tr>
+          <tr class="gaichuu"><td>LAN配線</td><td class="unit">m</td><td class="price-range">2,000〜5,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 12 空調・換気（外注） -->
+  <div class="section-wrap gaichuu-section" data-section="12 空調 換気設備工事 エアコン 換気扇 ダクト 外注">
+    <div class="section-header" onclick="toggleSection(this)" style="background:#92400e;">
+      <span class="section-title-text">12｜空調・換気設備工事 <span style="font-size:11px; background:rgba(255,255,255,0.2); padding:2px 6px; border-radius:3px; margin-left:6px;">※外注</span></span>
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-body">
+      <table>
+        <thead><tr><th style="width:40%">作業内容</th><th style="width:8%">単位</th><th style="width:22%">単価（見積）</th><th style="width:10%">区分</th><th>備考</th></tr></thead>
+        <tbody>
+          <tr class="gaichuu"><td>エアコン取付（壁掛け）</td><td class="unit">台</td><td class="price-range">15,000〜30,000円</td><td class="kubun">工賃のみ</td><td class="note">—</td></tr>
+          <tr class="gaichuu"><td>換気扇交換</td><td class="unit">箇所</td><td class="price-range">15,000〜40,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr class="gaichuu"><td>ダクト清掃</td><td class="unit">式</td><td class="price-range">見積による</td><td class="kubun">—</td><td class="note">外注対応</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 13 給排水（外注） -->
+  <div class="section-wrap gaichuu-section" data-section="13 給排水設備工事 給水 排水 水栓 給湯器 外注">
+    <div class="section-header" onclick="toggleSection(this)" style="background:#92400e;">
+      <span class="section-title-text">13｜給排水設備工事 <span style="font-size:11px; background:rgba(255,255,255,0.2); padding:2px 6px; border-radius:3px; margin-left:6px;">※外注</span></span>
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-body">
+      <table>
+        <thead><tr><th style="width:40%">作業内容</th><th style="width:8%">単位</th><th style="width:22%">単価（見積）</th><th style="width:10%">区分</th><th>備考</th></tr></thead>
+        <tbody>
+          <tr class="gaichuu"><td>給水管修理・交換</td><td class="unit">箇所</td><td class="price-range">20,000〜80,000円</td><td class="kubun">材工共</td><td class="note">規模による</td></tr>
+          <tr class="gaichuu"><td>排水管修理・清掃</td><td class="unit">箇所</td><td class="price-range">15,000〜50,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr class="gaichuu"><td>水栓金具交換</td><td class="unit">箇所</td><td class="price-range">10,000〜30,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr class="gaichuu"><td>給湯器交換</td><td class="unit">台</td><td class="price-range">100,000〜300,000円</td><td class="kubun">材工共</td><td class="note">機種による</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    株式会社アート・レイズ｜大分県別府市上原町13番25号｜TEL 0977-21-0603<br>
+    改訂履歴：2026-03-14 ver.1 初版　／　2026-03-15 ver.1 Googleドキュメントに移行
+  </div>
+
+</div>
+<script>
+function toggleSection(header) {
+  const body = header.nextElementSibling;
+  const toggle = header.querySelector('.section-toggle');
+  body.classList.toggle('open');
+  toggle.classList.toggle('open');
+}
+
+function filterSections() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  document.querySelectorAll('.section-wrap').forEach(sec => {
+    if (!q) { sec.style.display = ''; return; }
+    const text = (sec.getAttribute('data-section') || '') + sec.innerText;
+    sec.style.display = text.toLowerCase().includes(q) ? '' : 'none';
+    if (text.toLowerCase().includes(q)) {
+      const body = sec.querySelector('.section-body');
+      const toggle = sec.querySelector('.section-toggle');
+      body.classList.add('open');
+      toggle.classList.add('open');
+    }
+  });
+}
+
+function filterAll(btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.section-wrap').forEach(s => s.style.display = '');
+}
+
+function filterGaichuu(btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.section-wrap').forEach(s => {
+    s.style.display = s.classList.contains('gaichuu-section') ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

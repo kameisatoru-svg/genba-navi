@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>入金管理｜株式会社アート・レイズ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --band: #555;
+    --light: #f8f8f8;
+    --border: #ddd;
+    --border-dark: #aaa;
+    --text: #333;
+    --text-sub: #666;
+    --white: #fff;
+    --accent: #2563eb;
+    --even: #f5f5f5;
+    --red: #dc2626;
+    --green: #16a34a;
+    --yellow: #d97706;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #eee;
+    color: var(--text);
+    font-size: 14px;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+  .page-header {
+    background: var(--band);
+    color: var(--white);
+    padding: 18px 24px;
+    border-radius: 6px 6px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .page-header h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.05em; }
+  .page-header .meta { font-size: 12px; opacity: 0.8; text-align: right; }
+
+  /* サマリーカード */
+  .summary-bar {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 16px 24px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .summary-card {
+    flex: 1;
+    min-width: 150px;
+    padding: 12px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+  .summary-card.total { border-left: 4px solid var(--band); }
+  .summary-card.nyukin { border-left: 4px solid var(--green); }
+  .summary-card.mihai { border-left: 4px solid var(--red); }
+  .summary-label { font-size: 11px; color: var(--text-sub); font-weight: 700; margin-bottom: 6px; }
+  .summary-amount { font-size: 20px; font-weight: 700; }
+  .summary-card.total .summary-amount { color: var(--band); }
+  .summary-card.nyukin .summary-amount { color: var(--green); }
+  .summary-card.mihai .summary-amount { color: var(--red); }
+
+  .search-bar {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 12px 24px;
+    border-radius: 0 0 6px 6px;
+    margin-bottom: 20px;
+  }
+  .search-bar input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-dark);
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .search-bar input:focus { outline: none; border-color: var(--accent); }
+
+  /* テーブル */
+  .table-wrap {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead th {
+    background: var(--band);
+    color: var(--white);
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:nth-child(even) { background: var(--even); }
+  tbody tr:hover { background: #f0f4ff; }
+  tbody td {
+    padding: 12px 14px;
+    vertical-align: middle;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .badge-nyukin { background: #dcfce7; color: var(--green); }
+  .badge-mihai { background: #fee2e2; color: var(--red); }
+  .badge-ichibu { background: #fef9c3; color: var(--yellow); }
+
+  .amount { font-weight: 700; text-align: right; }
+  .amount-large { font-size: 16px; color: var(--band); }
+
+  /* フォロー履歴 */
+  .follow-tag {
+    display: inline-block;
+    font-size: 11px;
+    background: #dbeafe;
+    color: #1e40af;
+    padding: 2px 7px;
+    border-radius: 3px;
+    margin: 2px 0;
+  }
+
+  .add-row {
+    background: var(--light);
+    border: 1px dashed var(--border-dark);
+    border-radius: 6px;
+    padding: 18px;
+    text-align: center;
+    color: var(--text-sub);
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+
+  .page-footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-sub);
+    margin-top: 24px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* スマホ対応 */
+  @media (max-width: 700px) {
+    .table-wrap { overflow-x: auto; }
+    table { min-width: 700px; }
+    .page-header { flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="page-header">
+    <h1>💰 入金管理</h1>
+    <div class="meta">株式会社アート・レイズ<br>最終更新：2026-03-14</div>
+  </div>
+
+  <div class="summary-bar">
+    <div class="summary-card total">
+      <div class="summary-label">請求総額（税込）</div>
+      <div class="summary-amount">¥6,588,120</div>
+    </div>
+    <div class="summary-card nyukin">
+      <div class="summary-label">入金済</div>
+      <div class="summary-amount">¥0</div>
+    </div>
+    <div class="summary-card mihai">
+      <div class="summary-label">未入金</div>
+      <div class="summary-amount">¥6,588,120</div>
+    </div>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="🔍 案件番号・顧客名で絞り込み..." oninput="filterRows()">
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>案件番号</th>
+          <th>顧客名</th>
+          <th>請求金額（税込）</th>
+          <th>請求日</th>
+          <th>入金期限</th>
+          <th>入金日</th>
+          <th>ステータス</th>
+          <th>フォロー履歴</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr data-search="ar-2026-0004 さくら苑 西様 未入金">
+          <td><strong>AR-2026-0004</strong></td>
+          <td>さくら苑　西 俊至 様</td>
+          <td class="amount amount-large">¥6,588,120</td>
+          <td>—</td>
+          <td>—</td>
+          <td>—</td>
+          <td><span class="badge badge-mihai">未入金</span></td>
+          <td>—</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="add-row" id="addRow">
+    ＋ 次の入金データをここに追加
+  </div>
+
+  <div class="page-footer">
+    株式会社アート・レイズ｜大分県別府市上原町13番25号｜TEL 0977-21-0603
+  </div>
+
+</div>
+<script>
+function filterRows() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const rows = document.querySelectorAll('#tableBody tr');
+  rows.forEach(row => {
+    const text = row.getAttribute('data-search') || '';
+    row.style.display = (!q || text.toLowerCase().includes(q)) ? '' : 'none';
+  });
+  document.getElementById('addRow').style.display = q ? 'none' : '';
+}
+</script>
+</body>
+</html>

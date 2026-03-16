@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>顧客台帳｜株式会社アート・レイズ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --band: #555;
+    --band-mid: #777;
+    --light: #f8f8f8;
+    --border: #ddd;
+    --border-dark: #aaa;
+    --text: #333;
+    --text-sub: #666;
+    --white: #fff;
+    --accent: #2563eb;
+    --even: #f5f5f5;
+    --tag-blue: #dbeafe;
+    --tag-blue-text: #1e40af;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #eee;
+    color: var(--text);
+    font-size: 14px;
+  }
+  .container { max-width: 1000px; margin: 0 auto; padding: 24px 16px; }
+
+  /* ヘッダー */
+  .page-header {
+    background: var(--band);
+    color: var(--white);
+    padding: 18px 24px;
+    border-radius: 6px 6px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .page-header h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.05em; }
+  .page-header .meta { font-size: 12px; opacity: 0.8; text-align: right; }
+
+  /* 統計バー */
+  .stats-bar {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 14px 24px;
+    display: flex;
+    gap: 32px;
+  }
+  .stat-item { text-align: center; }
+  .stat-num { font-size: 24px; font-weight: 700; color: var(--band); }
+  .stat-label { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+
+  /* 検索バー */
+  .search-bar {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 12px 24px;
+    border-radius: 0 0 6px 6px;
+    margin-bottom: 20px;
+  }
+  .search-bar input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-dark);
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .search-bar input:focus { outline: none; border-color: var(--accent); }
+
+  /* 顧客カード */
+  .customer-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .card-header {
+    background: var(--light);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .customer-id {
+    font-size: 11px;
+    color: var(--text-sub);
+    background: var(--band);
+    color: var(--white);
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-weight: 700;
+  }
+  .customer-name {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    margin-left: 12px;
+  }
+  .card-header-left { display: flex; align-items: center; gap: 4px; }
+  .card-body { padding: 16px 18px; }
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 24px;
+  }
+  .info-item { display: flex; flex-direction: column; gap: 3px; }
+  .info-label {
+    font-size: 11px;
+    color: var(--text-sub);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .info-value { font-size: 14px; color: var(--text); }
+  .info-value a { color: var(--accent); text-decoration: none; }
+  .note-box {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: #fffbeb;
+    border-left: 3px solid #f59e0b;
+    border-radius: 0 4px 4px 0;
+    font-size: 13px;
+    color: var(--text);
+  }
+  .note-label { font-size: 11px; color: #92400e; font-weight: 700; margin-bottom: 4px; }
+
+  /* 追加欄 */
+  .add-row {
+    background: var(--light);
+    border: 1px dashed var(--border-dark);
+    border-radius: 6px;
+    padding: 18px;
+    text-align: center;
+    color: var(--text-sub);
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+
+  /* フッター */
+  .page-footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-sub);
+    margin-top: 24px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 600px) {
+    .info-grid { grid-template-columns: 1fr; }
+    .stats-bar { gap: 16px; }
+    .page-header { flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="page-header">
+    <h1>👤 顧客台帳</h1>
+    <div class="meta">株式会社アート・レイズ<br>最終更新：2026-03-14</div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-num" id="totalCount">1</div>
+      <div class="stat-label">登録顧客数</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">1</div>
+      <div class="stat-label">進行中案件</div>
+    </div>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="🔍 顧客名・ID・住所で絞り込み..." oninput="filterCards()">
+  </div>
+
+  <!-- 顧客カード：C-001 -->
+  <div class="customer-card" data-search="c-001 さくら苑 西俊至 096-875-1139 nishi@sakura-en.com 熊本県玉名市">
+    <div class="card-header">
+      <div class="card-header-left">
+        <span class="customer-id">C-001</span>
+        <span class="customer-name">さくら苑　西 俊至 様</span>
+      </div>
+      <span style="font-size:11px; color:#16a34a; font-weight:700;">● 進行中案件あり</span>
+    </div>
+    <div class="card-body">
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">法人名</span>
+          <span class="info-value">社会福祉法人 玉寿会　さくら苑</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">担当者</span>
+          <span class="info-value">西 俊至 様（事務課長）</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">電話番号</span>
+          <span class="info-value"><a href="tel:096-875-1139">096-875-1139</a></span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">メールアドレス</span>
+          <span class="info-value"><a href="mailto:nishi@sakura-en.com">nishi@sakura-en.com</a></span>
+        </div>
+        <div class="info-item" style="grid-column: 1/-1;">
+          <span class="info-label">住所</span>
+          <span class="info-value">熊本県玉名市伊倉北方1533</span>
+        </div>
+      </div>
+      <div class="note-box">
+        <div class="note-label">📝 備考</div>
+        床リフォーム案件あり（AR-2026-0004）。第1期：3月21〜22日施工済。第2期・第3期日程未定。
+      </div>
+    </div>
+  </div>
+
+  <!-- 追加欄 -->
+  <div class="add-row" id="addRow">
+    ＋ 次の顧客データをここに追加（C-002〜）
+  </div>
+
+  <div class="page-footer">
+    株式会社アート・レイズ｜大分県別府市上原町13番25号｜TEL 0977-21-0603
+  </div>
+
+</div>
+<script>
+function filterCards() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const cards = document.querySelectorAll('.customer-card');
+  let count = 0;
+  cards.forEach(card => {
+    const text = card.getAttribute('data-search') || '';
+    const show = !q || text.toLowerCase().includes(q);
+    card.style.display = show ? '' : 'none';
+    if (show) count++;
+  });
+  document.getElementById('totalCount').textContent = count;
+  document.getElementById('addRow').style.display = q ? 'none' : '';
+}
+</script>
+</body>
+</html>
