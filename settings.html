@@ -183,14 +183,17 @@ window.addEventListener('load',()=>{
 // アプリ更新
 function updateApp(){
   if(!confirm('アプリを最新版に更新しますか？\n（ページがリロードされます）'))return;
-  // Service Worker削除＋強制リロード
+  // Service Worker削除＋タイムスタンプ付きリダイレクト（Chromeキャッシュ回避）
+  const reload = () => {
+    location.href = location.pathname + '?v=' + Date.now();
+  };
   if('serviceWorker' in navigator){
     navigator.serviceWorker.getRegistrations().then(regs=>{
       regs.forEach(r=>r.unregister());
-      location.reload(true);
+      reload();
     });
   }else{
-    location.reload(true);
+    reload();
   }
 }
 
