@@ -903,6 +903,11 @@ function printGantt(){
   const now = new Date();
   const fname = `工程表_${projectName||'アートレイズ'}_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.html`;
 
+  // 用紙サイズ自動判定：2週間以内→A4横、3週間以上→A3横
+  const pageSize = weeks <= 2 ? 'A4 landscape' : 'A3 landscape';
+  const pageW    = weeks <= 2 ? '297mm' : '420mm';
+  const pageH    = weeks <= 2 ? '210mm' : '297mm';
+
   // 印刷用HTMLを生成してダウンロード
   const fullHtml = `<!DOCTYPE html>
 <html lang="ja">
@@ -911,29 +916,33 @@ function printGantt(){
 <title>工程表 - ${projectName||'アートレイズ'}</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&family=Shippori+Mincho:wght@600;700&display=swap');
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; color-adjust:exact !important; }
   body { font-family:'Noto Sans JP','Hiragino Kaku Gothic Pro','Meiryo',sans-serif; background:#e0e0e0; }
-  .page { width:297mm; min-height:210mm; margin:0 auto; background:#fff; padding:12mm; }
-  @page { size:A4 landscape; margin:0; }
+  .page { width:${pageW}; min-height:${pageH}; margin:0 auto; background:#fff; padding:10mm; }
+  .chart-svg { width:100%; height:auto; display:block; }
+  @page { size:${pageSize}; margin:0; }
   @media print { body { background:#fff; } .page { margin:0; box-shadow:none; } }
 </style>
 </head>
 <body>
 <div class="page">
-  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px;border-bottom:2px solid #1e2d40;padding-bottom:6px;">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:6px;border-bottom:2px solid #1e2d40;padding-bottom:5px;">
     <div>
-      <div style="font-family:'Shippori Mincho',serif;font-size:22px;font-weight:700;letter-spacing:4px;color:#1e2d40;">工　程　表</div>
-      ${projectName ? `<div style="font-size:12px;margin-top:3px;color:#333;">${projectName}${projectClient?' ／ '+projectClient:''}</div>` : ''}
-      <div style="font-size:10px;color:#666;margin-top:2px;">開始：${startDateStr||'未設定'}　${weeks}週間（${days}日）　${ganttRows.length}工種</div>
+      <div style="font-family:'Shippori Mincho',serif;font-size:20px;font-weight:700;letter-spacing:4px;color:#1e2d40;">工　程　表</div>
+      ${projectName ? `<div style="font-size:11px;margin-top:2px;color:#333;">${projectName}${projectClient?' ／ '+projectClient:''}</div>` : ''}
+      <div style="font-size:9px;color:#666;margin-top:2px;">開始：${startDateStr||'未設定'}　${weeks}週間（${days}日）　${ganttRows.length}工種</div>
     </div>
     <div style="text-align:right;">
-      <div style="font-size:12px;font-weight:700;color:#1e2d40;">株式会社アート・レイズ</div>
-      <div style="font-size:10px;color:#666;">〒874-0000　大分県別府市上原町13番25号</div>
-      <div style="font-size:10px;color:#666;">作成日：${printDate}</div>
+      <div style="font-size:11px;font-weight:700;color:#1e2d40;">株式会社アート・レイズ</div>
+      <div style="font-size:9px;color:#666;">大分県別府市上原町13番25号　TEL:0977-21-0603</div>
+      <div style="font-size:9px;color:#666;">作成日：${printDate}</div>
     </div>
   </div>
   <div>
-    <svg width="${totalW}" height="${totalH}" xmlns="http://www.w3.org/2000/svg" style="display:block;max-width:100%;">
+    <svg class="chart-svg"
+      viewBox="0 0 ${totalW} ${totalH}"
+      xmlns="http://www.w3.org/2000/svg"
+      preserveAspectRatio="xMinYMin meet">
       ${svgHdr}
       ${svgRows}
       ${svgToday}
