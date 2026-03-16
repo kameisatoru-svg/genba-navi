@@ -157,7 +157,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);display:flex
   <button class="tb-btn tb-btn-add" onclick="addGanttRow()">＋ 追加</button>
   <button class="tb-btn tb-btn-undo" id="ganttUndoBtn" onclick="ganttUndo()" style="opacity:.35;">↩️</button>
   <button class="tb-btn tb-btn-reset" onclick="showResetConfirm()">🗑</button>
-  <button class="tb-btn tb-btn-send" onclick="sendToClaude()">📋 Claudeに送る</button>
+  <button class="tb-btn" style="background:rgba(26,91,180,.12);border:1px solid rgba(26,91,180,.35);color:var(--blue);" onclick="openReceiveFromClaude()">📥 Claudeから受け取る</button>
+  <button class="tb-btn tb-btn-send" onclick="sendToClaude()">📤 Claudeに送る</button>
   <button class="tb-btn tb-btn-print" onclick="printGantt()">🖨️ 印刷</button>
 </div>
 
@@ -277,6 +278,117 @@ function deleteGanttRow(idx){
   saveGantt(); renderGantt();
 }
 
+// ===== 並び替え =====
+function moveGanttRow(idx, dir){
+  const newIdx = idx + dir;
+  if(newIdx < 0 || newIdx >= ganttRows.length) return;
+  const tmp = ganttRows[idx];
+  ganttRows[idx] = ganttRows[newIdx];
+  ganttRows[newIdx] = tmp;
+  saveGantt(); renderGantt();
+}
+
+// ===== Claudeから受け取る =====
+function openReceiveFromClaude(){
+  document.getElementById('modalSheet').innerHTML = `
+    <div class="modal-title">📥 Claudeから受け取る</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.7;">
+      Claudeが生成した工程テキストをコピーして貼り付けてください。<br>
+      以下の形式に対応しています：
+    </p>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:12px;font-size:11px;color:var(--text2);line-height:1.9;">
+      【工程表】<br>
+      案件名：○○リフォーム工事<br>
+      開始日：2026-04-01<br>
+      工期：3週間<br>
+      <br>
+      1. 解体工事｜1日目〜3日目<br>
+      2. 電気工事｜2日目〜5日目<br>
+      3. 床工事｜4日目〜8日目
+    </div>
+    <div class="form-group">
+      <label class="form-label">ここにClaudeのテキストを貼り付け</label>
+      <textarea id="receiveText" class="form-input" rows="10"
+        placeholder="Claudeからコピーしたテキストをここに貼り付けてください..."
+        style="resize:vertical;font-size:13px;line-height:1.7;"></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeModal()">キャンセル</button>
+      <button class="btn btn-primary" onclick="receiveFromClaude()">読み込む</button>
+    </div>`;
+  document.getElementById('modalOverlay').classList.add('show');
+  setTimeout(()=>document.getElementById('receiveText')?.focus(), 100);
+}
+
+function receiveFromClaude(){
+  const text = document.getElementById('receiveText')?.value.trim();
+  if(!text){ showToast('テキストを貼り付けてください'); return; }
+
+  const lines = text.split('\n').map(l=>l.trim()).filter(l=>l);
+  const newRows = [];
+
+  // 案件名・開始日・工期を読み取る
+  let projectName = '';
+  let startDateStr = '';
+  let weeksNum = 5;
+
+  lines.forEach(line => {
+    if(line.startsWith('案件名：') || line.startsWith('案件名:'))
+      projectName = line.replace(/^案件名[：:]/, '').trim();
+    if(line.startsWith('開始日：') || line.startsWith('開始日:'))
+      startDateStr = line.replace(/^開始日[：:]/, '').trim();
+    if(line.startsWith('工期：') || line.startsWith('工期:')) {
+      const m = line.match(/(\d+)/);
+      if(m) weeksNum = Math.max(2, Math.min(12, parseInt(m[1])));
+    }
+  });
+
+  // 工程行を読み取る
+  // 対応フォーマット：「1. 工種名｜1日目〜3日目」「1. 工種名：1〜3日目」など
+  const rowPattern = /^[\d０-９]+[.\．、\s]+(.+?)[｜|：:]\s*(\d+(?:\.\d+)?)\s*日?目?\s*[〜~－-]\s*(\d+(?:\.\d+)?)\s*日?目?/;
+  // メモ付きパターン：「※○○」「　※○○」
+  const memoPattern = /[　\s]*[※＊\*](.+)$/;
+
+  lines.forEach(line => {
+    const m = line.match(rowPattern);
+    if(!m) return;
+    const trade = m[1].trim();
+    let start = parseFloat(m[2]);
+    let end   = parseFloat(m[3]);
+    if(isNaN(start) || isNaN(end)) return;
+    if(end < start) { const t=start; start=end; end=t; }
+    end = Math.max(end, start + 0.5);
+
+    // メモ抽出
+    let memo = '';
+    const memoM = line.match(memoPattern);
+    if(memoM) memo = memoM[1].trim();
+
+    const color = ganttColors[newRows.length % ganttColors.length];
+    newRows.push({ id:'g'+Date.now()+newRows.length, trade, start, end, color, progress:0, memo, bars:[] });
+  });
+
+  if(newRows.length === 0){
+    showToast('工程を読み取れませんでした。形式を確認してください');
+    return;
+  }
+
+  // 反映
+  if(projectName) document.getElementById('projectName').value = projectName;
+  if(startDateStr) document.getElementById('ganttStartDate').value = startDateStr;
+  if(weeksNum){
+    const sel = document.getElementById('ganttWeeks');
+    // 一番近い選択肢を選ぶ
+    const opts = Array.from(sel.options).map(o=>parseInt(o.value));
+    const closest = opts.reduce((a,b)=>Math.abs(b-weeksNum)<Math.abs(a-weeksNum)?b:a);
+    sel.value = String(closest);
+  }
+
+  ganttRows = newRows;
+  saveGantt(); closeModal(); renderGantt();
+  showToast(`✅ ${newRows.length}工程を読み込みました`);
+}
+
 function updateGanttTrade(idx, val){
   ganttRows[idx].trade = val; saveGantt();
 }
@@ -383,6 +495,8 @@ function renderGantt(){
         <span style="font-size:9px;color:var(--muted);">${row.progress||0}%</span>
       </div>` : ''}
       <div style="display:flex;gap:4px;">
+        <button onclick="moveGanttRow(${ri},-1)" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-size:10px;cursor:pointer;padding:1px 5px;border-radius:3px;line-height:1;" ${ri===0?'disabled style="opacity:.3;background:transparent;border:1px solid var(--border);color:var(--muted);font-size:10px;cursor:pointer;padding:1px 5px;border-radius:3px;line-height:1;"':''}>↑</button>
+        <button onclick="moveGanttRow(${ri},1)" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-size:10px;cursor:pointer;padding:1px 5px;border-radius:3px;line-height:1;" ${ri===ganttRows.length-1?'disabled style="opacity:.3;background:transparent;border:1px solid var(--border);color:var(--muted);font-size:10px;cursor:pointer;padding:1px 5px;border-radius:3px;line-height:1;"':''}>↓</button>
         <button onclick="openGanttEdit(${ri})" style="background:transparent;border:none;color:var(--blue);font-size:9px;cursor:pointer;padding:0;">✏️編集</button>
         <button onclick="deleteGanttRow(${ri})" style="background:transparent;border:none;color:var(--red);font-size:9px;cursor:pointer;padding:0;">削除</button>
       </div>
