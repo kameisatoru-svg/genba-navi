@@ -47,9 +47,9 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
 .kigo-mode-bar{display:none;position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:10;background:var(--navy);color:var(--white);padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;pointer-events:none;white-space:nowrap;}
 .kigo-mode-bar.show{display:block;}
 
-.modal{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.5);align-items:flex-end;justify-content:center;}
+.modal{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.5);align-items:flex-start;justify-content:center;}
 .modal.show{display:flex;}
-.modal-panel{background:var(--white);width:100%;max-width:480px;border-radius:16px 16px 0 0;padding:18px 16px 36px;}
+.modal-panel{background:var(--white);width:100%;max-width:480px;border-radius:0 0 16px 16px;padding:18px 16px 20px;margin-top:0;}
 .modal-panel h3{font-size:13px;color:var(--text2);margin-bottom:10px;}
 .modal-panel input{width:100%;height:48px;border:2px solid var(--navy);border-radius:10px;padding:0 14px;font-size:18px;font-family:'Noto Sans JP',sans-serif;color:var(--text);background:var(--bg);outline:none;margin-bottom:0;}
 .modal-row{display:flex;gap:8px;align-items:center;margin-bottom:0;}
@@ -78,7 +78,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
 .save-btn:active{transform:scale(0.94);}
 
 .zoom-indicator{
-  display:none;position:fixed;top:60px;left:50%;
+  display:none;position:fixed;top:56px;left:50%;
   transform:translateX(-50%);
   z-index:200;
   background:rgba(30,45,64,0.85);color:#fff;
@@ -320,8 +320,14 @@ const oCtx=overlayC.getContext('2d');
 
 function resize(){
   const W=wrap.clientWidth,H=wrap.clientHeight;
+  // キャンバスリサイズ前に現在の描画内容をスナップショット保持
+  const snapshot=drawC.toDataURL();
   [gridC,drawC,overlayC].forEach(c=>{c.width=W;c.height=H;});
-  drawGrid();restoreCurrent();
+  drawGrid();
+  // スナップショットを復元（resize時に描画が消えないように）
+  if(snapshot && snapshot!=='data:,'){
+    const img=new Image();img.src=snapshot;img.onload=()=>dCtx.drawImage(img,0,0);
+  }
 }
 function drawGrid(){
   const W=gridC.width,H=gridC.height;
@@ -336,7 +342,14 @@ function drawGrid(){
 function snap(v){return Math.round(v/GRID)*GRID;}
 function getPos(e){
   const r=overlayC.getBoundingClientRect();
-  const t=e.touches?e.touches[0]:e.changedTouches?e.changedTouches[0]:e;
+  let t;
+  if(e.changedTouches && e.changedTouches.length>0){
+    t=e.changedTouches[0];
+  }else if(e.touches && e.touches.length>0){
+    t=e.touches[0];
+  }else{
+    t=e;
+  }
   return{x:t.clientX-r.left,y:t.clientY-r.top};
 }
 
@@ -466,9 +479,11 @@ function setupCtx(ctx,color,width){
 
 // ── 汎用入力モーダル ──
 let inputResolve=null;
+let modalOpen=false; // モーダル開いている間は描画イベントを無視
 function openInput(title,placeholder,numeric){
   return new Promise(resolve=>{
     inputResolve=resolve;
+    modalOpen=true;
     document.getElementById('inputTitle').textContent=title;
     const f=document.getElementById('inputField');
     f.placeholder=placeholder||'';f.inputMode=numeric?'numeric':'text';f.value='';
@@ -478,6 +493,7 @@ function openInput(title,placeholder,numeric){
 }
 function closeInput(val){
   document.getElementById('inputModal').classList.remove('show');
+  modalOpen=false;
   if(inputResolve){inputResolve(val);inputResolve=null;}
 }
 document.getElementById('inputOk').onclick=()=>closeInput(document.getElementById('inputField').value.trim());
@@ -488,16 +504,18 @@ document.getElementById('inputField').addEventListener('keydown',e=>{if(e.key===
 function openDimX(){
   return new Promise(resolve=>{
     dimXResolve=resolve;
+    modalOpen=true;
     document.getElementById('dimW').value='';document.getElementById('dimD').value='';
     document.getElementById('dimXModal').classList.add('show');
     setTimeout(()=>document.getElementById('dimW').focus(),100);
   });
 }
-function closeDimX(){document.getElementById('dimXModal').classList.remove('show');if(dimXResolve){dimXResolve(null);dimXResolve=null;}}
+function closeDimX(){document.getElementById('dimXModal').classList.remove('show');modalOpen=false;if(dimXResolve){dimXResolve(null);dimXResolve=null;}}
 function confirmDimX(){
   const w=document.getElementById('dimW').value.trim();
   const d=document.getElementById('dimD').value.trim();
   document.getElementById('dimXModal').classList.remove('show');
+  modalOpen=false;
   if(dimXResolve){
     const txt=(w&&d)?`${w}×${d}`:(w||d||'');
     dimXResolve(txt||null);dimXResolve=null;
@@ -541,6 +559,7 @@ document.addEventListener('touchstart', e=>{
 
 function onDown(e){
   if(tool==='zoom') return;
+  if(modalOpen) return; // モーダル表示中は描画しない
   if(e.touches && e.touches.length >= 2){ isDrawing=false; return; }
   e.preventDefault();
   const p=getPos(e);
@@ -613,6 +632,8 @@ function onMove(e){
 function onUp(e){
   if(!isDrawing)return;
   isDrawing=false;
+  // globalCompositeOperationを常にリセット（消しゴム使用後の残存バグ防止）
+  dCtx.globalCompositeOperation='source-over';
   const p=getPos(e);
   const sx=snap(p.x),sy=snap(p.y);
   const dx=sx-startX,dy=sy-startY;
@@ -621,7 +642,7 @@ function onUp(e){
     if(penPoints.length>0){const last=penPoints[penPoints.length-1];setupCtx(dCtx);dCtx.lineTo(last.x,last.y);dCtx.stroke();}
     saveStep();
   }
-  if(tool==='erase'){dCtx.globalCompositeOperation='source-over';saveStep();}
+  if(tool==='erase'){saveStep();}
   if(tool==='line'){
     oCtx.clearRect(0,0,overlayC.width,overlayC.height);
     setupCtx(dCtx);dCtx.beginPath();dCtx.moveTo(startX,startY);dCtx.lineTo(sx,sy);dCtx.stroke();
@@ -629,7 +650,7 @@ function onUp(e){
   }
   if(tool==='rect'){
     oCtx.clearRect(0,0,overlayC.width,overlayC.height);
-    setupCtx(dCtx);dCtx.strokeRect(startX,startY,dx,dy);saveStep();
+    setupCtx(dCtx);dCtx.beginPath();dCtx.strokeRect(startX,startY,dx,dy);saveStep();
     const mx=startX+dx/2,my=startY+dy/2;
     openInput('部屋名・エリア名（省略可）','例：リビング',false).then(val=>{
       if(val){placeText(val,mx,my,13);saveStep();}
