@@ -43,7 +43,10 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
 .photo-place{font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .photo-comment{font-size:11px;color:var(--text2);margin-top:2px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:14px;}
 .photo-date{font-size:10px;color:var(--text2);margin-top:4px;opacity:0.6;}
-.fab-wrap{position:fixed;bottom:max(16px,env(safe-area-inset-bottom));right:14px;z-index:50;display:flex;flex-direction:column;gap:10px;align-items:flex-end;}
+.fab-doc{background:var(--white);border:2px solid var(--navy);}
+.fab-doc-label{position:absolute;right:60px;background:var(--navy);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity 0.2s;}
+.fab-wrap.doc-open .fab-doc-label{opacity:1;}
+
 .fab{width:52px;height:52px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(30,45,64,0.28);}
 .fab:active{transform:scale(0.94);}
 .fab-camera{background:var(--navy);}
@@ -71,6 +74,14 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
 .detail-label{font-size:11px;color:var(--text2);}
 .detail-val{font-size:13px;font-weight:500;color:var(--text);}
 .detail-actions{display:flex;gap:8px;margin-top:14px;}
+.doc-type-btn{width:100%;padding:12px 14px;background:var(--bg);border:2px solid rgba(30,45,64,0.15);border-radius:10px;text-align:left;font-size:13px;font-weight:700;color:var(--text);cursor:pointer;font-family:'Noto Sans JP',sans-serif;line-height:1.4;}
+.doc-type-btn.active{border-color:var(--navy);background:#eef2f8;}
+.doc-photo-sel{position:relative;border-radius:8px;overflow:hidden;cursor:pointer;border:3px solid transparent;aspect-ratio:4/3;}
+.doc-photo-sel img{width:100%;height:100%;object-fit:cover;display:block;}
+.doc-photo-sel.selected{border-color:var(--accent);}
+.doc-photo-sel .sel-badge{display:none;position:absolute;top:4px;right:4px;width:20px;height:20px;background:var(--accent);border-radius:50%;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--navy);}
+.doc-photo-sel.selected .sel-badge{display:flex;}
+.doc-photo-sel .phase-tag{position:absolute;bottom:4px;left:4px;font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px;}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -111,6 +122,15 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
 </div>
 
 <div class="fab-wrap">
+  <button class="fab fab-doc" onclick="openDocModal()" title="書類作成" style="position:relative;">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <rect x="3" y="2" width="13" height="18" rx="2" stroke="#1e2d40" stroke-width="1.5" fill="none"/>
+      <path d="M16 6 L19 6 L19 20 L6 20 L6 18" stroke="#1e2d40" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+      <line x1="6" y1="7" x2="13" y2="7" stroke="#1e2d40" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="6" y1="10" x2="13" y2="10" stroke="#1e2d40" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="6" y1="13" x2="10" y2="13" stroke="#1e2d40" stroke-width="1.2" stroke-linecap="round"/>
+    </svg>
+  </button>
   <button class="fab fab-gallery" onclick="openGallery()" title="ギャラリーから選択">
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
       <rect x="2" y="2" width="18" height="18" rx="3" stroke="#1e2d40" stroke-width="1.5" fill="none"/>
@@ -197,6 +217,64 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
     </div>
   </div>
 </div>
+
+<!-- 書類作成モーダル -->
+<div class="modal" id="docModal">
+  <div class="modal-panel" style="max-height:92dvh;overflow-y:auto;">
+    <h3>📋 書類作成</h3>
+
+    <!-- STEP1: 書類選択 -->
+    <div id="docStep1">
+      <span class="form-label">書類の種類</span>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+        <button class="doc-type-btn active" data-type="kanryo" onclick="selectDocType('kanryo',this)">
+          工事完了報告書
+          <span style="font-size:10px;color:var(--text2);display:block;font-weight:400;">施工前・施工後の写真を添えてご報告</span>
+        </button>
+      </div>
+      <div class="modal-btns" style="margin-top:16px;">
+        <button class="btn-cancel" onclick="closeDocModal()">キャンセル</button>
+        <button class="btn-ok" onclick="goDocStep2()">次へ　写真を選ぶ →</button>
+      </div>
+    </div>
+
+    <!-- STEP2: 写真選択 -->
+    <div id="docStep2" style="display:none;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <button onclick="backDocStep1()" style="background:none;border:none;color:var(--text2);font-size:18px;cursor:pointer;padding:0;">←</button>
+        <span style="font-size:13px;font-weight:700;color:var(--text);">写真を選択</span>
+      </div>
+      <p style="font-size:11px;color:var(--text2);margin-bottom:10px;">この案件の写真から、書類に使う写真を選んでください。施工前・施工後それぞれ1枚以上選ぶと書類が充実します。</p>
+      <div id="docPhotoGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:38dvh;overflow-y:auto;"></div>
+      <p id="docNoPhoto" style="display:none;font-size:12px;color:var(--text2);text-align:center;padding:20px 0;">この案件に写真がありません。<br>先に写真を追加してください。</p>
+      <div style="margin-top:10px;padding:8px 10px;background:var(--bg);border-radius:8px;font-size:11px;color:var(--text2);">
+        選択中：<span id="docSelectedCount" style="font-weight:700;color:var(--navy);">0</span> 枚
+      </div>
+
+      <!-- STEP2b: 案件情報入力 -->
+      <div style="margin-top:12px;">
+        <span class="form-label">工事件名</span>
+        <input type="text" class="form-input" id="docKojiName" placeholder="例：床面リフォーム工事（塩ビタイル貼り）">
+        <span class="form-label">施工場所</span>
+        <input type="text" class="form-input" id="docKojiLoc" placeholder="例：1階廊下・居室">
+        <span class="form-label">工事期間</span>
+        <input type="text" class="form-input" id="docKojiPeriod" placeholder="例：令和8年3月21日〜22日">
+        <span class="form-label">宛先（お客様名）</span>
+        <input type="text" class="form-input" id="docClient" placeholder="例：社会福祉法人 玉寿会">
+        <span class="form-label">報告日</span>
+        <input type="text" class="form-input" id="docDate" placeholder="例：令和8年3月22日">
+      </div>
+
+      <div class="modal-btns" style="margin-top:14px;">
+        <button class="btn-cancel" onclick="closeDocModal()">キャンセル</button>
+        <button class="btn-ok" id="docSendBtn" onclick="buildClaudePrompt()">📋 Claudeに投げる</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- コピー完了トースト -->
+<div id="copyToast" style="display:none;position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#208040;color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;font-weight:700;z-index:999;white-space:nowrap;">✅ クリップボードにコピーしました！</div>
 
 <script>
 function loadData(key,def){try{const d=localStorage.getItem(key);return d?JSON.parse(d):def;}catch(e){return def;}}
@@ -396,6 +474,148 @@ function openAnkenMgr(){
 }
 buildAnkenSelect();
 renderPhotos();
+
+// ── 書類作成モーダル ──
+let selectedDocType='kanryo';
+let selectedDocPhotos=new Set();
+
+function selectDocType(type,btn){
+  selectedDocType=type;
+  document.querySelectorAll('.doc-type-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function openDocModal(){
+  if(!currentAnken){alert('先に案件を選択してください');return;}
+  selectedDocPhotos.clear();
+  // 案件情報を自動入力（案件名から推測）
+  document.getElementById('docClient').value='';
+  document.getElementById('docKojiName').value=currentAnken;
+  document.getElementById('docKojiLoc').value='';
+  const today=new Date();
+  const wareki=`令和${today.getFullYear()-2018}年${today.getMonth()+1}月${today.getDate()}日`;
+  document.getElementById('docDate').value=wareki;
+  document.getElementById('docKojiPeriod').value='';
+  document.getElementById('docStep1').style.display='';
+  document.getElementById('docStep2').style.display='none';
+  document.getElementById('docModal').classList.add('show');
+}
+function closeDocModal(){document.getElementById('docModal').classList.remove('show');}
+function backDocStep1(){
+  document.getElementById('docStep2').style.display='none';
+  document.getElementById('docStep1').style.display='';
+}
+function goDocStep2(){
+  document.getElementById('docStep1').style.display='none';
+  document.getElementById('docStep2').style.display='';
+  buildDocPhotoGrid();
+}
+function buildDocPhotoGrid(){
+  const ankenPhotos=photos.filter(p=>p.anken===currentAnken&&p.dataURL);
+  const grid=document.getElementById('docPhotoGrid');
+  const noPhoto=document.getElementById('docNoPhoto');
+  grid.innerHTML='';
+  selectedDocPhotos.clear();
+  updateDocCount();
+  if(ankenPhotos.length===0){grid.style.display='none';noPhoto.style.display='block';return;}
+  grid.style.display='grid';noPhoto.style.display='none';
+  ankenPhotos.slice().reverse().forEach(p=>{
+    const div=document.createElement('div');
+    div.className='doc-photo-sel';
+    div.dataset.id=p.id;
+    const phaseColor=p.phase==='before'?'rgba(26,111,196,0.85)':'rgba(32,128,64,0.85)';
+    const phaseText=p.phase==='before'?'施工前':'施工後';
+    div.innerHTML=`<img src="${p.dataURL}">
+      <div class="sel-badge">✓</div>
+      <div class="phase-tag" style="background:${phaseColor};color:#fff;">${phaseText}</div>`;
+    div.onclick=()=>toggleDocPhoto(p.id,div);
+    grid.appendChild(div);
+  });
+}
+function toggleDocPhoto(id,el){
+  if(selectedDocPhotos.has(id)){
+    selectedDocPhotos.delete(id);
+    el.classList.remove('selected');
+  }else{
+    selectedDocPhotos.add(id);
+    el.classList.add('selected');
+  }
+  updateDocCount();
+}
+function updateDocCount(){
+  document.getElementById('docSelectedCount').textContent=selectedDocPhotos.size;
+}
+
+function buildClaudePrompt(){
+  const kojiName=document.getElementById('docKojiName').value.trim();
+  const kojiLoc=document.getElementById('docKojiLoc').value.trim();
+  const kojiPeriod=document.getElementById('docKojiPeriod').value.trim();
+  const client=document.getElementById('docClient').value.trim();
+  const date=document.getElementById('docDate').value.trim();
+
+  if(selectedDocPhotos.size===0){alert('写真を1枚以上選択してください');return;}
+
+  const selPhotos=photos.filter(p=>selectedDocPhotos.has(p.id));
+  const beforePhotos=selPhotos.filter(p=>p.phase==='before');
+  const afterPhotos=selPhotos.filter(p=>p.phase==='after');
+
+  // 写真情報（Base64は重いのでメタ情報＋dataURLを渡す）
+  function photoInfo(p){
+    return `【${p.phase==='before'?'施工前':'施工後'}】場所：${p.place||'未記入'}　コメント：${p.comment||'なし'}　dataURL：${p.dataURL}`;
+  }
+
+  let prompt=`以下の情報と写真を使って、工事完了報告書のHTMLを作成してください。
+
+## 書類種別
+工事完了報告書
+
+## 案件情報
+- 宛先：${client||currentAnken}
+- 工事件名：${kojiName}
+- 施工場所：${kojiLoc}
+- 工事期間：${kojiPeriod}
+- 報告日：${date}
+- 担当：亀井 悟
+
+## 写真データ（${selPhotos.length}枚）
+`;
+
+  selPhotos.forEach((p,i)=>{
+    prompt+=`\n### 写真${i+1}\n`;
+    prompt+=`- 区分：${p.phase==='before'?'施工前':'施工後'}\n`;
+    prompt+=`- 場所：${p.place||'未記入'}\n`;
+    prompt+=`- コメント：${p.comment||'なし'}\n`;
+    prompt+=`- 画像データ：${p.dataURL}\n`;
+  });
+
+  prompt+=`
+## 出力仕様
+- 既存の工事完了報告書HTMLフォーマット（A4縦・印刷対応）に従って出力
+- 写真は施工前・施工後をペアで並べる（施工前が複数ある場合は見やすく配置）
+- 工事内容は写真のコメントと場所から気の利いた文章で箇条書き（2〜4項目）
+- 挨拶文は「下記の工事が完了いたしましたのでご報告申し上げます。」
+- フッターに「株式会社アート・レイズ　〒874-0829　大分県別府市上原町13番25号　担当：亀井 悟」
+- 完成したHTMLコードのみ出力（説明不要）
+`;
+
+  navigator.clipboard.writeText(prompt).then(()=>{
+    closeDocModal();
+    const toast=document.getElementById('copyToast');
+    toast.style.display='block';
+    setTimeout(()=>{toast.style.display='none';},2500);
+  }).catch(()=>{
+    // フォールバック：テキストエリアでコピー
+    const ta=document.createElement('textarea');
+    ta.value=prompt;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    closeDocModal();
+    const toast=document.getElementById('copyToast');
+    toast.style.display='block';
+    setTimeout(()=>{toast.style.display='none';},2500);
+  });
+}
+
 </script>
 </body>
 </html>
