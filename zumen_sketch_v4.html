@@ -30,10 +30,10 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
 .tool-btn.active{background:var(--navy);color:var(--white);}
 .tool-btn:active{opacity:0.7;}
 .divider{width:1px;height:26px;background:rgba(30,45,64,0.15);margin:0 2px;flex-shrink:0;}
-.stroke-selector{display:flex;align-items:center;gap:4px;padding:0 3px;flex-shrink:0;}
+.stroke-selector{display:flex;align-items:center;gap:10px;padding:0 8px;flex-shrink:0;}
 .stroke-dot{border-radius:50%;background:var(--navy);cursor:pointer;flex-shrink:0;border:2px solid transparent;}
 .stroke-dot.active{border-color:var(--accent);}
-.color-dot{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid transparent;flex-shrink:0;}
+.color-dot{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;flex-shrink:0;margin:0 4px;}
 .color-dot.active{border-color:var(--accent);}
 .spacer{flex:1;min-width:4px;}
 .grid-selector{display:flex;gap:2px;padding:0 2px;flex-shrink:0;}
@@ -85,7 +85,8 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
 <div class="header">
   <button class="btn-icon" onclick="goBack()">←</button>
   <div class="header-title">図面スケッチ</div>
-  <button class="btn-icon" onclick="undoStep()" style="font-size:15px;">↩</button>
+  <button class="btn-icon" onclick="undoStep()" title="元に戻す" style="font-size:15px;">↩</button>
+  <button class="btn-icon" onclick="redoStep()" title="やり直し" style="font-size:15px;">↪</button>
   <button class="btn-icon" style="font-size:12px;color:var(--accent);" onclick="clearCurrent()">全消</button>
 </div>
 
@@ -167,15 +168,15 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
   </button>
   <div class="divider"></div>
   <div class="stroke-selector">
-    <div class="stroke-dot active" style="width:5px;height:5px;" onclick="setStroke(1.5,this)"></div>
-    <div class="stroke-dot" style="width:9px;height:9px;" onclick="setStroke(3,this)"></div>
-    <div class="stroke-dot" style="width:13px;height:13px;" onclick="setStroke(6,this)"></div>
+    <div class="stroke-dot active" style="width:6px;height:6px;" onclick="setStroke(1.5,this)"></div>
+    <div class="stroke-dot" style="width:11px;height:11px;" onclick="setStroke(3,this)"></div>
+    <div class="stroke-dot" style="width:16px;height:16px;" onclick="setStroke(6,this)"></div>
   </div>
   <div class="divider"></div>
   <div class="color-dot active" style="background:#1e2d40;" onclick="setColor('#1e2d40',this)"></div>
   <div class="color-dot" style="background:#e03030;" onclick="setColor('#e03030',this)"></div>
   <div class="color-dot" style="background:#1a6fc4;" onclick="setColor('#1a6fc4',this)"></div>
-  <div class="spacer"></div>
+  <div class="divider"></div>
   <div class="grid-selector">
     <button class="grid-btn" onclick="setGrid('S',this)">S</button>
     <button class="grid-btn active" onclick="setGrid('M',this)">M</button>
@@ -291,16 +292,16 @@ let tabs=[{label:'平面図',history:[]}];
 let currentTab=0;
 
 // ── State ──
-let tool='pen',strokeWidth=1.5,strokeColor='#1e2d40';
+let tool='pen',prevTool='pen',strokeWidth=1.5,strokeColor='#1e2d40';
 let isDrawing=false,startX=0,startY=0;
 let penPoints=[];
 let selectedKigo=null;
-// 寸法パレット：数値入力後に配置場所待ち
 let pendingKigoText=null;
-// dimX（×）用
 let dimXResolve=null;
 const GRID_SIZE={S:10,M:20,L:50};
 let gridKey='M',GRID=20;
+// Redo用
+let redoStack=[];
 
 // ── Canvas ──
 const wrap=document.getElementById('canvasWrap');
@@ -380,12 +381,24 @@ function restoreCurrent(){
 function saveStep(){
   tabs[currentTab].history.push(drawC.toDataURL());
   if(tabs[currentTab].history.length>25)tabs[currentTab].history.shift();
+  redoStack=[]; // 新しい描画でRedoスタッククリア
 }
 function undoStep(){
   const h=tabs[currentTab].history;
   if(h.length===0){dCtx.clearRect(0,0,drawC.width,drawC.height);return;}
+  // 現在の状態をredoStackに積む
+  redoStack.push(drawC.toDataURL());
+  if(redoStack.length>25)redoStack.shift();
   h.pop();dCtx.clearRect(0,0,drawC.width,drawC.height);
   if(h.length>0){const img=new Image();img.src=h[h.length-1];img.onload=()=>dCtx.drawImage(img,0,0);}
+}
+function redoStep(){
+  if(redoStack.length===0)return;
+  const dataURL=redoStack.pop();
+  tabs[currentTab].history.push(dataURL);
+  if(tabs[currentTab].history.length>25)tabs[currentTab].history.shift();
+  dCtx.clearRect(0,0,drawC.width,drawC.height);
+  const img=new Image();img.src=dataURL;img.onload=()=>dCtx.drawImage(img,0,0);
 }
 function clearCurrent(){
   if(!confirm('このページを全て消しますか？'))return;
@@ -394,12 +407,20 @@ function clearCurrent(){
 
 // ── ツール ──
 function setTool(t){
+  // ズームボタンを再タップ → 解除して直前のツールに戻る
+  if(t==='zoom' && tool==='zoom'){
+    // viewportスケールをリセット
+    const vp=document.querySelector('meta[name=viewport]');
+    vp.content='width=device-width, initial-scale=1.0, maximum-scale=1.0';
+    setTimeout(()=>{vp.content='width=device-width, initial-scale=1.0';},100);
+    t=prevTool;
+  }
+  if(tool!=='zoom') prevTool=tool; // ズーム以外のツールを記憶
   tool=t;clearKigoMode();
   ['Pen','Line','Dim','Rect','Door','Sash','Circle','Text','Erase','Zoom'].forEach(n=>{
     const el=document.getElementById('tool'+n);
     if(el)el.classList.toggle('active',t===n.toLowerCase());
   });
-  // ズームモード時はcanvas-wrapにクラス付与してtouch-actionを切り替え
   const wrap=document.getElementById('canvasWrap');
   if(t==='zoom'){
     wrap.classList.add('zoom-mode');
