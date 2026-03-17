@@ -77,18 +77,18 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
 .save-btn{position:fixed;bottom:max(14px,env(safe-area-inset-bottom));right:14px;z-index:50;width:52px;height:52px;border-radius:50%;background:var(--accent);border:none;font-size:22px;cursor:pointer;box-shadow:0 4px 16px rgba(30,45,64,0.3);display:flex;align-items:center;justify-content:center;}
 .save-btn:active{transform:scale(0.94);}
 
-.zoom-release-btn{
-  display:none;position:fixed;z-index:200;
-  transform:translate(-50%,-50%);
-  background:var(--navy);color:var(--white);
-  border:none;border-radius:24px;
-  padding:12px 26px;font-size:16px;font-weight:700;
+.zoom-indicator{
+  display:none;position:fixed;top:60px;left:50%;
+  transform:translateX(-50%);
+  z-index:200;
+  background:rgba(30,45,64,0.85);color:#fff;
+  border-radius:20px;padding:6px 18px;
+  font-size:13px;font-weight:700;
   font-family:'Noto Sans JP',sans-serif;
-  box-shadow:0 4px 20px rgba(0,0,0,0.45);
-  cursor:pointer;white-space:nowrap;
-  opacity:0;transition:opacity 0.15s;
+  pointer-events:none;
+  white-space:nowrap;
 }
-.zoom-release-btn.show{display:block;opacity:1;}
+.zoom-indicator.show{display:block;}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -170,15 +170,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
       <line x1="4" y1="16" x2="18" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
     </svg>
   </button>
-  <!-- ズーム -->
-  <button class="tool-btn" id="toolZoom" onclick="setTool('zoom')" title="ズーム">
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <circle cx="9" cy="9" r="5.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-      <line x1="13" y1="13" x2="17" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      <line x1="9" y1="6.5" x2="9" y2="11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      <line x1="6.5" y1="9" x2="11.5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    </svg>
-  </button>
+
   <div class="divider"></div>
   <div class="stroke-selector">
     <div class="stroke-dot active" style="width:6px;height:6px;" onclick="setStroke(1.5,this)"></div>
@@ -263,7 +255,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
 </div>
 
 <button class="save-btn" onclick="saveSketch()">💾</button>
-<button class="zoom-release-btn" id="zoomReleaseBtn" onclick="releaseZoom()">✕ ズーム解除</button>
+<div class="zoom-indicator" id="zoomIndicator">🔍 ズームモード　2本指ダブルタップで解除</div>
 
 <script>
 // ── パレットデータ ──
@@ -420,34 +412,36 @@ function clearCurrent(){
 }
 
 function releaseZoom(){
-  document.getElementById('zoomReleaseBtn').classList.remove('show');
-  clearTimeout(zoomBtnHideTimer);
+  document.getElementById('zoomIndicator').classList.remove('show');
   // viewportスケールをリセット
   const vp=document.querySelector('meta[name=viewport]');
   vp.content='width=device-width, initial-scale=1.0, maximum-scale=1.0';
   setTimeout(()=>{vp.content='width=device-width, initial-scale=1.0';},100);
   // 直前のツールに戻す
-  setTool(prevTool);
+  tool=prevTool;
+  const wrap=document.getElementById('canvasWrap');
+  wrap.classList.remove('zoom-mode');
+  ['Pen','Line','Dim','Rect','Door','Sash','Circle','Text','Erase'].forEach(n=>{
+    const el=document.getElementById('tool'+n);
+    if(el)el.classList.toggle('active',prevTool===n.toLowerCase());
+  });
 }
 
 // ── ツール ──
 function setTool(t){
-  // ズームボタンを再タップ → 解除して直前のツールに戻る
-  if(t==='zoom' && tool==='zoom'){
-    releaseZoom();
-    return;
-  }
   if(tool!=='zoom') prevTool=tool;
   tool=t;clearKigoMode();
-  ['Pen','Line','Dim','Rect','Door','Sash','Circle','Text','Erase','Zoom'].forEach(n=>{
+  ['Pen','Line','Dim','Rect','Door','Sash','Circle','Text','Erase'].forEach(n=>{
     const el=document.getElementById('tool'+n);
     if(el)el.classList.toggle('active',t===n.toLowerCase());
   });
   const wrap=document.getElementById('canvasWrap');
   if(t==='zoom'){
     wrap.classList.add('zoom-mode');
+    document.getElementById('zoomIndicator').classList.add('show');
   }else{
     wrap.classList.remove('zoom-mode');
+    document.getElementById('zoomIndicator').classList.remove('show');
   }
 }
 function setStroke(w,el){
@@ -521,26 +515,27 @@ overlayC.addEventListener('mousedown',onDown);
 overlayC.addEventListener('mousemove',onMove);
 overlayC.addEventListener('mouseup',onUp);
 
-// ── ズームモード中の2本指タッチ → 解除ボタンを指の中心に表示 ──
-let zoomBtnHideTimer=null;
+// ── 2本指ダブルタップ → ズームON/OFFトグル ──
+let twoFingerLastTime=0;
+let twoFingerTimer=null;
+
 document.addEventListener('touchstart', e=>{
-  if(tool!=='zoom') return;
-  if(e.touches.length >= 2){
-    const t1=e.touches[0], t2=e.touches[1];
-    // visualViewportを使ってズーム状態でも正しい画面座標を取得
-    const vv=window.visualViewport;
-    const scale=vv ? vv.scale : 1;
-    const offsetX=vv ? vv.offsetLeft : 0;
-    const offsetY=vv ? vv.offsetTop : 0;
-    const cx=((t1.clientX+t2.clientX)/2 - offsetX) / scale;
-    const cy=((t1.clientY+t2.clientY)/2 - offsetY) / scale;
-    const btn=document.getElementById('zoomReleaseBtn');
-    btn.style.left = cx+'px';
-    btn.style.top  = cy+'px';
-    btn.classList.add('show');
-    // 3秒後に自動非表示
-    clearTimeout(zoomBtnHideTimer);
-    zoomBtnHideTimer=setTimeout(()=>btn.classList.remove('show'),3000);
+  if(e.touches.length < 2) return;
+
+  const now=Date.now();
+  const diff=now - twoFingerLastTime;
+
+  if(diff < 400 && diff > 50){
+    // 2本指ダブルタップ確定
+    clearTimeout(twoFingerTimer);
+    twoFingerLastTime=0;
+    if(tool==='zoom'){
+      releaseZoom();
+    }else{
+      setTool('zoom');
+    }
+  } else {
+    twoFingerLastTime=now;
   }
 },{passive:true});
 
