@@ -76,6 +76,19 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
 
 .save-btn{position:fixed;bottom:max(14px,env(safe-area-inset-bottom));right:14px;z-index:50;width:52px;height:52px;border-radius:50%;background:var(--accent);border:none;font-size:22px;cursor:pointer;box-shadow:0 4px 16px rgba(30,45,64,0.3);display:flex;align-items:center;justify-content:center;}
 .save-btn:active{transform:scale(0.94);}
+
+.zoom-release-btn{
+  display:none;position:fixed;z-index:200;
+  transform:translate(-50%,-50%);
+  background:var(--navy);color:var(--white);
+  border:none;border-radius:24px;
+  padding:12px 26px;font-size:16px;font-weight:700;
+  font-family:'Noto Sans JP',sans-serif;
+  box-shadow:0 4px 20px rgba(0,0,0,0.45);
+  cursor:pointer;white-space:nowrap;
+  opacity:0;transition:opacity 0.15s;
+}
+.zoom-release-btn.show{display:block;opacity:1;}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -250,6 +263,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
 </div>
 
 <button class="save-btn" onclick="saveSketch()">💾</button>
+<button class="zoom-release-btn" id="zoomReleaseBtn" onclick="releaseZoom()">✕ ズーム解除</button>
 
 <script>
 // ── パレットデータ ──
@@ -405,17 +419,25 @@ function clearCurrent(){
   dCtx.clearRect(0,0,drawC.width,drawC.height);tabs[currentTab].history=[];
 }
 
+function releaseZoom(){
+  document.getElementById('zoomReleaseBtn').classList.remove('show');
+  clearTimeout(zoomBtnHideTimer);
+  // viewportスケールをリセット
+  const vp=document.querySelector('meta[name=viewport]');
+  vp.content='width=device-width, initial-scale=1.0, maximum-scale=1.0';
+  setTimeout(()=>{vp.content='width=device-width, initial-scale=1.0';},100);
+  // 直前のツールに戻す
+  setTool(prevTool);
+}
+
 // ── ツール ──
 function setTool(t){
   // ズームボタンを再タップ → 解除して直前のツールに戻る
   if(t==='zoom' && tool==='zoom'){
-    // viewportスケールをリセット
-    const vp=document.querySelector('meta[name=viewport]');
-    vp.content='width=device-width, initial-scale=1.0, maximum-scale=1.0';
-    setTimeout(()=>{vp.content='width=device-width, initial-scale=1.0';},100);
-    t=prevTool;
+    releaseZoom();
+    return;
   }
-  if(tool!=='zoom') prevTool=tool; // ズーム以外のツールを記憶
+  if(tool!=='zoom') prevTool=tool;
   tool=t;clearKigoMode();
   ['Pen','Line','Dim','Rect','Door','Sash','Circle','Text','Erase','Zoom'].forEach(n=>{
     const el=document.getElementById('tool'+n);
@@ -498,6 +520,29 @@ overlayC.addEventListener('touchcancel',onUp);
 overlayC.addEventListener('mousedown',onDown);
 overlayC.addEventListener('mousemove',onMove);
 overlayC.addEventListener('mouseup',onUp);
+
+// ── ズームモード中の2本指タッチ → 解除ボタンを指の中心に表示 ──
+let zoomBtnHideTimer=null;
+document.addEventListener('touchstart', e=>{
+  if(tool!=='zoom') return;
+  if(e.touches.length >= 2){
+    const t1=e.touches[0], t2=e.touches[1];
+    // visualViewportを使ってズーム状態でも正しい画面座標を取得
+    const vv=window.visualViewport;
+    const scale=vv ? vv.scale : 1;
+    const offsetX=vv ? vv.offsetLeft : 0;
+    const offsetY=vv ? vv.offsetTop : 0;
+    const cx=((t1.clientX+t2.clientX)/2 - offsetX) / scale;
+    const cy=((t1.clientY+t2.clientY)/2 - offsetY) / scale;
+    const btn=document.getElementById('zoomReleaseBtn');
+    btn.style.left = cx+'px';
+    btn.style.top  = cy+'px';
+    btn.classList.add('show');
+    // 3秒後に自動非表示
+    clearTimeout(zoomBtnHideTimer);
+    zoomBtnHideTimer=setTimeout(()=>btn.classList.remove('show'),3000);
+  }
+},{passive:true});
 
 function onDown(e){
   if(tool==='zoom') return;
