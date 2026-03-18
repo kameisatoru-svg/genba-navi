@@ -90,7 +90,12 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
 .preview-screen{display:none;position:fixed;inset:0;z-index:200;background:var(--navy);flex-direction:column;}
 .preview-screen.show{display:flex;}
 .preview-header{background:var(--navy);padding:10px 12px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.preview-body{flex:1;background:#fff;overflow-y:auto;padding:14px 12px;}
+/* プレビュー本体：固定ヘッダー＋スクロールエリアの構造 */
+.preview-body{flex:1;background:#fff;display:flex;flex-direction:column;overflow:hidden;}
+.preview-doc-header{background:#fff;padding:10px 12px 8px;border-bottom:2px solid #1e2d40;flex-shrink:0;}
+.preview-doc-header-title{font-size:13px;font-weight:700;color:#1e2d40;text-align:center;}
+.preview-doc-header-sub{font-size:11px;color:#5a6a7a;text-align:center;margin-top:2px;}
+.preview-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 12px 20px;}
 .preview-footer{background:rgba(30,45,64,0.95);padding:10px 14px;display:flex;gap:10px;flex-shrink:0;}
 .btn-preview-back{flex:1;height:44px;background:transparent;border:1.5px solid rgba(255,255,255,0.3);border-radius:10px;color:#fff;font-size:13px;font-family:'Noto Sans JP',sans-serif;cursor:pointer;}
 .btn-preview-done{flex:2;height:44px;background:var(--accent);border:none;border-radius:10px;color:var(--navy);font-size:13px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;}
@@ -305,12 +310,23 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
 
 <!-- プレビュー全画面 -->
 <div class="preview-screen" id="previewScreen">
+  <!-- ナビバー（アプリUI） -->
   <div class="preview-header">
     <button onclick="closePreview()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:0;line-height:1;">←</button>
     <span style="color:#fff;font-size:13px;font-weight:700;flex:1;" id="previewTitle">プレビュー</span>
     <span style="color:var(--accent);font-size:11px;font-weight:700;">📸 スクショ→Claudeへ</span>
   </div>
-  <div class="preview-body" id="previewBody"></div>
+  <!-- 白背景エリア：固定ヘッダー＋スクロール -->
+  <div class="preview-body">
+    <!-- ★スクショに常に写る固定ヘッダー -->
+    <div class="preview-doc-header">
+      <div class="preview-doc-header-title" id="previewDocType">工事完成写真台帳</div>
+      <div class="preview-doc-header-sub" id="previewAnkenName"></div>
+    </div>
+    <!-- スクロールする写真エリア -->
+    <div class="preview-scroll" id="previewBody"></div>
+  </div>
+  <!-- 下部ボタン（スクショには写らない） -->
   <div class="preview-footer">
     <button class="btn-preview-back" onclick="closePreview()">← 選び直す</button>
     <button class="btn-preview-done" onclick="closePreview()">✅ スクショ撮った！完了</button>
@@ -622,8 +638,13 @@ function openPreview(){
   const label = docTypeLabel[selectedDocType]||'';
   const ankenName = currentAnken||'';
 
-  // プレビュー本文を生成
-  let html = `<div class="preview-doc-title">${label}　${ankenName}</div>`;
+  // 固定ヘッダーに書類名・案件名をセット
+  document.getElementById('previewDocType').textContent = label;
+  document.getElementById('previewAnkenName').textContent = ankenName;
+  document.getElementById('previewTitle').textContent = label;
+
+  // プレビュー本文を生成（タイトル行は固定ヘッダーに移したので不要）
+  let html = ``;
 
   if(selectedDocType==='photos'){
     // 完成写真台帳：2枚ずつペアで横並び
