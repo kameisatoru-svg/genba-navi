@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>見積台帳｜株式会社アート・レイズ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --band: #555;
+    --light: #f8f8f8;
+    --border: #ddd;
+    --border-dark: #aaa;
+    --text: #333;
+    --text-sub: #666;
+    --white: #fff;
+    --accent: #2563eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #eee;
+    color: var(--text);
+    font-size: 14px;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+  .page-header {
+    background: var(--band);
+    color: var(--white);
+    padding: 18px 24px;
+    border-radius: 6px 6px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .page-header h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.05em; }
+  .page-header .meta { font-size: 12px; opacity: 0.8; text-align: right; }
+
+  .stats-bar {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 14px 24px;
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .stat-item { text-align: center; }
+  .stat-num { font-size: 24px; font-weight: 700; color: var(--band); }
+  .stat-label { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+
+  .search-bar {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 12px 24px;
+    border-radius: 0 0 6px 6px;
+    margin-bottom: 20px;
+  }
+  .search-bar input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-dark);
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .search-bar input:focus { outline: none; border-color: var(--accent); }
+
+  /* 見積カード */
+  .estimate-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .card-header {
+    background: #444444;
+    color: var(--white);
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .card-header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .estimate-id {
+    font-size: 12px;
+    font-weight: 700;
+    background: rgba(255,255,255,0.2);
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+  .estimate-name { font-size: 14px; font-weight: 700; }
+
+  .badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+  .badge-mitsumori { background: #d97706; color: #fff; }
+  .badge-juchu     { background: #16a34a; color: #fff; }
+  .badge-kanryo    { background: #6b7280; color: #fff; }
+
+  .card-body { padding: 16px; }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px 20px;
+    margin-bottom: 14px;
+  }
+  .info-item { display: flex; flex-direction: column; gap: 2px; }
+  .info-label { font-size: 11px; color: var(--text-sub); font-weight: 700; }
+  .info-value { font-size: 13px; color: var(--text); }
+  .amount-value { font-size: 15px; font-weight: 700; color: #1e40af; }
+
+  /* 明細テーブル */
+  .meisai-toggle {
+    background: none;
+    border: 1px solid var(--border-dark);
+    border-radius: 4px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    color: var(--text-sub);
+    margin-bottom: 10px;
+  }
+  .meisai-toggle:hover { background: var(--light); }
+  .meisai-wrap { display: none; }
+  .meisai-wrap.open { display: block; }
+  .meisai-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border);
+  }
+  .meisai-table th {
+    background: #444444;
+    color: var(--white);
+    padding: 6px 10px;
+    text-align: left;
+    font-weight: 700;
+  }
+  .meisai-table th.right,
+  .meisai-table td.right { text-align: right; }
+  .meisai-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .meisai-table tr:nth-child(even) td { background: #f5f5f5; }
+  .meisai-table tr:last-child td { border-bottom: none; }
+
+  .totals-table {
+    width: 320px;
+    margin-left: auto;
+    border-collapse: collapse;
+    font-size: 13px;
+    border: 1px solid var(--border);
+  }
+  .totals-table td { padding: 6px 14px; border-bottom: 1px solid var(--border); }
+  .totals-table td:last-child { text-align: right; }
+  .totals-table tr:last-child td {
+    background: #444444;
+    color: var(--white);
+    font-weight: 700;
+    font-size: 14px;
+    border-bottom: none;
+  }
+
+  .note-box {
+    background: #fafafa;
+    border-left: 3px solid #d1d5db;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--text-sub);
+    border-radius: 0 4px 4px 0;
+    margin-top: 12px;
+    line-height: 1.7;
+  }
+  .note-label { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 11px; }
+
+  .add-row {
+    background: var(--white);
+    border: 2px dashed var(--border-dark);
+    border-radius: 6px;
+    padding: 16px;
+    text-align: center;
+    color: var(--text-sub);
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+  .page-footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-sub);
+    padding: 12px 0;
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="page-header">
+    <h1>📝 見積台帳</h1>
+    <div class="meta">株式会社アート・レイズ<br>最終更新：2026-03-18</div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-num" id="totalCount">3</div>
+      <div class="stat-label">総見積件数</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">1</div>
+      <div class="stat-label">受注済</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">2</div>
+      <div class="stat-label">提出予定</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">¥6,920,639</div>
+      <div class="stat-label">見積総額（税込）</div>
+    </div>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="🔍 案件番号・顧客名・工事内容で絞り込み..." oninput="filterCards()">
+  </div>
+
+  <!-- AR-2026-0004 -->
+  <div class="estimate-card" data-search="ar-2026-0004 さくら苑 玉寿会 西俊至 床面 フローリング 塩ビタイル 熊本 玉名 受注済">
+    <div class="card-header">
+      <div class="card-header-left">
+        <span class="estimate-id">AR-2026-0004</span>
+        <span class="estimate-name">床面リフォーム工事（塩ビタイル貼り）</span>
+      </div>
+      <span class="badge badge-juchu">受注済</span>
+    </div>
+    <div class="card-body">
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">顧客</span>
+          <span class="info-value">さくら苑　西 俊至 様（C-001）</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">施工場所</span>
+          <span class="info-value">熊本県玉名市伊倉北方1533</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">見積日</span>
+          <span class="info-value">2026-03-13</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">見積金額（税込）</span>
+          <span class="info-value amount-value">¥6,588,120</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">諸経費</span>
+          <span class="info-value">10%</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">見積ファイル</span>
+          <span class="info-value">見積書_AR-2026-0004_さくら苑_20260313.html</span>
+        </div>
+      </div>
+
+      <button class="meisai-toggle" onclick="toggleMeisai('meisai-0004', this)">▶ 明細を表示</button>
+      <div class="meisai-wrap" id="meisai-0004">
+        <table class="meisai-table">
+          <thead>
+            <tr>
+              <th>工事内容</th>
+              <th class="right">数量</th>
+              <th>単位</th>
+              <th class="right">単価</th>
+              <th class="right">金額</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>既存床材撤去・廃棄処分</td><td class="right">285.00</td><td>㎡</td><td class="right">¥1,500</td><td class="right">¥427,500</td></tr>
+            <tr><td>下地調整（レベラー打設）</td><td class="right">285.00</td><td>㎡</td><td class="right">¥2,000</td><td class="right">¥570,000</td></tr>
+            <tr><td>塩ビタイル貼り施工（材工）</td><td class="right">285.00</td><td>㎡</td><td class="right">¥8,500</td><td class="right">¥2,422,500</td></tr>
+            <tr><td>幅木取付（材工）</td><td class="right">210.00</td><td>m</td><td class="right">¥1,200</td><td class="right">¥252,000</td></tr>
+            <tr><td>養生・清掃・搬出入</td><td class="right">1.00</td><td>式</td><td class="right">¥180,000</td><td class="right">¥180,000</td></tr>
+            <tr><td>職人手配・監督費</td><td class="right">15.00</td><td>人工</td><td class="right">¥24,000</td><td class="right">¥360,000</td></tr>
+            <tr><td>交通費・宿泊費（熊本往復）</td><td class="right">1.00</td><td>式</td><td class="right">¥280,000</td><td class="right">¥280,000</td></tr>
+          </tbody>
+        </table>
+        <table class="totals-table">
+          <tr><td>小計</td><td>¥4,492,000</td></tr>
+          <tr><td>諸経費（10%）</td><td>¥449,200</td></tr>
+          <tr><td>税抜合計</td><td>¥4,941,200</td></tr>
+          <tr><td>消費税（10%）</td><td>¥494,120</td></tr>
+          <tr><td>税込合計（見積金額）</td><td>¥5,435,320</td></tr>
+        </table>
+        <div class="note-box" style="margin-top:10px;">
+          <div class="note-label">※ 備考</div>
+          第1フェーズ（3月21〜22日）：廊下・食堂・多目的室エリア（約95㎡）。第2・第3フェーズは日程調整中。
+          材料：東リ／サンゲツ相当品。幅木：高さ60mm 同系色。
+        </div>
+      </div>
+
+      <div class="note-box">
+        <div class="note-label">📝 案件メモ</div>
+        社会福祉法人 玉寿会（山田勝徳 理事長）。契約日：令和8年3月16日。第1期施工：3月21〜22日（土日）。
+      </div>
+    </div>
+  </div>
+
+  <!-- AR-2026-0005 -->
+  <div class="estimate-card" data-search="ar-2026-0005 松村整骨院 愛の治療院 松村 外装補修 看板 コーキング 別府 見積提出予定">
+    <div class="card-header">
+      <div class="card-header-left">
+        <span class="estimate-id">AR-2026-0005</span>
+        <span class="estimate-name">外壁コーキング補修・看板シート張替工事他</span>
+      </div>
+      <span class="badge badge-mitsumori">見積提出予定</span>
+    </div>
+    <div class="card-body">
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">顧客</span>
+          <span class="info-value">松村整骨院（愛の治療院）　松村 様</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">施工場所</span>
+          <span class="info-value">大分県別府市（詳細現地確認済み）</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">見積日</span>
+          <span class="info-value">2026-03-17</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">見積金額（税込）</span>
+          <span class="info-value amount-value">¥206,195</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">諸経費</span>
+          <span class="info-value">15%</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">見積ファイル</span>
+          <span class="info-value">見積書_AR-2026-0005_松村整骨院_20260317.html</span>
+        </div>
+      </div>
+
+      <button class="meisai-toggle" onclick="toggleMeisai('meisai-0005', this)">▶ 明細を表示</button>
+      <div class="meisai-wrap" id="meisai-0005">
+        <table class="meisai-table">
+          <thead>
+            <tr>
+              <th>工事内容</th>
+              <th class="right">数量</th>
+              <th>単位</th>
+              <th class="right">単価</th>
+              <th class="right">金額</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>外壁コーキング打ち（胴差天端）部分補修</td><td class="right">1.00</td><td>式</td><td class="right">¥48,000</td><td class="right">¥48,000</td></tr>
+            <tr><td>壁面突出看板インクジェットシート貼（600×1,800mm）</td><td class="right">1.00</td><td>枚</td><td class="right">¥28,000</td><td class="right">¥28,000</td></tr>
+            <tr><td>壁面看板インクジェットシート貼（600×600mm）</td><td class="right">1.00</td><td>枚</td><td class="right">¥18,000</td><td class="right">¥18,000</td></tr>
+            <tr><td>既存ボックス板金補修の上再取付（W1,800mm）</td><td class="right">1.00</td><td>式</td><td class="right">¥45,000</td><td class="right">¥45,000</td></tr>
+            <tr><td>職人手配・作業費</td><td class="right">2.00</td><td>人工</td><td class="right">¥24,000</td><td class="right">¥48,000</td></tr>
+          </tbody>
+        </table>
+        <table class="totals-table">
+          <tr><td>小計</td><td>¥187,000</td></tr>
+          <tr><td>諸経費（15%）</td><td>¥28,050</td></tr>
+          <tr><td>税抜合計</td><td>¥215,050</td></tr>
+          <tr><td>消費税（10%）</td><td>¥21,505</td></tr>
+          <tr><td>税込合計（見積金額）</td><td>¥236,555</td></tr>
+        </table>
+        <div class="note-box" style="margin-top:10px;">
+          <div class="note-label">※ 備考</div>
+          ふすま張り替え・耐熱配管交換は別途対応予定（設備屋確認待ち）。紹介経由（元同級生の妻が勤務）。
+        </div>
+      </div>
+
+      <div class="note-box">
+        <div class="note-label">📝 案件メモ</div>
+        見積書PDF保存後、提出予定。ふすま・配管は別途見積対応。
+      </div>
+    </div>
+  </div>
+
+  <!-- AR-2026-0006 -->
+  <div class="estimate-card" data-search="ar-2026-0006 信和 加藤博和 ビーコンプラザ 別府コンベンションセンター アルミアングル トイレ建具 見積提出予定">
+    <div class="card-header">
+      <div class="card-header-left">
+        <span class="estimate-id">AR-2026-0006</span>
+        <span class="estimate-name">トイレ建具アルミアングル取付工事</span>
+      </div>
+      <span class="badge badge-mitsumori">見積提出予定</span>
+    </div>
+    <div class="card-body">
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">顧客（元請）</span>
+          <span class="info-value">株式会社 信和　加藤 博和 様（C-003）</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">施工場所</span>
+          <span class="info-value">別府コンベンションセンター（ビーコンプラザ）</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">見積日</span>
+          <span class="info-value">2026-03-18</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">見積金額（税込）</span>
+          <span class="info-value amount-value">¥126,324</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">諸経費</span>
+          <span class="info-value">15%</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">見積ファイル</span>
+          <span class="info-value">見積書_AR-2026-0006_ビーコンプラザ追加工事_20260318.html</span>
+        </div>
+      </div>
+
+      <button class="meisai-toggle" onclick="toggleMeisai('meisai-0006', this)">▶ 明細を表示</button>
+      <div class="meisai-wrap" id="meisai-0006">
+        <table class="meisai-table">
+          <thead>
+            <tr>
+              <th>工事内容</th>
+              <th class="right">数量</th>
+              <th>単位</th>
+              <th class="right">単価</th>
+              <th class="right">金額</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>アルミアングル材料費</td><td class="right">1.00</td><td>式</td><td class="right">¥32,400</td><td class="right">¥32,400</td></tr>
+            <tr><td>アルミアングル取付施工</td><td class="right">1.00</td><td>式</td><td class="right">¥48,000</td><td class="right">¥48,000</td></tr>
+            <tr><td>木工下地補修</td><td class="right">1.00</td><td>式</td><td class="right">¥12,000</td><td class="right">¥12,000</td></tr>
+            <tr><td>養生・清掃費</td><td class="right">1.00</td><td>式</td><td class="right">¥8,000</td><td class="right">¥8,000</td></tr>
+          </tbody>
+        </table>
+        <table class="totals-table">
+          <tr><td>小計</td><td>¥100,400</td></tr>
+          <tr><td>諸経費（15%）</td><td>¥15,060</td></tr>
+          <tr><td>税抜合計</td><td>¥115,460</td></tr>
+          <tr><td>消費税（10%）</td><td>¥11,546</td></tr>
+          <tr><td>税込合計（見積金額）</td><td>¥127,006</td></tr>
+        </table>
+        <div class="note-box" style="margin-top:10px;">
+          <div class="note-label">※ 備考</div>
+          下請：塩出木工（y-siodew@ctb.ne.jp）。材料費は塩出木工請求書に基づき計上予定。
+        </div>
+      </div>
+
+      <div class="note-box">
+        <div class="note-label">📝 案件メモ</div>
+        元請：株式会社 信和（加藤 博和 様）。下請：塩出木工。見積提出後、受注確認待ち。
+      </div>
+    </div>
+  </div>
+
+  <!-- ★ 次の見積データをここに追加（AR-2026-0007〜） -->
+  <div class="add-row" id="addRow">
+    ＋ 次の見積データをここに追加（AR-2026-0007〜）
+  </div>
+
+  <div class="page-footer">
+    株式会社アート・レイズ｜大分県別府市上原町13番25号｜TEL 0977-21-0603
+  </div>
+
+</div>
+<script>
+function filterCards() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const cards = document.querySelectorAll('.estimate-card');
+  let count = 0;
+  cards.forEach(card => {
+    const text = card.getAttribute('data-search') || '';
+    const show = !q || text.toLowerCase().includes(q);
+    card.style.display = show ? '' : 'none';
+    if (show) count++;
+  });
+  document.getElementById('totalCount').textContent = count;
+  document.getElementById('addRow').style.display = q ? 'none' : '';
+}
+
+function toggleMeisai(id, btn) {
+  const wrap = document.getElementById(id);
+  const isOpen = wrap.classList.toggle('open');
+  btn.textContent = isOpen ? '▼ 明細を隠す' : '▶ 明細を表示';
+}
+</script>
+</body>
+</html>

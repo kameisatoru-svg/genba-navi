@@ -128,6 +128,40 @@ body{
 .link-desc{font-size:11px;color:var(--text2);margin-top:1px;}
 .link-arrow{color:var(--text2);font-size:16px;opacity:0.5;}
 
+/* ── 書類BOXアコーディオンカード ── */
+.doc-box-card{
+  background:var(--white);border-radius:16px;
+  box-shadow:0 2px 8px rgba(30,45,64,0.08);
+  border:1.5px solid transparent;
+  overflow:hidden;margin-bottom:12px;
+  transition:border-color 0.15s;
+}
+.doc-box-card.open{border-color:var(--accent);}
+.doc-box-trigger{
+  display:flex;flex-direction:column;align-items:flex-start;gap:10px;
+  padding:18px 14px 16px;cursor:pointer;
+  background:transparent;border:none;width:100%;text-align:left;
+  font-family:'Noto Sans JP',sans-serif;
+}
+.doc-box-trigger:active{background:#faf8f4;}
+.doc-box-header{display:flex;align-items:center;gap:10px;width:100%;}
+.doc-box-chevron{
+  margin-left:auto;font-size:14px;color:var(--text2);opacity:0.5;
+  transition:transform 0.2s;display:inline-block;
+}
+.doc-box-card.open .doc-box-chevron{transform:rotate(90deg);}
+.doc-box-body{
+  max-height:0;overflow:hidden;
+  transition:max-height 0.3s ease;
+}
+.doc-box-card.open .doc-box-body{max-height:800px;}
+.doc-sec-label{
+  font-size:10px;font-weight:700;color:var(--text2);
+  letter-spacing:0.08em;padding:10px 16px 4px;
+  border-top:1px solid rgba(30,45,64,0.06);
+}
+.doc-sec-label:first-child{border-top:none;padding-top:8px;}
+
 /* ── フッター ── */
 .footer-info{
   text-align:center;font-size:10px;color:var(--text2);
@@ -210,30 +244,6 @@ body{
       </div>
     </a>
 
-    <!-- 書類BOX -->
-    <a class="main-card" href="https://drive.google.com/drive/folders/13KxQJr5muE9_deKttjQ1xDHjqI42YKE0" target="_blank">
-      <div class="card-icon" style="background:rgba(200,169,110,0.15);">
-        <svg width="28" height="28" viewBox="0 0 30 30" fill="none">
-          <!-- フォルダ本体 -->
-          <path d="M3 10C3 8.9 3.9 8 5 8H12L14 6H25C26.1 6 27 6.9 27 8V23C27 24.1 26.1 25 25 25H5C3.9 25 3 24.1 3 23V10Z" fill="rgba(200,169,110,0.2)" stroke="#c8a96e" stroke-width="1.5"/>
-          <!-- 書類1枚目 -->
-          <rect x="8" y="12" width="6" height="8" rx="1" fill="white" stroke="#c8a96e" stroke-width="1.2"/>
-          <line x1="9.5" y1="14" x2="12.5" y2="14" stroke="#c8a96e" stroke-width="0.9" stroke-linecap="round"/>
-          <line x1="9.5" y1="16" x2="12.5" y2="16" stroke="#c8a96e" stroke-width="0.9" stroke-linecap="round"/>
-          <line x1="9.5" y1="18" x2="11.5" y2="18" stroke="#c8a96e" stroke-width="0.9" stroke-linecap="round"/>
-          <!-- 書類2枚目（右にずらす） -->
-          <rect x="16" y="11" width="6" height="8" rx="1" fill="white" stroke="#c8a96e" stroke-width="1.2"/>
-          <line x1="17.5" y1="13" x2="20.5" y2="13" stroke="#c8a96e" stroke-width="0.9" stroke-linecap="round"/>
-          <line x1="17.5" y1="15" x2="20.5" y2="15" stroke="#c8a96e" stroke-width="0.9" stroke-linecap="round"/>
-          <line x1="17.5" y1="17" x2="19.5" y2="17" stroke="#c8a96e" stroke-width="0.9" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div class="card-body">
-        <div class="card-title">書類BOX</div>
-        <div class="card-desc">Google Drive</div>
-      </div>
-    </a>
-
     <!-- 工程表 -->
     <a class="main-card" href="gantt.html">
       <div class="card-icon" style="background:rgba(26,122,48,0.1);">
@@ -274,95 +284,184 @@ body{
 
   </div>
 
-  <!-- 外部連携 -->
-  <div class="sec-title">台帳・管理</div>
-  <div class="link-list">
-
-    <!-- 工程カレンダー -->
-    <button class="link-row" onclick="openLink('https://calendar.google.com/calendar/r?src=hf02c6e51i9chil96o9hmsccmk@group.calendar.google.com')">
-      <div class="link-icon" style="background:rgba(32,128,64,0.1);">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <rect x="2" y="3" width="16" height="15" rx="2" stroke="#208040" stroke-width="1.5" fill="none"/>
-          <line x1="2" y1="8" x2="18" y2="8" stroke="#208040" stroke-width="1.2"/>
-          <line x1="6.5" y1="1.5" x2="6.5" y2="5" stroke="#208040" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="13.5" y1="1.5" x2="13.5" y2="5" stroke="#208040" stroke-width="1.5" stroke-linecap="round"/>
-          <rect x="5" y="11" width="3" height="3" rx="0.5" fill="#208040" opacity="0.5"/>
-        </svg>
+  <!-- 書類BOX アコーディオン -->
+  <div class="doc-box-card" id="docBoxCard">
+    <button class="doc-box-trigger" onclick="toggleDocBox()">
+      <div class="doc-box-header">
+        <div class="card-icon" style="background:rgba(200,169,110,0.15);width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="28" height="28" viewBox="0 0 30 30" fill="none">
+            <path d="M3 10C3 8.9 3.9 8 5 8H12L14 6H25C26.1 6 27 6.9 27 8V23C27 24.1 26.1 25 25 25H5C3.9 25 3 24.1 3 23V10Z" fill="rgba(200,169,110,0.2)" stroke="#c8a96e" stroke-width="1.5"/>
+            <rect x="8" y="12" width="6" height="8" rx="1" fill="white" stroke="#c8a96e" stroke-width="1.2"/>
+            <line x1="9.5" y1="14" x2="12.5" y2="14" stroke="#c8a96e" stroke-width="0.9" stroke-linecap="round"/>
+            <line x1="9.5" y1="16" x2="12.5" y2="16" stroke="#c8a96e" stroke-width="0.9" stroke-linecap="round"/>
+            <line x1="9.5" y1="18" x2="11.5" y2="18" stroke="#c8a96e" stroke-width="0.9" stroke-linecap="round"/>
+            <rect x="16" y="11" width="6" height="8" rx="1" fill="white" stroke="#c8a96e" stroke-width="1.2"/>
+            <line x1="17.5" y1="13" x2="20.5" y2="13" stroke="#c8a96e" stroke-width="0.9" stroke-linecap="round"/>
+            <line x1="17.5" y1="15" x2="20.5" y2="15" stroke="#c8a96e" stroke-width="0.9" stroke-linecap="round"/>
+            <line x1="17.5" y1="17" x2="19.5" y2="17" stroke="#c8a96e" stroke-width="0.9" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="card-body">
+          <div class="card-title">書類BOX</div>
+          <div class="card-desc">書類・台帳・マスター一覧</div>
+        </div>
+        <span class="doc-box-chevron">›</span>
       </div>
-      <div class="link-body">
-        <div class="link-title">工程カレンダー</div>
-        <div class="link-desc">Googleカレンダー（工程表）</div>
-      </div>
-      <div class="link-arrow">›</div>
     </button>
+    <div class="doc-box-body">
+      <!-- 現場書類 -->
+      <div class="doc-sec-label">現場書類</div>
+      <button class="link-row" onclick="location.href='見積台帳_アートレイズ.html'">
+        <div class="link-icon" style="background:rgba(200,169,110,0.15);">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <rect x="3" y="2" width="14" height="17" rx="2" stroke="#c8a96e" stroke-width="1.5" fill="none"/>
+            <line x1="6" y1="7" x2="14" y2="7" stroke="#c8a96e" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="6" y1="10" x2="14" y2="10" stroke="#c8a96e" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="6" y1="13" x2="10" y2="13" stroke="#c8a96e" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="link-body"><div class="link-title">見積書</div><div class="link-desc">見積台帳（全案件）</div></div>
+        <div class="link-arrow">›</div>
+      </button>
+      <button class="link-row" onclick="location.href='請求書_雛形_アートレイズ.html'">
+        <div class="link-icon" style="background:rgba(200,169,110,0.15);">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <rect x="3" y="2" width="14" height="17" rx="2" stroke="#c8a96e" stroke-width="1.5" fill="none"/>
+            <line x1="6" y1="7" x2="14" y2="7" stroke="#c8a96e" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="6" y1="10" x2="14" y2="10" stroke="#c8a96e" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="6" y1="13" x2="10" y2="13" stroke="#c8a96e" stroke-width="1.2" stroke-linecap="round"/>
+            <circle cx="13" cy="13" r="2.5" fill="rgba(200,169,110,0.3)" stroke="#c8a96e" stroke-width="1"/>
+            <line x1="12" y1="13" x2="14" y2="13" stroke="#c8a96e" stroke-width="1" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="link-body"><div class="link-title">請求書</div><div class="link-desc">請求書雛形</div></div>
+        <div class="link-arrow">›</div>
+      </button>
+      <button class="link-row" onclick="location.href='工事請負契約書_雛形_アートレイズ.html'">
+        <div class="link-icon" style="background:rgba(30,45,64,0.08);">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <rect x="3" y="2" width="14" height="17" rx="2" stroke="#1e2d40" stroke-width="1.5" fill="none"/>
+            <line x1="6" y1="7" x2="14" y2="7" stroke="#1e2d40" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="6" y1="10" x2="14" y2="10" stroke="#1e2d40" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="6" y1="13" x2="11" y2="13" stroke="#1e2d40" stroke-width="1.2" stroke-linecap="round"/>
+            <path d="M13 15 L14 14 L16 16 L13 17 Z" fill="#1e2d40" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="link-body"><div class="link-title">工事請負契約書</div><div class="link-desc">契約書雛形</div></div>
+        <div class="link-arrow">›</div>
+      </button>
 
-    <!-- 案件台帳 -->
-    <button class="link-row" onclick="openLink('https://kameisatoru-svg.github.io/genba-navi/案件台帳_アートレイズ.html')">
-      <div class="link-icon" style="background:rgba(26,111,196,0.1);">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <rect x="3" y="2" width="14" height="17" rx="2" stroke="#1a6fc4" stroke-width="1.5" fill="none"/>
-          <line x1="6" y1="7" x2="14" y2="7" stroke="#1a6fc4" stroke-width="1.2" stroke-linecap="round"/>
-          <line x1="6" y1="10" x2="14" y2="10" stroke="#1a6fc4" stroke-width="1.2" stroke-linecap="round"/>
-          <line x1="6" y1="13" x2="10" y2="13" stroke="#1a6fc4" stroke-width="1.2" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div class="link-body">
-        <div class="link-title">案件台帳</div>
-        <div class="link-desc">Googleドキュメント</div>
-      </div>
-      <div class="link-arrow">›</div>
-    </button>
+      <!-- 台帳 -->
+      <div class="doc-sec-label">台帳</div>
+      <button class="link-row" onclick="openLink('https://kameisatoru-svg.github.io/genba-navi/案件台帳_アートレイズ.html')">
+        <div class="link-icon" style="background:rgba(26,111,196,0.1);">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <rect x="3" y="2" width="14" height="17" rx="2" stroke="#1a6fc4" stroke-width="1.5" fill="none"/>
+            <line x1="6" y1="7" x2="14" y2="7" stroke="#1a6fc4" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="6" y1="10" x2="14" y2="10" stroke="#1a6fc4" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="6" y1="13" x2="10" y2="13" stroke="#1a6fc4" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="link-body"><div class="link-title">案件台帳</div><div class="link-desc">案件一覧・管理</div></div>
+        <div class="link-arrow">›</div>
+      </button>
+      <button class="link-row" onclick="openLink('https://kameisatoru-svg.github.io/genba-navi/顧客台帳_アートレイズ.html')">
+        <div class="link-icon" style="background:rgba(26,111,196,0.1);">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="7" r="3.5" stroke="#1a6fc4" stroke-width="1.5" fill="none"/>
+            <path d="M3 18c0-3.9 3.1-7 7-7s7 3.1 7 7" stroke="#1a6fc4" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          </svg>
+        </div>
+        <div class="link-body"><div class="link-title">顧客台帳</div><div class="link-desc">顧客一覧・管理</div></div>
+        <div class="link-arrow">›</div>
+      </button>
+      <button class="link-row" onclick="openLink('https://kameisatoru-svg.github.io/genba-navi/入金管理_アートレイズ.html')">
+        <div class="link-icon" style="background:rgba(200,169,110,0.15);">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <rect x="2" y="5" width="16" height="12" rx="2" stroke="#c8a96e" stroke-width="1.5" fill="none"/>
+            <line x1="2" y1="9" x2="18" y2="9" stroke="#c8a96e" stroke-width="1.2"/>
+            <circle cx="6" cy="13" r="1.5" fill="#c8a96e" opacity="0.6"/>
+            <line x1="10" y1="13" x2="15" y2="13" stroke="#c8a96e" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="link-body"><div class="link-title">入金管理</div><div class="link-desc">入金状況・管理</div></div>
+        <div class="link-arrow">›</div>
+      </button>
+      <button class="link-row" onclick="openLink('https://kameisatoru-svg.github.io/genba-navi/工事台帳_アートレイズ.html')">
+        <div class="link-icon" style="background:rgba(26,122,48,0.1);">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <rect x="2" y="3" width="16" height="14" rx="2" stroke="#1a7a30" stroke-width="1.5" fill="none"/>
+            <line x1="2" y1="8" x2="18" y2="8" stroke="#1a7a30" stroke-width="1" opacity="0.3"/>
+            <line x1="7" y1="3" x2="7" y2="17" stroke="#1a7a30" stroke-width="1" opacity="0.3"/>
+            <line x1="13" y1="3" x2="13" y2="17" stroke="#1a7a30" stroke-width="1" opacity="0.3"/>
+            <rect x="8" y="10" width="4" height="4" rx="0.5" fill="#1a7a30" opacity="0.4"/>
+          </svg>
+        </div>
+        <div class="link-body"><div class="link-title">工事台帳</div><div class="link-desc">原価・入出金管理</div></div>
+        <div class="link-arrow">›</div>
+      </button>
 
-    <!-- 顧客台帳 -->
-    <button class="link-row" onclick="openLink('https://kameisatoru-svg.github.io/genba-navi/顧客台帳_アートレイズ.html')">
-      <div class="link-icon" style="background:rgba(26,111,196,0.1);">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <circle cx="10" cy="7" r="3.5" stroke="#1a6fc4" stroke-width="1.5" fill="none"/>
-          <path d="M3 18c0-3.9 3.1-7 7-7s7 3.1 7 7" stroke="#1a6fc4" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-        </svg>
-      </div>
-      <div class="link-body">
-        <div class="link-title">顧客台帳</div>
-        <div class="link-desc">Googleドキュメント</div>
-      </div>
-      <div class="link-arrow">›</div>
-    </button>
+      <!-- マスター -->
+      <div class="doc-sec-label">マスター</div>
+      <button class="link-row" onclick="openLink('https://kameisatoru-svg.github.io/genba-navi/単価マスター_アートレイズ.html')">
+        <div class="link-icon" style="background:rgba(30,45,64,0.08);">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <rect x="2" y="3" width="16" height="14" rx="2" stroke="#1e2d40" stroke-width="1.5" fill="none"/>
+            <line x1="2" y1="8" x2="18" y2="8" stroke="#1e2d40" stroke-width="1" opacity="0.3"/>
+            <line x1="7" y1="3" x2="7" y2="17" stroke="#1e2d40" stroke-width="1" opacity="0.3"/>
+            <line x1="13" y1="3" x2="13" y2="17" stroke="#1e2d40" stroke-width="1" opacity="0.3"/>
+          </svg>
+        </div>
+        <div class="link-body"><div class="link-title">単価マスター</div><div class="link-desc">工種別単価一覧</div></div>
+        <div class="link-arrow">›</div>
+      </button>
+      <button class="link-row" onclick="openLink('https://docs.google.com/document/d/1x2v5xHDb6xTe_HwjJeDPxXxRj4iMW8zwFZh3qB90pTQ/edit')">
+        <div class="link-icon" style="background:rgba(30,45,64,0.08);">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="6" cy="6" r="2.5" stroke="#1e2d40" stroke-width="1.4" fill="none"/>
+            <circle cx="14" cy="6" r="2.5" stroke="#1e2d40" stroke-width="1.4" fill="none"/>
+            <circle cx="6" cy="14" r="2.5" stroke="#1e2d40" stroke-width="1.4" fill="none"/>
+            <line x1="9" y1="6" x2="11" y2="6" stroke="#1e2d40" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="6" y1="9" x2="6" y2="11" stroke="#1e2d40" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="link-body"><div class="link-title">業者一覧</div><div class="link-desc">業種別名刺一覧</div></div>
+        <div class="link-arrow">›</div>
+      </button>
 
-    <!-- 入金管理 -->
-    <button class="link-row" onclick="openLink('https://kameisatoru-svg.github.io/genba-navi/入金管理_アートレイズ.html')">
-      <div class="link-icon" style="background:rgba(200,169,110,0.15);">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <rect x="2" y="5" width="16" height="12" rx="2" stroke="#c8a96e" stroke-width="1.5" fill="none"/>
-          <line x1="2" y1="9" x2="18" y2="9" stroke="#c8a96e" stroke-width="1.2"/>
-          <circle cx="6" cy="13" r="1.5" fill="#c8a96e" opacity="0.6"/>
-          <line x1="10" y1="13" x2="15" y2="13" stroke="#c8a96e" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>
-        </svg>
-      </div>
-      <div class="link-body">
-        <div class="link-title">入金管理</div>
-        <div class="link-desc">Googleドキュメント</div>
-      </div>
-      <div class="link-arrow">›</div>
-    </button>
+      <!-- 工程表 -->
+      <div class="doc-sec-label">工程表</div>
+      <button class="link-row" onclick="openLink('https://calendar.google.com/calendar/r?src=hf02c6e51i9chil96o9hmsccmk@group.calendar.google.com')">
+        <div class="link-icon" style="background:rgba(32,128,64,0.1);">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <rect x="2" y="3" width="16" height="15" rx="2" stroke="#208040" stroke-width="1.5" fill="none"/>
+            <line x1="2" y1="8" x2="18" y2="8" stroke="#208040" stroke-width="1.2"/>
+            <line x1="6.5" y1="1.5" x2="6.5" y2="5" stroke="#208040" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="13.5" y1="1.5" x2="13.5" y2="5" stroke="#208040" stroke-width="1.5" stroke-linecap="round"/>
+            <rect x="5" y="11" width="3" height="3" rx="0.5" fill="#208040" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="link-body"><div class="link-title">工程カレンダー</div><div class="link-desc">Googleカレンダー（工程表）</div></div>
+        <div class="link-arrow">›</div>
+      </button>
 
-    <!-- 単価マスター -->
-    <button class="link-row" onclick="openLink('https://kameisatoru-svg.github.io/genba-navi/単価マスター_アートレイズ.html')">
-      <div class="link-icon" style="background:rgba(30,45,64,0.08);">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <rect x="2" y="3" width="16" height="14" rx="2" stroke="#1e2d40" stroke-width="1.5" fill="none"/>
-          <line x1="2" y1="8" x2="18" y2="8" stroke="#1e2d40" stroke-width="1" opacity="0.3"/>
-          <line x1="7" y1="3" x2="7" y2="17" stroke="#1e2d40" stroke-width="1" opacity="0.3"/>
-          <line x1="13" y1="3" x2="13" y2="17" stroke="#1e2d40" stroke-width="1" opacity="0.3"/>
-        </svg>
-      </div>
-      <div class="link-body">
-        <div class="link-title">単価マスター</div>
-        <div class="link-desc">工種別単価一覧</div>
-      </div>
-      <div class="link-arrow">›</div>
-    </button>
-
+      <!-- Google Drive -->
+      <div class="doc-sec-label">ファイル保管</div>
+      <button class="link-row" onclick="openLink('https://drive.google.com/drive/folders/13KxQJr5muE9_deKttjQ1xDHjqI42YKE0')" style="border-bottom:none;">
+        <div class="link-icon" style="background:rgba(200,169,110,0.15);">
+          <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+            <path d="M2 16L7.5 6H14.5L9 16H2Z" fill="rgba(26,111,196,0.15)" stroke="#1a6fc4" stroke-width="1.3" stroke-linejoin="round"/>
+            <path d="M9 16L14.5 6H21L15.5 16H9Z" fill="rgba(26,196,96,0.12)" stroke="#1a9a50" stroke-width="1.3" stroke-linejoin="round"/>
+            <path d="M2 16H9L12 19.5L9 21H5C3.3 21 2 19.7 2 18V16Z" fill="rgba(230,169,30,0.15)" stroke="#c8a00e" stroke-width="1.3" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="link-body"><div class="link-title">Google Drive</div><div class="link-desc">書類ファイル保管庫</div></div>
+        <div class="link-arrow">›</div>
+      </button>
+    </div>
   </div>
+
+
 
   <!-- GitHub -->
   <div class="link-list" style="margin-bottom:20px;">
@@ -400,6 +499,11 @@ updateDate();
 setInterval(updateDate, 60000);
 
 function openLink(url){ window.open(url,'_blank'); }
+
+function toggleDocBox(){
+  const card = document.getElementById('docBoxCard');
+  card.classList.toggle('open');
+}
 </script>
 </body>
 </html>
