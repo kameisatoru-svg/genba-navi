@@ -219,8 +219,8 @@
 
   <div class="stats-bar">
     <div class="stat-item">
-      <div class="stat-num" id="totalCount">3</div>
-      <div class="stat-label">総見積件数</div>
+      <div class="stat-num" id="totalCount">4</div>
+      <div class="stat-label">総件数</div>
     </div>
     <div class="stat-item">
       <div class="stat-num">1</div>
@@ -458,9 +458,78 @@
     </div>
   </div>
 
-  <!-- ★ 次の見積データをここに追加（AR-2026-0007〜） -->
+  <!-- AR-2026-0007 -->
+  <div class="estimate-card" data-search="ar-2026-0007 有限会社ウインズコーポレーション 大村勝美 民泊 客家 ロールスクリーン 補修 別府 請求のみ">
+    <div class="card-header">
+      <div class="card-header-left">
+        <span class="estimate-id">AR-2026-0007</span>
+        <span class="estimate-name">民泊 客家 ロールスクリーン補修工事</span>
+      </div>
+      <span class="badge badge-juchu">請求済</span>
+    </div>
+    <div class="card-body">
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">顧客</span>
+          <span class="info-value">有限会社ウインズコーポレーション　御中（C-004）</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">施工場所</span>
+          <span class="info-value">大分県別府市</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">請求日</span>
+          <span class="info-value">2026-03-18</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">請求金額（税込）</span>
+          <span class="info-value amount-value">¥14,520</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">諸経費</span>
+          <span class="info-value">10%</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">請求ファイル</span>
+          <span class="info-value">請求書_AR-2026-C004_ウインズコーポレーション民泊客家_20260318.html</span>
+        </div>
+      </div>
+
+      <button class="meisai-toggle" onclick="toggleMeisai('meisai-0007', this)">▶ 明細を表示</button>
+      <div class="meisai-wrap" id="meisai-0007">
+        <table class="meisai-table">
+          <thead>
+            <tr>
+              <th>工事内容</th>
+              <th class="right">数量</th>
+              <th>単位</th>
+              <th class="right">単価</th>
+              <th class="right">金額</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>民泊 客家 ロールスクリーン補修工事一式</td><td class="right">1</td><td>式</td><td class="right">¥12,000</td><td class="right">¥12,000</td></tr>
+          </tbody>
+        </table>
+        <table class="totals-table">
+          <tr><td>小計</td><td>¥12,000</td></tr>
+          <tr><td>諸経費（10%）</td><td>¥1,200</td></tr>
+          <tr><td>税抜合計</td><td>¥13,200</td></tr>
+          <tr><td>消費税（10%）</td><td>¥1,320</td></tr>
+          <tr><td>税込合計（請求金額）</td><td>¥14,520</td></tr>
+        </table>
+      </div>
+
+      <div class="note-box">
+        <div class="note-label">📝 案件メモ</div>
+        見積書なし・請求書のみ発行。請求番号：AR-2026-C004-001。
+      </div>
+    </div>
+  </div>
+
+  <!-- ★ 次の見積データをここに追加（AR-2026-0008〜） -->
   <div class="add-row" id="addRow">
-    ＋ 次の見積データをここに追加（AR-2026-0007〜）
+    ＋ 次の見積データをここに追加（AR-2026-0008〜）
   </div>
 
   <div class="page-footer">

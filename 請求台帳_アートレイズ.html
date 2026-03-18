@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>請求台帳｜株式会社アート・レイズ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --band: #555;
+    --light: #f8f8f8;
+    --border: #ddd;
+    --border-dark: #aaa;
+    --text: #333;
+    --text-sub: #666;
+    --white: #fff;
+    --accent: #2563eb;
+    --even: #f5f5f5;
+    --red: #dc2626;
+    --green: #16a34a;
+    --yellow: #d97706;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #eee;
+    color: var(--text);
+    font-size: 14px;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+  .page-header {
+    background: var(--band);
+    color: var(--white);
+    padding: 18px 24px;
+    border-radius: 6px 6px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .page-header h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.05em; }
+  .page-header .meta { font-size: 12px; opacity: 0.8; text-align: right; }
+
+  /* サマリーバー */
+  .summary-bar {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 16px 24px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .summary-card {
+    flex: 1;
+    min-width: 150px;
+    padding: 12px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+  .summary-card.total  { border-left: 4px solid var(--band); }
+  .summary-card.nyukin { border-left: 4px solid var(--green); }
+  .summary-card.mihai  { border-left: 4px solid var(--red); }
+  .summary-label { font-size: 11px; color: var(--text-sub); font-weight: 700; margin-bottom: 6px; }
+  .summary-amount { font-size: 20px; font-weight: 700; }
+  .summary-card.total  .summary-amount { color: var(--band); }
+  .summary-card.nyukin .summary-amount { color: var(--green); }
+  .summary-card.mihai  .summary-amount { color: var(--red); }
+
+  .search-bar {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 12px 24px;
+    border-radius: 0 0 6px 6px;
+    margin-bottom: 20px;
+  }
+  .search-bar input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-dark);
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .search-bar input:focus { outline: none; border-color: var(--accent); }
+
+  /* 請求カード */
+  .invoice-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .card-header {
+    background: #444444;
+    color: var(--white);
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .card-header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .invoice-id {
+    font-size: 12px;
+    font-weight: 700;
+    background: rgba(255,255,255,0.2);
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+  .invoice-name { font-size: 14px; font-weight: 700; }
+
+  .badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+  .badge-mihai  { background: #dc2626; color: #fff; }
+  .badge-nyukin { background: #16a34a; color: #fff; }
+  .badge-partial { background: #d97706; color: #fff; }
+
+  .card-body { padding: 16px; }
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px 20px;
+    margin-bottom: 14px;
+  }
+  .info-item { display: flex; flex-direction: column; gap: 2px; }
+  .info-label { font-size: 11px; color: var(--text-sub); font-weight: 700; }
+  .info-value { font-size: 13px; color: var(--text); }
+  .amount-value { font-size: 15px; font-weight: 700; color: #1e40af; }
+
+  .note-box {
+    background: #fafafa;
+    border-left: 3px solid #d1d5db;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--text-sub);
+    border-radius: 0 4px 4px 0;
+    margin-top: 12px;
+    line-height: 1.7;
+  }
+  .note-label { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 11px; }
+
+  /* 書類ボタン */
+  .doc-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .doc-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: opacity 0.15s;
+  }
+  .doc-btn:hover { opacity: 0.85; }
+  .doc-btn.active   { background: #2563eb; color: #fff; }
+  .doc-btn.inactive { background: #e5e7eb; color: #9ca3af; cursor: default; pointer-events: none; }
+
+  .add-row {
+    background: var(--white);
+    border: 2px dashed var(--border-dark);
+    border-radius: 6px;
+    padding: 16px;
+    text-align: center;
+    color: var(--text-sub);
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+  .page-footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-sub);
+    padding: 12px 0;
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+  }
+
+  @media (max-width: 600px) {
+    .info-grid { grid-template-columns: 1fr; }
+    .summary-bar { gap: 12px; }
+    .page-header { flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="page-header">
+    <h1>🧾 請求台帳</h1>
+    <div class="meta">株式会社アート・レイズ<br>最終更新：2026-03-18</div>
+  </div>
+
+  <div class="summary-bar">
+    <div class="summary-card total">
+      <div class="summary-label">請求総額（税込）</div>
+      <div class="summary-amount">¥14,520</div>
+    </div>
+    <div class="summary-card nyukin">
+      <div class="summary-label">入金済み</div>
+      <div class="summary-amount">¥0</div>
+    </div>
+    <div class="summary-card mihai">
+      <div class="summary-label">未入金</div>
+      <div class="summary-amount">¥14,520</div>
+    </div>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="🔍 請求番号・顧客名・工事内容で絞り込み..." oninput="filterCards()">
+  </div>
+
+  <!-- AR-2026-C004-001 -->
+  <div class="invoice-card" data-search="ar-2026-c004-001 有限会社ウインズコーポレーション 大村勝美 民泊 客家 ロールスクリーン 補修 別府 未入金">
+    <div class="card-header">
+      <div class="card-header-left">
+        <span class="invoice-id">AR-2026-C004-001</span>
+        <span class="invoice-name">民泊 客家 ロールスクリーン補修工事</span>
+      </div>
+      <span class="badge badge-mihai">未入金</span>
+    </div>
+    <div class="card-body">
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">顧客</span>
+          <span class="info-value">有限会社ウインズコーポレーション　御中（C-004）</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">案件番号</span>
+          <span class="info-value">AR-2026-0007</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">請求日</span>
+          <span class="info-value">2026-03-18</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">請求金額（税込）</span>
+          <span class="info-value amount-value">¥14,520</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">内訳（税抜）</span>
+          <span class="info-value">小計 ¥12,000 ／ 諸経費10% ¥1,200 ／ 消費税 ¥1,320</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">入金日</span>
+          <span class="info-value">未入金</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">施工場所</span>
+          <span class="info-value">大分県別府市</span>
+        </div>
+      </div>
+
+      <div class="note-box">
+        <div class="note-label">📝 備考</div>
+        見積書なし・請求書のみ発行。振込先：大分みらい信用金庫 石垣支店 普通 9151080。
+      </div>
+
+      <div class="doc-buttons">
+        <a class="doc-btn active" href="請求書_AR-2026-C004_ウインズコーポレーション民泊客家_20260318.html" target="_blank">📄 請求書</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ★ 次の請求データをここに追加 -->
+  <div class="add-row" id="addRow">
+    ＋ 次の請求データをここに追加
+  </div>
+
+  <div class="page-footer">
+    株式会社アート・レイズ｜大分県別府市上原町13番25号｜TEL 0977-21-0603
+  </div>
+
+</div>
+<script>
+function filterCards() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const cards = document.querySelectorAll('.invoice-card');
+  cards.forEach(card => {
+    const text = card.getAttribute('data-search') || '';
+    card.style.display = (!q || text.toLowerCase().includes(q)) ? '' : 'none';
+  });
+  document.getElementById('addRow').style.display = q ? 'none' : '';
+}
+</script>
+</body>
+</html>
