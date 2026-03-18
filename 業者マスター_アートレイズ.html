@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>業者マスター｜株式会社アート・レイズ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --band: #555;
+    --light: #f8f8f8;
+    --border: #ddd;
+    --border-dark: #aaa;
+    --text: #333;
+    --text-sub: #666;
+    --white: #fff;
+    --accent: #2563eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #eee;
+    color: var(--text);
+    font-size: 14px;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+  .page-header {
+    background: var(--band);
+    color: var(--white);
+    padding: 18px 24px;
+    border-radius: 6px 6px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .page-header h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.05em; }
+  .page-header .meta { font-size: 12px; opacity: 0.8; text-align: right; }
+
+  .stats-bar {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 14px 24px;
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .stat-item { text-align: center; }
+  .stat-num { font-size: 24px; font-weight: 700; color: var(--band); }
+  .stat-label { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+
+  .search-bar {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 12px 24px;
+    border-radius: 0 0 6px 6px;
+    margin-bottom: 20px;
+  }
+  .search-bar input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-dark);
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .search-bar input:focus { outline: none; border-color: var(--accent); }
+
+  .vendor-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .card-header {
+    background: #444444;
+    color: var(--white);
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .card-header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .vendor-id {
+    font-size: 12px;
+    font-weight: 700;
+    background: rgba(255,255,255,0.2);
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+  .vendor-name { font-size: 15px; font-weight: 700; }
+
+  .badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+  .badge-active   { background: #16a34a; color: #fff; }
+  .badge-incomplete { background: #d97706; color: #fff; }
+
+  .card-body { padding: 16px; }
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px 20px;
+    margin-bottom: 14px;
+  }
+  .info-item { display: flex; flex-direction: column; gap: 2px; }
+  .info-label { font-size: 11px; color: var(--text-sub); font-weight: 700; }
+  .info-value { font-size: 13px; color: var(--text); }
+  .info-value.warn { color: #b45309; font-weight: 700; }
+
+  .note-box {
+    background: #fafafa;
+    border-left: 3px solid #d1d5db;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--text-sub);
+    border-radius: 0 4px 4px 0;
+    margin-top: 8px;
+    line-height: 1.7;
+  }
+  .note-label { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 11px; }
+
+  .add-row {
+    background: var(--white);
+    border: 2px dashed var(--border-dark);
+    border-radius: 6px;
+    padding: 16px;
+    text-align: center;
+    color: var(--text-sub);
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+  .page-footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-sub);
+    padding: 12px 0;
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+  }
+
+  .section-divider {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-sub);
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+    margin: 20px 0 12px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="page-header">
+    <h1>🏗️ 業者マスター</h1>
+    <div class="meta">株式会社アート・レイズ<br>最終更新：2026-03-18</div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-num" id="totalCount">4</div>
+      <div class="stat-label">登録業者数</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">2</div>
+      <div class="stat-label">情報完全</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">2</div>
+      <div class="stat-label">情報不足</div>
+    </div>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="🔍 業者名・工種・担当者名で絞り込み..." oninput="filterCards()">
+  </div>
+
+  <!-- V-001 小田工業 -->
+  <div class="vendor-card" data-search="v-001 小田工業 小田勝美 左官 モルタル 別府">
+    <div class="card-header">
+      <div class="card-header-left">
+        <span class="vendor-id">V-001</span>
+        <span class="vendor-name">小田工業</span>
+      </div>
+      <span class="badge badge-active">情報完全</span>
+    </div>
+    <div class="card-body">
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">代表者</span>
+          <span class="info-value">小田 勝美</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">住所</span>
+          <span class="info-value">別府市中須賀東町5-3組</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">TEL</span>
+          <span class="info-value">0977-66-4198</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">携帯</span>
+          <span class="info-value">090-3320-5931</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">振込先</span>
+          <span class="info-value">大分県信用組合 上人支店（普通）4034903</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">登録番号</span>
+          <span class="info-value">T3-8103-2472-2011</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">主な工種</span>
+          <span class="info-value">左官工事・モルタル工事</span>
+        </div>
+      </div>
+      <div class="note-box">
+        <div class="note-label">📝 備考</div>
+        AR-2026-0007（朝見浄水場）にて実績。無収縮モルタル塗り工事。請求書より情報取得（令和8年3月14日付）。
+      </div>
+    </div>
+  </div>
+
+  <!-- V-002 塩出木工 -->
+  <div class="vendor-card" data-search="v-002 塩出木工 木工 建具 アルミ 別府">
+    <div class="card-header">
+      <div class="card-header-left">
+        <span class="vendor-id">V-002</span>
+        <span class="vendor-name">塩出木工</span>
+      </div>
+      <span class="badge badge-active">情報完全</span>
+    </div>
+    <div class="card-body">
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">メール</span>
+          <span class="info-value">y-siodew@ctb.ne.jp</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">主な工種</span>
+          <span class="info-value">木工事・建具・アルミ工事</span>
+        </div>
+      </div>
+      <div class="note-box">
+        <div class="note-label">📝 備考</div>
+        AR-2026-0006（ビーコンプラザ）の下請。住所・TEL・登録番号等は未取得。追加情報取得予定。
+      </div>
+    </div>
+  </div>
+
+  <!-- V-003 インテリア中津屋 -->
+  <div class="vendor-card" data-search="v-003 インテリア中津屋 床 内装 フローリング タイル 杵築">
+    <div class="card-header">
+      <div class="card-header-left">
+        <span class="vendor-id">V-003</span>
+        <span class="vendor-name">有限会社 インテリア中津屋</span>
+      </div>
+      <span class="badge badge-incomplete">情報不足</span>
+    </div>
+    <div class="card-body">
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">住所</span>
+          <span class="info-value">〒873-0001　杵築市煙硝倉1306-1</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">TEL</span>
+          <span class="info-value">0978-63-0081</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">FAX</span>
+          <span class="info-value">0978-63-1833</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">登録番号</span>
+          <span class="info-value">T2320002015061</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">担当者</span>
+          <span class="info-value warn">⚠ 未取得</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">携帯</span>
+          <span class="info-value warn">⚠ 未取得</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">主な工種</span>
+          <span class="info-value">床工事・内装仕上げ</span>
+        </div>
+      </div>
+      <div class="note-box">
+        <div class="note-label">📝 備考</div>
+        AR-2026-0004（さくら苑）第2期（4月18〜20日）で使用予定。担当者・携帯は追加情報待ち。
+      </div>
+    </div>
+  </div>
+
+  <!-- V-004 いわい装飾 -->
+  <div class="vendor-card" data-search="v-004 いわい装飾 岩井健一 内装 壁紙 クロス 別府">
+    <div class="card-header">
+      <div class="card-header-left">
+        <span class="vendor-id">V-004</span>
+        <span class="vendor-name">いわい装飾</span>
+      </div>
+      <span class="badge badge-incomplete">情報不足</span>
+    </div>
+    <div class="card-body">
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">担当者</span>
+          <span class="info-value">岩井 健一</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">住所</span>
+          <span class="info-value">〒874-0912　別府市南須賀1組</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">登録番号</span>
+          <span class="info-value">T2810104242784</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">TEL</span>
+          <span class="info-value warn">⚠ 未取得</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">メール</span>
+          <span class="info-value warn">⚠ 未取得</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">主な工種</span>
+          <span class="info-value">内装装飾・壁紙・クロス工事</span>
+        </div>
+      </div>
+      <div class="note-box">
+        <div class="note-label">📝 備考</div>
+        AR-2026-0004（さくら苑）第2期（4月18〜20日）で使用予定。TEL・メールは追加情報待ち。
+      </div>
+    </div>
+  </div>
+
+  <!-- ★ 次の業者データをここに追加（V-005〜） -->
+  <div class="add-row" id="addRow">
+    ＋ 次の業者データをここに追加（V-005〜）
+  </div>
+
+  <div class="page-footer">
+    株式会社アート・レイズ｜大分県別府市上原町13番25号｜TEL 0977-21-0603
+  </div>
+
+</div>
+<script>
+function filterCards() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const cards = document.querySelectorAll('.vendor-card');
+  let count = 0;
+  cards.forEach(card => {
+    const text = card.getAttribute('data-search') || '';
+    const show = !q || text.toLowerCase().includes(q);
+    card.style.display = show ? '' : 'none';
+    if (show) count++;
+  });
+  document.getElementById('totalCount').textContent = count;
+  document.getElementById('addRow').style.display = q ? 'none' : '';
+}
+</script>
+</body>
+</html>

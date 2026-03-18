@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>名刺帳｜株式会社アート・レイズ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --band: #555;
+    --light: #f8f8f8;
+    --border: #ddd;
+    --border-dark: #aaa;
+    --text: #333;
+    --text-sub: #666;
+    --white: #fff;
+    --accent: #2563eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: #eee; color: var(--text); font-size: 14px; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+  .page-header {
+    background: var(--band); color: var(--white);
+    padding: 18px 24px; border-radius: 6px 6px 0 0;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .page-header h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.05em; }
+  .page-header .meta { font-size: 12px; opacity: 0.8; text-align: right; }
+
+  .stats-bar {
+    background: var(--white); border: 1px solid var(--border); border-top: none;
+    padding: 14px 24px; display: flex; gap: 32px; flex-wrap: wrap; align-items: center;
+  }
+  .stat-item { text-align: center; }
+  .stat-num { font-size: 22px; font-weight: 700; color: var(--band); }
+  .stat-label { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+
+  /* CSVドロップゾーン */
+  .drop-zone {
+    background: var(--white); border: 1px solid var(--border); border-top: none;
+    padding: 20px 24px; border-radius: 0 0 6px 6px; margin-bottom: 16px;
+  }
+  .drop-inner {
+    border: 2px dashed var(--border-dark); border-radius: 8px;
+    padding: 28px; text-align: center; cursor: pointer; transition: all 0.2s;
+    color: var(--text-sub);
+  }
+  .drop-inner:hover, .drop-inner.dragover { border-color: var(--accent); background: #eff6ff; color: var(--accent); }
+  .drop-inner .drop-icon { font-size: 32px; margin-bottom: 8px; }
+  .drop-inner p { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .drop-inner small { font-size: 12px; }
+  .file-input { display: none; }
+
+  /* 検索バー */
+  .search-wrap {
+    display: none; background: var(--white); border: 1px solid var(--border);
+    border-radius: 6px; padding: 12px 16px; margin-bottom: 14px; gap: 10px;
+    align-items: center;
+  }
+  .search-wrap.visible { display: flex; }
+  .search-wrap input {
+    flex: 1; padding: 8px 12px; border: 1px solid var(--border-dark);
+    border-radius: 4px; font-size: 14px; font-family: inherit;
+  }
+  .search-wrap input:focus { outline: none; border-color: var(--accent); }
+  .reload-btn {
+    padding: 8px 16px; background: #f1f5f9; border: 1px solid var(--border-dark);
+    border-radius: 4px; font-size: 12px; cursor: pointer; font-family: inherit; white-space: nowrap;
+  }
+  .reload-btn:hover { background: #e2e8f0; }
+
+  /* テーブル */
+  .table-wrap { display: none; overflow-x: auto; background: var(--white); border-radius: 6px; border: 1px solid var(--border); }
+  .table-wrap.visible { display: block; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    background: #444; color: #fff; padding: 8px 12px;
+    text-align: left; font-weight: 700; font-size: 12px;
+    white-space: nowrap; border-right: 1px solid #666;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:nth-child(even) { background: #f8f8f8; }
+  tbody tr:hover { background: #eff6ff; }
+  tbody td { padding: 8px 12px; vertical-align: middle; color: var(--text); border-right: 1px solid var(--border); }
+  tbody td a { color: var(--accent); text-decoration: none; }
+
+  /* ページネーション */
+  .pagination {
+    display: none; justify-content: center; align-items: center;
+    gap: 6px; padding: 16px; background: var(--white);
+    border-top: 1px solid var(--border); flex-wrap: wrap;
+  }
+  .pagination.visible { display: flex; }
+  .page-btn {
+    padding: 5px 12px; border: 1px solid var(--border-dark); border-radius: 4px;
+    background: var(--white); cursor: pointer; font-size: 12px; font-family: inherit;
+  }
+  .page-btn:hover { background: #f0f0f0; }
+  .page-btn.active { background: #444; color: #fff; border-color: #444; }
+  .page-info { font-size: 12px; color: var(--text-sub); }
+
+  .no-data { padding: 32px; text-align: center; color: var(--text-sub); font-size: 14px; display: none; }
+
+  .page-footer {
+    text-align: center; font-size: 11px; color: var(--text-sub);
+    padding: 12px 0; border-top: 1px solid var(--border); margin-top: 20px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="page-header">
+    <h1>📇 名刺帳</h1>
+    <div class="meta">株式会社アート・レイズ<br>CSVを読み込んで検索</div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-num" id="totalCount">—</div>
+      <div class="stat-label">総件数</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="hitCount">—</div>
+      <div class="stat-label">検索ヒット</div>
+    </div>
+    <div style="font-size:12px; color:var(--text-sub); margin-left:auto;">
+      ※ CSVは端末内で処理されます。外部送信はしません。
+    </div>
+  </div>
+
+  <!-- CSVドロップゾーン -->
+  <div class="drop-zone">
+    <div class="drop-inner" id="dropZone"
+      ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)"
+      onclick="document.getElementById('fileInput').click()">
+      <div class="drop-icon">📂</div>
+      <p>CSVファイルをここにドロップ</p>
+      <small>またはクリックしてファイルを選択（Eight等からエクスポートしたCSV）</small>
+    </div>
+    <input type="file" id="fileInput" class="file-input" accept=".csv" onchange="loadFile(event)">
+  </div>
+
+  <!-- 検索バー（CSV読込後に表示） -->
+  <div class="search-wrap" id="searchWrap">
+    <input type="text" id="searchInput" placeholder="🔍 会社名・氏名・住所・TEL・メールで絞り込み..." oninput="doSearch()">
+    <button class="reload-btn" onclick="reloadCSV()">📂 別のCSVを読む</button>
+  </div>
+
+  <!-- テーブル -->
+  <div class="table-wrap" id="tableWrap">
+    <table>
+      <thead>
+        <tr>
+          <th>会社名</th>
+          <th>部署・役職</th>
+          <th>氏名</th>
+          <th>TEL</th>
+          <th>携帯</th>
+          <th>メール</th>
+          <th>住所</th>
+          <th>名刺交換日</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div class="no-data" id="noData">該当する名刺が見つかりません</div>
+    <div class="pagination" id="pagination"></div>
+  </div>
+
+  <div class="page-footer">
+    株式会社アート・レイズ｜大分県別府市上原町13番25号｜TEL 0977-21-0603
+  </div>
+</div>
+
+<script>
+  const PAGE_SIZE = 50;
+  let allData = [];
+  let filtered = [];
+  let currentPage = 1;
+
+  // ドラッグ&ドロップ
+  function onDragOver(e) { e.preventDefault(); document.getElementById('dropZone').classList.add('dragover'); }
+  function onDragLeave(e) { document.getElementById('dropZone').classList.remove('dragover'); }
+  function onDrop(e) {
+    e.preventDefault();
+    document.getElementById('dropZone').classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) parseCSV(file);
+  }
+  function loadFile(e) {
+    const file = e.target.files[0];
+    if (file) parseCSV(file);
+  }
+
+  function parseCSV(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const text = e.target.result;
+      const rows = text.split(/\r?\n/).filter(r => r.trim());
+      if (rows.length < 2) { alert('データが見つかりません'); return; }
+
+      // ヘッダー行からカラムインデックスを取得
+      const headers = parseRow(rows[0]);
+      const idx = {
+        company:  findIdx(headers, ['会社名', '会社', 'company']),
+        dept:     findIdx(headers, ['部署名', '部署', 'department']),
+        role:     findIdx(headers, ['役職', 'title']),
+        name:     findIdx(headers, ['氏名', '名前', 'name']),
+        email:    findIdx(headers, ['e-mail', 'email', 'メール']),
+        zip:      findIdx(headers, ['郵便番号', 'zip']),
+        address:  findIdx(headers, ['住所', 'address']),
+        tel:      findIdx(headers, ['TEL会社', 'tel', 'TEL', '電話']),
+        mobile:   findIdx(headers, ['携帯電話', '携帯', 'mobile']),
+        date:     findIdx(headers, ['名刺交換', '交換日', 'date']),
+      };
+
+      allData = rows.slice(1).map(row => {
+        const cols = parseRow(row);
+        return {
+          company: get(cols, idx.company),
+          dept:    get(cols, idx.dept),
+          role:    get(cols, idx.role),
+          name:    get(cols, idx.name),
+          email:   get(cols, idx.email),
+          zip:     get(cols, idx.zip),
+          address: get(cols, idx.address),
+          tel:     get(cols, idx.tel),
+          mobile:  get(cols, idx.mobile),
+          date:    get(cols, idx.date),
+        };
+      }).filter(r => r.company || r.name);
+
+      document.getElementById('totalCount').textContent = allData.length.toLocaleString();
+      document.getElementById('searchWrap').classList.add('visible');
+      document.getElementById('tableWrap').classList.add('visible');
+      document.getElementById('searchInput').value = '';
+      filtered = [...allData];
+      renderTable();
+    };
+    reader.readAsText(file, 'UTF-8');
+  }
+
+  function findIdx(headers, candidates) {
+    for (const c of candidates) {
+      const i = headers.findIndex(h => h.toLowerCase().includes(c.toLowerCase()));
+      if (i >= 0) return i;
+    }
+    return -1;
+  }
+  function get(cols, idx) { return idx >= 0 && cols[idx] ? cols[idx].trim() : ''; }
+
+  function parseRow(row) {
+    // CSVのクォート対応
+    const result = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < row.length; i++) {
+      const c = row[i];
+      if (c === '"') { inQ = !inQ; }
+      else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
+      else { cur += c; }
+    }
+    result.push(cur);
+    return result;
+  }
+
+  function doSearch() {
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    if (!q) {
+      filtered = [...allData];
+    } else {
+      filtered = allData.filter(r => {
+        const s = [r.company, r.dept, r.role, r.name, r.email, r.address, r.tel, r.mobile].join(' ').toLowerCase();
+        return s.includes(q);
+      });
+    }
+    currentPage = 1;
+    renderTable();
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('tableBody');
+    const noData = document.getElementById('noData');
+    document.getElementById('hitCount').textContent = filtered.length.toLocaleString();
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = '';
+      noData.style.display = 'block';
+      document.getElementById('pagination').classList.remove('visible');
+      return;
+    }
+    noData.style.display = 'none';
+
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const page  = filtered.slice(start, start + PAGE_SIZE);
+
+    tbody.innerHTML = page.map(r => `
+      <tr>
+        <td><strong>${esc(r.company)}</strong></td>
+        <td style="font-size:12px;color:#666;">${esc(r.dept)}${r.role ? '　' + esc(r.role) : ''}</td>
+        <td>${esc(r.name)}</td>
+        <td>${r.tel ? `<a href="tel:${r.tel}">${esc(r.tel)}</a>` : ''}</td>
+        <td>${r.mobile ? `<a href="tel:${r.mobile}">${esc(r.mobile)}</a>` : ''}</td>
+        <td>${r.email ? `<a href="mailto:${r.email}">${esc(r.email)}</a>` : ''}</td>
+        <td style="font-size:12px;">${r.zip ? r.zip + '　' : ''}${esc(r.address)}</td>
+        <td style="font-size:12px;color:#666;">${esc(r.date)}</td>
+      </tr>
+    `).join('');
+
+    renderPagination();
+  }
+
+  function renderPagination() {
+    const total = Math.ceil(filtered.length / PAGE_SIZE);
+    const pag = document.getElementById('pagination');
+    if (total <= 1) { pag.classList.remove('visible'); return; }
+    pag.classList.add('visible');
+
+    let html = `<span class="page-info">${filtered.length}件 / ${total}ページ</span>`;
+    if (currentPage > 1) html += `<button class="page-btn" onclick="goPage(${currentPage-1})">◀ 前へ</button>`;
+
+    const start = Math.max(1, currentPage - 2);
+    const end   = Math.min(total, currentPage + 2);
+    for (let i = start; i <= end; i++) {
+      html += `<button class="page-btn${i===currentPage?' active':''}" onclick="goPage(${i})">${i}</button>`;
+    }
+    if (currentPage < total) html += `<button class="page-btn" onclick="goPage(${currentPage+1})">次へ ▶</button>`;
+
+    pag.innerHTML = html;
+  }
+
+  function goPage(n) { currentPage = n; renderTable(); window.scrollTo(0,0); }
+  function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function reloadCSV() {
+    allData = []; filtered = [];
+    document.getElementById('totalCount').textContent = '—';
+    document.getElementById('hitCount').textContent = '—';
+    document.getElementById('searchWrap').classList.remove('visible');
+    document.getElementById('tableWrap').classList.remove('visible');
+    document.getElementById('fileInput').value = '';
+  }
+</script>
+</body>
+</html>
