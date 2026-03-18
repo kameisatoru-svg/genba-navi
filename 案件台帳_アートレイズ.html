@@ -175,6 +175,33 @@
     margin-bottom: 14px;
   }
 
+  /* 書類ボタンエリア */
+  .doc-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .doc-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: opacity 0.15s;
+  }
+  .doc-btn:hover { opacity: 0.85; }
+  .doc-btn.active { background: #2563eb; color: #fff; }
+  .doc-btn.inactive { background: #e5e7eb; color: #9ca3af; cursor: default; pointer-events: none; }
+
   .page-footer {
     text-align: center;
     font-size: 11px;
@@ -285,6 +312,14 @@
         <div class="note-label">📝 備考</div>
         第1期：3月21〜22日（土日）施工。Googleカレンダー登録済み。第2期・第3期は日程調整中。
       </div>
+
+      <!-- 書類ボタン -->
+      <div class="doc-buttons">
+        <a class="doc-btn active" href="見積書_第一期工事_さくら苑床工事.pdf" target="_blank">📄 見積書</a>
+        <button class="doc-btn inactive">📄 請求書</button>
+        <button class="doc-btn inactive">📄 注文書</button>
+        <a class="doc-btn active" href="工事請負契約書_雛形_アートレイズ.html" target="_blank">📄 工事請負契約書</a>
+      </div>
     </div>
   </div>
 
@@ -339,6 +374,14 @@
         ふすま張り替え・耐熱配管交換は別途対応予定（設備屋確認待ち）。紹介経由（元同級生の妻が勤務）。
         見積書ファイル：見積書_AR-2026-0005_松村整骨院_20260317.html
       </div>
+
+      <!-- 書類ボタン -->
+      <div class="doc-buttons">
+        <a class="doc-btn active" href="見積書_AR-2026-0005_松村整骨院_20260317.html" target="_blank">📄 見積書</a>
+        <button class="doc-btn inactive">📄 請求書</button>
+        <button class="doc-btn inactive">📄 注文書</button>
+        <button class="doc-btn inactive">📄 工事請負契約書</button>
+      </div>
     </div>
   </div>
 
@@ -390,6 +433,14 @@
         <div class="note-label">📝 備考</div>
         下請：塩出木工（y-siodew@ctb.ne.jp）。材料費は塩出木工請求書に基づき計上。
         見積書ファイル：見積書_AR-2026-0006_ビーコンプラザ追加工事_20260318.html
+      </div>
+
+      <!-- 書類ボタン -->
+      <div class="doc-buttons">
+        <a class="doc-btn active" href="見積書_AR-2026-0006_ビーコンプラザ追加工事_20260318.html" target="_blank">📄 見積書</a>
+        <button class="doc-btn inactive">📄 請求書</button>
+        <button class="doc-btn inactive">📄 注文書</button>
+        <button class="doc-btn inactive">📄 工事請負契約書</button>
       </div>
     </div>
   </div>
