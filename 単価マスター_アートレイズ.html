@@ -199,8 +199,8 @@
 <div class="container">
 
   <div class="page-header">
-    <h1>📐 工種別単価マスター <span class="version-tag">ver.1</span></h1>
-    <div class="meta">株式会社アート・レイズ<br>作成：2026-03-15</div>
+    <h1>📐 工種別単価マスター <span class="version-tag">ver.2</span></h1>
+    <div class="meta">株式会社アート・レイズ<br>更新：2026-03-19　九州2026版反映</div>
   </div>
 
   <!-- 基本ルール -->
@@ -246,7 +246,7 @@
   </div>
 
   <!-- 01 仮設工事 -->
-  <div class="section-wrap" data-section="01 仮設工事 足場 養生">
+  <div class="section-wrap" data-section="01 仮設工事 足場 養生 くさび 枠組 単管 飛散防止">
     <div class="section-header" onclick="toggleSection(this)">
       <span class="section-title-text">01｜仮設工事</span>
       <span class="section-toggle open">▶</span>
@@ -255,16 +255,22 @@
       <table>
         <thead><tr><th style="width:40%">作業内容</th><th style="width:8%">単位</th><th style="width:22%">単価（見積）</th><th style="width:10%">区分</th><th>備考</th></tr></thead>
         <tbody>
-          <tr><td>足場設置・解体（外部）</td><td class="unit">㎡</td><td class="price-range">700〜900円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
-          <tr><td>養生シート張り</td><td class="unit">㎡</td><td class="price-range">200〜400円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>くさび式足場（設置・解体）</td><td class="unit">㎡</td><td class="price-range">800〜1,200円</td><td class="kubun">材工共</td><td class="note">戸建て主流。組立が早く安価</td></tr>
+          <tr><td>枠組足場・ビティ足場（設置・解体）</td><td class="unit">㎡</td><td class="price-range">1,000〜1,500円</td><td class="kubun">材工共</td><td class="note">マンション・ビル等の中高層用</td></tr>
+          <tr><td>単管足場（設置・解体）</td><td class="unit">㎡</td><td class="price-range">700〜1,100円</td><td class="kubun">材工共</td><td class="note">狭小地や部分補修用</td></tr>
+          <tr><td>飛散防止ネット（養生メッシュ）</td><td class="unit">㎡</td><td class="price-range">150〜300円</td><td class="kubun">材工共</td><td class="note">塗料・ゴミ飛散防止</td></tr>
+          <tr><td>養生シート張り（一般）</td><td class="unit">㎡</td><td class="price-range">200〜400円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
           <tr><td>養生テープ・資材一式</td><td class="unit">式</td><td class="price-range">実費</td><td class="kubun">材工共</td><td class="note">現場規模による</td></tr>
+          <tr><td>高所作業車 使用料</td><td class="unit">日</td><td class="price-range">30,000〜60,000円</td><td class="kubun">材工共</td><td class="note">足場が組めない場所での作業用</td></tr>
+          <tr><td>運搬諸経費（足場回送等）</td><td class="unit">現場</td><td class="price-range">20,000〜50,000円</td><td class="kubun">—</td><td class="note">トラック回送費・ガソリン代</td></tr>
+          <tr class="meansure"><td colspan="5">📊 総額目安（飛散防止ネット込）：20坪 12〜18万円　30坪 15〜25万円　40坪 20〜30万円　50坪 28〜38万円</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
   <!-- 02 解体工事 -->
-  <div class="section-wrap" data-section="02 解体工事 撤去 廃材">
+  <div class="section-wrap" data-section="02 解体工事 撤去 廃材 ボード 産廃">
     <div class="section-header" onclick="toggleSection(this)">
       <span class="section-title-text">02｜解体工事</span>
       <span class="section-toggle">▶</span>
@@ -274,18 +280,22 @@
         <thead><tr><th style="width:40%">作業内容</th><th style="width:8%">単位</th><th style="width:22%">単価（見積）</th><th style="width:10%">区分</th><th>備考</th></tr></thead>
         <tbody>
           <tr><td>内装解体（天井・壁・床）</td><td class="unit">㎡</td><td class="price-range">1,500〜3,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
-          <tr><td>間仕切り撤去</td><td class="unit">㎡</td><td class="price-range">3,000〜6,000円</td><td class="kubun">材工共</td><td class="note">LGS含む</td></tr>
+          <tr><td>天井下地・ボード撤去</td><td class="unit">㎡</td><td class="price-range">850〜1,200円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>間仕切り壁（LGS共）撤去</td><td class="unit">㎡</td><td class="price-range">1,200〜1,500円</td><td class="kubun">材工共</td><td class="note">LGS含む</td></tr>
           <tr><td>建具撤去（ドア1枚）</td><td class="unit">箇所</td><td class="price-range">5,000〜10,000円</td><td class="kubun">材工共</td><td class="note">枠込み</td></tr>
-          <tr><td>廃材処分費</td><td class="unit">式</td><td class="price-range">実費</td><td class="kubun">材工共</td><td class="note">産廃マニフェスト別途</td></tr>
           <tr><td>天井開口</td><td class="unit">箇所</td><td class="price-range">8,000〜15,000円</td><td class="kubun">材工共</td><td class="note">点検口含む</td></tr>
           <tr><td>壁開口</td><td class="unit">箇所</td><td class="price-range">10,000〜20,000円</td><td class="kubun">材工共</td><td class="note">規模による</td></tr>
+          <tr><td>壁の開口・垂れ壁撤去</td><td class="unit">箇所</td><td class="price-range">30,000〜50,000円</td><td class="kubun">材工共</td><td class="note">構造に関わらない壁の場合</td></tr>
+          <tr><td>ブロック解体・処分</td><td class="unit">㎡</td><td class="price-range">3,000〜5,000円</td><td class="kubun">材工共</td><td class="note">搬出距離により加算あり</td></tr>
+          <tr><td>産廃処分費（石膏ボード）</td><td class="unit">㎥</td><td class="price-range">15,000〜25,000円</td><td class="kubun">—</td><td class="note">産廃マニフェスト別途</td></tr>
+          <tr><td>廃材処分費（一般）</td><td class="unit">式</td><td class="price-range">実費</td><td class="kubun">—</td><td class="note">産廃マニフェスト別途</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
   <!-- 06 内装仕上工事 -->
-  <div class="section-wrap" data-section="06 内装仕上工事 クロス CF 塩ビタイル ワックス">
+  <div class="section-wrap" data-section="06 内装仕上工事 クロス CF 塩ビタイル ワックス フローリング 巾木 カーテン 間仕切り">
     <div class="section-header" onclick="toggleSection(this)">
       <span class="section-title-text">06｜内装仕上工事</span>
       <span class="section-toggle">▶</span>
@@ -294,13 +304,23 @@
       <table>
         <thead><tr><th style="width:40%">作業内容</th><th style="width:8%">単位</th><th style="width:22%">単価（見積）</th><th style="width:10%">区分</th><th>備考</th></tr></thead>
         <tbody>
-          <tr><td>クロス張替（量産品・撤去込み）</td><td class="unit">㎡</td><td class="price-range">1,200〜1,800円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
-          <tr><td>クロス張替（1000番台・撤去込み）</td><td class="unit">㎡</td><td class="price-range">1,800〜2,500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
-          <tr><td>クロス張替（新規のみ）</td><td class="unit">㎡</td><td class="price-range">900〜1,500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
-          <tr><td>クッションフロア（撤去込み）</td><td class="unit">㎡</td><td class="price-range">3,000〜5,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
-          <tr><td>クッションフロア（上貼り）</td><td class="unit">㎡</td><td class="price-range">2,000〜3,500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
-          <tr><td>塩ビタイル（上貼り）</td><td class="unit">㎡</td><td class="price-range">5,000〜7,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
-          <tr><td>塩ビタイル（撤去込み）</td><td class="unit">㎡</td><td class="price-range">6,000〜9,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>クロス張替（量産品・撤去込み）</td><td class="unit">㎡</td><td class="price-range">1,200〜1,500円</td><td class="kubun">材工共</td><td class="note">賃貸・一般居室用</td></tr>
+          <tr><td>クロス張替（1000番台・撤去込み）</td><td class="unit">㎡</td><td class="price-range">1,600〜2,200円</td><td class="kubun">材工共</td><td class="note">デザイン性・消臭・強化機能付き</td></tr>
+          <tr><td>クロス張替（新規のみ・撤去なし）</td><td class="unit">㎡</td><td class="price-range">900〜1,500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>既存クロス剥がし・処分代</td><td class="unit">㎡</td><td class="price-range">300〜500円</td><td class="kubun">材工共</td><td class="note">リフォーム時に必須</td></tr>
+          <tr><td>下地調整（パテ処理）</td><td class="unit">㎡</td><td class="price-range">400〜700円</td><td class="kubun">材工共</td><td class="note">壁の凹凸を平らにする作業</td></tr>
+          <tr><td>内装塗装（エマルションペイント）</td><td class="unit">㎡</td><td class="price-range">2,000〜3,000円</td><td class="kubun">材工共</td><td class="note">カフェ風の壁等。下地処理により変動</td></tr>
+          <tr><td>クッションフロア（CF・撤去込み）</td><td class="unit">㎡</td><td class="price-range">3,000〜4,500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>クッションフロア（CF・上貼り）</td><td class="unit">㎡</td><td class="price-range">2,000〜3,500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>フロアタイル・塩ビタイル（上貼り）</td><td class="unit">㎡</td><td class="price-range">5,000〜7,500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>フロアタイル・塩ビタイル（撤去込み）</td><td class="unit">㎡</td><td class="price-range">6,000〜9,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>合板フローリング（一般）</td><td class="unit">㎡</td><td class="price-range">8,000〜12,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>無垢フローリング（天然木）</td><td class="unit">㎡</td><td class="price-range">15,000円〜</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>カーペット・タイルカーペット</td><td class="unit">㎡</td><td class="price-range">4,000〜6,500円</td><td class="kubun">材工共</td><td class="note">オフィス・寝室に多い</td></tr>
+          <tr><td>巾木（はばき）交換</td><td class="unit">m</td><td class="price-range">800〜1,200円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>カーテンレール取付</td><td class="unit">箇所</td><td class="price-range">3,000〜5,000円</td><td class="kubun">工賃のみ</td><td class="note">本体別</td></tr>
+          <tr><td>間仕切り壁 新設（LGS+PB）</td><td class="unit">㎡</td><td class="price-range">10,000〜15,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>室内クリーニング</td><td class="unit">㎡</td><td class="price-range">500〜1,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
           <tr><td>ワックス剥離・清掃</td><td class="unit">㎡</td><td class="price-range">300〜600円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
           <tr class="meansure"><td colspan="5">📊 目安：クロス 60〜80㎡／人工（撤去込み）　CF 40〜60㎡／人工（上貼り）　塩ビタイル 50㎡前後／人工（上貼り）</td></tr>
         </tbody>
@@ -309,7 +329,7 @@
   </div>
 
   <!-- 09 塗装工事 -->
-  <div class="section-wrap" data-section="09 塗装工事 外壁 屋根 鉄部 木部 内部">
+  <div class="section-wrap" data-section="09 塗装工事 外壁 屋根 鉄部 木部 内部 シリコン フッ素 ラジカル 無機 遮熱 養生 シーリング">
     <div class="section-header" onclick="toggleSection(this)">
       <span class="section-title-text">09｜塗装工事</span>
       <span class="section-toggle">▶</span>
@@ -318,20 +338,31 @@
       <table>
         <thead><tr><th style="width:40%">作業内容</th><th style="width:8%">単位</th><th style="width:22%">単価（見積）</th><th style="width:10%">区分</th><th>備考</th></tr></thead>
         <tbody>
-          <tr><td>外壁塗装（シリコン・3回塗り）</td><td class="unit">㎡</td><td class="price-range">1,800〜2,500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
-          <tr><td>外壁塗装（フッ素・3回塗り）</td><td class="unit">㎡</td><td class="price-range">2,500〜3,500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
-          <tr><td>屋根塗装（シリコン）</td><td class="unit">㎡</td><td class="price-range">2,000〜3,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>外壁塗装（アクリル・3回塗り）</td><td class="unit">㎡</td><td class="price-range">1,200〜1,500円</td><td class="kubun">材工共</td><td class="note">耐用年数3〜5年。付帯部等一部使用</td></tr>
+          <tr><td>外壁塗装（ウレタン・3回塗り）</td><td class="unit">㎡</td><td class="price-range">1,800〜2,200円</td><td class="kubun">材工共</td><td class="note">木部・雨樋向き。耐用年数5〜7年</td></tr>
+          <tr><td>外壁塗装（シリコン・3回塗り）</td><td class="unit">㎡</td><td class="price-range">2,500〜3,500円</td><td class="kubun">材工共</td><td class="note">現在の主流。耐用年数7〜10年</td></tr>
+          <tr><td>外壁塗装（ラジカル制御形・3回塗り）</td><td class="unit">㎡</td><td class="price-range">3,000〜3,800円</td><td class="kubun">材工共</td><td class="note">九州の紫外線に強い。耐用年数12〜15年</td></tr>
+          <tr><td>外壁塗装（フッ素・3回塗り）</td><td class="unit">㎡</td><td class="price-range">4,000〜5,500円</td><td class="kubun">材工共</td><td class="note">ビル・大型物件向け。耐用年数15〜20年</td></tr>
+          <tr><td>外壁塗装（無機・遮熱塗料・3回塗り）</td><td class="unit">㎡</td><td class="price-range">5,000〜6,500円</td><td class="kubun">材工共</td><td class="note">最高級。耐用年数20年以上</td></tr>
+          <tr><td>屋根塗装（シリコン・遮熱機能付き）</td><td class="unit">㎡</td><td class="price-range">2,200〜3,000円</td><td class="kubun">材工共</td><td class="note">遮熱機能付きが一般的</td></tr>
           <tr><td>鉄部塗装（さび止め込み）</td><td class="unit">㎡</td><td class="price-range">1,500〜2,500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
           <tr><td>木部塗装</td><td class="unit">㎡</td><td class="price-range">1,200〜2,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
           <tr><td>内部壁塗装（AEP）</td><td class="unit">㎡</td><td class="price-range">800〜1,500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
-          <tr class="meansure"><td colspan="5">📊 目安：外壁3回塗り 40〜55㎡／人工　外壁2回塗り 50〜70㎡／人工　鉄部 30〜40㎡／人工</td></tr>
+          <tr><td>高圧洗浄</td><td class="unit">㎡</td><td class="price-range">200〜400円</td><td class="kubun">材工共</td><td class="note">苔・汚れ除去（バイオ洗浄は+100円）</td></tr>
+          <tr><td>養生（マスキング）</td><td class="unit">㎡</td><td class="price-range">300〜500円</td><td class="kubun">材工共</td><td class="note">窓や床の保護</td></tr>
+          <tr><td>シーリング（打替）</td><td class="unit">m</td><td class="price-range">900〜1,300円</td><td class="kubun">材工共</td><td class="note">撤去・打設込み</td></tr>
+          <tr><td>雨樋（塗装）</td><td class="unit">m</td><td class="price-range">600〜800円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>軒天（塗装）</td><td class="unit">㎡</td><td class="price-range">1,000〜1,500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>破風・鼻隠し（塗装）</td><td class="unit">m</td><td class="price-range">700〜1,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>雨戸・シャッター（塗装）</td><td class="unit">枚</td><td class="price-range">3,000〜5,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr class="meansure"><td colspan="5">📊 目安：外壁3回塗り 40〜55㎡／人工　外壁2回塗り 50〜70㎡／人工　鉄部 30〜40㎡／人工　総額目安（足場・洗浄・付帯込）：30坪 80〜110万円　40坪 100〜140万円</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
   <!-- 11 電気設備（外注） -->
-  <div class="section-wrap gaichuu-section" data-section="11 電気設備工事 コンセント 照明 分電盤 LAN 外注">
+  <div class="section-wrap gaichuu-section" data-section="11 電気設備工事 コンセント 照明 分電盤 LAN アンテナ インターホン 防犯カメラ EV充電 外注">
     <div class="section-header" onclick="toggleSection(this)" style="background:#92400e;">
       <span class="section-title-text">11｜電気設備工事 <span style="font-size:11px; background:rgba(255,255,255,0.2); padding:2px 6px; border-radius:3px; margin-left:6px;">※外注</span></span>
       <span class="section-toggle">▶</span>
@@ -340,17 +371,24 @@
       <table>
         <thead><tr><th style="width:40%">作業内容</th><th style="width:8%">単位</th><th style="width:22%">単価（見積）</th><th style="width:10%">区分</th><th>備考</th></tr></thead>
         <tbody>
-          <tr class="gaichuu"><td>コンセント増設</td><td class="unit">箇所</td><td class="price-range">15,000〜30,000円</td><td class="kubun">材工共</td><td class="note">電気工事士資格要</td></tr>
-          <tr class="gaichuu"><td>照明器具交換</td><td class="unit">箇所</td><td class="price-range">5,000〜20,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
-          <tr class="gaichuu"><td>分電盤交換</td><td class="unit">式</td><td class="price-range">80,000〜200,000円</td><td class="kubun">材工共</td><td class="note">外注対応</td></tr>
-          <tr class="gaichuu"><td>LAN配線</td><td class="unit">m</td><td class="price-range">2,000〜5,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr class="gaichuu"><td>コンセント増設（露出）</td><td class="unit">箇所</td><td class="price-range">8,000〜12,000円</td><td class="kubun">材工共</td><td class="note">配線距離により変動</td></tr>
+          <tr class="gaichuu"><td>スイッチ交換</td><td class="unit">箇所</td><td class="price-range">4,000〜7,000円</td><td class="kubun">材工共</td><td class="note">プレート代込</td></tr>
+          <tr class="gaichuu"><td>照明器具取付（シーリング）</td><td class="unit">箇所</td><td class="price-range">3,000〜5,000円</td><td class="kubun">工賃のみ</td><td class="note">器具本体は別</td></tr>
+          <tr class="gaichuu"><td>ダウンライト新設（穴あけ込）</td><td class="unit">箇所</td><td class="price-range">8,000〜15,000円</td><td class="kubun">材工共</td><td class="note">配線工事費含む</td></tr>
+          <tr class="gaichuu"><td>エアコン専用回路</td><td class="unit">箇所</td><td class="price-range">18,000〜28,000円</td><td class="kubun">材工共</td><td class="note">分電盤からの引き込み</td></tr>
+          <tr class="gaichuu"><td>分電盤交換（一般住宅）</td><td class="unit">面</td><td class="price-range">40,000〜70,000円</td><td class="kubun">材工共</td><td class="note">回路数により変動</td></tr>
+          <tr class="gaichuu"><td>EV充電用コンセント設置</td><td class="unit">箇所</td><td class="price-range">50,000〜100,000円</td><td class="kubun">材工共</td><td class="note">200V工事、配線距離による</td></tr>
+          <tr class="gaichuu"><td>LAN配線工事（カテゴリー6）</td><td class="unit">箇所</td><td class="price-range">15,000〜25,000円</td><td class="kubun">材工共</td><td class="note">通線・プラグ加工込</td></tr>
+          <tr class="gaichuu"><td>テレビアンテナ設置（地デジ）</td><td class="unit">基</td><td class="price-range">35,000〜55,000円</td><td class="kubun">材工共</td><td class="note">魚骨型、ブースター込</td></tr>
+          <tr class="gaichuu"><td>インターホン交換</td><td class="unit">箇所</td><td class="price-range">15,000〜30,000円</td><td class="kubun">材工共</td><td class="note">モニター付き（本体別）</td></tr>
+          <tr class="gaichuu"><td>防犯カメラ設置</td><td class="unit">台</td><td class="price-range">30,000〜60,000円</td><td class="kubun">材工共</td><td class="note">配線、設定費込</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
   <!-- 12 空調・換気（外注） -->
-  <div class="section-wrap gaichuu-section" data-section="12 空調 換気設備工事 エアコン 換気扇 ダクト 外注">
+  <div class="section-wrap gaichuu-section" data-section="12 空調 換気設備工事 エアコン 換気扇 ダクト 全熱交換器 ロスナイ 外注">
     <div class="section-header" onclick="toggleSection(this)" style="background:#92400e;">
       <span class="section-title-text">12｜空調・換気設備工事 <span style="font-size:11px; background:rgba(255,255,255,0.2); padding:2px 6px; border-radius:3px; margin-left:6px;">※外注</span></span>
       <span class="section-toggle">▶</span>
@@ -359,16 +397,22 @@
       <table>
         <thead><tr><th style="width:40%">作業内容</th><th style="width:8%">単位</th><th style="width:22%">単価（見積）</th><th style="width:10%">区分</th><th>備考</th></tr></thead>
         <tbody>
-          <tr class="gaichuu"><td>エアコン取付（壁掛け）</td><td class="unit">台</td><td class="price-range">15,000〜30,000円</td><td class="kubun">工賃のみ</td><td class="note">—</td></tr>
-          <tr class="gaichuu"><td>換気扇交換</td><td class="unit">箇所</td><td class="price-range">15,000〜40,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
-          <tr class="gaichuu"><td>ダクト清掃</td><td class="unit">式</td><td class="price-range">見積による</td><td class="kubun">—</td><td class="note">外注対応</td></tr>
+          <tr class="gaichuu"><td>家庭用エアコン取付（〜4.0kW）</td><td class="unit">台</td><td class="price-range">18,000〜25,000円</td><td class="kubun">工賃のみ</td><td class="note">6畳〜14畳用。配管4m以内</td></tr>
+          <tr class="gaichuu"><td>既存エアコン 取り外し</td><td class="unit">台</td><td class="price-range">4,000〜7,000円</td><td class="kubun">工賃のみ</td><td class="note">処分費（リサイクル券）別</td></tr>
+          <tr class="gaichuu"><td>室外機 壁掛け・天吊り</td><td class="unit">台</td><td class="price-range">12,000〜18,000円</td><td class="kubun">材工共</td><td class="note">金具代込み</td></tr>
+          <tr class="gaichuu"><td>天井カセット形（4馬力）</td><td class="unit">式</td><td class="price-range">35万〜55万円</td><td class="kubun">材工共</td><td class="note">既存機との入れ替え</td></tr>
+          <tr class="gaichuu"><td>壁掛形（2.5馬力）業務用</td><td class="unit">式</td><td class="price-range">15万〜25万円</td><td class="kubun">材工共</td><td class="note">店舗・事務所用</td></tr>
+          <tr class="gaichuu"><td>換気扇交換（トイレ等）</td><td class="unit">式</td><td class="price-range">15,000〜30,000円</td><td class="kubun">材工共</td><td class="note">パイプファン等の小規模</td></tr>
+          <tr class="gaichuu"><td>全熱交換器（ロスナイ等）</td><td class="unit">式</td><td class="price-range">12万〜20万円</td><td class="kubun">材工共</td><td class="note">省エネ換気、本体込</td></tr>
+          <tr class="gaichuu"><td>ダクト工事（スパイラル）</td><td class="unit">m</td><td class="price-range">5,000〜8,000円</td><td class="kubun">材工共</td><td class="note">口径により大きく変動</td></tr>
+          <tr class="gaichuu"><td>ダクト清掃</td><td class="unit">箇所</td><td class="price-range">30,000〜60,000円</td><td class="kubun">—</td><td class="note">集合住宅・店舗のメインダクト</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
   <!-- 13 給排水（外注） -->
-  <div class="section-wrap gaichuu-section" data-section="13 給排水設備工事 給水 排水 水栓 給湯器 外注">
+  <div class="section-wrap gaichuu-section" data-section="13 給排水設備工事 給水 排水 水栓 給湯器 エコキュート トイレ キッチン ユニットバス 洗面 外注">
     <div class="section-header" onclick="toggleSection(this)" style="background:#92400e;">
       <span class="section-title-text">13｜給排水設備工事 <span style="font-size:11px; background:rgba(255,255,255,0.2); padding:2px 6px; border-radius:3px; margin-left:6px;">※外注</span></span>
       <span class="section-toggle">▶</span>
@@ -377,10 +421,227 @@
       <table>
         <thead><tr><th style="width:40%">作業内容</th><th style="width:8%">単位</th><th style="width:22%">単価（見積）</th><th style="width:10%">区分</th><th>備考</th></tr></thead>
         <tbody>
+          <tr class="gaichuu"><td>給水・給湯配管（露出）</td><td class="unit">m</td><td class="price-range">3,500〜5,500円</td><td class="kubun">材工共</td><td class="note">ポリ管・銅管など</td></tr>
+          <tr class="gaichuu"><td>排水配管（塩ビ管）</td><td class="unit">m</td><td class="price-range">2,800〜4,500円</td><td class="kubun">材工共</td><td class="note">屋内配管</td></tr>
           <tr class="gaichuu"><td>給水管修理・交換</td><td class="unit">箇所</td><td class="price-range">20,000〜80,000円</td><td class="kubun">材工共</td><td class="note">規模による</td></tr>
           <tr class="gaichuu"><td>排水管修理・清掃</td><td class="unit">箇所</td><td class="price-range">15,000〜50,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
-          <tr class="gaichuu"><td>水栓金具交換</td><td class="unit">箇所</td><td class="price-range">10,000〜30,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
-          <tr class="gaichuu"><td>給湯器交換</td><td class="unit">台</td><td class="price-range">100,000〜300,000円</td><td class="kubun">材工共</td><td class="note">機種による</td></tr>
+          <tr class="gaichuu"><td>蛇口・水栓交換</td><td class="unit">箇所</td><td class="price-range">15,000〜30,000円</td><td class="kubun">材工共</td><td class="note">キッチン・浴室（本体別）</td></tr>
+          <tr class="gaichuu"><td>排水管高圧洗浄</td><td class="unit">軒</td><td class="price-range">25,000〜45,000円</td><td class="kubun">材工共</td><td class="note">詰まり予防のメンテナンス</td></tr>
+          <tr class="gaichuu"><td>トイレ交換</td><td class="unit">式</td><td class="price-range">12万〜25万円</td><td class="kubun">材工共</td><td class="note">タンクレス等は本体代で上昇</td></tr>
+          <tr class="gaichuu"><td>システムキッチン</td><td class="unit">式</td><td class="price-range">60万〜150万円</td><td class="kubun">材工共</td><td class="note">配管位置変更なしの場合</td></tr>
+          <tr class="gaichuu"><td>ユニットバス</td><td class="unit">式</td><td class="price-range">80万〜160万円</td><td class="kubun">材工共</td><td class="note">1216〜1616サイズ</td></tr>
+          <tr class="gaichuu"><td>洗面化粧台</td><td class="unit">式</td><td class="price-range">8万〜18万円</td><td class="kubun">材工共</td><td class="note">750mm幅スタンダード</td></tr>
+          <tr class="gaichuu"><td>給湯器（ガス・エコジョーズ）</td><td class="unit">式</td><td class="price-range">15万〜25万円</td><td class="kubun">材工共</td><td class="note">24号・追い焚き機能付</td></tr>
+          <tr class="gaichuu"><td>エコキュート（オール電化）</td><td class="unit">式</td><td class="price-range">40万〜60万円</td><td class="kubun">材工共</td><td class="note">370L〜460L、工事費込</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 03 左官工事 -->
+  <div class="section-wrap" data-section="03 左官工事 モルタル 漆喰 珪藻土 ジョリパット 土間 セルフレベリング 砂壁">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-title-text">03｜左官工事</span>
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-body">
+      <table>
+        <thead><tr><th style="width:40%">作業内容</th><th style="width:8%">単位</th><th style="width:22%">単価（見積）</th><th style="width:10%">区分</th><th>備考</th></tr></thead>
+        <tbody>
+          <tr><td>床コンクリート金ゴテ仕上げ</td><td class="unit">㎡</td><td class="price-range">1,200〜1,800円</td><td class="kubun">材工共</td><td class="note">土間コンクリートを平らに仕上げる</td></tr>
+          <tr><td>モルタル薄塗り（厚さ3〜5mm）</td><td class="unit">㎡</td><td class="price-range">1,800〜2,500円</td><td class="kubun">材工共</td><td class="note">補修やタイルの下地調整</td></tr>
+          <tr><td>モルタル厚塗り（厚さ15〜20mm）</td><td class="unit">㎡</td><td class="price-range">3,500〜4,800円</td><td class="kubun">材工共</td><td class="note">玄関ポーチや基礎の仕上げ</td></tr>
+          <tr><td>セルフレベリング材散布</td><td class="unit">㎡</td><td class="price-range">1,500〜2,200円</td><td class="kubun">材工共</td><td class="note">床を自動で水平にする（マンション等）</td></tr>
+          <tr><td>ジョリパット仕上げ</td><td class="unit">㎡</td><td class="price-range">4,500〜6,500円</td><td class="kubun">材工共</td><td class="note">意匠性が高く、外壁・内装に人気</td></tr>
+          <tr><td>漆喰（しっくい）塗り</td><td class="unit">㎡</td><td class="price-range">6,000〜8,500円</td><td class="kubun">材工共</td><td class="note">調湿・抗菌作用がある伝統的な仕上げ</td></tr>
+          <tr><td>珪藻土（けいそうど）塗り</td><td class="unit">㎡</td><td class="price-range">5,500〜8,000円</td><td class="kubun">材工共</td><td class="note">自然素材。内装の機能性重視</td></tr>
+          <tr><td>砂壁・繊維壁の塗り替え</td><td class="unit">㎡</td><td class="price-range">3,500〜5,000円</td><td class="kubun">材工共</td><td class="note">和室の壁などのリフォーム</td></tr>
+          <tr><td>コンクリート打ち放し補修</td><td class="unit">㎡</td><td class="price-range">4,000〜6,000円</td><td class="kubun">材工共</td><td class="note">ジャンカ（気泡）の埋め・色合わせ</td></tr>
+          <tr><td>定木（じょうぎ）取り付け</td><td class="unit">m</td><td class="price-range">600〜1,000円</td><td class="kubun">材工共</td><td class="note">コーナーの角出し</td></tr>
+          <tr><td>養生費（汚れ防止）</td><td class="unit">㎡</td><td class="price-range">300〜500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>常用単価（職人1人/1日）</td><td class="unit">日</td><td class="price-range">30,000〜45,000円</td><td class="kubun">工賃のみ</td><td class="note">面積で出せない小規模な作業</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 04 大工・木工事 -->
+  <div class="section-wrap" data-section="04 大工 木工事 フローリング 石膏ボード 軽天 LGS ジプトーン 造作 手すり 階段 リフォーム">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-title-text">04｜大工・木工事</span>
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-body">
+      <table>
+        <thead><tr><th style="width:40%">作業内容</th><th style="width:8%">単位</th><th style="width:22%">単価（見積）</th><th style="width:10%">区分</th><th>備考</th></tr></thead>
+        <tbody>
+          <tr><td>大工手間（坪単価・新築）</td><td class="unit">坪</td><td class="price-range">55,000〜75,000円</td><td class="kubun">工賃のみ</td><td class="note">標準的な木造住宅の場合</td></tr>
+          <tr><td>フローリング貼り</td><td class="unit">㎡</td><td class="price-range">2,500〜4,000円</td><td class="kubun">工賃のみ</td><td class="note">既存処分・下地調整は別途</td></tr>
+          <tr><td>壁・天井下地（石膏ボード貼）</td><td class="unit">㎡</td><td class="price-range">1,200〜1,800円</td><td class="kubun">材工共</td><td class="note">木下地またはLGS下地込み</td></tr>
+          <tr><td>窓枠・建具取り付け</td><td class="unit">箇所</td><td class="price-range">5,000〜8,000円</td><td class="kubun">工賃のみ</td><td class="note">枠の組み立て・調整込</td></tr>
+          <tr><td>階段取り付け</td><td class="unit">式</td><td class="price-range">60,000〜90,000円</td><td class="kubun">材工共</td><td class="note">プレカット材の組み立て</td></tr>
+          <tr><td>和室から洋室への改装（床のみ）</td><td class="unit">6畳</td><td class="price-range">15万〜25万円</td><td class="kubun">材工共</td><td class="note">下地調整、断熱材、合板、床材込</td></tr>
+          <tr><td>手すり取り付け</td><td class="unit">箇所</td><td class="price-range">8,000〜15,000円</td><td class="kubun">材工共</td><td class="note">下地補強が必要な場合は別途</td></tr>
+          <tr><td>常用（人工出し）</td><td class="unit">日</td><td class="price-range">35,000〜45,000円</td><td class="kubun">工賃のみ</td><td class="note">1日拘束時の手間賃（会社管理費込）</td></tr>
+          <tr><td>天井軽鉄下地（軽天）</td><td class="unit">㎡</td><td class="price-range">1,400〜2,000円</td><td class="kubun">材工共</td><td class="note">天井高さや吊りボルト長さで変動</td></tr>
+          <tr><td>壁軽鉄下地（LGS）</td><td class="unit">㎡</td><td class="price-range">1,600〜2,400円</td><td class="kubun">材工共</td><td class="note">スタッドの間隔・振れ止め仕様による</td></tr>
+          <tr><td>石膏ボード貼り（9.5mm / 12.5mm）</td><td class="unit">㎡</td><td class="price-range">1,000〜1,500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>強化・遮音ボード貼り</td><td class="unit">㎡</td><td class="price-range">1,800〜2,800円</td><td class="kubun">材工共</td><td class="note">高機能ボード</td></tr>
+          <tr><td>ジプトーン貼り（天井）</td><td class="unit">㎡</td><td class="price-range">2,200〜2,800円</td><td class="kubun">材工共</td><td class="note">オフィス等で使われる化粧岩綿吸音板</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 05 建具・サッシ工事 -->
+  <div class="section-wrap" data-section="05 建具 サッシ工事 内窓 二重窓 カバー工法 ガラス 網戸 ペアガラス 複層 Low-E 襖 障子">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-title-text">05｜建具・サッシ工事</span>
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-body">
+      <table>
+        <thead><tr><th style="width:40%">作業内容</th><th style="width:8%">単位</th><th style="width:22%">単価（見積）</th><th style="width:10%">区分</th><th>備考</th></tr></thead>
+        <tbody>
+          <tr><td>内窓（二重窓）設置</td><td class="unit">箇所</td><td class="price-range">6万〜15万円</td><td class="kubun">材工共</td><td class="note">窓サイズ（小〜特大）により変動</td></tr>
+          <tr><td>外窓交換（カバー工法）</td><td class="unit">箇所</td><td class="price-range">12万〜35万円</td><td class="kubun">材工共</td><td class="note">壁を壊さず既存枠に新しい窓を被せる</td></tr>
+          <tr><td>サッシ交換（はつり工法）</td><td class="unit">箇所</td><td class="price-range">25万〜50万円</td><td class="kubun">材工共</td><td class="note">壁を解体して枠ごと交換（大規模修繕等）</td></tr>
+          <tr><td>網戸張替え（一般サイズ）</td><td class="unit">枚</td><td class="price-range">3,000〜6,000円</td><td class="kubun">材工共</td><td class="note">現場作業または持ち込み</td></tr>
+          <tr><td>透明ガラス交換（3mm厚）</td><td class="unit">枚</td><td class="price-range">12,000〜18,000円</td><td class="kubun">材工共</td><td class="note">一般的な単板ガラス。撤去処分込</td></tr>
+          <tr><td>型板ガラス（霞ガラス）交換</td><td class="unit">枚</td><td class="price-range">15,000〜22,000円</td><td class="kubun">材工共</td><td class="note">視線を遮る不透明なガラス</td></tr>
+          <tr><td>網入りガラス交換</td><td class="unit">枚</td><td class="price-range">25,000〜40,000円</td><td class="kubun">材工共</td><td class="note">防火地域などの延焼防止用</td></tr>
+          <tr><td>複層ガラス（ペアガラス）交換</td><td class="unit">枚</td><td class="price-range">35,000〜55,000円</td><td class="kubun">材工共</td><td class="note">断熱・結露防止（現在の標準仕様）</td></tr>
+          <tr><td>Low-E 複層ガラス交換</td><td class="unit">枚</td><td class="price-range">45,000〜70,000円</td><td class="kubun">材工共</td><td class="note">高断熱・遮熱性能（補助金対象の主流）</td></tr>
+          <tr><td>襖の張替え（並品）</td><td class="unit">枚</td><td class="price-range">3,500〜5,500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>襖の張替え（中級品）</td><td class="unit">枚</td><td class="price-range">6,500〜9,500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>障子の張替え（並品）</td><td class="unit">枚</td><td class="price-range">2,500〜4,500円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr><td>障子の張替え（中級品）</td><td class="unit">枚</td><td class="price-range">5,500〜8,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 07 外構・タイル工事 -->
+  <div class="section-wrap" data-section="07 外構 タイル工事 ブロック レンガ 土間コンクリート フェンス カーポート 人工芝 石貼り 整地">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-title-text">07｜外構・タイル工事</span>
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-body">
+      <table>
+        <thead><tr><th style="width:40%">作業内容</th><th style="width:8%">単位</th><th style="width:22%">単価（見積）</th><th style="width:10%">区分</th><th>備考</th></tr></thead>
+        <tbody>
+          <tr><td>普通コンクリートブロック積み（12cm厚）</td><td class="unit">㎡</td><td class="price-range">8,000〜11,000円</td><td class="kubun">材工共</td><td class="note">1段〜積み上げ。鉄筋代込</td></tr>
+          <tr><td>化粧ブロック積み（片面仕上げ）</td><td class="unit">㎡</td><td class="price-range">12,000〜16,000円</td><td class="kubun">材工共</td><td class="note">デザインにより大きく変動</td></tr>
+          <tr><td>レンガ積み（普通レンガ）</td><td class="unit">㎡</td><td class="price-range">18,000〜25,000円</td><td class="kubun">材工共</td><td class="note">下地・モルタル込</td></tr>
+          <tr><td>基礎コンクリート（ブロック用）</td><td class="unit">m</td><td class="price-range">4,000〜6,000円</td><td class="kubun">材工共</td><td class="note">掘削・砕石・鉄筋込</td></tr>
+          <tr><td>一般床タイル貼り（300角）</td><td class="unit">㎡</td><td class="price-range">12,000〜16,000円</td><td class="kubun">材工共</td><td class="note">玄関ポーチ、テラスなど</td></tr>
+          <tr><td>タイルデッキ仕上げ</td><td class="unit">㎡</td><td class="price-range">15,000〜20,000円</td><td class="kubun">材工共</td><td class="note">下地コンクリート造作費は別途</td></tr>
+          <tr><td>乱形石貼り（天然石）</td><td class="unit">㎡</td><td class="price-range">22,000〜30,000円</td><td class="kubun">材工共</td><td class="note">手間がかかるため高単価</td></tr>
+          <tr><td>土間コンクリート打ち</td><td class="unit">㎡</td><td class="price-range">8,000〜12,000円</td><td class="kubun">材工共</td><td class="note">駐車場等。砕石・ワイヤーメッシュ込</td></tr>
+          <tr><td>アルミフェンス設置（H=800）</td><td class="unit">m</td><td class="price-range">8,000〜15,000円</td><td class="kubun">材工共</td><td class="note">普及品。本体＋取付工賃</td></tr>
+          <tr><td>カーポート設置（1台用・アルミ）</td><td class="unit">基</td><td class="price-range">20万〜35万円</td><td class="kubun">材工共</td><td class="note">工賃・基礎込の標準仕様</td></tr>
+          <tr><td>人工芝敷設（防草シート込）</td><td class="unit">㎡</td><td class="price-range">6,000〜9,000円</td><td class="kubun">材工共</td><td class="note">下地処理（整地）を含む</td></tr>
+          <tr><td>真砂土（まさ土）整地</td><td class="unit">㎡</td><td class="price-range">1,500〜2,500円</td><td class="kubun">材工共</td><td class="note">庭の整地仕上げ</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 08 屋根・防水工事 -->
+  <div class="section-wrap" data-section="08 屋根 防水工事 塗装 カバー工法 葺き替え ガルバリウム スレート 和瓦 ドレン 脱気筒">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-title-text">08｜屋根・防水工事</span>
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-body">
+      <table>
+        <thead><tr><th style="width:40%">作業内容</th><th style="width:8%">単位</th><th style="width:22%">単価（見積）</th><th style="width:10%">区分</th><th>備考</th></tr></thead>
+        <tbody>
+          <tr><td>屋根塗装（シリコン〜遮熱塗料）</td><td class="unit">㎡</td><td class="price-range">2,500〜4,500円</td><td class="kubun">材工共</td><td class="note">足場代別途。30坪住宅目安 30〜50万円</td></tr>
+          <tr><td>屋根カバー工法（重ね葺き）</td><td class="unit">㎡</td><td class="price-range">8,000〜12,000円</td><td class="kubun">材工共</td><td class="note">既存屋根の上に重ね葺き。スレート向き</td></tr>
+          <tr><td>葺き替え（金属・ガルバリウム鋼板）</td><td class="unit">㎡</td><td class="price-range">10,000〜16,000円</td><td class="kubun">材工共</td><td class="note">軽量化・耐震対応</td></tr>
+          <tr><td>葺き替え（和瓦・防災瓦）</td><td class="unit">㎡</td><td class="price-range">15,000〜22,000円</td><td class="kubun">材工共</td><td class="note">耐久性重視</td></tr>
+          <tr><td>ガルバリウム鋼板（新規設置）</td><td class="unit">㎡</td><td class="price-range">6,000〜9,000円</td><td class="kubun">材工共</td><td class="note">耐用年数25〜35年。軽量で耐震性高い</td></tr>
+          <tr><td>スレート（コロニアル）屋根（新規）</td><td class="unit">㎡</td><td class="price-range">5,000〜8,000円</td><td class="kubun">材工共</td><td class="note">耐用年数20〜25年。定期塗装が必要</td></tr>
+          <tr><td>アスファルトシングル（新規）</td><td class="unit">㎡</td><td class="price-range">5,500〜8,500円</td><td class="kubun">材工共</td><td class="note">耐用年数20〜30年。複雑な形状に対応</td></tr>
+          <tr><td>和瓦・日本瓦（新規）</td><td class="unit">㎡</td><td class="price-range">10,000〜15,000円</td><td class="kubun">材工共</td><td class="note">耐用年数50年以上</td></tr>
+          <tr><td>トップコート塗り替え</td><td class="unit">㎡</td><td class="price-range">2,000〜3,500円</td><td class="kubun">材工共</td><td class="note">5〜7年ごとの保護塗装</td></tr>
+          <tr><td>高圧洗浄（屋根）</td><td class="unit">㎡</td><td class="price-range">300〜600円</td><td class="kubun">材工共</td><td class="note">施工前の汚れ落とし</td></tr>
+          <tr><td>既存防水層 撤去費</td><td class="unit">㎡</td><td class="price-range">1,500〜3,000円</td><td class="kubun">材工共</td><td class="note">下地を新調する場合に必要</td></tr>
+          <tr><td>改修用ドレン取付</td><td class="unit">箇所</td><td class="price-range">15,000〜25,000円</td><td class="kubun">材工共</td><td class="note">排水口の補修。漏水防止に重要</td></tr>
+          <tr><td>脱気筒（だっきとう）設置</td><td class="unit">箇所</td><td class="price-range">12,000〜18,000円</td><td class="kubun">材工共</td><td class="note">下地の湿気を逃がす煙突</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 10 労務単価 -->
+  <div class="section-wrap" data-section="10 労務単価 職種別 日当 人工 作業員 とび 鉄筋 型わく 溶接 大工 左官 塗装工 内装工 配管 タイル">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-title-text">10｜労務単価（職種別・九州2026年版）</span>
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-body">
+      <table>
+        <thead><tr><th style="width:40%">職種</th><th style="width:8%">単位</th><th style="width:22%">九州平均単価</th><th style="width:10%">区分</th><th>職務内容</th></tr></thead>
+        <tbody>
+          <tr><td>普通作業員</td><td class="unit">日</td><td class="price-range">22,000円</td><td class="kubun">工賃のみ</td><td class="note">現場片付け、手元作業などの一般的労務</td></tr>
+          <tr><td>特殊作業員</td><td class="unit">日</td><td class="price-range">28,300円</td><td class="kubun">工賃のみ</td><td class="note">コンクリート打設、足場組立補助など</td></tr>
+          <tr><td>軽作業員</td><td class="unit">日</td><td class="price-range">17,500円</td><td class="kubun">工賃のみ</td><td class="note">清掃、散水などの軽微な作業</td></tr>
+          <tr><td>運転手（特殊）</td><td class="unit">日</td><td class="price-range">29,500円</td><td class="kubun">工賃のみ</td><td class="note">大型重機、バックホウなどの操縦</td></tr>
+          <tr><td>運転手（一般）</td><td class="unit">日</td><td class="price-range">24,100円</td><td class="kubun">工賃のみ</td><td class="note">ダンプカー（10t以下）などの運転</td></tr>
+          <tr><td>潜水士</td><td class="unit">日</td><td class="price-range">58,000円</td><td class="kubun">工賃のみ</td><td class="note">港湾・ダムなどの水中作業</td></tr>
+          <tr><td>とび工</td><td class="unit">日</td><td class="price-range">31,000円</td><td class="kubun">工賃のみ</td><td class="note">足場設置、鉄骨の組立て（高所作業）</td></tr>
+          <tr><td>鉄筋工</td><td class="unit">日</td><td class="price-range">33,500円</td><td class="kubun">工賃のみ</td><td class="note">鉄筋の配筋、結束作業</td></tr>
+          <tr><td>型わく工</td><td class="unit">日</td><td class="price-range">29,200円</td><td class="kubun">工賃のみ</td><td class="note">コンクリートを流し込む型枠の製作・設置</td></tr>
+          <tr><td>鉄骨工</td><td class="unit">日</td><td class="price-range">29,700円</td><td class="kubun">工賃のみ</td><td class="note">鉄骨造建物の建方作業</td></tr>
+          <tr><td>溶接工</td><td class="unit">日</td><td class="price-range">31,200円</td><td class="kubun">工賃のみ</td><td class="note">鉄骨等の溶接接合（有資格者）</td></tr>
+          <tr><td>大工（建築）</td><td class="unit">日</td><td class="price-range">28,800円</td><td class="kubun">工賃のみ</td><td class="note">木造住宅の構造、造作作業</td></tr>
+          <tr><td>左官</td><td class="unit">日</td><td class="price-range">30,500円</td><td class="kubun">工賃のみ</td><td class="note">壁や床の塗り仕上げ</td></tr>
+          <tr><td>塗装工</td><td class="unit">日</td><td class="price-range">27,400円</td><td class="kubun">工賃のみ</td><td class="note">外壁や内部の塗装</td></tr>
+          <tr><td>内装工</td><td class="unit">日</td><td class="price-range">26,900円</td><td class="kubun">工賃のみ</td><td class="note">クロス貼り、床仕上げなど</td></tr>
+          <tr><td>電工（電気通信）</td><td class="unit">日</td><td class="price-range">26,900円</td><td class="kubun">工賃のみ</td><td class="note">配線、照明、通信設備の設置</td></tr>
+          <tr><td>配管工</td><td class="unit">日</td><td class="price-range">27,800円</td><td class="kubun">工賃のみ</td><td class="note">給排水、空調配管の設置</td></tr>
+          <tr><td>サッシ工</td><td class="unit">日</td><td class="price-range">26,500円</td><td class="kubun">工賃のみ</td><td class="note">窓枠、建具の取り付け</td></tr>
+          <tr><td>タイル工</td><td class="unit">日</td><td class="price-range">31,200円</td><td class="kubun">工賃のみ</td><td class="note">タイル貼り（2026年3月〜公共工事設計労務単価）</td></tr>
+          <tr><td>造園工</td><td class="unit">日</td><td class="price-range">26,100円</td><td class="kubun">工賃のみ</td><td class="note">植栽、公園整備、街路樹管理</td></tr>
+          <tr><td>舗装工</td><td class="unit">日</td><td class="price-range">26,800円</td><td class="kubun">工賃のみ</td><td class="note">道路のアスファルト舗装</td></tr>
+          <tr><td>トンネル工</td><td class="unit">日</td><td class="price-range">36,000円</td><td class="kubun">工賃のみ</td><td class="note">トンネル掘削、支保工の設置</td></tr>
+          <tr><td>橋梁特殊工</td><td class="unit">日</td><td class="price-range">35,200円</td><td class="kubun">工賃のみ</td><td class="note">橋の架設などの高度な作業</td></tr>
+          <tr class="meansure"><td colspan="5">⚠️ アート・レイズ社内ルール：職人日当（原価）20,000円 → 見積単価 24,000円（×1.2マークアップ）</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 14 消防・防災設備（外注） -->
+  <div class="section-wrap gaichuu-section" data-section="14 消防 防災設備 換気扇 レンジフード 誘導灯 火災警報器 感知器 24時間換気 ダクト 外注">
+    <div class="section-header" onclick="toggleSection(this)" style="background:#92400e;">
+      <span class="section-title-text">14｜消防・防災設備 / 換気工事 <span style="font-size:11px; background:rgba(255,255,255,0.2); padding:2px 6px; border-radius:3px; margin-left:6px;">※外注</span></span>
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-body">
+      <table>
+        <thead><tr><th style="width:40%">作業内容</th><th style="width:8%">単位</th><th style="width:22%">単価（見積）</th><th style="width:10%">区分</th><th>備考</th></tr></thead>
+        <tbody>
+          <tr class="gaichuu"><td>消火器（10型）新品交換</td><td class="unit">本</td><td class="price-range">7,000〜10,000円</td><td class="kubun">材工共</td><td class="note">業務用ABC粉末。処分込</td></tr>
+          <tr class="gaichuu"><td>住宅用火災警報器（電池式）</td><td class="unit">個</td><td class="price-range">5,000〜10,000円</td><td class="kubun">材工共</td><td class="note">寿命は約10年</td></tr>
+          <tr class="gaichuu"><td>感知器（差動式・定温式）</td><td class="unit">個</td><td class="price-range">6,000〜12,000円</td><td class="kubun">材工共</td><td class="note">配線工事別</td></tr>
+          <tr class="gaichuu"><td>誘導灯（LED・C級）</td><td class="unit">台</td><td class="price-range">25,000〜45,000円</td><td class="kubun">材工共</td><td class="note">避難口・通路誘導灯</td></tr>
+          <tr class="gaichuu"><td>非常コンセント 増設・交換</td><td class="unit">箇所</td><td class="price-range">30,000〜50,000円</td><td class="kubun">材工共</td><td class="note">—</td></tr>
+          <tr class="gaichuu"><td>避難はしご ハッチ枠・梯子更新</td><td class="unit">式</td><td class="price-range">12万〜20万円</td><td class="kubun">材工共</td><td class="note">マンションベランダ用</td></tr>
+          <tr class="gaichuu"><td>消防設備点検（消火器）</td><td class="unit">本</td><td class="price-range">700〜1,200円</td><td class="kubun">—</td><td class="note">本数が多いほど単価下落</td></tr>
+          <tr class="gaichuu"><td>基本出張・諸経費（消防点検）</td><td class="unit">回</td><td class="price-range">15,000〜30,000円</td><td class="kubun">—</td><td class="note">交通費・書類作成・提出代行込</td></tr>
+          <tr class="gaichuu"><td>浴室換気扇（一般）</td><td class="unit">式</td><td class="price-range">4万〜7万円</td><td class="kubun">材工共</td><td class="note">天井埋込形。電気工事込</td></tr>
+          <tr class="gaichuu"><td>浴室換気乾燥暖房機</td><td class="unit">式</td><td class="price-range">10万〜15万円</td><td class="kubun">材工共</td><td class="note">新規設置は専用回路工事(+3万〜)が必要</td></tr>
+          <tr class="gaichuu"><td>トイレ・洗面所換気扇</td><td class="unit">式</td><td class="price-range">2万〜4万円</td><td class="kubun">材工共</td><td class="note">パイプファン・小型埋込形</td></tr>
+          <tr class="gaichuu"><td>レンジフード交換（プロペラ）</td><td class="unit">式</td><td class="price-range">5万〜8万円</td><td class="kubun">材工共</td><td class="note">キッチン用。シンプルな交換</td></tr>
+          <tr class="gaichuu"><td>レンジフード交換（シロッコ）</td><td class="unit">式</td><td class="price-range">9万〜18万円</td><td class="kubun">材工共</td><td class="note">ノンフィルター・自動洗浄モデル等</td></tr>
+          <tr class="gaichuu"><td>第3種換気システム（1棟）</td><td class="unit">式</td><td class="price-range">15万〜25万円</td><td class="kubun">材工共</td><td class="note">自然給気＋機械排気の標準</td></tr>
+          <tr class="gaichuu"><td>第1種換気（全熱交換器）</td><td class="unit">式</td><td class="price-range">40万〜70万円</td><td class="kubun">材工共</td><td class="note">住宅用。ロスナイ等。ダクト配管込</td></tr>
+          <tr class="gaichuu"><td>アルミフレキダクト（100φ）</td><td class="unit">m</td><td class="price-range">2,500〜4,000円</td><td class="kubun">材工共</td><td class="note">材料＋吊り込み手間</td></tr>
+          <tr class="gaichuu"><td>ベントキャップ（外壁ガラリ）</td><td class="unit">個</td><td class="price-range">5,000〜8,000円</td><td class="kubun">材工共</td><td class="note">ステンレス製。取付・防水処理込</td></tr>
         </tbody>
       </table>
     </div>
@@ -388,7 +649,7 @@
 
   <div class="page-footer">
     株式会社アート・レイズ｜大分県別府市上原町13番25号｜TEL 0977-21-0603<br>
-    改訂履歴：2026-03-14 ver.1 初版　／　2026-03-15 ver.1 Googleドキュメントに移行
+    改訂履歴：2026-03-14 ver.1 初版　／　2026-03-15 ver.1 Googleドキュメントに移行　／　2026-03-19 ver.2 工事別単価マスター_九州2026.xlsx全11シート反映・新規工種追加
   </div>
 
 </div>
