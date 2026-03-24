@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>注文書 - 株式会社アート・レイズ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;700&family=Noto+Sans+JP:wght@300;400;500;700&family=Shippori+Mincho:wght@400;600;700&display=swap');
+
+  /* ===== 見積書と共通カラー設計 =====
+     文字：黒（#111）
+     帯・テーブルヘッダー：グレー（#555）→ 白抜き文字
+     合計最終行・金額ボックス：ダークグレー（#444）→ 白抜き文字
+     小計行：薄グレー（#e8e8e8）→ 黒文字
+     偶数行：極薄グレー（#f4f4f4）→ 黒文字
+  ================================ */
+  :root {
+    --text:        #111111;
+    --text-sub:    #444444;
+    --white:       #ffffff;
+    --band:        #555555;
+    --band-dark:   #444444;
+    --band-mid:    #666666;
+    --subtotal-bg: #e8e8e8;
+    --even:        #f4f4f4;
+    --border:      #bbbbbb;
+    --border-dark: #888888;
+    --light:       #f8f8f8;
+  }
+
+  @page { margin: 0; size: A4; }
+
+  * {
+    margin: 0; padding: 0; box-sizing: border-box;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #e0e0e0;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    background: var(--white);
+    padding: 13mm 15mm;
+
+  }
+
+  @media screen {
+    .page { margin-bottom: 24px; box-shadow: 0 2px 16px rgba(0,0,0,.18); }
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; padding: 11mm 13mm; box-shadow: none; }
+  }
+
+  .header-left{position:relative;display:inline-block;}
+  .kakuin{width:20mm;height:20mm;position:absolute;top:6px;right:-10mm;}
+  /* ===== ヘッダー ===== */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 3px solid var(--text);
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+  }
+
+  .company-name {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.06em;
+    line-height: 1.3;
+  }
+  .company-name .co-prefix {
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+  }
+
+  .company-info {
+    font-size: 11.5px;
+    color: var(--text-sub);
+    margin-top: 5px;
+    line-height: 1.9;
+  }
+
+  .doc-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.18em;
+    text-align: right;
+  }
+
+  .doc-meta {
+    font-size: 11.5px;
+    color: var(--text-sub);
+    text-align: right;
+    margin-top: 6px;
+    line-height: 2;
+  }
+
+  /* ===== 宛先エリア ===== */
+  .info-section { margin-bottom: 14px; }
+
+  .vendor-name {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 23px;
+    font-weight: 600;
+    color: var(--text);
+    border-bottom: 2px solid var(--text);
+    padding-bottom: 4px;
+    padding-right: 50px;
+    min-width: 200px;
+    display: inline-block;
+  }
+
+  .vendor-sub {
+    font-size: 12px;
+    color: var(--text-sub);
+    margin-top: 6px;
+  }
+
+  /* ===== 工事概要帯：グレー＋白抜き ===== */
+  .project-band {
+    background: var(--band) !important;
+    border-left: 5px solid var(--text);
+    padding: 8px 14px;
+    margin-bottom: 14px;
+    font-size: 12.5px;
+    color: var(--white) !important;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 28px;
+  }
+  .band-label { color: #dddddd !important; margin-right: 4px; }
+
+  /* ===== 発注金額ボックス：ダークグレー＋白抜き ===== */
+  .amount-box {
+    background: var(--band-dark) !important;
+    color: var(--white) !important;
+    padding: 12px 20px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 3px;
+  }
+  .amount-box .a-label {
+    font-size: 12px;
+    color: #e0e0e0 !important;
+    letter-spacing: 0.08em;
+  }
+  .amount-box .a-note {
+    font-size: 11px;
+    color: #e0e0e0 !important;
+    margin-top: 3px;
+  }
+  .amount-box .a-amount {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--white) !important;
+    letter-spacing: 0.04em;
+  }
+
+  /* ===== セクションタイトル ===== */
+  .section-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    border-bottom: 2px solid var(--text);
+    padding-bottom: 4px;
+    margin-bottom: 10px;
+    letter-spacing: 0.08em;
+  }
+
+  /* ===== 発注内容テーブル ===== */
+  .order-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border-dark);
+  }
+  .order-table thead th {
+    background: var(--band) !important;
+    color: var(--white) !important;
+    padding: 9px 10px;
+    font-weight: 700;
+    font-size: 12.5px;
+    text-align: center;
+    letter-spacing: 0.04em;
+    border-right: 1px solid var(--band-mid);
+  }
+  .order-table thead th:first-child { text-align: left; }
+  .order-table tbody tr { border-bottom: 1px solid var(--border); }
+  .order-table tbody tr:nth-child(even) { background: var(--even) !important; }
+  .order-table tbody td {
+    padding: 10px 10px;
+    vertical-align: middle;
+    color: var(--text);
+    border-right: 1px solid var(--border);
+    height: 38px;
+  }
+  .order-table tbody td:first-child { text-align: left; }
+  .order-table tbody td:not(:first-child) { text-align: right; }
+
+  /* ===== 合計ブロック ===== */
+  .totals-wrap {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+    margin-bottom: 18px;
+  }
+  .totals-table {
+    width: 320px;
+    border-collapse: collapse;
+    font-size: 13px;
+    border: 1px solid var(--border-dark);
+  }
+  .totals-table td {
+    padding: 7px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .totals-table td:last-child { text-align: right; }
+
+  /* 税込合計行：ダークグレー＋白抜き */
+  .totals-table .t-final { background: var(--band-dark) !important; }
+  .totals-table .t-final td {
+    padding: 11px 14px;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--white) !important;
+    border-bottom: none;
+  }
+
+  /* ===== 支払条件・特記事項 ===== */
+  .conditions {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .condition-box {
+    flex: 1;
+    border: 1px solid var(--border-dark);
+    border-radius: 3px;
+    padding: 10px 12px;
+    background: var(--light);
+  }
+  .condition-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 5px;
+    margin-bottom: 7px;
+    letter-spacing: 0.08em;
+  }
+  .condition-body {
+    font-size: 12px;
+    color: var(--text-sub);
+    line-height: 2;
+  }
+
+  /* ===== フッター ===== */
+  .footer {
+    margin-top: 16px;
+    border-top: 1px solid var(--border-dark);
+    padding-top: 8px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-sub);
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="header-left">
+      <div>
+        <div class="company-name"><span class="co-prefix">株式会社</span>アート・レイズ</div>
+        <div class="company-info">
+          〒874-0829　大分県別府市上原町13番25号<br>
+          TEL　0977-21-0603　　担当：亀井
+        </div>
+      </div>
+      <img class="kakuin" src="data:image/png;base64,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" alt="角印">
+    </div>
+    <div>
+      <div class="doc-title">注 文 書</div>
+      <div class="doc-meta">
+        注文番号：<br>
+        発行日：<br>
+        工期：
+      </div>
+    </div>
+  </div>
+
+  <!-- 宛先 -->
+  <div class="info-section">
+    <div class="vendor-name">　　　　　　　　　　　　　　　　　殿</div>
+    <div class="vendor-sub">担当者：</div>
+  </div>
+
+  <!-- 工事概要帯 -->
+  <div class="project-band">
+    <span><span class="band-label">工事件名：</span></span>
+    <span><span class="band-label">施工場所：</span></span>
+    <span><span class="band-label">工期：</span></span>
+  </div>
+
+  <!-- 発注金額 -->
+  <div class="amount-box">
+    <div>
+      <div class="a-label">発 注 金 額（税込）</div>
+      <div class="a-note">消費税（10%）¥　　　含む</div>
+    </div>
+    <div class="a-amount">¥</div>
+  </div>
+
+  <!-- 発注内容 -->
+  <div class="section-title">■ 発注内容</div>
+  <table class="order-table">
+    <thead>
+      <tr>
+        <th style="width:42%">作業内容</th>
+        <th style="width:10%">数量</th>
+        <th style="width:8%">単位</th>
+        <th style="width:18%">単価</th>
+        <th style="width:14%">金額</th>
+        <th style="width:8%">区分</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table>
+
+  <!-- 合計 -->
+  <div class="totals-wrap">
+    <table class="totals-table">
+      <tr><td>小　計</td><td>¥</td></tr>
+      <tr><td>消費税（10%）</td><td>¥</td></tr>
+      <tr class="t-final"><td>税込合計</td><td>¥</td></tr>
+    </table>
+  </div>
+
+  <!-- 支払条件・特記事項 -->
+  <div class="conditions">
+    <div class="condition-box">
+      <div class="condition-title">支 払 条 件</div>
+      <div class="condition-body">
+        締め日：月末締め<br>
+        支払日：翌月末払い<br>
+        支払方法：銀行振込
+      </div>
+    </div>
+    <div class="condition-box">
+      <div class="condition-title">特 記 事 項</div>
+      <div class="condition-body">
+        ・材料支給の場合は別途連絡します。<br>
+        ・作業前に現場責任者へ報告をお願いします。
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>上記の通り注文いたします。ご確認のほどよろしくお願いいたします。</div>
+    <div>株式会社アート・レイズ　© 2026</div>
+  </div>
+
+</div>
+</body>
+</html>

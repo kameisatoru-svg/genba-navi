@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>工事請負契約書 - 株式会社アート・レイズ</title>
+<style>
+  :root {
+    --text:#111111;--text-sub:#444444;--white:#ffffff;
+    --band:#555555;--band-dark:#444444;--band-mid:#666666;
+    --even:#f4f4f4;--border:#bbbbbb;--border-dark:#888888;--light:#f8f8f8;
+  }
+  @page{margin:0;size:A4;}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important;}
+  body{font-family:"Meiryo","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;background:#e0e0e0;color:var(--text);font-size:12px;line-height:1.7;}
+  .page{width:210mm;min-height:297mm;margin:0 auto;background:var(--white);padding:12mm 15mm 10mm;}
+  @media screen{.page{margin-bottom:24px;box-shadow:0 2px 16px rgba(0,0,0,.18);}}
+  @media print{body{background:#fff;}.page{margin:0;padding:11mm 13mm 9mm;box-shadow:none;}}
+
+  /* ヘッダー：印紙欄は右端より1cm内側 */
+  .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid var(--text);padding-bottom:8px;margin-bottom:11px;}
+  .doc-title{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:25px;font-weight:700;letter-spacing:0.22em;margin-top:8px;}
+  .doc-no{font-size:11px;color:var(--text-sub);margin-top:5px;line-height:2;}
+  /* 右端より約1cm内側に配置するためmargin-rightを設定 */
+  .stamp-header{width:86px;height:86px;border:1px dashed var(--border-dark);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;margin-right:10mm;}
+  .stamp-header-label{font-size:9px;color:var(--text-sub);text-align:center;line-height:1.8;}
+
+  /* リード文 */
+  .parties-intro{font-size:12px;line-height:1.85;margin-bottom:9px;}
+
+  /* 工事概要テーブル */
+  .overview-table{width:100%;border-collapse:collapse;margin-bottom:11px;font-size:12px;}
+  .overview-table th{background:var(--band-dark)!important;color:var(--white)!important;padding:6px 13px;font-weight:600;text-align:left;white-space:nowrap;border:1px solid var(--band-mid);width:22%;}
+  .overview-table td{padding:6px 13px;border:1px solid var(--border-dark);background:var(--white)!important;color:var(--text);}
+  .overview-table tr:nth-child(even) td{background:var(--even)!important;}
+  .overview-table .amount-row td{font-weight:700;font-size:13px;}
+  .overview-table .amount-row td .tax-note{font-size:10.5px;font-weight:400;color:var(--text-sub);margin-left:10px;font-family:"Meiryo","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;}
+
+  /* 条項 */
+  .section-title{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:12.5px;font-weight:700;color:var(--text);border-bottom:2px solid var(--text);padding-bottom:3px;margin-bottom:7px;letter-spacing:0.08em;}
+  .articles{margin-bottom:11px;}
+  .article{margin-bottom:5px;font-size:11.5px;line-height:1.75;}
+  .article-num{font-weight:700;margin-right:3px;}
+
+  /* 支払い条件テーブル */
+  .payment-table{width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:11px;}
+  .payment-table th{background:var(--band)!important;color:var(--white)!important;padding:5px 10px;font-weight:600;text-align:center;border:1px solid var(--band-mid);}
+  .payment-table td{padding:5px 10px;border:1px solid var(--border-dark);text-align:center;}
+  .payment-table tr:nth-child(even) td{background:var(--even)!important;}
+
+  /* 署名欄 */
+  .sign-section{margin-top:11px;}
+  .sign-intro{font-size:11.5px;margin-bottom:9px;line-height:1.75;}
+  .sign-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;}
+  .sign-box{border:1px solid var(--border-dark);padding:11px 13px;border-radius:2px;}
+  .sign-box-title{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:12px;font-weight:700;background:var(--band-dark)!important;color:var(--white)!important;padding:4px 10px;margin:-11px -13px 9px;letter-spacing:0.06em;}
+  .sign-row{display:flex;align-items:flex-end;margin-bottom:7px;font-size:11px;}
+  .sign-label{color:var(--text-sub);min-width:46px;font-size:10.5px;flex-shrink:0;}
+  .sign-line{flex:1;border-bottom:1px solid var(--border-dark);min-height:19px;margin-left:7px;}
+  .sign-name-block{display:flex;align-items:stretch;gap:7px;}
+  .sign-name-rows{flex:1;display:flex;flex-direction:column;gap:7px;}
+  .sign-name-row{display:flex;align-items:flex-end;}
+  .sign-name-label{color:var(--text-sub);min-width:46px;font-size:10.5px;flex-shrink:0;}
+  .sign-name-line{flex:1;border-bottom:1px solid var(--border-dark);min-height:19px;margin-left:7px;font-size:10.5px;padding-bottom:1px;}
+  .seal-text{font-size:11px;color:var(--text-sub);display:flex;align-items:center;padding-bottom:1px;}
+
+  /* フッター */
+  .footer{margin-top:9px;border-top:1px solid var(--border-dark);padding-top:5px;display:flex;justify-content:flex-end;font-size:9.5px;color:var(--text-sub);}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ヘッダー -->
+  <div class="header">
+    <div>
+      <div class="doc-title">工事請負契約書</div>
+      <div class="doc-no">
+        契約番号：<!-- ★ 例: AR-2026-0004 --><br>
+        契約日：令和　　年　　月　　日
+      </div>
+    </div>
+    <div class="stamp-header">
+      <div class="stamp-header-label">収　入<br>印　紙<br>貼付欄</div>
+    </div>
+  </div>
+
+  <!-- 工事概要 -->
+  <div class="parties-intro">
+    発注者　　　　　　　　　　　　　　　　　　　　　　（以下「甲」という）と<br>
+    受注者　株式会社アート・レイズ　　　　　　　　　　　（以下「乙」という）は、<br>
+    下記の工事について合意の上、この工事請負契約を締結する。
+  </div>
+
+  <table class="overview-table">
+    <tr>
+      <th>工　事　件　名</th>
+      <td><!-- ★ --></td>
+    </tr>
+    <tr>
+      <th>施　工　場　所</th>
+      <td><!-- ★ --></td>
+    </tr>
+    <tr class="amount-row">
+      <th>請負金額（税込）</th>
+      <td>¥<!-- ★ --><span class="tax-note">うち消費税（10%）　¥<!-- ★ --></span></td>
+    </tr>
+    <tr>
+      <th>工　　　　　期</th>
+      <td>令和　　年　　月　　日　〜　令和　　年　　月　　日</td>
+    </tr>
+  </table>
+
+  <!-- 契約条項 -->
+  <div class="section-title">■ 契約条項</div>
+  <div class="articles">
+    <div class="article">
+      <span class="article-num">第１条（工事の施工と範囲）</span>
+      乙は甲から上記工事を請け負い、関係法令等の規定を遵守し、誠実に施工する。また、工事の安全管理に十分注意を払い、本工事を設計図書・仕様書に基づき施工し、その対価として上記金額を支払う。
+    </div>
+    <div class="article">
+      <span class="article-num">第２条（工期の変更）</span>
+      天災・悪天候・材料の入手困難その他甲乙双方の責に帰さない事由により工期の延長が必要な場合、甲乙協議の上工期を変更できる。
+    </div>
+    <div class="article">
+      <span class="article-num">第３条（設計変更・追加工事）</span>
+      工事内容の変更または追加が生じた場合は、甲乙書面にて合意の上、請負代金及び工期を変更する。
+    </div>
+    <div class="article">
+      <span class="article-num">第４条（請負代金の支払い）</span>
+      甲は乙に対し、下表の通り請負代金を支払うものとする。支払いは乙の指定する銀行口座への振込とし、振込手数料は甲の負担とする。
+    </div>
+    <div class="article">
+      <span class="article-num">第５条（かし担保）</span>
+      乙は工事完成引渡し後１年間、工事のかし（施工上の瑕疵）について無償で補修する責任を負う。ただし、甲の故意・過失または通常の使用方法によらない損傷を除く。
+    </div>
+    <div class="article">
+      <span class="article-num">第６条（損害賠償）</span>
+      乙の施工上の過失により甲または第三者に損害を与えた場合、乙はその損害を賠償する。
+    </div>
+    <div class="article">
+      <span class="article-num">第７条（契約の解除）</span>
+      甲乙いずれかが本契約に違反し、相当期間内に是正しない場合、相手方は書面により本契約を解除できる。
+    </div>
+    <div class="article">
+      <span class="article-num">第８条（協議）</span>
+      本契約に定めのない事項または疑義が生じた場合は、甲乙誠意をもって協議し解決する。
+    </div>
+  </div>
+
+  <!-- 支払い条件 -->
+  <div class="section-title">■ 支払い条件</div>
+  <table class="payment-table">
+    <thead>
+      <tr>
+        <th style="width:25%">区　分</th>
+        <th style="width:30%">金　額（税込）</th>
+        <th style="width:45%">支　払　時　期</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>前払い金</td>
+        <td>¥<!-- ★ --></td>
+        <td>契約締結後　　　日以内</td>
+      </tr>
+      <tr>
+        <td>完成払い</td>
+        <td>¥<!-- ★ --></td>
+        <td>工事完了・引渡し後　　　日以内</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 署名欄 -->
+  <div class="sign-section">
+    <div class="sign-intro">
+      本契約の成立を証するため、本書２通を作成し、甲乙それぞれ記名押印の上、各１通を保有する。
+    </div>
+    <div class="sign-grid">
+
+      <!-- 発注者（甲） -->
+      <div class="sign-box">
+        <div class="sign-box-title">発注者（甲）</div>
+        <div class="sign-row">
+          <span class="sign-label">住　所</span>
+          <span class="sign-line"></span>
+        </div>
+        <div class="sign-name-block">
+          <div class="sign-name-rows">
+            <div class="sign-name-row">
+              <span class="sign-name-label">会社名</span>
+              <span class="sign-name-line"></span>
+            </div>
+            <div class="sign-name-row">
+              <span class="sign-name-label">氏　名</span>
+              <span class="sign-name-line"></span>
+            </div>
+          </div>
+          <span class="seal-text">印</span>
+        </div>
+      </div>
+
+      <!-- 受注者（乙） -->
+      <div class="sign-box">
+        <div class="sign-box-title">受注者（乙）</div>
+        <div class="sign-row">
+          <span class="sign-label">住　所</span>
+          <span class="sign-line" style="font-size:10.5px;padding-bottom:1px;">大分県別府市上原町13番25号</span>
+        </div>
+        <div class="sign-name-block">
+          <div class="sign-name-rows">
+            <div class="sign-name-row">
+              <span class="sign-name-label">会社名</span>
+              <span class="sign-name-line">株式会社アート・レイズ</span>
+            </div>
+            <div class="sign-name-row">
+              <span class="sign-name-label">氏　名</span>
+              <span class="sign-name-line">代表取締役　亀井 悟</span>
+            </div>
+          </div>
+          <span class="seal-text">印</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>株式会社アート・レイズ　© 2026</div>
+  </div>
+
+</div>
+</body>
+</html>

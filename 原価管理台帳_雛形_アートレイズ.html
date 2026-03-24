@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>原価管理台帳 - 株式会社アート・レイズ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;700&family=Noto+Sans+JP:wght@300;400;500;700&family=Shippori+Mincho:wght@400;600;700&display=swap');
+
+  :root {
+    --text:        #111111;
+    --text-sub:    #444444;
+    --white:       #ffffff;
+    --band-dark:   #444444;
+    --even:        #f4f4f4;
+    --border:      #bbbbbb;
+    --border-dark: #888888;
+    --light:       #f8f8f8;
+  }
+
+  @page { margin: 0; size: A4; }
+
+  * {
+    margin: 0; padding: 0; box-sizing: border-box;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #e0e0e0;
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    background: var(--white);
+    padding: 12mm 14mm;
+  }
+
+  @media screen {
+    .page { margin-bottom: 24px; box-shadow: 0 2px 16px rgba(0,0,0,.18); }
+  }
+  @media print {
+    body { background: #fff; }
+    .no-print { display: none !important; }
+    .page { margin: 0; padding: 10mm 12mm; box-shadow: none; }
+  }
+
+  /* ヘッダー */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 3px solid var(--text);
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+  }
+  .company-name {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 19px; font-weight: 700; letter-spacing: 0.06em;
+  }
+  .company-name .co-prefix { font-size: 12px; font-weight: 400; }
+  .company-info { font-size: 10.5px; color: var(--text-sub); margin-top: 4px; line-height: 1.9; }
+  .doc-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 24px; font-weight: 700; letter-spacing: 0.18em; text-align: right;
+  }
+  .doc-meta { font-size: 11px; color: var(--text-sub); text-align: right; margin-top: 6px; line-height: 2; }
+
+  /* 案件情報 */
+  .project-info {
+    background: var(--light);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 24px;
+  }
+  .pi-item { display: flex; align-items: baseline; gap: 8px; }
+  .pi-label { font-size: 11px; font-weight: 700; color: var(--text-sub); white-space: nowrap; min-width: 72px; }
+  .pi-value { font-size: 13px; }
+  .pi-full { grid-column: 1 / -1; }
+
+  /* セクションタイトル */
+  .sec-title {
+    background: var(--band-dark); color: var(--white);
+    font-size: 12px; font-weight: 700;
+    padding: 5px 12px; letter-spacing: 0.06em;
+  }
+
+  /* 共通テーブル */
+  table { width: 100%; border-collapse: collapse; font-size: 12px; border: 1px solid var(--border); margin-bottom: 14px; }
+  th { background: var(--band-dark); color: var(--white); padding: 6px 10px; font-weight: 700; font-size: 11px; text-align: left; }
+  th.right, td.right { text-align: right; }
+  th.center, td.center { text-align: center; }
+  td { padding: 6px 10px; border-bottom: 1px solid var(--border); }
+  tr:nth-child(even) td { background: var(--even); }
+  tr:last-child td { border-bottom: none; }
+  tr.cat td { background: #ddd; font-weight: 700; font-size: 11px; color: var(--text-sub); padding: 4px 10px; }
+  tr.subtotal td { background: #e8e8e8; font-weight: 700; border-top: 1px solid var(--border-dark); }
+  td.indent { padding-left: 20px; }
+  td.note-cell { color: var(--text-sub); font-size: 11px; }
+
+  /* 粗利サマリー */
+  .profit-wrap { display: flex; gap: 16px; margin-bottom: 14px; align-items: stretch; }
+  .profit-table { width: 280px; flex-shrink: 0; margin-bottom: 0; }
+  .profit-table td { padding: 7px 14px; }
+  tr.profit-row td { background: #e8f4ff; font-weight: 700; color: #1a3a7a; }
+  tr.loss-row td { background: #fff0f0; font-weight: 700; color: #7a1a1a; }
+  tr.grand-total td { background: var(--band-dark); color: var(--white); font-weight: 700; font-size: 13px; }
+
+  .profit-rate-box {
+    flex: 1; border: 2px solid var(--band-dark); border-radius: 6px;
+    padding: 12px 16px; text-align: center; display: flex; flex-direction: column; justify-content: center;
+  }
+  .profit-rate-label { font-size: 11px; color: var(--text-sub); font-weight: 700; margin-bottom: 6px; }
+  .profit-rate-num { font-size: 40px; font-weight: 700; color: var(--band-dark); line-height: 1.1; }
+  .profit-rate-sub { font-size: 11px; color: var(--text-sub); margin-top: 8px; line-height: 1.9; text-align: left; }
+
+  /* 備考 */
+  .note-label { font-size: 11px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .note-box {
+    border: 1px solid var(--border); border-radius: 4px;
+    padding: 8px 12px; font-size: 11px; color: var(--text-sub);
+    line-height: 1.8; min-height: 48px;
+  }
+
+  /* 印刷ボタン */
+  .print-btn {
+    display: block; margin: 0 auto 20px; padding: 10px 32px;
+    background: var(--band-dark); color: var(--white); border: none;
+    border-radius: 4px; font-size: 14px; font-family: inherit; cursor: pointer; font-weight: 700;
+  }
+  .print-btn:hover { opacity: 0.85; }
+</style>
+</head>
+<body>
+
+<div class="no-print" style="text-align:center;padding:16px;">
+  <button class="print-btn" onclick="window.print()">🖨️ 印刷 / PDF保存</button>
+</div>
+
+<div class="page">
+
+  <!-- ヘッダー -->
+  <div class="header">
+    <div>
+      <div class="company-name"><span class="co-prefix">株式会社</span>アート・レイズ</div>
+      <div class="company-info">
+        〒874-0829　大分県別府市上原町13番25号<br>
+        TEL 0977-21-0603　担当：亀井 悟
+      </div>
+    </div>
+    <div>
+      <div class="doc-title">原価管理台帳</div>
+      <div class="doc-meta">
+        <!-- ★ -->作成日：令和　　年　　月　　日<br>
+        <!-- ★ -->案件番号：AR-2026-
+      </div>
+    </div>
+  </div>
+
+  <!-- 案件情報 -->
+  <div class="project-info">
+    <div class="pi-item pi-full">
+      <span class="pi-label">工事件名</span>
+      <!-- ★ --><span class="pi-value"></span>
+    </div>
+    <div class="pi-item">
+      <span class="pi-label">顧客名</span>
+      <!-- ★ --><span class="pi-value"></span>
+    </div>
+    <div class="pi-item">
+      <span class="pi-label">施工場所</span>
+      <!-- ★ --><span class="pi-value"></span>
+    </div>
+    <div class="pi-item">
+      <span class="pi-label">契約日</span>
+      <!-- ★ --><span class="pi-value">令和　　年　　月　　日</span>
+    </div>
+    <div class="pi-item">
+      <span class="pi-label">完了日</span>
+      <!-- ★ --><span class="pi-value">令和　　年　　月　　日</span>
+    </div>
+  </div>
+
+  <!-- 売上 -->
+  <div class="sec-title">■ 売上</div>
+  <table>
+    <thead>
+      <tr><th style="width:45%">項目</th><th class="right" style="width:25%">金額（税抜）</th><th>備考</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>受注金額</td>
+        <!-- ★ --><td class="right">¥</td>
+        <td class="note-cell">見積書基準</td>
+      </tr>
+      <tr>
+        <td>請求金額</td>
+        <!-- ★ --><td class="right">¥</td>
+        <td class="note-cell"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 工事原価 -->
+  <div class="sec-title">■ 工事原価</div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:28%">項目・業者名</th>
+        <th class="center" style="width:14%">人工／数量</th>
+        <th class="right" style="width:16%">単価</th>
+        <th class="right" style="width:16%">金額</th>
+        <th style="width:26%">備考</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- 労務費 -->
+      <tr class="cat"><td colspan="5">労務費　（自社・手配職人）</td></tr>
+      <tr>
+        <!-- ★ --><td class="indent"></td>
+        <!-- ★ --><td class="center">人工</td>
+        <td class="right">¥20,000</td>
+        <!-- ★ --><td class="right">¥</td>
+        <td class="note-cell"></td>
+      </tr>
+      <tr>
+        <!-- ★ --><td class="indent"></td>
+        <!-- ★ --><td class="center">人工</td>
+        <td class="right">¥20,000</td>
+        <!-- ★ --><td class="right">¥</td>
+        <td class="note-cell"></td>
+      </tr>
+      <tr>
+        <!-- ★ --><td class="indent"></td>
+        <!-- ★ --><td class="center">人工</td>
+        <td class="right">¥20,000</td>
+        <!-- ★ --><td class="right">¥</td>
+        <td class="note-cell"></td>
+      </tr>
+      <tr class="subtotal">
+        <td colspan="3">労務費　小計</td>
+        <!-- ★ --><td class="right">¥</td>
+        <td></td>
+      </tr>
+
+      <!-- 材料費 -->
+      <tr class="cat"><td colspan="5">材料費</td></tr>
+      <tr>
+        <!-- ★ --><td class="indent"></td>
+        <!-- ★ --><td class="center"></td>
+        <!-- ★ --><td class="right"></td>
+        <!-- ★ --><td class="right">¥</td>
+        <td class="note-cell"></td>
+      </tr>
+      <tr>
+        <!-- ★ --><td class="indent"></td>
+        <!-- ★ --><td class="center"></td>
+        <!-- ★ --><td class="right"></td>
+        <!-- ★ --><td class="right">¥</td>
+        <td class="note-cell"></td>
+      </tr>
+      <tr>
+        <!-- ★ --><td class="indent"></td>
+        <!-- ★ --><td class="center"></td>
+        <!-- ★ --><td class="right"></td>
+        <!-- ★ --><td class="right">¥</td>
+        <td class="note-cell"></td>
+      </tr>
+      <tr class="subtotal">
+        <td colspan="3">材料費　小計</td>
+        <!-- ★ --><td class="right">¥</td>
+        <td></td>
+      </tr>
+
+      <!-- 外注費 -->
+      <tr class="cat"><td colspan="5">外注費　（業者・職人への発注）</td></tr>
+      <tr>
+        <!-- ★ --><td class="indent"></td>
+        <!-- ★ --><td class="center"></td>
+        <!-- ★ --><td class="right"></td>
+        <!-- ★ --><td class="right">¥</td>
+        <td class="note-cell">材料支給：有・無</td>
+      </tr>
+      <tr>
+        <!-- ★ --><td class="indent"></td>
+        <!-- ★ --><td class="center"></td>
+        <!-- ★ --><td class="right"></td>
+        <!-- ★ --><td class="right">¥</td>
+        <td class="note-cell">材料支給：有・無</td>
+      </tr>
+      <tr>
+        <!-- ★ --><td class="indent"></td>
+        <!-- ★ --><td class="center"></td>
+        <!-- ★ --><td class="right"></td>
+        <!-- ★ --><td class="right">¥</td>
+        <td class="note-cell">材料支給：有・無</td>
+      </tr>
+      <tr>
+        <!-- ★ --><td class="indent"></td>
+        <!-- ★ --><td class="center"></td>
+        <!-- ★ --><td class="right"></td>
+        <!-- ★ --><td class="right">¥</td>
+        <td class="note-cell">材料支給：有・無</td>
+      </tr>
+      <tr class="subtotal">
+        <td colspan="3">外注費　小計</td>
+        <!-- ★ --><td class="right">¥</td>
+        <td></td>
+      </tr>
+
+      <!-- 経費 -->
+      <tr class="cat"><td colspan="5">経費　（交通・宿泊・その他）</td></tr>
+      <tr>
+        <!-- ★ --><td class="indent"></td>
+        <!-- ★ --><td class="center"></td>
+        <!-- ★ --><td class="right"></td>
+        <!-- ★ --><td class="right">¥</td>
+        <td class="note-cell"></td>
+      </tr>
+      <tr>
+        <!-- ★ --><td class="indent"></td>
+        <!-- ★ --><td class="center"></td>
+        <!-- ★ --><td class="right"></td>
+        <!-- ★ --><td class="right">¥</td>
+        <td class="note-cell"></td>
+      </tr>
+      <tr class="subtotal">
+        <td colspan="3">経費　小計</td>
+        <!-- ★ --><td class="right">¥</td>
+        <td></td>
+      </tr>
+
+    </tbody>
+  </table>
+
+  <!-- 粗利サマリー -->
+  <div class="profit-wrap">
+    <table class="profit-table">
+      <tr><td>受注金額（税抜）</td><!-- ★ --><td class="right">¥</td></tr>
+      <tr><td>原価合計</td><!-- ★ --><td class="right">¥</td></tr>
+      <tr class="profit-row"><td>粗利</td><!-- ★ --><td class="right">¥</td></tr>
+      <tr class="grand-total"><td>粗利率</td><!-- ★ --><td class="right">％</td></tr>
+    </table>
+    <div class="profit-rate-box">
+      <div class="profit-rate-label">粗　利　率</div>
+      <!-- ★ -->
+      <div class="profit-rate-num">　　　　％</div>
+      <div class="profit-rate-sub">
+        受注金額　¥　　　　　　　<br>
+        原価合計　¥　　　　　　　<br>
+        粗　　利　¥　　　　　　　
+      </div>
+    </div>
+  </div>
+
+  <!-- 備考 -->
+  <div class="note-label">備考・特記事項</div>
+  <div class="note-box"><!-- ★ --></div>
+
+</div>
+</body>
+</html>

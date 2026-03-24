@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>納品書 - 株式会社アート・レイズ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;700&family=Noto+Sans+JP:wght@300;400;500;700&family=Shippori+Mincho:wght@400;600;700&display=swap');
+
+  /* ===== 見積書と共通カラー設計 =====
+     文字：黒（#111）
+     帯・テーブルヘッダー：グレー（#555）→ 白抜き文字
+     合計最終行：ダークグレー（#444）→ 白抜き文字
+     小計行：薄グレー（#e8e8e8）→ 黒文字
+     偶数行：極薄グレー（#f4f4f4）→ 黒文字
+  ================================ */
+  :root {
+    --text:        #111111;
+    --text-sub:    #444444;
+    --white:       #ffffff;
+    --band:        #555555;
+    --band-dark:   #444444;
+    --band-mid:    #666666;
+    --subtotal-bg: #e8e8e8;
+    --even:        #f4f4f4;
+    --border:      #bbbbbb;
+    --border-dark: #888888;
+    --light:       #f8f8f8;
+  }
+
+  @page { margin: 10mm 13mm; size: A4; }
+
+  * {
+    margin: 0; padding: 0; box-sizing: border-box;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #e0e0e0;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  .page {
+    width: 210mm;
+    margin: 0 auto;
+    background: var(--white);
+    padding: 8mm 13mm;
+    page-break-after: always;
+  }
+  .page:last-child { page-break-after: auto; }
+
+  @media screen {
+    .page { margin-bottom: 24px; box-shadow: 0 2px 16px rgba(0,0,0,.18); }
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; padding: 11mm 13mm; box-shadow: none; }
+    .no-print { display: none !important; }
+  }
+
+  /* ヘッダー */
+  .header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    border-bottom: 3px solid var(--text);
+    padding-bottom: 8px; margin-bottom: 10px;
+  }
+  .company-name {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: 0.06em;
+  }
+  .co-prefix { font-size: 13px; font-weight: 400; margin-right: 2px; }
+  .company-info { font-size: 11.5px; color: var(--text-sub); margin-top: 5px; line-height: 1.9; }
+  .doc-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 28px; font-weight: 700; color: var(--text);
+    letter-spacing: 0.18em; text-align: right;
+  }
+  .doc-meta { font-size: 11.5px; color: var(--text-sub); text-align: right; margin-top: 6px; line-height: 2; }
+
+  /* 顧客・金額エリア */
+  .info-section {
+    display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px;
+  }
+  .client-name {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 23px; font-weight: 600; color: var(--text);
+    border-bottom: 2px solid var(--text);
+    padding-bottom: 4px; padding-right: 50px; min-width: 200px;
+  }
+  .site-name { font-size: 12px; color: var(--text-sub); margin-top: 6px; }
+
+  /* 金額ボックス */
+  .summary-box {
+    background: var(--band) !important; color: var(--white) !important;
+    padding: 12px 22px; border-radius: 3px; text-align: right;
+  }
+  .summary-box .s-label { font-size: 11px; color: #e0e0e0 !important; letter-spacing: 0.08em; }
+  .summary-box .total-amount {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 28px; font-weight: 700; color: var(--white) !important;
+    margin-top: 2px; letter-spacing: 0.04em;
+  }
+  .summary-box .tax-note { font-size: 11px; color: #e0e0e0 !important; margin-top: 3px; }
+
+  /* 工事概要帯 */
+  .project-band {
+    background: var(--band) !important;
+    border-left: 5px solid var(--text);
+    padding: 7px 14px; margin-bottom: 10px;
+    font-size: 12.5px; color: var(--white) !important;
+    display: flex; flex-wrap: wrap; gap: 4px 28px;
+  }
+  .band-label { color: #dddddd !important; margin-right: 4px; }
+
+  /* セクションタイトル */
+  .section-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 14px; font-weight: 600; color: var(--text);
+    border-bottom: 2px solid var(--text);
+    padding-bottom: 4px; margin-bottom: 10px; letter-spacing: 0.08em;
+  }
+
+  /* 納品内容テーブル */
+  .delivery-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 13.5px; margin-bottom: 8px;
+    border: 1px solid var(--border-dark);
+  }
+  .delivery-table thead th {
+    background: var(--band) !important; color: var(--white) !important;
+    padding: 9px 12px; font-weight: 700; font-size: 12.5px;
+    letter-spacing: 0.05em; border-right: 1px solid var(--band-mid);
+  }
+  .delivery-table thead th:first-child { text-align: left; }
+  .delivery-table thead th:not(:first-child) { text-align: right; }
+  .delivery-table tbody tr { border-bottom: 1px solid var(--border); }
+  .delivery-table tbody tr:nth-child(even) { background: var(--even) !important; }
+  .delivery-table tbody td {
+    padding: 7px 12px; vertical-align: middle;
+    color: var(--text); border-right: 1px solid var(--border); height: 30px;
+  }
+  .delivery-table tbody td:first-child { text-align: left; }
+  .delivery-table tbody td:not(:first-child) { text-align: right; }
+
+  /* 合計ブロック */
+  .totals-wrap { display: flex; justify-content: flex-end; margin-top: 8px; margin-bottom: 10px; }
+  .totals-table {
+    width: 320px; border-collapse: collapse; font-size: 13px; border: 1px solid var(--border-dark);
+  }
+  .totals-table td { padding: 7px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+  .totals-table td:last-child { text-align: right; }
+  .totals-table .t-final { background: var(--band-dark) !important; }
+  .totals-table .t-final td {
+    padding: 11px 14px;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 15px; font-weight: 700; color: var(--white) !important; border-bottom: none;
+  }
+
+  /* 備考 */
+  .remarks {
+    border: 1px solid var(--border-dark); border-radius: 3px;
+    padding: 8px 14px; margin-bottom: 8px; background: var(--light);
+  }
+  .remarks-title { font-size: 12.5px; font-weight: 700; color: var(--text); margin-bottom: 5px; letter-spacing: 0.06em; }
+  .remarks ul { list-style: none; font-size: 12px; color: var(--text-sub); line-height: 2.1; }
+  .remarks ul li::before { content: "・"; color: var(--text); }
+
+  /* フッター */
+  .footer {
+    border-top: 1px solid var(--border-dark); padding-top: 8px;
+    display: flex; justify-content: space-between;
+    font-size: 11px; color: var(--text-sub);
+    margin-top: 16px;
+  }
+
+  /* 印刷ボタン */
+  .print-bar { position: fixed; bottom: 20px; right: 20px; z-index: 100; }
+  .btn-print {
+    background: var(--band); color: var(--white); border: none;
+    padding: 12px 28px; border-radius: 6px;
+    font-size: 14px; font-weight: 700;
+    font-family: 'Noto Sans JP', sans-serif;
+    cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+    letter-spacing: 0.05em;
+  }
+  .btn-print:hover { background: var(--band-dark); }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="header">
+    <div>
+      <div class="company-name"><span class="co-prefix">株式会社</span>アート・レイズ</div>
+      <div class="company-info">
+        〒874-0829　大分県別府市上原町13番25号<br>
+        TEL　0977-21-0603　　担当：亀井
+      </div>
+    </div>
+    <div>
+      <div class="doc-title">納 品 書</div>
+      <div class="doc-meta">
+        納品書番号：<br>
+        発行日：<br>
+        納品日：
+      </div>
+    </div>
+  </div>
+
+  <div class="info-section">
+    <div>
+      <div class="client-name">　　　　　　様</div>
+      <div class="site-name">施工場所：</div>
+    </div>
+    <div class="summary-box">
+      <div class="s-label">納 品 金 額（税込）</div>
+      <div class="total-amount">¥</div>
+      <div class="tax-note">消費税（10%）¥　　　含む</div>
+    </div>
+  </div>
+
+  <div class="project-band">
+    <span><span class="band-label">工事件名：</span></span>
+    <span><span class="band-label">施工場所：</span></span>
+    <span><span class="band-label">納品日：</span></span>
+  </div>
+
+  <div class="section-title">■ 納品内容</div>
+  <table class="delivery-table">
+    <thead>
+      <tr>
+        <th style="width:48%">品名・工事名</th>
+        <th style="width:10%">数量</th>
+        <th style="width:8%">単位</th>
+        <th style="width:17%">単価</th>
+        <th style="width:17%">金額（税抜）</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td></td><td></td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table>
+
+  <div class="totals-wrap">
+    <table class="totals-table">
+      <tr><td>小　計</td><td>¥</td></tr>
+      <tr><td>消費税（10%）</td><td>¥</td></tr>
+      <tr class="t-final"><td>税込合計</td><td>¥</td></tr>
+    </table>
+  </div>
+
+  <div class="remarks">
+    <div class="remarks-title">備　考</div>
+    <ul>
+      <li>上記の通り納品いたしましたのでご確認ください。</li>
+      <li></li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    <div>株式会社アート・レイズ　© 2026</div>
+  </div>
+
+</div>
+
+<div class="print-bar no-print">
+  <button class="btn-print" onclick="window.print()">🖨　印刷 / PDF保存</button>
+</div>
+
+</body>
+</html>

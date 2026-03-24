@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>原価管理台帳｜株式会社アート・レイズ</title>
+<title>案件台帳｜株式会社アート・レイズ</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --band: #555;
+    --band-mid: #777;
     --light: #f8f8f8;
     --border: #ddd;
     --border-dark: #aaa;
@@ -15,8 +16,7 @@
     --text-sub: #666;
     --white: #fff;
     --accent: #2563eb;
-    --green: #16a34a;
-    --red: #dc2626;
+    --even: #f5f5f5;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -27,7 +27,6 @@
   }
   .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
 
-  /* ページヘッダー */
   .page-header {
     background: var(--band);
     color: var(--white);
@@ -40,7 +39,6 @@
   .page-header h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.05em; }
   .page-header .meta { font-size: 12px; opacity: 0.8; text-align: right; }
 
-  /* 統計バー */
   .stats-bar {
     background: var(--white);
     border: 1px solid var(--border);
@@ -52,10 +50,8 @@
   }
   .stat-item { text-align: center; }
   .stat-num { font-size: 24px; font-weight: 700; color: var(--band); }
-  .stat-num.green { color: var(--green); }
   .stat-label { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
 
-  /* 検索バー */
   .search-bar {
     background: var(--white);
     border: 1px solid var(--border);
@@ -74,8 +70,8 @@
   }
   .search-bar input:focus { outline: none; border-color: var(--accent); }
 
-  /* 原価カード */
-  .cost-card {
+  /* 案件カード */
+  .project-card {
     background: var(--white);
     border: 1px solid var(--border);
     border-radius: 6px;
@@ -83,164 +79,144 @@
     overflow: hidden;
   }
   .card-header {
-    background: #444444;
-    color: var(--white);
-    padding: 10px 16px;
+    background: var(--light);
+    border-bottom: 2px solid var(--band);
+    padding: 12px 18px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 12px;
     flex-wrap: wrap;
+    gap: 8px;
   }
   .card-header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .case-id {
-    font-size: 12px; font-weight: 700;
-    background: rgba(255,255,255,0.2);
-    padding: 2px 8px; border-radius: 4px;
-    letter-spacing: 0.05em; white-space: nowrap;
-  }
-  .case-name { font-size: 14px; font-weight: 700; }
-
-  /* 粗利率バッジ */
-  .rate-badge {
-    font-size: 13px; font-weight: 700;
-    padding: 4px 12px; border-radius: 12px;
-    white-space: nowrap;
-  }
-  .rate-high { background: #dcfce7; color: #15803d; }
-  .rate-mid  { background: #fef9c3; color: #854d0e; }
-  .rate-low  { background: #fee2e2; color: #991b1b; }
-
-  .card-body { padding: 16px; }
-
-  /* 情報グリッド */
-  .info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 10px 20px;
-    margin-bottom: 16px;
-  }
-  .info-item { display: flex; flex-direction: column; gap: 2px; }
-  .info-label { font-size: 11px; color: var(--text-sub); font-weight: 700; }
-  .info-value { font-size: 13px; color: var(--text); }
-  .amount-value { font-size: 15px; font-weight: 700; color: #1e40af; }
-  .profit-value { font-size: 15px; font-weight: 700; color: var(--green); }
-
-  /* 原価サマリーバー */
-  .cost-summary {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 14px;
-    flex-wrap: wrap;
-  }
-  .cost-summary-item {
-    flex: 1;
-    min-width: 120px;
-    background: var(--light);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 8px 12px;
-    text-align: center;
-  }
-  .cost-summary-label { font-size: 10px; color: var(--text-sub); font-weight: 700; margin-bottom: 3px; }
-  .cost-summary-val { font-size: 13px; font-weight: 700; color: var(--text); }
-
-  /* 明細トグル */
-  .meisai-toggle {
-    background: none;
-    border: 1px solid var(--border-dark);
-    border-radius: 4px;
-    padding: 5px 12px;
+  .project-id {
     font-size: 12px;
-    font-family: inherit;
-    cursor: pointer;
-    color: var(--text-sub);
-    margin-bottom: 10px;
-  }
-  .meisai-toggle:hover { background: var(--light); }
-  .meisai-wrap { display: none; }
-  .meisai-wrap.open { display: block; }
-
-  /* 明細テーブル */
-  .meisai-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-    margin-bottom: 8px;
-    border: 1px solid var(--border);
-  }
-  .meisai-table th {
-    background: #444444;
+    font-weight: 700;
+    background: var(--band);
     color: var(--white);
-    padding: 6px 10px;
-    text-align: left;
+    padding: 3px 10px;
+    border-radius: 3px;
+  }
+  .project-name { font-size: 16px; font-weight: 700; }
+
+  /* ステータスバッジ */
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
     font-weight: 700;
   }
-  .meisai-table th.right,
-  .meisai-table td.right { text-align: right; }
-  .meisai-table th.center,
-  .meisai-table td.center { text-align: center; }
-  .meisai-table td { padding: 6px 10px; border-bottom: 1px solid var(--border); }
-  .meisai-table tr:nth-child(even) td { background: #f5f5f5; }
-  .meisai-table tr:last-child td { border-bottom: none; }
-  .meisai-table tr.cat-row td {
-    background: #e0e0e0; font-weight: 700;
-    font-size: 11px; color: var(--text-sub); padding: 4px 10px;
-  }
-  .meisai-table tr.subtotal-row td {
-    background: #ebebeb; font-weight: 700;
-    border-top: 1px solid var(--border-dark);
-  }
-  td.indent { padding-left: 20px; }
-  td.note-cell { color: var(--text-sub); font-size: 11px; }
+  .badge-juchu { background: #dcfce7; color: #15803d; }
+  .badge-mitumori { background: #dbeafe; color: #1d4ed8; }
+  .badge-kanryo { background: #f3f4f6; color: #6b7280; }
+  .badge-mihai { background: #fef9c3; color: #854d0e; }
 
-  /* 粗利テーブル */
-  .totals-table {
-    width: 320px;
-    margin-left: auto;
-    border-collapse: collapse;
-    font-size: 13px;
+  .card-body { padding: 16px 18px; }
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px 24px;
+    margin-bottom: 14px;
+  }
+  .info-item { display: flex; flex-direction: column; gap: 3px; }
+  .info-label { font-size: 11px; color: var(--text-sub); font-weight: 700; letter-spacing: 0.04em; }
+  .info-value { font-size: 14px; color: var(--text); }
+
+  /* 金額ハイライト */
+  .amount-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--band);
+  }
+
+  /* 工程バー */
+  .process-bar {
+    display: flex;
+    gap: 6px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .process-step {
+    flex: 1;
+    min-width: 80px;
+    text-align: center;
+    padding: 7px 4px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
     border: 1px solid var(--border);
-    margin-top: 8px;
-  }
-  .totals-table td { padding: 6px 14px; border-bottom: 1px solid var(--border); }
-  .totals-table td:last-child { text-align: right; }
-  .totals-table tr.profit-row td { background: #e8f4ff; font-weight: 700; color: #1a3a7a; }
-  .totals-table tr:last-child td {
-    background: #444444; color: var(--white);
-    font-weight: 700; font-size: 14px; border-bottom: none;
-  }
-
-  /* メモ */
-  .note-box {
-    background: #fafafa;
-    border-left: 3px solid #d1d5db;
-    padding: 10px 14px;
-    font-size: 12px;
+    background: var(--light);
     color: var(--text-sub);
-    border-radius: 0 4px 4px 0;
-    margin-top: 12px;
-    line-height: 1.7;
   }
-  .note-label { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 11px; }
+  .process-step.done { background: var(--band); color: var(--white); border-color: var(--band); }
+  .process-step.current { background: #2563eb; color: var(--white); border-color: #2563eb; }
+  .process-step.pending { background: #fef9c3; color: #854d0e; border-color: #fde68a; }
+
+  .note-box {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: #fffbeb;
+    border-left: 3px solid #f59e0b;
+    border-radius: 0 4px 4px 0;
+    font-size: 13px;
+    color: var(--text);
+  }
+  .note-label { font-size: 11px; color: #92400e; font-weight: 700; margin-bottom: 4px; }
 
   .add-row {
-    background: var(--white);
-    border: 2px dashed var(--border-dark);
+    background: var(--light);
+    border: 1px dashed var(--border-dark);
     border-radius: 6px;
-    padding: 16px;
+    padding: 18px;
     text-align: center;
     color: var(--text-sub);
     font-size: 13px;
-    margin-bottom: 20px;
+    margin-bottom: 14px;
   }
+
+  /* 書類ボタンエリア */
+  .doc-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .doc-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: opacity 0.15s;
+  }
+  .doc-btn:hover { opacity: 0.85; }
+  .doc-btn.active { background: #2563eb; color: #fff; }
+  .doc-btn.inactive { background: #e5e7eb; color: #9ca3af; cursor: default; pointer-events: none; }
+
   .page-footer {
     text-align: center;
     font-size: 11px;
     color: var(--text-sub);
-    padding: 12px 0;
+    margin-top: 24px;
+    padding-top: 12px;
     border-top: 1px solid var(--border);
-    margin-top: 8px;
+  }
+
+  @media (max-width: 700px) {
+    .info-grid { grid-template-columns: 1fr 1fr; }
+    .page-header { flex-direction: column; gap: 8px; }
+  }
+  @media (max-width: 480px) {
+    .info-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -248,29 +224,29 @@
 <div class="container">
 
   <div class="page-header">
-    <h1>💴 原価管理台帳</h1>
-    <div class="meta">株式会社アート・レイズ<br>最終更新：2026-03-18</div>
+    <h1>📋 案件台帳</h1>
+    <div class="meta">株式会社アート・レイズ<br>最終更新：2026-03-19</div>
   </div>
 
   <div class="stats-bar">
     <div class="stat-item">
-      <div class="stat-num" id="totalCount">3</div>
+      <div class="stat-num" id="totalCount">5</div>
       <div class="stat-label">総案件数</div>
     </div>
     <div class="stat-item">
       <div class="stat-num">1</div>
-      <div class="stat-label">完了</div>
+      <div class="stat-label">受注済</div>
     </div>
     <div class="stat-item">
-      <div class="stat-num">2</div>
-      <div class="stat-label">進行中</div>
+      <div class="stat-num">3</div>
+      <div class="stat-label">見積提出済／予定</div>
     </div>
     <div class="stat-item">
-      <div class="stat-num green">—</div>
-      <div class="stat-label">平均粗利率</div>
+      <div class="stat-num">1</div>
+      <div class="stat-label">請求済</div>
     </div>
     <div class="stat-item">
-      <div class="stat-num">¥10,322,719</div>
+      <div class="stat-num">¥9,990,200</div>
       <div class="stat-label">受注総額（税込）</div>
     </div>
   </div>
@@ -280,117 +256,89 @@
   </div>
 
   <!-- AR-2026-0004 -->
-  <div class="cost-card" data-search="ar-2026-0004 さくら苑 玉寿会 床工事 熊本 玉名 受注済">
+  <div class="project-card" data-search="ar-2026-0004 さくら苑 玉寿会 床工事 ウッドタイル 熊本 玉名 施工中 請求済み">
     <div class="card-header">
       <div class="card-header-left">
-        <span class="case-id">AR-2026-0004</span>
-        <span class="case-name">第一期工事　さくら苑床工事</span>
+        <span class="project-id">AR-2026-0004</span>
+        <span class="project-name">第一期工事　さくら苑床工事</span>
       </div>
-      <span class="rate-badge rate-mid">粗利率：未入力</span>
+      <span class="badge" style="background:#6b7280;color:#fff;">第1期完了・請求済み</span>
     </div>
     <div class="card-body">
       <div class="info-grid">
         <div class="info-item">
           <span class="info-label">顧客</span>
-          <span class="info-value">社会福祉法人 玉寿会　御中</span>
+          <span class="info-value">社会福祉法人 玉寿会　御中（C-001）</span>
         </div>
         <div class="info-item">
           <span class="info-label">施工場所</span>
           <span class="info-value">熊本県玉名市伊倉北方1533</span>
         </div>
         <div class="info-item">
-          <span class="info-label">受注金額（税抜）</span>
-          <span class="info-value amount-value">¥9,082,000</span>
+          <span class="info-label">見積金額（税込）</span>
+          <span class="info-value amount-value">¥9,990,200</span>
         </div>
         <div class="info-item">
-          <span class="info-label">原価合計</span>
-          <span class="info-value">未入力</span>
+          <span class="info-label">契約日</span>
+          <span class="info-value">2026-03-16（令和8年）</span>
         </div>
         <div class="info-item">
-          <span class="info-label">粗利</span>
-          <span class="info-value profit-value">未入力</span>
+          <span class="info-label">請求金額（第1期）</span>
+          <span class="info-value amount-value">¥9,990,200</span>
         </div>
         <div class="info-item">
-          <span class="info-label">完了日</span>
-          <span class="info-value">未定</span>
+          <span class="info-label">完了日（第1期）</span>
+          <span class="info-value">2026-03-23（令和8年）</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">入金日</span>
+          <span class="info-value">未入金</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">法人・代表者</span>
+          <span class="info-value">社会福祉法人 玉寿会　山田勝徳 理事長</span>
         </div>
       </div>
 
-      <!-- 原価サマリーバー -->
-      <div class="cost-summary">
-        <div class="cost-summary-item">
-          <div class="cost-summary-label">労務費</div>
-          <div class="cost-summary-val">未入力</div>
-        </div>
-        <div class="cost-summary-item">
-          <div class="cost-summary-label">材料費</div>
-          <div class="cost-summary-val">未入力</div>
-        </div>
-        <div class="cost-summary-item">
-          <div class="cost-summary-label">外注費</div>
-          <div class="cost-summary-val">未入力</div>
-        </div>
-        <div class="cost-summary-item">
-          <div class="cost-summary-label">経費</div>
-          <div class="cost-summary-val">未入力</div>
-        </div>
-      </div>
-
-      <button class="meisai-toggle" onclick="toggleMeisai('meisai-0004', this)">▶ 明細を表示</button>
-      <div class="meisai-wrap" id="meisai-0004">
-        <table class="meisai-table">
-          <thead>
-            <tr>
-              <th style="width:30%">項目・業者名</th>
-              <th class="center" style="width:14%">人工／数量</th>
-              <th class="right" style="width:16%">単価</th>
-              <th class="right" style="width:16%">金額</th>
-              <th style="width:24%">備考</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="cat-row"><td colspan="5">労務費　（自社・手配職人）</td></tr>
-            <tr><td class="indent"><!-- ★ 職人名 --></td><td class="center">人工</td><td class="right">¥20,000</td><td class="right">¥</td><td class="note-cell"></td></tr>
-            <tr class="subtotal-row"><td colspan="3">労務費　小計</td><td class="right">¥</td><td></td></tr>
-
-            <tr class="cat-row"><td colspan="5">材料費</td></tr>
-            <tr><td class="indent"><!-- ★ --></td><td class="center"></td><td class="right"></td><td class="right">¥</td><td class="note-cell"></td></tr>
-            <tr class="subtotal-row"><td colspan="3">材料費　小計</td><td class="right">¥</td><td></td></tr>
-
-            <tr class="cat-row"><td colspan="5">外注費　（業者・職人への発注）</td></tr>
-            <tr><td class="indent"><!-- ★ 業者名 --></td><td class="center"></td><td class="right"></td><td class="right">¥</td><td class="note-cell">材料支給：有・無</td></tr>
-            <tr><td class="indent"><!-- ★ 業者名 --></td><td class="center"></td><td class="right"></td><td class="right">¥</td><td class="note-cell">材料支給：有・無</td></tr>
-            <tr><td class="indent"><!-- ★ 業者名 --></td><td class="center"></td><td class="right"></td><td class="right">¥</td><td class="note-cell">材料支給：有・無</td></tr>
-            <tr class="subtotal-row"><td colspan="3">外注費　小計</td><td class="right">¥</td><td></td></tr>
-
-            <tr class="cat-row"><td colspan="5">経費　（交通・宿泊・その他）</td></tr>
-            <tr><td class="indent">交通費・宿泊費（熊本往復）</td><td class="center">1式</td><td class="right"></td><td class="right">¥</td><td class="note-cell"></td></tr>
-            <tr class="subtotal-row"><td colspan="3">経費　小計</td><td class="right">¥</td><td></td></tr>
-          </tbody>
-        </table>
-        <table class="totals-table">
-          <tr><td>受注金額（税抜）</td><td>¥9,082,000</td></tr>
-          <tr><td>原価合計</td><td>¥</td></tr>
-          <tr class="profit-row"><td>粗利</td><td>¥</td></tr>
-          <tr><td>粗利率</td><td>％</td></tr>
-        </table>
+      <!-- 工程バー -->
+      <div style="font-size:11px; color:var(--text-sub); font-weight:700; margin-bottom:6px;">📅 施工工程</div>
+      <div class="process-bar">
+        <div class="process-step done">第1期<br>3/21〜23</div>
+        <div class="process-step pending">第2期<br>4/18〜20</div>
+        <div class="process-step pending">第3期<br>日程未定</div>
       </div>
 
       <div class="note-box">
-        <div class="note-label">📝 案件メモ</div>
-        社会福祉法人 玉寿会（山田勝徳 理事長）。契約日：令和8年3月16日。第1期施工：3月21〜22日（土日）。
+        <div class="note-label">📝 備考</div>
+        第1期：3月21〜23日完了・請求済み（請求番号：AR-2026-0004-1）。原価管理台帳は業者請求書受領後に作成予定。<br>
+        第2期：4月18〜20日（Googleカレンダー登録済み）。第3期は日程調整中。
+      </div>
+
+      <!-- 残材メモ -->
+      <div class="note-box" style="border-left-color:#16a34a; background:#f0fdf4; margin-top:8px;">
+        <div class="note-label" style="color:#15803d;">📦 現場残材メモ（第2期発注時に確認）</div>
+        ウッドタイル：10ケース　／　接着剤：5ケース　／　見切り金物：8本<br>
+        <span style="font-size:11px; color:#166534;">※ すべてさくら苑現場保管。第2期発注前に残数を確認して不足分のみ追加発注すること。</span>
+      </div>
+
+      <!-- 書類ボタン -->
+      <div class="doc-buttons">
+        <a class="doc-btn active" href="見積台帳_アートレイズ.html" target="_blank">📄 見積書</a>
+        <a class="doc-btn active" href="請求台帳_アートレイズ.html" target="_blank">📄 請求書</a>
+        <button class="doc-btn inactive">📄 注文書</button>
+        <a class="doc-btn active" href="工事請負契約書_雛形_アートレイズ.html" target="_blank">📄 工事請負契約書</a>
       </div>
     </div>
   </div>
 
   <!-- AR-2026-0005 -->
-  <div class="cost-card" data-search="ar-2026-0005 松村整骨院 愛の治療院 外壁補修 看板 コーキング 別府">
+  <div class="project-card" data-search="ar-2026-0005 松村整骨院 愛の治療院 松村 外装補修 看板 コーキング 見積提出済み 別府">
     <div class="card-header">
       <div class="card-header-left">
-        <span class="case-id">AR-2026-0005</span>
-        <span class="case-name">外壁コーキング補修・看板インクジェットシート張替工事他</span>
+        <span class="project-id">AR-2026-0005</span>
+        <span class="project-name">外壁コーキング補修・看板シート張替工事他</span>
       </div>
-      <span class="rate-badge rate-mid">粗利率：未入力</span>
+      <span class="badge" style="background:#2563eb;color:#fff;">見積提出済み</span>
     </div>
     <div class="card-body">
       <div class="info-grid">
@@ -400,86 +348,119 @@
         </div>
         <div class="info-item">
           <span class="info-label">施工場所</span>
-          <span class="info-value">大分県別府市</span>
+          <span class="info-value">大分県別府市（詳細現地確認済み）</span>
         </div>
         <div class="info-item">
-          <span class="info-label">受注金額（税抜）</span>
-          <span class="info-value amount-value">¥187,450</span>
+          <span class="info-label">見積金額（税込）</span>
+          <span class="info-value amount-value">¥206,195</span>
         </div>
         <div class="info-item">
-          <span class="info-label">原価合計</span>
-          <span class="info-value">未入力</span>
+          <span class="info-label">見積日</span>
+          <span class="info-value">2026-03-17</span>
         </div>
         <div class="info-item">
-          <span class="info-label">粗利</span>
-          <span class="info-value profit-value">未入力</span>
+          <span class="info-label">契約日</span>
+          <span class="info-value">未定</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">請求金額</span>
+          <span class="info-value">未設定</span>
         </div>
         <div class="info-item">
           <span class="info-label">完了日</span>
           <span class="info-value">未定</span>
         </div>
+        <div class="info-item">
+          <span class="info-label">入金日</span>
+          <span class="info-value">未入金</span>
+        </div>
       </div>
-
-      <div class="cost-summary">
-        <div class="cost-summary-item"><div class="cost-summary-label">労務費</div><div class="cost-summary-val">未入力</div></div>
-        <div class="cost-summary-item"><div class="cost-summary-label">材料費</div><div class="cost-summary-val">未入力</div></div>
-        <div class="cost-summary-item"><div class="cost-summary-label">外注費</div><div class="cost-summary-val">未入力</div></div>
-        <div class="cost-summary-item"><div class="cost-summary-label">経費</div><div class="cost-summary-val">未入力</div></div>
-      </div>
-
-      <button class="meisai-toggle" onclick="toggleMeisai('meisai-0005', this)">▶ 明細を表示</button>
-      <div class="meisai-wrap" id="meisai-0005">
-        <table class="meisai-table">
-          <thead>
-            <tr>
-              <th style="width:30%">項目・業者名</th>
-              <th class="center" style="width:14%">人工／数量</th>
-              <th class="right" style="width:16%">単価</th>
-              <th class="right" style="width:16%">金額</th>
-              <th style="width:24%">備考</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="cat-row"><td colspan="5">労務費　（自社・手配職人）</td></tr>
-            <tr><td class="indent"><!-- ★ --></td><td class="center">人工</td><td class="right">¥20,000</td><td class="right">¥</td><td class="note-cell"></td></tr>
-            <tr class="subtotal-row"><td colspan="3">労務費　小計</td><td class="right">¥</td><td></td></tr>
-
-            <tr class="cat-row"><td colspan="5">材料費</td></tr>
-            <tr><td class="indent"><!-- ★ --></td><td class="center"></td><td class="right"></td><td class="right">¥</td><td class="note-cell"></td></tr>
-            <tr class="subtotal-row"><td colspan="3">材料費　小計</td><td class="right">¥</td><td></td></tr>
-
-            <tr class="cat-row"><td colspan="5">外注費　（業者・職人への発注）</td></tr>
-            <tr><td class="indent"><!-- ★ --></td><td class="center"></td><td class="right"></td><td class="right">¥</td><td class="note-cell">材料支給：有・無</td></tr>
-            <tr class="subtotal-row"><td colspan="3">外注費　小計</td><td class="right">¥</td><td></td></tr>
-
-            <tr class="cat-row"><td colspan="5">経費</td></tr>
-            <tr><td class="indent"><!-- ★ --></td><td class="center"></td><td class="right"></td><td class="right">¥</td><td class="note-cell"></td></tr>
-            <tr class="subtotal-row"><td colspan="3">経費　小計</td><td class="right">¥</td><td></td></tr>
-          </tbody>
-        </table>
-        <table class="totals-table">
-          <tr><td>受注金額（税抜）</td><td>¥187,450</td></tr>
-          <tr><td>原価合計</td><td>¥</td></tr>
-          <tr class="profit-row"><td>粗利</td><td>¥</td></tr>
-          <tr><td>粗利率</td><td>％</td></tr>
-        </table>
-      </div>
-
       <div class="note-box">
-        <div class="note-label">📝 案件メモ</div>
-        見積提出予定。ふすま・配管は別途見積対応。
+        <div class="note-label">📝 備考</div>
+        外壁コーキング打ち（胴差天端）部分補修・壁面突出看板インクジェットシート貼（600×1,800mm）・
+        壁面看板インクジェットシート貼（600×600mm）・既存ボックス板金補修の上再取付（W1,800mm）。
+        ふすま張り替え・耐熱配管交換は別途対応予定（設備屋確認待ち）。紹介経由（元同級生の妻が勤務）。
+        見積書ファイル：見積書_AR-2026-0005_松村整骨院_20260317.html
+      </div>
+
+      <!-- 書類ボタン -->
+      <div class="doc-buttons">
+        <a class="doc-btn active" href="見積台帳_アートレイズ.html" target="_blank">📄 見積書</a>
+        <button class="doc-btn inactive">📄 請求書</button>
+        <button class="doc-btn inactive">📄 注文書</button>
+        <button class="doc-btn inactive">📄 工事請負契約書</button>
       </div>
     </div>
   </div>
 
   <!-- AR-2026-0006 -->
-  <div class="cost-card" data-search="ar-2026-0006 信和 加藤博和 ビーコンプラザ アルミアングル 別府">
+  <div class="project-card" data-search="ar-2026-0006 信和 加藤博和 ビーコンプラザ 別府コンベンションセンター アルミアングル トイレ建具 見積提出予定">
     <div class="card-header">
       <div class="card-header-left">
-        <span class="case-id">AR-2026-0006</span>
-        <span class="case-name">トイレ建具アルミアングル取付工事</span>
+        <span class="project-id">AR-2026-0006</span>
+        <span class="project-name">トイレ建具アルミアングル取付工事</span>
       </div>
-      <span class="rate-badge rate-mid">粗利率：未入力</span>
+      <span class="badge" style="background:#d97706;color:#fff;">見積提出予定</span>
+    </div>
+    <div class="card-body">
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">顧客</span>
+          <span class="info-value">株式会社 信和　加藤 博和 様</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">施工場所</span>
+          <span class="info-value">別府コンベンションセンター（ビーコンプラザ）</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">見積金額（税込）</span>
+          <span class="info-value amount-value">¥126,324</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">見積日</span>
+          <span class="info-value">2026-03-18</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">契約日</span>
+          <span class="info-value">未定</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">請求金額</span>
+          <span class="info-value">未設定</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">完了日</span>
+          <span class="info-value">未定</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">入金日</span>
+          <span class="info-value">未入金</span>
+        </div>
+      </div>
+      <div class="note-box">
+        <div class="note-label">📝 備考</div>
+        下請：塩出木工（y-siodew@ctb.ne.jp）。材料費は塩出木工請求書に基づき計上。
+        見積書ファイル：見積書_AR-2026-0006_ビーコンプラザ追加工事_20260318.html
+      </div>
+
+      <!-- 書類ボタン -->
+      <div class="doc-buttons">
+        <a class="doc-btn active" href="見積台帳_アートレイズ.html" target="_blank">📄 見積書</a>
+        <button class="doc-btn inactive">📄 請求書</button>
+        <button class="doc-btn inactive">📄 注文書</button>
+        <button class="doc-btn inactive">📄 工事請負契約書</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AR-2026-0007 -->
+  <div class="project-card" data-search="ar-2026-0007 信和 加藤博和 朝見浄水場 ルーツブロア 基礎補修 見積提出予定">
+    <div class="card-header">
+      <div class="card-header-left">
+        <span class="project-id">AR-2026-0007</span>
+        <span class="project-name">ルーツブロア基礎補修工事</span>
+      </div>
+      <span class="badge" style="background:#d97706;color:#fff;">見積提出予定</span>
     </div>
     <div class="card-body">
       <div class="info-grid">
@@ -489,74 +470,89 @@
         </div>
         <div class="info-item">
           <span class="info-label">施工場所</span>
-          <span class="info-value">別府コンベンションセンター（ビーコンプラザ）</span>
+          <span class="info-value">朝見浄水場</span>
         </div>
         <div class="info-item">
-          <span class="info-label">受注金額（税抜）</span>
-          <span class="info-value amount-value">¥114,840</span>
+          <span class="info-label">見積金額（税込）</span>
+          <span class="info-value amount-value">¥82,280</span>
         </div>
         <div class="info-item">
-          <span class="info-label">原価合計</span>
-          <span class="info-value">未入力</span>
+          <span class="info-label">見積日</span>
+          <span class="info-value">2026-03-18</span>
         </div>
         <div class="info-item">
-          <span class="info-label">粗利</span>
-          <span class="info-value profit-value">未入力</span>
+          <span class="info-label">契約日</span>
+          <span class="info-value">未定</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">請求金額</span>
+          <span class="info-value">未設定</span>
         </div>
         <div class="info-item">
           <span class="info-label">完了日</span>
           <span class="info-value">未定</span>
         </div>
+        <div class="info-item">
+          <span class="info-label">入金日</span>
+          <span class="info-value">未入金</span>
+        </div>
       </div>
-
-      <div class="cost-summary">
-        <div class="cost-summary-item"><div class="cost-summary-label">労務費</div><div class="cost-summary-val">未入力</div></div>
-        <div class="cost-summary-item"><div class="cost-summary-label">材料費</div><div class="cost-summary-val">未入力</div></div>
-        <div class="cost-summary-item"><div class="cost-summary-label">外注費</div><div class="cost-summary-val">未入力</div></div>
-        <div class="cost-summary-item"><div class="cost-summary-label">経費</div><div class="cost-summary-val">未入力</div></div>
-      </div>
-
-      <button class="meisai-toggle" onclick="toggleMeisai('meisai-0006', this)">▶ 明細を表示</button>
-      <div class="meisai-wrap" id="meisai-0006">
-        <table class="meisai-table">
-          <thead>
-            <tr>
-              <th style="width:30%">項目・業者名</th>
-              <th class="center" style="width:14%">人工／数量</th>
-              <th class="right" style="width:16%">単価</th>
-              <th class="right" style="width:16%">金額</th>
-              <th style="width:24%">備考</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="cat-row"><td colspan="5">労務費　（自社・手配職人）</td></tr>
-            <tr><td class="indent"><!-- ★ --></td><td class="center">人工</td><td class="right">¥20,000</td><td class="right">¥</td><td class="note-cell"></td></tr>
-            <tr class="subtotal-row"><td colspan="3">労務費　小計</td><td class="right">¥</td><td></td></tr>
-
-            <tr class="cat-row"><td colspan="5">材料費</td></tr>
-            <tr><td class="indent">アルミアングル 10×10×2000</td><td class="center">58本</td><td class="right"></td><td class="right">¥</td><td class="note-cell"></td></tr>
-            <tr class="subtotal-row"><td colspan="3">材料費　小計</td><td class="right">¥</td><td></td></tr>
-
-            <tr class="cat-row"><td colspan="5">外注費　（業者・職人への発注）</td></tr>
-            <tr><td class="indent">塩出木工</td><td class="center"></td><td class="right"></td><td class="right">¥</td><td class="note-cell">材料支給：有・無</td></tr>
-            <tr class="subtotal-row"><td colspan="3">外注費　小計</td><td class="right">¥</td><td></td></tr>
-
-            <tr class="cat-row"><td colspan="5">経費</td></tr>
-            <tr><td class="indent"><!-- ★ --></td><td class="center"></td><td class="right"></td><td class="right">¥</td><td class="note-cell"></td></tr>
-            <tr class="subtotal-row"><td colspan="3">経費　小計</td><td class="right">¥</td><td></td></tr>
-          </tbody>
-        </table>
-        <table class="totals-table">
-          <tr><td>受注金額（税抜）</td><td>¥114,840</td></tr>
-          <tr><td>原価合計</td><td>¥</td></tr>
-          <tr class="profit-row"><td>粗利</td><td>¥</td></tr>
-          <tr><td>粗利率</td><td>％</td></tr>
-        </table>
-      </div>
-
       <div class="note-box">
-        <div class="note-label">📝 案件メモ</div>
-        元請：株式会社 信和（加藤 博和 様）。下請：塩出木工。見積提出後、受注確認待ち。
+        <div class="note-label">📝 備考</div>
+        外注：小田工業（¥31,900税込）。元請：株式会社 信和。
+      </div>
+      <!-- 書類ボタン -->
+      <div class="doc-buttons">
+        <a class="doc-btn active" href="見積台帳_アートレイズ.html" target="_blank">📄 見積書</a>
+        <button class="doc-btn inactive">📄 請求書</button>
+        <button class="doc-btn inactive">📄 注文書</button>
+        <button class="doc-btn inactive">📄 工事請負契約書</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AR-2026-0008 -->
+  <div class="project-card" data-search="ar-2026-0008 ウインズコーポレーション 民泊客家 ロールスクリーン 補修 請求済み">
+    <div class="card-header">
+      <div class="card-header-left">
+        <span class="project-id">AR-2026-0008</span>
+        <span class="project-name">ロールスクリーン補修工事</span>
+      </div>
+      <span class="badge" style="background:#6b7280;color:#fff;">請求済み</span>
+    </div>
+    <div class="card-body">
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">顧客</span>
+          <span class="info-value">有限会社ウインズコーポレーション</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">施工場所</span>
+          <span class="info-value">民泊客家</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">請求金額（税込）</span>
+          <span class="info-value amount-value">¥14,520</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">請求番号</span>
+          <span class="info-value">AR-2026-C004-001</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">請求日</span>
+          <span class="info-value">2026-03-18</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">入金日</span>
+          <span class="info-value">入金済み</span>
+        </div>
+      </div>
+      <!-- 書類ボタン -->
+      <div class="doc-buttons">
+        <button class="doc-btn inactive">📄 見積書</button>
+        <a class="doc-btn active" href="請求台帳_アートレイズ.html" target="_blank">📄 請求書</a>
+        <button class="doc-btn inactive">📄 注文書</button>
+        <button class="doc-btn inactive">📄 工事請負契約書</button>
       </div>
     </div>
   </div>
@@ -573,7 +569,7 @@
 <script>
 function filterCards() {
   const q = document.getElementById('searchInput').value.toLowerCase();
-  const cards = document.querySelectorAll('.cost-card');
+  const cards = document.querySelectorAll('.project-card');
   let count = 0;
   cards.forEach(card => {
     const text = card.getAttribute('data-search') || '';
@@ -583,12 +579,6 @@ function filterCards() {
   });
   document.getElementById('totalCount').textContent = count;
   document.getElementById('addRow').style.display = q ? 'none' : '';
-}
-
-function toggleMeisai(id, btn) {
-  const wrap = document.getElementById(id);
-  const isOpen = wrap.classList.toggle('open');
-  btn.textContent = isOpen ? '▼ 明細を隠す' : '▶ 明細を表示';
 }
 </script>
 </body>
