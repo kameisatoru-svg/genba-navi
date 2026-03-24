@@ -4,220 +4,156 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>案件台帳｜株式会社アート・レイズ</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --band: #555;
-    --band-mid: #777;
-    --light: #f8f8f8;
-    --border: #ddd;
-    --border-dark: #aaa;
-    --text: #333;
-    --text-sub: #666;
-    --white: #fff;
-    --accent: #2563eb;
-    --even: #f5f5f5;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Noto Sans JP', sans-serif;
-    background: #eee;
-    color: var(--text);
-    font-size: 14px;
-  }
-  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+:root {
+  --band: #555; --band-mid: #777; --light: #f8f8f8;
+  --border: #ddd; --border-dark: #aaa; --text: #333; --text-sub: #666;
+  --white: #fff; --accent: #2563eb; --even: #f5f5f5;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Meiryo,'Yu Gothic',sans-serif; background: #eee; color: var(--text); font-size: 14px; }
+.container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
 
-  .page-header {
-    background: var(--band);
-    color: var(--white);
-    padding: 18px 24px;
-    border-radius: 6px 6px 0 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .page-header h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.05em; }
-  .page-header .meta { font-size: 12px; opacity: 0.8; text-align: right; }
+.page-header {
+  background: var(--band); color: var(--white);
+  padding: 18px 24px; border-radius: 6px 6px 0 0;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.page-header h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.05em; }
+.page-header .meta { font-size: 12px; opacity: 0.8; text-align: right; }
 
-  .stats-bar {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-top: none;
-    padding: 14px 24px;
-    display: flex;
-    gap: 32px;
-    flex-wrap: wrap;
-  }
-  .stat-item { text-align: center; }
-  .stat-num { font-size: 24px; font-weight: 700; color: var(--band); }
-  .stat-label { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+.stats-bar {
+  background: var(--white); border: 1px solid var(--border); border-top: none;
+  padding: 14px 24px; display: flex; gap: 32px; flex-wrap: wrap;
+}
+.stat-item { text-align: center; }
+.stat-num { font-size: 22px; font-weight: 700; color: var(--band); }
+.stat-label { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
 
-  .search-bar {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-top: none;
-    padding: 12px 24px;
-    border-radius: 0 0 6px 6px;
-    margin-bottom: 20px;
-  }
-  .search-bar input {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid var(--border-dark);
-    border-radius: 4px;
-    font-size: 14px;
-    font-family: inherit;
-  }
-  .search-bar input:focus { outline: none; border-color: var(--accent); }
+.search-bar {
+  background: var(--white); border: 1px solid var(--border); border-top: none;
+  padding: 12px 24px; border-radius: 0 0 6px 6px; margin-bottom: 20px;
+  display: flex; gap: 10px; align-items: center;
+}
+.search-bar input {
+  flex: 1; padding: 8px 12px; border: 1px solid var(--border-dark);
+  border-radius: 4px; font-size: 14px; font-family: inherit;
+}
+.search-bar input:focus { outline: none; border-color: var(--accent); }
+.status-filter {
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+.filter-btn {
+  padding: 5px 12px; border: 1px solid var(--border-dark); border-radius: 20px;
+  background: var(--white); font-size: 12px; cursor: pointer; font-family: inherit;
+  transition: all 0.15s;
+}
+.filter-btn.active { background: var(--band); color: var(--white); border-color: var(--band); }
 
-  /* 案件カード */
-  .project-card {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    margin-bottom: 14px;
-    overflow: hidden;
-  }
-  .card-header {
-    background: var(--light);
-    border-bottom: 2px solid var(--band);
-    padding: 12px 18px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .card-header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .project-id {
-    font-size: 12px;
-    font-weight: 700;
-    background: var(--band);
-    color: var(--white);
-    padding: 3px 10px;
-    border-radius: 3px;
-  }
-  .project-name { font-size: 16px; font-weight: 700; }
+/* 案件カード */
+.project-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 6px; margin-bottom: 14px; overflow: hidden;
+}
+.card-header {
+  background: var(--light); border-bottom: 2px solid var(--band);
+  padding: 12px 18px; display: flex; justify-content: space-between;
+  align-items: center; flex-wrap: wrap; gap: 8px;
+}
+.card-header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.project-id {
+  font-size: 12px; font-weight: 700; background: var(--band);
+  color: var(--white); padding: 3px 10px; border-radius: 3px;
+}
+.project-name { font-size: 16px; font-weight: 700; }
+.badge {
+  font-size: 11px; font-weight: 700; padding: 3px 12px;
+  border-radius: 20px; white-space: nowrap;
+}
 
-  /* ステータスバッジ */
-  .badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 700;
-  }
-  .badge-juchu { background: #dcfce7; color: #15803d; }
-  .badge-mitumori { background: #dbeafe; color: #1d4ed8; }
-  .badge-kanryo { background: #f3f4f6; color: #6b7280; }
-  .badge-mihai { background: #fef9c3; color: #854d0e; }
+.card-body { padding: 16px 18px; }
+.info-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 12px 16px; margin-bottom: 14px;
+}
+.info-item { display: flex; flex-direction: column; gap: 3px; }
+.info-label { font-size: 10px; color: var(--text-sub); font-weight: 600; letter-spacing: 0.04em; }
+.info-value { font-size: 13px; color: var(--text); }
+.amount-value { font-weight: 700; color: #1a4a8a; font-size: 14px; }
 
-  .card-body { padding: 16px 18px; }
-  .info-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px 24px;
-    margin-bottom: 14px;
-  }
-  .info-item { display: flex; flex-direction: column; gap: 3px; }
-  .info-label { font-size: 11px; color: var(--text-sub); font-weight: 700; letter-spacing: 0.04em; }
-  .info-value { font-size: 14px; color: var(--text); }
+.note-box {
+  background: #fffbf0; border: 1px solid #e8d9a0;
+  border-radius: 4px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px; line-height: 1.7;
+}
+.note-label { font-size: 10px; font-weight: 700; color: #9a7a20; margin-bottom: 4px; }
 
-  /* 金額ハイライト */
-  .amount-value {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--band);
-  }
+/* 書類タグ */
+.doc-tags {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;
+}
+.doc-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 14px; border-radius: 20px; font-size: 12px;
+  font-weight: 600; font-family: inherit; cursor: pointer;
+  border: none; text-decoration: none; transition: all 0.15s;
+}
+.doc-tag.available {
+  background: #e8f0fe; color: #1a4a8a; border: 1px solid #b3caf5;
+}
+.doc-tag.available:hover { background: #2563eb; color: #fff; }
+.doc-tag.unavailable {
+  background: #f3f4f6; color: #b0b8c4; border: 1px solid #e5e7eb;
+  cursor: default; pointer-events: none;
+}
+.doc-tag-icon { font-size: 13px; }
 
-  /* 工程バー */
-  .process-bar {
-    display: flex;
-    gap: 6px;
-    margin-top: 14px;
-    flex-wrap: wrap;
-  }
-  .process-step {
-    flex: 1;
-    min-width: 80px;
-    text-align: center;
-    padding: 7px 4px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 700;
-    border: 1px solid var(--border);
-    background: var(--light);
-    color: var(--text-sub);
-  }
-  .process-step.done { background: var(--band); color: var(--white); border-color: var(--band); }
-  .process-step.current { background: #2563eb; color: var(--white); border-color: #2563eb; }
-  .process-step.pending { background: #fef9c3; color: #854d0e; border-color: #fde68a; }
+/* 工程バー */
+.process-bar { display: flex; gap: 4px; margin-bottom: 14px; }
+.process-step {
+  flex: 1; text-align: center; padding: 6px 4px; border-radius: 4px;
+  font-size: 11px; font-weight: 600; border: 1px solid var(--border);
+}
+.process-step.done { background: #1a7a30; color: #fff; border-color: #1a7a30; }
+.process-step.pending { background: var(--light); color: var(--text-sub); }
 
-  .note-box {
-    margin-top: 12px;
-    padding: 10px 14px;
-    background: #fffbeb;
-    border-left: 3px solid #f59e0b;
-    border-radius: 0 4px 4px 0;
-    font-size: 13px;
-    color: var(--text);
-  }
-  .note-label { font-size: 11px; color: #92400e; font-weight: 700; margin-bottom: 4px; }
+.add-row {
+  border: 2px dashed var(--border-dark); border-radius: 6px;
+  text-align: center; padding: 18px; color: var(--text-sub);
+  font-size: 13px; margin-bottom: 20px;
+}
+.page-footer {
+  text-align: center; font-size: 11px; color: var(--text-sub);
+  margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--border);
+}
 
-  .add-row {
-    background: var(--light);
-    border: 1px dashed var(--border-dark);
-    border-radius: 6px;
-    padding: 18px;
-    text-align: center;
-    color: var(--text-sub);
-    font-size: 13px;
-    margin-bottom: 14px;
-  }
+/* JSON貼り付けパネル（index.htmlから呼ばれる想定だがスタンドアロン対応） */
+.json-panel {
+  background: #1e2d40; color: #e0e8f0; border-radius: 6px;
+  margin-bottom: 20px; overflow: hidden;
+}
+.json-panel-header {
+  padding: 12px 18px; display: flex; justify-content: space-between;
+  align-items: center; cursor: pointer; user-select: none;
+}
+.json-panel-header span { font-size: 13px; font-weight: 700; }
+.json-panel-body { padding: 0 18px 16px; display: none; }
+.json-panel.open .json-panel-body { display: block; }
+.json-panel textarea {
+  width: 100%; height: 120px; background: #111d2a; color: #7ec8e3;
+  border: 1px solid #3a5a7a; border-radius: 4px; padding: 10px;
+  font-size: 12px; font-family: monospace; resize: vertical;
+}
+.json-panel-btns { display: flex; gap: 8px; margin-top: 8px; }
+.json-btn {
+  padding: 7px 18px; border: none; border-radius: 4px; font-size: 12px;
+  font-weight: 700; cursor: pointer; font-family: inherit;
+}
+.json-btn.primary { background: #2563eb; color: #fff; }
+.json-btn.danger { background: #dc2626; color: #fff; }
+.json-msg { font-size: 12px; margin-top: 6px; color: #6ee7b7; }
 
-  /* 書類ボタンエリア */
-  .doc-buttons {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px solid var(--border);
-  }
-  .doc-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 6px 14px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 700;
-    font-family: inherit;
-    cursor: pointer;
-    border: none;
-    text-decoration: none;
-    transition: opacity 0.15s;
-  }
-  .doc-btn:hover { opacity: 0.85; }
-  .doc-btn.active { background: #2563eb; color: #fff; }
-  .doc-btn.inactive { background: #e5e7eb; color: #9ca3af; cursor: default; pointer-events: none; }
-
-  .page-footer {
-    text-align: center;
-    font-size: 11px;
-    color: var(--text-sub);
-    margin-top: 24px;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
-  }
-
-  @media (max-width: 700px) {
-    .info-grid { grid-template-columns: 1fr 1fr; }
-    .page-header { flex-direction: column; gap: 8px; }
-  }
-  @media (max-width: 480px) {
-    .info-grid { grid-template-columns: 1fr; }
-  }
+@media (max-width: 700px) { .info-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 480px) { .info-grid { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -225,337 +161,42 @@
 
   <div class="page-header">
     <h1>📋 案件台帳</h1>
-    <div class="meta">株式会社アート・レイズ<br>最終更新：2026-03-19</div>
+    <div class="meta">株式会社アート・レイズ<br><span id="lastUpdated">-</span></div>
   </div>
 
   <div class="stats-bar">
-    <div class="stat-item">
-      <div class="stat-num" id="totalCount">5</div>
-      <div class="stat-label">総案件数</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">1</div>
-      <div class="stat-label">受注済</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">3</div>
-      <div class="stat-label">見積提出済／予定</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">1</div>
-      <div class="stat-label">請求済</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">¥9,990,200</div>
-      <div class="stat-label">受注総額（税込）</div>
-    </div>
+    <div class="stat-item"><div class="stat-num" id="totalCount">-</div><div class="stat-label">総案件数</div></div>
+    <div class="stat-item"><div class="stat-num" id="countJuchu">-</div><div class="stat-label">受注済</div></div>
+    <div class="stat-item"><div class="stat-num" id="countMitsumori">-</div><div class="stat-label">見積提出済／予定</div></div>
+    <div class="stat-item"><div class="stat-num" id="countSeikyu">-</div><div class="stat-label">請求済</div></div>
+    <div class="stat-item"><div class="stat-num" id="totalAmount">-</div><div class="stat-label">受注総額（税込）</div></div>
   </div>
 
   <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="🔍 案件番号・顧客名・工事内容で絞り込み..." oninput="filterCards()">
+    <input type="text" id="searchInput" placeholder="🔍 案件番号・顧客名・工事内容で絞り込み..." oninput="renderCards()">
+    <div class="status-filter" id="statusFilter"></div>
   </div>
 
-  <!-- AR-2026-0004 -->
-  <div class="project-card" data-search="ar-2026-0004 さくら苑 西俊至 床面リフォーム 塩ビタイル 熊本 受注済">
-    <div class="card-header">
-      <div class="card-header-left">
-        <span class="project-id">AR-2026-0004</span>
-        <span class="project-name">床面リフォーム工事（塩ビタイル貼り）</span>
-      </div>
-      <span class="badge badge-juchu">受注済</span>
+  <!-- JSONデータ貼り付けパネル -->
+  <div class="json-panel" id="jsonPanel">
+    <div class="json-panel-header" onclick="toggleJsonPanel()">
+      <span>📥 案件データ貼り付け（ClaudeからJSONをここに貼る）</span>
+      <span id="jsonPanelArrow">▼</span>
     </div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">顧客</span>
-          <span class="info-value">さくら苑　西 俊至 様（C-001）</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">施工場所</span>
-          <span class="info-value">熊本県玉名市伊倉北方1533</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">見積金額（税込）</span>
-          <span class="info-value amount-value">¥6,588,120</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">見積日</span>
-          <span class="info-value">2026-03-13</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">契約日</span>
-          <span class="info-value">2026-03-16（令和8年）</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">請求金額</span>
-          <span class="info-value">未設定</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">完了日</span>
-          <span class="info-value">未定</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">入金日</span>
-          <span class="info-value">未入金</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">法人・代表者</span>
-          <span class="info-value">社会福祉法人 玉寿会　山田勝徳 理事長</span>
-        </div>
+    <div class="json-panel-body">
+      <textarea id="jsonInput" placeholder='ClaudeがJSON生成 → ここに貼り付け → 「保存」ボタン押下&#10;&#10;例：[{"案件番号":"AR-2026-0009", "工事名":"...", ...}]'></textarea>
+      <div class="json-panel-btns">
+        <button class="json-btn primary" onclick="saveJson()">💾 保存してアプリに反映</button>
+        <button class="json-btn danger" onclick="clearJson()">🗑 全データ削除</button>
       </div>
-
-      <!-- 工程バー -->
-      <div style="font-size:11px; color:var(--text-sub); font-weight:700; margin-bottom:6px;">📅 施工工程</div>
-      <div class="process-bar">
-        <div class="process-step done">第1期<br>3/21〜22</div>
-        <div class="process-step pending">第2期<br>日程未定</div>
-        <div class="process-step pending">第3期<br>日程未定</div>
-      </div>
-
-      <div class="note-box">
-        <div class="note-label">📝 備考</div>
-        第1期：3月21〜22日（土日）施工。Googleカレンダー登録済み。第2期・第3期は日程調整中。
-      </div>
-
-      <!-- 書類ボタン -->
-      <div class="doc-buttons">
-        <a class="doc-btn active" href="見積台帳_アートレイズ.html" target="_blank">📄 見積書</a>
-        <button class="doc-btn inactive">📄 請求書</button>
-        <button class="doc-btn inactive">📄 注文書</button>
-        <a class="doc-btn active" href="工事請負契約書_雛形_アートレイズ.html" target="_blank">📄 工事請負契約書</a>
-      </div>
+      <div id="jsonMsg" class="json-msg"></div>
     </div>
   </div>
 
-  <!-- AR-2026-0005 -->
-  <div class="project-card" data-search="ar-2026-0005 松村整骨院 愛の治療院 松村 外装補修 看板 コーキング 見積提出済み 別府">
-    <div class="card-header">
-      <div class="card-header-left">
-        <span class="project-id">AR-2026-0005</span>
-        <span class="project-name">外壁コーキング補修・看板シート張替工事他</span>
-      </div>
-      <span class="badge" style="background:#2563eb;color:#fff;">見積提出済み</span>
-    </div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">顧客</span>
-          <span class="info-value">松村整骨院（愛の治療院）　松村 様</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">施工場所</span>
-          <span class="info-value">大分県別府市（詳細現地確認済み）</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">見積金額（税込）</span>
-          <span class="info-value amount-value">¥206,195</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">見積日</span>
-          <span class="info-value">2026-03-17</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">契約日</span>
-          <span class="info-value">未定</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">請求金額</span>
-          <span class="info-value">未設定</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">完了日</span>
-          <span class="info-value">未定</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">入金日</span>
-          <span class="info-value">未入金</span>
-        </div>
-      </div>
-      <div class="note-box">
-        <div class="note-label">📝 備考</div>
-        外壁コーキング打ち（胴差天端）部分補修・壁面突出看板インクジェットシート貼（600×1,800mm）・
-        壁面看板インクジェットシート貼（600×600mm）・既存ボックス板金補修の上再取付（W1,800mm）。
-        ふすま張り替え・耐熱配管交換は別途対応予定（設備屋確認待ち）。紹介経由（元同級生の妻が勤務）。
-        見積書ファイル：見積書_AR-2026-0005_松村整骨院_20260317.html
-      </div>
+  <!-- 案件カード出力エリア -->
+  <div id="cardsArea"></div>
 
-      <!-- 書類ボタン -->
-      <div class="doc-buttons">
-        <a class="doc-btn active" href="見積台帳_アートレイズ.html" target="_blank">📄 見積書</a>
-        <button class="doc-btn inactive">📄 請求書</button>
-        <button class="doc-btn inactive">📄 注文書</button>
-        <button class="doc-btn inactive">📄 工事請負契約書</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- AR-2026-0006 -->
-  <div class="project-card" data-search="ar-2026-0006 信和 加藤博和 ビーコンプラザ 別府コンベンションセンター アルミアングル トイレ建具 見積提出予定">
-    <div class="card-header">
-      <div class="card-header-left">
-        <span class="project-id">AR-2026-0006</span>
-        <span class="project-name">トイレ建具アルミアングル取付工事</span>
-      </div>
-      <span class="badge" style="background:#d97706;color:#fff;">見積提出予定</span>
-    </div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">顧客</span>
-          <span class="info-value">株式会社 信和　加藤 博和 様</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">施工場所</span>
-          <span class="info-value">別府コンベンションセンター（ビーコンプラザ）</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">見積金額（税込）</span>
-          <span class="info-value amount-value">¥126,324</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">見積日</span>
-          <span class="info-value">2026-03-18</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">契約日</span>
-          <span class="info-value">未定</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">請求金額</span>
-          <span class="info-value">未設定</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">完了日</span>
-          <span class="info-value">未定</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">入金日</span>
-          <span class="info-value">未入金</span>
-        </div>
-      </div>
-      <div class="note-box">
-        <div class="note-label">📝 備考</div>
-        下請：塩出木工（y-siodew@ctb.ne.jp）。材料費は塩出木工請求書に基づき計上。
-        見積書ファイル：見積書_AR-2026-0006_ビーコンプラザ追加工事_20260318.html
-      </div>
-
-      <!-- 書類ボタン -->
-      <div class="doc-buttons">
-        <a class="doc-btn active" href="見積台帳_アートレイズ.html" target="_blank">📄 見積書</a>
-        <button class="doc-btn inactive">📄 請求書</button>
-        <button class="doc-btn inactive">📄 注文書</button>
-        <button class="doc-btn inactive">📄 工事請負契約書</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- AR-2026-0007 -->
-  <div class="project-card" data-search="ar-2026-0007 信和 加藤博和 朝見浄水場 ルーツブロア 基礎補修 見積提出予定">
-    <div class="card-header">
-      <div class="card-header-left">
-        <span class="project-id">AR-2026-0007</span>
-        <span class="project-name">ルーツブロア基礎補修工事</span>
-      </div>
-      <span class="badge" style="background:#d97706;color:#fff;">見積提出予定</span>
-    </div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">顧客（元請）</span>
-          <span class="info-value">株式会社 信和　加藤 博和 様</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">施工場所</span>
-          <span class="info-value">朝見浄水場</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">見積金額（税込）</span>
-          <span class="info-value amount-value">¥82,280</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">見積日</span>
-          <span class="info-value">2026-03-18</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">契約日</span>
-          <span class="info-value">未定</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">請求金額</span>
-          <span class="info-value">未設定</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">完了日</span>
-          <span class="info-value">未定</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">入金日</span>
-          <span class="info-value">未入金</span>
-        </div>
-      </div>
-      <div class="note-box">
-        <div class="note-label">📝 備考</div>
-        外注：小田工業（¥31,900税込）。元請：株式会社 信和。
-      </div>
-      <!-- 書類ボタン -->
-      <div class="doc-buttons">
-        <a class="doc-btn active" href="見積台帳_アートレイズ.html" target="_blank">📄 見積書</a>
-        <button class="doc-btn inactive">📄 請求書</button>
-        <button class="doc-btn inactive">📄 注文書</button>
-        <button class="doc-btn inactive">📄 工事請負契約書</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- AR-2026-0008 -->
-  <div class="project-card" data-search="ar-2026-0008 ウインズコーポレーション 民泊客家 ロールスクリーン 補修 請求済み">
-    <div class="card-header">
-      <div class="card-header-left">
-        <span class="project-id">AR-2026-0008</span>
-        <span class="project-name">ロールスクリーン補修工事</span>
-      </div>
-      <span class="badge" style="background:#6b7280;color:#fff;">請求済み</span>
-    </div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">顧客</span>
-          <span class="info-value">有限会社ウインズコーポレーション</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">施工場所</span>
-          <span class="info-value">民泊客家</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">請求金額（税込）</span>
-          <span class="info-value amount-value">¥14,520</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">請求番号</span>
-          <span class="info-value">AR-2026-C004-001</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">請求日</span>
-          <span class="info-value">2026-03-18</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">入金日</span>
-          <span class="info-value">入金済み</span>
-        </div>
-      </div>
-      <!-- 書類ボタン -->
-      <div class="doc-buttons">
-        <button class="doc-btn inactive">📄 見積書</button>
-        <a class="doc-btn active" href="請求台帳_アートレイズ.html" target="_blank">📄 請求書</a>
-        <button class="doc-btn inactive">📄 注文書</button>
-        <button class="doc-btn inactive">📄 工事請負契約書</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="add-row" id="addRow">
-    ＋ 次の案件データをここに追加（AR-2026-0007〜）
-  </div>
+  <div class="add-row" id="addRow">＋ Claudeに依頼してJSONで案件を追加</div>
 
   <div class="page-footer">
     株式会社アート・レイズ｜大分県別府市上原町13番25号｜TEL 0977-21-0603
@@ -563,19 +204,195 @@
 
 </div>
 <script>
-function filterCards() {
+// ─── 定数 ───────────────────────────────────────────
+const STORAGE_KEY = 'artrise_anken_v1';
+const BASE_URL = 'https://kameisatoru-svg.github.io/genba-navi/';
+
+// バッジ色マップ
+const BADGE_COLORS = {
+  '受注済':      'background:#1a7a30;color:#fff',
+  '施工中':      'background:#0e6b9a;color:#fff',
+  '完了':        'background:#6b7280;color:#fff',
+  '見積提出済み': 'background:#2563eb;color:#fff',
+  '見積提出予定': 'background:#d97706;color:#fff',
+  '請求済み':    'background:#6b7280;color:#fff',
+  '入金済み':    'background:#4b5563;color:#fff',
+};
+
+// ─── データ操作 ──────────────────────────────────────
+function loadData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+  catch(e) { return []; }
+}
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+// ─── JSON貼り付けパネル ──────────────────────────────
+function toggleJsonPanel() {
+  const panel = document.getElementById('jsonPanel');
+  const arrow = document.getElementById('jsonPanelArrow');
+  panel.classList.toggle('open');
+  arrow.textContent = panel.classList.contains('open') ? '▲' : '▼';
+}
+function saveJson() {
+  const raw = document.getElementById('jsonInput').value.trim();
+  const msg = document.getElementById('jsonMsg');
+  if (!raw) { msg.style.color='#fca5a5'; msg.textContent='⚠ JSONを貼り付けてください'; return; }
+  try {
+    let incoming = JSON.parse(raw);
+    if (!Array.isArray(incoming)) incoming = [incoming];
+    const existing = loadData();
+    // 案件番号で上書きマージ
+    const map = {};
+    existing.forEach(p => { map[p.案件番号] = p; });
+    incoming.forEach(p => { map[p.案件番号] = p; });
+    const merged = Object.values(map).sort((a,b) => a.案件番号.localeCompare(b.案件番号));
+    saveData(merged);
+    document.getElementById('jsonInput').value = '';
+    msg.style.color='#6ee7b7';
+    msg.textContent = `✅ ${incoming.length}件を保存しました（合計${merged.length}件）`;
+    renderCards();
+  } catch(e) {
+    msg.style.color='#fca5a5';
+    msg.textContent = '❌ JSON形式が正しくありません: ' + e.message;
+  }
+}
+function clearJson() {
+  if (!confirm('全案件データを削除します。よろしいですか？')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  document.getElementById('jsonMsg').textContent = '🗑 全データを削除しました';
+  renderCards();
+}
+
+// ─── 書類タグ生成 ────────────────────────────────────
+function buildDocTags(item) {
+  const docs = item.書類 || {};
+  const defs = [
+    { key: '見積書', icon: '📄', label: '見積書' },
+    { key: '請求書', icon: '🧾', label: '請求書' },
+    { key: '注文書', icon: '📝', label: '注文書' },
+    { key: '契約書', icon: '📜', label: '契約書' },
+  ];
+  return defs.map(d => {
+    const url = docs[d.key];
+    if (url) {
+      // 相対パスの場合はBASE_URLを付与、http始まりはそのまま
+      const href = url.startsWith('http') ? url : BASE_URL + url;
+      return `<a class="doc-tag available" href="${href}" target="_blank">
+        <span class="doc-tag-icon">${d.icon}</span>${d.label}
+      </a>`;
+    } else {
+      return `<span class="doc-tag unavailable">
+        <span class="doc-tag-icon">${d.icon}</span>${d.label}
+      </span>`;
+    }
+  }).join('');
+}
+
+// ─── 案件カード生成 ──────────────────────────────────
+function buildCard(item) {
+  const badge = BADGE_COLORS[item.ステータス] || 'background:#9ca3af;color:#fff';
+  const mitsumoriFormatted = item.見積金額 ? '¥' + Number(item.見積金額).toLocaleString() : '未設定';
+  const seikyuFormatted = item.請求金額 ? '¥' + Number(item.請求金額).toLocaleString() : '未設定';
+
+  // 元請表示
+  const motoukeRow = item.元請フラグ && item.元請名
+    ? `<div class="info-item"><span class="info-label">元請</span><span class="info-value" style="color:#b45309;font-weight:600;">${item.元請名}</span></div>` : '';
+
+  // 検索用テキスト
+  const searchText = [
+    item.案件番号, item.工事名, item.法人名, item.代表者,
+    item.施工場所, item.ステータス, item.元請名, item.備考
+  ].filter(Boolean).join(' ').toLowerCase();
+
+  return `
+  <div class="project-card" data-search="${searchText}" data-status="${item.ステータス || ''}">
+    <div class="card-header">
+      <div class="card-header-left">
+        <span class="project-id">${item.案件番号}</span>
+        <span class="project-name">${item.工事名}</span>
+      </div>
+      <span class="badge" style="${badge}">${item.ステータス || '未設定'}</span>
+    </div>
+    <div class="card-body">
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">法人名</span><span class="info-value">${item.法人名 || '-'}</span></div>
+        <div class="info-item"><span class="info-label">代表者</span><span class="info-value">${item.代表者 || '-'}</span></div>
+        <div class="info-item"><span class="info-label">施工場所</span><span class="info-value">${item.施工場所 || '-'}</span></div>
+        ${motoukeRow}
+        <div class="info-item"><span class="info-label">見積金額（税込）</span><span class="info-value amount-value">${mitsumoriFormatted}</span></div>
+        <div class="info-item"><span class="info-label">見積日</span><span class="info-value">${item.見積日 || '-'}</span></div>
+        <div class="info-item"><span class="info-label">契約日</span><span class="info-value">${item.契約日 || '未定'}</span></div>
+        <div class="info-item"><span class="info-label">請求金額（税込）</span><span class="info-value amount-value">${seikyuFormatted}</span></div>
+        <div class="info-item"><span class="info-label">請求日</span><span class="info-value">${item.請求日 || '未設定'}</span></div>
+        <div class="info-item"><span class="info-label">完了日</span><span class="info-value">${item.完了日 || '未定'}</span></div>
+        <div class="info-item"><span class="info-label">入金日</span><span class="info-value">${item.入金日 || '未入金'}</span></div>
+      </div>
+      ${item.備考 ? `<div class="note-box"><div class="note-label">📝 備考</div>${item.備考}</div>` : ''}
+      <div class="doc-tags">${buildDocTags(item)}</div>
+    </div>
+  </div>`;
+}
+
+// ─── 統計・フィルター ────────────────────────────────
+let activeStatus = 'all';
+
+function updateStats(data) {
+  document.getElementById('totalCount').textContent = data.length;
+  document.getElementById('countJuchu').textContent = data.filter(p => p.ステータス === '受注済' || p.ステータス === '施工中').length;
+  document.getElementById('countMitsumori').textContent = data.filter(p => p.ステータス?.includes('見積')).length;
+  document.getElementById('countSeikyu').textContent = data.filter(p => p.ステータス?.includes('請求') || p.ステータス === '入金済み').length;
+  const juchuTotal = data.filter(p => p.ステータス === '受注済' || p.ステータス === '施工中' || p.ステータス === '完了')
+    .reduce((s, p) => s + (Number(p.請求金額) || Number(p.見積金額) || 0), 0);
+  document.getElementById('totalAmount').textContent = juchuTotal ? '¥' + juchuTotal.toLocaleString() : '-';
+  const now = new Date();
+  document.getElementById('lastUpdated').textContent = `最終更新：${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+}
+
+function buildStatusFilter(data) {
+  const statuses = ['all', ...new Set(data.map(p => p.ステータス).filter(Boolean))];
+  const labels = { all: 'すべて' };
+  document.getElementById('statusFilter').innerHTML = statuses.map(s =>
+    `<button class="filter-btn ${s === activeStatus ? 'active' : ''}" onclick="setFilter('${s}')">${labels[s] || s}</button>`
+  ).join('');
+}
+
+function setFilter(status) {
+  activeStatus = status;
+  renderCards();
+}
+
+// ─── メインレンダリング ──────────────────────────────
+function renderCards() {
+  const data = loadData();
   const q = document.getElementById('searchInput').value.toLowerCase();
-  const cards = document.querySelectorAll('.project-card');
-  let count = 0;
-  cards.forEach(card => {
-    const text = card.getAttribute('data-search') || '';
-    const show = !q || text.toLowerCase().includes(q);
-    card.style.display = show ? '' : 'none';
-    if (show) count++;
+  updateStats(data);
+  buildStatusFilter(data);
+
+  const filtered = data.filter(p => {
+    const searchMatch = !q || (p.案件番号 + p.工事名 + (p.法人名||'') + (p.施工場所||'') + (p.備考||'')).toLowerCase().includes(q);
+    const statusMatch = activeStatus === 'all' || p.ステータス === activeStatus;
+    return searchMatch && statusMatch;
   });
-  document.getElementById('totalCount').textContent = count;
+
+  const area = document.getElementById('cardsArea');
+  if (filtered.length === 0) {
+    area.innerHTML = '<div class="add-row" style="margin-bottom:14px;">該当する案件がありません</div>';
+  } else {
+    area.innerHTML = filtered.map(buildCard).join('');
+  }
   document.getElementById('addRow').style.display = q ? 'none' : '';
 }
+
+// ─── 初期化 ─────────────────────────────────────────
+// index.htmlのlocalStorageからもデータを読む（共有ハブ対応）
+function init() {
+  // index.htmlが同一オリジンであれば共有キーも参照可能
+  // 現状はartrise_anken_v1キーで統一
+  renderCards();
+}
+init();
 </script>
 </body>
 </html>
