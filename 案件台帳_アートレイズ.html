@@ -106,6 +106,14 @@ body { font-family: Meiryo,'Yu Gothic',sans-serif; background: #eee; color: var(
   cursor: default; pointer-events: none;
 }
 .doc-tag-icon { font-size: 13px; }
+.doc-tag.drive-tag {
+  background: #e6f4ea; color: #1a7a30; border: 1px solid #a8d5b0;
+}
+.doc-tag.drive-tag:hover { background: #1a7a30; color: #fff; }
+.doc-tag.drive-tag.unavailable {
+  background: #f3f4f6; color: #b0b8c4; border: 1px solid #e5e7eb;
+  cursor: default; pointer-events: none;
+}
 
 /* 工程バー */
 .process-bar { display: flex; gap: 4px; margin-bottom: 14px; }
@@ -253,7 +261,12 @@ function buildCard(item) {
         <div class="info-item"><span class="info-label">入金日</span><span class="info-value">${item.入金日 || '未入金'}</span></div>
       </div>
       ${item.備考 ? `<div class="note-box"><div class="note-label">📝 備考</div>${item.備考}</div>` : ''}
-      <div class="doc-tags">${buildDocTags(item)}</div>
+      <div class="doc-tags">
+        ${buildDocTags(item)}
+        ${item.driveUrl
+          ? `<a class="doc-tag drive-tag" href="${item.driveUrl}" target="_blank"><span class="doc-tag-icon">📁</span>Drive</a>`
+          : `<span class="doc-tag drive-tag unavailable"><span class="doc-tag-icon">📁</span>Drive</span>`}
+      </div>
     </div>
   </div>`;
 }
