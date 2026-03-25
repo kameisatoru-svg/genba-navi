@@ -126,31 +126,7 @@ body { font-family: Meiryo,'Yu Gothic',sans-serif; background: #eee; color: var(
   margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--border);
 }
 
-/* JSON貼り付けパネル（index.htmlから呼ばれる想定だがスタンドアロン対応） */
-.json-panel {
-  background: #1e2d40; color: #e0e8f0; border-radius: 6px;
-  margin-bottom: 20px; overflow: hidden;
-}
-.json-panel-header {
-  padding: 12px 18px; display: flex; justify-content: space-between;
-  align-items: center; cursor: pointer; user-select: none;
-}
-.json-panel-header span { font-size: 13px; font-weight: 700; }
-.json-panel-body { padding: 0 18px 16px; display: none; }
-.json-panel.open .json-panel-body { display: block; }
-.json-panel textarea {
-  width: 100%; height: 120px; background: #111d2a; color: #7ec8e3;
-  border: 1px solid #3a5a7a; border-radius: 4px; padding: 10px;
-  font-size: 12px; font-family: monospace; resize: vertical;
-}
-.json-panel-btns { display: flex; gap: 8px; margin-top: 8px; }
-.json-btn {
-  padding: 7px 18px; border: none; border-radius: 4px; font-size: 12px;
-  font-weight: 700; cursor: pointer; font-family: inherit;
-}
-.json-btn.primary { background: #2563eb; color: #fff; }
-.json-btn.danger { background: #dc2626; color: #fff; }
-.json-msg { font-size: 12px; margin-top: 6px; color: #6ee7b7; }
+
 
 @media (max-width: 700px) { .info-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 480px) { .info-grid { grid-template-columns: 1fr; } }
@@ -170,31 +146,11 @@ body { font-family: Meiryo,'Yu Gothic',sans-serif; background: #eee; color: var(
     <div class="stat-item"><div class="stat-num" id="countMitsumori">-</div><div class="stat-label">見積提出済／予定</div></div>
     <div class="stat-item"><div class="stat-num" id="countSeikyu">-</div><div class="stat-label">請求済</div></div>
     <div class="stat-item"><div class="stat-num" id="totalAmount">-</div><div class="stat-label">受注総額（税込）</div></div>
-    <div class="stat-item" style="margin-left:auto;text-align:right;">
-      <div style="font-size:12px;font-weight:600;" id="sourceBadge">読込中...</div>
-      <div class="stat-label">データソース</div>
-    </div>
   </div>
 
   <div class="search-bar">
     <input type="text" id="searchInput" placeholder="🔍 案件番号・顧客名・工事内容で絞り込み..." oninput="renderCards()">
     <div class="status-filter" id="statusFilter"></div>
-  </div>
-
-  <!-- JSONデータ貼り付けパネル -->
-  <div class="json-panel" id="jsonPanel">
-    <div class="json-panel-header" onclick="toggleJsonPanel()">
-      <span>📥 案件データ貼り付け（ClaudeからJSONをここに貼る）</span>
-      <span id="jsonPanelArrow">▼</span>
-    </div>
-    <div class="json-panel-body">
-      <textarea id="jsonInput" placeholder='ClaudeがJSON生成 → ここに貼り付け → 「保存」ボタン押下&#10;&#10;例：[{"案件番号":"AR-2026-0009", "工事名":"...", ...}]'></textarea>
-      <div class="json-panel-btns">
-        <button class="json-btn primary" onclick="saveJson()">💾 保存してアプリに反映</button>
-        <button class="json-btn danger" onclick="clearJson()">🗑 全データ削除</button>
-      </div>
-      <div id="jsonMsg" class="json-msg"></div>
-    </div>
   </div>
 
   <!-- 案件カード出力エリア -->
@@ -211,7 +167,6 @@ body { font-family: Meiryo,'Yu Gothic',sans-serif; background: #eee; color: var(
 // ─── 定数 ───────────────────────────────────────────
 const STORAGE_KEY = 'artrise_anken_v1';
 const BASE_URL = 'https://kameisatoru-svg.github.io/genba-navi/';
-const DATA_JSON_URL = BASE_URL + 'data.json';
 
 // バッジ色マップ
 const BADGE_COLORS = {
@@ -225,82 +180,12 @@ const BADGE_COLORS = {
 };
 
 // ─── データ操作 ──────────────────────────────────────
-// fetch優先・localStorageフォールバック
-async function loadDataAsync() {
-  // まずfetchを試みる（キャッシュバスター付き）
-  try {
-    const res = await fetch(DATA_JSON_URL + '?v=' + Date.now());
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const json = await res.json();
-    const data = json.案件 || [];
-    // 取得成功：localStorageにも同期しておく（オフライン時の保険）
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    setSourceBadge('fetch', json.最終更新 || '');
-    return data;
-  } catch(e) {
-    // fetch失敗 → localStorageにフォールバック
-    setSourceBadge('local', '');
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-    catch(e2) { return []; }
-  }
-}
-
-// 同期版（JSONパネルの貼り付け後など即時再描画用）
-function loadDataSync() {
+function loadData() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
   catch(e) { return []; }
 }
-
 function saveData(data) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
-
-// データソースバッジ表示
-function setSourceBadge(type, updatedAt) {
-  const el = document.getElementById('sourceBadge');
-  if (!el) return;
-  if (type === 'fetch') {
-    el.innerHTML = `<span style="color:#1a7a30;">● GitHub同期</span>${updatedAt ? ' <span style="color:#888;font-size:11px;">(' + updatedAt + ')</span>' : ''}`;
-  } else {
-    el.innerHTML = `<span style="color:#d97706;">● オフライン（ローカル）</span>`;
-  }
-}
-
-// ─── JSON貼り付けパネル ──────────────────────────────
-function toggleJsonPanel() {
-  const panel = document.getElementById('jsonPanel');
-  const arrow = document.getElementById('jsonPanelArrow');
-  panel.classList.toggle('open');
-  arrow.textContent = panel.classList.contains('open') ? '▲' : '▼';
-}
-function saveJson() {
-  const raw = document.getElementById('jsonInput').value.trim();
-  const msg = document.getElementById('jsonMsg');
-  if (!raw) { msg.style.color='#fca5a5'; msg.textContent='⚠ JSONを貼り付けてください'; return; }
-  try {
-    let incoming = JSON.parse(raw);
-    if (!Array.isArray(incoming)) incoming = [incoming];
-    const existing = loadDataSync();
-    // 案件番号で上書きマージ
-    const map = {};
-    existing.forEach(p => { map[p.案件番号] = p; });
-    incoming.forEach(p => { map[p.案件番号] = p; });
-    const merged = Object.values(map).sort((a,b) => a.案件番号.localeCompare(b.案件番号));
-    saveData(merged);
-    document.getElementById('jsonInput').value = '';
-    msg.style.color='#6ee7b7';
-    msg.textContent = `✅ ${incoming.length}件を保存しました（合計${merged.length}件）`;
-    renderCards(merged);
-  } catch(e) {
-    msg.style.color='#fca5a5';
-    msg.textContent = '❌ JSON形式が正しくありません: ' + e.message;
-  }
-}
-function clearJson() {
-  if (!confirm('全案件データを削除します。よろしいですか？')) return;
-  localStorage.removeItem(STORAGE_KEY);
-  document.getElementById('jsonMsg').textContent = '🗑 全データを削除しました';
-  renderCards([]);
 }
 
 // ─── 書類タグ生成 ────────────────────────────────────
@@ -317,7 +202,7 @@ function buildDocTags(item) {
     if (url) {
       // 相対パスの場合はBASE_URLを付与、http始まりはそのまま
       const href = url.startsWith('http') ? url : BASE_URL + url;
-      return `<a class="doc-tag available" href="${href}" download>
+      return `<a class="doc-tag available" href="${href}" target="_blank">
         <span class="doc-tag-icon">${d.icon}</span>${d.label}
       </a>`;
     } else {
@@ -402,9 +287,8 @@ function setFilter(status) {
 }
 
 // ─── メインレンダリング ──────────────────────────────
-// data引数あり→そのまま使用、なし→localStorageから読む
-function renderCards(data) {
-  if (data === undefined) data = loadDataSync();
+function renderCards() {
+  const data = loadData();
   const q = document.getElementById('searchInput').value.toLowerCase();
   updateStats(data);
   buildStatusFilter(data);
@@ -425,12 +309,8 @@ function renderCards(data) {
 }
 
 // ─── 初期化 ─────────────────────────────────────────
-async function init() {
-  // ローディング表示
-  document.getElementById('cardsArea').innerHTML =
-    '<div class="add-row" style="margin-bottom:14px;color:#888;">📡 データを読み込んでいます...</div>';
-  const data = await loadDataAsync();
-  renderCards(data);
+function init() {
+  renderCards();
 }
 init();
 </script>
