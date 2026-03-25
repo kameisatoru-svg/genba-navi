@@ -253,8 +253,8 @@ function buildCard(item, idx) {
       </table>
     </div>` : '';
 
-  const docTag = item.書類
-    ? `<a class="doc-tag available" href="${item.書類}" download>📄 請求書PDF</a>`
+  const docTag = item.請求書PDF
+    ? `<a class="doc-tag available" href="${item.請求書PDF}" target="_blank">📄 請求書PDF</a>`
     : `<span class="doc-tag unavailable">📄 請求書PDF</span>`;
 
   const searchText = [item.請求番号, item.案件番号, item.顧客, item.工事名, item.施工場所, badgeLabel].filter(Boolean).join(' ').toLowerCase();
