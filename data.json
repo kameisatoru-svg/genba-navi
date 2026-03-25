@@ -17,7 +17,7 @@
         "見積日": "2026-02-10",
         "見積金額": 9536000,
         "備考": "",
-        "PDF": "",
+        "PDF": "https://drive.google.com/file/d/1h_b0axuuDQKv-FkCakpF8y4sRFcJo10h/view",
         "明細": [
           {
             "工事内容": "フロアタイル張り工事（LGS下地含む）",
@@ -58,7 +58,7 @@
           "入金状況": "minyukin",
           "入金日": "",
           "備考": "第1期",
-          "PDF": "",
+          "PDF": "https://drive.google.com/file/d/1WnYax9cPi6G80p3IRqG-NoaTWtadrAo_/view",
           "税抜合計": 9082000,
           "消費税": 908200,
           "税込合計": 9990200,
@@ -96,7 +96,7 @@
         "契約日": "",
         "契約金額": 0,
         "ステータス": "未締結",
-        "PDF": ""
+        "PDF": "https://drive.google.com/file/d/17JPX0lWcCljb56GGCqVXyQ274_LH0RHS/view"
       },
       "原価": {
         "労務費": 0,
