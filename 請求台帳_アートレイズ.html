@@ -416,5 +416,110 @@ document.querySelectorAll('.invoice-card').forEach(card => {
 // 初期集計
 filterCards();
 </script>
+
+<!-- ★ 共通ナビバー（編集する場合はこのブロックをすべてのアプリで同時に差し替える） -->
+<style>
+.app-navbar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 60px;
+  background: #1e2d40;
+  display: flex;
+  align-items: stretch;
+  z-index: 9999;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.18);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.app-navbar a {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  text-decoration: none;
+  color: rgba(255,255,255,0.45);
+  font-family: Meiryo,'Yu Gothic',sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  transition: color 0.15s, background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.app-navbar a:active {
+  background: rgba(255,255,255,0.06);
+}
+.app-navbar a.nav-active {
+  color: #c8a96e;
+}
+.app-navbar a svg {
+  opacity: 0.45;
+  transition: opacity 0.15s;
+}
+.app-navbar a.nav-active svg {
+  opacity: 1;
+}
+/* ナビバー分の余白 */
+body { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)); }
+</style>
+<nav class="app-navbar" id="appNavbar">
+  <a href="案件台帳_アートレイズ.html" data-page="anken">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <rect x="3" y="2" width="16" height="18" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <line x1="7" y1="7" x2="15" y2="7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      <line x1="7" y1="11" x2="15" y2="11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      <line x1="7" y1="15" x2="11" y2="15" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+    </svg>
+    案件台帳
+  </a>
+  <a href="見積台帳_アートレイズ.html" data-page="mitsumori">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <rect x="3" y="2" width="16" height="18" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <line x1="7" y1="7" x2="15" y2="7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      <line x1="7" y1="11" x2="13" y2="11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      <path d="M10 17 L13 14 L16 17" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+    見積台帳
+  </a>
+  <a href="請求台帳_アートレイズ.html" data-page="seikyu">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <rect x="3" y="2" width="16" height="18" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <path d="M11 7 v8 M8.5 9 Q8.5 7 11 7 Q13.5 7 13.5 9 Q13.5 11 11 11 Q13.5 11 13.5 13 Q13.5 15 11 15 Q8.5 15 8.5 13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+    </svg>
+    請求台帳
+  </a>
+  <a href="原価管理台帳_アートレイズ.html" data-page="genka">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <rect x="2" y="14" width="4" height="6" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/>
+      <rect x="9" y="9" width="4" height="11" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/>
+      <rect x="16" y="4" width="4" height="16" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/>
+      <path d="M4 12 L9 8 L13 10 L18 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+    工事台帳
+  </a>
+</nav>
+<script>
+(function(){
+  var path = location.pathname;
+  var map = {
+    '案件台帳_アートレイズ.html': 'anken',
+    '見積台帳_アートレイズ.html': 'mitsumori',
+    '請求台帳_アートレイズ.html': 'seikyu',
+    '原価管理台帳_アートレイズ.html': 'genka'
+  };
+  var current = null;
+  Object.keys(map).forEach(function(k){
+    if(path.indexOf(k) !== -1) current = map[k];
+  });
+  if(current){
+    var links = document.querySelectorAll('#appNavbar a');
+    links.forEach(function(a){
+      if(a.getAttribute('data-page') === current) a.classList.add('nav-active');
+    });
+  }
+})();
+</script>
+<!-- ★ 共通ナビバー ここまで -->
+
 </body>
 </html>
