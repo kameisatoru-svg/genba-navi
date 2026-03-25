@@ -580,6 +580,19 @@ function filterCards() {
   document.getElementById('totalCount').textContent = count;
   document.getElementById('addRow').style.display = q ? 'none' : '';
 }
+
+// ─── URLパラメータから案件番号を読んで自動フィルタ ──
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const anken = params.get('anken');
+  if (anken) {
+    const input = document.getElementById('searchInput');
+    if (input) {
+      input.value = anken;
+      filterCards();
+    }
+  }
+})();
 </script>
 
 <!-- ★ 共通ナビバー（編集する場合はこのブロックをすべてのアプリで同時に差し替える） -->

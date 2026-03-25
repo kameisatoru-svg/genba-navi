@@ -196,29 +196,20 @@ function saveData(data) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
-// ─── 書類タグ生成 ────────────────────────────────────
+// ─── 書類タグ生成（各台帳クロスリンク） ──────────────
 function buildDocTags(item) {
-  const docs = item.書類 || {};
+  const id = encodeURIComponent(item.案件番号);
   const defs = [
-    { key: '見積書', icon: '📄', label: '見積書' },
-    { key: '請求書', icon: '🧾', label: '請求書' },
-    { key: '注文書', icon: '📝', label: '注文書' },
-    { key: '契約書', icon: '📜', label: '契約書' },
+    { label: '見積書', icon: '📄', url: BASE_URL + '見積台帳_アートレイズ.html?anken=' + id },
+    { label: '請求書', icon: '🧾', url: BASE_URL + '請求台帳_アートレイズ.html?anken=' + id },
+    { label: '注文書', icon: '📝', url: BASE_URL + '注文書_雛形_アートレイズ.html?anken=' + id },
+    { label: '契約書', icon: '📜', url: BASE_URL + '工事請負契約書_雛形_アートレイズ.html?anken=' + id },
   ];
-  return defs.map(d => {
-    const url = docs[d.key];
-    if (url) {
-      // 相対パスの場合はBASE_URLを付与、http始まりはそのまま
-      const href = url.startsWith('http') ? url : BASE_URL + url;
-      return `<a class="doc-tag available" href="${href}" target="_blank">
-        <span class="doc-tag-icon">${d.icon}</span>${d.label}
-      </a>`;
-    } else {
-      return `<span class="doc-tag unavailable">
-        <span class="doc-tag-icon">${d.icon}</span>${d.label}
-      </span>`;
-    }
-  }).join('');
+  return defs.map(d =>
+    `<a class="doc-tag available" href="${d.url}" target="_blank">
+      <span class="doc-tag-icon">${d.icon}</span>${d.label}
+    </a>`
+  ).join('');
 }
 
 // ─── 案件カード生成 ──────────────────────────────────

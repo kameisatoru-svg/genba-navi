@@ -347,7 +347,19 @@ function toggleMeisai(id, btn) {
   btn.textContent = isOpen ? '▼ 明細を隠す' : '▶ 明細を表示';
 }
 
-init();
+init().then(() => {
+  const params = new URLSearchParams(window.location.search);
+  const anken = params.get('anken');
+  if (anken) {
+    const input = document.getElementById('searchInput');
+    if (input) {
+      input.value = anken;
+      // renderCardsを再実行してフィルタ適用
+      const data = JSON.parse(localStorage.getItem('artrise_seikyu_v1') || '[]');
+      renderCards(data);
+    }
+  }
+});
 </script>
 </body>
 </html>
