@@ -4,522 +4,350 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>請求台帳｜株式会社アート・レイズ</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --band: #555;
-    --light: #f8f8f8;
-    --border: #ddd;
-    --border-dark: #aaa;
-    --text: #333;
-    --text-sub: #666;
-    --white: #fff;
-    --accent: #2563eb;
-    --green: #16a34a;
-    --orange: #d97706;
-    --red: #dc2626;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Noto Sans JP', sans-serif;
-    background: #eee;
-    color: var(--text);
-    font-size: 14px;
-  }
-  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+:root {
+  --band: #555; --light: #f8f8f8; --border: #ddd; --border-dark: #aaa;
+  --text: #333; --text-sub: #666; --white: #fff; --accent: #2563eb;
+  --green: #16a34a; --orange: #d97706; --red: #dc2626;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Meiryo,'Yu Gothic',sans-serif; background: #eee; color: var(--text); font-size: 14px; padding-bottom: 70px; }
+.container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
 
-  .page-header {
-    background: var(--band);
-    color: var(--white);
-    padding: 18px 24px;
-    border-radius: 6px 6px 0 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .page-header h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.05em; }
-  .page-header .meta { font-size: 12px; opacity: 0.8; text-align: right; }
+.page-header {
+  background: var(--band); color: var(--white);
+  padding: 18px 24px; border-radius: 6px 6px 0 0;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.page-header h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.05em; }
+.page-header .meta { font-size: 12px; opacity: 0.8; text-align: right; }
 
-  .stats-bar {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-top: none;
-    padding: 14px 24px;
-    display: flex;
-    gap: 32px;
-    flex-wrap: wrap;
-  }
-  .stat-item { text-align: center; }
-  .stat-num { font-size: 24px; font-weight: 700; color: var(--band); }
-  .stat-label { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+.stats-bar {
+  background: var(--white); border: 1px solid var(--border); border-top: none;
+  padding: 14px 24px; display: flex; gap: 32px; flex-wrap: wrap;
+}
+.stat-item { text-align: center; }
+.stat-num { font-size: 22px; font-weight: 700; color: var(--band); }
+.stat-label { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
 
-  .search-bar {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-top: none;
-    padding: 12px 24px;
-    border-radius: 0 0 6px 6px;
-    margin-bottom: 20px;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .search-bar input {
-    flex: 1;
-    min-width: 200px;
-    padding: 8px 12px;
-    border: 1px solid var(--border-dark);
-    border-radius: 4px;
-    font-size: 14px;
-    font-family: inherit;
-  }
-  .search-bar input:focus { outline: none; border-color: var(--accent); }
-  .filter-btn {
-    padding: 7px 14px;
-    border-radius: 4px;
-    border: 1px solid var(--border-dark);
-    background: var(--white);
-    font-size: 12px;
-    font-family: inherit;
-    cursor: pointer;
-    color: var(--text-sub);
-    font-weight: 700;
-  }
-  .filter-btn:hover { background: var(--light); }
-  .filter-btn.active-all  { background: var(--band); color: #fff; border-color: var(--band); }
-  .filter-btn.active-minyukin { background: var(--red); color: #fff; border-color: var(--red); }
-  .filter-btn.active-nyukin { background: var(--green); color: #fff; border-color: var(--green); }
+.search-bar {
+  background: var(--white); border: 1px solid var(--border); border-top: none;
+  padding: 12px 24px; border-radius: 0 0 6px 6px; margin-bottom: 20px;
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+}
+.search-bar input {
+  flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid var(--border-dark);
+  border-radius: 4px; font-size: 14px; font-family: inherit;
+}
+.search-bar input:focus { outline: none; border-color: var(--accent); }
+.filter-btn {
+  padding: 5px 12px; border: 1px solid var(--border-dark); border-radius: 20px;
+  background: var(--white); font-size: 12px; cursor: pointer; font-family: inherit;
+}
+.filter-btn.active-all     { background: var(--band); color: var(--white); border-color: var(--band); }
+.filter-btn.active-minyukin { background: var(--red); color: var(--white); border-color: var(--red); }
+.filter-btn.active-nyukin   { background: var(--green); color: var(--white); border-color: var(--green); }
 
-  /* 請求カード */
-  .invoice-card {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    margin-bottom: 14px;
-    overflow: hidden;
-  }
-  .card-header {
-    background: #444444;
-    color: var(--white);
-    padding: 10px 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .card-header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .invoice-id {
-    font-size: 12px;
-    font-weight: 700;
-    background: rgba(255,255,255,0.2);
-    padding: 2px 8px;
-    border-radius: 4px;
-    letter-spacing: 0.05em;
-    white-space: nowrap;
-  }
-  .invoice-name { font-size: 14px; font-weight: 700; }
+.invoice-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 6px; margin-bottom: 14px; overflow: hidden;
+}
+.card-header {
+  background: #444; color: var(--white);
+  padding: 10px 16px; display: flex; justify-content: space-between;
+  align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.card-header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.invoice-id {
+  font-size: 12px; font-weight: 700; background: rgba(255,255,255,0.2);
+  padding: 2px 8px; border-radius: 4px; letter-spacing: 0.05em; white-space: nowrap;
+}
+.invoice-name { font-size: 14px; font-weight: 700; }
+.badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px; white-space: nowrap; }
+.badge-nyukin  { background: #16a34a; color: #fff; }
+.badge-minyukin { background: #dc2626; color: #fff; }
 
-  .badge {
-    font-size: 11px;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 12px;
-    white-space: nowrap;
-  }
-  .badge-minyukin { background: #dc2626; color: #fff; }
-  .badge-nyukin   { background: #16a34a; color: #fff; }
-  .badge-ichibu   { background: #d97706; color: #fff; }
+.card-body { padding: 16px; }
+.info-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px 20px; margin-bottom: 14px;
+}
+.info-item { display: flex; flex-direction: column; gap: 2px; }
+.info-label { font-size: 11px; color: var(--text-sub); font-weight: 700; }
+.info-value { font-size: 13px; color: var(--text); }
+.amount-value { font-size: 15px; font-weight: 700; color: #1e40af; }
+.nyukin-value { font-weight: 700; color: #16a34a; }
+.minyukin-value { font-weight: 700; color: #dc2626; }
 
-  .card-body { padding: 16px; }
+.meisai-toggle {
+  background: none; border: 1px solid var(--border-dark); border-radius: 4px;
+  padding: 5px 12px; font-size: 12px; font-family: inherit;
+  cursor: pointer; color: var(--text-sub); margin-bottom: 10px;
+}
+.meisai-toggle:hover { background: var(--light); }
+.meisai-wrap { display: none; }
+.meisai-wrap.open { display: block; }
+.meisai-table {
+  width: 100%; border-collapse: collapse; font-size: 12px;
+  margin-bottom: 8px; border: 1px solid var(--border);
+}
+.meisai-table th {
+  background: #444; color: var(--white); padding: 6px 10px;
+  text-align: left; font-weight: 700;
+}
+.meisai-table th.right, .meisai-table td.right { text-align: right; }
+.meisai-table td { padding: 6px 10px; border-bottom: 1px solid var(--border); }
+.meisai-table tr:nth-child(even) td { background: #f5f5f5; }
+.meisai-table tr:last-child td { border-bottom: none; }
+.totals-table {
+  width: 320px; margin-left: auto; border-collapse: collapse;
+  font-size: 13px; border: 1px solid var(--border);
+}
+.totals-table td { padding: 6px 14px; border-bottom: 1px solid var(--border); }
+.totals-table td:last-child { text-align: right; }
+.totals-table tr:last-child td {
+  background: #444; color: var(--white);
+  font-weight: 700; font-size: 14px; border-bottom: none;
+}
 
-  .info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 10px 20px;
-    margin-bottom: 14px;
-  }
-  .info-item { display: flex; flex-direction: column; gap: 2px; }
-  .info-label { font-size: 11px; color: var(--text-sub); font-weight: 700; }
-  .info-value { font-size: 13px; color: var(--text); }
-  .amount-value { font-size: 15px; font-weight: 700; color: #1e40af; }
-  .nyukin-value { font-size: 13px; font-weight: 700; color: var(--green); }
-  .minyukin-value { font-size: 13px; font-weight: 700; color: var(--red); }
+.note-box {
+  background: #fafafa; border-left: 3px solid #d1d5db;
+  padding: 10px 14px; font-size: 12px; color: var(--text-sub);
+  border-radius: 0 4px 4px 0; margin-top: 12px; line-height: 1.7;
+}
+.note-label { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 11px; }
 
-  /* 明細トグル */
-  .meisai-toggle {
-    background: none;
-    border: 1px solid var(--border-dark);
-    border-radius: 4px;
-    padding: 5px 12px;
-    font-size: 12px;
-    font-family: inherit;
-    cursor: pointer;
-    color: var(--text-sub);
-    margin-bottom: 10px;
-  }
-  .meisai-toggle:hover { background: var(--light); }
-  .meisai-wrap { display: none; }
-  .meisai-wrap.open { display: block; }
-  .meisai-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-    margin-bottom: 8px;
-    border: 1px solid var(--border);
-  }
-  .meisai-table th {
-    background: #444444;
-    color: var(--white);
-    padding: 6px 10px;
-    text-align: left;
-    font-weight: 700;
-  }
-  .meisai-table th.right,
-  .meisai-table td.right { text-align: right; }
-  .meisai-table td {
-    padding: 6px 10px;
-    border-bottom: 1px solid var(--border);
-  }
-  .meisai-table tr:nth-child(even) td { background: #f5f5f5; }
-  .meisai-table tr:last-child td { border-bottom: none; }
+.doc-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 4px; font-size: 12px;
+  text-decoration: none; margin: 4px 4px 0 0;
+}
+.doc-tag.available { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+.doc-tag.unavailable { background: #f3f4f6; color: #9ca3af; border: 1px solid #e5e7eb; }
 
-  .totals-table {
-    width: 320px;
-    margin-left: auto;
-    border-collapse: collapse;
-    font-size: 13px;
-    border: 1px solid var(--border);
-  }
-  .totals-table td { padding: 6px 14px; border-bottom: 1px solid var(--border); }
-  .totals-table td:last-child { text-align: right; }
-  .totals-table tr:last-child td {
-    background: #444444;
-    color: var(--white);
-    font-weight: 700;
-    font-size: 14px;
-    border-bottom: none;
-  }
+.add-row {
+  background: var(--white); border: 2px dashed var(--border-dark);
+  border-radius: 6px; padding: 16px; text-align: center;
+  color: var(--text-sub); font-size: 13px; margin-bottom: 20px;
+}
+.page-footer {
+  text-align: center; font-size: 11px; color: var(--text-sub);
+  padding: 12px 0; border-top: 1px solid var(--border); margin-top: 8px;
+}
 
-  .note-box {
-    background: #fafafa;
-    border-left: 3px solid #d1d5db;
-    padding: 10px 14px;
-    font-size: 12px;
-    color: var(--text-sub);
-    border-radius: 0 4px 4px 0;
-    margin-top: 12px;
-    line-height: 1.7;
-  }
-  .note-label { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 11px; }
-
-  .add-row {
-    background: var(--white);
-    border: 2px dashed var(--border-dark);
-    border-radius: 6px;
-    padding: 16px;
-    text-align: center;
-    color: var(--text-sub);
-    font-size: 13px;
-    margin-bottom: 20px;
-  }
-  .page-footer {
-    text-align: center;
-    font-size: 11px;
-    color: var(--text-sub);
-    padding: 12px 0;
-    border-top: 1px solid var(--border);
-    margin-top: 8px;
-  }
-  .back-link {
-    display: inline-block;
-    margin-bottom: 16px;
-    font-size: 13px;
-    color: var(--accent);
-    text-decoration: none;
-  }
-  .back-link:hover { text-decoration: underline; }
+/* ★ 共通ナビバー */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: #333; display: flex; border-top: 2px solid #c8a96e;
+}
+.bottom-nav a {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 8px 4px; color: #ccc;
+  text-decoration: none; font-size: 11px; gap: 2px; transition: background 0.15s;
+}
+.bottom-nav a:hover { background: #444; }
+.bottom-nav a.active { color: #c8a96e; border-top: 2px solid #c8a96e; margin-top: -2px; }
+.bottom-nav a .nav-icon { font-size: 18px; }
 </style>
 </head>
 <body>
 <div class="container">
 
-  <a href="index.html" class="back-link">← 現場ナビPROに戻る</a>
-
   <div class="page-header">
     <h1>🧾 請求台帳</h1>
-    <div class="meta">株式会社アート・レイズ<br>最終更新：2026-03-19</div>
+    <div class="meta">株式会社アート・レイズ<br><span id="lastUpdated">-</span></div>
   </div>
 
   <div class="stats-bar">
-    <div class="stat-item">
-      <div class="stat-num" id="totalCount">1</div>
-      <div class="stat-label">総請求件数</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num" id="minyukinCount" style="color:#dc2626;">0</div>
-      <div class="stat-label">未入金</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num" id="nyukinCount" style="color:#16a34a;">1</div>
-      <div class="stat-label">入金済み</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num" id="totalAmount">¥14,520</div>
-      <div class="stat-label">請求総額（税込）</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num" id="minyukinAmount" style="color:#dc2626;">¥0</div>
-      <div class="stat-label">未入金合計</div>
+    <div class="stat-item"><div class="stat-num" id="totalCount">-</div><div class="stat-label">総請求件数</div></div>
+    <div class="stat-item"><div class="stat-num" id="minyukinCount" style="color:#dc2626;">-</div><div class="stat-label">未入金</div></div>
+    <div class="stat-item"><div class="stat-num" id="nyukinCount" style="color:#16a34a;">-</div><div class="stat-label">入金済み</div></div>
+    <div class="stat-item"><div class="stat-num" id="totalAmount">-</div><div class="stat-label">請求総額（税込）</div></div>
+    <div class="stat-item"><div class="stat-num" id="minyukinAmount" style="color:#dc2626;">-</div><div class="stat-label">未入金合計</div></div>
+    <div class="stat-item" style="margin-left:auto;text-align:right;">
+      <div style="font-size:12px;font-weight:600;" id="sourceBadge">読込中...</div>
+      <div class="stat-label">データソース</div>
     </div>
   </div>
 
   <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="🔍 案件番号・顧客名・工事内容で絞り込み..." oninput="filterCards()">
-    <button class="filter-btn active-all" id="btn-all"    onclick="setFilter('all')">すべて</button>
+    <input type="text" id="searchInput" placeholder="🔍 請求番号・顧客名・工事内容で絞り込み..." oninput="renderCards()">
+    <button class="filter-btn active-all" id="btn-all"      onclick="setFilter('all')">すべて</button>
     <button class="filter-btn"            id="btn-minyukin" onclick="setFilter('minyukin')">未入金のみ</button>
     <button class="filter-btn"            id="btn-nyukin"   onclick="setFilter('nyukin')">入金済みのみ</button>
   </div>
 
-  <!-- AR-2026-C004-001 -->
-  <div class="invoice-card" data-search="ar-2026-c004-001 ar-2026-0008 ウインズコーポレーション 民泊客家 ロールスクリーン 補修 入金済み" data-status="nyukin">
-    <div class="card-header">
-      <div class="card-header-left">
-        <span class="invoice-id">AR-2026-C004-001</span>
-        <span class="invoice-name">ロールスクリーン補修工事</span>
-      </div>
-      <span class="badge badge-nyukin">入金済み</span>
-    </div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">顧客</span>
-          <span class="info-value">有限会社ウインズコーポレーション</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">案件番号</span>
-          <span class="info-value">AR-2026-0008</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">施工場所</span>
-          <span class="info-value">民泊客家</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">請求日</span>
-          <span class="info-value">2026-03-18</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">請求金額（税込）</span>
-          <span class="info-value amount-value">¥14,520</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">入金状況</span>
-          <span class="info-value nyukin-value">✅ 入金済み</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">請求ファイル</span>
-          <span class="info-value">請求書_AR-2026-C004-001_ウインズコーポレーション.html</span>
-        </div>
-      </div>
-
-      <button class="meisai-toggle" onclick="toggleMeisai('meisai-c004-001', this)">▶ 明細を表示</button>
-      <div class="meisai-wrap" id="meisai-c004-001">
-        <table class="meisai-table">
-          <thead>
-            <tr>
-              <th>工事内容</th>
-              <th class="right">数量</th>
-              <th>単位</th>
-              <th class="right">金額（税抜）</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td>ロールスクリーン補修工事一式</td><td class="right">1</td><td>式</td><td class="right">¥13,200</td></tr>
-          </tbody>
-        </table>
-        <table class="totals-table">
-          <tr><td>税抜合計</td><td>¥13,200</td></tr>
-          <tr><td>消費税（10%）</td><td>¥1,320</td></tr>
-          <tr><td>税込合計（請求金額）</td><td>¥14,520</td></tr>
-        </table>
-      </div>
-
-      <div class="note-box">
-        <div class="note-label">📝 案件メモ</div>
-        民泊客家のロールスクリーン補修。請求済み・入金済み。
-      </div>
-    </div>
-  </div>
-
-  <!-- ★ 次の請求データをここに追加 -->
-  <div class="add-row" id="addRow">
-    ＋ 次の請求データをここに追加
-  </div>
+  <div id="cardsArea"></div>
+  <div class="add-row" id="addRow">＋ Claudeに依頼してJSONで請求を追加</div>
 
   <div class="page-footer">
     株式会社アート・レイズ｜大分県別府市上原町13番25号｜TEL 0977-21-0603
   </div>
-
 </div>
+
+<!-- ★ 共通ナビバー -->
+<nav class="bottom-nav">
+  <a href="案件台帳_アートレイズ.html"><span class="nav-icon">📋</span>案件台帳</a>
+  <a href="見積台帳_アートレイズ.html"><span class="nav-icon">📄</span>見積台帳</a>
+  <a href="請求台帳_アートレイズ.html" class="active"><span class="nav-icon">🧾</span>請求台帳</a>
+  <a href="原価管理台帳_アートレイズ.html"><span class="nav-icon">📊</span>工事台帳</a>
+</nav>
+
 <script>
+const BASE_URL = 'https://kameisatoru-svg.github.io/genba-navi/';
+const DATA_JSON_URL = BASE_URL + 'data.json';
+const STORAGE_KEY = 'artrise_seikyu_v1';
 let currentFilter = 'all';
+
+// ─── データ読み込み ──────────────────────────────────
+async function loadDataAsync() {
+  try {
+    const res = await fetch(DATA_JSON_URL + '?v=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    const data = json.請求 || [];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    setSourceBadge('fetch', json.最終更新 || '');
+    return data;
+  } catch(e) {
+    setSourceBadge('local', '');
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+    catch(e2) { return []; }
+  }
+}
+function loadDataSync() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+  catch(e) { return []; }
+}
+function setSourceBadge(type, updatedAt) {
+  const el = document.getElementById('sourceBadge');
+  if (!el) return;
+  el.innerHTML = type === 'fetch'
+    ? `<span style="color:#1a7a30;">● GitHub同期</span>${updatedAt ? ' <span style="color:#888;font-size:11px;">('+updatedAt+')</span>' : ''}`
+    : `<span style="color:#d97706;">● オフライン（ローカル）</span>`;
+}
+
+// ─── カード生成 ──────────────────────────────────────
+function buildCard(item, idx) {
+  const isNyukin = item.入金状況 === 'nyukin';
+  const badgeClass = isNyukin ? 'badge-nyukin' : 'badge-minyukin';
+  const badgeLabel = isNyukin ? '入金済み' : '未入金';
+  const nyukinClass = isNyukin ? 'nyukin-value' : 'minyukin-value';
+  const nyukinLabel = isNyukin ? '✅ 入金済み' : '⚠ 未入金';
+
+  const meisaiRows = (item.明細 || []).map(m =>
+    `<tr><td>${m.工事内容}</td><td class="right">${m.数量}</td><td>${m.単位}</td>
+     <td class="right">¥${Number(m.金額税抜).toLocaleString()}</td></tr>`
+  ).join('');
+  const meisaiHtml = meisaiRows ? `
+    <button class="meisai-toggle" onclick="toggleMeisai('meisai-${idx}', this)">▶ 明細を表示</button>
+    <div class="meisai-wrap" id="meisai-${idx}">
+      <table class="meisai-table">
+        <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">金額（税抜）</th></tr></thead>
+        <tbody>${meisaiRows}</tbody>
+      </table>
+      <table class="totals-table">
+        <tr><td>税抜合計</td><td>¥${Number(item.税抜合計).toLocaleString()}</td></tr>
+        <tr><td>消費税（10%）</td><td>¥${Number(item.消費税).toLocaleString()}</td></tr>
+        <tr><td>税込合計（請求金額）</td><td>¥${Number(item.税込合計).toLocaleString()}</td></tr>
+      </table>
+    </div>` : '';
+
+  const docTag = item.書類
+    ? `<a class="doc-tag available" href="${item.書類}" download>📄 請求書PDF</a>`
+    : `<span class="doc-tag unavailable">📄 請求書PDF</span>`;
+
+  const searchText = [item.請求番号, item.案件番号, item.顧客, item.工事名, item.施工場所, badgeLabel].filter(Boolean).join(' ').toLowerCase();
+
+  return `
+  <div class="invoice-card" data-search="${searchText}" data-status="${item.入金状況 || 'minyukin'}" data-amount="${item.税込合計 || item.請求金額 || 0}">
+    <div class="card-header">
+      <div class="card-header-left">
+        <span class="invoice-id">${item.請求番号}</span>
+        <span class="invoice-name">${item.工事名}</span>
+      </div>
+      <span class="badge ${badgeClass}">${badgeLabel}</span>
+    </div>
+    <div class="card-body">
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">顧客</span><span class="info-value">${item.顧客 || '-'}</span></div>
+        <div class="info-item"><span class="info-label">案件番号</span><span class="info-value">${item.案件番号 || '-'}</span></div>
+        <div class="info-item"><span class="info-label">施工場所</span><span class="info-value">${item.施工場所 || '-'}</span></div>
+        <div class="info-item"><span class="info-label">請求日</span><span class="info-value">${item.請求日 || '-'}</span></div>
+        <div class="info-item"><span class="info-label">支払期限</span><span class="info-value">${item.支払期限 || '-'}</span></div>
+        <div class="info-item"><span class="info-label">請求金額（税込）</span><span class="info-value amount-value">¥${Number(item.税込合計 || item.請求金額 || 0).toLocaleString()}</span></div>
+        <div class="info-item"><span class="info-label">入金状況</span><span class="info-value ${nyukinClass}">${nyukinLabel}</span></div>
+        ${item.入金日 ? `<div class="info-item"><span class="info-label">入金日</span><span class="info-value">${item.入金日}</span></div>` : ''}
+      </div>
+      ${meisaiHtml}
+      ${item.備考 ? `<div class="note-box"><div class="note-label">📝 案件メモ</div>${item.備考}</div>` : ''}
+      <div style="margin-top:10px;">${docTag}</div>
+    </div>
+  </div>`;
+}
+
+// ─── 統計 ────────────────────────────────────────────
+function updateStats(data) {
+  const shown = data.filter(p => {
+    const matchF = currentFilter === 'all' || p.入金状況 === currentFilter;
+    return matchF;
+  });
+  let total = 0, minyukin = 0, nyukin = 0, totalAmt = 0, minyukinAmt = 0;
+  shown.forEach(p => {
+    const amt = Number(p.税込合計 || p.請求金額 || 0);
+    total++; totalAmt += amt;
+    if (p.入金状況 === 'minyukin') { minyukin++; minyukinAmt += amt; }
+    if (p.入金状況 === 'nyukin') nyukin++;
+  });
+  document.getElementById('totalCount').textContent = total;
+  document.getElementById('minyukinCount').textContent = minyukin;
+  document.getElementById('nyukinCount').textContent = nyukin;
+  document.getElementById('totalAmount').textContent = totalAmt ? '¥' + totalAmt.toLocaleString() : '¥0';
+  document.getElementById('minyukinAmount').textContent = minyukinAmt ? '¥' + minyukinAmt.toLocaleString() : '¥0';
+  const now = new Date();
+  document.getElementById('lastUpdated').textContent = `最終更新：${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+}
 
 function setFilter(f) {
   currentFilter = f;
   ['all','minyukin','nyukin'].forEach(k => {
-    const btn = document.getElementById('btn-' + k);
-    btn.className = 'filter-btn' + (k === f ? ' active-' + k : '');
+    document.getElementById('btn-' + k).className = 'filter-btn' + (k === f ? ' active-' + k : '');
   });
-  filterCards();
+  renderCards();
 }
 
-function filterCards() {
+// ─── レンダリング ────────────────────────────────────
+function renderCards(data) {
+  if (data === undefined) data = loadDataSync();
   const q = document.getElementById('searchInput').value.toLowerCase();
-  const cards = document.querySelectorAll('.invoice-card');
-  let total = 0, minyukin = 0, nyukin = 0;
-  let totalAmt = 0, minyukinAmt = 0;
-
-  cards.forEach(card => {
-    const text   = (card.getAttribute('data-search') || '').toLowerCase();
-    const status = card.getAttribute('data-status') || '';
-    const amt    = parseInt(card.getAttribute('data-amount') || '0');
-
-    const matchQ = !q || text.includes(q);
-    const matchF = currentFilter === 'all' || status === currentFilter;
-    const show   = matchQ && matchF;
-
-    card.style.display = show ? '' : 'none';
-
-    if (show) {
-      total++;
-      totalAmt += amt;
-      if (status === 'minyukin') { minyukin++; minyukinAmt += amt; }
-      if (status === 'nyukin')   { nyukin++; }
-    }
+  updateStats(data);
+  const filtered = data.filter(p => {
+    const sm = !q || [p.請求番号, p.案件番号, p.顧客, p.工事名, p.施工場所].filter(Boolean).join(' ').toLowerCase().includes(q);
+    const fm = currentFilter === 'all' || p.入金状況 === currentFilter;
+    return sm && fm;
   });
-
-  document.getElementById('totalCount').textContent   = total;
-  document.getElementById('minyukinCount').textContent = minyukin;
-  document.getElementById('nyukinCount').textContent   = nyukin;
-  document.getElementById('addRow').style.display = (q || currentFilter !== 'all') ? 'none' : '';
+  const area = document.getElementById('cardsArea');
+  area.innerHTML = filtered.length === 0
+    ? '<div class="add-row" style="margin-bottom:14px;">該当する請求がありません</div>'
+    : filtered.map((p, i) => buildCard(p, i)).join('');
+  document.getElementById('addRow').style.display = q ? 'none' : '';
 }
 
-// data-amount を各カードに付与（金額集計用）
-document.querySelectorAll('.invoice-card').forEach(card => {
-  const amtEl = card.querySelector('.amount-value');
-  if (amtEl) {
-    const num = parseInt(amtEl.textContent.replace(/[¥,]/g, '')) || 0;
-    card.setAttribute('data-amount', num);
-  }
-});
-// 初期集計
-filterCards();
+// ─── 初期化 ─────────────────────────────────────────
+async function init() {
+  document.getElementById('cardsArea').innerHTML =
+    '<div class="add-row" style="margin-bottom:14px;color:#888;">📡 データを読み込んでいます...</div>';
+  const data = await loadDataAsync();
+  renderCards(data);
+}
+
+function toggleMeisai(id, btn) {
+  const wrap = document.getElementById(id);
+  const isOpen = wrap.classList.toggle('open');
+  btn.textContent = isOpen ? '▼ 明細を隠す' : '▶ 明細を表示';
+}
+
+init();
 </script>
-
-<!-- ★ 共通ナビバー（編集する場合はこのブロックをすべてのアプリで同時に差し替える） -->
-<style>
-.app-navbar {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  height: 60px;
-  background: #1e2d40;
-  display: flex;
-  align-items: stretch;
-  z-index: 9999;
-  box-shadow: 0 -2px 12px rgba(0,0,0,0.18);
-  padding-bottom: env(safe-area-inset-bottom, 0);
-}
-.app-navbar a {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  text-decoration: none;
-  color: rgba(255,255,255,0.45);
-  font-family: Meiryo,'Yu Gothic',sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  transition: color 0.15s, background 0.15s;
-  -webkit-tap-highlight-color: transparent;
-}
-.app-navbar a:active {
-  background: rgba(255,255,255,0.06);
-}
-.app-navbar a.nav-active {
-  color: #c8a96e;
-}
-.app-navbar a svg {
-  opacity: 0.45;
-  transition: opacity 0.15s;
-}
-.app-navbar a.nav-active svg {
-  opacity: 1;
-}
-/* ナビバー分の余白 */
-body { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)); }
-</style>
-<nav class="app-navbar" id="appNavbar">
-  <a href="案件台帳_アートレイズ.html" data-page="anken">
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <rect x="3" y="2" width="16" height="18" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
-      <line x1="7" y1="7" x2="15" y2="7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-      <line x1="7" y1="11" x2="15" y2="11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-      <line x1="7" y1="15" x2="11" y2="15" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-    </svg>
-    案件台帳
-  </a>
-  <a href="見積台帳_アートレイズ.html" data-page="mitsumori">
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <rect x="3" y="2" width="16" height="18" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
-      <line x1="7" y1="7" x2="15" y2="7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-      <line x1="7" y1="11" x2="13" y2="11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-      <path d="M10 17 L13 14 L16 17" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    </svg>
-    見積台帳
-  </a>
-  <a href="請求台帳_アートレイズ.html" data-page="seikyu">
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <rect x="3" y="2" width="16" height="18" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
-      <path d="M11 7 v8 M8.5 9 Q8.5 7 11 7 Q13.5 7 13.5 9 Q13.5 11 11 11 Q13.5 11 13.5 13 Q13.5 15 11 15 Q8.5 15 8.5 13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" fill="none"/>
-    </svg>
-    請求台帳
-  </a>
-  <a href="原価管理台帳_アートレイズ.html" data-page="genka">
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <rect x="2" y="14" width="4" height="6" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/>
-      <rect x="9" y="9" width="4" height="11" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/>
-      <rect x="16" y="4" width="4" height="16" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/>
-      <path d="M4 12 L9 8 L13 10 L18 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    </svg>
-    工事台帳
-  </a>
-</nav>
-<script>
-(function(){
-  var path = location.pathname;
-  var map = {
-    '案件台帳_アートレイズ.html': 'anken',
-    '見積台帳_アートレイズ.html': 'mitsumori',
-    '請求台帳_アートレイズ.html': 'seikyu',
-    '原価管理台帳_アートレイズ.html': 'genka'
-  };
-  var current = null;
-  Object.keys(map).forEach(function(k){
-    if(path.indexOf(k) !== -1) current = map[k];
-  });
-  if(current){
-    var links = document.querySelectorAll('#appNavbar a');
-    links.forEach(function(a){
-      if(a.getAttribute('data-page') === current) a.classList.add('nav-active');
-    });
-  }
-})();
-</script>
-<!-- ★ 共通ナビバー ここまで -->
-
 </body>
 </html>

@@ -3,372 +3,312 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>原価管理台帳 - 株式会社アート・レイズ</title>
+<title>工事台帳｜株式会社アート・レイズ</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;700&family=Noto+Sans+JP:wght@300;400;500;700&family=Shippori+Mincho:wght@400;600;700&display=swap');
+:root {
+  --band: #555; --band-mid: #777; --light: #f8f8f8; --border: #ddd;
+  --border-dark: #aaa; --text: #333; --text-sub: #666; --white: #fff;
+  --accent: #2563eb; --even: #f5f5f5;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Meiryo,'Yu Gothic',sans-serif; background: #eee; color: var(--text); font-size: 14px; padding-bottom: 70px; }
+.container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
 
-  :root {
-    --text:        #111111;
-    --text-sub:    #444444;
-    --white:       #ffffff;
-    --band-dark:   #444444;
-    --even:        #f4f4f4;
-    --border:      #bbbbbb;
-    --border-dark: #888888;
-    --light:       #f8f8f8;
-  }
+.page-header {
+  background: var(--band); color: var(--white);
+  padding: 18px 24px; border-radius: 6px 6px 0 0;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.page-header h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.05em; }
+.page-header .meta { font-size: 12px; opacity: 0.8; text-align: right; }
 
-  @page { margin: 0; size: A4; }
+.stats-bar {
+  background: var(--white); border: 1px solid var(--border); border-top: none;
+  padding: 14px 24px; display: flex; gap: 32px; flex-wrap: wrap;
+}
+.stat-item { text-align: center; }
+.stat-num { font-size: 22px; font-weight: 700; color: var(--band); }
+.stat-label { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
 
-  * {
-    margin: 0; padding: 0; box-sizing: border-box;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    color-adjust: exact !important;
-  }
+.search-bar {
+  background: var(--white); border: 1px solid var(--border); border-top: none;
+  padding: 12px 24px; border-radius: 0 0 6px 6px; margin-bottom: 20px;
+}
+.search-bar input {
+  width: 100%; padding: 8px 12px; border: 1px solid var(--border-dark);
+  border-radius: 4px; font-size: 14px; font-family: inherit;
+}
+.search-bar input:focus { outline: none; border-color: var(--accent); }
 
-  body {
-    font-family: 'Noto Sans JP', sans-serif;
-    background: #e0e0e0;
-    color: var(--text);
-    font-size: 13px;
-    line-height: 1.6;
-  }
+.project-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 6px; margin-bottom: 14px; overflow: hidden;
+}
+.card-header {
+  background: var(--light); border-bottom: 2px solid var(--band);
+  padding: 12px 18px; display: flex; justify-content: space-between;
+  align-items: center; flex-wrap: wrap; gap: 8px;
+}
+.card-header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.project-id {
+  font-size: 12px; font-weight: 700; background: var(--band);
+  color: var(--white); padding: 3px 10px; border-radius: 3px;
+}
+.project-name { font-size: 16px; font-weight: 700; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 12px; font-size: 12px; font-weight: 700; }
 
-  .page {
-    width: 210mm;
-    min-height: 297mm;
-    margin: 0 auto;
-    background: var(--white);
-    padding: 12mm 14mm;
-  }
+.card-body { padding: 16px 18px; }
+.info-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 12px 24px; margin-bottom: 14px;
+}
+.info-item { display: flex; flex-direction: column; gap: 3px; }
+.info-label { font-size: 11px; color: var(--text-sub); font-weight: 700; letter-spacing: 0.04em; }
+.info-value { font-size: 14px; color: var(--text); }
+.amount-value { font-size: 18px; font-weight: 700; color: var(--band); }
 
-  @media screen {
-    .page { margin-bottom: 24px; box-shadow: 0 2px 16px rgba(0,0,0,.18); }
-  }
-  @media print {
-    body { background: #fff; }
-    .no-print { display: none !important; }
-    .page { margin: 0; padding: 10mm 12mm; box-shadow: none; }
-  }
+.process-bar { display: flex; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
+.process-step {
+  flex: 1; min-width: 80px; text-align: center;
+  padding: 7px 4px; border-radius: 4px; font-size: 11px; font-weight: 700;
+  border: 1px solid var(--border); background: var(--light); color: var(--text-sub);
+}
+.process-step.done    { background: var(--band); color: var(--white); border-color: var(--band); }
+.process-step.current { background: #2563eb; color: var(--white); border-color: #2563eb; }
+.process-step.pending { background: #fef9c3; color: #854d0e; border-color: #fde68a; }
 
-  /* ヘッダー */
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    border-bottom: 3px solid var(--text);
-    padding-bottom: 10px;
-    margin-bottom: 14px;
-  }
-  .company-name {
-    font-family: 'Shippori Mincho', serif;
-    font-size: 19px; font-weight: 700; letter-spacing: 0.06em;
-  }
-  .company-name .co-prefix { font-size: 12px; font-weight: 400; }
-  .company-info { font-size: 10.5px; color: var(--text-sub); margin-top: 4px; line-height: 1.9; }
-  .doc-title {
-    font-family: 'Shippori Mincho', serif;
-    font-size: 24px; font-weight: 700; letter-spacing: 0.18em; text-align: right;
-  }
-  .doc-meta { font-size: 11px; color: var(--text-sub); text-align: right; margin-top: 6px; line-height: 2; }
+.note-box {
+  margin-top: 12px; padding: 10px 14px; background: #fffbeb;
+  border-left: 3px solid #f59e0b; border-radius: 0 4px 4px 0;
+  font-size: 13px; color: var(--text);
+}
+.note-label { font-size: 11px; color: #92400e; font-weight: 700; margin-bottom: 4px; }
 
-  /* 案件情報 */
-  .project-info {
-    background: var(--light);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 10px 14px;
-    margin-bottom: 14px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px 24px;
-  }
-  .pi-item { display: flex; align-items: baseline; gap: 8px; }
-  .pi-label { font-size: 11px; font-weight: 700; color: var(--text-sub); white-space: nowrap; min-width: 72px; }
-  .pi-value { font-size: 13px; }
-  .pi-full { grid-column: 1 / -1; }
+.doc-buttons {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);
+}
+.doc-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 14px; border-radius: 4px; font-size: 12px; font-weight: 700;
+  font-family: inherit; cursor: pointer; border: none;
+  text-decoration: none; transition: opacity 0.15s;
+}
+.doc-btn:hover { opacity: 0.85; }
+.doc-btn.active   { background: #2563eb; color: #fff; }
+.doc-btn.inactive { background: #e5e7eb; color: #9ca3af; cursor: default; pointer-events: none; }
 
-  /* セクションタイトル */
-  .sec-title {
-    background: var(--band-dark); color: var(--white);
-    font-size: 12px; font-weight: 700;
-    padding: 5px 12px; letter-spacing: 0.06em;
-  }
+.add-row {
+  background: var(--light); border: 1px dashed var(--border-dark);
+  border-radius: 6px; padding: 18px; text-align: center;
+  color: var(--text-sub); font-size: 13px; margin-bottom: 14px;
+}
+.page-footer {
+  text-align: center; font-size: 11px; color: var(--text-sub);
+  margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--border);
+}
 
-  /* 共通テーブル */
-  table { width: 100%; border-collapse: collapse; font-size: 12px; border: 1px solid var(--border); margin-bottom: 14px; }
-  th { background: var(--band-dark); color: var(--white); padding: 6px 10px; font-weight: 700; font-size: 11px; text-align: left; }
-  th.right, td.right { text-align: right; }
-  th.center, td.center { text-align: center; }
-  td { padding: 6px 10px; border-bottom: 1px solid var(--border); }
-  tr:nth-child(even) td { background: var(--even); }
-  tr:last-child td { border-bottom: none; }
-  tr.cat td { background: #ddd; font-weight: 700; font-size: 11px; color: var(--text-sub); padding: 4px 10px; }
-  tr.subtotal td { background: #e8e8e8; font-weight: 700; border-top: 1px solid var(--border-dark); }
-  td.indent { padding-left: 20px; }
-  td.note-cell { color: var(--text-sub); font-size: 11px; }
+@media (max-width: 700px) {
+  .info-grid { grid-template-columns: 1fr 1fr; }
+  .page-header { flex-direction: column; gap: 8px; }
+}
+@media (max-width: 480px) { .info-grid { grid-template-columns: 1fr; } }
 
-  /* 粗利サマリー */
-  .profit-wrap { display: flex; gap: 16px; margin-bottom: 14px; align-items: stretch; }
-  .profit-table { width: 280px; flex-shrink: 0; margin-bottom: 0; }
-  .profit-table td { padding: 7px 14px; }
-  tr.profit-row td { background: #e8f4ff; font-weight: 700; color: #1a3a7a; }
-  tr.loss-row td { background: #fff0f0; font-weight: 700; color: #7a1a1a; }
-  tr.grand-total td { background: var(--band-dark); color: var(--white); font-weight: 700; font-size: 13px; }
-
-  .profit-rate-box {
-    flex: 1; border: 2px solid var(--band-dark); border-radius: 6px;
-    padding: 12px 16px; text-align: center; display: flex; flex-direction: column; justify-content: center;
-  }
-  .profit-rate-label { font-size: 11px; color: var(--text-sub); font-weight: 700; margin-bottom: 6px; }
-  .profit-rate-num { font-size: 40px; font-weight: 700; color: var(--band-dark); line-height: 1.1; }
-  .profit-rate-sub { font-size: 11px; color: var(--text-sub); margin-top: 8px; line-height: 1.9; text-align: left; }
-
-  /* 備考 */
-  .note-label { font-size: 11px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-  .note-box {
-    border: 1px solid var(--border); border-radius: 4px;
-    padding: 8px 12px; font-size: 11px; color: var(--text-sub);
-    line-height: 1.8; min-height: 48px;
-  }
-
-  /* 印刷ボタン */
-  .print-btn {
-    display: block; margin: 0 auto 20px; padding: 10px 32px;
-    background: var(--band-dark); color: var(--white); border: none;
-    border-radius: 4px; font-size: 14px; font-family: inherit; cursor: pointer; font-weight: 700;
-  }
-  .print-btn:hover { opacity: 0.85; }
+/* ★ 共通ナビバー */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: #333; display: flex; border-top: 2px solid #c8a96e;
+}
+.bottom-nav a {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 8px 4px; color: #ccc;
+  text-decoration: none; font-size: 11px; gap: 2px; transition: background 0.15s;
+}
+.bottom-nav a:hover { background: #444; }
+.bottom-nav a.active { color: #c8a96e; border-top: 2px solid #c8a96e; margin-top: -2px; }
+.bottom-nav a .nav-icon { font-size: 18px; }
 </style>
 </head>
 <body>
+<div class="container">
 
-<div class="no-print" style="text-align:center;padding:16px;">
-  <button class="print-btn" onclick="window.print()">🖨️ 印刷 / PDF保存</button>
+  <div class="page-header">
+    <h1>📊 工事台帳（原価管理）</h1>
+    <div class="meta">株式会社アート・レイズ<br><span id="lastUpdated">-</span></div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-item"><div class="stat-num" id="totalCount">-</div><div class="stat-label">総案件数</div></div>
+    <div class="stat-item"><div class="stat-num" id="countJuchu">-</div><div class="stat-label">受注済</div></div>
+    <div class="stat-item"><div class="stat-num" id="countMitsumori">-</div><div class="stat-label">見積提出済／予定</div></div>
+    <div class="stat-item"><div class="stat-num" id="countSeikyu">-</div><div class="stat-label">請求済</div></div>
+    <div class="stat-item"><div class="stat-num" id="totalAmount">-</div><div class="stat-label">受注総額（税込）</div></div>
+    <div class="stat-item" style="margin-left:auto;text-align:right;">
+      <div style="font-size:12px;font-weight:600;" id="sourceBadge">読込中...</div>
+      <div class="stat-label">データソース</div>
+    </div>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="🔍 案件番号・顧客名・工事内容で絞り込み..." oninput="renderCards()">
+  </div>
+
+  <div id="cardsArea"></div>
+  <div class="add-row" id="addRow">＋ Claudeに依頼してJSONで案件を追加</div>
+
+  <div class="page-footer">
+    株式会社アート・レイズ｜大分県別府市上原町13番25号｜TEL 0977-21-0603
+  </div>
 </div>
 
-<div class="page">
+<!-- ★ 共通ナビバー -->
+<nav class="bottom-nav">
+  <a href="案件台帳_アートレイズ.html"><span class="nav-icon">📋</span>案件台帳</a>
+  <a href="見積台帳_アートレイズ.html"><span class="nav-icon">📄</span>見積台帳</a>
+  <a href="請求台帳_アートレイズ.html"><span class="nav-icon">🧾</span>請求台帳</a>
+  <a href="原価管理台帳_アートレイズ.html" class="active"><span class="nav-icon">📊</span>工事台帳</a>
+</nav>
 
-  <!-- ヘッダー -->
-  <div class="header">
-    <div>
-      <div class="company-name"><span class="co-prefix">株式会社</span>アート・レイズ</div>
-      <div class="company-info">
-        〒874-0829　大分県別府市上原町13番25号<br>
-        TEL 0977-21-0603　担当：亀井 悟
+<script>
+const BASE_URL = 'https://kameisatoru-svg.github.io/genba-navi/';
+const DATA_JSON_URL = BASE_URL + 'data.json';
+const STORAGE_KEY = 'artrise_genka_v1';
+
+const BADGE_COLORS = {
+  '受注済':        'background:#1a7a30;color:#fff',
+  '施工中':        'background:#0e6b9a;color:#fff',
+  '完了':          'background:#6b7280;color:#fff',
+  '見積提出済み':   'background:#2563eb;color:#fff',
+  '見積提出予定':   'background:#d97706;color:#fff',
+  '請求済み':      'background:#6b7280;color:#fff',
+  '入金済み':      'background:#4b5563;color:#fff',
+  '第1期完了・請求済み': 'background:#6b7280;color:#fff',
+};
+
+// ─── データ読み込み ──────────────────────────────────
+async function loadDataAsync() {
+  try {
+    const res = await fetch(DATA_JSON_URL + '?v=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    const data = json.原価 || [];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    setSourceBadge('fetch', json.最終更新 || '');
+    return data;
+  } catch(e) {
+    setSourceBadge('local', '');
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+    catch(e2) { return []; }
+  }
+}
+function loadDataSync() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+  catch(e) { return []; }
+}
+function setSourceBadge(type, updatedAt) {
+  const el = document.getElementById('sourceBadge');
+  if (!el) return;
+  el.innerHTML = type === 'fetch'
+    ? `<span style="color:#1a7a30;">● GitHub同期</span>${updatedAt ? ' <span style="color:#888;font-size:11px;">('+updatedAt+')</span>' : ''}`
+    : `<span style="color:#d97706;">● オフライン（ローカル）</span>`;
+}
+
+// ─── カード生成 ──────────────────────────────────────
+function buildDocBtn(url, label) {
+  if (url) return `<a class="doc-btn active" href="${url}" download>${label}</a>`;
+  return `<button class="doc-btn inactive">${label}</button>`;
+}
+
+function buildCard(item) {
+  const badgeStyle = BADGE_COLORS[item.ステータス] || 'background:#9ca3af;color:#fff';
+  const mitsumoriF = item.見積金額 ? '¥' + Number(item.見積金額).toLocaleString() : '未設定';
+  const seikyuF    = item.請求金額 ? '¥' + Number(item.請求金額).toLocaleString() : '未設定';
+
+  const processHtml = (item.工程 && item.工程.length > 0)
+    ? `<div style="font-size:11px;color:var(--text-sub);font-weight:700;margin-bottom:6px;">📅 施工工程</div>
+       <div class="process-bar">${item.工程.map(p =>
+         `<div class="process-step ${p.状態}">${p.期}<br>${p.期間}</div>`
+       ).join('')}</div>` : '';
+
+  const zanzaiHtml = item.残材
+    ? `<div class="note-box" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:8px;">
+         <div class="note-label" style="color:#15803d;">📦 現場残材メモ（第2期発注時に確認）</div>
+         ${item.残材}<br><span style="font-size:11px;color:#166534;">※ 第2期発注前に残数確認・不足分のみ追加発注すること。</span>
+       </div>` : '';
+
+  const docs = item.書類 || {};
+  const searchText = [item.案件番号, item.工事名, item.顧客, item.施工場所, item.ステータス, item.備考].filter(Boolean).join(' ').toLowerCase();
+
+  return `
+  <div class="project-card" data-search="${searchText}">
+    <div class="card-header">
+      <div class="card-header-left">
+        <span class="project-id">${item.案件番号}</span>
+        <span class="project-name">${item.工事名}</span>
+      </div>
+      <span class="badge" style="${badgeStyle}">${item.ステータス}</span>
+    </div>
+    <div class="card-body">
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">顧客</span><span class="info-value">${item.顧客 || '-'}</span></div>
+        <div class="info-item"><span class="info-label">施工場所</span><span class="info-value">${item.施工場所 || '-'}</span></div>
+        <div class="info-item"><span class="info-label">見積金額（税込）</span><span class="info-value amount-value">${mitsumoriF}</span></div>
+        <div class="info-item"><span class="info-label">契約日</span><span class="info-value">${item.契約日 || '未定'}</span></div>
+        <div class="info-item"><span class="info-label">請求金額（税込）</span><span class="info-value amount-value">${seikyuF}</span></div>
+        <div class="info-item"><span class="info-label">請求日</span><span class="info-value">${item.請求日 || '未設定'}</span></div>
+        <div class="info-item"><span class="info-label">完了日</span><span class="info-value">${item.完了日 || '未定'}</span></div>
+        <div class="info-item"><span class="info-label">入金日</span><span class="info-value">${item.入金日 || '未入金'}</span></div>
+      </div>
+      ${processHtml}
+      ${item.備考 ? `<div class="note-box"><div class="note-label">📝 備考</div>${item.備考}</div>` : ''}
+      ${zanzaiHtml}
+      <div class="doc-buttons">
+        ${buildDocBtn(docs.見積書,  '📄 見積書')}
+        ${buildDocBtn(docs.請求書,  '📄 請求書')}
+        ${buildDocBtn(docs.注文書,  '📄 注文書')}
+        ${buildDocBtn(docs.契約書,  '📄 工事請負契約書')}
       </div>
     </div>
-    <div>
-      <div class="doc-title">原価管理台帳</div>
-      <div class="doc-meta">
-        <!-- ★ -->作成日：令和　　年　　月　　日<br>
-        <!-- ★ -->案件番号：AR-2026-
-      </div>
-    </div>
-  </div>
+  </div>`;
+}
 
-  <!-- 案件情報 -->
-  <div class="project-info">
-    <div class="pi-item pi-full">
-      <span class="pi-label">工事件名</span>
-      <!-- ★ --><span class="pi-value"></span>
-    </div>
-    <div class="pi-item">
-      <span class="pi-label">顧客名</span>
-      <!-- ★ --><span class="pi-value"></span>
-    </div>
-    <div class="pi-item">
-      <span class="pi-label">施工場所</span>
-      <!-- ★ --><span class="pi-value"></span>
-    </div>
-    <div class="pi-item">
-      <span class="pi-label">契約日</span>
-      <!-- ★ --><span class="pi-value">令和　　年　　月　　日</span>
-    </div>
-    <div class="pi-item">
-      <span class="pi-label">完了日</span>
-      <!-- ★ --><span class="pi-value">令和　　年　　月　　日</span>
-    </div>
-  </div>
+// ─── 統計 ────────────────────────────────────────────
+function updateStats(data) {
+  document.getElementById('totalCount').textContent = data.length;
+  document.getElementById('countJuchu').textContent = data.filter(p => ['受注済','施工中'].includes(p.ステータス)).length;
+  document.getElementById('countMitsumori').textContent = data.filter(p => p.ステータス?.includes('見積')).length;
+  document.getElementById('countSeikyu').textContent = data.filter(p => p.ステータス?.includes('請求') || p.ステータス === '入金済み').length;
+  const total = data.filter(p => ['受注済','施工中','完了','請求済み','入金済み','第1期完了・請求済み'].some(s => p.ステータス?.includes(s.slice(0,3))))
+    .reduce((s, p) => s + (Number(p.請求金額) || Number(p.見積金額) || 0), 0);
+  document.getElementById('totalAmount').textContent = total ? '¥' + total.toLocaleString() : '-';
+  const now = new Date();
+  document.getElementById('lastUpdated').textContent = `最終更新：${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+}
 
-  <!-- 売上 -->
-  <div class="sec-title">■ 売上</div>
-  <table>
-    <thead>
-      <tr><th style="width:45%">項目</th><th class="right" style="width:25%">金額（税抜）</th><th>備考</th></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>受注金額</td>
-        <!-- ★ --><td class="right">¥</td>
-        <td class="note-cell">見積書基準</td>
-      </tr>
-      <tr>
-        <td>請求金額</td>
-        <!-- ★ --><td class="right">¥</td>
-        <td class="note-cell"></td>
-      </tr>
-    </tbody>
-  </table>
+// ─── レンダリング ────────────────────────────────────
+function renderCards(data) {
+  if (data === undefined) data = loadDataSync();
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  updateStats(data);
+  const filtered = data.filter(p =>
+    !q || (p.案件番号||''+p.工事名||''+p.顧客||''+p.施工場所||''+p.備考||'').toLowerCase().includes(q)
+  );
+  const area = document.getElementById('cardsArea');
+  area.innerHTML = filtered.length === 0
+    ? '<div class="add-row" style="margin-bottom:14px;">該当する案件がありません</div>'
+    : filtered.map(p => buildCard(p)).join('');
+  document.getElementById('addRow').style.display = q ? 'none' : '';
+}
 
-  <!-- 工事原価 -->
-  <div class="sec-title">■ 工事原価</div>
-  <table>
-    <thead>
-      <tr>
-        <th style="width:28%">項目・業者名</th>
-        <th class="center" style="width:14%">人工／数量</th>
-        <th class="right" style="width:16%">単価</th>
-        <th class="right" style="width:16%">金額</th>
-        <th style="width:26%">備考</th>
-      </tr>
-    </thead>
-    <tbody>
+// ─── 初期化 ─────────────────────────────────────────
+async function init() {
+  document.getElementById('cardsArea').innerHTML =
+    '<div class="add-row" style="margin-bottom:14px;color:#888;">📡 データを読み込んでいます...</div>';
+  const data = await loadDataAsync();
+  renderCards(data);
+}
 
-      <!-- 労務費 -->
-      <tr class="cat"><td colspan="5">労務費　（自社・手配職人）</td></tr>
-      <tr>
-        <!-- ★ --><td class="indent"></td>
-        <!-- ★ --><td class="center">人工</td>
-        <td class="right">¥20,000</td>
-        <!-- ★ --><td class="right">¥</td>
-        <td class="note-cell"></td>
-      </tr>
-      <tr>
-        <!-- ★ --><td class="indent"></td>
-        <!-- ★ --><td class="center">人工</td>
-        <td class="right">¥20,000</td>
-        <!-- ★ --><td class="right">¥</td>
-        <td class="note-cell"></td>
-      </tr>
-      <tr>
-        <!-- ★ --><td class="indent"></td>
-        <!-- ★ --><td class="center">人工</td>
-        <td class="right">¥20,000</td>
-        <!-- ★ --><td class="right">¥</td>
-        <td class="note-cell"></td>
-      </tr>
-      <tr class="subtotal">
-        <td colspan="3">労務費　小計</td>
-        <!-- ★ --><td class="right">¥</td>
-        <td></td>
-      </tr>
-
-      <!-- 材料費 -->
-      <tr class="cat"><td colspan="5">材料費</td></tr>
-      <tr>
-        <!-- ★ --><td class="indent"></td>
-        <!-- ★ --><td class="center"></td>
-        <!-- ★ --><td class="right"></td>
-        <!-- ★ --><td class="right">¥</td>
-        <td class="note-cell"></td>
-      </tr>
-      <tr>
-        <!-- ★ --><td class="indent"></td>
-        <!-- ★ --><td class="center"></td>
-        <!-- ★ --><td class="right"></td>
-        <!-- ★ --><td class="right">¥</td>
-        <td class="note-cell"></td>
-      </tr>
-      <tr>
-        <!-- ★ --><td class="indent"></td>
-        <!-- ★ --><td class="center"></td>
-        <!-- ★ --><td class="right"></td>
-        <!-- ★ --><td class="right">¥</td>
-        <td class="note-cell"></td>
-      </tr>
-      <tr class="subtotal">
-        <td colspan="3">材料費　小計</td>
-        <!-- ★ --><td class="right">¥</td>
-        <td></td>
-      </tr>
-
-      <!-- 外注費 -->
-      <tr class="cat"><td colspan="5">外注費　（業者・職人への発注）</td></tr>
-      <tr>
-        <!-- ★ --><td class="indent"></td>
-        <!-- ★ --><td class="center"></td>
-        <!-- ★ --><td class="right"></td>
-        <!-- ★ --><td class="right">¥</td>
-        <td class="note-cell">材料支給：有・無</td>
-      </tr>
-      <tr>
-        <!-- ★ --><td class="indent"></td>
-        <!-- ★ --><td class="center"></td>
-        <!-- ★ --><td class="right"></td>
-        <!-- ★ --><td class="right">¥</td>
-        <td class="note-cell">材料支給：有・無</td>
-      </tr>
-      <tr>
-        <!-- ★ --><td class="indent"></td>
-        <!-- ★ --><td class="center"></td>
-        <!-- ★ --><td class="right"></td>
-        <!-- ★ --><td class="right">¥</td>
-        <td class="note-cell">材料支給：有・無</td>
-      </tr>
-      <tr>
-        <!-- ★ --><td class="indent"></td>
-        <!-- ★ --><td class="center"></td>
-        <!-- ★ --><td class="right"></td>
-        <!-- ★ --><td class="right">¥</td>
-        <td class="note-cell">材料支給：有・無</td>
-      </tr>
-      <tr class="subtotal">
-        <td colspan="3">外注費　小計</td>
-        <!-- ★ --><td class="right">¥</td>
-        <td></td>
-      </tr>
-
-      <!-- 経費 -->
-      <tr class="cat"><td colspan="5">経費　（交通・宿泊・その他）</td></tr>
-      <tr>
-        <!-- ★ --><td class="indent"></td>
-        <!-- ★ --><td class="center"></td>
-        <!-- ★ --><td class="right"></td>
-        <!-- ★ --><td class="right">¥</td>
-        <td class="note-cell"></td>
-      </tr>
-      <tr>
-        <!-- ★ --><td class="indent"></td>
-        <!-- ★ --><td class="center"></td>
-        <!-- ★ --><td class="right"></td>
-        <!-- ★ --><td class="right">¥</td>
-        <td class="note-cell"></td>
-      </tr>
-      <tr class="subtotal">
-        <td colspan="3">経費　小計</td>
-        <!-- ★ --><td class="right">¥</td>
-        <td></td>
-      </tr>
-
-    </tbody>
-  </table>
-
-  <!-- 粗利サマリー -->
-  <div class="profit-wrap">
-    <table class="profit-table">
-      <tr><td>受注金額（税抜）</td><!-- ★ --><td class="right">¥</td></tr>
-      <tr><td>原価合計</td><!-- ★ --><td class="right">¥</td></tr>
-      <tr class="profit-row"><td>粗利</td><!-- ★ --><td class="right">¥</td></tr>
-      <tr class="grand-total"><td>粗利率</td><!-- ★ --><td class="right">％</td></tr>
-    </table>
-    <div class="profit-rate-box">
-      <div class="profit-rate-label">粗　利　率</div>
-      <!-- ★ -->
-      <div class="profit-rate-num">　　　　％</div>
-      <div class="profit-rate-sub">
-        受注金額　¥　　　　　　　<br>
-        原価合計　¥　　　　　　　<br>
-        粗　　利　¥　　　　　　　
-      </div>
-    </div>
-  </div>
-
-  <!-- 備考 -->
-  <div class="note-label">備考・特記事項</div>
-  <div class="note-box"><!-- ★ --></div>
-
-</div>
+init();
+</script>
 </body>
 </html>
