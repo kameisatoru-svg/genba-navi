@@ -565,16 +565,33 @@ function toggleMeisai(id, btn) {
   btn.textContent = isOpen ? '▼ 明細を隠す' : '▶ 明細を表示';
 }
 
-// ─── URLパラメータから案件番号を読んで自動フィルタ ──
+// ─── URLパラメータ：1件専用ビュー ──────────────────
 (function() {
   const params = new URLSearchParams(window.location.search);
   const anken = params.get('anken');
-  if (anken) {
-    const input = document.getElementById('searchInput');
-    if (input) {
-      input.value = anken;
-      filterCards();
-    }
+  if (!anken) return;
+
+  // 統計バー・検索バーを非表示
+  const statsBar = document.querySelector('.stats-bar');
+  const searchBar = document.querySelector('.search-bar');
+  if (statsBar) statsBar.style.display = 'none';
+  if (searchBar) searchBar.style.display = 'none';
+
+  // 「← 案件台帳に戻る」ボタンを追加
+  const header = document.querySelector('.page-header');
+  if (header) {
+    const backBtn = document.createElement('a');
+    backBtn.href = 'https://kameisatoru-svg.github.io/genba-navi/案件台帳_アートレイズ.html';
+    backBtn.textContent = '← 案件台帳に戻る';
+    backBtn.style.cssText = 'display:inline-block;margin-bottom:10px;color:#2563eb;font-size:13px;font-weight:700;text-decoration:none;';
+    header.parentNode.insertBefore(backBtn, header);
+  }
+
+  // 検索を実行して該当案件のみ表示
+  const input = document.getElementById('searchInput');
+  if (input) {
+    input.value = anken;
+    filterCards();
   }
 })();
 </script>
