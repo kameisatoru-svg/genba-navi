@@ -167,51 +167,6 @@ body{
   opacity:0.6;padding:4px 0 8px;
 }
 
-/* ── JSONデータハブ ── */
-.json-hub{
-  background:var(--navy2);border-radius:16px;
-  margin-bottom:20px;overflow:hidden;
-  box-shadow:0 2px 8px rgba(30,45,64,0.12);
-}
-.json-hub-trigger{
-  display:flex;align-items:center;gap:12px;
-  padding:14px 16px;cursor:pointer;border:none;
-  background:transparent;width:100%;text-align:left;
-  font-family:'Noto Sans JP',sans-serif;
-}
-.json-hub-trigger:active{background:rgba(255,255,255,0.05);}
-.json-hub-icon{
-  width:34px;height:34px;border-radius:10px;
-  background:rgba(200,169,110,0.2);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  font-size:18px;
-}
-.json-hub-body-text{flex:1;}
-.json-hub-title{font-size:13px;font-weight:700;color:var(--white);}
-.json-hub-desc{font-size:11px;color:rgba(255,255,255,0.5);margin-top:1px;}
-.json-hub-chevron{color:rgba(255,255,255,0.4);font-size:16px;transition:transform 0.2s;}
-.json-hub.open .json-hub-chevron{transform:rotate(90deg);}
-.json-hub-panel{
-  max-height:0;overflow:hidden;transition:max-height 0.3s ease;
-}
-.json-hub.open .json-hub-panel{max-height:400px;}
-.json-hub-inner{padding:0 16px 16px;}
-.json-hub textarea{
-  width:100%;height:110px;
-  background:#111d2a;color:#7ec8e3;
-  border:1px solid #3a5a7a;border-radius:8px;
-  padding:10px;font-size:12px;font-family:monospace;
-  resize:vertical;
-}
-.json-hub-btns{display:flex;gap:8px;margin-top:8px;}
-.jhub-btn{
-  padding:8px 18px;border:none;border-radius:8px;
-  font-size:12px;font-weight:700;cursor:pointer;
-  font-family:'Noto Sans JP',sans-serif;
-}
-.jhub-btn.primary{background:var(--accent);color:var(--white);}
-.jhub-btn.danger{background:#dc2626;color:var(--white);}
-.jhub-msg{font-size:11px;margin-top:6px;color:#6ee7b7;min-height:16px;}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&amp;display=swap" rel="stylesheet">
@@ -236,27 +191,7 @@ body{
             inset 0 0 30px rgba(217, 119, 87, 0.1);
         }
       }
-    </style><style>
-.jhub-copy-section{
-  border-top:1px solid rgba(255,255,255,0.1);
-  margin-top:14px;padding-top:14px;
-}
-.jhub-copy-label{
-  font-size:11px;color:rgba(255,255,255,0.5);
-  margin-bottom:10px;letter-spacing:0.06em;
-}
-.jhub-copy-btns{display:flex;gap:8px;}
-.jhub-btn.copy-latest{
-  flex:1;background:rgba(200,169,110,0.25);color:#c8a96e;
-  font-size:13px;padding:12px 8px;
-}
-.jhub-btn.copy-latest:active{background:rgba(200,169,110,0.4);}
-.jhub-btn.copy-all{
-  flex:1;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);
-  font-size:13px;padding:12px 8px;
-}
-.jhub-btn.copy-all:active{background:rgba(255,255,255,0.15);}
-</style></head>
+    </style></head>
 <body>
 
 <!-- ヘッダー -->
@@ -562,37 +497,6 @@ body{
   </div>
 
 
-
-  <!-- JSONデータハブ -->
-  <div class="json-hub" id="jsonHub">
-    <button class="json-hub-trigger" onclick="toggleJsonHub()">
-      <div class="json-hub-icon">📥</div>
-      <div class="json-hub-body-text">
-        <div class="json-hub-title">データ投入（JSON貼り付け口）</div>
-        <div class="json-hub-desc">Claudeが生成したJSONをここに貼る → 全アプリに反映</div>
-      </div>
-      <span class="json-hub-chevron">›</span>
-    </button>
-    <div class="json-hub-panel">
-      <div class="json-hub-inner">
-        <textarea id="jsonHubInput" placeholder="ClaudeからJSONをコピーしてここに貼り付け
-例：[{&quot;案件番号&quot;:&quot;AR-2026-0009&quot;,&quot;工事名&quot;:&quot;給湯配管漏水調査&quot;,...}]"></textarea>
-        <div class="json-hub-btns">
-          <button class="jhub-btn primary" onclick="hubSave()">💾 保存して全アプリに反映</button>
-          <button class="jhub-btn danger" onclick="hubClear()">🗑 全案件データ削除</button>
-        </div>
-        <div class="jhub-msg" id="jhubMsg"></div><div class="jhub-copy-section">
-  <div class="jhub-copy-label">📋 保存済みデータをコピー</div>
-  <div class="jhub-copy-btns">
-    <button class="jhub-btn copy-latest" onclick="copyLatestAnken()">最新1件をコピー</button>
-    <button class="jhub-btn copy-all" onclick="copyAllAnken()">全データをコピー</button>
-  </div>
-  <div class="jhub-msg" id="copyMsg"></div>
-</div>
-      </div>
-    </div>
-  </div>
-
   <!-- GitHub -->
   <div class="link-list" style="margin-bottom:20px;">
     <button class="link-row" onclick="openLink('https://github.com/kameisatoru-svg/genba-navi')">
@@ -633,73 +537,5 @@ function openLink(url){ window.open(url,'_blank'); }
 function toggleDocBox(){
   const card = document.getElementById('docBoxCard');
   card.classList.toggle('open');
-}
-
-// ─── JSONデータハブ ───────────────────────────────────
-const ANKEN_KEY = 'artrise_anken_v1';
-
-function toggleJsonHub(){
-  const hub = document.getElementById('jsonHub');
-  hub.classList.toggle('open');
-}
-
-function hubSave(){
-  const raw = document.getElementById('jsonHubInput').value.trim();
-  const msg = document.getElementById('jhubMsg');
-  if(!raw){ msg.style.color='#fca5a5'; msg.textContent='⚠ JSONを貼り付けてください'; return; }
-  try {
-    let incoming = JSON.parse(raw);
-    if(!Array.isArray(incoming)) incoming = [incoming];
-    // 既存データとマージ（案件番号で上書き）
-    let existing = [];
-    try { existing = JSON.parse(localStorage.getItem(ANKEN_KEY) || '[]'); } catch(e){}
-    const map = {};
-    existing.forEach(p => { map[p.案件番号] = p; });
-    incoming.forEach(p => { map[p.案件番号] = p; });
-    const merged = Object.values(map).sort((a,b) => a.案件番号.localeCompare(b.案件番号));
-    localStorage.setItem(ANKEN_KEY, JSON.stringify(merged));
-    document.getElementById('jsonHubInput').value = '';
-    msg.style.color='#6ee7b7';
-    msg.textContent = `✅ ${incoming.length}件を保存（合計${merged.length}件）`;
-  } catch(e) {
-    msg.style.color='#fca5a5';
-    msg.textContent = '❌ JSON形式エラー: ' + e.message;
-  }
-}
-
-function hubClear(){
-  if(!confirm('全案件データを削除します。よろしいですか？')) return;
-  localStorage.removeItem(ANKEN_KEY);
-  document.getElementById('jhubMsg').textContent = '🗑 削除しました';
-}
-</script>
-
-
-<div id="claude-agent-glow-border" style="position: fixed; inset: 0px; pointer-events: none; z-index: 2147483646; opacity: 1; transition: opacity 0.3s ease-in-out; animation: 2s ease-in-out 0s infinite normal none running claude-pulse; box-shadow: rgba(217, 119, 87, 0.5) 0px 0px 10px inset, rgba(217, 119, 87, 0.3) 0px 0px 20px inset, rgba(217, 119, 87, 0.1) 0px 0px 30px inset;"></div><script>
-function copyLatestAnken(){
-  const msg = document.getElementById('copyMsg');
-  try {
-    const data = JSON.parse(localStorage.getItem('artrise_anken_v1') || '[]');
-    if(data.length === 0){ msg.style.color='#fca5a5'; msg.textContent='⚠ データがありません'; return; }
-    const latest = [data[data.length - 1]];
-    navigator.clipboard.writeText(JSON.stringify(latest, null, 2)).then(() => {
-      msg.style.color='#6ee7b7';
-      msg.textContent='✅ 最新1件をコピーしました！';
-      setTimeout(()=>{ msg.textContent=''; }, 3000);
-    }).catch(()=>{ msg.style.color='#fca5a5'; msg.textContent='❌ コピー失敗'; });
-  } catch(e){ msg.style.color='#fca5a5'; msg.textContent='❌ エラー: '+e.message; }
-}
-function copyAllAnken(){
-  const msg = document.getElementById('copyMsg');
-  try {
-    const raw = localStorage.getItem('artrise_anken_v1') || '[]';
-    const parsed = JSON.parse(raw);
-    if(parsed.length === 0){ msg.style.color='#fca5a5'; msg.textContent='⚠ データがありません'; return; }
-    navigator.clipboard.writeText(JSON.stringify(parsed, null, 2)).then(() => {
-      msg.style.color='#6ee7b7';
-      msg.textContent='✅ 全'+parsed.length+'件をコピーしました！';
-      setTimeout(()=>{ msg.textContent=''; }, 3000);
-    }).catch(()=>{ msg.style.color='#fca5a5'; msg.textContent='❌ コピー失敗'; });
-  } catch(e){ msg.style.color='#fca5a5'; msg.textContent='❌ エラー: '+e.message; }
 }
 </script></body></html>
