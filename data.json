@@ -10,14 +10,14 @@
       "ステータス": "施工中",
       "元請フラグ": false,
       "元請名": "",
-      "driveUrl": "https://drive.google.com/drive/folders/1FrmLGumpJkrsOApJiJMXkUuF5YbboG5H",
+      "driveUrl": "https://drive.google.com/drive/folders/1RFqxmTP4uFcZ9nPID5eByQdhsulO-R6c",
       "備考": "第1期請求済み。第2期 4/18〜20予定。現場残材：ウッドタイル10ケース・接着剤5ケース・見切り金物8本",
       "見積": {
         "見積番号": "M-2026-0004",
         "見積日": "2026-02-10",
         "見積金額": 9536000,
         "備考": "",
-        "PDF": "https://drive.google.com/file/d/1h_b0axuuDQKv-FkCakpF8y4sRFcJo10h/view",
+        "PDF": "",
         "明細": [
           {
             "工事内容": "フロアタイル張り工事（LGS下地含む）",
@@ -58,7 +58,7 @@
           "入金状況": "minyukin",
           "入金日": "",
           "備考": "第1期",
-          "PDF": "https://drive.google.com/file/d/1WnYax9cPi6G80p3IRqG-NoaTWtadrAo_/view",
+          "PDF": "",
           "税抜合計": 9082000,
           "消費税": 908200,
           "税込合計": 9990200,
@@ -96,7 +96,7 @@
         "契約日": "",
         "契約金額": 0,
         "ステータス": "未締結",
-        "PDF": "https://drive.google.com/file/d/17JPX0lWcCljb56GGCqVXyQ274_LH0RHS/view"
+        "PDF": ""
       },
       "原価": {
         "労務費": 0,
@@ -114,7 +114,7 @@
       "ステータス": "見積提出済み",
       "元請フラグ": false,
       "元請名": "",
-      "driveUrl": "https://drive.google.com/drive/folders/1OEL8JBUCw631OoxCOZJDYcgFwUhwd4Lj",
+      "driveUrl": "https://drive.google.com/drive/folders/1hmr7K7YTNI55IVgiJFx-RcrEgDlOfK-P",
       "備考": "",
       "見積": {
         "見積番号": "M-2026-0005",
@@ -148,7 +148,7 @@
       "ステータス": "見積提出予定",
       "元請フラグ": true,
       "元請名": "株式会社 信和",
-      "driveUrl": "https://drive.google.com/drive/folders/1XB2vbIoQsPU2zDARJaUd2MhwrvvVihJ2",
+      "driveUrl": "https://drive.google.com/drive/folders/1qHhNaUJS7G_SJqV4K4JVW-w78JXlgdnn",
       "備考": "",
       "見積": {
         "見積番号": "M-2026-0006",
@@ -182,7 +182,7 @@
       "ステータス": "見積提出予定",
       "元請フラグ": false,
       "元請名": "",
-      "driveUrl": "https://drive.google.com/drive/folders/1L4bP-vGrW9HX_ztBUvNjOqfBI8qXzeYt",
+      "driveUrl": "https://drive.google.com/drive/folders/1UX1dHIgSnGdROD2ys9_BwxGxRpwGeAkR",
       "備考": "",
       "見積": {
         "見積番号": "M-2026-0007",
@@ -216,7 +216,7 @@
       "ステータス": "入金済み",
       "元請フラグ": false,
       "元請名": "",
-      "driveUrl": "https://drive.google.com/drive/folders/1paBI66-0lye37PhhG4HSH59gJgiTZam4",
+      "driveUrl": "https://drive.google.com/drive/folders/1hMWQHLC3_eEJUkrOVFN5i1osIxx94ZGl",
       "備考": "",
       "見積": {
         "見積番号": "",
@@ -261,7 +261,7 @@
       "ステータス": "見積提出済み",
       "元請フラグ": false,
       "元請名": "",
-      "driveUrl": "https://drive.google.com/drive/folders/1b4uX5o8rOzsBjx7XQw5MFCSLSGLCvBL8",
+      "driveUrl": "https://drive.google.com/drive/folders/1ipTz2EPj0J319rzoEQRifizhUhiK3pq4",
       "備考": "",
       "見積": {
         "見積番号": "M-2026-0009",
