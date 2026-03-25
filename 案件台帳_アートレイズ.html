@@ -93,6 +93,24 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 .view-card-id{font-size:12px;font-weight:700;color:var(--blue);}
 .view-card-name{font-size:14px;font-weight:700;color:var(--text);}
 .view-anken-ref{font-size:11px;color:var(--text-sub);background:var(--light);padding:2px 8px;border-radius:10px;}
+.meisai-toggle{
+  background:var(--light);border:1px solid var(--border);border-radius:4px;
+  padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit;
+  color:var(--text-sub);margin-top:8px;width:100%;text-align:left;
+}
+.meisai-toggle:hover{background:#e8e8e8;}
+.meisai-wrap{display:none;margin-top:8px;}
+.meisai-wrap.open{display:block;}
+.meisai-table{width:100%;border-collapse:collapse;font-size:12px;border:1px solid var(--border);}
+.meisai-table th{background:#444;color:#fff;padding:6px 10px;text-align:left;font-weight:600;}
+.meisai-table th.right,.meisai-table td.right{text-align:right;}
+.meisai-table td{padding:6px 10px;border-bottom:1px solid var(--border);}
+.meisai-table tr:nth-child(even) td{background:#f5f5f5;}
+.meisai-table tr:last-child td{border-bottom:none;}
+.totals-table{width:280px;margin-left:auto;border-collapse:collapse;font-size:12px;border:1px solid var(--border);margin-top:4px;}
+.totals-table td{padding:5px 12px;border-bottom:1px solid var(--border);}
+.totals-table td:last-child{text-align:right;}
+.totals-table tr:last-child td{background:#444;color:#fff;font-weight:700;border-bottom:none;}
 .empty{background:var(--white);border:2px dashed var(--border-dark);border-radius:6px;padding:20px;text-align:center;color:var(--text-sub);font-size:13px;margin-bottom:12px;}
 .loading{text-align:center;padding:40px;color:var(--text-sub);font-size:13px;}
 @media(max-width:600px){.info-grid{grid-template-columns:1fr 1fr;}.tab-btn{padding:10px 12px;font-size:12px;}}
@@ -323,6 +341,15 @@ function buildAnkenCard(p){
         <div class="info-item"><span class="info-label">入金日</span><span class="info-value">${fmtDate(r.入金日)}</span></div>
       </div>
       <div>${pdfTag(r.PDF,'請求書PDF')}</div>
+      ${(r.明細||[]).length ? `
+        <button class="meisai-toggle" onclick="toggleMeisai('r-meisai-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}-${r.請求番号?.replace(/[^a-zA-Z0-9]/g,'-')||'x'}', this)">▶ 明細を表示</button>
+        <div class="meisai-wrap" id="r-meisai-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}-${r.請求番号?.replace(/[^a-zA-Z0-9]/g,'-')||'x'}">
+          <table class="meisai-table">
+            <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">金額（税抜）</th></tr></thead>
+            <tbody>${(r.明細||[]).map(m=>`<tr><td>${m.工事内容||'-'}</td><td class="right">${m.数量||'-'}</td><td>${m.単位||''}</td><td class="right">¥${Number(m.金額税抜||0).toLocaleString()}</td></tr>`).join('')}</tbody>
+          </table>
+          ${r.税込合計?`<table class="totals-table"><tr><td>税抜合計</td><td>¥${Number(r.税抜合計||0).toLocaleString()}</td></tr><tr><td>消費税（10%）</td><td>¥${Number(r.消費税||0).toLocaleString()}</td></tr><tr><td>税込合計</td><td>¥${Number(r.税込合計||0).toLocaleString()}</td></tr></table>`:''}
+        </div>` : ''}
     </div>`;
   }).join('')||'<div style="font-size:12px;color:#999;padding:4px 0;">請求書なし</div>';
 
@@ -377,6 +404,14 @@ function buildAnkenCard(p){
           </div>
           ${p.見積?.備考?`<div class="note-box"><div class="note-label">備考</div>${p.見積.備考}</div>`:''}
           <div style="margin-top:8px;">${pdfTag(p.見積?.PDF,'見積書PDF')}</div>
+          ${(p.見積?.明細||[]).length ? `
+            <button class="meisai-toggle" onclick="toggleMeisai('m-meisai-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}', this)">▶ 明細を表示</button>
+            <div class="meisai-wrap" id="m-meisai-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}">
+              <table class="meisai-table">
+                <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">単価</th><th class="right">金額（税抜）</th></tr></thead>
+                <tbody>${(p.見積.明細||[]).map(m=>`<tr><td>${m.工事内容||'-'}</td><td class="right">${m.数量||'-'}</td><td>${m.単位||''}</td><td class="right">${m.単価?'¥'+Number(m.単価).toLocaleString():'-'}</td><td class="right">¥${Number(m.金額税抜||0).toLocaleString()}</td></tr>`).join('')}</tbody>
+              </table>
+            </div>` : ''}
         </div>
       </div>
       <div class="detail-section">
@@ -445,6 +480,14 @@ function renderMitsumori(){
       </div>
       ${p.見積?.備考?`<div class="note-box"><div class="note-label">備考</div>${p.見積.備考}</div>`:''}
       <div style="margin-top:8px;">${pdfTag(p.見積?.PDF,'見積書PDF')}</div>
+      ${(p.見積?.明細||[]).length ? `
+        <button class="meisai-toggle" onclick="toggleMeisai('mv-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}',this)">▶ 明細を表示</button>
+        <div class="meisai-wrap" id="mv-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}">
+          <table class="meisai-table">
+            <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">単価</th><th class="right">金額（税抜）</th></tr></thead>
+            <tbody>${(p.見積.明細||[]).map(m=>`<tr><td>${m.工事内容||'-'}</td><td class="right">${m.数量||'-'}</td><td>${m.単位||''}</td><td class="right">${m.単価?'¥'+Number(m.単価).toLocaleString():'-'}</td><td class="right">¥${Number(m.金額税抜||0).toLocaleString()}</td></tr>`).join('')}</tbody>
+          </table>
+        </div>` : ''}
     </div>
   </div>`).join('');
 }
@@ -488,6 +531,15 @@ function renderSeikyu(){
         </div>
         ${r.備考?`<div class="note-box"><div class="note-label">備考</div>${r.備考}</div>`:''}
         <div style="margin-top:8px;">${pdfTag(r.PDF,'請求書PDF')}</div>
+        ${(r.明細||[]).length ? `
+          <button class="meisai-toggle" onclick="toggleMeisai('rv-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}-${r.請求番号?.replace(/[^a-zA-Z0-9]/g,'-')||'x'}',this)">▶ 明細を表示</button>
+          <div class="meisai-wrap" id="rv-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}-${r.請求番号?.replace(/[^a-zA-Z0-9]/g,'-')||'x'}">
+            <table class="meisai-table">
+              <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">金額（税抜）</th></tr></thead>
+              <tbody>${(r.明細||[]).map(m=>`<tr><td>${m.工事内容||'-'}</td><td class="right">${m.数量||'-'}</td><td>${m.単位||''}</td><td class="right">¥${Number(m.金額税抜||0).toLocaleString()}</td></tr>`).join('')}</tbody>
+            </table>
+            ${r.税込合計?`<table class="totals-table"><tr><td>税抜合計</td><td>¥${Number(r.税抜合計||0).toLocaleString()}</td></tr><tr><td>消費税（10%）</td><td>¥${Number(r.消費税||0).toLocaleString()}</td></tr><tr><td>税込合計</td><td>¥${Number(r.税込合計||0).toLocaleString()}</td></tr></table>`:''}
+          </div>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -612,6 +664,13 @@ function renderGenka(){
       </div>
     </div>`;
   }).join('');
+}
+
+function toggleMeisai(id,btn){
+  const wrap=document.getElementById(id);
+  if(!wrap)return;
+  const isOpen=wrap.classList.toggle('open');
+  btn.textContent=isOpen?'▼ 明細を隠す':'▶ 明細を表示';
 }
 
 loadData();
