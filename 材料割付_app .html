@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>材料割付｜アート・レイズ</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1e2d40">
+<style>
+:root{
+  --bg:#eeebe5;--navy:#1e2d40;--navy2:#2a3f5a;
+  --accent:#c8a96e;--text:#1e2d40;--text2:#5a6a7a;--white:#ffffff;
+  /* カテゴリカラー */
+  --cc:#2563a8;--cw:#0d6e50;--cf:#9a5a10;
+  --bc:rgba(37,99,168,0.10);--bw:rgba(13,110,80,0.10);--bf:rgba(154,90,16,0.10);
+  --tc:#1a4a88;--tw:#085040;--tf:#7a4008;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Meiryo','Yu Gothic',sans-serif;
+  height:100dvh;display:flex;flex-direction:column;overflow:hidden;
+}
+
+/* ── ヘッダー ── */
+.header{
+  background:var(--navy);height:50px;
+  display:flex;align-items:center;padding:0 12px;gap:8px;flex-shrink:0;
+}
+.btn-back{
+  width:40px;height:40px;border:none;background:transparent;
+  color:var(--white);font-size:20px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;border-radius:8px;
+}
+.btn-back:active{background:rgba(255,255,255,0.15);}
+.header-title{flex:1;font-size:15px;font-weight:700;color:var(--white);}
+.header-cat{
+  font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;
+  border:1.5px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.8);
+}
+
+/* ── スクロールエリア ── */
+.scroll-area{
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:14px 14px max(20px,env(safe-area-inset-bottom));
+}
+
+/* ── カテゴリ選択 ── */
+.cat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;}
+.cat-btn{
+  padding:14px 4px;border:1.5px solid rgba(30,45,64,0.15);
+  border-radius:12px;background:var(--white);color:var(--text2);
+  font-size:15px;font-weight:600;cursor:pointer;text-align:center;
+  font-family:inherit;
+  box-shadow:0 1px 4px rgba(30,45,64,0.07);
+}
+.cat-btn.ac-ceil{border-color:var(--cc);background:var(--bc);color:var(--tc);}
+.cat-btn.ac-wall{border-color:var(--cw);background:var(--bw);color:var(--tw);}
+.cat-btn.ac-floor{border-color:var(--cf);background:var(--bf);color:var(--tf);}
+
+/* ── 材料ボタン ── */
+.mat-row{display:grid;gap:6px;margin-bottom:14px;}
+.mat-btn{
+  padding:13px 14px;border:1.5px solid rgba(30,45,64,0.12);
+  border-radius:12px;background:var(--white);color:var(--text2);
+  font-size:14px;font-weight:500;cursor:pointer;text-align:left;
+  font-family:inherit;
+  box-shadow:0 1px 3px rgba(30,45,64,0.06);
+}
+.mat-btn.ac-ceil{border-color:var(--cc);background:var(--bc);color:var(--tc);font-weight:700;}
+.mat-btn.ac-wall{border-color:var(--cw);background:var(--bw);color:var(--tw);font-weight:700;}
+.mat-btn.ac-floor{border-color:var(--cf);background:var(--bf);color:var(--tf);font-weight:700;}
+
+/* ── サブ選択 ── */
+.sub-sel-row{display:grid;gap:6px;margin-bottom:12px;}
+.sub-btn{
+  padding:12px 14px;border:1.5px solid rgba(30,45,64,0.12);
+  border-radius:12px;background:var(--white);color:var(--text2);
+  font-size:14px;cursor:pointer;text-align:left;
+  font-family:inherit;display:flex;justify-content:space-between;align-items:center;
+}
+.sub-btn.ac-floor{border-color:var(--cf);background:var(--bf);color:var(--tf);font-weight:700;}
+.sub-hint{font-size:11px;opacity:.65;}
+
+/* ── パターン選択 ── */
+.pat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px;}
+.pat-btn{
+  padding:10px 6px;border:1.5px solid rgba(30,45,64,0.12);
+  border-radius:10px;background:var(--white);color:var(--text2);
+  font-size:12px;font-weight:500;cursor:pointer;text-align:center;font-family:inherit;
+}
+.pat-btn.ac-ceil{border-color:var(--cc);background:var(--bc);color:var(--tc);font-weight:700;}
+.pat-btn.ac-floor{border-color:var(--cf);background:var(--bf);color:var(--tf);font-weight:700;}
+
+/* ── セクションラベル ── */
+.st{
+  font-size:10px;font-weight:700;color:var(--text2);
+  letter-spacing:0.08em;margin-bottom:7px;
+}
+
+/* ── 入力グリッド ── */
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;}
+.iw{display:flex;flex-direction:column;gap:3px;}
+.iw span{font-size:11px;color:var(--text2);}
+input[type=number],select{
+  width:100%;height:46px;padding:0 10px;
+  border:1.5px solid rgba(30,45,64,0.18);border-radius:10px;
+  background:var(--white);color:var(--text);font-size:16px;
+  font-family:inherit;outline:none;
+}
+input[type=number]:focus,select:focus{border-color:var(--navy);}
+
+/* ── シート幅ボタン ── */
+.swb{
+  padding:10px 4px;border:1.5px solid rgba(30,45,64,0.12);
+  border-radius:10px;background:var(--white);color:var(--text2);
+  font-size:13px;cursor:pointer;text-align:center;font-family:inherit;
+}
+.swb.act{border-color:var(--cf);background:var(--bf);color:var(--tf);font-weight:700;}
+
+/* ── 計算ボタン ── */
+.calc-btn{
+  width:100%;height:50px;border:none;border-radius:12px;
+  font-size:15px;font-weight:700;cursor:pointer;
+  font-family:inherit;color:var(--white);letter-spacing:0.04em;
+  margin-top:2px;
+}
+.calc-ceil{background:var(--cc);}
+.calc-wall{background:var(--cw);}
+.calc-floor{background:var(--cf);}
+
+/* ── トリムカード ── */
+.trim-card{
+  background:var(--bg);border-radius:12px;padding:12px;margin-bottom:12px;
+  border:1px solid rgba(30,45,64,0.08);
+}
+
+/* ── 4面タブ ── */
+.face-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:12px;}
+.face-tab{
+  padding:10px 4px;border:1.5px solid rgba(30,45,64,0.12);
+  border-radius:10px;background:var(--white);color:var(--text2);
+  font-size:13px;font-weight:500;cursor:pointer;text-align:center;
+  font-family:inherit;position:relative;
+}
+.face-tab.ac-wall{border-color:var(--cw);background:var(--bw);color:var(--tw);font-weight:700;}
+.face-tab .fdot{
+  width:7px;height:7px;border-radius:50%;background:var(--cw);
+  position:absolute;top:5px;right:5px;display:none;
+}
+.face-tab.has-data .fdot{display:block;}
+
+/* ── まとめ計算チェック ── */
+.face-check-row{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:10px;}
+.face-check{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:8px 4px;border:1.5px solid rgba(30,45,64,0.1);
+  border-radius:10px;background:var(--bg);font-size:12px;color:var(--text2);cursor:pointer;
+}
+.face-check input{width:16px;height:16px;cursor:pointer;}
+.face-check.checked{border-color:var(--cw);background:var(--bw);color:var(--tw);}
+
+/* ── 開口ボタン群 ── */
+.aor{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;}
+.aob{
+  padding:11px 4px;border:1.5px solid rgba(30,45,64,0.12);
+  border-radius:10px;background:var(--white);color:var(--text2);
+  font-size:12px;cursor:pointer;text-align:center;line-height:1.5;font-family:inherit;
+}
+.aob:active{background:var(--bg);}
+
+/* ── 開口リスト ── */
+.oi{
+  background:var(--white);border:1.5px solid rgba(30,45,64,0.1);
+  border-radius:10px;padding:10px 12px;margin-bottom:6px;cursor:pointer;
+}
+.oi.sel-wall{border-color:var(--cw);background:var(--bw);}
+.on{font-size:13px;font-weight:600;}
+.op{font-size:11px;color:var(--text2);margin-top:3px;line-height:1.6;}
+.db{
+  font-size:11px;color:var(--text2);background:none;
+  border:1px solid rgba(30,45,64,0.15);border-radius:6px;
+  padding:3px 8px;cursor:pointer;float:right;font-family:inherit;
+}
+
+/* ── Canvas ── */
+.vw2{
+  border:1.5px solid rgba(30,45,64,0.1);border-radius:10px;
+  overflow:hidden;margin-bottom:10px;background:var(--white);
+}
+.vl{
+  font-size:11px;color:var(--text2);padding:7px 10px;
+  border-bottom:1px solid rgba(30,45,64,0.08);font-weight:500;
+}
+canvas{display:block;width:100%;touch-action:none;}
+
+/* ── 移動パネル ── */
+.mpanel{border-radius:12px;padding:12px;margin-bottom:10px;}
+.mpanel-wall{background:var(--bw);border:1px solid var(--cw);}
+.mg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;margin-bottom:10px;}
+.mb{
+  height:50px;border:1.5px solid rgba(30,45,64,0.12);
+  border-radius:10px;background:var(--white);font-size:22px;cursor:pointer;
+}
+.mb:active{background:var(--bg);}
+.mc-pos{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:11px;color:var(--text2);line-height:1.6;
+  background:var(--white);border-radius:10px;padding:6px;
+}
+.dg4{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;}
+.dc{background:var(--white);border-radius:10px;padding:9px 10px;text-align:center;}
+.dl{font-size:11px;color:var(--text2);}
+.dv-wall{color:var(--tw);font-size:16px;font-weight:700;margin-top:2px;}
+.sr{display:flex;align-items:center;gap:6px;margin-top:10px;}
+.sr span{font-size:11px;color:var(--text2);white-space:nowrap;}
+.sb{
+  padding:7px 12px;border:1.5px solid rgba(30,45,64,0.12);
+  border-radius:8px;background:var(--white);color:var(--text2);
+  font-size:12px;cursor:pointer;font-family:inherit;
+}
+.sb.act-wall{border-color:var(--cw);background:var(--bw);color:var(--tw);font-weight:700;}
+
+/* ── 結果カード ── */
+.mx{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0;}
+.mc2{border-radius:12px;padding:12px;text-align:center;}
+.mc2-ceil{background:var(--bc);}
+.mc2-wall{background:var(--bw);}
+.mc2-floor{background:var(--bf);}
+.mv{font-size:20px;font-weight:700;}
+.mv-ceil{color:var(--tc);}
+.mv-wall{color:var(--tw);}
+.mv-floor{color:var(--tf);}
+.ml{font-size:11px;color:var(--text2);margin-top:3px;}
+
+/* ── 詳細テーブル ── */
+.dt{
+  background:var(--white);border:1.5px solid rgba(30,45,64,0.08);
+  border-radius:12px;overflow:hidden;margin-bottom:10px;
+}
+.dr{
+  display:flex;justify-content:space-between;padding:11px 12px;
+  border-bottom:1px solid rgba(30,45,64,0.06);font-size:13px;
+}
+.dr:last-child{border-bottom:none;}
+.dr span:first-child{color:var(--text2);}
+.dr span:last-child{font-weight:600;}
+
+/* ── カット詳細 ── */
+.cd{padding:9px 12px;border-bottom:1px solid rgba(30,45,64,0.06);font-size:13px;}
+.cd:last-child{border-bottom:none;}
+.ch{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;}
+.cn{font-size:11px;color:var(--text2);margin-top:2px;line-height:1.6;}
+
+/* ── バッジ ── */
+.bg{display:inline-block;font-size:10px;padding:2px 6px;border-radius:5px;font-weight:700;margin-left:3px;}
+.bgok{background:#dcf5e6;color:#1a7a3a;}
+.bgwn{background:#fff0d6;color:#9a5a10;}
+.bgin{background:#dceeff;color:#1a4a88;}
+
+/* ── カット集計 ── */
+.cut-summary{
+  border-radius:12px;padding:11px 13px;margin-bottom:10px;
+  background:var(--bw);border:1px solid var(--cw);
+}
+.cut-title{font-size:12px;font-weight:700;margin-bottom:7px;color:var(--tw);}
+.cut-row{
+  display:flex;justify-content:space-between;font-size:13px;
+  padding:3px 0;border-bottom:1px solid rgba(0,0,0,0.05);
+}
+.cut-row:last-child{border-bottom:none;}
+
+/* ── トリム結果 ── */
+.trim-res{border-radius:12px;padding:11px 13px;margin-bottom:10px;}
+.trim-res-ceil{background:var(--bc);border:1px solid var(--cc);}
+.trim-res-wall{background:var(--bw);border:1px solid var(--cw);}
+.trim-row{
+  display:flex;justify-content:space-between;font-size:13px;
+  padding:3px 0;border-bottom:1px solid rgba(0,0,0,0.05);
+}
+.trim-row:last-child{border-bottom:none;font-weight:700;padding-top:6px;}
+
+/* ── まとめカード ── */
+.summary-card{
+  border-radius:12px;padding:14px;margin-bottom:10px;
+  background:var(--bw);border:1.5px solid var(--cw);
+}
+.summary-title{font-size:13px;font-weight:700;color:var(--tw);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.summary-row{
+  display:flex;justify-content:space-between;font-size:13px;
+  padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.05);
+}
+.summary-row:last-child{border-bottom:none;font-weight:700;padding-top:8px;font-size:14px;}
+
+/* ── 面結果ヘッダー ── */
+.face-result-header{
+  background:var(--bg);border-radius:10px;padding:8px 12px;
+  margin-bottom:8px;font-size:12px;font-weight:700;color:var(--text2);
+  border:1px solid rgba(30,45,64,0.1);
+}
+
+/* ── シート比較 ── */
+.sheet-compare{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;}
+.sheet-card{
+  border:1.5px solid rgba(30,45,64,0.1);border-radius:12px;
+  padding:12px;background:var(--white);
+}
+.sheet-card.best{border-color:var(--cf);background:var(--bf);}
+.sct{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+.bb{font-size:10px;background:var(--cf);color:#fff;padding:2px 7px;border-radius:5px;font-weight:700;}
+.sv{font-size:22px;font-weight:700;color:var(--tf);}
+.ss{font-size:11px;color:var(--text2);margin-top:2px;}
+.sd{margin-top:8px;font-size:12px;color:var(--text2);line-height:1.8;border-top:1px solid rgba(30,45,64,0.08);padding-top:8px;}
+.viz-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.vw-sheet{border:1.5px solid rgba(30,45,64,0.1);border-radius:10px;overflow:visible;background:var(--white);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <button class="btn-back" onclick="history.back()">←</button>
+  <div class="header-title">材料割付</div>
+  <div class="header-cat" id="header-cat">天井</div>
+</div>
+
+<div class="scroll-area">
+  <div class="cat-row">
+    <button class="cat-btn ac-ceil" onclick="setCat('ceil',this)">天井</button>
+    <button class="cat-btn" onclick="setCat('wall',this)">壁</button>
+    <button class="cat-btn" onclick="setCat('floor',this)">床</button>
+  </div>
+  <div id="mat-list" class="mat-row"></div>
+  <div id="sub-area"></div>
+  <div id="pat-area"></div>
+  <div id="form-area"></div>
+  <div id="result-area"></div>
+</div>
+
+<script>
+var curCat='ceil',curMatIdx=0,curPat='通し目地';
+var curFloorType='タイル',curTileType='Pタイル',curSheetW=1820,curFlooringType='フローリング';
+
+var FACES=['東','西','南','北'];
+var curFaceIdx=0;
+var faceData=[null,null,null,null];
+var faceInputs=[null,null,null,null];
+var faceOpenings=[[],[],[],[]];
+var faceSelId=[null,null,null,null];
+var faceOidSeq=[0,0,0,0];
+var moveStep=10;
+
+function getOpenings(){return faceOpenings[curFaceIdx];}
+function setOpenings(a){faceOpenings[curFaceIdx]=a;}
+
+var patsByCat={ceil:['通し目地','レンガ張り','ダイヤ張り'],wall:null,floor:['通し目地','レンガ張り','ダイヤ張り']};
+var vcols={ceil:'#2563a8',wall:'#0d6e50',floor:'#9a5a10'};
+var tileDefaults={'Pタイル':{BL:457,BW:457,LOSS:10,PRICE:500},'塩ビタイル':{BL:300,BW:300,LOSS:10,PRICE:400},'フロアタイル':{BL:600,BW:300,LOSS:10,PRICE:800},'カーペットタイル':{BL:500,BW:500,LOSS:5,PRICE:1200}};
+var floorDefaults={'フローリング':{BL:1818,BW:303,LOSS:10,PRICE:1200},'無垢材':{BL:1800,BW:120,LOSS:15,PRICE:2000}};
+
+function fmt(n){return '¥'+Math.round(n).toLocaleString();}
+function fv(k){var e=document.getElementById('f-'+k);return e?parseFloat(e.value)||0:0;}
+function fsel(k){var e=document.getElementById('f-'+k);return e?e.value:'';}
+function rceil(len,rp){return(!rp||len<=0)?len:Math.ceil(len/rp)*rp;}
+function edgeSize(room,pitch){var r=room%pitch;return r<1?pitch:Math.round(r);}
+function getOpeningArea(){var t=0;getOpenings().forEach(function(o){t+=(o.w/1000)*(o.h/1000)*o.count;});return t;}
+function getOpeningPerim(){var t=0;getOpenings().forEach(function(o){if(o.type==='ドア')t+=o.w/1000*o.count;});return t;}
+function bothInside(x1,x2,op){var E=0.5;return(x1>op.x+E&&x1<op.x+op.w-E)&&(x2>op.x+E&&x2<op.x+op.w-E);}
+function toHonStr(arr){var m={};arr.forEach(function(l){if(l>0)m[l]=(m[l]||0)+1;});return Object.keys(m).map(Number).sort(function(a,b){return b-a;}).map(function(k){return k+'mm × '+m[k]+'本';}).join('　');}
+
+function calcSheetDir(L,W,sw,loss,price,dir){
+  var cols,lenPerCol,edgeMm;
+  if(dir==='縦割り'){cols=Math.ceil(W/sw);lenPerCol=L/1000;edgeMm=cols*sw-W;}
+  else{cols=Math.ceil(L/sw);lenPerCol=W/1000;edgeMm=cols*sw-L;}
+  if(edgeMm>=sw)edgeMm=0;
+  var totalM=cols*lenPerCol,ordM=Math.ceil(totalM*(1+loss/100)*10)/10;
+  return{dir:dir,cols:cols,lenPerCol:lenPerCol,edgeMm:edgeMm,totalM:totalM,ordM:ordM,costOrd:Math.round(ordM*price)};
+}
+
+function calcClothCols(W,H,rw,rp){
+  var nc=Math.ceil(W/rw),res=[];
+  for(var c=0;c<nc;c++){
+    var x1=c*rw,x2=Math.min(x1+rw,W);
+    var co=getOpenings().filter(function(op){return op.x<x2&&op.x+op.w>x1;});
+    if(!co.length){var l=rceil(H,rp);res.push({c:c+1,x1:Math.round(x1),x2:Math.round(x2),mode:'通常',cuts:[{lb:'全高',len:l,nt:rp?H+'→'+l+'mm':''}],tot:l,reuse:0});continue;}
+    var spOp=null;
+    for(var i=0;i<co.length;i++){if(bothInside(x1,x2,co[i])){spOp=co[i];break;}}
+    if(!spOp){var lf=rceil(H,rp);res.push({c:c+1,x1:Math.round(x1),x2:Math.round(x2),mode:'全高',cuts:[{lb:'全高',len:lf,nt:co.map(function(o){return o.type;}).join('・')+(rp?' ('+H+'→'+lf+'mm)':'')}],tot:lf,reuse:0});continue;}
+    var cuts=[],tot=0,reuse=0,op=spOp,topH=H-op.y-op.h,botH=op.y;
+    if(op.type==='窓（中連）'){var uc=rceil(topH,rp),ur=uc-topH;cuts.push({lb:'窓上',len:uc,nt:'天端'+topH+'mm'+(rp?' → '+uc+'mm 余り'+ur+'mm':'')});tot+=uc;if(botH>0){if(ur>=botH){cuts.push({lb:'窓下',len:botH,reuse:true,nt:'残材流用（余り'+ur+'mm≥窓下'+botH+'mm）'});reuse+=botH;}else{var bc=rceil(botH,rp);cuts.push({lb:'窓下',len:bc,nt:'新規 床'+botH+'mm'+(rp?' → '+bc:'')});tot+=bc;}}}
+    else if(op.type==='窓（掃出）'){if(topH>0){var uc3=rceil(topH,rp);cuts.push({lb:'窓上',len:uc3,nt:'天端'+topH+'mm'+(rp?' → '+uc3+'mm':'')});tot+=uc3;}else cuts.push({lb:'窓上',len:0,nt:'不要'});}
+    else{if(topH>0){var uc2=rceil(topH,rp);cuts.push({lb:'開口上',len:uc2,nt:'天端'+topH+'mm'+(rp?' → '+uc2+'mm':'')});tot+=uc2;}else cuts.push({lb:'開口上',len:0,nt:'不要'});}
+    res.push({c:c+1,x1:Math.round(x1),x2:Math.round(x2),mode:'分割',cuts:cuts,tot:tot,reuse:reuse});
+  }
+  return res;
+}
+
+function calcGrid(d,pat){
+  var pl=d.BL,pw=d.BW,lx=pat==='ダイヤ張り'?7:0,tl=d.LOSS+lx;
+  var cols=Math.ceil(d.L/pl),rows=Math.ceil(d.W/pw),base=cols*rows,total=Math.ceil(base*(1+tl/100));
+  var eH=edgeSize(d.L,pl),eV=edgeSize(d.W,pw);
+  var trim=null;
+  if(curCat==='ceil'){var mt=fsel('MAWARI_TYPE')||'塩ビ廻り縁',mp=d.MAWARI_PRICE||0;var per=(d.L+d.W)*2/1000,ord=Math.ceil(per*1.05*10)/10;trim={name:'廻り縁',type:mt,perim:per.toFixed(2),order:ord.toFixed(1),cost:Math.round(ord*mp)};}
+  return{m:[{v:base+'枚',l:'必要枚数'},{v:total+'枚',l:'発注数（ロス込）'},{v:((d.L/1000)*(d.W/1000)).toFixed(2)+'m²',l:'面積'},{v:tl+'%',l:'ロス率'}],rows:[['横',cols+'列','端材 '+eH+'mm'],['縦',rows+'行','端材 '+eV+'mm'],[pat,'',lx>0?'端部+'+lx+'%':'']],costs:[{l:'材料費（正味）',v:fmt(base*d.PRICE)},{l:'材料費（ロス込）',v:fmt(total*d.PRICE)}],trim:trim,viz:{rW:d.L,rH:d.W,tW:pl,tH:pw,pat:pat,eH:eH,eV:eV,lbl:cols+'×'+rows+'='+base+'枚'}};}
+
+function calcFloorTile(d,pat){var pl=d.BL,pw=d.BW,lx=pat==='ダイヤ張り'?7:0,tl=d.LOSS+lx;var cols=Math.ceil(d.L/pl),rows=Math.ceil(d.W/pw),base=cols*rows,total=Math.ceil(base*(1+tl/100));var eH=edgeSize(d.L,pl),eV=edgeSize(d.W,pw);return{m:[{v:base+'枚',l:'必要枚数'},{v:total+'枚',l:'発注数（ロス込）'},{v:((d.L/1000)*(d.W/1000)).toFixed(2)+'m²',l:'面積'},{v:tl+'%',l:'ロス率'}],rows:[['横',cols+'列','端材 '+eH+'mm'],['縦',rows+'行','端材 '+eV+'mm'],[pat,'',lx>0?'端部+'+lx+'%':'']],costs:[{l:'材料費（正味）',v:fmt(base*d.PRICE)},{l:'材料費（ロス込）',v:fmt(total*d.PRICE)}],trim:null,viz:{rW:d.L,rH:d.W,tW:pl,tH:pw,pat:pat,eH:eH,eV:eV,lbl:cols+'×'+rows+'='+base+'枚'}};}
+
+function calcFlooringMat(d,pat){var pl=d.BL,pw=d.BW,lx=pat==='ダイヤ張り'?7:0,tl=d.LOSS+lx;var cols=Math.ceil(d.L/pl),rows=Math.ceil(d.W/pw),base=cols*rows,total=Math.ceil(base*(1+tl/100));var eH=edgeSize(d.L,pl),eV=edgeSize(d.W,pw);return{m:[{v:base+'枚',l:'必要枚数'},{v:total+'枚',l:'発注数（ロス込）'},{v:((d.L/1000)*(d.W/1000)).toFixed(2)+'m²',l:'面積'},{v:tl+'%',l:'ロス率'}],rows:[['長手',cols+'列','端材 '+eH+'mm'],['短手',rows+'行','端材 '+eV+'mm'],[pat,'',lx>0?'端部+'+lx+'%':'']],costs:[{l:'材料費（正味）',v:fmt(base*d.PRICE)},{l:'材料費（ロス込）',v:fmt(total*d.PRICE)}],trim:null,viz:{rW:d.L,rH:d.W,tW:pl,tH:pw,pat:pat,eH:eH,eV:eV,lbl:cols+'×'+rows+'='+base+'枚'}};}
+
+function calcClothWithFace(d,fIdx){
+  var savedIdx=curFaceIdx;curFaceIdx=fIdx;
+  var opArea=getOpeningArea(),opPerim=getOpeningPerim();
+  var rw=d.BL||920,rp=d.REPEAT||0;
+  var cr=calcClothCols(d.L,d.W,rw,rp);
+  curFaceIdx=savedIdx;
+  var totMm=cr.reduce(function(s,r){return s+r.tot;},0),totM=totMm/1000;
+  var ordM=Math.ceil(totM*(1+d.LOSS/100)*10)/10;
+  var cutMap={};cr.forEach(function(r){r.cuts.forEach(function(ct){if(ct.len>0&&!ct.reuse)cutMap[ct.len]=(cutMap[ct.len]||0)+1;});});
+  var reuseT=cr.reduce(function(s,r){return s+(r.reuse||0);},0);
+  var wallArea=(d.L/1000)*(d.W/1000)-opArea;
+  var hType=d.HABAKI_TYPE||'ソフト巾木',hH=d.HABAKI_H||'60',hPrice=d.HABAKI_PRICE||0;
+  var hPerim=(d.L+d.W)*2/1000-opPerim,hOrd=Math.ceil(hPerim*1.05*10)/10;
+  var trim={name:'巾木',type:hType+(hType==='ソフト巾木'?' H'+hH:''),perim:hPerim.toFixed(2),order:hOrd.toFixed(1),cost:Math.round(hOrd*hPrice),ordM:hOrd};
+  return{m:[{v:ordM.toFixed(1)+'m',l:'発注数（ロス込）'},{v:Math.ceil(d.L/rw)+'列',l:'割り付け列数'},{v:totM.toFixed(1)+'m',l:'正味合計'},{v:wallArea.toFixed(2)+'m²',l:'有効壁面積'}],rows:[],costs:[{l:'材料費（正味）',v:fmt(totM*d.PRICE)},{l:'材料費（ロス込）',v:fmt(ordM*d.PRICE)}],trim:trim,colResults:cr,cutMap:cutMap,reuseT:reuseT,viz:null,ordM:ordM,costOrd:Math.round(ordM*d.PRICE),costNet:Math.round(totM*d.PRICE)};}
+
+function calcCloth(d){return calcClothWithFace(d,curFaceIdx);}
+
+function calcPaintWithFace(d,fIdx){
+  var savedIdx=curFaceIdx;curFaceIdx=fIdx;
+  var opArea=getOpeningArea(),opPerim=getOpeningPerim();
+  curFaceIdx=savedIdx;
+  var area=(d.L/1000)*(d.W/1000)-opArea,tot=area*(d.COAT||1),ord=Math.ceil(tot*(1+d.LOSS/100)*10)/10;
+  var hType=d.HABAKI_TYPE||'ソフト巾木',hH=d.HABAKI_H||'60',hPrice=d.HABAKI_PRICE||0;
+  var hPerim=(d.L+d.W)*2/1000-opPerim,hOrd=Math.ceil(hPerim*1.05*10)/10;
+  var trim={name:'巾木',type:hType+(hType==='ソフト巾木'?' H'+hH:''),perim:hPerim.toFixed(2),order:hOrd.toFixed(1),cost:Math.round(hOrd*hPrice),ordM:hOrd};
+  return{m:[{v:area.toFixed(2)+'m²',l:'有効面積'},{v:ord.toFixed(1)+'m²',l:'塗布量'},{v:(d.COAT||1)+'回',l:'塗り回数'},{v:opArea.toFixed(2)+'m²',l:'開口控除'}],rows:[['壁面積',((d.L/1000)*(d.W/1000)).toFixed(2)+'m²',''],['開口控除','-'+opArea.toFixed(2)+'m²',''],['有効面積',area.toFixed(2)+'m²','']],costs:[{l:'材料費（正味）',v:fmt(tot*d.PRICE)},{l:'材料費（ロス込）',v:fmt(ord*d.PRICE)}],trim:trim,viz:null,ordM:ord,costOrd:Math.round(ord*d.PRICE),costNet:Math.round(tot*d.PRICE)};}
+
+function calcPaint(d){return calcPaintWithFace(d,curFaceIdx);}
+
+var cats={
+  ceil:{mats:[
+    {name:'プラスターボード',fields:[{label:'天井寸法',row:[{k:'L',lbl:'長さ mm'},{k:'W',lbl:'幅 mm'}],def:[6000,4500]},{label:'ボードサイズ',row:[{k:'BL',lbl:'長さ mm'},{k:'BW',lbl:'幅 mm'}],def:[1820,910]},{label:'設定',row:[{k:'LOSS',lbl:'ロス率 %'},{k:'PRICE',lbl:'単価 円/枚'}],def:[10,900]}],calc:calcGrid},
+    {name:'ジプトーン',fields:[{label:'天井寸法',row:[{k:'L',lbl:'長さ mm'},{k:'W',lbl:'幅 mm'}],def:[6000,4500]},{label:'サイズ',row:[{k:'BL',lbl:'長さ mm'},{k:'BW',lbl:'幅 mm'}],def:[910,455]},{label:'設定',row:[{k:'LOSS',lbl:'ロス率 %'},{k:'PRICE',lbl:'単価 円/枚'}],def:[10,600]}],calc:calcGrid},
+    {name:'岩綿板',fields:[{label:'天井寸法',row:[{k:'L',lbl:'長さ mm'},{k:'W',lbl:'幅 mm'}],def:[6000,4500]},{label:'サイズ',row:[{k:'BL',lbl:'長さ mm'},{k:'BW',lbl:'幅 mm'}],def:[600,600]},{label:'設定',row:[{k:'LOSS',lbl:'ロス率 %'},{k:'PRICE',lbl:'単価 円/枚'}],def:[5,300]}],calc:calcGrid}]},
+  wall:{mats:[
+    {name:'ビニールクロス',fields:[{label:'壁寸法',row:[{k:'L',lbl:'幅 mm'},{k:'W',lbl:'高さ mm'}],def:[3600,2400]},{label:'クロス設定',row:[{k:'BL',lbl:'ロール幅 mm'},{k:'PRICE',lbl:'単価 円/m'}],def:[920,300]},{label:'',row:[{k:'LOSS',lbl:'ロス率 %'},{k:'REPEAT',lbl:'リピート mm'}],def:[10,0]}],calc:calcCloth},
+    {name:'塗装',fields:[{label:'壁寸法',row:[{k:'L',lbl:'幅 mm'},{k:'W',lbl:'高さ mm'}],def:[3600,2400]},{label:'設定',row3:[{k:'COAT',lbl:'塗り回数'},{k:'LOSS',lbl:'ロス率 %'},{k:'PRICE',lbl:'単価 円/m²'}],def:[2,10,800]}],calc:calcPaint},
+    {name:'硬質塩ビシート',fields:[{label:'壁寸法',row:[{k:'L',lbl:'幅 mm'},{k:'W',lbl:'高さ mm'}],def:[3600,2400]},{label:'シートサイズ',row:[{k:'BL',lbl:'長さ mm'},{k:'BW',lbl:'幅 mm'}],def:[910,2420]},{label:'設定',row:[{k:'LOSS',lbl:'ロス率 %'},{k:'PRICE',lbl:'単価 円/枚'}],def:[5,1800]}],calc:calcGrid}]}
+};
+
+// ── カテゴリ切替 ──
+function setCat(cat,btn){
+  curCat=cat;curMatIdx=0;curPat='通し目地';curFaceIdx=0;
+  faceData=[null,null,null,null];faceInputs=[null,null,null,null];
+  faceOpenings=[[],[],[],[]];faceSelId=[null,null,null,null];faceOidSeq=[0,0,0,0];
+  document.querySelectorAll('.cat-btn').forEach(function(b){b.className='cat-btn';});
+  btn.className='cat-btn ac-'+cat;
+  document.getElementById('header-cat').textContent={ceil:'天井',wall:'壁',floor:'床'}[cat];
+  document.getElementById('result-area').innerHTML='';
+  if(cat==='floor'){renderFloorUI();}
+  else if(cat==='wall'){renderWallUI();}
+  else{renderMats();}
+}
+
+// ── 壁4面 ──
+function renderWallUI(){
+  document.getElementById('mat-list').innerHTML='';
+  document.getElementById('pat-area').innerHTML='';
+  var ms=cats.wall.mats,h='';
+  ms.forEach(function(m,i){h+='<button class="mat-btn'+(i===curMatIdx?' ac-wall':'')+'" onclick="setWallMat('+i+',this)">'+m.name+'</button>';});
+  document.getElementById('mat-list').innerHTML=h;
+  renderFaceTabsAndForm();
+}
+
+function setWallMat(idx,btn){
+  curMatIdx=idx;faceData=[null,null,null,null];faceInputs=[null,null,null,null];
+  document.querySelectorAll('.mat-btn').forEach(function(b){b.className='mat-btn';});
+  btn.className='mat-btn ac-wall';
+  document.getElementById('result-area').innerHTML='';
+  renderFaceTabsAndForm();
+}
+
+function renderFaceTabsAndForm(){
+  var h='<div class="st">面を選択</div><div class="face-tabs">';
+  FACES.forEach(function(f,i){
+    var hasDot=faceData[i]!==null;
+    h+='<button class="face-tab'+(i===curFaceIdx?' ac-wall':'')+(hasDot?' has-data':'')+'" onclick="switchFace('+i+')">'+f+'面<div class="fdot"></div></button>';
+  });
+  h+='</div>';
+  document.getElementById('sub-area').innerHTML=h;
+  renderWallForm();
+}
+
+function switchFace(idx){saveCurrentFaceInputs();curFaceIdx=idx;renderFaceTabsAndForm();}
+
+function saveCurrentFaceInputs(){
+  var keys=['L','W','BL','BW','LOSS','PRICE','REPEAT','COAT','HABAKI_PRICE'];
+  var d={};keys.forEach(function(k){d[k]=fv(k);});
+  d.HABAKI_TYPE=fsel('HABAKI_TYPE');d.HABAKI_H=fsel('HABAKI_H');
+  faceInputs[curFaceIdx]=d;
+}
+
+function renderWallForm(){
+  var m=cats.wall.mats[curMatIdx],h='',saved=faceInputs[curFaceIdx];
+  m.fields.forEach(function(f){
+    h+='<div style="margin-bottom:12px">'+(f.label?'<div class="st">'+f.label+'</div>':'');
+    if(f.row){h+='<div class="r2">';f.row.forEach(function(r,i){var val=saved&&saved[r.k]!=null?saved[r.k]:f.def[i];h+='<div class="iw"><span>'+r.lbl+'</span><input type="number" id="f-'+r.k+'" value="'+val+'" inputmode="numeric"></div>';});h+='</div>';}
+    else if(f.row3){h+='<div class="r3">';f.row3.forEach(function(r,i){var val=saved&&saved[r.k]!=null?saved[r.k]:f.def[i];h+='<div class="iw"><span>'+r.lbl+'</span><input type="number" id="f-'+r.k+'" value="'+val+'" inputmode="numeric"></div>';});h+='</div>';}
+    h+='</div>';
+  });
+  h+='<div style="margin-bottom:12px"><div class="st">開口部</div><div class="aor"><button class="aob" onclick="addOp(\'ドア\',900,2100)">＋ ドア<br><span style="font-size:10px">900×2100</span></button><button class="aob" onclick="addOp(\'窓（中連）\',1600,1100)">＋ 窓（中連）<br><span style="font-size:10px">1600×1100</span></button><button class="aob" onclick="addOp(\'窓（掃出）\',1600,2100)">＋ 窓（掃出）<br><span style="font-size:10px">1600×2100</span></button></div><div id="olist"></div></div>';
+  var hType=saved?saved.HABAKI_TYPE||'ソフト巾木':'ソフト巾木',hH=saved?saved.HABAKI_H||'60':'60',hPrice=saved?saved.HABAKI_PRICE||400:400;
+  h+='<div class="trim-card"><div class="st">巾木</div><div class="r2" style="margin-top:8px"><div class="iw"><span>種別</span><select id="f-HABAKI_TYPE" onchange="toggleHH()"><option'+(hType==='ソフト巾木'?' selected':'')+'>ソフト巾木</option><option'+(hType==='木製巾木'?' selected':'')+'>木製巾木</option></select></div><div class="iw" id="hh-wrap"><span>高さ</span><select id="f-HABAKI_H"><option value="60"'+(hH==='60'?' selected':'')+'>60mm</option><option value="75"'+(hH==='75'?' selected':'')+'>75mm</option><option value="100"'+(hH==='100'?' selected':'')+'>100mm</option></select></div></div><div class="r2" style="margin-top:8px"><div class="iw"><span>単価 円/m</span><input type="number" id="f-HABAKI_PRICE" value="'+hPrice+'" inputmode="numeric"></div><div></div></div></div>';
+  h+='<div class="vw2"><div class="vl">壁割り付け図（タップで開口選択）</div><canvas id="wall-cv"></canvas></div><div id="wall-mpanel" style="display:none"></div>';
+  h+='<button class="calc-btn calc-wall" style="margin-bottom:10px" onclick="doWallFaceCalc()">この面を計算</button>';
+  h+='<div><div class="st">まとめて計算する面を選択</div><div class="face-check-row">';
+  FACES.forEach(function(f,i){var hasData=faceData[i]!==null;h+='<label class="face-check'+(hasData?' checked':'')+'" id="fc-label-'+i+'"><input type="checkbox" id="fc-'+i+'"'+(hasData?' checked':'')+' onchange="updateFaceCheckStyle('+i+')">'+(hasData?'✓ ':'')+f+'面</label>';});
+  h+='</div><button class="calc-btn calc-wall" onclick="doWallSummary()">まとめて計算</button></div>';
+  document.getElementById('form-area').innerHTML=h;
+  renderOlist();redrawWall();toggleHH();
+}
+
+function updateFaceCheckStyle(i){var cb=document.getElementById('fc-'+i),lbl=document.getElementById('fc-label-'+i);if(!lbl)return;lbl.className='face-check'+(cb&&cb.checked?' checked':'');}
+
+function doWallFaceCalc(){
+  saveCurrentFaceInputs();var inp=faceInputs[curFaceIdx];var m=cats.wall.mats[curMatIdx];
+  var r=m.calc(inp,curPat);r.faceName=FACES[curFaceIdx];r.matName=m.name;
+  faceData[curFaceIdx]={result:r,inp:inp,fIdx:curFaceIdx};
+  renderFaceTabsAndForm();renderResult(r,'wall');
+  var cb=document.getElementById('fc-'+curFaceIdx);if(cb){cb.checked=true;updateFaceCheckStyle(curFaceIdx);}
+}
+
+function doWallSummary(){
+  var checked=[];FACES.forEach(function(f,i){var cb=document.getElementById('fc-'+i);if(cb&&cb.checked&&faceData[i])checked.push(i);});
+  if(!checked.length){alert('計算済みの面を選択してください');return;}
+  renderWallSummary(checked);
+}
+
+function renderWallSummary(idxs){
+  var totalOrdM=0,totalCostOrd=0,totalHabaki=0,allCutMap={};var faceDetails=[];
+  idxs.forEach(function(i){var fd=faceData[i];if(!fd)return;var r=fd.result;totalOrdM+=r.ordM||0;totalCostOrd+=r.costOrd||0;if(r.trim)totalHabaki+=r.trim.ordM||0;if(r.cutMap){Object.keys(r.cutMap).forEach(function(k){allCutMap[k]=(allCutMap[k]||0)+r.cutMap[k];});}faceDetails.push({name:FACES[i]+'面',matName:r.matName,ordM:r.ordM||0,cost:r.costOrd||0,habaki:r.trim?r.trim.order:'-'});});
+  var h='<div style="margin-top:14px"><div class="st">まとめ集計 — '+idxs.map(function(i){return FACES[i];}).join('・')+'面</div><div class="dt" style="margin-bottom:10px">';
+  faceDetails.forEach(function(fd){h+='<div class="dr"><span>'+fd.name+'（'+fd.matName+'）</span><span>'+fd.ordM.toFixed(1)+'m　¥'+fd.cost.toLocaleString()+'</span></div>';});
+  h+='</div><div class="summary-card"><div class="summary-title">📋 合計</div><div class="summary-row"><span>発注数合計</span><span>'+totalOrdM.toFixed(1)+'m</span></div><div class="summary-row"><span>材料費合計</span><span>¥'+totalCostOrd.toLocaleString()+'</span></div>';
+  if(totalHabaki>0)h+='<div class="summary-row"><span>巾木合計</span><span>'+totalHabaki.toFixed(1)+'m</span></div>';
+  var cutKeys=Object.keys(allCutMap).map(Number).sort(function(a,b){return b-a;});
+  if(cutKeys.length){h+='<div class="summary-row" style="display:block"><span style="font-size:12px;color:var(--text2)">糊機カット本数</span>';cutKeys.forEach(function(k){h+='<div style="display:flex;justify-content:space-between;font-size:13px;padding:2px 0"><span>'+k+'mm</span><span>'+allCutMap[k]+'本</span></div>';});h+='</div>';}
+  h+='</div>';
+  idxs.forEach(function(i){var fd=faceData[i];if(!fd)return;h+='<div class="face-result-header">'+FACES[i]+'面 — '+fd.result.matName+'</div>'+buildResultHTML(fd.result,'wall');});
+  h+='</div>';document.getElementById('result-area').innerHTML=h;
+}
+
+// ── 開口 ──
+function addOp(type,w,h2){var L=fv('L')||3600,H=fv('W')||2400,rw=fv('BL')||920;var nc=Math.ceil(L/rw),mc=Math.floor(nc/2);var x=w<rw?mc*rw+Math.round((rw-w)/2/10)*10:Math.round((L-w)/2/10)*10;x=Math.max(0,Math.min(L-w,x));var y=type==='ドア'?0:Math.max(0,Math.min(H-h2,Math.round((H-h2)/2/10)*10));faceOidSeq[curFaceIdx]++;var newId=faceOidSeq[curFaceIdx];getOpenings().push({id:newId,type:type,w:w,h:h2,x:x,y:y,count:1});faceSelId[curFaceIdx]=newId;renderOlist();redrawWall();showMP();}
+function removeOp(id){faceOpenings[curFaceIdx]=faceOpenings[curFaceIdx].filter(function(o){return o.id!==id;});if(faceSelId[curFaceIdx]===id){faceSelId[curFaceIdx]=null;hideMP();}renderOlist();redrawWall();}
+function odists(op){var L=fv('L')||3600,H=fv('W')||2400;return{left:op.x,right:L-op.x-op.w,bottom:op.y,top:H-op.y-op.h};}
+function renderOlist(){var el=document.getElementById('olist');if(!el)return;var h='';getOpenings().forEach(function(op){var s=op.id===faceSelId[curFaceIdx],d=odists(op);h+='<div class="oi'+(s?' sel-wall':'')+'" onclick="selOp('+op.id+')"><button class="db" onclick="event.stopPropagation();removeOp('+op.id+')">削除</button><div class="on">'+op.type+'　'+op.w+'×'+op.h+'mm</div><div class="op">左:'+op.x+'mm　右:'+d.right+'mm　床:'+d.bottom+'mm　天端:'+d.top+'mm</div></div>';});if(!getOpenings().length)h='<div style="font-size:12px;color:var(--text2);padding:3px 0">開口なし</div>';el.innerHTML=h;}
+function selOp(id){faceSelId[curFaceIdx]=id;renderOlist();showMP();}
+function showMP(){var p=document.getElementById('wall-mpanel');if(!p)return;p.style.display='block';updMP();}
+function hideMP(){var p=document.getElementById('wall-mpanel');if(p)p.style.display='none';}
+function updMP(){var op=getOpenings().find(function(o){return o.id===faceSelId[curFaceIdx];});if(!op)return;var d=odists(op);var h='<div class="mpanel mpanel-wall"><div style="font-size:13px;font-weight:700;margin-bottom:10px">'+op.type+'（'+op.w+'×'+op.h+'mm）</div><div class="mg"><div></div><button class="mb" onclick="movOp(0,1)">▲</button><div></div><button class="mb" onclick="movOp(-1,0)">◀</button><div class="mc-pos">X:'+op.x+'<br>Y:'+op.y+'</div><button class="mb" onclick="movOp(1,0)">▶</button><div></div><button class="mb" onclick="movOp(0,-1)">▼</button><div></div></div><div class="sr"><span>移動単位:</span>';[10,100,300].forEach(function(s){h+='<button class="sb'+(moveStep===s?' act-wall':'')+'" onclick="setMvStep('+s+',this)">'+s+'mm</button>';});h+='</div><div class="dg4"><div class="dc"><div class="dl">左端から</div><div class="dv-wall">'+op.x+'mm</div></div><div class="dc"><div class="dl">右端から</div><div class="dv-wall">'+d.right+'mm</div></div><div class="dc"><div class="dl">床から</div><div class="dv-wall">'+d.bottom+'mm</div></div><div class="dc"><div class="dl">天端から</div><div class="dv-wall">'+d.top+'mm</div></div></div></div>';document.getElementById('wall-mpanel').innerHTML=h;renderOlist();}
+function setMvStep(s){moveStep=s;updMP();}
+function movOp(dx,dy){var op=getOpenings().find(function(o){return o.id===faceSelId[curFaceIdx];});if(!op)return;var L=fv('L')||3600,H=fv('W')||2400;op.x=Math.max(0,Math.min(L-op.w,op.x+dx*moveStep));op.y=Math.max(0,Math.min(H-op.h,op.y+dy*moveStep));updMP();redrawWall();}
+function toggleHH(){var s=document.getElementById('f-HABAKI_TYPE'),w=document.getElementById('hh-wrap');if(w)w.style.visibility=s&&s.value==='ソフト巾木'?'visible':'hidden';}
+
+document.addEventListener('click',function(e){
+  var cv=document.getElementById('wall-cv');if(!cv||e.target!==cv)return;
+  var r=cv.getBoundingClientRect(),px=(e.clientX-r.left)*(cv.width/r.width),py=(e.clientY-r.top)*(cv.height/r.height);
+  var W=fv('L')||3600,H=fv('W')||2400,sc=Math.min((cv.offsetWidth-24)/W,180/H),ox=12,oy=10,hit=null;
+  for(var i=getOpenings().length-1;i>=0;i--){var o=getOpenings()[i],rx=ox+o.x*sc,ry=oy+(H-o.y-o.h)*sc;if(px>=rx&&px<=rx+o.w*sc&&py>=ry&&py<=ry+o.h*sc){hit=o.id;break;}}
+  if(hit!==null){selOp(hit);}else{faceSelId[curFaceIdx]=null;hideMP();renderOlist();redrawWall();}
+});
+
+function redrawWall(){
+  var cv=document.getElementById('wall-cv');if(!cv)return;
+  var W=fv('L')||3600,H=fv('W')||2400,rw=fv('BL')||920,rp=fv('REPEAT')||0;
+  var CW=cv.offsetWidth||360,sc=Math.min((CW-24)/W,180/H),rw2=W*sc,rh=H*sc,ox=12,oy=10;
+  cv.width=CW;cv.height=rh+28;
+  var ctx=cv.getContext('2d');ctx.clearRect(0,0,CW,rh+28);
+  var nc=Math.ceil(W/rw);
+  for(var c=0;c<nc;c++){var cx1=ox+c*rw*sc,cx2=ox+Math.min((c+1)*rw,W)*sc;ctx.fillStyle=c%2===0?'rgba(13,110,80,0.06)':'rgba(13,110,80,0.03)';ctx.fillRect(cx1,oy,cx2-cx1,rh);}
+  ctx.strokeStyle='rgba(13,110,80,0.18)';ctx.lineWidth=0.8;
+  for(var c2=0;c2<=nc;c2++){var cx=ox+Math.min(c2*rw,W)*sc;ctx.beginPath();ctx.moveTo(cx,oy);ctx.lineTo(cx,oy+rh);ctx.stroke();if(c2<nc){ctx.fillStyle='rgba(13,110,80,0.5)';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.fillText((c2+1)+'列',ox+(c2*rw+Math.min((c2+1)*rw,W))/2*sc,oy+9);}}
+  if(rp>0){var sl=rceil(H,rp);ctx.strokeStyle='rgba(13,110,80,0.1)';ctx.lineWidth=0.5;ctx.setLineDash([2,5]);for(var rr=rp;rr<sl;rr+=rp){var ry3=oy+(H-rr)*sc;if(ry3>oy&&ry3<oy+rh){ctx.beginPath();ctx.moveTo(ox,ry3);ctx.lineTo(ox+rw2,ry3);ctx.stroke();}}ctx.setLineDash([]);}
+  getOpenings().forEach(function(op){
+    var rx=ox+op.x*sc,ry2=oy+(H-op.y-op.h)*sc,rw3=op.w*sc,rh2=op.h*sc,s=op.id===faceSelId[curFaceIdx];
+    ctx.fillStyle='#f8f7f4';ctx.fillRect(rx,ry2,rw3,rh2);
+    ctx.save();ctx.beginPath();ctx.rect(rx,ry2,rw3,rh2);ctx.clip();ctx.strokeStyle='rgba(150,150,150,0.2)';ctx.lineWidth=0.8;for(var dd=-rh2;dd<=rw3+rh2;dd+=12){ctx.beginPath();ctx.moveTo(rx+dd,ry2);ctx.lineTo(rx+dd+rh2,ry2+rh2);ctx.stroke();}ctx.restore();
+    ctx.strokeStyle=s?'var(--cw)':'rgba(60,60,60,0.5)';ctx.lineWidth=s?2:1;ctx.strokeRect(rx,ry2,rw3,rh2);
+    ctx.fillStyle=s?'#0d6e50':'rgba(60,60,60,0.65)';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText(op.type==='ドア'?'D':(op.type==='窓（中連）'?'中連':'掃出'),rx+rw3/2,ry2+rh2/2+4);
+    if(s){var d2=odists(op);ctx.fillStyle='#0d6e50';ctx.font='10px sans-serif';ctx.textAlign='center';ctx.fillText(op.w+'mm',rx+rw3/2,ry2-5);ctx.save();ctx.translate(rx-5,ry2+rh2/2);ctx.rotate(-Math.PI/2);ctx.fillText(op.h+'mm',0,0);ctx.restore();}
+    if(op.type==='ドア'){ctx.strokeStyle='rgba(13,110,80,0.6)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(rx,oy+rh);ctx.lineTo(rx+rw3,oy+rh);ctx.stroke();}
+  });
+  ctx.strokeStyle='rgba(30,45,64,0.6)';ctx.lineWidth=2;ctx.strokeRect(ox,oy,rw2,rh);
+  ctx.strokeStyle='rgba(30,45,64,0.25)';ctx.lineWidth=0.8;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(ox,oy+rh+12);ctx.lineTo(ox+rw2,oy+rh+12);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='rgba(90,106,122,0.7)';ctx.font='10px sans-serif';ctx.textAlign='center';ctx.fillText(W+'mm',ox+rw2/2,oy+rh+24);
+}
+
+// ── 床 ──
+function renderFloorUI(){
+  document.getElementById('mat-list').innerHTML='';document.getElementById('pat-area').innerHTML='';document.getElementById('sub-area').innerHTML='';
+  var h='<div class="st" style="margin-bottom:8px">素材</div><div class="sub-sel-row">';
+  ['タイル','長尺シート','フローリング','コンパネ'].forEach(function(t){
+    var hint=t==='タイル'?'Pタイル / 塩ビタイル 等':t==='長尺シート'?'920 / 1320 / 1820mm幅':t==='フローリング'?'フローリング / 無垢材':'910×1820mm + 根太303ピッチ';
+    h+='<button class="sub-btn'+(curFloorType===t?' ac-floor':'')+'" onclick="setFloorType(\''+t+'\',this)"><span>'+t+'</span><span class="sub-hint">'+hint+'</span></button>';
+  });
+  document.getElementById('mat-list').innerHTML=h+'</div>';renderFloorSubUI();
+}
+
+function setFloorType(type,btn){curFloorType=type;document.querySelectorAll('.sub-btn').forEach(function(b){b.className='sub-btn';});btn.className='sub-btn ac-floor';document.getElementById('result-area').innerHTML='';renderFloorSubUI();}
+
+function renderFloorSubUI(){
+  var sa=document.getElementById('sub-area'),pa=document.getElementById('pat-area'),fa=document.getElementById('form-area');
+  sa.innerHTML='';pa.innerHTML='';fa.innerHTML='';
+  if(curFloorType==='コンパネ'){renderCompaneForm();}
+  else if(curFloorType==='タイル'){
+    var h='<div class="st" style="margin-bottom:8px">タイル種別</div><div class="sub-sel-row">';
+    ['Pタイル','塩ビタイル','フロアタイル','カーペットタイル'].forEach(function(t){var def=tileDefaults[t];h+='<button class="sub-btn'+(curTileType===t?' ac-floor':'')+'" onclick="setTileType(\''+t+'\',this)"><span>'+t+'</span><span class="sub-hint">'+def.BL+'×'+def.BW+'mm</span></button>';});
+    sa.innerHTML=h+'</div>';renderPatArea();renderTileForm();
+  }else if(curFloorType==='長尺シート'){
+    var h2='<div class="st" style="margin-bottom:8px">シート幅</div><div class="r3">';
+    [{w:920,lbl:'920mm'},{w:1320,lbl:'1320mm'},{w:1820,lbl:'1820mm'}].forEach(function(sw){h2+='<button class="swb'+(curSheetW===sw.w?' act':'')+'" onclick="setSheetW('+sw.w+',this)">'+sw.lbl+'</button>';});
+    sa.innerHTML=h2+'</div>';renderSheetForm();
+  }else{
+    var h3='<div class="st" style="margin-bottom:8px">フローリング種別</div><div class="sub-sel-row">';
+    ['フローリング','無垢材'].forEach(function(t){var def=floorDefaults[t];h3+='<button class="sub-btn'+(curFlooringType===t?' ac-floor':'')+'" onclick="setFlooringType(\''+t+'\',this)"><span>'+t+'</span><span class="sub-hint">'+def.BL+'×'+def.BW+'mm</span></button>';});
+    sa.innerHTML=h3+'</div>';renderPatArea();renderFlooringForm();
+  }
+}
+
+function renderCompaneForm(){
+  var nedaLen=window.curNedaLen||3;
+  var h='<div style="margin-bottom:12px"><div class="st">床寸法</div><div class="r2"><div class="iw"><span>長さ mm</span><input type="number" id="f-L" value="4000" inputmode="numeric"></div><div class="iw"><span>幅 mm</span><input type="number" id="f-W" value="3000" inputmode="numeric"></div></div></div>';
+  h+='<div style="margin-bottom:12px"><div class="st">コンパネサイズ</div><div class="r2"><div class="iw"><span>長さ mm</span><input type="number" id="f-BL" value="1800" inputmode="numeric"></div><div class="iw"><span>幅 mm</span><input type="number" id="f-BW" value="900" inputmode="numeric"></div></div></div>';
+  h+='<div style="margin-bottom:12px"><div class="st">設定</div><div class="r2"><div class="iw"><span>ロス率 %</span><input type="number" id="f-LOSS" value="10" inputmode="numeric"></div><div class="iw"><span>単価 円/枚</span><input type="number" id="f-PRICE" value="1200" inputmode="numeric"></div></div></div>';
+  h+='<div class="trim-card"><div class="st">根太（45×45）303mmピッチ</div><div class="r2" style="margin-top:8px"><div class="iw"><span>単価 円/本</span><input type="number" id="f-NEDA_PRICE" value="400" inputmode="numeric"></div><div class="iw"><span>1本の長さ</span><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:2px">';
+  [2,3,4].forEach(function(l){h+='<button type="button" id="nb-'+l+'" style="height:40px;border:1.5px solid rgba(30,45,64,0.15);border-radius:8px;font-size:13px;cursor:pointer;background:'+(nedaLen===l?'var(--bf)':'var(--white)')+';color:'+(nedaLen===l?'var(--tf)':'var(--text2)')+';font-weight:'+(nedaLen===l?'700':'400')+'" onclick="setNedaLen('+l+')">'+l+'m</button>';});
+  h+='</div></div></div></div><button class="calc-btn calc-floor" onclick="doCompaneCalc()">計算する</button>';
+  document.getElementById('form-area').innerHTML=h;
+}
+
+function setNedaLen(l){window.curNedaLen=l;[2,3,4].forEach(function(n){var b=document.getElementById('nb-'+n);if(!b)return;b.style.background=n===l?'var(--bf)':'var(--white)';b.style.color=n===l?'var(--tf)':'var(--text2)';b.style.fontWeight=n===l?'700':'400';b.style.borderColor=n===l?'var(--cf)':'rgba(30,45,64,0.15)';});}
+
+function doCompaneCalc(){
+  var L=fv('L'),W=fv('W'),BL=fv('BL')||1800,BW=fv('BW')||900,loss=fv('LOSS'),price=fv('PRICE'),nedaPrice=fv('NEDA_PRICE'),nedaLen=window.curNedaLen||3;
+  var cols=Math.ceil(L/BL),rows=Math.ceil(W/BW),base=cols*rows,total=Math.ceil(base*(1+loss/100));
+  var eH=edgeSize(L,BL),eV=edgeSize(W,BW);
+  var PITCH=303,nedaW=Math.ceil(W/PITCH)+1,nedaL2=2,nedaCount=nedaW+nedaL2;
+  var totalLenM=(nedaW*(L/1000))+(nedaL2*(W/1000));
+  var h='<div style="margin-top:14px"><div class="st">コンパネ割り付け</div><div class="mx">';
+  [{v:base+'枚',l:'必要枚数'},{v:total+'枚',l:'発注数（ロス込）'},{v:((L/1000)*(W/1000)).toFixed(2)+'m²',l:'面積'},{v:loss+'%',l:'ロス率'}].forEach(function(x){h+='<div class="mc2 mc2-floor"><div class="mv mv-floor">'+x.v+'</div><div class="ml">'+x.l+'</div></div>';});
+  h+='</div><div class="dt" style="margin-bottom:10px"><div class="dr"><span>横（長手）</span><span>'+cols+'列　端材 '+eH+'mm</span></div><div class="dr"><span>縦（短手）</span><span>'+rows+'行　端材 '+eV+'mm</span></div><div class="dr"><span>張り方</span><span>レンガ張り</span></div></div>';
+  h+='<div class="vw2"><div class="vl">コンパネ・根太 割り付け図</div><canvas id="viz-cv" height="200"></canvas></div>';
+  h+='<div class="dt" style="margin-bottom:12px"><div class="dr"><span>材料費（正味）</span><span>'+fmt(base*price)+'</span></div><div class="dr" style="font-weight:700"><span>材料費（ロス込）</span><span>'+fmt(total*price)+'</span></div></div>';
+  var positions=[];for(var i=0;i<nedaCount;i++)positions.push(Math.round(Math.min(i*PITCH,W))+'mm');
+  h+='<div class="st">根太 45×45　303mmピッチ（'+nedaLen+'m材）</div><div class="mx">';
+  [{v:nedaCount+'本',l:'根太本数合計'},{v:totalLenM.toFixed(1)+'m',l:'正味総延長'},{v:nedaLen+'m',l:'1本の長さ'},{v:(nedaCount*nedaLen).toFixed(1)+'m',l:'発注総延長'}].forEach(function(x){h+='<div class="mc2 mc2-floor"><div class="mv mv-floor">'+x.v+'</div><div class="ml">'+x.l+'</div></div>';});
+  h+='</div><div class="dt" style="margin-bottom:10px"><div class="dr"><span>ピッチ</span><span>303mm</span></div><div class="dr"><span>配置位置</span><span style="font-size:11px;text-align:right;line-height:1.8">'+positions.join(' / ')+'</span></div></div>';
+  if(nedaPrice>0)h+='<div class="dt" style="margin-bottom:10px"><div class="dr" style="font-weight:700"><span>根太材料費（'+nedaCount+'本）</span><span>'+fmt(nedaCount*nedaPrice)+'</span></div></div>';
+  if(price>0&&nedaPrice>0){h+='<div class="summary-card"><div class="summary-title">📋 合計（コンパネ＋根太）</div><div class="summary-row"><span>コンパネ材料費</span><span>'+fmt(total*price)+'</span></div><div class="summary-row"><span>根太材料費</span><span>'+fmt(nedaCount*nedaPrice)+'</span></div><div class="summary-row"><span>合計</span><span>'+fmt(total*price+nedaCount*nedaPrice)+'</span></div></div>';}
+  h+='</div>';
+  document.getElementById('result-area').innerHTML=h;
+  setTimeout(function(){drawCompaneViz(L,W,BL,BW,eH,eV,cols,rows,nedaCount,PITCH);},50);
+}
+
+function drawCompaneViz(L,W,BL,BW,eH,eV,cols,rows,nedaCount,PITCH){
+  var cv=document.getElementById('viz-cv');if(!cv)return;
+  var CW=cv.offsetWidth||340,CH=200;cv.width=CW;cv.height=CH;
+  var mL=10,mR=14,mT=14,mB=20,sc=Math.min((CW-mL-mR)/L,(CH-mT-mB)/W);
+  var rw=L*sc,rh=W*sc,ox=mL,oy=mT,ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,CW,CH);
+  var tw=BL*sc,th=BW*sc;
+  for(var row=0;row<rows;row++){var off=(row%2===1)?tw/2:0;var y1=oy+row*th,y2=Math.min(oy+(row+1)*th,oy+rh);for(var col=0;col<cols+(row%2===1?1:0);col++){var x1=ox+col*tw-off,x2=Math.min(x1+tw,ox+rw);if(x1>=ox+rw)break;var isEdge=(x2-Math.max(x1,ox)<tw-1)||(y2-y1<th-1);ctx.fillStyle=isEdge?'rgba(154,90,16,0.18)':'rgba(154,90,16,0.05)';ctx.fillRect(Math.max(x1,ox),y1,Math.min(x2,ox+rw)-Math.max(x1,ox),y2-y1);ctx.strokeStyle='rgba(154,90,16,0.4)';ctx.lineWidth=0.8;ctx.strokeRect(Math.max(x1,ox),y1,Math.min(x2,ox+rw)-Math.max(x1,ox),y2-y1);}}
+  var nedaW=Math.ceil(W/PITCH)+1;
+  for(var n=0;n<nedaW;n++){var ny=oy+Math.min(n*PITCH,W)*sc,nthick=Math.max(2,45*sc);ctx.fillStyle='rgba(37,99,168,0.15)';ctx.fillRect(ox,ny-nthick/2,rw,nthick);ctx.strokeStyle='rgba(37,99,168,0.4)';ctx.lineWidth=0.8;ctx.strokeRect(ox,ny-nthick/2,rw,nthick);}
+  var lthick=Math.max(2,45*sc);[ox,ox+rw-lthick].forEach(function(lx){ctx.fillStyle='rgba(37,99,168,0.22)';ctx.fillRect(lx,oy,lthick,rh);ctx.strokeStyle='rgba(37,99,168,0.5)';ctx.lineWidth=0.8;ctx.strokeRect(lx,oy,lthick,rh);});
+  ctx.strokeStyle='rgba(30,45,64,0.6)';ctx.lineWidth=1.5;ctx.strokeRect(ox,oy,rw,rh);
+  ctx.fillStyle='rgba(90,106,122,0.7)';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.fillText(L+'mm',ox+rw/2,oy+rh+14);ctx.save();ctx.translate(ox-6,oy+rh/2);ctx.rotate(-Math.PI/2);ctx.fillText(W+'mm',0,0);ctx.restore();
+}
+
+function setTileType(t,btn){curTileType=t;document.querySelectorAll('#sub-area .sub-btn').forEach(function(b){b.className='sub-btn';});btn.className='sub-btn ac-floor';document.getElementById('result-area').innerHTML='';renderTileForm();}
+function setSheetW(w,btn){curSheetW=w;document.querySelectorAll('.swb').forEach(function(b){b.className='swb';});btn.className='swb act';document.getElementById('result-area').innerHTML='';}
+function setFlooringType(t,btn){curFlooringType=t;document.querySelectorAll('#sub-area .sub-btn').forEach(function(b){b.className='sub-btn';});btn.className='sub-btn ac-floor';document.getElementById('result-area').innerHTML='';renderFlooringForm();}
+function renderPatArea(){var pats=patsByCat['floor'];if(pats.indexOf(curPat)<0)curPat=pats[0];var h='<div class="st" style="margin-bottom:8px">割付パターン</div><div class="pat-row">';pats.forEach(function(p){h+='<button class="pat-btn'+(p===curPat?' ac-floor':'')+'" onclick="setFloorPat(\''+p+'\',this)">'+p+'</button>';});document.getElementById('pat-area').innerHTML=h+'</div>';}
+function setFloorPat(pat,btn){curPat=pat;document.querySelectorAll('.pat-btn').forEach(function(b){b.className='pat-btn';});btn.className='pat-btn ac-floor';document.getElementById('result-area').innerHTML='';}
+function renderTileForm(){var def=tileDefaults[curTileType];document.getElementById('form-area').innerHTML='<div style="margin-bottom:12px"><div class="st">床寸法</div><div class="r2"><div class="iw"><span>長さ mm</span><input type="number" id="f-L" value="4000" inputmode="numeric"></div><div class="iw"><span>幅 mm</span><input type="number" id="f-W" value="3000" inputmode="numeric"></div></div></div><div style="margin-bottom:12px"><div class="st">タイルサイズ</div><div class="r2"><div class="iw"><span>長さ mm</span><input type="number" id="f-BL" value="'+def.BL+'" inputmode="numeric"></div><div class="iw"><span>幅 mm</span><input type="number" id="f-BW" value="'+def.BW+'" inputmode="numeric"></div></div></div><div style="margin-bottom:12px"><div class="st">設定</div><div class="r2"><div class="iw"><span>ロス率 %</span><input type="number" id="f-LOSS" value="'+def.LOSS+'" inputmode="numeric"></div><div class="iw"><span>単価 円/枚</span><input type="number" id="f-PRICE" value="'+def.PRICE+'" inputmode="numeric"></div></div></div><button class="calc-btn calc-floor" onclick="doFloorCalc()">計算する</button>';}
+function renderSheetForm(){document.getElementById('form-area').innerHTML='<div style="margin-bottom:12px"><div class="st">床寸法</div><div class="r2"><div class="iw"><span>長さ mm（長手）</span><input type="number" id="f-L" value="4000" inputmode="numeric"></div><div class="iw"><span>幅 mm（短手）</span><input type="number" id="f-W" value="3000" inputmode="numeric"></div></div></div><div style="margin-bottom:12px"><div class="st">設定</div><div class="r2"><div class="iw"><span>ロス率 %</span><input type="number" id="f-LOSS" value="5" inputmode="numeric"></div><div class="iw"><span>単価 円/m</span><input type="number" id="f-PRICE" value="1500" inputmode="numeric"></div></div></div><button class="calc-btn calc-floor" onclick="doFloorCalc()">計算する</button>';}
+function renderFlooringForm(){var def=floorDefaults[curFlooringType];document.getElementById('form-area').innerHTML='<div style="margin-bottom:12px"><div class="st">床寸法</div><div class="r2"><div class="iw"><span>長さ mm</span><input type="number" id="f-L" value="4000" inputmode="numeric"></div><div class="iw"><span>幅 mm</span><input type="number" id="f-W" value="3000" inputmode="numeric"></div></div></div><div style="margin-bottom:12px"><div class="st">フローリングサイズ</div><div class="r2"><div class="iw"><span>長さ mm</span><input type="number" id="f-BL" value="'+def.BL+'" inputmode="numeric"></div><div class="iw"><span>幅 mm</span><input type="number" id="f-BW" value="'+def.BW+'" inputmode="numeric"></div></div></div><div style="margin-bottom:12px"><div class="st">設定</div><div class="r2"><div class="iw"><span>ロス率 %</span><input type="number" id="f-LOSS" value="'+def.LOSS+'" inputmode="numeric"></div><div class="iw"><span>単価 円/枚</span><input type="number" id="f-PRICE" value="'+def.PRICE+'" inputmode="numeric"></div></div></div><button class="calc-btn calc-floor" onclick="doFloorCalc()">計算する</button>';}
+
+function doFloorCalc(){
+  var L=fv('L'),W=fv('W'),loss=fv('LOSS'),price=fv('PRICE');
+  if(curFloorType==='タイル'){renderResult(calcFloorTile({L:L,W:W,BL:fv('BL'),BW:fv('BW'),LOSS:loss,PRICE:price},curPat),'floor');}
+  else if(curFloorType==='長尺シート'){var tate=calcSheetDir(L,W,curSheetW,loss,price,'縦割り');var yoko=calcSheetDir(L,W,curSheetW,loss,price,'横割り');renderSheetResult(tate,yoko,L,W);}
+  else{renderResult(calcFlooringMat({L:L,W:W,BL:fv('BL'),BW:fv('BW'),LOSS:loss,PRICE:price},curPat),'floor');}
+}
+
+function renderSheetResult(tate,yoko,L,W){
+  var best=tate.ordM<=yoko.ordM?'縦割り':'横割り';
+  var h='<div style="margin-top:14px"><div class="st">長尺シート '+curSheetW+'mm幅　縦割り / 横割り 比較</div><div class="sheet-compare">';
+  [tate,yoko].forEach(function(s){var isBest=s.dir===best;h+='<div class="sheet-card'+(isBest?' best':'')+'">';h+='<div class="sct"><span>'+s.dir+'</span>'+(isBest?'<span class="bb">ロス少</span>':'')+'</div><div class="sv">'+s.ordM.toFixed(1)+'m</div><div class="ss">発注数（ロス込）</div><div class="sd">'+s.cols+'本　×　'+s.lenPerCol.toFixed(2)+'m/本<br>正味 '+s.totalM.toFixed(1)+'m<br>端材 '+(s.edgeMm>0?s.edgeMm+'mm':'なし')+(s.costOrd>0?'<br>材料費 ¥'+s.costOrd.toLocaleString():'')+'</div></div>';});
+  h+='</div><div class="viz-row"><div class="vw-sheet"><div class="vl">縦割り</div><canvas id="cv-tate" height="170"></canvas></div><div class="vw-sheet"><div class="vl">横割り</div><canvas id="cv-yoko" height="170"></canvas></div></div></div>';
+  document.getElementById('result-area').innerHTML=h;
+  setTimeout(function(){
+    var cv0=document.getElementById('cv-tate');if(!cv0)return;
+    var CW=cv0.offsetWidth||200,CH=170,mL=8,mR=30,mT=8,mB=30,sc=Math.min((CW-mL-mR)/L,(CH-mT-mB)/W);
+    var rw=L*sc,rh=W*sc,ox=mL,oy=mT;
+    drawSheetCanvas('cv-tate',tate,L,W,sc,ox,oy,rw,rh,CW,CH,'縦');
+    drawSheetCanvas('cv-yoko',yoko,L,W,sc,ox,oy,rw,rh,CW,CH,'横');
+  },60);
+}
+
+function drawSheetCanvas(cvId,s,L,W,sc,ox,oy,rw,rh,CW,CH,lineDir){
+  var cv=document.getElementById(cvId);if(!cv)return;
+  cv.width=CW;cv.height=CH;var ctx=cv.getContext('2d');ctx.clearRect(0,0,CW,CH);
+  var swPx=curSheetW*sc;
+  ctx.fillStyle='rgba(154,90,16,0.04)';ctx.fillRect(ox,oy,rw,rh);
+  function drawHorizDim(x1,x2,y,label){ctx.strokeStyle='rgba(154,90,16,0.7)';ctx.fillStyle='rgba(154,90,16,0.7)';ctx.lineWidth=0.9;ctx.beginPath();ctx.moveTo(x1,y);ctx.lineTo(x2,y);ctx.stroke();ctx.beginPath();ctx.moveTo(x1,y-3);ctx.lineTo(x1,y+3);ctx.stroke();ctx.beginPath();ctx.moveTo(x2,y-3);ctx.lineTo(x2,y+3);ctx.stroke();ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(label,(x1+x2)/2,y+5);}
+  function drawVertDim(x,y1,y2,label){ctx.strokeStyle='rgba(154,90,16,0.7)';ctx.fillStyle='rgba(154,90,16,0.7)';ctx.lineWidth=0.9;ctx.beginPath();ctx.moveTo(x,y1);ctx.lineTo(x,y2);ctx.stroke();ctx.beginPath();ctx.moveTo(x-3,y1);ctx.lineTo(x+3,y1);ctx.stroke();ctx.beginPath();ctx.moveTo(x-3,y2);ctx.lineTo(x+3,y2);ctx.stroke();ctx.save();ctx.translate(x+12,(y1+y2)/2);ctx.rotate(Math.PI/2);ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,0,0);ctx.restore();}
+  if(lineDir==='縦'){for(var i=0;i<s.cols;i++){var x1=ox+i*swPx,bw=Math.min(swPx,ox+rw-x1);if(bw<=0)break;ctx.fillStyle=i%2===0?'rgba(154,90,16,0.05)':'rgba(154,90,16,0.12)';ctx.fillRect(x1,oy,bw,rh);}if(s.edgeMm>0){ctx.fillStyle='rgba(154,90,16,0.22)';ctx.fillRect(ox+rw-s.edgeMm*sc,oy,s.edgeMm*sc,rh);}ctx.strokeStyle='rgba(154,90,16,0.3)';ctx.lineWidth=0.8;for(var i2=1;i2<s.cols;i2++){var lx=ox+i2*swPx;if(lx>ox+rw)break;ctx.beginPath();ctx.moveTo(lx,oy);ctx.lineTo(lx,oy+rh);ctx.stroke();}if(s.edgeMm>0)drawHorizDim(ox+rw-s.edgeMm*sc,ox+rw,oy+rh+10,s.edgeMm+'mm');ctx.fillStyle='rgba(90,106,122,0.6)';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(s.cols+'本',ox+rw/2,oy+rh+(s.edgeMm>0?22:6));}
+  else{for(var j=0;j<s.cols;j++){var y1=oy+j*swPx,bh=Math.min(swPx,oy+rh-y1);if(bh<=0)break;ctx.fillStyle=j%2===0?'rgba(154,90,16,0.05)':'rgba(154,90,16,0.12)';ctx.fillRect(ox,y1,rw,bh);}if(s.edgeMm>0){ctx.fillStyle='rgba(154,90,16,0.22)';ctx.fillRect(ox,oy+rh-s.edgeMm*sc,rw,s.edgeMm*sc);}ctx.strokeStyle='rgba(154,90,16,0.3)';ctx.lineWidth=0.8;for(var j2=1;j2<s.cols;j2++){var ly=oy+j2*swPx;if(ly>oy+rh)break;ctx.beginPath();ctx.moveTo(ox,ly);ctx.lineTo(ox+rw,ly);ctx.stroke();}if(s.edgeMm>0)drawVertDim(ox+rw+10,oy+rh-s.edgeMm*sc,oy+rh,s.edgeMm+'mm');ctx.fillStyle='rgba(90,106,122,0.6)';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(s.cols+'本',ox+rw/2,oy+rh+6);}
+  ctx.strokeStyle='rgba(30,45,64,0.55)';ctx.lineWidth=1.5;ctx.strokeRect(ox,oy,rw,rh);
+}
+
+// ── 天井 ──
+function renderMats(){
+  document.getElementById('sub-area').innerHTML='';
+  var ms=cats[curCat].mats,cc=curCat,h='';
+  ms.forEach(function(m,i){h+='<button class="mat-btn'+(i===curMatIdx?' ac-'+cc:'')+'" onclick="setMat('+i+',this)">'+m.name+'</button>';});
+  document.getElementById('mat-list').innerHTML=h;renderPat();
+}
+function setMat(idx,btn){curMatIdx=idx;document.querySelectorAll('.mat-btn').forEach(function(b){b.className='mat-btn';});btn.className='mat-btn ac-'+curCat;document.getElementById('result-area').innerHTML='';renderPat();}
+function renderPat(){
+  var pats=patsByCat[curCat],pa=document.getElementById('pat-area');
+  if(!pats){pa.innerHTML='';renderCeilForm();return;}
+  var cc=curCat;if(pats.indexOf(curPat)<0)curPat=pats[0];
+  var h='<div class="st" style="margin-bottom:8px">割付パターン</div><div class="pat-row">';
+  pats.forEach(function(p){h+='<button class="pat-btn'+(p===curPat?' ac-'+cc:'')+'" onclick="setPat(\''+p+'\',this)">'+p+'</button>';});
+  pa.innerHTML=h+'</div>';renderCeilForm();
+}
+function setPat(pat,btn){curPat=pat;document.querySelectorAll('.pat-btn').forEach(function(b){b.className='pat-btn';});btn.className='pat-btn ac-'+curCat;document.getElementById('result-area').innerHTML='';}
+function renderCeilForm(){
+  var m=cats[curCat].mats[curMatIdx],cc=curCat,h='';
+  m.fields.forEach(function(f){
+    h+='<div style="margin-bottom:12px">'+(f.label?'<div class="st">'+f.label+'</div>':'');
+    if(f.row){h+='<div class="r2">';f.row.forEach(function(r,i){h+='<div class="iw"><span>'+r.lbl+'</span><input type="number" id="f-'+r.k+'" value="'+f.def[i]+'" inputmode="numeric"></div>';});h+='</div>';}
+    else if(f.row3){h+='<div class="r3">';f.row3.forEach(function(r,i){h+='<div class="iw"><span>'+r.lbl+'</span><input type="number" id="f-'+r.k+'" value="'+f.def[i]+'" inputmode="numeric"></div>';});h+='</div>';}
+    h+='</div>';
+  });
+  if(cc==='ceil'){h+='<div class="trim-card"><div class="st">廻り縁</div><div class="r2" style="margin-top:8px"><div class="iw"><span>種別</span><select id="f-MAWARI_TYPE"><option>塩ビ廻り縁</option><option>木製廻り縁</option></select></div><div class="iw"><span>単価 円/m</span><input type="number" id="f-MAWARI_PRICE" value="300" inputmode="numeric"></div></div></div>';}
+  h+='<button class="calc-btn calc-'+cc+'" onclick="doCalc()">計算する</button>';
+  document.getElementById('form-area').innerHTML=h;
+}
+function doCalc(){
+  var m=cats[curCat].mats[curMatIdx],keys=['L','W','BL','BW','LOSS','PRICE','REPEAT','COAT','MAWARI_PRICE','HABAKI_PRICE'],d={};
+  keys.forEach(function(k){d[k]=fv(k);});renderResult(m.calc(d,curPat),curCat);
+}
+
+// ── 結果描画 ──
+function renderResult(r,cc){
+  document.getElementById('result-area').innerHTML='<div style="margin-top:14px">'+buildResultHTML(r,cc)+'</div>';
+  if(r.viz&&r.viz.tW){setTimeout(function(){drawViz(r.viz,cc);},50);}
+}
+
+function buildResultHTML(r,cc){
+  var h='<div class="mx">';
+  r.m.forEach(function(x){h+='<div class="mc2 mc2-'+cc+'"><div class="mv mv-'+cc+'">'+x.v+'</div><div class="ml">'+x.l+'</div></div>';});
+  h+='</div>';
+  if(r.colResults){
+    var cutKeys=Object.keys(r.cutMap).map(Number).sort(function(a,b){return b-a;});
+    h+='<div class="cut-summary"><div class="cut-title">✂ 糊機カット本数</div>';
+    cutKeys.forEach(function(k){h+='<div class="cut-row"><span>'+k+'mm</span><span>'+r.cutMap[k]+'本</span></div>';});
+    if(!cutKeys.length)h+='<div style="font-size:13px">全列全高</div>';
+    h+='</div><div class="dt">';
+    r.colResults.forEach(function(cr){
+      var bg=cr.mode==='通常'?'':cr.mode==='全高'?'<span class="bg bgin">全高1本</span>':'<span class="bg bgwn">分割カット</span>';
+      var lArr=cr.cuts.filter(function(ct){return ct.len>0&&!ct.reuse;}).map(function(ct){return ct.len;});
+      h+='<div class="cd"><div class="ch"><span style="color:var(--text2)">'+cr.c+'列目　<span style="font-size:10px">'+cr.x1+'〜'+cr.x2+'mm</span></span><span style="font-weight:700;font-size:12px">'+toHonStr(lArr)+bg+'</span></div>';
+      cr.cuts.forEach(function(ct){if(ct.len===0&&!ct.reuse)return;h+='<div class="cn">'+(ct.reuse?'<span class="bg bgok">残材流用</span> ':'')+'<b>'+ct.lb+'</b>: '+(ct.reuse?ct.len+'mm（流用）':ct.len+'mm × 1本')+(ct.nt?'　'+ct.nt:'')+'</div>';});
+      h+='</div>';
+    });
+    h+='</div>';
+    if(r.reuseT)h+='<div class="dt" style="margin-bottom:10px"><div class="dr"><span>残材流用節約</span><span><span class="bg bgok">'+r.reuseT+'mm</span></span></div></div>';
+  }else if(r.rows&&r.rows.length){
+    h+='<div class="dt">';
+    r.rows.forEach(function(row){if(row[0]||row[2])h+='<div class="dr"><span>'+row[0]+(row[1]?' '+row[1]:'')+'</span><span>'+row[2]+'</span></div>';});
+    h+='</div>';
+    if(r.viz&&r.viz.tW)h+='<div class="vw2"><div class="vl">割り付け図</div><canvas id="viz-cv" height="200"></canvas></div>';
+  }
+  h+='<div class="dt">';
+  r.costs.forEach(function(c,i){var last=i===r.costs.length-1;h+='<div class="dr"'+(last?' style="font-weight:700"':'')+'>'+' <span style="color:var(--'+(last?'text':'text2')+')">' +c.l+'</span><span>'+c.v+'</span></div>';});
+  h+='</div>';
+  if(r.trim){h+='<div class="st">'+r.trim.name+' — '+r.trim.type+'</div><div class="trim-res trim-res-'+cc+'"><div class="trim-row"><span>周長</span><span>'+r.trim.perim+'m</span></div><div class="trim-row"><span>発注数（ロス5%込）</span><span>'+r.trim.order+'m</span></div>';if(r.trim.cost>0)h+='<div class="trim-row"><span>材料費概算</span><span>'+fmt(r.trim.cost)+'</span></div>';h+='</div>';}
+  return h;
+}
+
+function drawViz(v,cc){
+  var cv=document.getElementById('viz-cv');if(!cv)return;
+  var CW=cv.offsetWidth||340;cv.width=CW;var CH=200;cv.height=CH;
+  var mL=38,mR=14,mT=10,mB=44,sc=Math.min((CW-mL-mR)/v.rW,(CH-mT-mB)/v.rH);
+  var rw=v.rW*sc,rh=v.rH*sc,ox=mL,oy=mT,col=vcols[cc];
+  var ctx=cv.getContext('2d');ctx.clearRect(0,0,CW,CH);
+  ctx.save();ctx.beginPath();ctx.rect(ox,oy,rw,rh);ctx.clip();
+  ctx.fillStyle='rgba(128,128,128,0.05)';ctx.fillRect(ox,oy,rw,rh);
+  ctx.strokeStyle=col;ctx.lineWidth=0.8;ctx.globalAlpha=0.6;
+  var tw=v.tW*sc,th=v.tH*sc;
+  if(v.pat==='ダイヤ張り'){ctx.save();ctx.translate(ox+rw/2,oy+rh/2);ctx.rotate(Math.PI/4);for(var x=-rw*1.5;x<=rw*1.5;x+=tw){ctx.beginPath();ctx.moveTo(x,-rh*1.5);ctx.lineTo(x,rh*1.5);ctx.stroke();}for(var y=-rh*1.5;y<=rh*1.5;y+=th){ctx.beginPath();ctx.moveTo(-rw*1.5,y);ctx.lineTo(rw*1.5,y);ctx.stroke();}ctx.restore();}
+  else if(v.pat==='レンガ張り'){var row=0;for(var yy=oy;yy<=oy+rh+th;yy+=th){var off=(row%2===1)?tw/2:0;for(var xx=ox-tw+off;xx<=ox+rw+tw;xx+=tw){ctx.strokeRect(xx,yy,tw,th);}row++;}}
+  else{for(var xi=ox;xi<=ox+rw+tw;xi+=tw){ctx.beginPath();ctx.moveTo(xi,oy);ctx.lineTo(xi,oy+rh);ctx.stroke();}for(var yi=oy;yi<=oy+rh+th;yi+=th){ctx.beginPath();ctx.moveTo(ox,yi);ctx.lineTo(ox+rw,yi);ctx.stroke();}}
+  ctx.globalAlpha=0.18;ctx.fillStyle=col;
+  if(v.eH>0&&v.eH*sc>2)ctx.fillRect(ox+rw-v.eH*sc,oy,v.eH*sc,rh);
+  if(v.eV>0&&v.eV*sc>2)ctx.fillRect(ox,oy+rh-v.eV*sc,rw,v.eV*sc);
+  ctx.restore();
+  ctx.strokeStyle='rgba(30,45,64,0.45)';ctx.lineWidth=1.5;ctx.strokeRect(ox,oy,rw,rh);ctx.globalAlpha=1;
+  ctx.fillStyle='rgba(90,106,122,0.7)';ctx.font='10px sans-serif';
+  if(v.eH>0&&v.eH*sc>10){ctx.textAlign='center';ctx.fillText(v.eH+'mm',ox+rw-v.eH*sc/2,oy+rh+13);ctx.strokeStyle='rgba(120,120,120,0.4)';ctx.lineWidth=0.8;ctx.beginPath();ctx.moveTo(ox+rw-v.eH*sc,oy+rh+9);ctx.lineTo(ox+rw,oy+rh+9);ctx.stroke();ctx.beginPath();ctx.moveTo(ox+rw-v.eH*sc,oy+rh+6);ctx.lineTo(ox+rw-v.eH*sc,oy+rh+12);ctx.stroke();ctx.beginPath();ctx.moveTo(ox+rw,oy+rh+6);ctx.lineTo(ox+rw,oy+rh+12);ctx.stroke();}
+  if(v.eV>0&&v.eV*sc>10){ctx.save();ctx.translate(ox-10,oy+rh-v.eV*sc/2);ctx.rotate(-Math.PI/2);ctx.textAlign='center';ctx.fillText(v.eV+'mm',0,0);ctx.restore();}
+  ctx.fillStyle=col;ctx.globalAlpha=0.18;ctx.fillRect(ox,oy+rh+24,12,10);ctx.globalAlpha=1;ctx.strokeStyle='rgba(30,45,64,0.2)';ctx.lineWidth=0.5;ctx.strokeRect(ox,oy+rh+24,12,10);ctx.fillStyle='rgba(90,106,122,0.7)';ctx.textAlign='left';ctx.fillText('端材',ox+16,oy+rh+33);ctx.textAlign='center';ctx.fillText(v.lbl,CW/2,oy+rh+33);
+}
+
+// ── 初期化 ──
+renderMats();
+</script>
+</body>
+</html>
