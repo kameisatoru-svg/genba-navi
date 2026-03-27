@@ -318,6 +318,71 @@ canvas#wall-cv{touch-action:none;}
 .sd{margin-top:8px;font-size:12px;color:var(--text2);line-height:1.8;border-top:1px solid rgba(30,45,64,0.08);padding-top:8px;}
 .viz-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
 .vw-sheet{border:1.5px solid rgba(30,45,64,0.1);border-radius:10px;overflow:visible;background:var(--white);}
+
+/* ── 作図へ送るボタン（ヘッダー） ── */
+.btn-zumen{
+  height:32px;padding:0 12px;border:1.5px solid var(--accent);
+  border-radius:8px;background:transparent;color:var(--accent);
+  font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;
+  font-family:inherit;display:flex;align-items:center;gap:4px;
+}
+.btn-zumen:active{background:rgba(200,169,110,0.2);}
+
+/* ── モーダル ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(10,20,35,0.6);
+  z-index:100;display:flex;align-items:center;justify-content:center;
+  padding:20px;
+}
+.modal-overlay.hidden{display:none;}
+.modal-box{
+  background:var(--white);border-radius:16px;width:100%;max-width:380px;
+  box-shadow:0 8px 32px rgba(10,20,35,0.3);overflow:hidden;
+}
+.modal-head{
+  background:var(--navy);padding:16px 18px;
+  font-size:15px;font-weight:700;color:var(--white);
+  display:flex;align-items:center;gap:8px;
+}
+.modal-body{padding:18px;}
+.modal-label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px;}
+.modal-input{
+  width:100%;height:42px;border:1.5px solid rgba(30,45,64,0.2);
+  border-radius:10px;padding:0 12px;font-size:14px;font-family:inherit;
+  color:var(--text);background:var(--bg);outline:none;
+  box-sizing:border-box;
+}
+.modal-input:focus{border-color:var(--accent);}
+.modal-faces{margin:14px 0 0;}
+.modal-face-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 12px;border-radius:10px;margin-bottom:6px;
+  background:var(--bg);font-size:13px;
+}
+.modal-face-row.has-data{background:rgba(13,110,80,0.08);border:1px solid rgba(13,110,80,0.2);}
+.modal-face-row.no-data{opacity:0.45;}
+.mfr-left{display:flex;align-items:center;gap:8px;font-weight:600;}
+.mfr-badge{
+  font-size:10px;padding:2px 7px;border-radius:5px;font-weight:700;
+  background:rgba(13,110,80,0.15);color:#085040;
+}
+.mfr-detail{font-size:11px;color:var(--text2);}
+.modal-footer{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  padding:0 18px 18px;
+}
+.modal-cancel{
+  height:44px;border:1.5px solid rgba(30,45,64,0.2);border-radius:10px;
+  background:transparent;color:var(--text2);font-size:14px;font-weight:600;
+  cursor:pointer;font-family:inherit;
+}
+.modal-send{
+  height:44px;border:none;border-radius:10px;
+  background:var(--navy);color:var(--white);font-size:14px;font-weight:700;
+  cursor:pointer;font-family:inherit;
+}
+.modal-send:active{background:var(--navy2);}
+.modal-send:disabled{background:rgba(30,45,64,0.3);cursor:not-allowed;}
 </style>
 </head>
 <body>
@@ -326,6 +391,24 @@ canvas#wall-cv{touch-action:none;}
   <button class="btn-back" onclick="history.back()">←</button>
   <div class="header-title">材料割付</div>
   <div class="header-cat" id="header-cat">天井</div>
+  <button class="btn-zumen" onclick="openZumenModal()">📐 作図へ</button>
+</div>
+
+<!-- 作図へ送るモーダル -->
+<div class="modal-overlay hidden" id="zumen-modal" onclick="closeZumenModal(event)">
+  <div class="modal-box">
+    <div class="modal-head">📐 作図アプリへ壁データを送信</div>
+    <div class="modal-body">
+      <div class="modal-label">案件名</div>
+      <input class="modal-input" id="zumen-project" type="text" placeholder="例：さくら苑　北側居室" maxlength="40">
+      <div class="modal-label modal-faces" style="margin-bottom:8px">送信する面</div>
+      <div id="zumen-face-list"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-cancel" onclick="closeZumenModal(null)">キャンセル</button>
+      <button class="modal-send" id="zumen-send-btn" onclick="doSendToZumen()">送信する</button>
+    </div>
+  </div>
 </div>
 
 <div class="scroll-area">
@@ -512,9 +595,9 @@ function renderWallForm(){
     else if(f.row3){h+='<div class="r3">';f.row3.forEach(function(r,i){var val=saved&&saved[r.k]!=null?saved[r.k]:f.def[i];h+='<div class="iw"><span>'+r.lbl+'</span><input type="number" id="f-'+r.k+'" value="'+val+'" inputmode="numeric"></div>';});h+='</div>';}
     h+='</div>';
   });
-  h+='<div style="margin-bottom:12px"><div class="st">開口部</div><div class="aor"><button class="aob" onclick="addOp(\'ドア\',900,2100)">＋ ドア<br><span style="font-size:10px">900×2100</span></button><button class="aob" onclick="addOp(\'窓（中連）\',1600,1100)">＋ 窓（中連）<br><span style="font-size:10px">1600×1100</span></button><button class="aob" onclick="addOp(\'窓（掃出）\',1600,2100)">＋ 窓（掃出）<br><span style="font-size:10px">1600×2100</span></button></div><div id="olist"></div></div>';
   var hType=saved?saved.HABAKI_TYPE||'ソフト巾木':'ソフト巾木',hH=saved?saved.HABAKI_H||'60':'60',hPrice=saved?saved.HABAKI_PRICE||400:400;
   h+='<div class="trim-card"><div class="st">巾木</div><div class="r2" style="margin-top:8px"><div class="iw"><span>種別</span><select id="f-HABAKI_TYPE" onchange="toggleHH()"><option'+(hType==='ソフト巾木'?' selected':'')+'>ソフト巾木</option><option'+(hType==='木製巾木'?' selected':'')+'>木製巾木</option></select></div><div class="iw" id="hh-wrap"><span>高さ</span><select id="f-HABAKI_H"><option value="60"'+(hH==='60'?' selected':'')+'>60mm</option><option value="75"'+(hH==='75'?' selected':'')+'>75mm</option><option value="100"'+(hH==='100'?' selected':'')+'>100mm</option></select></div></div><div class="r2" style="margin-top:8px"><div class="iw"><span>単価 円/m</span><input type="number" id="f-HABAKI_PRICE" value="'+hPrice+'" inputmode="numeric"></div><div></div></div></div>';
+  h+='<div style="margin-bottom:12px"><div class="st">開口部</div><div class="aor"><button class="aob" onclick="addOp(\'ドア\',900,2100)">＋ ドア<br><span style="font-size:10px">900×2100</span></button><button class="aob" onclick="addOp(\'窓（中連）\',1600,1100)">＋ 窓（中連）<br><span style="font-size:10px">1600×1100</span></button><button class="aob" onclick="addOp(\'窓（掃出）\',1600,2100)">＋ 窓（掃出）<br><span style="font-size:10px">1600×2100</span></button></div><div id="olist"></div></div>';
   h+='<div class="vw2"><div class="vl">壁割り付け図（タップで開口選択）</div><canvas id="wall-cv"></canvas></div><div id="wall-mpanel" style="display:none"></div>';
   h+='<button class="calc-btn calc-wall" style="margin-bottom:10px" onclick="doWallFaceCalc()">この面を計算</button>';
   h+='<div><div class="st">まとめて計算する面を選択</div><div class="face-check-row">';
@@ -826,6 +909,78 @@ function drawViz(v,cc){
   if(v.eH>0&&v.eH*sc>10){ctx.textAlign='center';ctx.fillText(v.eH+'mm',ox+rw-v.eH*sc/2,oy+rh+13);ctx.strokeStyle='rgba(120,120,120,0.4)';ctx.lineWidth=0.8;ctx.beginPath();ctx.moveTo(ox+rw-v.eH*sc,oy+rh+9);ctx.lineTo(ox+rw,oy+rh+9);ctx.stroke();ctx.beginPath();ctx.moveTo(ox+rw-v.eH*sc,oy+rh+6);ctx.lineTo(ox+rw-v.eH*sc,oy+rh+12);ctx.stroke();ctx.beginPath();ctx.moveTo(ox+rw,oy+rh+6);ctx.lineTo(ox+rw,oy+rh+12);ctx.stroke();}
   if(v.eV>0&&v.eV*sc>10){ctx.save();ctx.translate(ox-10,oy+rh-v.eV*sc/2);ctx.rotate(-Math.PI/2);ctx.textAlign='center';ctx.fillText(v.eV+'mm',0,0);ctx.restore();}
   ctx.fillStyle=col;ctx.globalAlpha=0.18;ctx.fillRect(ox,oy+rh+24,12,10);ctx.globalAlpha=1;ctx.strokeStyle='rgba(30,45,64,0.2)';ctx.lineWidth=0.5;ctx.strokeRect(ox,oy+rh+24,12,10);ctx.fillStyle='rgba(90,106,122,0.7)';ctx.textAlign='left';ctx.fillText('端材',ox+16,oy+rh+33);ctx.textAlign='center';ctx.fillText(v.lbl,CW/2,oy+rh+33);
+}
+
+// ── 作図へ送る ──
+function openZumenModal(){
+  if(curCat==='wall') saveCurrentFaceInputs();
+  var list=document.getElementById('zumen-face-list');
+  var html='';var hasAny=false;
+  FACES.forEach(function(f,i){
+    var inp=faceInputs[i];
+    var W=inp&&inp.L?Math.round(inp.L):0;
+    var H=inp&&inp.W?Math.round(inp.W):0;
+    var ops=faceOpenings[i]||[];
+    var hasData=W>0&&H>0;
+    if(hasData) hasAny=true;
+    var detail=hasData?(W+'×'+H+'mm'):'（寸法未入力）';
+    var opStr='';
+    if(hasData&&ops.length){
+      var opCounts={};
+      ops.forEach(function(o){opCounts[o.type]=(opCounts[o.type]||0)+1;});
+      opStr='　'+Object.keys(opCounts).map(function(t){return t+'×'+opCounts[t];}).join('・');
+    }
+    html+='<div class="modal-face-row '+(hasData?'has-data':'no-data')+'">';
+    html+='<div class="mfr-left">';
+    if(hasData) html+='<span class="mfr-badge">✓</span>';
+    html+=f+'面</div>';
+    html+='<div class="mfr-detail">'+detail+opStr+'</div>';
+    html+='</div>';
+  });
+  list.innerHTML=html;
+  var sendBtn=document.getElementById('zumen-send-btn');
+  sendBtn.disabled=!hasAny;
+  sendBtn.textContent=hasAny?'送信する':'（寸法入力がありません）';
+  document.getElementById('zumen-modal').classList.remove('hidden');
+  setTimeout(function(){document.getElementById('zumen-project').focus();},100);
+}
+
+function closeZumenModal(e){
+  if(e&&e.target!==document.getElementById('zumen-modal')) return;
+  document.getElementById('zumen-modal').classList.add('hidden');
+}
+
+function doSendToZumen(){
+  var project=document.getElementById('zumen-project').value.trim()||'未設定';
+  var today=new Date();
+  var dateStr=today.getFullYear()+'-'+(today.getMonth()+1).toString().padStart(2,'0')+'-'+today.getDate().toString().padStart(2,'0');
+  var faces=[];
+  FACES.forEach(function(f,i){
+    var inp=faceInputs[i];
+    var W=inp&&inp.L?Math.round(inp.L):0;
+    var H=inp&&inp.W?Math.round(inp.W):0;
+    if(W<=0||H<=0) return;
+    var ops=(faceOpenings[i]||[]).map(function(o){
+      return{id:o.id,type:o.type,x:Math.round(o.x),y:Math.round(o.y),w:Math.round(o.w),h:Math.round(o.h)};
+    });
+    faces.push({id:'face_'+i,name:f+'面',W:W,H:H,openings:ops,objects:[]});
+  });
+  var data={project:project,createdAt:dateStr,faces:faces};
+  try{
+    localStorage.setItem('genba_wall_data',JSON.stringify(data));
+    document.getElementById('zumen-modal').classList.add('hidden');
+    showToast('📐 '+faces.length+'面を作図アプリへ送信しました');
+  }catch(err){
+    alert('送信に失敗しました: '+err.message);
+  }
+}
+
+function showToast(msg){
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:700;z-index:200;white-space:nowrap;box-shadow:0 4px 16px rgba(10,20,35,0.3)';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';t.style.transition='opacity 0.4s';setTimeout(function(){document.body.removeChild(t);},400);},2200);
 }
 
 // ── 初期化 ──
