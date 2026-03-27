@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>展開図｜アート・レイズ</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1e2d40">
+<style>
+:root{
+  --bg:#eeebe5;--navy:#1e2d40;--navy2:#2a3f5a;
+  --accent:#c8a96e;--text:#1e2d40;--text2:#5a6a7a;--white:#ffffff;
+  --cz:#1e2d40;
+  --cop:#b06a00;--bop:rgba(176,106,0,0.10);--top:#7a4800;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Meiryo','Yu Gothic',sans-serif;
+  height:100svh;display:flex;flex-direction:column;overflow:hidden;
+  position:fixed;width:100%;
+}
+/* ── ヘッダー ── */
+.header{
+  background:var(--navy);height:50px;
+  display:flex;align-items:center;padding:0 12px;gap:8px;flex-shrink:0;
+}
+.btn-back{
+  width:36px;height:36px;border:none;background:transparent;
+  color:var(--white);font-size:20px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;border-radius:8px;
+}
+.btn-back:active{background:rgba(255,255,255,0.15);}
+.header-title{flex:1;font-size:15px;font-weight:700;color:var(--white);}
+
+/* ── 面タブ ── */
+.face-tab-bar{
+  background:var(--navy2);display:flex;padding:0 12px;gap:4px;
+  flex-shrink:0;border-bottom:1px solid rgba(255,255,255,0.08);
+}
+.ftab{
+  flex:1;height:40px;border:none;background:transparent;
+  color:rgba(255,255,255,0.85);font-size:13px;font-weight:600;
+  cursor:pointer;font-family:inherit;position:relative;
+  border-bottom:2px solid transparent;transition:color 0.15s;
+}
+.ftab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.ftab .fdot{
+  width:5px;height:5px;border-radius:50%;background:var(--accent);
+  position:absolute;top:7px;right:8px;display:none;
+}
+.ftab.has-data .fdot{display:block;}
+
+/* ── スクロールエリア ── */
+.scroll-area{
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:14px 14px max(20px,env(safe-area-inset-bottom));
+  touch-action:pan-y;
+}
+
+/* ── 共通 ── */
+.st{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px;letter-spacing:0.03em;}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.iw{display:flex;flex-direction:column;gap:4px;}
+.iw span{font-size:11px;color:var(--text2);font-weight:600;}
+.iw input{
+  height:42px;border:1.5px solid rgba(30,45,64,0.18);border-radius:10px;
+  padding:0 12px;font-size:15px;font-family:inherit;color:var(--text);
+  background:var(--white);outline:none;
+}
+.iw input:focus{border-color:var(--accent);}
+.sec{margin-bottom:16px;}
+
+/* ── 開口部ボタン群 ── */
+.aor{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;}
+.aob{
+  padding:11px 4px;border:1.5px solid rgba(30,45,64,0.12);
+  border-radius:10px;background:var(--white);color:var(--text2);
+  font-size:12px;cursor:pointer;text-align:center;line-height:1.5;font-family:inherit;
+}
+.aob:active{background:var(--bg);}
+
+/* ── 開口リスト ── */
+.oi{
+  background:var(--white);border:1.5px solid rgba(30,45,64,0.1);
+  border-radius:10px;padding:10px 12px;margin-bottom:6px;cursor:pointer;
+}
+.oi.sel-op{border-color:var(--cop);background:var(--bop);}
+.on{font-size:13px;font-weight:600;}
+.op-dist{font-size:11px;color:var(--text2);margin-top:3px;line-height:1.6;}
+.db{
+  font-size:11px;color:var(--text2);background:none;
+  border:1px solid rgba(30,45,64,0.15);border-radius:6px;
+  padding:3px 8px;cursor:pointer;float:right;font-family:inherit;
+}
+
+/* ── 移動パネル ── */
+.mpanel{
+  border-radius:12px;padding:12px;margin-bottom:10px;
+  background:var(--bop);border:1px solid var(--cop);
+}
+.mg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;margin-bottom:10px;}
+.mb{
+  height:50px;border:1.5px solid rgba(30,45,64,0.12);
+  border-radius:10px;background:var(--white);font-size:22px;cursor:pointer;
+  font-family:inherit;
+}
+.mb:active{background:var(--bg);}
+.mc-pos{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:11px;color:var(--text2);line-height:1.6;
+  background:var(--white);border-radius:10px;padding:6px;
+}
+.dg4{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;}
+.dc2{background:var(--white);border-radius:10px;padding:9px 10px;text-align:center;}
+.dl2{font-size:11px;color:var(--text2);}
+.dv-op{color:var(--top);font-size:16px;font-weight:700;margin-top:2px;}
+.sr{display:flex;align-items:center;gap:6px;margin-top:10px;}
+.sr span{font-size:11px;color:var(--text2);white-space:nowrap;}
+.sb{
+  padding:7px 12px;border:1.5px solid rgba(30,45,64,0.12);
+  border-radius:8px;background:var(--white);color:var(--text2);
+  font-size:12px;cursor:pointer;font-family:inherit;
+}
+.sb.act-op{border-color:var(--cop);background:var(--bop);color:var(--top);font-weight:700;}
+
+/* ── canvas ── */
+.canvas-wrap{
+  background:var(--white);border-radius:14px;
+  border:1.5px solid rgba(30,45,64,0.1);overflow:hidden;
+  box-shadow:0 2px 8px rgba(30,45,64,0.07);
+  margin-bottom:12px;
+}
+.canvas-label{
+  font-size:11px;font-weight:700;color:var(--text2);
+  padding:8px 14px;border-bottom:1px solid rgba(30,45,64,0.07);
+  letter-spacing:0.04em;
+}
+canvas{display:block;width:100%;}
+#zumen-cv{touch-action:none;}
+
+/* ── 寸法カード ── */
+.dim-card{
+  background:var(--white);border-radius:12px;
+  border:1.5px solid rgba(30,45,64,0.08);padding:12px 14px;
+  display:grid;grid-template-columns:1fr 1fr;gap:6px;
+  margin-bottom:14px;
+}
+.dc{text-align:center;}
+.dl{font-size:10px;color:var(--text2);margin-bottom:2px;}
+.dv{font-size:16px;font-weight:700;color:var(--navy);}
+
+/* ── アコーディオン ── */
+.acc-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;background:var(--white);border-radius:12px;
+  border:1.5px solid rgba(30,45,64,0.1);cursor:pointer;margin-bottom:6px;
+  font-size:13px;font-weight:700;color:var(--text);
+  box-shadow:0 1px 3px rgba(30,45,64,0.06);
+}
+.acc-hd:active{background:var(--bg);}
+.acc-hd .acc-arrow{font-size:11px;color:var(--text2);transition:transform 0.2s;}
+.acc-hd.open .acc-arrow{transform:rotate(180deg);}
+.acc-hd .acc-badge{
+  font-size:10px;background:var(--navy);color:#fff;
+  border-radius:10px;padding:1px 7px;margin-left:6px;
+}
+.acc-body{display:none;margin-bottom:10px;}
+.acc-body.open{display:block;}
+
+/* ── コンパクト移動パネル ── */
+.mpanel-compact{
+  border-radius:12px;padding:10px 12px;margin-bottom:10px;
+}
+.mpanel-compact.cop{background:var(--bop);border:1px solid var(--cop);}
+.mpanel-compact.ceq{background:rgba(26,106,170,0.08);border:1px solid #1a6aaa;}
+.mpc-title{font-size:12px;font-weight:700;margin-bottom:8px;}
+.mpc-title.cop{color:var(--top);}
+.mpc-title.ceq{color:#1a4a88;}
+.mpc-body{display:flex;gap:8px;align-items:stretch;}
+/* 左：位置表示 */
+.mpc-pos{
+  flex:1 1 0;display:grid;grid-template-columns:1fr 1fr;gap:4px;
+}
+.mpc-ctrl{
+  flex:1 1 0;display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;
+}
+.mpc-cell{background:var(--white);border-radius:8px;padding:6px 8px;text-align:center;}
+.mpc-lbl{font-size:10px;color:var(--text2);}
+.mpc-val{font-size:13px;font-weight:700;margin-top:1px;}
+.mpc-val.cop{color:var(--top);}
+.mpc-val.ceq{color:#1a4a88;}
+/* 右：操作ボタン */
+.mpc-dpad{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;width:100%;}
+.mpb{
+  width:100%;height:36px;border:1.5px solid rgba(30,45,64,0.12);
+  border-radius:8px;background:var(--white);font-size:16px;
+  cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;
+}
+.mpb:active{background:var(--bg);}
+.mpc-steps{display:flex;gap:3px;margin-top:2px;width:100%;}
+.mps{
+  flex:1;padding:6px 0;border:1.5px solid rgba(30,45,64,0.12);
+  border-radius:6px;background:var(--white);color:var(--text2);
+  font-size:10px;cursor:pointer;font-family:inherit;text-align:center;
+}
+.mps.act-op{border-color:var(--cop);background:var(--bop);color:var(--top);font-weight:700;}
+.mps.act-eq{border-color:#1a6aaa;background:rgba(26,106,170,0.1);color:#1a4a88;font-weight:700;}
+
+/* ── 設備記号 ── */
+.eq-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;}
+.eq-btn{
+  padding:12px 4px;border:1.5px solid rgba(30,45,64,0.12);
+  border-radius:10px;background:var(--white);color:var(--text2);
+  font-size:11px;cursor:pointer;text-align:center;line-height:1.6;font-family:inherit;
+}
+.eq-btn:active{background:var(--bg);}
+.eq-icon{font-size:18px;display:block;margin-bottom:2px;}
+.ei{
+  background:var(--white);border:1.5px solid rgba(30,45,64,0.1);
+  border-radius:10px;padding:9px 12px;margin-bottom:6px;cursor:pointer;
+  display:flex;align-items:center;gap:10px;
+}
+.ei.sel-eq{border-color:#1a6aaa;background:rgba(26,106,170,0.08);}
+.ei-sym{font-size:20px;line-height:1;}
+.ei-info{flex:1;}
+.ei-name{font-size:13px;font-weight:600;}
+.ei-pos{font-size:11px;color:var(--text2);margin-top:2px;}
+.db-eq{
+  font-size:11px;color:var(--text2);background:none;
+  border:1px solid rgba(30,45,64,0.15);border-radius:6px;
+  padding:3px 8px;cursor:pointer;font-family:inherit;
+}
+.mpanel-eq{background:rgba(26,106,170,0.08);border:1px solid #1a6aaa;}
+.dv-eq{color:#1a4a88;font-size:16px;font-weight:700;margin-top:2px;}
+
+/* ── モードトグル ── */
+.mode-toggle{display:flex;gap:2px;background:rgba(255,255,255,0.1);border-radius:8px;padding:2px;}
+.mtb{
+  height:28px;padding:0 10px;border:none;border-radius:6px;
+  background:transparent;color:rgba(255,255,255,0.7);
+  font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;
+}
+.mtb.active{background:var(--accent);color:var(--navy);}
+.btn-do-print{
+  height:30px;padding:0 10px;border:1.5px solid var(--accent);border-radius:8px;
+  background:transparent;color:var(--accent);font-size:11px;font-weight:700;
+  cursor:pointer;font-family:inherit;white-space:nowrap;
+}
+.btn-do-print:active{background:rgba(200,169,110,0.2);}
+
+/* ── 印刷スタイル ── */
+@media print{
+  body{position:static;height:auto;overflow:visible;background:#fff;}
+  .header,.face-tab-bar,.scroll-area > .sec,.dim-card,
+  #mpanel-wrap,.mode-toggle,.btn-do-print,.btn-back{display:none!important;}
+  .scroll-area{overflow:visible;padding:0;}
+  .canvas-wrap{border:none;box-shadow:none;border-radius:0;}
+  .canvas-label{display:none;}
+  #eq-del-btn{display:none!important;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <button class="btn-back" onclick="history.back()">←</button>
+  <div class="header-title">展開図</div>
+  <div class="mode-toggle">
+    <button class="mtb active" id="btn-edit" onclick="setMode('edit')">✏️ 編集</button>
+    <button class="mtb" id="btn-print" onclick="setMode('print')">🖨️ 印刷</button>
+  </div>
+  <button class="btn-do-print" onclick="doPrint()">出力</button>
+</div>
+
+<div class="face-tab-bar" id="face-tab-bar"></div>
+<div class="scroll-area" id="main-area"></div>
+
+<script>
+var FACES = ['東','西','南','北'];
+var curFaceIdx = 0;
+var faceData     = [null,null,null,null]; // {W,H}
+var faceOpenings = [[],[],[],[]];
+var faceSelId    = [null,null,null,null];
+var faceOidSeq   = [0,0,0,0];
+var moveStep     = 10;
+var drawMode     = 'edit'; // 'edit' | 'print'
+
+function setMode(m){
+  drawMode=m;
+  var be=document.getElementById('btn-edit');
+  var bp=document.getElementById('btn-print');
+  if(be) be.className='mtb'+(m==='edit'?' active':'');
+  if(bp) bp.className='mtb'+(m==='print'?' active':'');
+  // 編集モードに戻るとき削除ボタンも非表示
+  if(m==='edit'){
+    var btn=document.getElementById('eq-del-btn'); if(btn) btn.style.display='none';
+  }
+  redraw();
+}
+
+function doPrint(){
+  setMode('print');
+  setTimeout(function(){
+    window.print();
+    setTimeout(function(){ setMode('edit'); },500);
+  },150);
+}
+
+// ── 設備記号データ ──
+var EQ_TYPES = [
+  {id:'outlet',    label:'コンセント',    icon:'⊟', w:86,  h:86},
+  {id:'switch',    label:'スイッチ',      icon:'▣', w:86,  h:86},
+  {id:'switch3',   label:'3路SW',         icon:'▣', w:86,  h:86},
+  {id:'bracket',   label:'ブラケット照明', icon:'◫', w:150, h:200},
+  {id:'fan_round', label:'換気扇（丸）',  icon:'◎', w:150, h:150},
+  {id:'fan_sq',    label:'換気扇（角）',  icon:'⊠', w:200, h:200},
+];
+var faceEquips   = [[],[],[],[]];  // 各面の設備記号
+var faceEqSelId  = [null,null,null,null];
+var faceEqSeq    = [0,0,0,0];
+function getEquips(){ return faceEquips[curFaceIdx]; }
+
+
+function getW(){ return parseFloat(document.getElementById('inp-W').value)||3600; }
+function getH(){ return parseFloat(document.getElementById('inp-H').value)||2400; }
+function getOps(){ return faceOpenings[curFaceIdx]; }
+
+// ── タブ ──
+function renderTabs(){
+  var bar = document.getElementById('face-tab-bar');
+  bar.innerHTML = FACES.map(function(f,i){
+    var ac = i===curFaceIdx?' active':'';
+    var hd = faceData[i]?' has-data':'';
+    return '<button class="ftab'+ac+hd+'" onclick="switchFace('+i+')">'+f+'面<div class="fdot"></div></button>';
+  }).join('');
+}
+
+function switchFace(idx){
+  saveCurrentInputs();
+  faceSelId[curFaceIdx]=null;
+  faceEqSelId[curFaceIdx]=null;
+  var btn=document.getElementById('eq-del-btn'); if(btn) btn.style.display='none';
+  curFaceIdx = idx;
+  renderTabs();
+  renderMain();
+}
+
+function saveCurrentInputs(){
+  var wEl=document.getElementById('inp-W'), hEl=document.getElementById('inp-H');
+  if(!wEl||!hEl) return;
+  var W=parseFloat(wEl.value)||0, H=parseFloat(hEl.value)||0;
+  if(W>0&&H>0){
+    faceData[curFaceIdx] = faceData[curFaceIdx]||{};
+    faceData[curFaceIdx].W = W;
+    faceData[curFaceIdx].H = H;
+  }
+}
+
+// ── メイン描画 ──
+function renderMain(){
+  var d = faceData[curFaceIdx];
+  var W = d?d.W:3600, H = d?d.H:2400;
+  var face = FACES[curFaceIdx];
+  var html = '';
+
+  // 寸法入力
+  html += '<div class="sec"><div class="st">'+face+'面　寸法</div>';
+  html += '<div class="r2">';
+  html += '<div class="iw"><span>幅 mm</span><input type="number" id="inp-W" value="'+W+'" inputmode="numeric" oninput="onDimChange()"></div>';
+  html += '<div class="iw"><span>高さ mm</span><input type="number" id="inp-H" value="'+H+'" inputmode="numeric" oninput="onDimChange()"></div>';
+  html += '</div></div>';
+
+  // ── アコーディオン：開口部（追加ボタンのみ）──
+  html += '<div class="acc-hd" id="acc-op-hd" onclick="toggleAcc(\'op\')">';
+  html += '開口部<span class="acc-badge" id="acc-op-badge">'+getOps().length+'</span>';
+  html += '<span class="acc-arrow">▼</span></div>';
+  html += '<div class="acc-body" id="acc-op-body">';
+  // ドア系
+  html += '<div class="st" style="margin:6px 0 4px">ドア</div><div class="aor">';
+  html += '<button class="aob" onclick="addOp(\'ドア\',900,2100)">＋ 片開き<br><span style="font-size:10px">900×2100</span></button>';
+  html += '<button class="aob" onclick="addOp(\'親子ドア\',1200,2100)">＋ 親子<br><span style="font-size:10px">1200×2100</span></button>';
+  html += '<button class="aob" onclick="addOp(\'両開きドア\',1800,2100)">＋ 両開き<br><span style="font-size:10px">1800×2100</span></button>';
+  html += '</div><div class="aor" style="margin-bottom:10px">';
+  html += '<button class="aob" onclick="addOp(\'引き違いドア\',1800,2100)">＋ 引き違い<br><span style="font-size:10px">1800×2100</span></button>';
+  html += '<button class="aob" onclick="addOp(\'スライドドア\',900,2100)">＋ スライド<br><span style="font-size:10px">900×2100</span></button>';
+  html += '<div></div></div>';
+  // 窓系
+  html += '<div class="st" style="margin:6px 0 4px">窓</div><div class="aor">';
+  html += '<button class="aob" onclick="addOp(\'窓（中連）\',1600,1100)">＋ 中連<br><span style="font-size:10px">1600×1100</span></button>';
+  html += '<button class="aob" onclick="addOp(\'窓（掃出）\',1600,2100)">＋ 掃出し<br><span style="font-size:10px">1600×2100</span></button>';
+  html += '<button class="aob" onclick="addOp(\'排煙窓\',1200,600)">＋ 排煙<br><span style="font-size:10px">1200×600</span></button>';
+  html += '</div><div class="aor" style="margin-bottom:10px">';
+  html += '<button class="aob" onclick="addOp(\'縦滑り窓\',600,1100)">＋ 縦滑り<br><span style="font-size:10px">600×1100</span></button>';
+  html += '<button class="aob" onclick="addOp(\'横滑り窓\',1200,600)">＋ 横滑り<br><span style="font-size:10px">1200×600</span></button>';
+  html += '<button class="aob" onclick="addOp(\'出窓\',1800,1100)">＋ 出窓<br><span style="font-size:10px">1800×1100</span></button>';
+  html += '</div><div class="aor" style="margin-bottom:4px">';
+  html += '<button class="aob" onclick="addOp(\'ジャロジー\',900,600)">＋ ジャロジー<br><span style="font-size:10px">900×600</span></button>';
+  html += '<button class="aob" onclick="addOp(\'嵌め殺し\',900,1100)">＋ 嵌め殺し<br><span style="font-size:10px">900×1100</span></button>';
+  html += '<div></div></div></div>';
+
+  // ── アコーディオン：設備記号（追加ボタンのみ）──
+  html += '<div class="acc-hd" id="acc-eq-hd" onclick="toggleAcc(\'eq\')">';
+  html += '設備記号<span class="acc-badge" id="acc-eq-badge">'+getEquips().length+'</span>';
+  html += '<span class="acc-arrow">▼</span></div>';
+  html += '<div class="acc-body" id="acc-eq-body">';
+  html += '<div class="eq-grid">';
+  EQ_TYPES.forEach(function(eq){
+    html += '<button class="eq-btn" onclick="addEq(\''+eq.id+'\')"><span class="eq-icon">'+eq.icon+'</span>'+eq.label+'</button>';
+  });
+  html += '</div></div>';
+
+  // canvas
+  html += '<div class="canvas-wrap" style="position:relative"><div class="canvas-label">展開図　（タップで選択）</div><canvas id="zumen-cv"></canvas><button id="eq-del-btn" onclick="delSelEq()" style="display:none;position:absolute;background:#e53535;color:#fff;border:none;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.25)">✕ 削除</button></div>';
+
+  // 移動パネル（canvasの直下）
+  html += '<div id="mpanel-wrap"></div>';
+
+  // 配置済みリスト（移動パネルの下・アコーディオンより下）
+  html += '<div id="placed-list"></div>';
+
+  // 寸法カード（最下部）
+  html += '<div class="dim-card">';
+  html += '<div class="dc"><div class="dl">幅</div><div class="dv" id="dv-W">'+W.toLocaleString()+'mm</div></div>';
+  html += '<div class="dc"><div class="dl">高さ</div><div class="dv" id="dv-H">'+H.toLocaleString()+'mm</div></div>';
+  html += '<div class="dc"><div class="dl">面積</div><div class="dv" id="dv-A">'+((W/1000)*(H/1000)).toFixed(2)+'m²</div></div>';
+  html += '<div class="dc"><div class="dl">周長</div><div class="dv" id="dv-P">'+((W+H)*2/1000).toFixed(2)+'m</div></div>';
+  html += '</div>';
+
+  document.getElementById('main-area').innerHTML = html;
+  renderPlacedList();
+  setTimeout(redraw, 30);
+}
+
+function renderPlacedList(){
+  var el=document.getElementById('placed-list'); if(!el) return;
+  var h='';
+  // 開口部リスト
+  getOps().forEach(function(op){
+    var s=op.id===faceSelId[curFaceIdx], d=odists(op);
+    h+='<div class="oi'+(s?' sel-op':'')+'" onclick="selOp('+op.id+')">';
+    h+='<button class="db" onclick="event.stopPropagation();removeOp('+op.id+')">削除</button>';
+    h+='<div class="on">'+op.type+'　'+op.w+'×'+op.h+'mm</div>';
+    h+='<div class="op-dist">左:'+op.x+'mm　右:'+d.right+'mm　床:'+d.bottom+'mm　天端:'+d.top+'mm</div>';
+    h+='</div>';
+  });
+  // 設備記号リスト
+  getEquips().forEach(function(eq){
+    var s=eq.id===faceEqSelId[curFaceIdx];
+    var cyMm=Math.round(eq.y+eq.h/2);
+    h+='<div class="ei'+(s?' sel-eq':'')+'" onclick="selEq('+eq.id+')">';
+    h+='<div class="ei-sym">'+eq.icon+'</div>';
+    h+='<div class="ei-info"><div class="ei-name">'+eq.label+'</div>';
+    h+='<div class="ei-pos">左:'+Math.round(eq.x+eq.w/2)+'mm　床CL:'+cyMm+'mm</div></div>';
+    h+='<button class="db-eq" onclick="event.stopPropagation();removeEq('+eq.id+')">削除</button>';
+    h+='</div>';
+  });
+  el.innerHTML=h;
+}
+
+function toggleAcc(key){
+  var hd=document.getElementById('acc-'+key+'-hd');
+  var bd=document.getElementById('acc-'+key+'-body');
+  if(!hd||!bd) return;
+  var isOpen=bd.classList.contains('open');
+  if(isOpen){ bd.classList.remove('open'); hd.classList.remove('open'); }
+  else {
+    bd.classList.add('open'); hd.classList.add('open');
+    // 開いたタイミングでリストを更新
+    if(key==='op') renderOlist();
+    if(key==='eq') renderEqlist();
+  }
+}
+function updateAccBadge(){
+  var ob=document.getElementById('acc-op-badge');
+  var eb=document.getElementById('acc-eq-badge');
+  if(ob) ob.textContent=getOps().length;
+  if(eb) eb.textContent=getEquips().length;
+}
+
+function onDimChange(){
+  var W=getW(), H=getH();
+  if(W>0&&H>0){
+    faceData[curFaceIdx]=faceData[curFaceIdx]||{};
+    faceData[curFaceIdx].W=W; faceData[curFaceIdx].H=H;
+    var dW=document.getElementById('dv-W');
+    var dH=document.getElementById('dv-H');
+    var dA=document.getElementById('dv-A');
+    var dP=document.getElementById('dv-P');
+    if(dW) dW.textContent=W.toLocaleString()+'mm';
+    if(dH) dH.textContent=H.toLocaleString()+'mm';
+    if(dA) dA.textContent=((W/1000)*(H/1000)).toFixed(2)+'m²';
+    if(dP) dP.textContent=((W+H)*2/1000).toFixed(2)+'m';
+    renderTabs();
+    redraw();
+  }
+}
+
+// ── 開口部操作 ──
+function addOp(type,w,h2){
+  var W=getW(), H=getH();
+  var x=Math.round((W-w)/2/10)*10;
+  x=Math.max(0,Math.min(W-w,x));
+  var isDoor=type==='ドア'||type==='親子ドア'||type==='両開きドア'||type==='引き違いドア'||type==='スライドドア';
+  var isSweep=type==='窓（掃出）';
+  var y=isDoor||isSweep?0:Math.max(0,Math.min(H-h2,Math.round((H-h2*1.5)/10)*10));
+  y=Math.max(0,Math.min(H-h2,y));
+  faceOidSeq[curFaceIdx]++;
+  var id=faceOidSeq[curFaceIdx];
+  getOps().push({id:id,type:type,w:w,h:h2,x:x,y:y});
+  faceSelId[curFaceIdx]=id;
+  renderPlacedList(); redraw(); showMP(); updateAccBadge();
+}
+
+function removeOp(id){
+  faceOpenings[curFaceIdx]=faceOpenings[curFaceIdx].filter(function(o){return o.id!==id;});
+  if(faceSelId[curFaceIdx]===id){faceSelId[curFaceIdx]=null; hideMP();}
+  renderPlacedList(); redraw(); updateAccBadge();
+}
+
+function odists(op){
+  var W=getW(), H=getH();
+  return{left:op.x, right:W-op.x-op.w, bottom:op.y, top:H-op.y-op.h};
+}
+
+function renderOlist(){
+  var el=document.getElementById('olist'); if(!el) return;
+  var bd=document.getElementById('acc-op-body');
+  if(bd&&!bd.classList.contains('open')) return;
+  var h='';
+  getOps().forEach(function(op){
+    var s=op.id===faceSelId[curFaceIdx], d=odists(op);
+    h+='<div class="oi'+(s?' sel-op':'')+'" onclick="selOp('+op.id+')">';
+    h+='<button class="db" onclick="event.stopPropagation();removeOp('+op.id+')">削除</button>';
+    h+='<div class="on">'+op.type+'　'+op.w+'×'+op.h+'mm</div>';
+    h+='<div class="op-dist">左:'+op.x+'mm　右:'+d.right+'mm　床:'+d.bottom+'mm　天端:'+d.top+'mm</div>';
+    h+='</div>';
+  });
+  // 空の場合は何も表示しない（アコーディオンバッジで件数確認）
+  el.innerHTML=h;
+}
+
+function selOp(id){faceSelId[curFaceIdx]=id; renderOlist(); showMP();}
+
+function showMP(){
+  var w=document.getElementById('mpanel-wrap'); if(!w) return;
+  updMP(); w.style.display='block';
+  // canvasが見えるようにスクロール
+  var cv=document.getElementById('zumen-cv');
+  if(cv) setTimeout(function(){ cv.scrollIntoView({behavior:'smooth', block:'nearest'}); }, 50);
+}
+function hideMP(){
+  var w=document.getElementById('mpanel-wrap'); if(w) w.style.display='none';
+}
+
+function updMP(){
+  var op=getOps().find(function(o){return o.id===faceSelId[curFaceIdx];}); if(!op) return;
+  var d=odists(op);
+  var steps=[10,100,300].map(function(s){
+    return '<button class="mps'+(moveStep===s?' act-op':'')+'" onclick="setMvStep('+s+')">'+s+'mm</button>';
+  }).join('');
+  var h=''
+    +'<div class="mpanel-compact cop">'
+      +'<div class="mpc-title cop">'+op.type+'</div>'
+      +'<div class="mpc-body">'
+        +'<div class="mpc-pos">'
+          +'<div class="mpc-cell"><div class="mpc-lbl">左端から</div><div class="mpc-val cop">'+op.x+'mm</div></div>'
+          +'<div class="mpc-cell"><div class="mpc-lbl">右端から</div><div class="mpc-val cop">'+d.right+'mm</div></div>'
+          +'<div class="mpc-cell"><div class="mpc-lbl">床から</div><div class="mpc-val cop">'+d.bottom+'mm</div></div>'
+          +'<div class="mpc-cell"><div class="mpc-lbl">天端から</div><div class="mpc-val cop">'+d.top+'mm</div></div>'
+        +'</div>'
+        +'<div class="mpc-ctrl">'
+          +'<div class="mpc-dpad">'
+            +'<div></div><button class="mpb" onclick="movOp(0,1)">▲</button><div></div>'
+            +'<button class="mpb" onclick="movOp(-1,0)">◀</button><div style="width:36px"></div><button class="mpb" onclick="movOp(1,0)">▶</button>'
+            +'<div></div><button class="mpb" onclick="movOp(0,-1)">▼</button><div></div>'
+          +'</div>'
+          +'<div class="mpc-steps">'+steps+'</div>'
+        +'</div>'
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">'
+        +'<div class="mpc-cell"><div class="mpc-lbl">幅 mm</div>'
+        +'<input type="number" id="op-w-inp" value="'+op.w+'" inputmode="numeric" style="width:100%;height:32px;border:1.5px solid rgba(176,106,0,0.4);border-radius:6px;padding:0 6px;font-size:13px;font-family:inherit;color:var(--top);text-align:center;background:#fff;" oninput="resizeOp(&apos;w&apos;,this.value)"></div>'
+        +'<div class="mpc-cell"><div class="mpc-lbl">高さ mm</div>'
+        +'<input type="number" id="op-h-inp" value="'+op.h+'" inputmode="numeric" style="width:100%;height:32px;border:1.5px solid rgba(176,106,0,0.4);border-radius:6px;padding:0 6px;font-size:13px;font-family:inherit;color:var(--top);text-align:center;background:#fff;" oninput="resizeOp(&apos;h&apos;,this.value)"></div>'
+      +'</div>'
+    +'</div>';
+  document.getElementById('mpanel-wrap').innerHTML=h;
+  renderPlacedList();
+}
+
+function setMvStep(s){moveStep=s; updMP();}
+
+function resizeOp(axis, val){
+  var op=getOps().find(function(o){return o.id===faceSelId[curFaceIdx];}); if(!op) return;
+  var v=parseInt(val)||0; if(v<10) return;
+  var W=getW(), H=getH();
+  if(axis==='w'){ op.w=Math.min(v,W-op.x); }
+  else { op.h=Math.min(v,H-op.y); }
+  redraw(); renderPlacedList(); updateAccBadge();
+}
+
+function resizeEq(axis, val){
+  var eq=getEquips().find(function(e){return e.id===faceEqSelId[curFaceIdx];}); if(!eq) return;
+  var v=parseInt(val)||0; if(v<10) return;
+  var W=getW(), H=getH();
+  if(axis==='w'){ eq.w=Math.min(v,W-eq.x); }
+  else { eq.h=Math.min(v,H-eq.y); }
+  updateDelBtn(); redraw(); renderPlacedList();
+}
+
+function movOp(dx,dy){
+  var op=getOps().find(function(o){return o.id===faceSelId[curFaceIdx];}); if(!op) return;
+  var W=getW(), H=getH();
+  op.x=Math.max(0,Math.min(W-op.w, op.x+dx*moveStep));
+  op.y=Math.max(0,Math.min(H-op.h, op.y+dy*moveStep));
+  updMP(); redraw();
+}
+
+
+// ── 設備記号操作 ──
+function addEq(typeId){
+  var W=getW(), H=getH();
+  var eq=EQ_TYPES.find(function(e){return e.id===typeId;});
+  if(!eq) return;
+  faceEqSeq[curFaceIdx]++;
+  var id=faceEqSeq[curFaceIdx];
+  var ew=eq.w, eh=eq.h;
+  // デフォルト位置：センターがキリ番になるよう下端を逆算
+  var x=Math.round((W-ew)/2/10)*10;
+  var centerY=300;  // コンセント：センター300mm
+  if(typeId==='switch'||typeId==='switch3') centerY=1200;
+  if(typeId==='bracket') centerY=1800;
+  if(typeId==='fan_round'||typeId==='fan_sq') centerY=H-100;
+  var y=centerY-Math.round(eh/2); // センター→下端に変換
+  x=Math.max(0,Math.min(W-ew,x)); y=Math.max(0,Math.min(H-eh,y));
+  getEquips().push({id:id,typeId:typeId,label:eq.label,icon:eq.icon,w:ew,h:eh,x:x,y:y});
+  faceEqSelId[curFaceIdx]=id;
+  faceSelId[curFaceIdx]=null; // 開口部の選択解除
+  renderPlacedList(); showMPEq(); redraw(); updateAccBadge();
+}
+
+function removeEq(id){
+  faceEquips[curFaceIdx]=faceEquips[curFaceIdx].filter(function(e){return e.id!==id;});
+  if(faceEqSelId[curFaceIdx]===id){faceEqSelId[curFaceIdx]=null; hideMPEq();}
+  var btn=document.getElementById('eq-del-btn'); if(btn) btn.style.display='none';
+  renderPlacedList(); redraw(); updateAccBadge();
+}
+
+function selEq(id){
+  faceEqSelId[curFaceIdx]=id;
+  faceSelId[curFaceIdx]=null; // 開口部選択解除
+  renderPlacedList(); showMPEq(); redraw(); updateAccBadge();
+}
+
+function eqdists(eq){
+  var W=getW(), H=getH();
+  return{left:eq.x, right:W-eq.x-eq.w, bottom:eq.y, top:H-eq.y-eq.h};
+}
+
+function renderEqlist(){
+  var el=document.getElementById('eqlist'); if(!el) return;
+  var bd=document.getElementById('acc-eq-body');
+  if(bd&&!bd.classList.contains('open')) return;
+  var h='';
+  getEquips().forEach(function(eq){
+    var s=eq.id===faceEqSelId[curFaceIdx], d=eqdists(eq);
+    h+='<div class="ei'+(s?' sel-eq':'')+'" onclick="selEq('+eq.id+')">';
+    h+='<div class="ei-sym">'+eq.icon+'</div>';
+    h+='<div class="ei-info"><div class="ei-name">'+eq.label+'</div>';
+    h+='<div class="ei-pos">左:'+eq.x+'mm　床:'+eq.y+'mm</div></div>';
+    h+='<button class="db-eq" onclick="event.stopPropagation();removeEq('+eq.id+')">削除</button>';
+    h+='</div>';
+  });
+  // 空の場合は何も表示しない（アコーディオンバッジで件数確認）
+  el.innerHTML=h;
+}
+
+function showMPEq(){
+  var w=document.getElementById('mpanel-wrap'); if(!w) return;
+  updMPEq(); w.style.display='block';
+  var cv=document.getElementById('zumen-cv');
+  if(cv) setTimeout(function(){ cv.scrollIntoView({behavior:'smooth',block:'nearest'}); },50);
+  updateDelBtn();
+}
+function hideMPEq(){
+  var w=document.getElementById('mpanel-wrap'); if(w){w.innerHTML='';w.style.display='none';}
+  var btn=document.getElementById('eq-del-btn'); if(btn) btn.style.display='none';
+}
+function delSelEq(){
+  var id=faceEqSelId[curFaceIdx]; if(id===null) return;
+  removeEq(id);
+}
+function updateDelBtn(){
+  var btn=document.getElementById('eq-del-btn');
+  var cv=document.getElementById('zumen-cv');
+  if(!btn||!cv) return;
+  var eq=getEquips().find(function(e){return e.id===faceEqSelId[curFaceIdx];});
+  if(!eq){btn.style.display='none';return;}
+  var W=getW(),H=getH();
+  var mL=48,mR=16,mT=16;
+  var sc=Math.min((cv.offsetWidth-mL-mR)/W,200/H);
+  var ox=mL,oy=mT;
+  var erx=ox+eq.x*sc;
+  var ery=oy+(H-eq.y-eq.h)*sc;
+  var erw=eq.w*sc;
+  // ボタンを器具の右上角に配置
+  btn.style.display='block';
+  btn.style.left=(erx+erw+2)+'px';
+  btn.style.top=(ery-2)+'px';
+}
+
+function updMPEq(){
+  var eq=getEquips().find(function(e){return e.id===faceEqSelId[curFaceIdx];}); if(!eq) return;
+  var d=eqdists(eq);
+  var cyMm=Math.round(eq.y+eq.h/2);
+  var steps=[10,100,300].map(function(s){
+    return '<button class="mps'+(moveStep===s?' act-eq':'')+'" onclick="setMvStep('+s+')">'+s+'mm</button>';
+  }).join('');
+  var h=''
+    +'<div class="mpanel-compact ceq">'
+      +'<div class="mpc-title ceq">'+eq.icon+' '+eq.label+'</div>'
+      +'<div class="mpc-body">'
+        +'<div class="mpc-pos">'
+          +'<div class="mpc-cell"><div class="mpc-lbl">左端から</div><div class="mpc-val ceq">'+eq.x+'mm</div></div>'
+          +'<div class="mpc-cell"><div class="mpc-lbl">右端から</div><div class="mpc-val ceq">'+d.right+'mm</div></div>'
+          +'<div class="mpc-cell"><div class="mpc-lbl">床（センター）</div><div class="mpc-val ceq">'+cyMm+'mm</div></div>'
+          +'<div class="mpc-cell"><div class="mpc-lbl">天端から</div><div class="mpc-val ceq">'+d.top+'mm</div></div>'
+        +'</div>'
+        +'<div class="mpc-ctrl">'
+          +'<div class="mpc-dpad">'
+            +'<div></div><button class="mpb" onclick="movEq(0,1)">▲</button><div></div>'
+            +'<button class="mpb" onclick="movEq(-1,0)">◀</button><div style="width:36px"></div><button class="mpb" onclick="movEq(1,0)">▶</button>'
+            +'<div></div><button class="mpb" onclick="movEq(0,-1)">▼</button><div></div>'
+          +'</div>'
+          +'<div class="mpc-steps">'+steps+'</div>'
+        +'</div>'
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">'
+        +'<div class="mpc-cell"><div class="mpc-lbl">幅 mm</div>'
+        +'<input type="number" id="eq-w-inp" value="'+eq.w+'" inputmode="numeric" style="width:100%;height:32px;border:1.5px solid rgba(26,106,170,0.4);border-radius:6px;padding:0 6px;font-size:13px;font-family:inherit;color:#1a4a88;text-align:center;background:#fff;" oninput="resizeEq(&apos;w&apos;,this.value)"></div>'
+        +'<div class="mpc-cell"><div class="mpc-lbl">高さ mm</div>'
+        +'<input type="number" id="eq-h-inp" value="'+eq.h+'" inputmode="numeric" style="width:100%;height:32px;border:1.5px solid rgba(26,106,170,0.4);border-radius:6px;padding:0 6px;font-size:13px;font-family:inherit;color:#1a4a88;text-align:center;background:#fff;" oninput="resizeEq(&apos;h&apos;,this.value)"></div>'
+      +'</div>'
+    +'</div>';
+  document.getElementById('mpanel-wrap').innerHTML=h;
+  renderPlacedList();
+}
+
+function movEq(dx,dy){
+  var eq=getEquips().find(function(e){return e.id===faceEqSelId[curFaceIdx];}); if(!eq) return;
+  var W=getW(), H=getH();
+  eq.x=Math.max(0,Math.min(W-eq.w, eq.x+dx*moveStep));
+  eq.y=Math.max(0,Math.min(H-eq.h, eq.y+dy*moveStep));
+  updMPEq(); redraw();
+  setTimeout(updateDelBtn,30);
+}
+
+// canvas タップで開口選択
+document.addEventListener('click', function(e){
+  var cv=document.getElementById('zumen-cv'); if(!cv||e.target!==cv) return;
+  var r=cv.getBoundingClientRect();
+  var px=e.clientX-r.left, py=e.clientY-r.top;
+  var W=getW(), H=getH();
+  var mL=48,mR=16,mT=16;
+  var sc=Math.min((cv.offsetWidth-mL-mR)/W, 200/H);
+  var ox=mL, oy=mT, hit=null;
+  for(var i=getOps().length-1;i>=0;i--){
+    var o=getOps()[i];
+    var dpr=window.devicePixelRatio||1;
+    var rx=ox+o.x*sc, ry2=oy+(H-o.y-o.h)*sc, rw3=o.w*sc, rh2=o.h*sc;
+    if(px>=rx&&px<=rx+rw3&&py>=ry2&&py<=ry2+rh2){hit=o.id;break;}
+  }
+  if(hit!==null){
+    faceEqSelId[curFaceIdx]=null;
+    selOp(hit);
+  } else {
+    // 設備記号をタップ判定（半径20px）
+    var eqHit=null;
+    for(var j=getEquips().length-1;j>=0;j--){
+      var eq=getEquips()[j];
+      var erx=ox+eq.x*sc, ery=oy+(H-eq.y-eq.h)*sc;
+      var erw=eq.w*sc, erh=eq.h*sc;
+      if(px>=erx&&px<=erx+erw&&py>=ery&&py<=ery+erh){eqHit=eq.id;break;}
+    }
+    if(eqHit!==null){
+      faceSelId[curFaceIdx]=null;
+      selEq(eqHit);
+    } else {
+      faceSelId[curFaceIdx]=null; faceEqSelId[curFaceIdx]=null;
+      hideMP(); hideMPEq(); renderOlist(); renderEqlist(); redraw();
+    }
+  }
+});
+
+// ── canvas描画 ──
+function setupCanvas(cv,cssW,cssH){
+  var dpr=window.devicePixelRatio||1;
+  cv.width=Math.round(cssW*dpr); cv.height=Math.round(cssH*dpr);
+  cv.style.width=cssW+'px'; cv.style.height=cssH+'px';
+  var ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
+  return ctx;
+}
+
+function redraw(){
+  var cv=document.getElementById('zumen-cv'); if(!cv) return;
+  var W=getW(), H=getH();
+  var CW=cv.offsetWidth||340;
+  // 印刷モードは右側に縦寸法基線が必要なので余白を拡張
+  var mL=48, mR=drawMode==='print'?80:16, mT=16, mB=drawMode==='print'?70:40;
+  var sc=Math.min((CW-mL-mR)/W, 200/H);
+  var rw=W*sc, rh=H*sc, CH=rh+mT+mB;
+  var ox=mL, oy=mT;
+  var ctx=setupCanvas(cv,CW,CH);
+  ctx.clearRect(0,0,CW,CH);
+
+  // 壁面背景
+  ctx.fillStyle='#f9f8f6';
+  ctx.fillRect(ox,oy,rw,rh);
+
+  // 900mmグリッド
+  ctx.strokeStyle='rgba(30,45,64,0.07)';
+  ctx.lineWidth=0.8; ctx.setLineDash([3,4]);
+  for(var x=900;x<W;x+=900){var gx=ox+x*sc;ctx.beginPath();ctx.moveTo(gx,oy);ctx.lineTo(gx,oy+rh);ctx.stroke();}
+  for(var y=900;y<H;y+=900){var gy=oy+(H-y)*sc;ctx.beginPath();ctx.moveTo(ox,gy);ctx.lineTo(ox+rw,gy);ctx.stroke();}
+  ctx.setLineDash([]);
+
+  // 巾木ゾーン
+  var habakiH=60, habakiY=oy+rh-habakiH*sc;
+  if(habakiH*sc>4){
+    ctx.fillStyle='rgba(30,45,64,0.04)';
+    ctx.fillRect(ox,habakiY,rw,rh-(habakiY-oy));
+    ctx.strokeStyle='rgba(30,45,64,0.2)';
+    ctx.lineWidth=0.8; ctx.setLineDash([4,3]);
+    ctx.beginPath();ctx.moveTo(ox,habakiY);ctx.lineTo(ox+rw,habakiY);ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // 開口部（図面表記）
+  getOps().forEach(function(op){
+    var rx=ox+op.x*sc, ry2=oy+(H-op.y-op.h)*sc, rw3=op.w*sc, rh2=op.h*sc;
+    var rcx=rx+rw3/2, rcy=ry2+rh2/2;
+    var sel=op.id===faceSelId[curFaceIdx];
+    var col=sel?'#b06a00':'rgba(40,40,40,0.8)';
+    var lw=sel?2:1.5;
+    ctx.save();
+    ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=lw;
+
+    // 開口部の白抜き（共通）
+    ctx.fillStyle='#ffffff'; ctx.fillRect(rx,ry2,rw3,rh2);
+    ctx.strokeStyle=col; ctx.fillStyle=col;
+
+    var t=op.type;
+
+    if(t==='ドア'){
+      // 片開きドア（展開図）：外枠＋丁番側縦線＋沓摺線
+      ctx.strokeRect(rx,ry2,rw3,rh2);
+      // 丁番側縦線（左端内側）
+      ctx.lineWidth=lw*1.2;
+      ctx.beginPath();ctx.moveTo(rx+3*sc,ry2);ctx.lineTo(rx+3*sc,ry2+rh2);ctx.stroke();
+      ctx.lineWidth=lw;
+      // 沓摺線（下端・床と接する位置）
+      ctx.beginPath();ctx.moveTo(rx,ry2+rh2);ctx.lineTo(rx+rw3,ry2+rh2);ctx.stroke();
+
+    } else if(t==='親子ドア'){
+      // 親子ドア（展開図）：外枠＋大小扉の区切り縦線
+      ctx.strokeRect(rx,ry2,rw3,rh2);
+      // 丁番縦線（左）
+      ctx.lineWidth=lw*1.2;
+      ctx.beginPath();ctx.moveTo(rx+3*sc,ry2);ctx.lineTo(rx+3*sc,ry2+rh2);ctx.stroke();
+      ctx.lineWidth=lw;
+      // 親子区切り（2/3位置）
+      ctx.beginPath();ctx.moveTo(rx+rw3*0.67,ry2);ctx.lineTo(rx+rw3*0.67,ry2+rh2);ctx.stroke();
+      // 沓摺線
+      ctx.beginPath();ctx.moveTo(rx,ry2+rh2);ctx.lineTo(rx+rw3,ry2+rh2);ctx.stroke();
+      // 小さい「子」ラベル
+      ctx.font='bold '+Math.max(7,rw3*0.06)+'px Meiryo,sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('子',rx+rw3*0.83,rcy);
+
+    } else if(t==='両開きドア'){
+      // 両開きドア（展開図）：外枠＋中央合わせ目縦線＋両端丁番線
+      ctx.strokeRect(rx,ry2,rw3,rh2);
+      // 両端丁番縦線
+      ctx.lineWidth=lw*1.2;
+      ctx.beginPath();ctx.moveTo(rx+3*sc,ry2);ctx.lineTo(rx+3*sc,ry2+rh2);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(rx+rw3-3*sc,ry2);ctx.lineTo(rx+rw3-3*sc,ry2+rh2);ctx.stroke();
+      ctx.lineWidth=lw;
+      // 中央召し合わせ線（2本）
+      ctx.beginPath();ctx.moveTo(rcx-1,ry2);ctx.lineTo(rcx-1,ry2+rh2);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(rcx+1,ry2);ctx.lineTo(rcx+1,ry2+rh2);ctx.stroke();
+      // 沓摺線
+      ctx.beginPath();ctx.moveTo(rx,ry2+rh2);ctx.lineTo(rx+rw3,ry2+rh2);ctx.stroke();
+
+    } else if(t==='引き違いドア'){
+      // 引き違いドア（展開図）：外枠＋2枚の引き戸線（左右にずれた重なり）
+      ctx.strokeRect(rx,ry2,rw3,rh2);
+      var hw2=rw3/2;
+      // 手前側扉（実線）
+      ctx.lineWidth=lw;
+      ctx.strokeRect(rx,ry2+2,hw2+4,rh2-4);
+      // 奥側扉（点線）
+      ctx.lineWidth=lw*0.7; ctx.setLineDash([3,2]);
+      ctx.strokeRect(rx+hw2-4,ry2+4,hw2+4,rh2-8);
+      ctx.setLineDash([]); ctx.lineWidth=lw;
+
+    } else if(t==='スライドドア'){
+      // スライドドア（展開図）：外枠＋扉1枚（端に寄った位置）＋上下レール
+      ctx.strokeRect(rx,ry2,rw3,rh2);
+      // 上下レール線
+      ctx.lineWidth=lw*0.6;
+      ctx.beginPath();ctx.moveTo(rx,ry2+3);ctx.lineTo(rx+rw3,ry2+3);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(rx,ry2+rh2-3);ctx.lineTo(rx+rw3,ry2+rh2-3);ctx.stroke();
+      ctx.lineWidth=lw;
+      // 扉（左端に寄せた1枚）
+      ctx.strokeRect(rx+2,ry2+3,rw3*0.55,rh2-6);
+      // 矢印で移動方向を示す
+      ctx.lineWidth=lw*0.6; ctx.setLineDash([2,2]);
+      ctx.beginPath();ctx.moveTo(rx+rw3*0.6,rcy);ctx.lineTo(rx+rw3-4,rcy);ctx.stroke();
+      ctx.setLineDash([]); ctx.lineWidth=lw;
+
+    } else if(t==='窓（中連）'||t==='窓（掃出）'){
+      // 中連・掃出し窓：外枠＋内枠2本（ガラス線）＋中央召し合わせ線
+      ctx.strokeRect(rx,ry2,rw3,rh2);
+      var gi=Math.max(2,2*sc); // ガラス内側余白
+      ctx.strokeRect(rx+gi,ry2+gi,rw3-gi*2,rh2-gi*2);
+      // 召し合わせ線（中央縦）
+      ctx.lineWidth=lw*0.8;
+      ctx.beginPath();ctx.moveTo(rcx,ry2+gi);ctx.lineTo(rcx,ry2+rh2-gi);ctx.stroke();
+      // ガラス表現（薄い斜線1本）
+      ctx.strokeStyle='rgba(100,160,200,0.3)'; ctx.lineWidth=0.6;
+      ctx.beginPath();ctx.moveTo(rx+gi,ry2+gi);ctx.lineTo(rx+rw3-gi,ry2+rh2-gi);ctx.stroke();
+      ctx.strokeStyle=col; ctx.lineWidth=lw;
+
+    } else if(t==='排煙窓'){
+      // 排煙窓：外枠＋上部に開き線（上端ヒンジ）
+      ctx.strokeRect(rx,ry2,rw3,rh2);
+      var gi2=Math.max(2,2*sc);
+      ctx.strokeRect(rx+gi2,ry2+gi2,rw3-gi2*2,rh2-gi2*2);
+      // 開き方向（上ヒンジ・下開き弧）
+      ctx.lineWidth=lw*0.7; ctx.setLineDash([3,2]);
+      ctx.beginPath();ctx.moveTo(rx+gi2,ry2+gi2);ctx.lineTo(rcx,ry2+rh2-gi2);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(rx+rw3-gi2,ry2+gi2);ctx.lineTo(rcx,ry2+rh2-gi2);ctx.stroke();
+      ctx.setLineDash([]); ctx.lineWidth=lw;
+      // EXラベル
+      ctx.font='bold '+Math.max(8,rw3*0.1)+'px Meiryo,sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('EX',rcx,rcy);
+
+    } else if(t==='縦滑り窓'){
+      // 縦滑り窓：外枠＋縦開き表示（片側ヒンジ）
+      ctx.strokeRect(rx,ry2,rw3,rh2);
+      var gi3=Math.max(2,2*sc);
+      ctx.strokeRect(rx+gi3,ry2+gi3,rw3-gi3*2,rh2-gi3*2);
+      // 縦開き弧（左ヒンジ）
+      ctx.lineWidth=lw*0.7; ctx.setLineDash([3,2]);
+      ctx.beginPath();ctx.moveTo(rx+gi3,ry2+gi3);ctx.lineTo(rx+rw3-gi3,rcy);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(rx+gi3,ry2+rh2-gi3);ctx.lineTo(rx+rw3-gi3,rcy);ctx.stroke();
+      ctx.setLineDash([]); ctx.lineWidth=lw;
+
+    } else if(t==='横滑り窓'){
+      // 横滑り窓：外枠＋上ヒンジの横開き
+      ctx.strokeRect(rx,ry2,rw3,rh2);
+      var gi4=Math.max(2,2*sc);
+      ctx.strokeRect(rx+gi4,ry2+gi4,rw3-gi4*2,rh2-gi4*2);
+      ctx.lineWidth=lw*0.7; ctx.setLineDash([3,2]);
+      ctx.beginPath();ctx.moveTo(rx+gi4,ry2+gi4);ctx.lineTo(rcx,ry2+rh2-gi4);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(rx+rw3-gi4,ry2+gi4);ctx.lineTo(rcx,ry2+rh2-gi4);ctx.stroke();
+      ctx.setLineDash([]); ctx.lineWidth=lw;
+
+    } else if(t==='出窓'){
+      // 出窓：外枠＋中央に出っ張り表現（二重枠）
+      ctx.strokeRect(rx,ry2,rw3,rh2);
+      var bump=rh2*0.2;
+      ctx.strokeRect(rx+rw3*0.15,ry2,rw3*0.7,rh2+bump);
+      // ガラス線
+      ctx.strokeStyle='rgba(100,160,200,0.4)'; ctx.lineWidth=0.6;
+      ctx.beginPath();ctx.moveTo(rx+rw3*0.15,ry2+2);ctx.lineTo(rx+rw3*0.85,ry2+rh2-2);ctx.stroke();
+      ctx.strokeStyle=col; ctx.lineWidth=lw;
+
+    } else if(t==='ジャロジー'){
+      // ジャロジー窓：枠＋横羽根3〜4枚
+      ctx.strokeRect(rx,ry2,rw3,rh2);
+      var blades=4, bh=rh2/blades;
+      for(var bi=1;bi<blades;bi++){
+        var by=ry2+bi*bh;
+        ctx.lineWidth=lw*0.8;
+        ctx.beginPath();ctx.moveTo(rx+2,by);ctx.lineTo(rx+rw3-2,by-bh*0.3);ctx.stroke();
+      }
+
+    } else if(t==='嵌め殺し'){
+      // 嵌め殺し（FIX）窓：外枠＋内枠＋×印＋FIXラベル
+      ctx.strokeRect(rx,ry2,rw3,rh2);
+      var gi5=Math.max(2,2*sc);
+      ctx.strokeRect(rx+gi5,ry2+gi5,rw3-gi5*2,rh2-gi5*2);
+      // ×印（FIX表現）
+      ctx.lineWidth=lw*0.5; ctx.strokeStyle='rgba(100,160,200,0.5)';
+      ctx.beginPath();
+      ctx.moveTo(rx+gi5,ry2+gi5);ctx.lineTo(rx+rw3-gi5,ry2+rh2-gi5);
+      ctx.moveTo(rx+rw3-gi5,ry2+gi5);ctx.lineTo(rx+gi5,ry2+rh2-gi5);
+      ctx.stroke();
+      ctx.strokeStyle=col; ctx.lineWidth=lw;
+      // FIXラベル
+      ctx.font='bold '+Math.max(7,rw3*0.1)+'px Meiryo,sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle=col;
+      ctx.fillText('FIX',rcx,rcy);
+    }
+
+    // 選択時：寸法表示
+    if(sel){
+      ctx.strokeStyle='rgba(176,106,0,0.5)'; ctx.lineWidth=0.8;
+      // 幅寸法（上）
+      ctx.fillStyle='#b06a00'; ctx.font='10px Meiryo,sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='bottom';
+      ctx.fillText(op.w+'mm',rcx,ry2-3);
+      // 高さ寸法（左）
+      ctx.save(); ctx.translate(rx-5,rcy); ctx.rotate(-Math.PI/2);
+      ctx.textAlign='center'; ctx.textBaseline='bottom';
+      ctx.fillText(op.h+'mm',0,0); ctx.restore();
+      // 左端からの寸法線
+      if(op.x>0){
+        var dimY2b=oy+rh+8;
+        ctx.strokeStyle='rgba(176,106,0,0.5)'; ctx.lineWidth=0.8;
+        ctx.beginPath();ctx.moveTo(ox,dimY2b);ctx.lineTo(rx,dimY2b);ctx.stroke();
+        [ox,rx].forEach(function(tx2){ctx.beginPath();ctx.moveTo(tx2,dimY2b-3);ctx.lineTo(tx2,dimY2b+3);ctx.stroke();});
+        ctx.fillStyle='rgba(176,106,0,0.8)'; ctx.font='9px Meiryo,sans-serif';
+        ctx.textAlign='center'; ctx.textBaseline='top';
+        ctx.fillText(op.x+'mm',ox+(rx-ox)/2,dimY2b+4);
+      }
+    }
+    ctx.restore();
+  });
+
+  // 外形線
+  ctx.strokeStyle='rgba(30,45,64,0.85)'; ctx.lineWidth=2;
+  ctx.strokeRect(ox,oy,rw,rh);
+
+  // 設備記号
+  getEquips().forEach(function(eq){
+    var ex=ox+eq.x*sc, ey=oy+(H-eq.y)*sc;
+    var sel=eq.id===faceEqSelId[curFaceIdx];
+    var col=sel?'#1a6aaa':'rgba(30,45,64,0.75)';
+    ctx.save();
+    ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=sel?2:1.5;
+
+    // 実寸ベース：左下角(eq.x, eq.y)、W=eq.w、H=eq.h
+    var erx=ox+eq.x*sc;           // canvas上の左端X
+    var ery=oy+(H-eq.y-eq.h)*sc;  // canvas上の上端Y（Y軸反転）
+    var erw=eq.w*sc;              // canvas上の幅
+    var erh=eq.h*sc;              // canvas上の高さ
+    var ecx=erx+erw/2;            // 中心X
+    var ecy=ery+erh/2;            // 中心Y
+
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+
+    if(eq.typeId==='outlet'){
+      // コンセント 86×86mm：プレート外形＋内側面取り＋差込口2本
+      // 外形プレート
+      ctx.strokeRect(erx,ery,erw,erh);
+      // 内側（面取り風：4mm内側）
+      var m=Math.max(2,3*sc);
+      ctx.strokeRect(erx+m,ery+m,erw-m*2,erh-m*2);
+      // 差込口2本（縦スリット）
+      var sw2=erw*0.12, sh2=erh*0.3, sx1=ecx-erw*0.18, sx2=ecx+erw*0.06;
+      ctx.fillStyle=col;
+      ctx.fillRect(sx1-sw2/2, ecy-sh2/2, sw2, sh2);
+      ctx.fillRect(sx2-sw2/2, ecy-sh2/2, sw2, sh2);
+      ctx.fillStyle=col;
+
+    } else if(eq.typeId==='switch'||eq.typeId==='switch3'){
+      // スイッチ 86×86mm：プレート外形＋ロッカー（縦2分割）
+      ctx.strokeRect(erx,ery,erw,erh);
+      var m2=Math.max(2,3*sc);
+      ctx.strokeRect(erx+m2,ery+m2,erw-m2*2,erh-m2*2);
+      // ロッカー中心線（横中央に縦線）
+      ctx.beginPath();
+      ctx.moveTo(ecx,ery+m2);ctx.lineTo(ecx,ery+erh-m2);
+      ctx.stroke();
+      // 3路：右上に「3」
+      if(eq.typeId==='switch3'){
+        ctx.font='bold '+Math.max(8,erw*0.18)+'px Meiryo,sans-serif';
+        ctx.textBaseline='top';
+        ctx.fillText('3',erx+erw+3,ery);
+        ctx.textBaseline='middle';
+      }
+
+    } else if(eq.typeId==='bracket'){
+      // ブラケット照明 150×200mm：台座＋ランプ胴体＋傘
+      // 台座（下1/4）
+      var baseH=erh*0.2;
+      ctx.strokeRect(erx+erw*0.2,ery+erh-baseH,erw*0.6,baseH);
+      // 胴体（中央縦長楕円）
+      var bodyW=erw*0.35, bodyH=erh*0.45;
+      ctx.beginPath();ctx.ellipse(ecx,ery+erh*0.55,bodyW/2,bodyH/2,0,0,Math.PI*2);ctx.stroke();
+      // 傘（上部台形）
+      ctx.beginPath();
+      ctx.moveTo(ecx-erw*0.45,ery+erh*0.25);
+      ctx.lineTo(ecx+erw*0.45,ery+erh*0.25);
+      ctx.lineTo(ecx+bodyW/2,ery+erh*0.55-bodyH/2);
+      ctx.lineTo(ecx-bodyW/2,ery+erh*0.55-bodyH/2);
+      ctx.closePath();ctx.stroke();
+      // BL傍記
+      ctx.font='bold '+Math.max(8,erw*0.14)+'px Meiryo,sans-serif';
+      ctx.textBaseline='middle';
+      ctx.fillText('BL',erx+erw+6,ecy);
+
+    } else if(eq.typeId==='fan_round'){
+      // 換気扇（丸）φ150mm：外円＋内円＋十字羽根＋中心点
+      var fr=Math.min(erw,erh)/2;
+      ctx.beginPath();ctx.arc(ecx,ecy,fr,0,Math.PI*2);ctx.stroke();
+      ctx.beginPath();ctx.arc(ecx,ecy,fr*0.75,0,Math.PI*2);ctx.stroke();
+      // 十字羽根
+      ctx.beginPath();
+      ctx.moveTo(ecx-fr*0.65,ecy);ctx.lineTo(ecx+fr*0.65,ecy);
+      ctx.moveTo(ecx,ecy-fr*0.65);ctx.lineTo(ecx,ecy+fr*0.65);
+      ctx.stroke();
+      ctx.beginPath();ctx.arc(ecx,ecy,fr*0.12,0,Math.PI*2);ctx.fill();
+      ctx.font='bold '+Math.max(8,fr*0.28)+'px Meiryo,sans-serif';
+      ctx.textBaseline='top';
+      ctx.fillText('EF',ecx+fr+3,ery);
+      ctx.textBaseline='middle';
+
+    } else if(eq.typeId==='fan_sq'){
+      // 換気扇（角）200×200mm：外枠＋内枠＋対角線＋中心点
+      ctx.strokeRect(erx,ery,erw,erh);
+      var mg=erw*0.1;
+      ctx.strokeRect(erx+mg,ery+mg,erw-mg*2,erh-mg*2);
+      ctx.beginPath();
+      ctx.moveTo(erx+mg,ery+mg);ctx.lineTo(erx+erw-mg,ery+erh-mg);
+      ctx.moveTo(erx+erw-mg,ery+mg);ctx.lineTo(erx+mg,ery+erh-mg);
+      ctx.stroke();
+      ctx.beginPath();ctx.arc(ecx,ecy,Math.min(erw,erh)*0.08,0,Math.PI*2);ctx.fill();
+      ctx.font='bold '+Math.max(8,erw*0.14)+'px Meiryo,sans-serif';
+      ctx.textBaseline='top';
+      ctx.fillText('EF',erx+erw+3,ery);
+      ctx.textBaseline='middle';
+    }
+
+    // 選択時：ハイライト点線枠＋2方向寸法線（編集モードのみ）
+    if(sel&&drawMode==='edit'){
+      // 点線ハイライト枠
+      ctx.strokeStyle='rgba(26,106,170,0.4)'; ctx.lineWidth=1;
+      ctx.setLineDash([3,3]);
+      ctx.strokeRect(erx-2,ery-2,erw+4,erh+4);
+      ctx.setLineDash([]);
+
+      var dc='#1a6aaa', df='rgba(26,106,170,0.85)';
+      // センター座標（実寸）
+      var cxMm=Math.round(eq.x+eq.w/2); // 左端からセンターX
+      var cyMm=Math.round(eq.y+eq.h/2); // 床からセンターY
+
+      // ── 水平寸法線（左壁→センターX）──
+      if(cxMm>0){
+        var dimY2=oy+rh+10;
+        ctx.strokeStyle=dc; ctx.lineWidth=0.8;
+        // 寸法線
+        ctx.beginPath();ctx.moveTo(ox,dimY2);ctx.lineTo(ecx,dimY2);ctx.stroke();
+        // ティック
+        [ox,ecx].forEach(function(tx){
+          ctx.beginPath();ctx.moveTo(tx,dimY2-4);ctx.lineTo(tx,dimY2+4);ctx.stroke();
+        });
+        // 引出線（センターXから下へ）
+        ctx.strokeStyle='rgba(26,106,170,0.3)'; ctx.setLineDash([2,3]);
+        ctx.beginPath();ctx.moveTo(ecx,ery+erh);ctx.lineTo(ecx,dimY2);ctx.stroke();
+        ctx.setLineDash([]);
+        // テキスト
+        ctx.fillStyle=df; ctx.font='bold 10px Meiryo,sans-serif';
+        ctx.textAlign='center'; ctx.textBaseline='top';
+        ctx.fillText(cxMm.toLocaleString()+'mm', ox+(ecx-ox)/2, dimY2+5);
+      }
+
+      // ── 垂直寸法線（床→センターY）──
+      if(cyMm>0){
+        var dimX2=ox-10;
+        ctx.strokeStyle=dc; ctx.lineWidth=0.8;
+        // 寸法線
+        ctx.beginPath();ctx.moveTo(dimX2,oy+rh);ctx.lineTo(dimX2,ecy);ctx.stroke();
+        // ティック
+        [oy+rh,ecy].forEach(function(ty){
+          ctx.beginPath();ctx.moveTo(dimX2-4,ty);ctx.lineTo(dimX2+4,ty);ctx.stroke();
+        });
+        // 引出線（センターYから左へ）
+        ctx.strokeStyle='rgba(26,106,170,0.3)'; ctx.setLineDash([2,3]);
+        ctx.beginPath();ctx.moveTo(erx,ecy);ctx.lineTo(dimX2,ecy);ctx.stroke();
+        ctx.setLineDash([]);
+        // テキスト（縦書き）
+        ctx.fillStyle=df; ctx.font='bold 10px Meiryo,sans-serif';
+        ctx.save();
+        ctx.translate(dimX2-12, oy+rh-(oy+rh-ecy)/2);
+        ctx.rotate(-Math.PI/2);
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(cyMm.toLocaleString()+'mm', 0, 0);
+        ctx.restore();
+      }
+
+      // ラベル（右側に表示）
+      ctx.fillStyle=df; ctx.font='bold 10px Meiryo,sans-serif';
+      ctx.textAlign='left'; ctx.textBaseline='middle';
+      ctx.fillText(eq.label, erx+erw+5, ecy);
+    }
+    ctx.restore();
+  });
+
+  // 寸法線（下：幅）
+  var dimY=oy+rh+20;
+  ctx.strokeStyle='rgba(30,45,64,0.45)'; ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(ox,dimY);ctx.lineTo(ox+rw,dimY);ctx.stroke();
+  [ox,ox+rw].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY-4);ctx.lineTo(tx,dimY+4);ctx.stroke();});
+  ctx.fillStyle='rgba(30,45,64,0.6)'; ctx.font='bold 11px Meiryo,sans-serif';
+  ctx.textAlign='center'; ctx.fillText(W.toLocaleString()+'mm',ox+rw/2,dimY+14);
+
+  // 寸法線（左：高さ）
+  var dimX=ox-22;
+  ctx.strokeStyle='rgba(30,45,64,0.45)'; ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(dimX,oy);ctx.lineTo(dimX,oy+rh);ctx.stroke();
+  [oy,oy+rh].forEach(function(ty){ctx.beginPath();ctx.moveTo(dimX-4,ty);ctx.lineTo(dimX+4,ty);ctx.stroke();});
+  ctx.save(); ctx.translate(dimX-13,oy+rh/2); ctx.rotate(-Math.PI/2);
+  ctx.textAlign='center'; ctx.fillStyle='rgba(30,45,64,0.6)';
+  ctx.font='bold 11px Meiryo,sans-serif';
+  ctx.fillText(H.toLocaleString()+'mm',0,0); ctx.restore();
+
+  // 面積
+  ctx.fillStyle='rgba(30,45,64,0.3)'; ctx.font='10px Meiryo,sans-serif';
+  ctx.textAlign='right';
+  ctx.fillText(((W/1000)*(H/1000)).toFixed(2)+'m²',ox+rw-4,oy+rh-6);
+
+  // ── 印刷モード：整理された寸法表示 ──
+  if(drawMode==='print'&&getEquips().length>0){
+    var eqs=getEquips();
+    var pc='rgba(30,45,64,0.75)', pf='rgba(30,45,64,0.85)';
+    var pfont='bold 9px Meiryo,sans-serif';
+
+    // 水平基線（壁幅寸法線の少し上）
+    var hBase=oy+rh+38;
+    ctx.strokeStyle=pc; ctx.lineWidth=0.7;
+    ctx.beginPath();ctx.moveTo(ox,hBase);ctx.lineTo(ox+rw,hBase);ctx.stroke();
+    // 端部ティック
+    [ox,ox+rw].forEach(function(tx){
+      ctx.beginPath();ctx.moveTo(tx,hBase-4);ctx.lineTo(tx,hBase+4);ctx.stroke();
+    });
+
+    // 各器具のセンターXを基線に落とす
+    eqs.forEach(function(eq){
+      var cxMm=Math.round(eq.x+eq.w/2);
+      var ecx2=ox+cxMm*sc;
+      // 引出線（器具下端→基線）
+      ctx.strokeStyle='rgba(30,45,64,0.2)'; ctx.lineWidth=0.6; ctx.setLineDash([2,3]);
+      ctx.beginPath();ctx.moveTo(ecx2,oy+(H-(eq.y))*sc);ctx.lineTo(ecx2,hBase);ctx.stroke();
+      ctx.setLineDash([]);
+      // 基線上ティック
+      ctx.strokeStyle=pc; ctx.lineWidth=0.7;
+      ctx.beginPath();ctx.moveTo(ecx2,hBase-3);ctx.lineTo(ecx2,hBase+3);ctx.stroke();
+      // 数値（基線の下）
+      ctx.fillStyle=pf; ctx.font=pfont;
+      ctx.textAlign='center'; ctx.textBaseline='top';
+      ctx.fillText(cxMm.toLocaleString(),ecx2,hBase+5);
+    });
+    // 「水平寸法（mm）」ラベル
+    ctx.fillStyle='rgba(30,45,64,0.4)'; ctx.font='8px Meiryo,sans-serif';
+    ctx.textAlign='left'; ctx.textBaseline='top';
+    ctx.fillText('← 左端からセンター(mm)',ox,hBase+15);
+
+    // 垂直基線（壁右端の外側）
+    var vBase=ox+rw+36;
+    ctx.strokeStyle=pc; ctx.lineWidth=0.7;
+    ctx.beginPath();ctx.moveTo(vBase,oy);ctx.lineTo(vBase,oy+rh);ctx.stroke();
+    [oy,oy+rh].forEach(function(ty){
+      ctx.beginPath();ctx.moveTo(vBase-3,ty);ctx.lineTo(vBase+3,ty);ctx.stroke();
+    });
+
+    // 各器具のセンターYを右端の基線に落とす
+    // 高さ順にソートして重なり回避
+    var sorted=eqs.slice().sort(function(a,b){return b.y-a.y;}); // 床側から
+    sorted.forEach(function(eq){
+      var cyMm=Math.round(eq.y+eq.h/2);
+      var ecy2=oy+(H-cyMm)*sc;
+      // 引出線（器具右端→基線）
+      ctx.strokeStyle='rgba(30,45,64,0.2)'; ctx.lineWidth=0.6; ctx.setLineDash([2,3]);
+      ctx.beginPath();ctx.moveTo(ox+(eq.x+eq.w)*sc,ecy2);ctx.lineTo(vBase,ecy2);ctx.stroke();
+      ctx.setLineDash([]);
+      // 基線上ティック
+      ctx.strokeStyle=pc; ctx.lineWidth=0.7;
+      ctx.beginPath();ctx.moveTo(vBase-3,ecy2);ctx.lineTo(vBase+3,ecy2);ctx.stroke();
+      // 数値（基線の右）+ 器具名
+      ctx.fillStyle=pf; ctx.font=pfont;
+      ctx.textAlign='left'; ctx.textBaseline='middle';
+      ctx.fillText(cyMm.toLocaleString()+'  '+eq.label, vBase+6, ecy2);
+    });
+  }
+}
+
+// ── 初期化 ──
+renderTabs();
+renderMain();
+window.addEventListener('resize', function(){ setTimeout(redraw,50); });
+</script>
+</body>
+</html>
