@@ -566,18 +566,25 @@ function toggleHH(){var s=document.getElementById('f-HABAKI_TYPE'),w=document.ge
 
 document.addEventListener('click',function(e){
   var cv=document.getElementById('wall-cv');if(!cv||e.target!==cv)return;
-  var r=cv.getBoundingClientRect(),px=(e.clientX-r.left)*(cv.width/r.width),py=(e.clientY-r.top)*(cv.height/r.height);
+  var r=cv.getBoundingClientRect(),px=(e.clientX-r.left),py=(e.clientY-r.top);
   var W=fv('L')||3600,H=fv('W')||2400,sc=Math.min((cv.offsetWidth-24)/W,180/H),ox=12,oy=10,hit=null;
   for(var i=getOpenings().length-1;i>=0;i--){var o=getOpenings()[i],rx=ox+o.x*sc,ry=oy+(H-o.y-o.h)*sc;if(px>=rx&&px<=rx+o.w*sc&&py>=ry&&py<=ry+o.h*sc){hit=o.id;break;}}
   if(hit!==null){selOp(hit);}else{faceSelId[curFaceIdx]=null;hideMP();renderOlist();redrawWall();}
 });
 
+function setupCanvas(cv,cssW,cssH){
+  var dpr=window.devicePixelRatio||1;
+  cv.width=Math.round(cssW*dpr);cv.height=Math.round(cssH*dpr);
+  cv.style.width=cssW+'px';cv.style.height=cssH+'px';
+  var ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
+  return ctx;
+}
+
 function redrawWall(){
   var cv=document.getElementById('wall-cv');if(!cv)return;
   var W=fv('L')||3600,H=fv('W')||2400,rw=fv('BL')||920,rp=fv('REPEAT')||0;
   var CW=cv.offsetWidth||360,sc=Math.min((CW-24)/W,180/H),rw2=W*sc,rh=H*sc,ox=12,oy=10;
-  cv.width=CW;cv.height=rh+28;
-  var ctx=cv.getContext('2d');ctx.clearRect(0,0,CW,rh+28);
+  var ctx=setupCanvas(cv,CW,rh+28);ctx.clearRect(0,0,CW,rh+28);
   var nc=Math.ceil(W/rw);
   for(var c=0;c<nc;c++){var cx1=ox+c*rw*sc,cx2=ox+Math.min((c+1)*rw,W)*sc;ctx.fillStyle=c%2===0?'rgba(13,110,80,0.06)':'rgba(13,110,80,0.03)';ctx.fillRect(cx1,oy,cx2-cx1,rh);}
   ctx.strokeStyle='rgba(13,110,80,0.18)';ctx.lineWidth=0.8;
@@ -666,9 +673,9 @@ function doCompaneCalc(){
 
 function drawCompaneViz(L,W,BL,BW,eH,eV,cols,rows,nedaCount,PITCH){
   var cv=document.getElementById('viz-cv');if(!cv)return;
-  var CW=cv.offsetWidth||340,CH=200;cv.width=CW;cv.height=CH;
+  var CW=cv.offsetWidth||340,CH=200;
   var mL=10,mR=14,mT=14,mB=20,sc=Math.min((CW-mL-mR)/L,(CH-mT-mB)/W);
-  var rw=L*sc,rh=W*sc,ox=mL,oy=mT,ctx=cv.getContext('2d');
+  var rw=L*sc,rh=W*sc,ox=mL,oy=mT,ctx=setupCanvas(cv,CW,CH);
   ctx.clearRect(0,0,CW,CH);
   var tw=BL*sc,th=BW*sc;
   for(var row=0;row<rows;row++){var off=(row%2===1)?tw/2:0;var y1=oy+row*th,y2=Math.min(oy+(row+1)*th,oy+rh);for(var col=0;col<cols+(row%2===1?1:0);col++){var x1=ox+col*tw-off,x2=Math.min(x1+tw,ox+rw);if(x1>=ox+rw)break;var isEdge=(x2-Math.max(x1,ox)<tw-1)||(y2-y1<th-1);ctx.fillStyle=isEdge?'rgba(154,90,16,0.18)':'rgba(154,90,16,0.05)';ctx.fillRect(Math.max(x1,ox),y1,Math.min(x2,ox+rw)-Math.max(x1,ox),y2-y1);ctx.strokeStyle='rgba(154,90,16,0.4)';ctx.lineWidth=0.8;ctx.strokeRect(Math.max(x1,ox),y1,Math.min(x2,ox+rw)-Math.max(x1,ox),y2-y1);}}
@@ -712,7 +719,7 @@ function renderSheetResult(tate,yoko,L,W){
 
 function drawSheetCanvas(cvId,s,L,W,sc,ox,oy,rw,rh,CW,CH,lineDir){
   var cv=document.getElementById(cvId);if(!cv)return;
-  cv.width=CW;cv.height=CH;var ctx=cv.getContext('2d');ctx.clearRect(0,0,CW,CH);
+  var ctx=setupCanvas(cv,CW,CH);ctx.clearRect(0,0,CW,CH);
   var swPx=curSheetW*sc;
   ctx.fillStyle='rgba(154,90,16,0.04)';ctx.fillRect(ox,oy,rw,rh);
   function drawHorizDim(x1,x2,y,label){ctx.strokeStyle='rgba(154,90,16,0.7)';ctx.fillStyle='rgba(154,90,16,0.7)';ctx.lineWidth=0.9;ctx.beginPath();ctx.moveTo(x1,y);ctx.lineTo(x2,y);ctx.stroke();ctx.beginPath();ctx.moveTo(x1,y-3);ctx.lineTo(x1,y+3);ctx.stroke();ctx.beginPath();ctx.moveTo(x2,y-3);ctx.lineTo(x2,y+3);ctx.stroke();ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(label,(x1+x2)/2,y+5);}
@@ -796,10 +803,10 @@ function buildResultHTML(r,cc){
 
 function drawViz(v,cc){
   var cv=document.getElementById('viz-cv');if(!cv)return;
-  var CW=cv.offsetWidth||340;cv.width=CW;var CH=200;cv.height=CH;
+  var CW=cv.offsetWidth||340;var CH=200;
   var mL=38,mR=14,mT=10,mB=44,sc=Math.min((CW-mL-mR)/v.rW,(CH-mT-mB)/v.rH);
   var rw=v.rW*sc,rh=v.rH*sc,ox=mL,oy=mT,col=vcols[cc];
-  var ctx=cv.getContext('2d');ctx.clearRect(0,0,CW,CH);
+  var ctx=setupCanvas(cv,CW,CH);ctx.clearRect(0,0,CW,CH);
   ctx.save();ctx.beginPath();ctx.rect(ox,oy,rw,rh);ctx.clip();
   ctx.fillStyle='rgba(128,128,128,0.05)';ctx.fillRect(ox,oy,rw,rh);
   ctx.strokeStyle=col;ctx.lineWidth=0.8;ctx.globalAlpha=0.6;
