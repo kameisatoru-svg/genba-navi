@@ -44,6 +44,7 @@ body{
 .scroll-area{
   flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
   padding:14px 14px max(20px,env(safe-area-inset-bottom));
+  touch-action:pan-y;
 }
 
 /* ── カテゴリ選択 ── */
@@ -194,7 +195,8 @@ input[type=number]:focus,select:focus{border-color:var(--navy);}
   font-size:11px;color:var(--text2);padding:7px 10px;
   border-bottom:1px solid rgba(30,45,64,0.08);font-weight:500;
 }
-canvas{display:block;width:100%;touch-action:none;}
+canvas{display:block;width:100%;touch-action:pan-y;}
+canvas#wall-cv{touch-action:none;}
 
 /* ── 移動パネル ── */
 .mpanel{border-radius:12px;padding:12px;margin-bottom:10px;}
