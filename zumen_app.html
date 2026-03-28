@@ -257,6 +257,58 @@ canvas{display:block;width:100%;}
 }
 .ceil-btn:active{background:var(--bg);}
 
+/* ── 割付送信モーダル ── */
+.wa-modal-overlay{
+  position:fixed;inset:0;background:rgba(10,20,35,0.6);
+  z-index:100;display:flex;align-items:center;justify-content:center;
+  padding:20px;
+}
+.wa-modal-overlay.hidden{display:none;}
+.wa-modal-box{
+  background:var(--white);border-radius:16px;width:100%;max-width:380px;
+  box-shadow:0 8px 32px rgba(10,20,35,0.3);overflow:hidden;
+}
+.wa-modal-head{
+  background:var(--navy);padding:16px 18px;
+  font-size:15px;font-weight:700;color:var(--white);
+}
+.wa-modal-body{padding:18px;}
+.wa-modal-label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px;}
+.wa-modal-input{
+  width:100%;height:42px;border:1.5px solid rgba(30,45,64,0.2);
+  border-radius:10px;padding:0 12px;font-size:14px;font-family:inherit;
+  color:var(--text);background:var(--bg);outline:none;box-sizing:border-box;
+}
+.wa-modal-input:focus{border-color:var(--accent);}
+.wa-face-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 12px;border-radius:10px;margin-bottom:6px;
+  background:var(--bg);font-size:13px;
+}
+.wa-face-row.has-data{background:rgba(200,169,110,0.1);border:1px solid rgba(200,169,110,0.4);}
+.wa-face-row.no-data{opacity:0.4;}
+.wa-mfr-left{display:flex;align-items:center;gap:8px;font-weight:600;}
+.wa-mfr-badge{
+  font-size:10px;padding:2px 7px;border-radius:5px;font-weight:700;
+  background:rgba(200,169,110,0.2);color:var(--navy);
+}
+.wa-mfr-detail{font-size:11px;color:var(--text2);}
+.wa-modal-footer{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  padding:0 18px 18px;
+}
+.wa-modal-cancel{
+  height:44px;border:1.5px solid rgba(30,45,64,0.2);border-radius:10px;
+  background:transparent;color:var(--text2);font-size:14px;font-weight:600;
+  cursor:pointer;font-family:inherit;
+}
+.wa-modal-send{
+  height:44px;border:none;border-radius:10px;
+  background:var(--accent);color:var(--navy);font-size:14px;font-weight:700;
+  cursor:pointer;font-family:inherit;
+}
+.wa-modal-send:disabled{background:rgba(30,45,64,0.15);color:var(--text2);cursor:not-allowed;}
+
 /* ── 印刷スタイル ── */
 @media print{
   body{position:static;height:auto;overflow:visible;background:#fff;}
@@ -288,8 +340,25 @@ canvas{display:block;width:100%;}
     <button class="mtb active" id="btn-edit" onclick="setMode('edit')">✏️</button>
     <button class="mtb" id="btn-print" onclick="setMode('print')">🖨️</button>
   </div>
-  <button class="btn-do-print" onclick="sendToWaritsuke()" style="background:rgba(200,169,110,0.15);margin-right:2px;">📐 割付</button>
+  <button class="btn-do-print" onclick="openWaritsukeModal()" style="background:rgba(200,169,110,0.15);margin-right:2px;">📐 割付</button>
   <button class="btn-do-print" onclick="doPrint()">出力</button>
+</div>
+
+<!-- 割付送信モーダル -->
+<div class="wa-modal-overlay hidden" id="wa-modal" onclick="closeWaModal(event)">
+  <div class="wa-modal-box">
+    <div class="wa-modal-head">📐 割付アプリへ送信</div>
+    <div class="wa-modal-body">
+      <div class="wa-modal-label">現場名</div>
+      <input class="wa-modal-input" id="wa-project" type="text" placeholder="例：さくら苑　北側居室" maxlength="40">
+      <div class="wa-modal-label" style="margin-top:14px;margin-bottom:8px;">送信する面</div>
+      <div id="wa-face-list"></div>
+    </div>
+    <div class="wa-modal-footer">
+      <button class="wa-modal-cancel" onclick="closeWaModal(null)">キャンセル</button>
+      <button class="wa-modal-send" id="wa-send-btn" onclick="doSendToWaritsuke()">送信する</button>
+    </div>
+  </div>
 </div>
 
 <div class="scroll-area" id="main-area"></div>
@@ -1762,11 +1831,43 @@ function drawEquip(ctx,eq,ox,oy,W,H,sc){
 // ══════════════════════════════════════════
 
 // ══════════════════════════════════════════
-//  割付アプリへデータ送信
+//  割付アプリへデータ送信（モーダル）
 // ══════════════════════════════════════════
 
-function sendToWaritsuke(){
+function openWaritsukeModal(){
   saveCurrentInputs();
+  var faceNames=['A面','B面','C面','D面'];
+  var html=''; var hasAny=false;
+  FACES.forEach(function(f,i){
+    var W=faceW(i), H=faceH();
+    var opCnt=faceOpenings[i].length, eqCnt=faceEquips[i].length;
+    var hasData=W>0&&H>0;
+    if(hasData) hasAny=true;
+    var detail=hasData?(W.toLocaleString()+'×'+H.toLocaleString()+'mm'):'（寸法未入力）';
+    var badge='';
+    if(hasData&&(opCnt+eqCnt)>0){
+      badge=' <span class="wa-mfr-badge">'+(opCnt?'開口'+opCnt:'')+(opCnt&&eqCnt?' / ':'')+(eqCnt?'設備'+eqCnt:'')+'</span>';
+    }
+    html+='<div class="wa-face-row '+(hasData?'has-data':'no-data')+'">';
+    html+='<div class="wa-mfr-left">'+faceNames[i]+badge+'</div>';
+    html+='<div class="wa-mfr-detail">'+detail+'</div>';
+    html+='</div>';
+  });
+  document.getElementById('wa-face-list').innerHTML=html;
+  var btn=document.getElementById('wa-send-btn');
+  btn.disabled=!hasAny;
+  btn.textContent=hasAny?'送信する':'（寸法を入力してください）';
+  document.getElementById('wa-modal').classList.remove('hidden');
+  setTimeout(function(){ document.getElementById('wa-project').focus(); },100);
+}
+
+function closeWaModal(e){
+  if(e&&e.target!==document.getElementById('wa-modal')) return;
+  document.getElementById('wa-modal').classList.add('hidden');
+}
+
+function doSendToWaritsuke(){
+  var project=document.getElementById('wa-project').value.trim()||'未設定';
   var today=new Date();
   var dateStr=today.getFullYear()+'-'+(today.getMonth()+1).toString().padStart(2,'0')+'-'+today.getDate().toString().padStart(2,'0');
   var faceNames=['A面（東）','B面（南）','C面（西）','D面（北）'];
@@ -1775,12 +1876,12 @@ function sendToWaritsuke(){
     var W=faceW(i), H=faceH();
     if(W<=0||H<=0) return;
     var openings=faceOpenings[i].map(function(op){
-      return{id:op.id, type:op.type, x:Math.round(op.x), y:Math.round(op.y), w:Math.round(op.w), h:Math.round(op.h)};
+      return{id:op.id,type:op.type,x:Math.round(op.x),y:Math.round(op.y),w:Math.round(op.w),h:Math.round(op.h)};
     });
     var objects=faceEquips[i].map(function(eq){
-      return{id:eq.id, typeId:eq.typeId, label:eq.label, x:Math.round(eq.x), y:Math.round(eq.y), w:Math.round(eq.w), h:Math.round(eq.h)};
+      return{id:eq.id,typeId:eq.typeId,label:eq.label,x:Math.round(eq.x),y:Math.round(eq.y),w:Math.round(eq.w),h:Math.round(eq.h)};
     });
-    faces.push({id:'face_'+i, name:faceNames[i], W:W, H:H, openings:openings, objects:objects});
+    faces.push({id:'face_'+i,name:faceNames[i],W:W,H:H,openings:openings,objects:objects});
   });
 
   if(faces.length===0){
@@ -1789,14 +1890,15 @@ function sendToWaritsuke(){
   }
 
   var data={
-    project:'図面アプリより',
+    project:project,
     createdAt:dateStr,
     roomW:roomData.W, roomD:roomData.D, roomH:roomData.H,
     faces:faces
   };
   try{
     localStorage.setItem('genba_wall_data', JSON.stringify(data));
-    showWaToast('📐 '+faces.length+'面を割付アプリへ送信しました');
+    document.getElementById('wa-modal').classList.add('hidden');
+    showWaToast('📐 「'+project+'」'+faces.length+'面を割付アプリへ送信しました');
   }catch(err){
     showWaToast('⚠️ 送信に失敗しました: '+err.message);
   }
@@ -1809,6 +1911,58 @@ function showWaToast(msg){
   document.body.appendChild(t);
   setTimeout(function(){t.style.opacity='0';t.style.transition='opacity 0.4s';setTimeout(function(){if(t.parentNode)document.body.removeChild(t);},400);},2500);
 }
+
+// ══════════════════════════════════════════
+//  割付アプリからのデータ受信
+// ══════════════════════════════════════════
+
+(function loadFromWaritsuke(){
+  var raw;
+  try{ raw=localStorage.getItem('genba_wall_data'); }catch(e){ return; }
+  if(!raw) return;
+  var data;
+  try{ data=JSON.parse(raw); }catch(e){ return; }
+  if(!data||!data.faces||!data.faces.length) return;
+
+  // 部屋寸法をroomDataに反映（roomW/D/Hがあれば優先）
+  if(data.roomW>0) roomData.W=data.roomW;
+  if(data.roomD>0) roomData.D=data.roomD;
+  if(data.roomH>0) roomData.H=data.roomH;
+
+  // 各面の開口部・設備記号を展開図データに反映
+  data.faces.forEach(function(face,i){
+    if(i>=4) return;
+    var W=face.W||0, H=face.H||0;
+    if(W<=0||H<=0) return;
+
+    // roomDataの高さはfaceのHで上書き（全面共通）
+    if(H>0) roomData.H=H;
+
+    // 開口部をセット（割付アプリ→図面アプリ型変換）
+    var ops=[];
+    var seq=faceOidSeq[i]||0;
+    (face.openings||[]).forEach(function(op){
+      seq++;
+      // 割付アプリの開口typeをそのまま使用（ドア/窓（中連）/窓（掃出））
+      // 図面アプリの型名にマッピング
+      var type=op.type;
+      if(type==='ドア') type='ドア';
+      else if(type==='窓（掃出）') type='窓（掃出）';
+      else type='窓（引き違い）';
+      ops.push({id:seq, type:type, w:op.w||900, h:op.h||2100, x:op.x||0, y:op.y||0});
+    });
+    faceOpenings[i]=ops;
+    faceOidSeq[i]=seq;
+  });
+
+  // 展開図A面に切替して表示
+  curView='faceA';
+  curFaceIdx=0;
+
+  showWaToast('📐 割付アプリから'+data.faces.length+'面を読み込みました');
+  // 読み込み後は消去して二重読み込みを防ぐ
+  try{ localStorage.removeItem('genba_wall_data'); }catch(e){}
+})();
 
 renderMain();
 window.addEventListener('resize',function(){ setTimeout(redraw,50); });
