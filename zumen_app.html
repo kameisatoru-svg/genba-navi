@@ -282,8 +282,8 @@ canvas{display:block;width:100%;}
 /* ── 柱配置ダイアログ ── */
 .col-dialog-overlay{
   position:fixed;inset:0;background:rgba(10,20,35,0.55);
-  z-index:200;display:flex;align-items:center;justify-content:center;
-  padding:20px;
+  z-index:200;display:flex;align-items:flex-start;justify-content:center;
+  padding:80px 20px 20px;
 }
 .col-dialog-overlay.hidden{display:none;}
 .col-dialog-box{
@@ -291,13 +291,13 @@ canvas{display:block;width:100%;}
   box-shadow:0 8px 32px rgba(10,20,35,0.3);overflow:hidden;
 }
 .col-dialog-head{
-  background:var(--navy);padding:14px 18px;
+  background:var(--navy);padding:12px 16px;
   font-size:14px;font-weight:700;color:var(--white);
 }
-.col-dialog-body{padding:16px 18px;}
+.col-dialog-body{padding:14px 16px;}
 .col-dialog-footer{
   display:grid;grid-template-columns:1fr 1fr;gap:10px;
-  padding:0 18px 18px;
+  padding:0 16px 16px;
 }
 .col-dialog-cancel{
   height:44px;border:1.5px solid rgba(30,45,64,0.2);border-radius:10px;
@@ -2477,6 +2477,49 @@ function redraw(){
     ctx.beginPath();ctx.moveTo(ox,habakiY);ctx.lineTo(ox+rw,habakiY);ctx.stroke();
     ctx.setLineDash([]);
   }
+
+  // 間仕切り断面（交差する壁を展開図に表示）
+  var faceIdx=curFaceIdx; // 0=A,1=B,2=C,3=D
+  var T2=roomData.wallT;
+  planPartitions.forEach(function(p){
+    var secX=null, secW2=null;
+    if(faceIdx===0||faceIdx===2){
+      // A面(上)・C面(下)：縦壁(v)が交差
+      if(p.axis==='v'){
+        var touchesA=(p.start<=0);
+        var touchesC=(p.start+p.len>=roomData.D);
+        if((faceIdx===0&&touchesA)||(faceIdx===2&&touchesC)){
+          secX=ox+p.pos*sc-(p.t||T2)*sc/2;
+          secW2=(p.t||T2)*sc;
+        }
+      }
+    } else {
+      // B面(右)・D面(左)：横壁(h)が交差
+      if(p.axis==='h'){
+        var touchesB=(p.start+p.len>=roomData.W);
+        var touchesD=(p.start<=0);
+        if((faceIdx===1&&touchesB)||(faceIdx===3&&touchesD)){
+          var posInFace=faceIdx===1?(roomData.D-p.pos):p.pos;
+          secX=ox+posInFace*sc-(p.t||T2)*sc/2;
+          secW2=(p.t||T2)*sc;
+        }
+      }
+    }
+    if(secX!==null){
+      ctx.save();
+      ctx.beginPath();ctx.rect(secX,oy,secW2,rh);ctx.clip();
+      ctx.fillStyle='rgba(30,45,64,0.2)';
+      ctx.fillRect(secX,oy,secW2,rh);
+      // ハッチング
+      ctx.strokeStyle='rgba(30,45,64,0.2)'; ctx.lineWidth=0.8;
+      for(var hi=-rh;hi<secW2+rh;hi+=7){
+        ctx.beginPath();ctx.moveTo(secX+hi,oy);ctx.lineTo(secX+hi+rh,oy+rh);ctx.stroke();
+      }
+      ctx.restore();
+      ctx.strokeStyle='rgba(30,45,64,0.5)'; ctx.lineWidth=1;
+      ctx.strokeRect(secX,oy,secW2,rh);
+    }
+  });
 
   // 開口部
   getOps().forEach(function(op){ drawOpening(ctx,op,ox,oy,W,H,sc); });
