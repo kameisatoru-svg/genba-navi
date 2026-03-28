@@ -1870,7 +1870,7 @@ function doSendToWaritsuke(){
   var project=document.getElementById('wa-project').value.trim()||'未設定';
   var today=new Date();
   var dateStr=today.getFullYear()+'-'+(today.getMonth()+1).toString().padStart(2,'0')+'-'+today.getDate().toString().padStart(2,'0');
-  var faceNames=['A面（東）','B面（南）','C面（西）','D面（北）'];
+  var faceNames=['A面','B面','C面','D面'];
   var faces=[];
   FACES.forEach(function(f,i){
     var W=faceW(i), H=faceH();
