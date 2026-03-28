@@ -26,13 +26,14 @@ body{
 
 /* ── ヘッダー ── */
 .header{
-  background:var(--navy);height:50px;
+  background:var(--navy);height:60px;
   display:flex;align-items:center;padding:0 12px;gap:8px;flex-shrink:0;
 }
 .btn-back{
-  width:40px;height:40px;border:none;background:transparent;
-  color:var(--white);font-size:20px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;border-radius:8px;
+  width:44px;height:44px;border:none;background:transparent;
+  color:var(--white);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;border-radius:10px;
+  flex-shrink:0;
 }
 .btn-back:active{background:rgba(255,255,255,0.15);}
 .header-title{flex:1;font-size:15px;font-weight:700;color:var(--white);}
@@ -321,10 +322,10 @@ canvas#wall-cv{touch-action:none;}
 
 /* ── 作図へ送るボタン（ヘッダー） ── */
 .btn-zumen{
-  height:32px;padding:0 12px;border:1.5px solid var(--accent);
-  border-radius:8px;background:transparent;color:var(--accent);
+  height:38px;padding:0 12px;border:1.5px solid var(--accent);
+  border-radius:10px;background:transparent;color:var(--accent);
   font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;
-  font-family:inherit;display:flex;align-items:center;gap:4px;
+  font-family:inherit;display:flex;align-items:center;gap:5px;flex-shrink:0;
 }
 .btn-zumen:active{background:rgba(200,169,110,0.2);}
 
@@ -388,16 +389,24 @@ canvas#wall-cv{touch-action:none;}
 <body>
 
 <div class="header">
-  <button class="btn-back" onclick="history.back()">←</button>
+  <button class="btn-back" onclick="history.back()" title="戻る">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
   <div class="header-title">材料割付</div>
   <div class="header-cat" id="header-cat">天井</div>
-  <button class="btn-zumen" onclick="openZumenModal()">📐 作図へ</button>
+  <button class="btn-zumen" onclick="openZumenModal()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M2 4h20M6 4v16M18 4v16M6 12h12"/></svg>
+    作図へ
+  </button>
 </div>
 
 <!-- 作図へ送るモーダル -->
 <div class="modal-overlay hidden" id="zumen-modal" onclick="closeZumenModal(event)">
   <div class="modal-box">
-    <div class="modal-head">📐 作図アプリへ壁データを送信</div>
+    <div class="modal-head">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M2 4h20M6 4v16M18 4v16M6 12h12"/></svg>
+      作図アプリへ壁データを送信
+    </div>
     <div class="modal-body">
       <div class="modal-label">案件名</div>
       <input class="modal-input" id="zumen-project" type="text" placeholder="例：さくら苑　北側居室" maxlength="40">
@@ -428,7 +437,7 @@ canvas#wall-cv{touch-action:none;}
 var curCat='ceil',curMatIdx=0,curPat='通し目地';
 var curFloorType='タイル',curTileType='Pタイル',curSheetW=1820,curFlooringType='フローリング';
 
-var FACES=['A','B','C','D'];
+var FACES=['東','西','南','北'];
 var curFaceIdx=0;
 var faceData=[null,null,null,null];
 var faceInputs=[null,null,null,null];
@@ -985,71 +994,6 @@ function showToast(msg){
 
 // ── 初期化 ──
 renderMats();
-
-// ── 図面アプリからのデータ受信 ──
-(function loadFromZumen(){
-  var raw;
-  try{ raw=localStorage.getItem('genba_wall_data'); }catch(e){ return; }
-  if(!raw) return;
-  var data;
-  try{ data=JSON.parse(raw); }catch(e){ return; }
-  if(!data||!data.faces||!data.faces.length) return;
-
-  // 壁カテゴリへ切替
-  var wallBtn=document.querySelector('.cat-btn:nth-child(2)');
-  if(wallBtn){
-    curCat='wall'; curMatIdx=0; curPat='通し目地'; curFaceIdx=0;
-    faceData=[null,null,null,null];
-    faceInputs=[null,null,null,null];
-    faceOpenings=[[],[],[],[]];
-    faceSelId=[null,null,null,null];
-    faceOidSeq=[0,0,0,0];
-    document.querySelectorAll('.cat-btn').forEach(function(b){b.className='cat-btn';});
-    wallBtn.className='cat-btn ac-wall';
-    document.getElementById('header-cat').textContent='壁';
-    document.getElementById('result-area').innerHTML='';
-  }
-
-  // 各面データをセット（最大4面）
-  data.faces.forEach(function(face,i){
-    if(i>=4) return;
-    var W=face.W||0, H=face.H||0;
-    if(W<=0||H<=0) return;
-
-    // 開口部を変換（図面アプリの形式→割付アプリ形式）
-    var ops=[];
-    var seq=0;
-    (face.openings||[]).forEach(function(op){
-      // 図面アプリのy=0が床面なので割付アプリも同様
-      seq++;
-      // typeの変換（図面アプリ→割付アプリ）
-      var type=op.type;
-      if(type==='ドア'||type==='親子ドア'||type==='両開きドア'||type==='引き違いドア'||type==='スライドドア') type='ドア';
-      else if(type==='窓（引き違い）'||type==='窓（中連）') type='窓（中連）';
-      else if(type==='窓（掃出）') type='窓（掃出）';
-      else type='ドア'; // デフォルトはドア
-      ops.push({id:seq, type:type, w:op.w, h:op.h, x:op.x, y:op.y, count:1});
-    });
-    faceOpenings[i]=ops;
-    faceOidSeq[i]=seq;
-
-    // 入力値を保存（既存の材料デフォルト値は保持）
-    var m=cats.wall.mats[0]; // ビニールクロスをデフォルト
-    var def0=m.fields[0].def, def1=m.fields[1].def, def2=m.fields[2].def;
-    faceInputs[i]={
-      L:W, W:H,
-      BL:def1?def1[0]:920, BW:0,
-      LOSS:def2?def2[0]:10, PRICE:def2?def2[1]:300,
-      REPEAT:0, COAT:2,
-      HABAKI_TYPE:'ソフト巾木', HABAKI_H:'60', HABAKI_PRICE:400
-    };
-  });
-
-  renderWallUI();
-  showToast('📐 図面アプリから'+data.faces.length+'面を読み込みました');
-  // 読み込み後は消去して二重読み込みを防ぐ
-  try{ localStorage.removeItem('genba_wall_data'); }catch(e){}
-})();
 </script>
 </body>
 </html>

@@ -25,47 +25,69 @@ body{
 
 /* ── ヘッダー ── */
 .header{
-  background:var(--navy);height:50px;
-  display:flex;align-items:center;padding:0 10px;gap:6px;flex-shrink:0;
+  background:var(--navy);height:60px;
+  display:flex;align-items:center;padding:0 10px;gap:5px;flex-shrink:0;
 }
 .btn-back{
-  width:36px;height:36px;border:none;background:transparent;
-  color:var(--white);font-size:20px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;border-radius:8px;
+  width:44px;height:44px;border:none;background:transparent;
+  color:var(--white);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;border-radius:10px;
   flex-shrink:0;
 }
 .btn-back:active{background:rgba(255,255,255,0.15);}
 
 /* 図面種別セレクト */
 .view-select-wrap{
-  position:relative;flex:1;max-width:180px;
+  position:relative;flex:1;max-width:175px;
 }
 .view-select{
-  width:100%;height:32px;
+  width:100%;height:38px;
   background:rgba(255,255,255,0.12);
   border:1px solid rgba(255,255,255,0.25);
-  border-radius:8px;color:var(--white);
+  border-radius:10px;color:var(--white);
   font-size:13px;font-weight:700;font-family:inherit;
-  padding:0 28px 0 10px;cursor:pointer;
+  padding:0 26px 0 10px;cursor:pointer;
   -webkit-appearance:none;appearance:none;outline:none;
+}
+.view-select option{
+  background:#ffffff;
+  color:#1e2d40;
 }
 .view-select-wrap::after{
   content:'▼';position:absolute;right:8px;top:50%;transform:translateY(-50%);
   font-size:9px;color:rgba(255,255,255,0.7);pointer-events:none;
 }
 
-/* モードトグル */
-.mode-toggle{display:flex;gap:2px;background:rgba(255,255,255,0.1);border-radius:8px;padding:2px;margin-left:auto;}
+/* モードトグル（編集/印刷） */
+.mode-toggle{display:flex;gap:2px;background:rgba(255,255,255,0.1);border-radius:10px;padding:2px;margin-left:auto;}
 .mtb{
-  height:28px;padding:0 8px;border:none;border-radius:6px;
-  background:transparent;color:rgba(255,255,255,0.7);
-  font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;
+  width:40px;height:40px;border:none;border-radius:8px;
+  background:transparent;color:rgba(255,255,255,0.75);
+  font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;
 }
+.mtb svg{display:block;}
 .mtb.active{background:var(--accent);color:var(--navy);}
+.mtb.active svg{stroke:var(--navy);}
+
+/* Undo/Redoトグル */
+.undo-toggle{display:flex;gap:2px;background:rgba(255,255,255,0.1);border-radius:10px;padding:2px;margin-left:0;}
+.utb{
+  width:40px;height:40px;border:none;border-radius:8px;
+  background:transparent;color:var(--accent);
+  cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity 0.15s;
+}
+.utb:active{background:rgba(200,169,110,0.2);}
+.utb svg{display:block;}
+
+/* 割付・出力ボタン */
 .btn-do-print{
-  height:30px;padding:0 8px;border:1.5px solid var(--accent);border-radius:8px;
-  background:transparent;color:var(--accent);font-size:11px;font-weight:700;
+  height:38px;padding:0 10px;border:1.5px solid var(--accent);border-radius:10px;
+  background:transparent;color:var(--accent);font-size:12px;font-weight:700;
   cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;
+  display:flex;align-items:center;gap:4px;
 }
 .btn-do-print:active{background:rgba(200,169,110,0.2);}
 
@@ -325,23 +347,54 @@ canvas{display:block;width:100%;}
 <body>
 
 <div class="header">
-  <button class="btn-back" onclick="history.back()">←</button>
+  <!-- 戻る -->
+  <button class="btn-back" onclick="history.back()" title="戻る">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+
+  <!-- 図面種別セレクト -->
   <div class="view-select-wrap">
     <select class="view-select" id="view-select" onchange="switchView(this.value)">
-      <option value="plan">📐 平面図</option>
-      <option value="faceA">🧱 展開図 A面</option>
-      <option value="faceB">🧱 展開図 B面</option>
-      <option value="faceC">🧱 展開図 C面</option>
-      <option value="faceD">🧱 展開図 D面</option>
-      <option value="ceil">✦ 天井図</option>
+      <option value="plan">平面図</option>
+      <option value="faceA">展開図 A面</option>
+      <option value="faceB">展開図 B面</option>
+      <option value="faceC">展開図 C面</option>
+      <option value="faceD">展開図 D面</option>
+      <option value="ceil">天井図</option>
     </select>
   </div>
+
+  <!-- 編集 / 印刷モード -->
   <div class="mode-toggle">
-    <button class="mtb active" id="btn-edit" onclick="setMode('edit')">✏️</button>
-    <button class="mtb" id="btn-print" onclick="setMode('print')">🖨️</button>
+    <button class="mtb active" id="btn-edit" onclick="setMode('edit')" title="編集">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    </button>
+    <button class="mtb" id="btn-print" onclick="setMode('print')" title="印刷">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    </button>
   </div>
-  <button class="btn-do-print" onclick="openWaritsukeModal()" style="background:rgba(200,169,110,0.15);margin-right:2px;">📐 割付</button>
-  <button class="btn-do-print" onclick="doPrint()">出力</button>
+
+  <!-- Undo / Redo -->
+  <div class="undo-toggle">
+    <button class="utb" id="btn-undo" onclick="doUndo()" title="元に戻す">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M3 13C5 8 9.5 5 15 5a9 9 0 0 1 9 9 9 9 0 0 1-9 9c-3.5 0-6.5-1.5-8.5-4"/></svg>
+    </button>
+    <button class="utb" id="btn-redo" onclick="doRedo()" title="やり直す">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M21 13c-2 5-6.5 8-12 8a9 9 0 0 1-9-9 9 9 0 0 1 9-9c3.5 0 6.5 1.5 8.5 4"/></svg>
+    </button>
+  </div>
+
+  <!-- 割付 -->
+  <button class="btn-do-print" onclick="openWaritsukeModal()" style="background:rgba(200,169,110,0.15);">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M2 4h20M6 4v16M18 4v16M6 12h12"/></svg>
+    割付
+  </button>
+
+  <!-- 出力 -->
+  <button class="btn-do-print" onclick="doPrint()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    出力
+  </button>
 </div>
 
 <!-- 割付送信モーダル -->
@@ -391,11 +444,88 @@ var ceilParts   = [];
 var ceilSelId   = null;
 var ceilSeq     = 0;
 
+// 平面図 柱・間仕切りデータ
+var planColumns    = [];  // {id, x, y, w, d}  x/y=左上座標(内法基準), w/d=幅×奥行(mm)
+var planColSelId   = null;
+var planColSeq     = 0;
+var planPartitions = [];  // {id, axis:'v'|'h', pos, start, end, t}
+                          // v: pos=X(左壁から), start=Y開始, end=Y終了
+                          // h: pos=Y(上壁から), start=X開始, end=X終了
+var planPartSeq    = 0;
+
 // 状態
 var curView    = 'plan'; // 'plan' | 'faceA'〜'faceD' | 'ceil'
 var curFaceIdx = 0;      // 展開図時の面インデックス
 var moveStep   = 10;
 var drawMode   = 'edit';
+
+// ══════════════════════════════════════════
+//  Undo/Redo
+// ══════════════════════════════════════════
+
+var _undoStack = [];
+var _redoStack = [];
+var _UNDO_MAX  = 30;
+
+function _snapshot(){
+  return JSON.stringify({
+    roomData:    roomData,
+    faceOpenings:faceOpenings,
+    faceOidSeq:  faceOidSeq,
+    faceEquips:  faceEquips,
+    faceEqSeq:   faceEqSeq,
+    ceilParts:   ceilParts,
+    ceilSeq:     ceilSeq,
+    planColumns: planColumns,
+    planColSeq:  planColSeq,
+    planPartitions:planPartitions,
+    planPartSeq: planPartSeq
+  });
+}
+
+function _restore(snap){
+  var s=JSON.parse(snap);
+  roomData=s.roomData;
+  faceOpenings=s.faceOpenings;  faceOidSeq=s.faceOidSeq;
+  faceEquips=s.faceEquips;      faceEqSeq=s.faceEqSeq;
+  ceilParts=s.ceilParts;        ceilSeq=s.ceilSeq;
+  planColumns=s.planColumns;    planColSeq=s.planColSeq;
+  planPartitions=s.planPartitions; planPartSeq=s.planPartSeq;
+  // 選択状態はリセット
+  faceSelId=[null,null,null,null];
+  faceEqSelId=[null,null,null,null];
+  ceilSelId=null; planColSelId=null;
+}
+
+function pushHistory(){
+  _undoStack.push(_snapshot());
+  if(_undoStack.length>_UNDO_MAX) _undoStack.shift();
+  _redoStack=[];
+  _updateUndoBtn();
+}
+
+function doUndo(){
+  if(!_undoStack.length) return;
+  _redoStack.push(_snapshot());
+  _restore(_undoStack.pop());
+  _updateUndoBtn();
+  renderMain();
+}
+
+function doRedo(){
+  if(!_redoStack.length) return;
+  _undoStack.push(_snapshot());
+  _restore(_redoStack.pop());
+  _updateUndoBtn();
+  renderMain();
+}
+
+function _updateUndoBtn(){
+  var u=document.getElementById('btn-undo');
+  var r=document.getElementById('btn-redo');
+  if(u) u.style.opacity=_undoStack.length?'1':'0.35';
+  if(r) r.style.opacity=_redoStack.length?'1':'0.35';
+}
 
 // 設備記号定義（展開図用）
 var EQ_TYPES = [
@@ -460,11 +590,14 @@ function saveCurrentInputs(){
     var wEl=document.getElementById('inp-W');
     var dEl=document.getElementById('inp-D');
     var hEl=document.getElementById('inp-H');
-    if(wEl) roomData.W=parseFloat(wEl.value)||roomData.W;
-    if(dEl) roomData.D=parseFloat(dEl.value)||roomData.D;
-    if(hEl) roomData.H=parseFloat(hEl.value)||roomData.H;
-  } else if(curView.startsWith('face')){
-    // 展開図はW/Hをroomから自動計算するので個別保存不要
+    var newW=parseFloat(wEl?wEl.value:0)||roomData.W;
+    var newD=parseFloat(dEl?dEl.value:0)||roomData.D;
+    var newH=parseFloat(hEl?hEl.value:0)||roomData.H;
+    // 変化があった時だけ履歴を積む
+    if(newW!==roomData.W||newD!==roomData.D||newH!==roomData.H) pushHistory();
+    if(wEl) roomData.W=newW;
+    if(dEl) roomData.D=newD;
+    if(hEl) roomData.H=newH;
   }
 }
 
@@ -519,13 +652,77 @@ function renderPlan(){
   html+='<div class="dc"><div class="dl">床面積</div><div class="dv" id="dv-A">'+((W/1000)*(D/1000)).toFixed(2)+'㎡</div></div>';
   html+='</div>';
 
+  // ── 柱セクション ──
+  html+='<div class="sec"><div class="st">柱</div>';
+  // 寸法入力
+  html+='<div class="r2" style="margin-bottom:10px;">';
+  html+='<div class="iw"><span>幅 mm</span><input type="number" id="col-w" value="120" inputmode="numeric"></div>';
+  html+='<div class="iw"><span>奥行 mm</span><input type="number" id="col-d" value="120" inputmode="numeric"></div>';
+  html+='</div>';
+  // コーナー配置
+  html+='<div class="st" style="margin-bottom:6px;">コーナーに配置</div>';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;">';
+  [['左上（A-D）','tl'],['右上（A-B）','tr'],['左下（C-D）','bl'],['右下（B-C）','br']].forEach(function(pos){
+    html+='<button onclick="addPlanColCorner(\''+pos[1]+'\')" style="height:38px;border:1.5px solid rgba(30,45,64,0.15);border-radius:8px;background:var(--white);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text);">'+pos[0]+'</button>';
+  });
+  html+='</div>';
+  // 壁面吸着配置
+  html+='<div class="st" style="margin-bottom:6px;">壁面に配置</div>';
+  html+='<div style="background:var(--white);border:1.5px solid rgba(30,45,64,0.1);border-radius:10px;padding:10px 12px;margin-bottom:10px;">';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">';
+  [['A面（上壁）','A'],['B面（右壁）','B'],['C面（下壁）','C'],['D面（左壁）','D']].forEach(function(f){
+    var isV=(f[1]==='A'||f[1]==='C');
+    html+='<button onclick="setPlanColFace(\''+f[1]+'\')" id="col-face-btn-'+f[1]+'" style="height:34px;border:1.5px solid rgba(30,45,64,0.15);border-radius:7px;background:var(--white);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text);">'+f[0]+'</button>';
+  });
+  html+='</div>';
+  html+='<div style="display:flex;align-items:center;gap:8px;">';
+  html+='<div class="iw" style="flex:1;"><span id="col-offset-lbl">左端からの距離 mm</span><input type="number" id="col-offset" value="0" inputmode="numeric"></div>';
+  html+='<button onclick="addPlanColWall()" style="height:42px;padding:0 14px;border:none;border-radius:8px;background:var(--navy);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;align-self:flex-end;">配置</button>';
+  html+='</div>';
+  html+='</div>';
+  // 配置済みリスト
+  if(planColumns.length>0){
+    html+='<div>';
+    planColumns.forEach(function(c){
+      var label='';
+      if(c.corner){label={tl:'左上',tr:'右上',bl:'左下',br:'右下'}[c.corner]+'コーナー';}
+      else if(c.face){label=c.face+'面　端から'+c.offset+'mm';}
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;margin-bottom:4px;background:var(--white);border:1.5px solid rgba(30,45,64,0.1);">';
+      html+='<span style="font-size:13px;font-weight:600;">柱 '+c.w+'×'+c.d+'mm</span>';
+      html+='<span style="font-size:11px;color:var(--text2);">'+label+'</span>';
+      html+='<button onclick="removePlanCol('+c.id+')" style="margin-left:auto;font-size:11px;color:var(--text2);background:none;border:1px solid rgba(30,45,64,0.15);border-radius:5px;padding:2px 7px;cursor:pointer;">削除</button>';
+      html+='</div>';
+    });
+    html+='</div>';
+  }
+  html+='</div>';
+
+  // ── 間仕切りセクション ──
+  html+='<div class="sec"><div class="st">間仕切り壁　<span style="font-size:11px;font-weight:400;color:var(--text2);">平面図上をドラッグして追加</span></div>';
+  if(planPartitions.length>0){
+    html+='<div style="margin-bottom:6px;">';
+    planPartitions.forEach(function(p){
+      var label=p.axis==='v'
+        ?'縦壁　X:'+p.pos+'mm　長さ:'+p.len+'mm'
+        :'横壁　Y:'+p.pos+'mm　長さ:'+p.len+'mm';
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;margin-bottom:4px;background:var(--white);border:1.5px solid rgba(30,45,64,0.1);">';
+      html+='<span style="font-size:12px;flex:1;">'+label+'</span>';
+      html+='<button onclick="removePlanPartition('+p.id+')" style="font-size:11px;color:var(--text2);background:none;border:1px solid rgba(30,45,64,0.15);border-radius:5px;padding:2px 7px;cursor:pointer;">削除</button>';
+      html+='</div>';
+    });
+    html+='</div>';
+  } else {
+    html+='<div style="font-size:12px;color:var(--text2);padding:4px 0 8px;">まだ間仕切りがありません</div>';
+  }
+  html+='</div>';
+
   // 展開図への案内
   html+='<div style="background:rgba(200,169,110,0.1);border:1px solid rgba(200,169,110,0.4);border-radius:12px;padding:12px 14px;margin-bottom:14px;">';
   html+='<div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:6px;">展開図へ移動して部品を配置</div>';
   html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">';
   ['A','B','C','D'].forEach(function(f,i){
     var cnt=faceOpenings[i].length+faceEquips[i].length;
-    html+='<button onclick="goFace(\''+f+'\')" style="padding:8px;border:1.5px solid rgba(30,45,64,0.15);border-radius:8px;background:var(--white);font-size:12px;font-family:inherit;cursor:pointer;text-align:left;">';
+    html+='<button onclick="goFace(\''+f+'\')" style="padding:8px;border:1.5px solid rgba(30,45,64,0.15);border-radius:8px;background:var(--white);font-size:12px;font-family:inherit;cursor:pointer;text-align:left;color:var(--text);">';
     html+='<span style="font-weight:700;color:var(--navy);">'+FACE_LABEL[f]+'</span>';
     html+=(cnt>0?'　<span style="font-size:10px;background:var(--navy);color:#fff;border-radius:8px;padding:1px 5px;">'+cnt+'件</span>':'');
     html+='</button>';
@@ -534,6 +731,99 @@ function renderPlan(){
 
   document.getElementById('main-area').innerHTML=html;
   setTimeout(redrawPlan,30);
+}
+
+// ══════════════════════════════════════════
+//  平面図 柱操作
+// ══════════════════════════════════════════
+
+var _colSelFace = null; // 壁面選択状態
+
+function addPlanColCorner(corner){
+  pushHistory();
+  var cw=parseInt((document.getElementById('col-w')||{}).value)||120;
+  var cd=parseInt((document.getElementById('col-d')||{}).value)||120;
+  var W=roomData.W, D=roomData.D;
+  var x=0, y=0;
+  if(corner==='tl'){ x=0;     y=0;     }
+  if(corner==='tr'){ x=W-cw;  y=0;     }
+  if(corner==='bl'){ x=0;     y=D-cd;  }
+  if(corner==='br'){ x=W-cw;  y=D-cd;  }
+  // 同じコーナーに既存があれば上書き
+  planColumns=planColumns.filter(function(c){return c.corner!==corner;});
+  planColSeq++;
+  planColumns.push({id:planColSeq, corner:corner, face:null, offset:0, x:x, y:y, w:cw, d:cd});
+  _colSelFace=null;
+  renderPlan();
+}
+
+function setPlanColFace(face){
+  _colSelFace=face;
+  // ラベル更新
+  var lbl=document.getElementById('col-offset-lbl');
+  if(lbl){
+    lbl.textContent=(face==='A'||face==='C')?'左端からの距離 mm':'上端からの距離 mm';
+  }
+  // ボタンハイライト
+  ['A','B','C','D'].forEach(function(f){
+    var btn=document.getElementById('col-face-btn-'+f);
+    if(btn) btn.style.background=f===face?'var(--navy)':'';;
+    if(btn) btn.style.color=f===face?'#fff':'';
+  });
+}
+
+function addPlanColWall(){
+  pushHistory();
+  if(!_colSelFace){ showWaToast('⚠️ まず面（A/B/C/D）を選択してください'); return; }
+  var cw=parseInt((document.getElementById('col-w')||{}).value)||120;
+  var cd=parseInt((document.getElementById('col-d')||{}).value)||120;
+  var offset=parseInt((document.getElementById('col-offset')||{}).value)||0;
+  var W=roomData.W, D=roomData.D;
+  var x=0, y=0;
+  var face=_colSelFace;
+  if(face==='A'){ x=Math.max(0,Math.min(W-cw,offset)); y=0; }           // 上壁：左端から
+  if(face==='C'){ x=Math.max(0,Math.min(W-cw,offset)); y=D-cd; }        // 下壁：左端から
+  if(face==='D'){ x=0;     y=Math.max(0,Math.min(D-cd,offset)); }       // 左壁：上端から
+  if(face==='B'){ x=W-cw;  y=Math.max(0,Math.min(D-cd,offset)); }       // 右壁：上端から
+  planColSeq++;
+  planColumns.push({id:planColSeq, corner:null, face:face, offset:offset, x:x, y:y, w:cw, d:cd});
+  _colSelFace=null;
+  renderPlan();
+}
+
+function removePlanCol(id){
+  pushHistory();
+  planColumns=planColumns.filter(function(c){return c.id!==id;});
+  renderPlan();
+}
+
+// ══════════════════════════════════════════
+//  平面図 間仕切り操作（ドラッグ）
+// ══════════════════════════════════════════
+
+var _partDrag={active:false, sx:0, sy:0, ex:0, ey:0};
+
+function removePlanPartition(id){
+  pushHistory();
+  planPartitions=planPartitions.filter(function(p){return p.id!==id;});
+  renderPlan();
+}
+
+function _planSc(){
+  var cv=document.getElementById('zumen-cv'); if(!cv) return null;
+  var W=roomData.W, D=roomData.D;
+  var CW=cv.offsetWidth||340;
+  var mL=56,mR=20,mT=20,mB=56;
+  var sc=Math.min((CW-mL-mR)/W,240/D);
+  return{sc:sc, ox:mL, oy:mT, W:W, D:D, cv:cv};
+}
+
+function _snapMm(px, info){
+  // canvas座標 → mm（内法座標）
+  return{
+    x:Math.max(0,Math.min(info.W, Math.round((px.x-info.ox)/info.sc/10)*10)),
+    y:Math.max(0,Math.min(info.D, Math.round((px.y-info.oy)/info.sc/10)*10))
+  };
 }
 
 function goFace(f){
@@ -545,6 +835,7 @@ function goFace(f){
 }
 
 function setWallT(t){
+  pushHistory();
   roomData.wallT=t;
   renderPlan();
 }
@@ -609,6 +900,65 @@ function redrawPlan(){
   // 壁線（外壁）
   ctx.strokeStyle='rgba(30,45,64,0.85)'; ctx.lineWidth=2;
   ctx.strokeRect(ox-Tpx, oy-Tpx, rw+Tpx*2, rd+Tpx*2);
+
+  // ── 間仕切り描画 ──
+  planPartitions.forEach(function(p){
+    var pt=Math.max(2, (p.t||roomData.wallT)*sc);
+    ctx.fillStyle='rgba(30,45,64,0.55)';
+    ctx.strokeStyle='rgba(30,45,64,0.8)'; ctx.lineWidth=1;
+    if(p.axis==='v'){
+      var px2=ox+p.pos*sc - pt/2;
+      var py2=oy+p.start*sc;
+      var pl=p.len*sc;
+      ctx.fillRect(px2, py2, pt, pl);
+      ctx.strokeRect(px2, py2, pt, pl);
+      // 寸法ラベル
+      ctx.save();
+      ctx.fillStyle='rgba(30,45,64,0.6)'; ctx.font='bold 9px Meiryo,sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='bottom';
+      ctx.fillText(p.pos+'mm', px2+pt/2, py2-2);
+      ctx.restore();
+    } else {
+      var px3=ox+p.start*sc;
+      var py3=oy+p.pos*sc - pt/2;
+      var pl2=p.len*sc;
+      ctx.fillRect(px3, py3, pl2, pt);
+      ctx.strokeRect(px3, py3, pl2, pt);
+      // 寸法ラベル
+      ctx.save();
+      ctx.fillStyle='rgba(30,45,64,0.6)'; ctx.font='bold 9px Meiryo,sans-serif';
+      ctx.textAlign='left'; ctx.textBaseline='bottom';
+      ctx.fillText(p.pos+'mm', px3+2, py3-2);
+      ctx.restore();
+    }
+  });
+
+  // ── 柱描画 ──
+  planColumns.forEach(function(c){
+    var sel=c.id===planColSelId;
+    var cx=ox+c.x*sc, cy=oy+c.y*sc;
+    var cw2=c.w*sc, cd2=c.d*sc;
+    // 塗りつぶし（構造体ハッチング風）
+    ctx.fillStyle=sel?'rgba(30,45,64,0.55)':'rgba(30,45,64,0.45)';
+    ctx.fillRect(cx,cy,cw2,cd2);
+    // 対角線（柱の記号）
+    ctx.strokeStyle=sel?'rgba(200,169,110,0.9)':'rgba(255,255,255,0.5)';
+    ctx.lineWidth=0.8;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+cw2,cy+cd2);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx+cw2,cy);ctx.lineTo(cx,cy+cd2);ctx.stroke();
+    // 外枠
+    ctx.strokeStyle=sel?'var(--accent)':'rgba(30,45,64,0.8)';
+    ctx.lineWidth=sel?2:1.5;
+    ctx.strokeRect(cx,cy,cw2,cd2);
+    // 選択時ハイライト＋寸法
+    if(sel){
+      ctx.strokeStyle='rgba(200,169,110,0.5)'; ctx.lineWidth=1; ctx.setLineDash([3,2]);
+      ctx.strokeRect(cx-2,cy-2,cw2+4,cd2+4); ctx.setLineDash([]);
+      ctx.fillStyle='rgba(200,169,110,0.9)'; ctx.font='bold 9px Meiryo,sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='bottom';
+      ctx.fillText(c.w+'×'+c.d, cx+cw2/2, cy-3);
+    }
+  });
 
   // 寸法線 外周
   var dY=oy+rd+Tpx+18;
@@ -866,6 +1216,7 @@ function renderCeil(){
 function getCeilParts(){ return ceilParts; }
 
 function addCeilPart(typeId){
+  pushHistory();
   var ct=CEIL_TYPES.find(function(c){return c.id===typeId;}); if(!ct) return;
   ceilSeq++;
   var W=roomData.W, D=roomData.D;
@@ -879,6 +1230,7 @@ function addCeilPart(typeId){
 }
 
 function removeCeilPart(id){
+  pushHistory();
   ceilParts=ceilParts.filter(function(c){return c.id!==id;});
   if(ceilSelId===id){ceilSelId=null; hideMPCeil();}
   var btn=document.getElementById('eq-del-btn'); if(btn) btn.style.display='none';
@@ -962,6 +1314,7 @@ function updMPCeil(){
 }
 
 function movCeil(dx,dy){
+  pushHistory();
   var cp=ceilParts.find(function(c){return c.id===ceilSelId;}); if(!cp) return;
   var W=roomData.W, D=roomData.D;
   cp.x=Math.max(0,Math.min(W-cp.w, cp.x+dx*moveStep));
@@ -971,6 +1324,7 @@ function movCeil(dx,dy){
 }
 
 function resizeCeil(axis,val){
+  pushHistory();
   var cp=ceilParts.find(function(c){return c.id===ceilSelId;}); if(!cp) return;
   var v=parseInt(val)||0; if(v<10) return;
   if(axis==='w') cp.w=Math.min(v,roomData.W-cp.x);
@@ -1235,6 +1589,7 @@ function updateAccBadge(){
 }
 
 function addOp(type,w,h2){
+  pushHistory();
   var W=getW(), H=getH();
   var x=Math.round((W-w)/2/10)*10;
   x=Math.max(0,Math.min(W-w,x));
@@ -1250,6 +1605,7 @@ function addOp(type,w,h2){
 }
 
 function removeOp(id){
+  pushHistory();
   faceOpenings[curFaceIdx]=faceOpenings[curFaceIdx].filter(function(o){return o.id!==id;});
   if(faceSelId[curFaceIdx]===id){faceSelId[curFaceIdx]=null;hideMP();}
   renderPlacedList(); redraw(); updateAccBadge();
@@ -1309,6 +1665,7 @@ function updMP(){
 function setMvStep(s){moveStep=s; if(curView==='ceil') updMPCeil(); else updMP();}
 
 function resizeOp(axis,val){
+  pushHistory();
   var op=getOps().find(function(o){return o.id===faceSelId[curFaceIdx];}); if(!op) return;
   var v=parseInt(val)||0; if(v<10) return;
   var W=getW(),H=getH();
@@ -1318,6 +1675,7 @@ function resizeOp(axis,val){
 }
 
 function movOp(dx,dy){
+  pushHistory();
   var op=getOps().find(function(o){return o.id===faceSelId[curFaceIdx];}); if(!op) return;
   var W=getW(),H=getH();
   op.x=Math.max(0,Math.min(W-op.w,op.x+dx*moveStep));
@@ -1326,6 +1684,7 @@ function movOp(dx,dy){
 }
 
 function addEq(typeId){
+  pushHistory();
   var W=getW(),H=getH();
   var eq=EQ_TYPES.find(function(e){return e.id===typeId;}); if(!eq) return;
   faceEqSeq[curFaceIdx]++;
@@ -1346,6 +1705,7 @@ function addEq(typeId){
 }
 
 function removeEq(id){
+  pushHistory();
   faceEquips[curFaceIdx]=faceEquips[curFaceIdx].filter(function(e){return e.id!==id;});
   if(faceEqSelId[curFaceIdx]===id){faceEqSelId[curFaceIdx]=null;hideMPEq();}
   var btn=document.getElementById('eq-del-btn'); if(btn) btn.style.display='none';
@@ -1430,6 +1790,7 @@ function updMPEq(){
 }
 
 function movEq(dx,dy){
+  pushHistory();
   var eq=getEquips().find(function(e){return e.id===faceEqSelId[curFaceIdx];}); if(!eq) return;
   var W=getW(),H=getH();
   eq.x=Math.max(0,Math.min(W-eq.w,eq.x+dx*moveStep));
@@ -1439,12 +1800,124 @@ function movEq(dx,dy){
 }
 
 function resizeEq(axis,val){
+  pushHistory();
   var eq=getEquips().find(function(e){return e.id===faceEqSelId[curFaceIdx];}); if(!eq) return;
   var v=parseInt(val)||0; if(v<10) return;
   var W=getW(),H=getH();
   if(axis==='w') eq.w=Math.min(v,W-eq.x);
   else eq.h=Math.min(v,H-eq.y);
   updateDelBtn(); redraw(); renderPlacedList();
+}
+
+// canvasドラッグ（平面図）間仕切り追加
+(function(){
+  var cv_el=null;
+  function getCV(){ return document.getElementById('zumen-cv'); }
+
+  function getEvPos(e, cv){
+    var r=cv.getBoundingClientRect();
+    var src=e.touches?e.touches[0]:e;
+    return{x:src.clientX-r.left, y:src.clientY-r.top};
+  }
+
+  function onStart(e){
+    if(curView!=='plan') return;
+    var cv=getCV(); if(!cv||e.target!==cv) return;
+    if(e.touches) e.preventDefault();
+    var pos=getEvPos(e,cv);
+    _partDrag.active=true;
+    _partDrag.sx=pos.x; _partDrag.sy=pos.y;
+    _partDrag.ex=pos.x; _partDrag.ey=pos.y;
+  }
+
+  function onMove(e){
+    if(!_partDrag.active||curView!=='plan') return;
+    if(e.touches) e.preventDefault();
+    var cv=getCV(); if(!cv) return;
+    var pos=getEvPos(e,cv);
+    _partDrag.ex=pos.x; _partDrag.ey=pos.y;
+    // ドラッグ中プレビュー
+    redrawPlanWithDrag();
+  }
+
+  function onEnd(e){
+    if(!_partDrag.active||curView!=='plan'){ _partDrag.active=false; return; }
+    _partDrag.active=false;
+    var dx=Math.abs(_partDrag.ex-_partDrag.sx);
+    var dy=Math.abs(_partDrag.ey-_partDrag.sy);
+    // 最低10px以上ドラッグしていれば確定
+    if(dx<10&&dy<10){ redrawPlan(); return; }
+
+    var info=_planSc(); if(!info) return;
+    var s=_snapMm({x:_partDrag.sx,y:_partDrag.sy},info);
+    var ex=_snapMm({x:_partDrag.ex,y:_partDrag.ey},info);
+    var T=roomData.wallT;
+
+    planPartSeq++;
+    if(dx>=dy){
+      // 横壁（水平ドラッグ）
+      var posY=Math.round((s.y+ex.y)/2/10)*10;
+      var startX=Math.min(s.x,ex.x);
+      var len=Math.abs(ex.x-s.x);
+      planPartitions.push({id:planPartSeq,axis:'h',pos:posY,start:startX,len:len,t:T});
+    } else {
+      // 縦壁（垂直ドラッグ）
+      var posX=Math.round((s.x+ex.x)/2/10)*10;
+      var startY=Math.min(s.y,ex.y);
+      var len2=Math.abs(ex.y-s.y);
+      planPartitions.push({id:planPartSeq,axis:'v',pos:posX,start:startY,len:len2,t:T});
+    }
+    renderPlan();
+  }
+
+  document.addEventListener('mousedown', onStart);
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup',   onEnd);
+  document.addEventListener('touchstart', onStart, {passive:false});
+  document.addEventListener('touchmove',  onMove,  {passive:false});
+  document.addEventListener('touchend',   onEnd);
+})();
+
+function redrawPlanWithDrag(){
+  redrawPlan();
+  if(!_partDrag.active) return;
+  var cv=document.getElementById('zumen-cv'); if(!cv) return;
+  var ctx=cv.getContext('2d');
+  var info=_planSc(); if(!info) return;
+  var T=roomData.wallT;
+  var dpr=window.devicePixelRatio||1;
+  ctx.save(); ctx.setTransform(dpr,0,0,dpr,0,0);
+  var dx=Math.abs(_partDrag.ex-_partDrag.sx);
+  var dy=Math.abs(_partDrag.ey-_partDrag.sy);
+  var Tpx=Math.max(2,T*info.sc);
+  ctx.fillStyle='rgba(30,45,64,0.35)';
+  ctx.strokeStyle='rgba(30,45,64,0.7)'; ctx.lineWidth=1;
+  if(dx>=dy){
+    // 横壁プレビュー
+    var midY=(_partDrag.sy+_partDrag.ey)/2;
+    var x1=Math.min(_partDrag.sx,_partDrag.ex);
+    var x2=Math.max(_partDrag.sx,_partDrag.ex);
+    ctx.fillRect(x1, midY-Tpx/2, x2-x1, Tpx);
+    ctx.strokeRect(x1, midY-Tpx/2, x2-x1, Tpx);
+    ctx.fillStyle='rgba(30,45,64,0.7)'; ctx.font='bold 10px Meiryo,sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='bottom';
+    var s2=_snapMm({x:_partDrag.sx,y:midY},info);
+    var e2=_snapMm({x:_partDrag.ex,y:midY},info);
+    ctx.fillText(Math.abs(e2.x-s2.x).toLocaleString()+'mm',(x1+x2)/2,midY-Tpx/2-3);
+  } else {
+    // 縦壁プレビュー
+    var midX=(_partDrag.sx+_partDrag.ex)/2;
+    var y1=Math.min(_partDrag.sy,_partDrag.ey);
+    var y2=Math.max(_partDrag.sy,_partDrag.ey);
+    ctx.fillRect(midX-Tpx/2, y1, Tpx, y2-y1);
+    ctx.strokeRect(midX-Tpx/2, y1, Tpx, y2-y1);
+    ctx.fillStyle='rgba(30,45,64,0.7)'; ctx.font='bold 10px Meiryo,sans-serif';
+    ctx.textAlign='left'; ctx.textBaseline='middle';
+    var s3=_snapMm({x:midX,y:_partDrag.sy},info);
+    var e3=_snapMm({x:midX,y:_partDrag.ey},info);
+    ctx.fillText(Math.abs(e3.y-s3.y).toLocaleString()+'mm',midX+Tpx/2+3,(y1+y2)/2);
+  }
+  ctx.restore();
 }
 
 // canvasタップ（展開図）
@@ -1965,6 +2438,7 @@ function showWaToast(msg){
 })();
 
 renderMain();
+_updateUndoBtn();
 window.addEventListener('resize',function(){ setTimeout(redraw,50); });
 </script>
 </body>
