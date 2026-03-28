@@ -985,6 +985,71 @@ function showToast(msg){
 
 // ── 初期化 ──
 renderMats();
+
+// ── 図面アプリからのデータ受信 ──
+(function loadFromZumen(){
+  var raw;
+  try{ raw=localStorage.getItem('genba_wall_data'); }catch(e){ return; }
+  if(!raw) return;
+  var data;
+  try{ data=JSON.parse(raw); }catch(e){ return; }
+  if(!data||!data.faces||!data.faces.length) return;
+
+  // 壁カテゴリへ切替
+  var wallBtn=document.querySelector('.cat-btn:nth-child(2)');
+  if(wallBtn){
+    curCat='wall'; curMatIdx=0; curPat='通し目地'; curFaceIdx=0;
+    faceData=[null,null,null,null];
+    faceInputs=[null,null,null,null];
+    faceOpenings=[[],[],[],[]];
+    faceSelId=[null,null,null,null];
+    faceOidSeq=[0,0,0,0];
+    document.querySelectorAll('.cat-btn').forEach(function(b){b.className='cat-btn';});
+    wallBtn.className='cat-btn ac-wall';
+    document.getElementById('header-cat').textContent='壁';
+    document.getElementById('result-area').innerHTML='';
+  }
+
+  // 各面データをセット（最大4面）
+  data.faces.forEach(function(face,i){
+    if(i>=4) return;
+    var W=face.W||0, H=face.H||0;
+    if(W<=0||H<=0) return;
+
+    // 開口部を変換（図面アプリの形式→割付アプリ形式）
+    var ops=[];
+    var seq=0;
+    (face.openings||[]).forEach(function(op){
+      // 図面アプリのy=0が床面なので割付アプリも同様
+      seq++;
+      // typeの変換（図面アプリ→割付アプリ）
+      var type=op.type;
+      if(type==='ドア'||type==='親子ドア'||type==='両開きドア'||type==='引き違いドア'||type==='スライドドア') type='ドア';
+      else if(type==='窓（引き違い）'||type==='窓（中連）') type='窓（中連）';
+      else if(type==='窓（掃出）') type='窓（掃出）';
+      else type='ドア'; // デフォルトはドア
+      ops.push({id:seq, type:type, w:op.w, h:op.h, x:op.x, y:op.y, count:1});
+    });
+    faceOpenings[i]=ops;
+    faceOidSeq[i]=seq;
+
+    // 入力値を保存（既存の材料デフォルト値は保持）
+    var m=cats.wall.mats[0]; // ビニールクロスをデフォルト
+    var def0=m.fields[0].def, def1=m.fields[1].def, def2=m.fields[2].def;
+    faceInputs[i]={
+      L:W, W:H,
+      BL:def1?def1[0]:920, BW:0,
+      LOSS:def2?def2[0]:10, PRICE:def2?def2[1]:300,
+      REPEAT:0, COAT:2,
+      HABAKI_TYPE:'ソフト巾木', HABAKI_H:'60', HABAKI_PRICE:400
+    };
+  });
+
+  renderWallUI();
+  showToast('📐 図面アプリから'+data.faces.length+'面を読み込みました');
+  // 読み込み後は消去して二重読み込みを防ぐ
+  try{ localStorage.removeItem('genba_wall_data'); }catch(e){}
+})();
 </script>
 </body>
 </html>

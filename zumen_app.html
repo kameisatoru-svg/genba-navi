@@ -288,6 +288,7 @@ canvas{display:block;width:100%;}
     <button class="mtb active" id="btn-edit" onclick="setMode('edit')">✏️</button>
     <button class="mtb" id="btn-print" onclick="setMode('print')">🖨️</button>
   </div>
+  <button class="btn-do-print" onclick="sendToWaritsuke()" style="background:rgba(200,169,110,0.15);margin-right:2px;">📐 割付</button>
   <button class="btn-do-print" onclick="doPrint()">出力</button>
 </div>
 
@@ -1759,6 +1760,55 @@ function drawEquip(ctx,eq,ox,oy,W,H,sc){
 // ══════════════════════════════════════════
 //  初期化
 // ══════════════════════════════════════════
+
+// ══════════════════════════════════════════
+//  割付アプリへデータ送信
+// ══════════════════════════════════════════
+
+function sendToWaritsuke(){
+  saveCurrentInputs();
+  var today=new Date();
+  var dateStr=today.getFullYear()+'-'+(today.getMonth()+1).toString().padStart(2,'0')+'-'+today.getDate().toString().padStart(2,'0');
+  var faceNames=['A面（東）','B面（南）','C面（西）','D面（北）'];
+  var faces=[];
+  FACES.forEach(function(f,i){
+    var W=faceW(i), H=faceH();
+    if(W<=0||H<=0) return;
+    var openings=faceOpenings[i].map(function(op){
+      return{id:op.id, type:op.type, x:Math.round(op.x), y:Math.round(op.y), w:Math.round(op.w), h:Math.round(op.h)};
+    });
+    var objects=faceEquips[i].map(function(eq){
+      return{id:eq.id, typeId:eq.typeId, label:eq.label, x:Math.round(eq.x), y:Math.round(eq.y), w:Math.round(eq.w), h:Math.round(eq.h)};
+    });
+    faces.push({id:'face_'+i, name:faceNames[i], W:W, H:H, openings:openings, objects:objects});
+  });
+
+  if(faces.length===0){
+    showWaToast('⚠️ 寸法が入力されていません（平面図で設定してください）');
+    return;
+  }
+
+  var data={
+    project:'図面アプリより',
+    createdAt:dateStr,
+    roomW:roomData.W, roomD:roomData.D, roomH:roomData.H,
+    faces:faces
+  };
+  try{
+    localStorage.setItem('genba_wall_data', JSON.stringify(data));
+    showWaToast('📐 '+faces.length+'面を割付アプリへ送信しました');
+  }catch(err){
+    showWaToast('⚠️ 送信に失敗しました: '+err.message);
+  }
+}
+
+function showWaToast(msg){
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:calc(env(safe-area-inset-bottom,0px)+20px);left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:700;z-index:200;white-space:nowrap;box-shadow:0 4px 16px rgba(10,20,35,0.3)';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';t.style.transition='opacity 0.4s';setTimeout(function(){if(t.parentNode)document.body.removeChild(t);},400);},2500);
+}
 
 renderMain();
 window.addEventListener('resize',function(){ setTimeout(redraw,50); });
