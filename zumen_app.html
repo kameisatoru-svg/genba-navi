@@ -933,7 +933,7 @@ function redrawCeil(){
   var cv=document.getElementById('zumen-cv'); if(!cv) return;
   var W=roomData.W, D=roomData.D;
   var CW=cv.offsetWidth||340;
-  var mL=56, mR=20, mT=20, mB=56;
+  var mL=56, mR=20, mT=20, mB=64;
   var sc=Math.min((CW-mL-mR)/W, 240/D);
   var rw=W*sc, rd=D*sc, CH=rd+mT+mB;
   var ox=mL, oy=mT;
@@ -1039,16 +1039,64 @@ function redrawCeil(){
       ctx.fillStyle=col; ctx.fillText('点検',ecx,ecy);
     }
 
-    // 選択時ハイライト
-    if(sel){
+    // 選択時ハイライト＋寸法引き出し線
+    if(sel&&drawMode==='edit'){
+      // 選択枠
       ctx.strokeStyle='rgba(42,106,74,0.4)'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
       ctx.strokeRect(erx-2,ery-2,erw+4,erd+4); ctx.setLineDash([]);
+
+      var df='rgba(42,106,74,0.9)';
+      var cxMm=Math.round(cp.x+cp.w/2);
+      var cyMm=Math.round(cp.y+cp.h/2);
+
+      // X方向：左端から中心まで（下部寸法線）
+      if(cxMm>0){
+        var cdimY=oy+rd+12;
+        ctx.strokeStyle='#2a6a4a'; ctx.lineWidth=0.8;
+        ctx.beginPath();ctx.moveTo(ox,cdimY);ctx.lineTo(ecx,cdimY);ctx.stroke();
+        [ox,ecx].forEach(function(tx){
+          ctx.beginPath();ctx.moveTo(tx,cdimY-3);ctx.lineTo(tx,cdimY+3);ctx.stroke();
+        });
+        // 引き出し垂直線
+        ctx.strokeStyle='rgba(42,106,74,0.3)'; ctx.setLineDash([2,3]);
+        ctx.beginPath();ctx.moveTo(ecx,ery+erd);ctx.lineTo(ecx,cdimY);ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle=df; ctx.font='bold 9px Meiryo,sans-serif';
+        ctx.textAlign='center'; ctx.textBaseline='top';
+        ctx.fillText(cxMm.toLocaleString()+'mm', ox+(ecx-ox)/2, cdimY+4);
+      }
+
+      // Y方向：上端から中心まで（左側寸法線）
+      if(cyMm>0){
+        var cdimX=ox-14;
+        ctx.strokeStyle='#2a6a4a'; ctx.lineWidth=0.8;
+        ctx.beginPath();ctx.moveTo(cdimX,oy);ctx.lineTo(cdimX,ecy);ctx.stroke();
+        [oy,ecy].forEach(function(ty){
+          ctx.beginPath();ctx.moveTo(cdimX-3,ty);ctx.lineTo(cdimX+3,ty);ctx.stroke();
+        });
+        // 引き出し水平線
+        ctx.strokeStyle='rgba(42,106,74,0.3)'; ctx.setLineDash([2,3]);
+        ctx.beginPath();ctx.moveTo(erx,ecy);ctx.lineTo(cdimX,ecy);ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle=df; ctx.font='bold 9px Meiryo,sans-serif';
+        ctx.save();
+        ctx.translate(cdimX-10, oy+(ecy-oy)/2);
+        ctx.rotate(-Math.PI/2);
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(cyMm.toLocaleString()+'mm', 0, 0);
+        ctx.restore();
+      }
+
+      // 器具名ラベル（右上）
+      ctx.fillStyle=df; ctx.font='bold 10px Meiryo,sans-serif';
+      ctx.textAlign='left'; ctx.textBaseline='bottom';
+      ctx.fillText(cp.label, erx+erw+4, ery);
     }
     ctx.restore();
   });
 
   // 寸法線
-  var dimY=oy+rd+18;
+  var dimY=oy+rd+30;
   ctx.strokeStyle='rgba(30,45,64,0.45)'; ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(ox,dimY);ctx.lineTo(ox+rw,dimY);ctx.stroke();
   [ox,ox+rw].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY-4);ctx.lineTo(tx,dimY+4);ctx.stroke();});
