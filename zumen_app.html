@@ -1228,7 +1228,7 @@ function _planSc(){
   var W=roomData.W, D=roomData.D;
   var CW=cv.offsetWidth||340;
   var mL=56,mR=20,mT=20,mB=56;
-  var sc=Math.min((CW-mL-mR)/W,315/D);
+  var sc=Math.min((CW-mL-mR)/W,370/D);
   return{sc:sc, ox:mL, oy:mT, W:W, D:D, cv:cv};
 }
 
@@ -1359,7 +1359,7 @@ function redrawPlan(){
   // ── 固定キャンバス高さ（315/Dベース）＋余白固定 ──
   var mL=56, mR=20, mT=20, mB=56;
   // 基準スケール（固定CHに合わせる）
-  var sc=Math.min((CW-mL-mR)/W, 315/D);
+  var sc=Math.min((CW-mL-mR)/W, 370/D);
 
   // ドア弧・外周寸法線が余白に収まるか確認し、収まらなければscを縮小
   var Tpx0=T*sc;
@@ -1862,7 +1862,7 @@ function updateCeilDelBtn(){
   var W=roomData.W, D=roomData.D;
   var CW=cv.offsetWidth||340;
   var mL=56,mR=20,mT=20;
-  var sc=Math.min((CW-mL-mR)/W, 315/D);
+  var sc=Math.min((CW-mL-mR)/W, 370/D);
   var ox=mL, oy=mT;
   var erx=ox+cp.x*sc, ery=oy+cp.y*sc, erw=cp.w*sc;
   btn.style.display='block';
@@ -1879,7 +1879,7 @@ function redrawCeil(){
   var W=roomData.W, D=roomData.D;
   var CW=cv.offsetWidth||340;
   var mL=56, mR=20, mT=20, mB=64;
-  var sc=Math.min((CW-mL-mR)/W, 315/D);
+  var sc=Math.min((CW-mL-mR)/W, 370/D);
   var rw=W*sc, rd=D*sc, CH=rd+mT+mB;
   var ox=mL, oy=mT;
   var ctx=setupCanvas(cv,CW,CH); ctx.clearRect(0,0,CW,CH);
@@ -2617,7 +2617,7 @@ document.addEventListener('click',function(e){
   var W=roomData.W,D=roomData.D;
   var CW=cv.offsetWidth||340;
   var mL=56,mR=20,mT=20;
-  var sc=Math.min((CW-mL-mR)/W,315/D);
+  var sc=Math.min((CW-mL-mR)/W,370/D);
   var ox=mL,oy=mT;
   var hit=null;
   for(var j=ceilParts.length-1;j>=0;j--){
