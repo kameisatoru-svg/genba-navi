@@ -2452,16 +2452,14 @@ function _innerToOuter(dim){
   return dim + roomData.wallT;
 }
 
-// 誤差計算：各辺の外寸（内寸+T）の符号付き合計
-// 閉じた外周では 横成分合計=0、縦成分合計=0 が正解
+// 誤差計算：各辺の内寸の符号付き合計（閉じた外周なら横=0・縦=0が正解）
 function _outlineCalcError(){
   var xSum=0, ySum=0;
   for(var i=0;i<_outlineDims.length;i++){
     var dir=_outlineEdgeDir(i);
     var sign=_outlineEdgeSign(i);
-    var outerDim=_innerToOuter(_outlineDims[i]);
-    if(dir==='h') xSum += sign * outerDim;
-    else          ySum += sign * outerDim;
+    if(dir==='h') xSum += sign * _outlineDims[i];
+    else          ySum += sign * _outlineDims[i];
   }
   return {xErr: Math.round(xSum), yErr: Math.round(ySum)};
 }
@@ -2553,34 +2551,52 @@ function outlineConfirm(){
     if(adjDim!==null) _outlineDims[absorbIdx]=adjDim;
   }
 
-  // 各辺の角度（スケッチから）＋内寸で頂点を再計算（仮起点0,0）
+  // 各辺の角度（スケッチから）＋内寸で内寸頂点を再計算
   var T=roomData.wallT;
-  var newVerts=[{x:0,y:0}];
+  var innerVerts=[{x:0,y:0}];
   for(var j=0;j<_outlineDims.length;j++){
     var sv1=_outlineVerts[j], sv2=_outlineVerts[j+1];
     if(!sv1||!sv2) continue;
     var sdx=sv2.x-sv1.x, sdy=sv2.y-sv1.y;
     var ang=Math.atan2(sdy,sdx);
     var snapAng=Math.round(ang*180/Math.PI/15)*15*Math.PI/180;
-    var prev=newVerts[newVerts.length-1];
-    newVerts.push({
+    var prev=innerVerts[innerVerts.length-1];
+    innerVerts.push({
       x: Math.round(prev.x + Math.cos(snapAng)*_outlineDims[j]),
       y: Math.round(prev.y + Math.sin(snapAng)*_outlineDims[j])
     });
   }
 
-  // バウンディングボックスでW・D算出
-  var minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
-  newVerts.forEach(function(v){
-    minX=Math.min(minX,v.x); minY=Math.min(minY,v.y);
-    maxX=Math.max(maxX,v.x); maxY=Math.max(maxY,v.y);
-  });
+  // 内寸ポリゴンを外向きT/2オフセットして外寸BBoxでW・D算出
+  function signedArea(pts){
+    var a=0,n=pts.length;
+    for(var i=0;i<n;i++){ var j=(i+1)%n; a+=(pts[i].x*pts[j].y-pts[j].x*pts[i].y); }
+    return a/2;
+  }
+  function offsetPolygon(pts,d){
+    var n=pts.length, sa=signedArea(pts), sign=(sa>0)?1:-1, result=[];
+    for(var i=0;i<n;i++){
+      var prev=pts[(i-1+n)%n],curr=pts[i],next=pts[(i+1)%n];
+      var ax=curr.x-prev.x,ay=curr.y-prev.y,bx=next.x-curr.x,by=next.y-curr.y;
+      var la=Math.sqrt(ax*ax+ay*ay)||1, lb=Math.sqrt(bx*bx+by*by)||1;
+      var na={x:ay/la,y:-ax/la}, nb={x:by/lb,y:-bx/lb};
+      var mx=na.x+nb.x, my=na.y+nb.y, ml=Math.sqrt(mx*mx+my*my)||1;
+      var cosA=na.x*nb.x+na.y*nb.y;
+      var miterLen=Math.min(1/Math.sqrt((1+cosA)/2)||1, 4);
+      result.push({x:Math.round(curr.x+sign*(mx/ml)*d*miterLen), y:Math.round(curr.y+sign*(my/ml)*d*miterLen)});
+    }
+    return result;
+  }
+  var outerVerts=offsetPolygon(innerVerts,T/2);
+  var minOX=Infinity,minOY=Infinity,maxOX=-Infinity,maxOY=-Infinity;
+  outerVerts.forEach(function(v){ minOX=Math.min(minOX,v.x); minOY=Math.min(minOY,v.y); maxOX=Math.max(maxOX,v.x); maxOY=Math.max(maxOY,v.y); });
+  var shiftX=-minOX, shiftY=-minOY;
 
   pushHistory();
-  roomData.W=Math.round(maxX-minX);
-  roomData.D=Math.round(maxY-minY);
+  roomData.W=Math.round(maxOX-minOX);
+  roomData.D=Math.round(maxOY-minOY);
   roomData.H=h;
-  roomData._outline=newVerts.map(function(v){return{x:v.x-minX,y:v.y-minY};});
+  roomData._outline=innerVerts.map(function(v){ return{x:Math.round(v.x+shiftX),y:Math.round(v.y+shiftY)}; });
   roomData._setupMode=null;
   _outlineVerts=[]; _outlineClosed=false; _outlineSelEdge=null; _outlinePreview=null;
   _outlineDims=[]; _outlineAutoCorner=false; _outlineAdjIdx=null; _outlinePhase='input';
@@ -2875,22 +2891,31 @@ function redrawPlan(){
 
   // ══════════════════════════════════════════
   //  寸法線：外周の外・固定余白内に配置
-  //  外壁外面基準・1層（W・D）
+  //  外壁外面基準・1層（表示値は内寸）
   // ══════════════════════════════════════════
   var outerL=ox-Tpx, outerR=ox+rw+Tpx;
   var outerT=oy-Tpx, outerB=oy+rd+Tpx;
+
+  // 内寸算出（_outlineがあればそのBBox、なければW/D-wallT）
+  var innerW, innerD;
+  if(roomData._outline&&roomData._outline.length>=3){
+    var olMinX=Infinity,olMinY=Infinity,olMaxX=-Infinity,olMaxY=-Infinity;
+    roomData._outline.forEach(function(v){ olMinX=Math.min(olMinX,v.x); olMinY=Math.min(olMinY,v.y); olMaxX=Math.max(olMaxX,v.x); olMaxY=Math.max(olMaxY,v.y); });
+    innerW=Math.round(olMaxX-olMinX); innerD=Math.round(olMaxY-olMinY);
+  } else {
+    innerW=Math.max(0,W-roomData.wallT); innerD=Math.max(0,D-roomData.wallT);
+  }
 
   ctx.strokeStyle='rgba(30,45,64,0.5)';
   ctx.fillStyle='rgba(30,45,64,0.75)';
   ctx.lineWidth=1;
 
-  // 下：W（外壁外面→外壁外面）
+  // 下：W（外壁外面→外壁外面、表示は内寸）
   var dY=outerB+16;
   ctx.beginPath();ctx.moveTo(outerL,dY);ctx.lineTo(outerR,dY);ctx.stroke();
   [outerL,outerR].forEach(function(tx){
     ctx.beginPath();ctx.moveTo(tx,dY-4);ctx.lineTo(tx,dY+4);ctx.stroke();
   });
-  // 補助線
   ctx.strokeStyle='rgba(30,45,64,0.25)'; ctx.lineWidth=0.7; ctx.setLineDash([2,3]);
   ctx.beginPath();ctx.moveTo(outerL,outerB+2);ctx.lineTo(outerL,dY+6);ctx.stroke();
   ctx.beginPath();ctx.moveTo(outerR,outerB+2);ctx.lineTo(outerR,dY+6);ctx.stroke();
@@ -2898,15 +2923,14 @@ function redrawPlan(){
   ctx.strokeStyle='rgba(30,45,64,0.5)'; ctx.lineWidth=1;
   ctx.font='bold 11px Meiryo,sans-serif';
   ctx.textAlign='center'; ctx.textBaseline='top';
-  ctx.fillText(W.toLocaleString()+'mm', (outerL+outerR)/2, dY+5);
+  ctx.fillText(innerW.toLocaleString()+'mm', (outerL+outerR)/2, dY+5);
 
-  // 左：D（外壁外面→外壁外面）
+  // 左：D（外壁外面→外壁外面、表示は内寸）
   var dX=outerL-16;
   ctx.beginPath();ctx.moveTo(dX,outerT);ctx.lineTo(dX,outerB);ctx.stroke();
   [outerT,outerB].forEach(function(ty){
     ctx.beginPath();ctx.moveTo(dX-4,ty);ctx.lineTo(dX+4,ty);ctx.stroke();
   });
-  // 補助線
   ctx.strokeStyle='rgba(30,45,64,0.25)'; ctx.lineWidth=0.7; ctx.setLineDash([2,3]);
   ctx.beginPath();ctx.moveTo(outerL-2,outerT);ctx.lineTo(dX-6,outerT);ctx.stroke();
   ctx.beginPath();ctx.moveTo(outerL-2,outerB);ctx.lineTo(dX-6,outerB);ctx.stroke();
@@ -2917,7 +2941,7 @@ function redrawPlan(){
   ctx.rotate(-Math.PI/2);
   ctx.font='bold 11px Meiryo,sans-serif';
   ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText(D.toLocaleString()+'mm', 0, 0);
+  ctx.fillText(innerD.toLocaleString()+'mm', 0, 0);
   ctx.restore();
 
   // ── 外周作図モード描画 ──
@@ -3529,14 +3553,22 @@ function redrawCeil(){
     ctx.restore();
   });
 
-  // 寸法線
+  // 寸法線（内寸表示）
+  var innerWc, innerDc;
+  if(roomData._outline&&roomData._outline.length>=3){
+    var olMinXc=Infinity,olMinYc=Infinity,olMaxXc=-Infinity,olMaxYc=-Infinity;
+    roomData._outline.forEach(function(v){ olMinXc=Math.min(olMinXc,v.x); olMinYc=Math.min(olMinYc,v.y); olMaxXc=Math.max(olMaxXc,v.x); olMaxYc=Math.max(olMaxYc,v.y); });
+    innerWc=Math.round(olMaxXc-olMinXc); innerDc=Math.round(olMaxYc-olMinYc);
+  } else {
+    innerWc=Math.max(0,W-roomData.wallT); innerDc=Math.max(0,D-roomData.wallT);
+  }
   var dimY=oy+rd+30;
   ctx.strokeStyle='rgba(30,45,64,0.45)'; ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(ox,dimY);ctx.lineTo(ox+rw,dimY);ctx.stroke();
   [ox,ox+rw].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY-4);ctx.lineTo(tx,dimY+4);ctx.stroke();});
   ctx.fillStyle='rgba(30,45,64,0.6)'; ctx.font='bold 11px Meiryo,sans-serif';
   ctx.textAlign='center'; ctx.textBaseline='top';
-  ctx.fillText(W.toLocaleString()+'mm',ox+rw/2,dimY+5);
+  ctx.fillText(innerWc.toLocaleString()+'mm',ox+rw/2,dimY+5);
 
   var dimX=ox-22;
   ctx.beginPath();ctx.moveTo(dimX,oy);ctx.lineTo(dimX,oy+rd);ctx.stroke();
@@ -3544,7 +3576,7 @@ function redrawCeil(){
   ctx.save(); ctx.translate(dimX-13,oy+rd/2); ctx.rotate(-Math.PI/2);
   ctx.textAlign='center'; ctx.fillStyle='rgba(30,45,64,0.6)';
   ctx.font='bold 11px Meiryo,sans-serif';
-  ctx.fillText(D.toLocaleString()+'mm',0,0); ctx.restore();
+  ctx.fillText(innerDc.toLocaleString()+'mm',0,0); ctx.restore();
 
   // 方位記号
   drawCompass(ctx, ox+rw+30, oy, 16);
@@ -4772,70 +4804,127 @@ function _renderProjList(keyword){
   groupOrder.forEach(function(g){
     var rooms=groups[g];
     var isCurrentGenba=(g===_projGenba);
-    // 現場名行
+
+    var genbaWrap=document.createElement('div');
+    genbaWrap.style.cssText='margin-bottom:4px;';
+
     var genbaRow=document.createElement('div');
-    genbaRow.style.cssText='padding:8px 10px;border-radius:8px;margin-bottom:2px;background:'+(isCurrentGenba?'rgba(200,169,110,0.15)':'rgba(255,255,255,0.05)')+';border:1px solid '+(isCurrentGenba?'rgba(200,169,110,0.4)':'transparent')+';cursor:pointer;';
+    genbaRow.style.cssText='display:flex;align-items:center;gap:8px;padding:10px;border-radius:8px;background:'+(isCurrentGenba?'rgba(200,169,110,0.15)':'rgba(255,255,255,0.05)')+';border:1px solid '+(isCurrentGenba?'rgba(200,169,110,0.4)':'transparent')+';cursor:pointer;';
     var genbaInner=document.createElement('div');
-    genbaInner.style.cssText='display:flex;align-items:center;gap:6px;';
+    genbaInner.style.cssText='display:flex;align-items:center;gap:6px;flex:1;min-width:0;';
     var arrow=document.createElement('span');
-    arrow.style.cssText='font-size:10px;color:rgba(255,255,255,0.5);transition:transform 0.2s;';
+    arrow.style.cssText='font-size:10px;color:rgba(255,255,255,0.5);transition:transform 0.2s;flex-shrink:0;';
     arrow.textContent='▶';
     var genbaLabel=document.createElement('span');
-    genbaLabel.style.cssText='flex:1;font-size:13px;font-weight:700;color:#fff;';
+    genbaLabel.style.cssText='flex:1;font-size:14px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
     genbaLabel.textContent='🏠 '+g;
     var countBadge=document.createElement('span');
-    countBadge.style.cssText='font-size:10px;color:rgba(255,255,255,0.4);';
+    countBadge.style.cssText='font-size:11px;color:rgba(255,255,255,0.4);flex-shrink:0;';
     countBadge.textContent=rooms.length+'室';
-    genbaInner.appendChild(arrow);
-    genbaInner.appendChild(genbaLabel);
-    genbaInner.appendChild(countBadge);
+    genbaInner.appendChild(arrow); genbaInner.appendChild(genbaLabel); genbaInner.appendChild(countBadge);
     genbaRow.appendChild(genbaInner);
+
+    var genbaDelBtn=document.createElement('button');
+    genbaDelBtn.textContent='🗑';
+    genbaDelBtn.style.cssText='height:36px;width:36px;border:none;border-radius:8px;background:rgba(229,53,53,0.35);color:#fff;font-size:15px;cursor:pointer;flex-shrink:0;';
+    genbaDelBtn.onclick=function(e){ e.stopPropagation(); genbaRow.style.display='none'; genbaConfirmRow.style.display='flex'; };
+    genbaRow.appendChild(genbaDelBtn);
+
+    var genbaConfirmRow=document.createElement('div');
+    genbaConfirmRow.style.cssText='display:none;align-items:center;gap:10px;padding:10px;border-radius:8px;background:rgba(229,53,53,0.18);border:1px solid rgba(229,53,53,0.5);';
+    var genbaConfirmMsg=document.createElement('span');
+    genbaConfirmMsg.style.cssText='flex:1;font-size:12px;color:#fff;';
+    genbaConfirmMsg.textContent='「'+g+'」の全部屋を削除しますか？';
+    genbaConfirmRow.appendChild(genbaConfirmMsg);
+    var genbaCancelBtn=document.createElement('button');
+    genbaCancelBtn.textContent='キャンセル';
+    genbaCancelBtn.style.cssText='height:36px;padding:0 12px;border:1px solid rgba(255,255,255,0.35);border-radius:8px;background:transparent;color:#fff;font-size:12px;cursor:pointer;flex-shrink:0;font-family:inherit;';
+    genbaCancelBtn.onclick=function(e){ e.stopPropagation(); genbaConfirmRow.style.display='none'; genbaRow.style.display='flex'; };
+    genbaConfirmRow.appendChild(genbaCancelBtn);
+    var genbaExecBtn=document.createElement('button');
+    genbaExecBtn.textContent='削除';
+    genbaExecBtn.style.cssText='height:36px;padding:0 14px;border:none;border-radius:8px;background:rgba(229,53,53,0.8);color:#fff;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;font-family:inherit;';
+    genbaExecBtn.onclick=function(e){ e.stopPropagation(); projDeleteGenba(g); };
+    genbaConfirmRow.appendChild(genbaExecBtn);
+    genbaWrap.appendChild(genbaRow);
+    genbaWrap.appendChild(genbaConfirmRow);
 
     // 部屋一覧（折りたたみ）
     var roomList=document.createElement('div');
     roomList.style.cssText='overflow:hidden;max-height:0;transition:max-height 0.2s;';
-    var expanded=isCurrentGenba; // 現在の現場は展開済み
-    if(expanded){ roomList.style.maxHeight='400px'; arrow.style.transform='rotate(90deg)'; }
+    var expanded=isCurrentGenba;
+    if(expanded){ roomList.style.maxHeight='600px'; arrow.style.transform='rotate(90deg)'; }
 
     rooms.forEach(function(r){
       (function(g,r){
         var isCurrent=(g===_projGenba&&r===_projRoom);
         var roomRow=document.createElement('div');
-        roomRow.style.cssText='display:flex;align-items:center;gap:8px;padding:7px 10px 7px 22px;border-radius:6px;margin-top:2px;background:'+(isCurrent?'rgba(200,169,110,0.2)':'rgba(255,255,255,0.04)')+';cursor:pointer;';
-
+        roomRow.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 10px 10px 22px;border-radius:8px;margin-top:4px;background:'+(isCurrent?'rgba(200,169,110,0.2)':'rgba(255,255,255,0.04)')+';';
         var roomLabel=document.createElement('span');
-        roomLabel.style.cssText='flex:1;font-size:12px;color:#fff;font-weight:'+(isCurrent?'700':'400')+';';
+        roomLabel.style.cssText='flex:1;font-size:14px;color:#fff;font-weight:'+(isCurrent?'700':'400')+';';
         roomLabel.textContent='🚪 '+r;
-        if(!isCurrent) roomLabel.onclick=function(){ projLoadExisting(g,r); };
         roomRow.appendChild(roomLabel);
-
-        var status=document.createElement('span');
-        status.style.cssText='font-size:10px;color:'+(isCurrent?'var(--accent)':'rgba(255,255,255,0.4)')+';flex-shrink:0;';
-        status.textContent=isCurrent?'表示中':'読込';
-        if(!isCurrent) status.onclick=function(){ projLoadExisting(g,r); };
-        roomRow.appendChild(status);
-
+        if(!isCurrent){
+          var loadBtn=document.createElement('button');
+          loadBtn.textContent='読込';
+          loadBtn.style.cssText='height:36px;padding:0 14px;border:1px solid rgba(255,255,255,0.35);border-radius:8px;background:transparent;color:#fff;font-size:13px;cursor:pointer;flex-shrink:0;font-family:inherit;';
+          loadBtn.onclick=function(e){ e.stopPropagation(); projLoadExisting(g,r); };
+          roomRow.appendChild(loadBtn);
+        } else {
+          var curTag=document.createElement('span');
+          curTag.style.cssText='font-size:11px;color:var(--accent);flex-shrink:0;';
+          curTag.textContent='表示中';
+          roomRow.appendChild(curTag);
+        }
         var delBtn=document.createElement('button');
         delBtn.textContent='🗑';
-        delBtn.style.cssText='height:28px;width:28px;border:none;border-radius:6px;background:rgba(229,53,53,0.3);color:#fff;font-size:12px;cursor:pointer;flex-shrink:0;';
-        delBtn.onclick=function(e){ e.stopPropagation(); projDeleteRoom(g,r); };
+        delBtn.style.cssText='height:36px;width:36px;border:none;border-radius:8px;background:rgba(229,53,53,0.35);color:#fff;font-size:15px;cursor:pointer;flex-shrink:0;';
+        delBtn.onclick=function(e){ e.stopPropagation(); roomRow.style.display='none'; confirmRow.style.display='flex'; };
         roomRow.appendChild(delBtn);
 
+        var confirmRow=document.createElement('div');
+        confirmRow.style.cssText='display:none;align-items:center;gap:10px;padding:10px 10px 10px 22px;border-radius:8px;margin-top:4px;background:rgba(229,53,53,0.18);border:1px solid rgba(229,53,53,0.5);';
+        var confirmMsg=document.createElement('span');
+        confirmMsg.style.cssText='flex:1;font-size:13px;color:#fff;';
+        confirmMsg.textContent='本当に削除しますか？';
+        confirmRow.appendChild(confirmMsg);
+        var cancelBtn=document.createElement('button');
+        cancelBtn.textContent='キャンセル';
+        cancelBtn.style.cssText='height:36px;padding:0 12px;border:1px solid rgba(255,255,255,0.35);border-radius:8px;background:transparent;color:#fff;font-size:12px;cursor:pointer;flex-shrink:0;font-family:inherit;';
+        cancelBtn.onclick=function(e){ e.stopPropagation(); confirmRow.style.display='none'; roomRow.style.display='flex'; };
+        confirmRow.appendChild(cancelBtn);
+        var execBtn=document.createElement('button');
+        execBtn.textContent='削除';
+        execBtn.style.cssText='height:36px;padding:0 14px;border:none;border-radius:8px;background:rgba(229,53,53,0.8);color:#fff;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;font-family:inherit;';
+        execBtn.onclick=function(e){ e.stopPropagation(); projDeleteRoom(g,r); };
+        confirmRow.appendChild(execBtn);
         roomList.appendChild(roomRow);
+        roomList.appendChild(confirmRow);
       })(g,r);
     });
 
-    genbaRow.appendChild(roomList);
-
-    // 現場名タップで展開/折りたたみ
+    genbaWrap.appendChild(roomList);
     genbaInner.onclick=function(){
       expanded=!expanded;
-      roomList.style.maxHeight=expanded?'400px':'0';
+      roomList.style.maxHeight=expanded?'600px':'0';
       arrow.style.transform=expanded?'rotate(90deg)':'';
     };
-
-    list.appendChild(genbaRow);
+    list.appendChild(genbaWrap);
   });
+}
+
+function projDeleteGenba(g){
+  var keys=[];
+  for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k&&k.indexOf(PROJ_PREFIX+g+'|')===0) keys.push(k); }
+  keys.forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
+  showWaToast('🗑 「'+g+'」の全部屋を削除しました');
+  if(g===_projGenba){
+    _projGenba=''; _projRoom='';
+    try{ localStorage.removeItem('zumen_lastRoom'); }catch(e){}
+    _updateProjLabel(); _resetData(); curView='plan';
+    var sel=document.getElementById('view-select'); if(sel) sel.value='plan';
+    closeProjPanel(); renderMain();
+  } else { _renderProjList(''); }
 }
 
 function projDeleteRoom(g,r){
@@ -4844,16 +4933,11 @@ function projDeleteRoom(g,r){
   showWaToast('🗑 「'+label+'」を削除しました');
   if(g===_projGenba&&r===_projRoom){
     _projGenba=''; _projRoom='';
-    _updateProjLabel();
-    _resetData();
-    curView='plan';
-    var sel=document.getElementById('view-select');
-    if(sel) sel.value='plan';
-    closeProjPanel();
-    renderMain();
-  } else {
-    _renderProjList('');
-  }
+    try{ localStorage.removeItem('zumen_lastRoom'); }catch(e){}
+    _updateProjLabel(); _resetData(); curView='plan';
+    var sel=document.getElementById('view-select'); if(sel) sel.value='plan';
+    closeProjPanel(); renderMain();
+  } else { _renderProjList(''); }
 }
 
 function projSearch(){
@@ -4877,6 +4961,7 @@ function projLoadNew(){
   } else {
     _resetData();
     _projGenba=gv; _projRoom=rv;
+    try{ localStorage.setItem('zumen_lastRoom', JSON.stringify({g:gv,r:rv})); }catch(e){}
     _updateProjLabel();
     projAutoSave();
     curView='plan';
@@ -4901,6 +4986,7 @@ function projLoadAddRoom(){
   } else {
     _resetData();
     _projRoom=rv;
+    try{ localStorage.setItem('zumen_lastRoom', JSON.stringify({g:_projGenba,r:rv})); }catch(e){}
     _updateProjLabel();
     projAutoSave();
     curView='plan';
@@ -4974,6 +5060,7 @@ function _loadData(g,r,raw){
     var sel=document.getElementById('view-select');
     if(sel) sel.value='plan';
     _projGenba=g; _projRoom=r;
+    try{ localStorage.setItem('zumen_lastRoom', JSON.stringify({g:g,r:r})); }catch(e){}
     _updateProjLabel();
     renderMain();
     showWaToast('📂 読込：'+g+'｜'+r);
@@ -4984,6 +5071,19 @@ function _loadData(g,r,raw){
 
 renderMain();
 _updateUndoBtn();
+// ── 起動時：最後に使っていた現場・部屋を自動復元 ──
+(function(){
+  try{
+    var last=localStorage.getItem('zumen_lastRoom');
+    if(last){
+      var lr=JSON.parse(last);
+      if(lr.g&&lr.r){
+        var raw=localStorage.getItem(_projKey(lr.g,lr.r));
+        if(raw){ _loadData(lr.g,lr.r,raw); }
+      }
+    }
+  }catch(e){}
+})();
 window.addEventListener('resize',function(){ setTimeout(redraw,50); });
 var _bleDevice    = null;
 var _bleChar      = null;
