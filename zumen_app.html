@@ -610,7 +610,7 @@ canvas{display:block;width:100%;}
 // ══════════════════════════════════════════
 
 // 部屋基本データ（平面図が起点）
-var roomData = {W:3600, D:4500, H:2400, wallT:120, compassDeg:0};
+var roomData = {W:0, D:0, H:0, wallT:120, compassDeg:0};
 
 // 面定義（A=上/B=右/C=下/D=左）
 var FACES = ['A','B','C','D'];
@@ -694,6 +694,10 @@ function pushHistory(){
 }
 
 function doUndo(){
+  if(_planMode==='outline'){
+    outlineUndo();
+    return;
+  }
   if(!_undoStack.length) return;
   _redoStack.push(_snapshot());
   _restore(_undoStack.pop());
@@ -702,6 +706,7 @@ function doUndo(){
 }
 
 function doRedo(){
+  if(_planMode==='outline') return; // 外周モード中はRedo不要
   if(!_redoStack.length) return;
   _undoStack.push(_snapshot());
   _restore(_redoStack.pop());
@@ -712,6 +717,11 @@ function doRedo(){
 function _updateUndoBtn(){
   var u=document.getElementById('btn-undo');
   var r=document.getElementById('btn-redo');
+  if(_planMode==='outline'){
+    if(u) u.style.opacity=_outlineVerts.length>0?'1':'0.35';
+    if(r) r.style.opacity='0.35';
+    return;
+  }
   if(u) u.style.opacity=_undoStack.length?'1':'0.35';
   if(r) r.style.opacity=_redoStack.length?'1':'0.35';
 }
@@ -830,31 +840,100 @@ function renderMain(){
 
 function renderPlan(){
   var W=roomData.W,D=roomData.D,H=roomData.H,T=roomData.wallT;
-  var dimOpen=roomData._dimOpen!==false; // デフォルト開いている
+  var dimOpen=roomData._dimOpen!==false;
+  var area=document.getElementById('main-area');
   var html='';
 
-  // 寸法入力（折りたたみ）
-  html+='<div class="sec" style="margin-bottom:8px;">';
-  html+='<div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleDimPanel()">';
-  html+='<div class="st" style="margin-bottom:0;">部屋寸法・壁厚</div>';
-  html+='<div style="font-size:11px;color:var(--text2);display:flex;align-items:center;gap:6px;">';
-  if(!dimOpen) html+='<span>W'+W.toLocaleString()+' D'+D.toLocaleString()+' H'+H.toLocaleString()+' T'+T+'</span>';
-  html+='<span style="font-size:14px;">'+(dimOpen?'▲':'▼')+'</span>';
-  html+='</div></div>';
-  if(dimOpen){
-    html+='<div style="margin-top:8px;">';
-    html+='<div class="r3" style="margin-bottom:8px;">';
-    html+='<div class="iw"><span>幅 W mm</span><input type="number" id="inp-W" value="'+W+'" inputmode="numeric" oninput="onPlanDimChange()"></div>';
-    html+='<div class="iw"><span>奥行 D mm</span><input type="number" id="inp-D" value="'+D+'" inputmode="numeric" oninput="onPlanDimChange()"></div>';
-    html+='<div class="iw"><span>高さ H mm</span><input type="number" id="inp-H" value="'+H+'" inputmode="numeric" oninput="onPlanDimChange()"></div>';
+  // ── 外周作図モード：専用画面 ──
+  if(_planMode==='outline'){
+    _renderOutlineScreen(area, T, H);
+    return;
+  }
+
+  // ── 未設定時：作成方法の選択画面 ──
+  if(W===0&&D===0&&H===0&&!roomData._setupMode){
+    html+='<div style="padding:24px 0;">';
+    html+='<div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:16px;text-align:center;">部屋の作り方を選んでください</div>';
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">';
+    // 四角モード
+    html+='<button onclick="startRectMode()" style="padding:20px 10px;border:2px solid rgba(30,45,64,0.2);border-radius:14px;background:var(--white);cursor:pointer;font-family:inherit;text-align:center;">';
+    html+='<div style="font-size:28px;margin-bottom:8px;">□</div>';
+    html+='<div style="font-size:13px;font-weight:700;color:var(--navy);">四角で作る</div>';
+    html+='<div style="font-size:11px;color:var(--text2);margin-top:4px;">W・D・H を入力</div>';
+    html+='</button>';
+    // 外周モード
+    html+='<button onclick="startOutlineMode()" style="padding:20px 10px;border:2px solid rgba(200,169,110,0.4);border-radius:14px;background:rgba(200,169,110,0.06);cursor:pointer;font-family:inherit;text-align:center;">';
+    html+='<div style="font-size:28px;margin-bottom:8px;">✏</div>';
+    html+='<div style="font-size:13px;font-weight:700;color:#b06a00;">外周を描く</div>';
+    html+='<div style="font-size:11px;color:var(--text2);margin-top:4px;">タップで頂点を作図</div>';
+    html+='</button>';
+    html+='</div></div>';
+    if(area) area.innerHTML=html;
+    return;
+  }
+
+  // ── 四角モード：寸法入力画面（未確定時）──
+  if(roomData._setupMode==='rect'&&(W===0||D===0||H===0)){
+    html+='<div class="sec" style="margin-bottom:8px;">';
+    html+='<div class="st" style="margin-bottom:12px;">部屋寸法を入力</div>';
+    html+='<div class="r3" style="margin-bottom:12px;">';
+    html+='<div class="iw"><span>幅 W mm</span><input type="number" id="inp-W-setup" value="" placeholder="3600" inputmode="numeric" style="font-size:16px;"></div>';
+    html+='<div class="iw"><span>奥行 D mm</span><input type="number" id="inp-D-setup" value="" placeholder="4500" inputmode="numeric" style="font-size:16px;"></div>';
+    html+='<div class="iw"><span>高さ H mm</span><input type="number" id="inp-H-setup" value="" placeholder="2400" inputmode="numeric" style="font-size:16px;"></div>';
     html+='</div>';
-    html+='<div class="wt-btns">';
+    html+='<div class="wt-btns" style="margin-bottom:12px;">';
     [100,120,150].forEach(function(t){
       html+='<button class="wt-btn'+(T===t?' active':'')+'" onclick="setWallT('+t+')">'+t+'mm</button>';
     });
-    html+='</div></div>';
+    html+='</div>';
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
+    html+='<button onclick="roomData._setupMode=null;roomData.W=0;roomData.D=0;roomData.H=0;renderPlan();" style="height:44px;border:1.5px solid rgba(30,45,64,0.2);border-radius:10px;background:transparent;color:var(--text2);font-size:13px;cursor:pointer;font-family:inherit;">← 戻る</button>';
+    html+='<button onclick="confirmRectMode()" style="height:44px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">確定</button>';
+    html+='</div>';
+    html+='</div>';
+    if(area) area.innerHTML=html;
+    return;
   }
-  html+='</div>';
+
+  // 寸法入力（矩形モード時のみ表示）
+  if(_planMode!=='outline'){
+    html+='<div class="sec" style="margin-bottom:8px;">';
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleDimPanel()">';
+    html+='<div class="st" style="margin-bottom:0;">部屋寸法・壁厚</div>';
+    html+='<div style="font-size:11px;color:var(--text2);display:flex;align-items:center;gap:6px;">';
+    if(!dimOpen) html+='<span>W'+W.toLocaleString()+' D'+D.toLocaleString()+' H'+H.toLocaleString()+' T'+T+'</span>';
+    html+='<span style="font-size:14px;">'+(dimOpen?'▲':'▼')+'</span>';
+    html+='</div></div>';
+    if(dimOpen){
+      html+='<div style="margin-top:8px;">';
+      html+='<div class="r3" style="margin-bottom:8px;">';
+      html+='<div class="iw"><span>幅 W mm</span><input type="number" id="inp-W" value="'+W+'" inputmode="numeric" oninput="onPlanDimChange()"></div>';
+      html+='<div class="iw"><span>奥行 D mm</span><input type="number" id="inp-D" value="'+D+'" inputmode="numeric" oninput="onPlanDimChange()"></div>';
+      html+='<div class="iw"><span>高さ H mm</span><input type="number" id="inp-H" value="'+H+'" inputmode="numeric" oninput="onPlanDimChange()"></div>';
+      html+='</div>';
+      html+='<div class="wt-btns">';
+      [100,120,150].forEach(function(t){
+        html+='<button class="wt-btn'+(T===t?' active':'')+'" onclick="setWallT('+t+')">'+t+'mm</button>';
+      });
+      html+='</div></div>';
+    }
+    html+='</div>';
+  }
+
+  // 外周モード時：壁厚＋高さのみ表示
+  if(_planMode==='outline'){
+    html+='<div class="sec" style="margin-bottom:8px;padding:10px 14px;">';
+    html+='<div style="display:flex;align-items:center;gap:10px;">';
+    html+='<span class="st" style="margin-bottom:0;flex-shrink:0;">壁厚</span>';
+    html+='<div class="wt-btns" style="flex:1;">';
+    [100,120,150].forEach(function(t){
+      html+='<button class="wt-btn'+(T===t?' active':'')+'" onclick="setWallT('+t+')">'+t+'mm</button>';
+    });
+    html+='</div>';
+    html+='<span style="font-size:11px;color:var(--text2);white-space:nowrap;">高さH <input type="number" id="inp-H" value="'+H+'" inputmode="numeric" style="width:60px;height:28px;border:1.5px solid rgba(30,45,64,0.2);border-radius:6px;padding:0 6px;font-size:12px;font-family:inherit;" oninput="onPlanDimChange()"> mm</span>';
+    html+='</div>';
+    html+='</div>';
+  }
 
   // canvas
   html+='<div class="canvas-wrap" style="position:relative">';
@@ -903,13 +982,58 @@ function renderPlan(){
   [['none','通常'],['column','柱'],['part_v','縦壁'],['part_h','横壁']].forEach(function(m){
     var active=_planMode===m[0];
     var s=active
-      ?'height:42px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;'
-      :'height:42px;border:1.5px solid rgba(30,45,64,0.2);border-radius:10px;background:var(--white);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;';
+      ?'height:42px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;'
+      :'height:42px;border:1.5px solid rgba(30,45,64,0.2);border-radius:10px;background:var(--white);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;';
     html+='<button style="'+s+'" onclick="setPlanMode(\''+m[0]+'\')">'+m[1]+'</button>';
   });
   html+='</div>';
 
-  // 通常モード：選択削除バー
+  // 外周作図モード操作バー
+  if(_planMode==='outline'){
+    html+='<div style="background:rgba(200,169,110,0.08);border:1px solid rgba(200,169,110,0.35);border-radius:10px;padding:10px 14px;margin-bottom:10px;">';
+    html+='<div style="font-size:12px;font-weight:700;color:#b06a00;margin-bottom:8px;">外周作図モード</div>';
+    if(_outlineVerts.length===0){
+      html+='<div style="font-size:12px;color:var(--text2);">キャンバスをタップして最初の頂点を打ってください</div>';
+    } else {
+      html+='<div style="font-size:12px;color:var(--text2);margin-bottom:8px;">頂点: '+_outlineVerts.length+'点　';
+      if(_outlineVerts.length>=3) html+='最初の頂点付近をタップで閉じる';
+      else html+='続けてタップして頂点を追加';
+      html+='</div>';
+      // 辺の寸法一覧
+      if(_outlineVerts.length>=2){
+        html+='<div style="margin-bottom:8px;">';
+        for(var ei=0;ei<_outlineVerts.length;ei++){
+          var v1=_outlineVerts[ei];
+          var v2=_outlineVerts[(ei+1)%_outlineVerts.length];
+          if(ei===_outlineVerts.length-1&&!_outlineClosed) break;
+          var dx2=v2.x-v1.x, dy2=v2.y-v1.y;
+          var len2=Math.round(Math.sqrt(dx2*dx2+dy2*dy2));
+          var ang2=Math.round(Math.atan2(-dy2,dx2)*180/Math.PI);
+          var isSelEdge=_outlineSelEdge===ei;
+          html+='<div onclick="selectOutlineEdge('+ei+')" style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;margin-bottom:3px;background:'+(isSelEdge?'rgba(200,169,110,0.2)':'rgba(255,255,255,0.7)')+';border:1px solid '+(isSelEdge?'rgba(200,169,110,0.5)':'rgba(30,45,64,0.1)')+';cursor:pointer;">';
+          html+='<span style="font-size:11px;color:var(--text2);flex-shrink:0;">辺'+(ei+1)+'</span>';
+          html+='<span style="font-size:12px;font-weight:700;flex:1;">'+len2+'mm</span>';
+          html+='<span style="font-size:10px;color:var(--text2);">'+ang2+'°</span>';
+          if(isSelEdge){
+            html+='<button onclick="event.stopPropagation();openOutlineDimInput('+ei+')" style="height:26px;padding:0 8px;border:none;border-radius:5px;background:var(--accent);color:var(--navy);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">寸法入力</button>';
+            html+='<button onclick="event.stopPropagation();outlineDimFromBle('+ei+')" style="height:26px;padding:0 8px;border:none;border-radius:5px;background:var(--navy);color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">GLM</button>';
+          }
+          html+='</div>';
+        }
+        html+='</div>';
+      }
+      html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+      if(_outlineClosed){
+        html+='<button onclick="outlineClear()" style="height:38px;border:1px solid rgba(229,53,53,0.4);border-radius:8px;background:transparent;color:#e53535;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">やり直す</button>';
+        html+='<button onclick="outlineConfirm()" style="height:38px;border:none;border-radius:8px;background:var(--accent);color:var(--navy);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">外周を確定</button>';
+      } else {
+        html+='<button onclick="outlineUndo()" style="height:38px;border:1px solid rgba(30,45,64,0.2);border-radius:8px;background:var(--white);color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit;">← 戻す</button>';
+        html+='<button onclick="outlineClear()" style="height:38px;border:1px solid rgba(229,53,53,0.4);border-radius:8px;background:transparent;color:#e53535;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">クリア</button>';
+      }
+      html+='</div>';
+    }
+    html+='</div>';
+  }
   if(_planMode==='none'&&_planSelId!==null){
     var selLabel='';
     var sp=null;
@@ -1148,11 +1272,17 @@ function removePlanCol(id){
 //  平面図 間仕切り操作（ドラッグ）
 // ══════════════════════════════════════════
 
-var _planMode = 'none'; // 'none' | 'column' | 'part_v' | 'part_h'
-var _partPending = null; // 確定待ちの間仕切り {axis, pos, start, len}
+var _planMode = 'none'; // 'none' | 'column' | 'part_v' | 'part_h' | 'outline'
+var _partPending = null;
 var _partDrag={active:false, sx:0, sy:0, ex:0, ey:0};
-var _planSelType = null; // 'partition' | 'column'
-var _planSelId   = null; // 選択中のid
+var _planSelType = null;
+var _planSelId   = null;
+
+// 外周作図モード用変数
+var _outlineVerts = [];
+var _outlinePreview = null;
+var _outlineSelEdge = null;
+var _outlineClosed = false;
 
 function movePart(delta){
   var sp=planPartitions.find(function(p){return p.id===_planSelId;});
@@ -1196,12 +1326,470 @@ function deletePlanSel(){
   renderPlan();
 }
 
+function startRectMode(){
+  _planMode='none';
+  roomData.W=0; roomData.D=0; roomData.H=0;
+  roomData._setupMode='rect';
+  renderPlan();
+}
+
+function startOutlineMode(){
+  _planMode='outline';
+  roomData._setupMode='outline';
+  _outlineVerts=[];
+  _outlineClosed=false;
+  _outlineSelEdge=null;
+  _outlinePreview=null;
+  // 作図用の仮サイズ（グリッド表示のためだけ）
+  roomData.W=0; roomData.D=0; roomData.H=0;
+  renderPlan();
+}
+
+function confirmRectMode(){
+  var wEl=document.getElementById('inp-W-setup');
+  var dEl=document.getElementById('inp-D-setup');
+  var hEl=document.getElementById('inp-H-setup');
+  var w=parseInt(wEl?wEl.value:0)||0;
+  var d=parseInt(dEl?dEl.value:0)||0;
+  var h=parseInt(hEl?hEl.value:0)||0;
+  if(!w||!d||!h){ showWaToast('⚠ W・D・H をすべて入力してください'); return; }
+  pushHistory();
+  roomData.W=w; roomData.D=d; roomData.H=h;
+  roomData._setupMode=null;
+  _planMode='none';
+  renderPlan();
+}
+
 function setPlanMode(mode){
   _planMode=mode;
   if(mode!=='part_v'&&mode!=='part_h') _partPending=null;
   _planSelType=null; _planSelId=null;
+  if(mode!=='outline'){ _outlineVerts=[]; _outlinePreview=null; _outlineClosed=false; _outlineSelEdge=null; }
   renderPlan();
 }
+
+// ══════════════════════════════════════════
+//  外周作図専用画面
+// ══════════════════════════════════════════
+
+function _renderOutlineScreen(area, T, H){
+  var html='';
+
+  // フェーズ1：スケッチ中
+  if(!_outlineClosed){
+    // 操作ボタン
+    html+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">';
+    html+='<button id="outline-undo-btn" onclick="outlineUndo()" '+ (_outlineVerts.length===0?'disabled':'') +' style="height:36px;padding:0 12px;border:1px solid rgba(30,45,64,0.2);border-radius:8px;background:var(--white);font-size:12px;cursor:pointer;font-family:inherit;opacity:'+(_outlineVerts.length===0?'0.35':'1')+';">戻す</button>';
+    if(_outlineVerts.length>0){
+      html+='<button onclick="outlineClear()" style="height:36px;padding:0 12px;border:1px solid rgba(229,53,53,0.3);border-radius:8px;background:transparent;color:#e53535;font-size:12px;cursor:pointer;font-family:inherit;">全消し</button>';
+    }
+    html+='<span id="outline-guide" style="font-size:11px;color:#b06a00;flex:1;text-align:right;">';
+    if(_outlineVerts.length===0) html+='ドラッグして辺を描いてください';
+    else if(_outlineVerts.length<3) html+='続けてドラッグ';
+    else html+='描き続けるか→外周を閉じる';
+    html+='</span>';
+    html+='</div>';
+    html+='<div style="position:relative;">';
+    html+='<canvas id="outline-cv" style="display:block;width:100%;border-radius:12px;border:1.5px solid rgba(30,45,64,0.1);background:#fff;"></canvas>';
+    html+='<canvas id="outline-ov" style="position:absolute;top:0;left:0;border-radius:12px;touch-action:none;"></canvas>';
+    html+='</div>';
+    html+='<div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html+='<button onclick="if(confirm(\'最初の選択画面に戻りますか？\'))outlineCancelMode();" style="height:40px;border:1.5px solid rgba(30,45,64,0.2);border-radius:10px;background:transparent;color:var(--text2);font-size:13px;cursor:pointer;font-family:inherit;">最初から</button>';
+    if(_outlineVerts.length>=3){
+      html+='<button id="outline-close-btn" onclick="outlineAutoClose()" style="height:40px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">外周を閉じる</button>';
+    } else {
+      html+='<div id="outline-close-btn" style="display:none;"></div>';
+    }
+    html+='</div>';
+
+  // フェーズ2：寸法入力中（閉じた後）
+  } else {
+    // スケッチプレビュー（小）+ 辺リスト
+    html+='<div style="background:rgba(30,45,64,0.04);border:1px solid rgba(30,45,64,0.1);border-radius:10px;padding:10px 14px;margin-bottom:8px;">';
+    html+='<div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px;">各辺の寸法を入力してください</div>';
+    // スケッチプレビューcanvas（小）
+    html+='<canvas id="outline-preview" style="display:block;width:100%;max-height:160px;border-radius:8px;border:1px solid rgba(30,45,64,0.1);background:#f9f8f6;margin-bottom:10px;"></canvas>';
+    // 壁厚・高さ
+    html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">';
+    html+='<span style="font-size:11px;color:var(--text2);">壁厚</span>';
+    [100,120,150].forEach(function(t){
+      html+='<button class="wt-btn'+(T===t?' active':'')+'" onclick="setWallT('+t+')" style="height:28px;padding:0 8px;font-size:11px;">'+t+'mm</button>';
+    });
+    html+='<span style="font-size:11px;color:var(--text2);margin-left:8px;">高さH</span>';
+    html+='<input type="number" id="outline-H" value="'+(H||'')+'" placeholder="2400" inputmode="numeric" style="width:64px;height:28px;border:1.5px solid rgba(30,45,64,0.2);border-radius:6px;padding:0 6px;font-size:12px;font-family:inherit;">';
+    html+='<span style="font-size:11px;color:var(--text2);">mm</span>';
+    html+='</div>';
+    // 辺リスト
+    for(var ei=0;ei<_outlineVerts.length;ei++){
+      var v1=_outlineVerts[ei];
+      var v2=_outlineVerts[(ei+1)%_outlineVerts.length];
+      var dx=v2.x-v1.x,dy=v2.y-v1.y;
+      var isSel=_outlineSelEdge===ei;
+      var hasDim=(_outlineDims&&_outlineDims[ei]>0);
+      html+='<div onclick="selectOutlineEdge('+ei+')" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;margin-bottom:4px;cursor:pointer;background:'+(isSel?'rgba(200,169,110,0.15)':'rgba(255,255,255,0.8)')+';border:1px solid '+(isSel?'rgba(200,169,110,0.5)':'rgba(30,45,64,0.08)')+'">';
+      html+='<span style="font-size:12px;color:var(--text2);flex-shrink:0;width:28px;">辺'+(ei+1)+'</span>';
+      html+='<input type="number" id="odim-'+ei+'" value="'+(hasDim?_outlineDims[ei]:'')+'" placeholder="寸法mm" inputmode="numeric" onclick="event.stopPropagation();" style="flex:1;height:34px;border:1.5px solid rgba(30,45,64,0.15);border-radius:7px;padding:0 8px;font-size:13px;font-family:inherit;" oninput="setOutlineDim('+ei+',this.value)">';
+      html+='<span style="font-size:10px;color:var(--text2);">mm</span>';
+      html+='<button onclick="event.stopPropagation();outlineDimFromBle('+ei+')" style="height:34px;padding:0 8px;border:none;border-radius:7px;background:var(--navy);color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">GLM</button>';
+      html+='</div>';
+    }
+    html+='</div>';
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html+='<button onclick="_outlineClosed=false;_outlineVerts=[];_outlineDims=[];roomData.W=0;roomData.D=0;roomData.H=0;renderPlan();" style="height:40px;border:1.5px solid rgba(30,45,64,0.2);border-radius:10px;background:transparent;color:var(--text2);font-size:13px;cursor:pointer;font-family:inherit;">← 描き直す</button>';
+    html+='<button onclick="outlineConfirm()" style="height:40px;border:none;border-radius:10px;background:var(--accent);color:var(--navy);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">外周を確定</button>';
+    html+='</div>';
+  }
+
+  if(area) area.innerHTML=html;
+
+  // キャンバス初期化
+  if(!_outlineClosed){
+    setTimeout(_initOutlineCv, 50);
+    _updateUndoBtn();
+  } else {
+    // プレビューcanvasにスケッチを描画
+    setTimeout(_drawOutlinePreview, 50);
+  }
+}
+
+function _drawOutlinePreview(){
+  var cv=document.getElementById('outline-preview'); if(!cv) return;
+  if(_outlineVerts.length<2) return;
+  var dpr=window.devicePixelRatio||1;
+  var cw=cv.offsetWidth||320;
+  // バウンディングボックス計算
+  var minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  _outlineVerts.forEach(function(v){
+    minX=Math.min(minX,v.x);minY=Math.min(minY,v.y);
+    maxX=Math.max(maxX,v.x);maxY=Math.max(maxY,v.y);
+  });
+  var vw=maxX-minX||1, vh=maxY-minY||1;
+  var pad=16*dpr;
+  var sc=Math.min((cw*dpr-pad*2)/vw, (160*dpr-pad*2)/vh);
+  var ch=Math.round(vh*sc+pad*2)/dpr;
+  cv.style.height=Math.min(ch,160)+'px';
+  cv.width=Math.round(cw*dpr);
+  cv.height=Math.round(Math.min(ch,160)*dpr);
+  var ox=(cw*dpr-vw*sc)/2, oy=(cv.height-vh*sc)/2;
+  var ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.fillStyle='#f9f8f6'; ctx.fillRect(0,0,cv.width,cv.height);
+  // 外周
+  ctx.strokeStyle='#1e2d40'; ctx.lineWidth=2*dpr;
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath();
+  ctx.moveTo(ox+(_outlineVerts[0].x-minX)*sc, oy+(_outlineVerts[0].y-minY)*sc);
+  for(var i=1;i<_outlineVerts.length;i++){
+    ctx.lineTo(ox+(_outlineVerts[i].x-minX)*sc, oy+(_outlineVerts[i].y-minY)*sc);
+  }
+  ctx.closePath(); ctx.stroke();
+  // 辺番号（選択中は強調）
+  for(var ei=0;ei<_outlineVerts.length;ei++){
+    var v1=_outlineVerts[ei];
+    var v2=_outlineVerts[(ei+1)%_outlineVerts.length];
+    var mx=(v1.x+v2.x)/2-minX, my=(v1.y+v2.y)/2-minY;
+    var a=Math.atan2(v2.y-v1.y,v2.x-v1.x);
+    var isSel=_outlineSelEdge===ei;
+    var hasDim=_outlineDims&&_outlineDims[ei]>0;
+    ctx.fillStyle=isSel?'#b06a00':hasDim?'#2db55d':'rgba(30,45,64,0.5)';
+    ctx.font='bold '+(9*dpr)+'px Meiryo,sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(ei+1, ox+mx*sc-Math.sin(a)*12*dpr, oy+my*sc+Math.cos(a)*12*dpr);
+  }
+}
+
+
+var _outlineDims=[];
+var _outlineIsDrawing=false;
+var _outlineStartX=0, _outlineStartY=0;
+
+function setOutlineDim(idx,val){
+  if(!_outlineDims) _outlineDims=[];
+  _outlineDims[idx]=parseInt(val)||0;
+}
+
+function outlineAutoClose(){
+  if(_outlineVerts.length<3) return;
+  // 最後の頂点を最初の頂点に強制スナップ（同一視）
+  // → 最後の頂点は削除して最初の頂点で閉じる
+  var first=_outlineVerts[0];
+  var last=_outlineVerts[_outlineVerts.length-1];
+  var dist=Math.sqrt(Math.pow(last.x-first.x,2)+Math.pow(last.y-first.y,2));
+  // 最後の頂点が最初の頂点にほぼ重なっていれば削除
+  if(dist<20*(window.devicePixelRatio||1)){
+    _outlineVerts.pop();
+  }
+  _outlineClosed=true;
+  _outlineDims=new Array(_outlineVerts.length).fill(0);
+  renderPlan();
+}
+
+function outlineCancelMode(){
+  _planMode='none';
+  _outlineVerts=[]; _outlineClosed=false; _outlineSelEdge=null; _outlinePreview=null;
+  _outlineDims=[];
+  roomData._setupMode=null;
+  roomData.W=0; roomData.D=0; roomData.H=0;
+  renderPlan();
+}
+
+function outlineUndo(){
+  if(_outlineVerts.length===0) return;
+  _outlineVerts.pop();
+  if(_outlineVerts.length>0){
+    var last=_outlineVerts[_outlineVerts.length-1];
+    _outlineStartX=last.x; _outlineStartY=last.y;
+  }
+  _redrawOutlineCv();
+  var guide=document.getElementById('outline-guide');
+  if(guide){
+    if(_outlineVerts.length===0) guide.textContent='ドラッグして最初の辺を描いてください';
+    else if(_outlineVerts.length<3) guide.textContent='続けてドラッグして外周を描いてください';
+    else guide.textContent='最初の頂点●付近で離すと閉じます';
+  }
+  var undoBtn=document.getElementById('outline-undo-btn');
+  if(undoBtn){
+    undoBtn.disabled=(_outlineVerts.length===0);
+    undoBtn.style.opacity=(_outlineVerts.length===0)?'0.35':'1';
+  }
+  var closeBtn=document.getElementById('outline-close-btn');
+  if(closeBtn) closeBtn.style.display=_outlineVerts.length>=3?'':'none';
+  _updateUndoBtn();
+}
+
+function outlineClear(){
+  _outlineVerts=[]; _outlineClosed=false; _outlineSelEdge=null; _outlineDims=[];
+  _outlineStartX=0; _outlineStartY=0;
+  _redrawOutlineCv();
+  var guide=document.getElementById('outline-guide');
+  if(guide) guide.textContent='ドラッグして最初の辺を描いてください';
+  var closeBtn=document.getElementById('outline-close-btn');
+  if(closeBtn){ closeBtn.style.display='none'; }
+}
+
+function outlineDimFromBle(idx){
+  if(!window._bleLastMm){ showWaToast('先にGLMで測定してください'); return; }
+  if(!_outlineDims) _outlineDims=new Array(_outlineVerts.length).fill(0);
+  _outlineDims[idx]=window._bleLastMm;
+  var el=document.getElementById('odim-'+idx);
+  if(el) el.value=window._bleLastMm;
+  showWaToast('辺'+(idx+1)+' = '+window._bleLastMm+'mm をセットしました');
+}
+
+function _initOutlineCv(){
+  var cv=document.getElementById('outline-cv'); if(!cv) return;
+  var ov=document.getElementById('outline-ov'); if(!ov) return;
+  var dpr=window.devicePixelRatio||1;
+  var cw=cv.parentElement.offsetWidth||320;
+  var ch=Math.round(cw*1.05);
+  [cv,ov].forEach(function(c){
+    c.style.width=cw+'px'; c.style.height=ch+'px';
+    c.width=Math.round(cw*dpr); c.height=Math.round(ch*dpr);
+  });
+  _outlineCvW=cw*dpr; _outlineCvH=ch*dpr;
+  _redrawOutlineCv();
+  ov.addEventListener('touchstart', _outlineDown, {passive:false});
+  ov.addEventListener('touchmove',  _outlineMove, {passive:false});
+  ov.addEventListener('touchend',   _outlineUp,   {passive:false});
+  ov.addEventListener('mousedown',  _outlineDown);
+  ov.addEventListener('mousemove',  _outlineMove);
+  ov.addEventListener('mouseup',    _outlineUp);
+}
+
+function _outlinePos(e, el){
+  var r=el.getBoundingClientRect();
+  var dpr=window.devicePixelRatio||1;
+  var src=(e.touches&&e.touches.length>0)?e.touches[0]
+        :(e.changedTouches&&e.changedTouches.length>0)?e.changedTouches[0]:e;
+  return {x:(src.clientX-r.left)*dpr, y:(src.clientY-r.top)*dpr};
+}
+
+function _outline15snap(fx,fy,tx,ty){
+  var dx=tx-fx,dy=ty-fy;
+  var len=Math.sqrt(dx*dx+dy*dy);
+  if(len<2) return {x:tx,y:ty};
+  var ang=Math.round(Math.atan2(dy,dx)*180/Math.PI/15)*15*Math.PI/180;
+  return {x:Math.round(fx+Math.cos(ang)*len), y:Math.round(fy+Math.sin(ang)*len)};
+}
+
+function _redrawOutlineCv(){
+  var cv=document.getElementById('outline-cv'); if(!cv) return;
+  var dpr=window.devicePixelRatio||1;
+  var W=_outlineCvW, H=_outlineCvH;
+  var ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#f9f8f6'; ctx.fillRect(0,0,W,H);
+  // グリッド
+  var g=Math.round(W/12);
+  ctx.strokeStyle='rgba(30,45,64,0.07)'; ctx.lineWidth=0.8;
+  for(var x=0;x<=W;x+=g){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(var y=0;y<=H;y+=g){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  ctx.strokeStyle='rgba(30,45,64,0.14)'; ctx.lineWidth=1;
+  for(var x2=0;x2<=W;x2+=g*5){ctx.beginPath();ctx.moveTo(x2,0);ctx.lineTo(x2,H);ctx.stroke();}
+  for(var y2=0;y2<=H;y2+=g*5){ctx.beginPath();ctx.moveTo(0,y2);ctx.lineTo(W,y2);ctx.stroke();}
+  if(_outlineVerts.length===0) return;
+  // 確定辺
+  ctx.strokeStyle='#1e2d40'; ctx.lineWidth=2.5*dpr;
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath(); ctx.moveTo(_outlineVerts[0].x,_outlineVerts[0].y);
+  for(var vi=1;vi<_outlineVerts.length;vi++) ctx.lineTo(_outlineVerts[vi].x,_outlineVerts[vi].y);
+  ctx.stroke();
+  // 辺番号
+  for(var ei=0;ei<_outlineVerts.length-1;ei++){
+    var v1=_outlineVerts[ei],v2=_outlineVerts[ei+1];
+    var mx=(v1.x+v2.x)/2,my=(v1.y+v2.y)/2;
+    var a=Math.atan2(v2.y-v1.y,v2.x-v1.x);
+    ctx.fillStyle='rgba(30,45,64,0.55)';
+    ctx.font='bold '+(10*dpr)+'px Meiryo,sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('辺'+(ei+1), mx-Math.sin(a)*14*dpr, my+Math.cos(a)*14*dpr);
+  }
+  // 頂点
+  _outlineVerts.forEach(function(v,i){
+    ctx.fillStyle=i===0?'#c8a96e':'#1e2d40';
+    ctx.beginPath(); ctx.arc(v.x,v.y,(i===0?8:5)*dpr,0,Math.PI*2); ctx.fill();
+    if(i===0){
+      ctx.strokeStyle='#b06a00'; ctx.lineWidth=2*dpr;
+      ctx.beginPath(); ctx.arc(v.x,v.y,12*dpr,0,Math.PI*2); ctx.stroke();
+    }
+  });
+}
+
+var _outlineCvW=320, _outlineCvH=350;function _outlineDown(e){
+  e.preventDefault();
+  var ov=document.getElementById('outline-ov'); if(!ov) return;
+  var pos=_outlinePos(e,ov);
+  var dpr=window.devicePixelRatio||1;
+  var snapR=28*dpr;
+  _outlineDragVertIdx=-1;
+  // 最後の頂点に近ければ吸着
+  if(_outlineVerts.length>0){
+    var last=_outlineVerts[_outlineVerts.length-1];
+    var d=Math.sqrt(Math.pow(pos.x-last.x,2)+Math.pow(pos.y-last.y,2));
+    if(d<snapR){ _outlineStartX=last.x; _outlineStartY=last.y; _outlineIsDrawing=true; return; }
+  }
+  _outlineIsDrawing=true;
+  _outlineStartX=pos.x; _outlineStartY=pos.y;
+}
+
+function _outlineMove(e){
+  e.preventDefault();
+  if(!_outlineIsDrawing) return;
+  var ov=document.getElementById('outline-ov'); if(!ov) return;
+  var pos=_outlinePos(e,ov);
+  var dpr=window.devicePixelRatio||1;
+  var snapped=_outline15snap(_outlineStartX,_outlineStartY,pos.x,pos.y);
+  var oCtx=ov.getContext('2d');
+  oCtx.clearRect(0,0,ov.width,ov.height);
+  oCtx.strokeStyle='rgba(200,169,110,0.9)'; oCtx.lineWidth=2.5*dpr; oCtx.lineCap='round';
+  oCtx.beginPath(); oCtx.moveTo(_outlineStartX,_outlineStartY); oCtx.lineTo(snapped.x,snapped.y); oCtx.stroke();
+  var ang=Math.round(Math.atan2(snapped.y-_outlineStartY,snapped.x-_outlineStartX)*180/Math.PI);
+  oCtx.fillStyle='rgba(30,45,64,0.65)';
+  oCtx.font='bold '+(10*dpr)+'px Meiryo,sans-serif';
+  oCtx.textAlign='center'; oCtx.textBaseline='bottom';
+  oCtx.fillText(ang+'°', (_outlineStartX+snapped.x)/2, (_outlineStartY+snapped.y)/2-4*dpr);
+}
+
+function _outlineUp(e){
+  e.preventDefault();
+  var ov=document.getElementById('outline-ov'); if(!ov) return;
+  var oCtx=ov.getContext('2d');
+  oCtx.clearRect(0,0,ov.width,ov.height);
+  if(!_outlineIsDrawing) return;
+  _outlineIsDrawing=false;
+  var pos=_outlinePos(e,ov);
+  var dpr=window.devicePixelRatio||1;
+  // 最低ドラッグ距離
+  var dist=Math.sqrt(Math.pow(pos.x-_outlineStartX,2)+Math.pow(pos.y-_outlineStartY,2));
+  if(dist<10*dpr) return;
+  var snapped=_outline15snap(_outlineStartX,_outlineStartY,pos.x,pos.y);
+  // 初辺なら開始点も追加
+  if(_outlineVerts.length===0) _outlineVerts.push({x:_outlineStartX,y:_outlineStartY});
+  // 最初の頂点に近ければ閉じる
+  var v0=_outlineVerts[0];
+  var closeDist=Math.sqrt(Math.pow(snapped.x-v0.x,2)+Math.pow(snapped.y-v0.y,2));
+  if(_outlineVerts.length>=3&&closeDist<20*dpr){
+    _outlineClosed=true;
+    _outlineDims=new Array(_outlineVerts.length).fill(0);
+    renderPlan();
+    return;
+  }
+  _outlineVerts.push({x:snapped.x,y:snapped.y});
+  // 次の辺の開始点を自動セット
+  _outlineStartX=snapped.x; _outlineStartY=snapped.y;
+  _redrawOutlineCv();
+  // パネルのガイド文を更新
+  var guide=document.getElementById('outline-guide');
+  if(guide){
+    if(_outlineVerts.length<3) guide.textContent='続けてドラッグして外周を描いてください';
+    else guide.textContent='最初の頂点●付近で離すと閉じます';
+  }
+}
+
+function selectOutlineEdge(idx){
+  _outlineSelEdge=(_outlineSelEdge===idx)?null:idx;
+}
+
+function outlineConfirm(){
+  if(_outlineVerts.length<3||!_outlineClosed){ showWaToast('外周を閉じてから確定してください'); return; }
+  var hEl=document.getElementById('outline-H');
+  var h=parseInt(hEl?hEl.value:0)||0;
+  if(!h){ showWaToast('⚠ 高さ H を入力してください'); return; }
+
+  // 全辺の寸法が入力されているか確認
+  var allDims=true;
+  for(var i=0;i<_outlineVerts.length;i++){
+    var el=document.getElementById('odim-'+i);
+    var v=parseInt(el?el.value:0)||(_outlineDims?_outlineDims[i]:0)||0;
+    if(el) _outlineDims[i]=v;
+    if(!v){ allDims=false; showWaToast('⚠ 辺'+(i+1)+'の寸法を入力してください'); return; }
+  }
+
+  // スケッチの各辺の角度を取得して、正確な寸法で頂点を再計算
+  var newVerts=[{x:0,y:0}];
+  for(var j=0;j<_outlineVerts.length-1;j++){
+    var sv1=_outlineVerts[j], sv2=_outlineVerts[j+1];
+    var sdx=sv2.x-sv1.x, sdy=sv2.y-sv1.y;
+    var ang=Math.atan2(sdy,sdx);
+    // 角度を15度単位にスナップ
+    var snapAng=Math.round(ang*180/Math.PI/15)*15*Math.PI/180;
+    var dim=_outlineDims[j];
+    var prev=newVerts[newVerts.length-1];
+    newVerts.push({
+      x: Math.round(prev.x + Math.cos(snapAng)*dim),
+      y: Math.round(prev.y + Math.sin(snapAng)*dim)
+    });
+  }
+  // 最終辺（閉じる辺）
+  var lastV=_outlineVerts[_outlineVerts.length-1];
+  var firstV=_outlineVerts[0];
+  var lastDx=firstV.x-lastV.x, lastDy=firstV.y-lastV.y;
+  var lastAng=Math.atan2(lastDy,lastDx);
+  var lastSnapAng=Math.round(lastAng*180/Math.PI/15)*15*Math.PI/180;
+  var lastDim=_outlineDims[_outlineVerts.length-1]||0;
+
+  // バウンディングボックスでW・D算出
+  var minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  newVerts.forEach(function(v){
+    minX=Math.min(minX,v.x); minY=Math.min(minY,v.y);
+    maxX=Math.max(maxX,v.x); maxY=Math.max(maxY,v.y);
+  });
+
+  pushHistory();
+  roomData.W=Math.round(maxX-minX);
+  roomData.D=Math.round(maxY-minY);
+  roomData.H=h;
+  roomData._outline=newVerts.map(function(v){return{x:v.x-minX,y:v.y-minY};});
+  roomData._setupMode=null;
+  _outlineVerts=[]; _outlineClosed=false; _outlineSelEdge=null; _outlinePreview=null;
+  _outlineDims=[];
+  _planMode='none';
+  renderPlan();
+  showWaToast('✅ 外周確定 W'+roomData.W+' D'+roomData.D+' H'+h);
+}
+
+// BLE受信値の保存（_applyBleValueから更新）
+window._bleLastMm=0;
 
 function confirmPartPending(){
   if(!_partPending) return;
@@ -1233,10 +1821,17 @@ function _planSc(){
 }
 
 function _snapMm(px, info){
-  // canvas座標 → mm（内法座標）
   return{
     x:Math.max(0,Math.min(info.W, Math.round((px.x-info.ox)/info.sc/10)*10)),
     y:Math.max(0,Math.min(info.D, Math.round((px.y-info.oy)/info.sc/10)*10))
+  };
+}
+
+function _pxToMm(pxX, pxY, info){
+  // canvas座標 → mm（クランプなし、外周作図用）
+  return{
+    x: (pxX-info.ox)/info.sc,
+    y: (pxY-info.oy)/info.sc
   };
 }
 
@@ -1497,7 +2092,73 @@ function redrawPlan(){
   ctx.fillText(D.toLocaleString()+'mm', 0, 0);
   ctx.restore();
 
-  // 確定待ち間仕切りプレビュー
+  // ── 外周作図モード描画 ──
+  if(_planMode==='outline'){
+    var GRID=OUTLINE_GRID;
+    // グリッド描画
+    ctx.strokeStyle='rgba(200,169,110,0.25)'; ctx.lineWidth=0.5; ctx.setLineDash([]);
+    for(var gxi=0;gxi<=W;gxi+=GRID){
+      ctx.beginPath();ctx.moveTo(ox+gxi*sc,oy);ctx.lineTo(ox+gxi*sc,oy+rd);ctx.stroke();
+    }
+    for(var gyi=0;gyi<=D;gyi+=GRID){
+      ctx.beginPath();ctx.moveTo(ox,oy+gyi*sc);ctx.lineTo(ox+rw,oy+gyi*sc);ctx.stroke();
+    }
+    // 描画済み頂点・辺
+    if(_outlineVerts.length>0){
+      ctx.strokeStyle='#c8a96e'; ctx.lineWidth=2; ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.moveTo(ox+_outlineVerts[0].x*sc, oy+_outlineVerts[0].y*sc);
+      for(var vi=1;vi<_outlineVerts.length;vi++){
+        ctx.lineTo(ox+_outlineVerts[vi].x*sc, oy+_outlineVerts[vi].y*sc);
+      }
+      if(_outlineClosed) ctx.closePath();
+      ctx.stroke();
+      // 辺の長さラベル
+      var edgeCount=_outlineClosed?_outlineVerts.length:_outlineVerts.length-1;
+      for(var evi=0;evi<edgeCount;evi++){
+        var ev1=_outlineVerts[evi];
+        var ev2=_outlineVerts[(evi+1)%_outlineVerts.length];
+        var emx=(ev1.x+ev2.x)/2, emy=(ev1.y+ev2.y)/2;
+        var edx=ev2.x-ev1.x, edy=ev2.y-ev1.y;
+        var elen=Math.round(Math.sqrt(edx*edx+edy*edy));
+        var isSel=_outlineSelEdge===evi;
+        ctx.fillStyle=isSel?'#b06a00':'rgba(30,45,64,0.6)';
+        ctx.font='bold 9px Meiryo,sans-serif';
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        // 辺に垂直方向に少しオフセット
+        var ang2=Math.atan2(edy,edx);
+        var offX=-Math.sin(ang2)*12, offY=Math.cos(ang2)*12;
+        ctx.fillText(elen+'mm', ox+emx*sc+offX, oy+emy*sc+offY);
+      }
+      // 頂点マーカー
+      _outlineVerts.forEach(function(v,vi2){
+        ctx.fillStyle=vi2===0?'#c8a96e':'rgba(30,45,64,0.6)';
+        ctx.beginPath();ctx.arc(ox+v.x*sc, oy+v.y*sc, vi2===0?6:4, 0, Math.PI*2);ctx.fill();
+        if(vi2===0){
+          ctx.strokeStyle='#b06a00'; ctx.lineWidth=1.5;
+          ctx.beginPath();ctx.arc(ox+v.x*sc, oy+v.y*sc, 8, 0, Math.PI*2);ctx.stroke();
+        }
+      });
+      // プレビュー線
+      if(_outlinePreview&&!_outlineClosed){
+        var last2=_outlineVerts[_outlineVerts.length-1];
+        ctx.strokeStyle='rgba(200,169,110,0.5)'; ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
+        ctx.beginPath();
+        ctx.moveTo(ox+last2.x*sc, oy+last2.y*sc);
+        ctx.lineTo(ox+_outlinePreview.x*sc, oy+_outlinePreview.y*sc);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        // プレビュー長さ
+        var pdx=_outlinePreview.x-last2.x, pdy=_outlinePreview.y-last2.y;
+        var plen=Math.round(Math.sqrt(pdx*pdx+pdy*pdy));
+        ctx.fillStyle='rgba(200,169,110,0.9)';
+        ctx.font='bold 9px Meiryo,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='bottom';
+        ctx.fillText(plen+'mm', ox+(_outlinePreview.x+last2.x)/2*sc, oy+(_outlinePreview.y+last2.y)/2*sc-4);
+        ctx.fillStyle='rgba(200,169,110,0.5)';
+        ctx.beginPath();ctx.arc(ox+_outlinePreview.x*sc,oy+_outlinePreview.y*sc,3,0,Math.PI*2);ctx.fill();
+      }
+    }
+  }
   if(_partPending){
     var Tpx2=Math.max(2,roomData.wallT*sc);
     ctx.fillStyle='rgba(30,45,64,0.25)';
@@ -2349,8 +3010,14 @@ function resizeEq(axis,val){
     _partDrag.active=true;
     _partDrag.sx=pos.x; _partDrag.sy=pos.y;
     _partDrag.ex=pos.x; _partDrag.ey=pos.y;
+    // 外周作図モード
+    if(_planMode==='outline'){
+      var info0=_planSc(); if(!info0) return;
+      var mm0=_pxToMm(pos.x, pos.y, info0);
+      outlineTap(mm0.x, mm0.y, pos.x, pos.y, info0.sc, info0.ox, info0.oy);
+      return;
+    }
     if(_planMode==='none') {
-      // 選択中間仕切りのdimOffsetベース値を記録
       if(_planSelType==='partition'&&_planSelId!==null){
         var pb=planPartitions.find(function(p){return p.id===_planSelId;});
         if(pb) pb._dimBase=pb.dimOffset||0;
@@ -2368,15 +3035,20 @@ function resizeEq(axis,val){
     var cv=getCV(); if(!cv) return;
     var pos=getEvPos(e,cv);
     _partDrag.ex=pos.x; _partDrag.ey=pos.y;
+    // 外周作図モード：プレビュー更新
+    if(_planMode==='outline'){
+      var info1=_planSc(); if(!info1) return;
+      var mm1=_pxToMm(pos.x, pos.y, info1);
+      outlineMove(mm1.x, mm1.y);
+      return;
+    }
     if(_planMode==='part_v'||_planMode==='part_h') redrawPlanWithDrag();
-    // 通常モード：選択中間仕切りの寸法線ドラッグ
     if(_planMode==='none'&&_planSelType==='partition'&&_planSelId!==null){
       var info3=_planSc(); if(!info3) return;
       var p3=planPartitions.find(function(p){return p.id===_planSelId;});
       if(p3){
         var ddx=(_partDrag.ex-_partDrag.sx)/info3.sc;
         var ddy=(_partDrag.ey-_partDrag.sy)/info3.sc;
-        // 縦壁→Y方向のみ、横壁→X方向のみ
         p3.dimOffset=(p3._dimBase||0)+(p3.axis==='v'?ddy:ddx);
         redrawPlan();
       }
@@ -3321,7 +3993,7 @@ function projLoadExisting(g,r){
 
 // ── 内部：データリセット ──
 function _resetData(){
-  roomData={W:3600,D:4500,H:2400,wallT:120,compassDeg:0};
+  roomData={W:0,D:0,H:0,wallT:120,compassDeg:0};
   faceOpenings=[[],[],[],[]]; faceOidSeq=[0,0,0,0];
   faceEquips=[[],[],[],[]];   faceEqSeq=[0,0,0,0];
   ceilParts=[];ceilSeq=0;
@@ -3462,6 +4134,7 @@ function bleInjectTest(){
 
 function _applyBleValue(mm){
   if(mm<=0||mm>50000) return;
+  window._bleLastMm=mm; // 外周作図モードでも使えるよう保存
   var lastEl=document.getElementById('ble-last-val');
   if(lastEl) lastEl.textContent=mm.toLocaleString()+' mm';
 
