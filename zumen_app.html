@@ -1344,45 +1344,37 @@ function redrawPlan(){
   var W=roomData.W, D=roomData.D, T=roomData.wallT;
   var CW=cv.offsetWidth||340;
 
-  // ── ドア弧の最大はみ出し量を事前計算 ──
-  // A面(上)・C面(下)：弧はY方向にはみ出す（ropw = 開口幅px）
-  // B面(右)・D面(左)：弧はX方向にはみ出す
-  var maxArcU=0, maxArcD=0, maxArcL=0, maxArcR=0;
-  var faceArcFaces=[
-    {fi:0, dir:'U'}, {fi:2, dir:'D'},
-    {fi:1, dir:'R'}, {fi:3, dir:'L'}
-  ];
-  faceArcFaces.forEach(function(f){
+  // ── ドア弧の最大はみ出し量（mm）を事前計算 ──
+  var maxArcU=0,maxArcD=0,maxArcL=0,maxArcR=0;
+  [{fi:0,dir:'U'},{fi:2,dir:'D'},{fi:1,dir:'R'},{fi:3,dir:'L'}].forEach(function(f){
     faceOpenings[f.fi].forEach(function(op){
       if(!isDoor(op.type)) return;
-      var fw=faceW(f.fi);
-      var arcMm=op.w; // 弧の半径＝開口幅
-      if(f.dir==='U') maxArcU=Math.max(maxArcU,arcMm);
-      if(f.dir==='D') maxArcD=Math.max(maxArcD,arcMm);
-      if(f.dir==='L') maxArcL=Math.max(maxArcL,arcMm);
-      if(f.dir==='R') maxArcR=Math.max(maxArcR,arcMm);
+      if(f.dir==='U') maxArcU=Math.max(maxArcU,op.w);
+      if(f.dir==='D') maxArcD=Math.max(maxArcD,op.w);
+      if(f.dir==='L') maxArcL=Math.max(maxArcL,op.w);
+      if(f.dir==='R') maxArcR=Math.max(maxArcR,op.w);
     });
   });
 
-  // ── 余白：寸法2層＋ドア弧を確保 ──
-  // 第1層（間仕切り割付）: 28px、第2層（外周W/D）: 22px、弧: arcMm*sc
-  var dimL1=28, dimL2=22, dimPad=8;
-  // まず仮scで弧px計算
-  var mL0=T+dimL1+dimL2+dimPad+16;
-  var mR0=T+dimL1+dimL2+dimPad+8;
-  var mT0=T+dimL1+dimL2+dimPad+8;
-  var mB0=T+dimL1+dimL2+dimPad+16;
-  var sc0=Math.min((CW-mL0-mR0)/W, 280/D);
-  var arcUpx  =maxArcU*sc0, arcDpx=maxArcD*sc0;
-  var arcLpx  =maxArcL*sc0, arcRpx=maxArcR*sc0;
-  // 弧がある面は余白を弧分増やす
-  var mT=Math.max(mT0, Math.ceil(T*sc0)+arcUpx+dimL1+dimL2+dimPad+8);
-  var mB=Math.max(mB0, Math.ceil(T*sc0)+arcDpx+dimL1+dimL2+dimPad+16);
-  var mL=Math.max(mL0, Math.ceil(T*sc0)+arcLpx+dimL1+dimL2+dimPad+16);
-  var mR=Math.max(mR0, Math.ceil(T*sc0)+arcRpx+dimL1+dimL2+dimPad+8);
+  // ── 固定キャンバス高さ（315/Dベース）＋余白固定 ──
+  var mL=56, mR=20, mT=20, mB=56;
+  // 基準スケール（固定CHに合わせる）
+  var sc=Math.min((CW-mL-mR)/W, 315/D);
 
-  var sc=Math.min((CW-mL-mR)/W, (280-(mT+mB-mT0-mB0))/D);
-  sc=Math.max(sc, 0.01);
+  // ドア弧・外周寸法線が余白に収まるか確認し、収まらなければscを縮小
+  var Tpx0=T*sc;
+  var needL = Tpx0 + maxArcL*sc + 36; // 左に必要なpx（弧+寸法線）
+  var needR = Tpx0 + maxArcR*sc + 16;
+  var needT = Tpx0 + maxArcU*sc + 16;
+  var needB = Tpx0 + maxArcD*sc + 36;
+  // 余白が足りない場合はscを縮小して収める
+  var scL = needL>mL ? sc*(mL/needL) : sc;
+  var scR = needR>mR ? sc*(mR/needR) : sc;
+  var scT = needT>mT ? sc*(mT/needT) : sc;
+  var scB = needB>mB ? sc*(mB/needB) : sc;
+  sc = Math.min(sc, scL, scR, scT, scB);
+  sc = Math.max(sc, 0.01);
+
   var Tpx=T*sc;
   var rw=W*sc, rd=D*sc;
   var CH=rd+mT+mB;
@@ -1459,175 +1451,51 @@ function redrawPlan(){
   });
 
   // ══════════════════════════════════════════
-  //  寸法線：外周の外に階層配置
-  //  外壁外面を基準に外側へ
-  //  第1層（割付）：外壁外面から dimPad+dimL1/2
-  //  第2層（外周）：外壁外面から dimPad+dimL1+14
+  //  寸法線：外周の外・固定余白内に配置
+  //  外壁外面基準・1層（W・D）
   // ══════════════════════════════════════════
-  var outerL=ox-Tpx;   // 外壁左面px
-  var outerR=ox+rw+Tpx; // 外壁右面px
-  var outerT=oy-Tpx;   // 外壁上面px
-  var outerB=oy+rd+Tpx; // 外壁下面px
+  var outerL=ox-Tpx, outerR=ox+rw+Tpx;
+  var outerT=oy-Tpx, outerB=oy+rd+Tpx;
 
-  // 第1層：間仕切り割付寸法（下・左）
-  var dim1Y=outerB+dimPad+dimL1;   // 下側第1層Y
-  var dim1X=outerL-dimPad-dimL1;   // 左側第1層X
-
-  // 第2層：外周W・D寸法（下・左）
-  var dim2Y=dim1Y+dimL2+6;
-  var dim2X=dim1X-dimL2-6;
-
-  ctx.strokeStyle='rgba(30,45,64,0.45)';
-  ctx.fillStyle='rgba(30,45,64,0.7)';
+  ctx.strokeStyle='rgba(30,45,64,0.5)';
+  ctx.fillStyle='rgba(30,45,64,0.75)';
   ctx.lineWidth=1;
 
-  // ── 下側：間仕切り縦壁（V）の割付 ──
-  // 割付は左外壁面→各縦壁左面→右外壁面の直列寸法
-  var vParts=planPartitions.filter(function(p){return p.axis==='v';});
-  vParts.sort(function(a,b){return a.pos-b.pos;});
-  if(vParts.length>0){
-    var halfT=Math.round(T/2);
-    // 補助線：外壁左面から外壁右面まで
-    function drawDimLineH(y, x1, x2, label, above){
-      ctx.beginPath();ctx.moveTo(x1,y);ctx.lineTo(x2,y);ctx.stroke();
-      [x1,x2].forEach(function(tx){
-        ctx.beginPath();ctx.moveTo(tx,y-4);ctx.lineTo(tx,y+4);ctx.stroke();
-      });
-      ctx.font='bold 9px Meiryo,sans-serif';
-      ctx.textAlign='center';
-      ctx.textBaseline=above?'bottom':'top';
-      ctx.fillText(label, (x1+x2)/2, above?y-5:y+5);
-    }
-    // 各縦壁の割付
-    var prevX=outerL;
-    var prevMm=0; // 外壁左外面基準
-    vParts.forEach(function(p){
-      var pt=Math.max(2,(p.t||T)*sc);
-      var pLeft=ox+p.pos*sc-pt/2; // 間仕切り左面px
-      var pRight=ox+p.pos*sc+pt/2;
-      var distMm=p.pos-Math.round(T/2); // 内壁面→間仕切り左面
-      // 補助線（外に引き出す）
-      ctx.strokeStyle='rgba(30,45,64,0.3)'; ctx.lineWidth=0.7; ctx.setLineDash([2,3]);
-      ctx.beginPath();ctx.moveTo(pLeft,oy+rd);ctx.lineTo(pLeft,dim1Y+8);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(pRight,oy+rd);ctx.lineTo(pRight,dim1Y+8);ctx.stroke();
-      ctx.setLineDash([]);
-      prevX=pRight;
-    });
-    // 補助線（外壁左・右）
-    ctx.strokeStyle='rgba(30,45,64,0.3)'; ctx.lineWidth=0.7; ctx.setLineDash([2,3]);
-    ctx.beginPath();ctx.moveTo(outerL,oy+rd);ctx.lineTo(outerL,dim1Y+8);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(outerR,oy+rd);ctx.lineTo(outerR,dim1Y+8);ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.strokeStyle='rgba(30,45,64,0.45)';
-    // 直列寸法線
-    var pts=[outerL];
-    vParts.forEach(function(p){
-      var pt=Math.max(2,(p.t||T)*sc);
-      pts.push(ox+p.pos*sc-pt/2);
-      pts.push(ox+p.pos*sc+pt/2);
-    });
-    pts.push(outerR);
-    // 対応するmm値
-    var mmPts=[0];
-    vParts.forEach(function(p){
-      var pt2=p.t||T;
-      mmPts.push(p.pos-Math.round(pt2/2));
-      mmPts.push(p.pos+Math.round(pt2/2));
-    });
-    mmPts.push(W+T);
-    for(var i2=0;i2<pts.length-1;i2++){
-      var x1=pts[i2], x2=pts[i2+1];
-      var dist=mmPts[i2+1]-mmPts[i2];
-      if(dist<=0) continue;
-      drawDimLineH(dim1Y, x1, x2, dist+'mm', true);
-    }
-  }
-
-  // ── 左側：間仕切り横壁（H）の割付 ──
-  var hParts=planPartitions.filter(function(p){return p.axis==='h';});
-  hParts.sort(function(a,b){return a.pos-b.pos;});
-  if(hParts.length>0){
-    function drawDimLineV(x, y1, y2, label){
-      ctx.beginPath();ctx.moveTo(x,y1);ctx.lineTo(x,y2);ctx.stroke();
-      [y1,y2].forEach(function(ty){
-        ctx.beginPath();ctx.moveTo(x-4,ty);ctx.lineTo(x+4,ty);ctx.stroke();
-      });
-      ctx.save();
-      ctx.translate(x-5, (y1+y2)/2);
-      ctx.rotate(-Math.PI/2);
-      ctx.font='bold 9px Meiryo,sans-serif';
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText(label, 0, 0);
-      ctx.restore();
-    }
-    ctx.strokeStyle='rgba(30,45,64,0.3)'; ctx.lineWidth=0.7; ctx.setLineDash([2,3]);
-    ctx.beginPath();ctx.moveTo(ox,outerT);ctx.lineTo(dim1X-8,outerT);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(ox,outerB);ctx.lineTo(dim1X-8,outerB);ctx.stroke();
-    hParts.forEach(function(p){
-      var pt=Math.max(2,(p.t||T)*sc);
-      var pTop=oy+p.pos*sc-pt/2;
-      var pBot=oy+p.pos*sc+pt/2;
-      ctx.beginPath();ctx.moveTo(ox,pTop);ctx.lineTo(dim1X-8,pTop);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(ox,pBot);ctx.lineTo(dim1X-8,pBot);ctx.stroke();
-    });
-    ctx.setLineDash([]);
-    ctx.strokeStyle='rgba(30,45,64,0.45)';
-    var ptsV=[outerT];
-    hParts.forEach(function(p){
-      var pt=Math.max(2,(p.t||T)*sc);
-      ptsV.push(oy+p.pos*sc-pt/2);
-      ptsV.push(oy+p.pos*sc+pt/2);
-    });
-    ptsV.push(outerB);
-    var mmPtsV=[0];
-    hParts.forEach(function(p){
-      var pt2=p.t||T;
-      mmPtsV.push(p.pos-Math.round(pt2/2));
-      mmPtsV.push(p.pos+Math.round(pt2/2));
-    });
-    mmPtsV.push(D+T);
-    for(var j2=0;j2<ptsV.length-1;j2++){
-      var y1=ptsV[j2], y2=ptsV[j2+1];
-      var dist2=mmPtsV[j2+1]-mmPtsV[j2];
-      if(dist2<=0) continue;
-      drawDimLineV(dim1X, y1, y2, dist2+'mm');
-    }
-  }
-
-  // ── 第2層：外周W寸法（下）・D寸法（左）─最外層 ──
-  ctx.strokeStyle='rgba(30,45,64,0.6)';
-  ctx.fillStyle='rgba(30,45,64,0.85)';
-  ctx.lineWidth=1.2;
-  // 下：W
-  ctx.beginPath();ctx.moveTo(outerL,dim2Y);ctx.lineTo(outerR,dim2Y);ctx.stroke();
+  // 下：W（外壁外面→外壁外面）
+  var dY=outerB+16;
+  ctx.beginPath();ctx.moveTo(outerL,dY);ctx.lineTo(outerR,dY);ctx.stroke();
   [outerL,outerR].forEach(function(tx){
-    ctx.beginPath();ctx.moveTo(tx,dim2Y-5);ctx.lineTo(tx,dim2Y+5);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(tx,dY-4);ctx.lineTo(tx,dY+4);ctx.stroke();
   });
-  ctx.font='bold 11px Meiryo,sans-serif';
-  ctx.textAlign='center'; ctx.textBaseline='top';
-  ctx.fillText(W.toLocaleString()+'mm', (outerL+outerR)/2, dim2Y+5);
   // 補助線
   ctx.strokeStyle='rgba(30,45,64,0.25)'; ctx.lineWidth=0.7; ctx.setLineDash([2,3]);
-  ctx.beginPath();ctx.moveTo(outerL,outerB+2);ctx.lineTo(outerL,dim2Y+12);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(outerR,outerB+2);ctx.lineTo(outerR,dim2Y+12);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(outerL,outerB+2);ctx.lineTo(outerL,dY+6);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(outerR,outerB+2);ctx.lineTo(outerR,dY+6);ctx.stroke();
   ctx.setLineDash([]);
-  // 左：D
-  ctx.strokeStyle='rgba(30,45,64,0.6)'; ctx.lineWidth=1.2;
-  ctx.beginPath();ctx.moveTo(dim2X,outerT);ctx.lineTo(dim2X,outerB);ctx.stroke();
+  ctx.strokeStyle='rgba(30,45,64,0.5)'; ctx.lineWidth=1;
+  ctx.font='bold 11px Meiryo,sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='top';
+  ctx.fillText(W.toLocaleString()+'mm', (outerL+outerR)/2, dY+5);
+
+  // 左：D（外壁外面→外壁外面）
+  var dX=outerL-16;
+  ctx.beginPath();ctx.moveTo(dX,outerT);ctx.lineTo(dX,outerB);ctx.stroke();
   [outerT,outerB].forEach(function(ty){
-    ctx.beginPath();ctx.moveTo(dim2X-5,ty);ctx.lineTo(dim2X+5,ty);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(dX-4,ty);ctx.lineTo(dX+4,ty);ctx.stroke();
   });
+  // 補助線
+  ctx.strokeStyle='rgba(30,45,64,0.25)'; ctx.lineWidth=0.7; ctx.setLineDash([2,3]);
+  ctx.beginPath();ctx.moveTo(outerL-2,outerT);ctx.lineTo(dX-6,outerT);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(outerL-2,outerB);ctx.lineTo(dX-6,outerB);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.strokeStyle='rgba(30,45,64,0.5)'; ctx.lineWidth=1;
   ctx.save();
-  ctx.translate(dim2X-13, (outerT+outerB)/2);
+  ctx.translate(dX-13, (outerT+outerB)/2);
   ctx.rotate(-Math.PI/2);
   ctx.font='bold 11px Meiryo,sans-serif';
   ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillText(D.toLocaleString()+'mm', 0, 0);
   ctx.restore();
-  ctx.strokeStyle='rgba(30,45,64,0.25)'; ctx.lineWidth=0.7; ctx.setLineDash([2,3]);
-  ctx.beginPath();ctx.moveTo(outerL-2,outerT);ctx.lineTo(dim2X-14,outerT);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(outerL-2,outerB);ctx.lineTo(dim2X-14,outerB);ctx.stroke();
-  ctx.setLineDash([]);
 
   // 確定待ち間仕切りプレビュー
   if(_partPending){
