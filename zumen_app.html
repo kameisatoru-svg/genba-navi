@@ -362,6 +362,29 @@ canvas{display:block;width:100%;}
 }
 .wa-modal-send:disabled{background:rgba(30,45,64,0.15);color:var(--text2);cursor:not-allowed;}
 
+/* ── GLM BLEモーダル ── */
+.ble-overlay{
+  position:fixed;inset:0;background:rgba(10,20,35,0.6);
+  z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.ble-overlay.hidden{display:none;}
+.ble-box{
+  background:var(--white);border-radius:16px;width:100%;max-width:360px;
+  box-shadow:0 8px 32px rgba(10,20,35,0.3);overflow:hidden;
+}
+.ble-head{
+  background:var(--navy);padding:14px 18px;
+  font-size:15px;font-weight:700;color:var(--white);
+  display:flex;align-items:center;gap:8px;
+}
+.ble-body{padding:16px 16px 4px;}
+.ble-target{
+  height:40px;border:1.5px solid rgba(30,45,64,0.2);border-radius:10px;
+  background:var(--white);color:var(--text);font-size:13px;font-weight:600;
+  cursor:pointer;font-family:inherit;
+}
+.ble-target.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+
 /* ── 印刷スタイル ── */
 @media print{
   body{position:static;height:auto;overflow:visible;background:#fff;}
@@ -415,6 +438,14 @@ canvas{display:block;width:100%;}
     </button>
   </div>
 
+  <!-- GLM Bluetooth接続ボタン -->
+  <button class="btn-do-print" id="ble-btn" onclick="openBleModal()" style="background:rgba(255,255,255,0.08);padding:0 10px;gap:5px;">
+    <svg id="ble-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"/>
+    </svg>
+    <span id="ble-label" style="font-size:11px;color:rgba(255,255,255,0.7);">GLM</span>
+  </button>
+
   <!-- 割付 -->
   <button class="btn-do-print" onclick="openWaritsukeModal()" style="background:rgba(200,169,110,0.15);">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M2 4h20M6 4v16M18 4v16M6 12h12"/></svg>
@@ -462,6 +493,47 @@ canvas{display:block;width:100%;}
   </div>
 </div>
 
+<!-- ── GLM BLE モーダル ── -->
+<div class="ble-overlay hidden" id="ble-modal" onclick="closeBleModal(event)">
+  <div class="ble-box">
+    <div class="ble-head">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"/></svg>
+      GLM Bluetooth連携
+    </div>
+    <div class="ble-body">
+      <div id="ble-status-bar" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;background:var(--bg);margin-bottom:14px;">
+        <span id="ble-dot" style="width:10px;height:10px;border-radius:50%;background:rgba(30,45,64,0.2);flex-shrink:0;"></span>
+        <span id="ble-status-text" style="font-size:13px;flex:1;color:var(--text2);">未接続</span>
+        <button id="ble-connect-btn" onclick="bleConnect()" style="height:34px;padding:0 14px;border:none;border-radius:8px;background:var(--navy);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">接続</button>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;">受信した値をどこに入れますか？</div>
+      <div id="ble-target-btns" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px;">
+        <button class="ble-target active" id="bt-W"  onclick="setBleTarget('W')">幅 W</button>
+        <button class="ble-target"        id="bt-D"  onclick="setBleTarget('D')">奥行 D</button>
+        <button class="ble-target"        id="bt-H"  onclick="setBleTarget('H')">高さ H</button>
+        <button class="ble-target"        id="bt-PL" onclick="setBleTarget('PL')">間仕切り長さ</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;background:var(--bg);margin-bottom:14px;">
+        <span style="font-size:12px;color:var(--text2);">最後の受信値</span>
+        <span id="ble-last-val" style="font-size:18px;font-weight:700;margin-left:auto;color:var(--navy);">—</span>
+      </div>
+      <div style="border-top:1px solid rgba(30,45,64,0.1);padding-top:12px;">
+        <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;">🧪 テスト注入（実機なしで動作確認）</div>
+        <div style="display:flex;gap:8px;">
+          <input id="ble-test-input" type="number" value="3600" inputmode="numeric"
+            style="flex:1;height:38px;border:1.5px solid rgba(30,45,64,0.2);border-radius:8px;padding:0 10px;font-size:14px;font-family:inherit;outline:none;">
+          <button onclick="bleInjectTest()" style="height:38px;padding:0 14px;border:none;border-radius:8px;background:var(--accent);color:var(--navy);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">注入</button>
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:6px;">単位: mm で入力してください</div>
+      </div>
+    </div>
+    <div style="padding:0 16px 16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <button onclick="bleDisconnect()" style="height:42px;border:1.5px solid rgba(30,45,64,0.2);border-radius:10px;background:transparent;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">切断</button>
+      <button onclick="closeBleModal(null)" style="height:42px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">閉じる</button>
+    </div>
+  </div>
+</div>
+
 <div class="scroll-area" id="main-area"></div>
 
 <script>
@@ -486,7 +558,6 @@ var faceOidSeq   = [0,0,0,0];
 var faceEquips   = [[],[],[],[]];
 var faceEqSelId  = [null,null,null,null];
 var faceEqSeq    = [0,0,0,0];
-var facePartSelId = null; // 展開図で選択中の間仕切りid
 
 // 天井データ
 var ceilParts   = [];
@@ -755,53 +826,6 @@ function renderPlan(){
   html+='</div>';
   html+='<canvas id="zumen-cv"></canvas></div>';
 
-  // ── 開口部選択時の属性切り替えUI（canvasすぐ下）──
-  if(_planOpSelFi!==null&&_planOpSelId!==null){
-    var selOp=faceOpenings[_planOpSelFi].find(function(o){return o.id===_planOpSelId;});
-    if(selOp){
-      var isDoor5=selOp.type==='ドア'||selOp.type==='親子ドア';
-      var isBoth5=selOp.type==='両開きドア';
-      var faceName=FACE_LABEL[FACES[_planOpSelFi]];
-      var bAct='height:36px;flex:1;border:none;border-radius:8px;background:var(--navy);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;';
-      var bInact='height:36px;flex:1;border:1.5px solid rgba(30,45,64,0.2);border-radius:8px;background:var(--white);color:var(--text);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;';
-      html+='<div style="background:rgba(200,169,110,0.1);border:1.5px solid rgba(200,169,110,0.5);border-radius:12px;padding:12px 14px;margin-bottom:12px;">';
-      html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">';
-      html+='<div style="font-size:13px;font-weight:700;color:var(--navy);">'+faceName+'　'+selOp.type+'</div>';
-      html+='<button onclick="_planOpSelFi=null;_planOpSelId=null;renderPlan();" style="font-size:11px;color:var(--text2);background:none;border:1px solid rgba(30,45,64,0.2);border-radius:6px;padding:3px 10px;cursor:pointer;">✕ 閉じる</button>';
-      html+='</div>';
-      if(isDoor5){
-        html+='<div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px;">吊り元</div>';
-        html+='<div style="display:flex;gap:6px;margin-bottom:10px;">';
-        ['left','right'].forEach(function(v){
-          var lbl=v==='left'?'左吊り':'右吊り';
-          var act=(selOp.hinge||'left')===v;
-          html+='<button style="'+(act?bAct:bInact)+'" onclick="setPlanOpAttr('+_planOpSelFi+','+_planOpSelId+',\'hinge\',\''+v+'\')">'+lbl+'</button>';
-        });
-        html+='</div>';
-        html+='<div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px;">開き方向</div>';
-        html+='<div style="display:flex;gap:6px;">';
-        ['in','out'].forEach(function(v){
-          var lbl=v==='in'?'内開き':'外開き';
-          var act=(selOp.swing||'in')===v;
-          html+='<button style="'+(act?bAct:bInact)+'" onclick="setPlanOpAttr('+_planOpSelFi+','+_planOpSelId+',\'swing\',\''+v+'\')">'+lbl+'</button>';
-        });
-        html+='</div>';
-      } else if(isBoth5){
-        html+='<div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px;">開き方向</div>';
-        html+='<div style="display:flex;gap:6px;">';
-        ['in','out'].forEach(function(v){
-          var lbl=v==='in'?'内開き':'外開き';
-          var act=(selOp.swing||'in')===v;
-          html+='<button style="'+(act?bAct:bInact)+'" onclick="setPlanOpAttr('+_planOpSelFi+','+_planOpSelId+',\'swing\',\''+v+'\')">'+lbl+'</button>';
-        });
-        html+='</div>';
-      } else {
-        html+='<div style="font-size:12px;color:var(--text2);">窓・引き違いは属性なし</div>';
-      }
-      html+='</div>';
-    }
-  }
-
   // 平面図モード切替
   html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:10px;">';
   [['none','通常'],['column','柱'],['part_v','縦壁'],['part_h','横壁']].forEach(function(m){
@@ -1057,8 +1081,6 @@ var _partPending = null; // 確定待ちの間仕切り {axis, pos, start, len}
 var _partDrag={active:false, sx:0, sy:0, ex:0, ey:0};
 var _planSelType = null; // 'partition' | 'column'
 var _planSelId   = null; // 選択中のid
-var _planOpSelFi = null; // 平面図でタップした開口部の面インデックス
-var _planOpSelId = null; // 平面図でタップした開口部のid
 
 function movePart(delta){
   var sp=planPartitions.find(function(p){return p.id===_planSelId;});
@@ -1209,13 +1231,6 @@ function rotateCompass(dir){
   renderPlan();
 }
 
-function setPlanOpAttr(fi, id, attr, val){
-  var op=faceOpenings[fi].find(function(o){return o.id===id;}); if(!op) return;
-  pushHistory();
-  op[attr]=val;
-  renderPlan();
-}
-
 function goFace(f){
   saveCurrentInputs();
   curView='face'+f;
@@ -1281,9 +1296,8 @@ function redrawPlan(){
   ctx.setLineDash([]);
 
   // 各面の開口部（平面図表記）
+  // A面（上壁 y=oy-Tpx〜oy）, B面（右壁）, C面（下壁）, D面（左壁）
   drawPlanOpenings(ctx, ox, oy, rw, rd, Tpx, sc);
-  // 各面の設備記号（平面図表記）
-  drawPlanEquips(ctx, ox, oy, rw, rd, Tpx, sc);
 
   // 壁線（内壁）
   ctx.strokeStyle='rgba(30,45,64,0.6)'; ctx.lineWidth=1;
@@ -1448,330 +1462,77 @@ function redrawPlan(){
 }
 
 function drawPlanOpenings(ctx, ox, oy, rw, rd, Tpx, sc){
-  // 展開図の「左/右」が平面図上でどの方向に対応するか
-  // A面(上壁): 展開図左=D側(x小)、展開図右=B側(x大)、室内=下(y大)
-  // B面(右壁): 展開図左=A側(y小)、展開図右=C側(y大)、室内=左(x小)
-  // C面(下壁): 展開図左=B側(x大)、展開図右=D側(x小)、室内=上(y小)
-  // D面(左壁): 展開図左=C側(y大)、展開図右=A側(y小)、室内=右(x大)
-
-  // 各面の設定
-  // wallEdgeOuter: 壁の室外面座標（開口白抜き開始）
-  // dirX/dirY: 開口幅が伸びる方向の単位ベクトル（展開図の左→右）
-  // inX/inY:  室内方向の単位ベクトル（室外面→室内面）
-  var W=roomData.W, D=roomData.D;
-  var faces=[
-    // A面(上): 室外面=oy-Tpx、開口x方向、室内=下(+y)
-    {fi:0, len:rw,
-      getOrigin: function(xR){ return {x:ox+xR*rw, y:oy-Tpx}; },
-      dx:1, dy:0, ix:0, iy:1},
-    // B面(右): 室外面=ox+rw+Tpx、開口y方向、室内=左(-x)
-    {fi:1, len:rd,
-      getOrigin: function(xR){ return {x:ox+rw+Tpx, y:oy+xR*rd}; },
-      dx:0, dy:1, ix:-1, iy:0},
-    // C面(下): 室外面=oy+rd+Tpx、開口-x方向、室内=上(-y)
-    {fi:2, len:rw,
-      getOrigin: function(xR){ return {x:ox+rw-xR*rw, y:oy+rd+Tpx}; },
-      dx:-1, dy:0, ix:0, iy:-1},
-    // D面(左): 室外面=ox-Tpx、開口-y方向、室内=右(+x)
-    {fi:3, len:rd,
-      getOrigin: function(xR){ return {x:ox-Tpx, y:oy+rd-xR*rd}; },
-      dx:0, dy:-1, ix:1, iy:0},
+  // A面(idx=0)：上壁 D方向が面の幅なので openingのxはW方向
+  // 各面の開口部を平面図的に描画
+  var faceConfigs=[
+    // {fi, axis:'h'or'v', wallX, wallY, wallLen, wallT, dir:1=外方向}
+    {fi:0, wallX:ox,      wallY:oy-Tpx, wallLen:rw,  wallT:Tpx, axis:'h', ydir:-1}, // A上
+    {fi:1, wallX:ox+rw,   wallY:oy,     wallLen:rd,  wallT:Tpx, axis:'v', xdir:1},  // B右
+    {fi:2, wallX:ox,      wallY:oy+rd,  wallLen:rw,  wallT:Tpx, axis:'h', ydir:1},  // C下
+    {fi:3, wallX:ox-Tpx,  wallY:oy,     wallLen:rd,  wallT:Tpx, axis:'v', xdir:-1}, // D左
   ];
-
-  faces.forEach(function(cfg){
+  faceConfigs.forEach(function(cfg){
     faceOpenings[cfg.fi].forEach(function(op){
-      var xRatio = op.x / faceW(cfg.fi);
-      var wRatio = op.w / faceW(cfg.fi);
-      var ow = wRatio * cfg.len;      // 開口幅px
-      var ori = cfg.getOrigin(xRatio); // 開口「展開図左端」の室外面座標
-      var col = (cfg.fi===_planOpSelFi&&op.id===_planOpSelId) ? '#b06a00' : 'rgba(30,45,64,0.85)';
-
-      // 4頂点を計算
-      // P0=室外面・展開図左端、P1=室外面・展開図右端
-      // P2=室内面・展開図右端、P3=室内面・展開図左端
-      var p0x=ori.x, p0y=ori.y;
-      var p1x=ori.x+cfg.dx*ow, p1y=ori.y+cfg.dy*ow;
-      var p2x=p1x+cfg.ix*Tpx, p2y=p1y+cfg.iy*Tpx;
-      var p3x=p0x+cfg.ix*Tpx, p3y=p0y+cfg.iy*Tpx;
-
+      var xRatio=op.x/faceW(cfg.fi);
+      var wRatio=op.w/faceW(cfg.fi);
+      var col=(op.id===faceSelId[cfg.fi])?'#b06a00':'rgba(40,40,40,0.85)';
       ctx.save();
-      ctx.strokeStyle=col; ctx.lineWidth=1.5;
-
-      // 外開き時：弧が外壁外面より外に出ないようクリップ
-      // 内開き時：弧が室内にはみ出てOK（クリップなし）
-      if(op.swing==='out'||(!op.swing)){
-        // 外開きは外壁外面から開口幅分だけ外側をクリップ領域とする
-        var clipMargin=ow+Tpx;
-        ctx.beginPath();
-        ctx.rect(ox-clipMargin, oy-clipMargin, rw+clipMargin*2, rd+clipMargin*2);
-        ctx.clip();
-      }
-
-      // 白抜き
-      ctx.fillStyle='#f9f8f6';
-      ctx.beginPath();
-      ctx.moveTo(p0x,p0y); ctx.lineTo(p1x,p1y);
-      ctx.lineTo(p2x,p2y); ctx.lineTo(p3x,p3y);
-      ctx.closePath(); ctx.fill();
-      // 外枠
-      ctx.stroke();
-
-      var t=op.type;
-      if(t==='ドア'||t==='親子ドア'||t==='両開きドア'){
-        _drawDoorPlanXY(ctx, op, t,
-          p0x,p0y, p1x,p1y, p2x,p2y, p3x,p3y,
-          ow, Tpx, cfg.dx,cfg.dy, cfg.ix,cfg.iy, col);
-      } else if(t==='引き違いドア'||t==='スライドドア'){
-        // 引き違い：2本の引き線
-        ctx.lineWidth=1;
-        var mx=(p0x+p3x)/2, my=(p0y+p3y)/2; // 室外面中点
-        var mx2=(p1x+p2x)/2, my2=(p1y+p2y)/2; // 室内面中点
-        // 左寄り線
-        ctx.beginPath();
-        ctx.moveTo(p0x,p0y); ctx.lineTo(p0x+cfg.dx*ow*0.6, p0y+cfg.dy*ow*0.6); ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(mx,my); ctx.lineTo(mx+cfg.dx*ow*0.6, my+cfg.dy*ow*0.6); ctx.stroke();
-        // 右寄り線
-        ctx.beginPath();
-        ctx.moveTo(p2x,p2y); ctx.lineTo(p2x-cfg.dx*ow*0.6, p2y-cfg.dy*ow*0.6); ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(mx2,my2); ctx.lineTo(mx2-cfg.dx*ow*0.6, my2-cfg.dy*ow*0.6); ctx.stroke();
+      ctx.strokeStyle=col; ctx.fillStyle='#ffffff'; ctx.lineWidth=1.5;
+      if(cfg.axis==='h'){
+        var rx=cfg.wallX+xRatio*cfg.wallLen;
+        var ropw=wRatio*cfg.wallLen;
+        // 開口白抜き
+        ctx.fillRect(rx, cfg.wallY, ropw, cfg.wallT);
+        // ドア系は弧、窓系は二重線
+        if(isDoor(op.type)){
+          // ドアの平面表記：弧
+          ctx.strokeStyle=col;
+          ctx.strokeRect(rx, cfg.wallY, ropw, cfg.wallT);
+          ctx.beginPath();
+          if(cfg.ydir<0){
+            ctx.moveTo(rx,cfg.wallY+cfg.wallT);
+            ctx.arc(rx,cfg.wallY+cfg.wallT, ropw, -Math.PI/2, 0);
+          } else {
+            ctx.moveTo(rx,cfg.wallY);
+            ctx.arc(rx,cfg.wallY, ropw, 0, Math.PI/2);
+          }
+          ctx.setLineDash([3,2]); ctx.stroke(); ctx.setLineDash([]);
+        } else {
+          // 窓：外枠＋内枠
+          ctx.strokeRect(rx, cfg.wallY, ropw, cfg.wallT);
+          var gi=Tpx*0.25;
+          ctx.lineWidth=0.8;
+          ctx.strokeRect(rx+gi, cfg.wallY+gi, ropw-gi*2, cfg.wallT-gi*2);
+        }
       } else {
-        // 窓類：内枠（二重線）
-        var gi=Math.max(1.5, Tpx*0.22);
-        var q0x=p0x+cfg.dx*gi+cfg.ix*gi, q0y=p0y+cfg.dy*gi+cfg.iy*gi;
-        var q1x=p1x-cfg.dx*gi+cfg.ix*gi, q1y=p1y-cfg.dy*gi+cfg.iy*gi;
-        var q2x=p2x-cfg.dx*gi-cfg.ix*gi, q2y=p2y-cfg.dy*gi-cfg.iy*gi;
-        var q3x=p3x+cfg.dx*gi-cfg.ix*gi, q3y=p3y+cfg.dy*gi-cfg.iy*gi;
-        ctx.lineWidth=0.8;
-        ctx.beginPath();
-        ctx.moveTo(q0x,q0y); ctx.lineTo(q1x,q1y);
-        ctx.lineTo(q2x,q2y); ctx.lineTo(q3x,q3y);
-        ctx.closePath(); ctx.stroke();
+        var ry=cfg.wallY+xRatio*cfg.wallLen;
+        var ropd=wRatio*cfg.wallLen;
+        ctx.fillRect(cfg.wallX, ry, cfg.wallT, ropd);
+        if(isDoor(op.type)){
+          ctx.strokeRect(cfg.wallX, ry, cfg.wallT, ropd);
+          ctx.beginPath();
+          if(cfg.xdir>0){
+            ctx.moveTo(cfg.wallX, ry);
+            ctx.arc(cfg.wallX, ry, ropd, 0, Math.PI/2);
+          } else {
+            ctx.moveTo(cfg.wallX+cfg.wallT, ry);
+            ctx.arc(cfg.wallX+cfg.wallT, ry, ropd, Math.PI/2, Math.PI);
+          }
+          ctx.setLineDash([3,2]); ctx.stroke(); ctx.setLineDash([]);
+        } else {
+          ctx.strokeRect(cfg.wallX, ry, cfg.wallT, ropd);
+          var gi2=Tpx*0.25;
+          ctx.lineWidth=0.8;
+          ctx.strokeRect(cfg.wallX+gi2, ry+gi2, cfg.wallT-gi2*2, ropd-gi2*2);
+        }
       }
       ctx.restore();
     });
   });
-}
-
-// ── 平面図ドア描画（かめさんロジック）──
-//
-// 【ロジック】
-// 1. 壁厚センターライン上に「吊元点」「戸先点」を決める
-//    吊元: hinge=left → 開口左端センター、right → 開口右端センター
-//    戸先: 吊元の反対側センター
-// 2. 吊元から内or外方向（直角）に ドア幅の点線（開いた扉板）
-//    先端 = 吊元 + (内外方向) × ドア幅
-// 3. 弧 = 先端 〜 戸先センター点（吊元を中心に）
-//
-// センターY（壁厚の中心）: p0 + ix*Tpx/2
-// dx/dy: 開口の左→右方向、ix/iy: 室外→室内方向
-function _drawDoorPlanXY(ctx, op, t, p0x,p0y, p1x,p1y, p2x,p2y, p3x,p3y, ow, Tpx, dx,dy, ix,iy, col){
-  var hinge = op.hinge||'left';
-  var swing = op.swing||'in';
-  ctx.strokeStyle = col;
-
-  // 壁厚センターライン上の各点
-  // 左センター = p0 + ix*Tpx/2
-  var lcx = p0x + ix*Tpx/2, lcy = p0y + iy*Tpx/2;
-  // 右センター = p1 + ix*Tpx/2
-  var rcx = p1x + ix*Tpx/2, rcy = p1y + iy*Tpx/2;
-
-  // 吊元点・戸先点
-  var hcx,hcy, tcx,tcy;
-  if(hinge==='left'){
-    hcx=lcx; hcy=lcy; // 吊元=左センター
-    tcx=rcx; tcy=rcy; // 戸先=右センター
-  } else {
-    hcx=rcx; hcy=rcy; // 吊元=右センター
-    tcx=lcx; tcy=lcy; // 戸先=左センター
-  }
-
-  // 内外方向の単位ベクトル
-  var swIx = swing==='in' ? ix  : -ix;
-  var swIy = swing==='in' ? iy  : -iy;
-
-  if(t==='両開きドア'){
-    // 中央センター点
-    var mcx=(lcx+rcx)/2, mcy=(lcy+rcy)/2;
-    var half=ow/2;
-    // 左半扉：吊元=左センター、戸先=中央
-    _drawOneDoor(ctx, lcx,lcy, mcx,mcy, half, swIx,swIy, col);
-    // 右半扉：吊元=右センター、戸先=中央
-    _drawOneDoor(ctx, rcx,rcy, mcx,mcy, half, swIx,swIy, col);
-    return;
-  }
-
-  // 片開き・親子共通：まず親扉を描く
-  // 親子ドアの場合、親扉幅=全体の2/3
-  var mainW = (t==='親子ドア') ? ow*2/3 : ow;
-
-  // 親扉の戸先センター点（吊元から開口方向にmainW）
-  var mainTcx, mainTcy;
-  if(hinge==='left'){
-    mainTcx = lcx + dx*mainW;
-    mainTcy = lcy + dy*mainW;
-  } else {
-    mainTcx = rcx - dx*mainW;
-    mainTcy = rcy - dy*mainW;
-  }
-
-  _drawOneDoor(ctx, hcx,hcy, mainTcx,mainTcy, mainW, swIx,swIy, col);
-
-  // 親子ドア：子扉（1/3幅）、吊元=親扉と逆の端、戸先=親扉の戸先と同じ点
-  if(t==='親子ドア'){
-    var subW=ow/3;
-    // 子扉の吊元=開口の反対端センター（親扉とは逆）
-    var subHcx = hinge==='left' ? rcx : lcx;
-    var subHcy = hinge==='left' ? rcy : lcy;
-    // 子扉の戸先=親扉の戸先と同じ点（合わせ目）
-    ctx.save(); ctx.lineWidth=1;
-    _drawOneDoor(ctx, subHcx,subHcy, mainTcx,mainTcy, subW, swIx,swIy, col);
-    ctx.restore();
-  }
-}
-
-// 1枚のドアを描く
-// (hcx,hcy): 吊元センター点
-// (tcx,tcy): 戸先センター点
-// dw: ドア幅px
-// swIx,swIy: 開き方向（内or外）単位ベクトル
-function _drawOneDoor(ctx, hcx,hcy, tcx,tcy, dw, swIx,swIy, col){
-  ctx.strokeStyle=col;
-
-  // 扉板の先端（吊元から開き方向にドア幅分）
-  var tipx=hcx+swIx*dw, tipy=hcy+swIy*dw;
-
-  // 扉板（点線）：吊元 → 先端
-  ctx.beginPath(); ctx.moveTo(hcx,hcy); ctx.lineTo(tipx,tipy);
-  ctx.setLineDash([3,2]); ctx.stroke(); ctx.setLineDash([]);
-
-  // 弧：吊元を中心、先端 〜 戸先センター点
-  var startA = Math.atan2(tipy-hcy, tipx-hcx);
-  var endA   = Math.atan2(tcy-hcy,  tcx-hcx);
-  // 時計/反時計：外積で判定
-  var cross=(tipx-hcx)*(tcy-hcy)-(tipy-hcy)*(tcx-hcx);
-  var ccw = cross < 0;
-  ctx.beginPath();
-  ctx.arc(hcx, hcy, dw, startA, endA, ccw);
-  ctx.setLineDash([3,2]); ctx.stroke(); ctx.setLineDash([]);
 }
 
 function isDoor(type){
   return type==='ドア'||type==='親子ドア'||type==='両開きドア'||type==='引き違いドア'||type==='スライドドア';
-}
-
-// ══════════════════════════════════════════
-//  平面図 設備記号描画
-// ══════════════════════════════════════════
-function drawPlanEquips(ctx, ox, oy, rw, rd, Tpx, sc){
-  // 各面の設定
-  // getCtr: 壁の室内面座標を返す（記号はここから室内側に描く）
-  var faces=[
-    {fi:0, getCtr:function(xR){ return {x:ox+xR*rw,    y:oy      }; }, ix:0,  iy:1 }, // A面：室内面=oy
-    {fi:1, getCtr:function(xR){ return {x:ox+rw,        y:oy+xR*rd}; }, ix:-1, iy:0 }, // B面：室内面=ox+rw
-    {fi:2, getCtr:function(xR){ return {x:ox+rw-xR*rw, y:oy+rd   }; }, ix:0,  iy:-1}, // C面：室内面=oy+rd
-    {fi:3, getCtr:function(xR){ return {x:ox,           y:oy+rd-xR*rd}; }, ix:1, iy:0 }, // D面：室内面=ox
-  ];
-
-  var sz = Math.max(6, Tpx*0.55); // 記号サイズ
-  var out = sz/2 + 1;             // 室内面からの飛び出し量（記号が壁に掛からない）
-
-  faces.forEach(function(cfg){
-    faceEquips[cfg.fi].forEach(function(eq){
-      // 展開図のX位置をセンター座標に変換
-      var xCtrRatio = (eq.x + eq.w/2) / faceW(cfg.fi);
-      var ctr = cfg.getCtr(xCtrRatio);
-      var cx=ctr.x, cy=ctr.y;
-      var ix=cfg.ix, iy=cfg.iy;
-
-      // 室内面からoutだけ室内側に入った位置が記号中心
-      var mx=cx+ix*out, my=cy+iy*out;
-
-      ctx.save();
-      ctx.strokeStyle='rgba(30,45,64,0.8)';
-      ctx.fillStyle='rgba(255,255,255,0.9)';
-      ctx.lineWidth=1;
-
-      var id=eq.typeId;
-
-      if(id==='outlet'){
-        // コンセント：小四角＋斜め線
-        var hw=sz/2;
-        ctx.fillRect(mx-hw, my-hw, sz, sz);
-        ctx.strokeRect(mx-hw, my-hw, sz, sz);
-        // 斜め線2本
-        ctx.beginPath();
-        ctx.moveTo(mx-hw+1, my+hw-1); ctx.lineTo(mx+hw-1, my-hw+1);
-        ctx.stroke();
-
-      } else if(id==='switch'||id==='switch3'){
-        // スイッチ：丸＋S or 3
-        ctx.beginPath(); ctx.arc(mx,my,sz/2,0,Math.PI*2);
-        ctx.fill(); ctx.stroke();
-        ctx.fillStyle='rgba(30,45,64,0.85)';
-        ctx.font='bold '+Math.round(sz*0.7)+'px Meiryo,sans-serif';
-        ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.fillText(id==='switch'?'S':'3', mx, my);
-
-      } else if(id==='bracket'){
-        // ブラケット：壁から飛び出た半円
-        var r2=sz/2;
-        ctx.beginPath();
-        // 室内方向に半円
-        var baseA=Math.atan2(iy,ix)-Math.PI/2;
-        ctx.arc(mx, my, r2, baseA, baseA+Math.PI);
-        ctx.fill(); ctx.stroke();
-        // 壁面線
-        ctx.beginPath();
-        ctx.moveTo(cx-iy*sz/2, cy+ix*sz/2);
-        ctx.lineTo(cx+iy*sz/2, cy-ix*sz/2);
-        ctx.stroke();
-
-      } else if(id==='fan_round'||id==='fan_ceil_r'){
-        // 換気扇（丸）：丸＋×
-        var r3=sz/2;
-        ctx.beginPath(); ctx.arc(mx,my,r3,0,Math.PI*2);
-        ctx.fill(); ctx.stroke();
-        ctx.strokeStyle='rgba(30,45,64,0.6)'; ctx.lineWidth=0.8;
-        ctx.beginPath();
-        ctx.moveTo(mx-r3*0.6,my-r3*0.6); ctx.lineTo(mx+r3*0.6,my+r3*0.6);
-        ctx.moveTo(mx+r3*0.6,my-r3*0.6); ctx.lineTo(mx-r3*0.6,my+r3*0.6);
-        ctx.stroke();
-
-      } else if(id==='fan_sq'||id==='fan_ceil_s'){
-        // 換気扇（角）：四角＋×
-        var hw2=sz/2;
-        ctx.fillRect(mx-hw2,my-hw2,sz,sz);
-        ctx.strokeRect(mx-hw2,my-hw2,sz,sz);
-        ctx.strokeStyle='rgba(30,45,64,0.6)'; ctx.lineWidth=0.8;
-        ctx.beginPath();
-        ctx.moveTo(mx-hw2+1,my-hw2+1); ctx.lineTo(mx+hw2-1,my+hw2-1);
-        ctx.moveTo(mx+hw2-1,my-hw2+1); ctx.lineTo(mx-hw2+1,my+hw2-1);
-        ctx.stroke();
-
-      } else if(id==='ac_wall'){
-        // エアコン：実寸600×250mmをscで換算
-        var acW=600*sc, acD=250*sc;
-        var tx2=-iy, ty2=ix; // 壁面接線方向
-        ctx.fillStyle='rgba(200,230,255,0.9)';
-        ctx.save();
-        ctx.translate(cx+ix*acD/2, cy+iy*acD/2);
-        ctx.rotate(Math.atan2(ty2,tx2));
-        ctx.fillRect(-acW/2,-acD/2,acW,acD);
-        ctx.strokeRect(-acW/2,-acD/2,acW,acD);
-        // ルーバー線
-        ctx.lineWidth=0.5; ctx.strokeStyle='rgba(30,45,64,0.4)';
-        for(var li=1;li<=4;li++){
-          var lx2=-acW/2+acW*li/5;
-          ctx.beginPath(); ctx.moveTo(lx2,-acD/2); ctx.lineTo(lx2,acD/2); ctx.stroke();
-        }
-        ctx.restore();
-      }
-
-      ctx.restore();
-    });
-  });
 }
 
 function drawCompass(ctx, cx, cy, r){
@@ -2333,54 +2094,6 @@ function showMP(){
 }
 function hideMP(){var w=document.getElementById('mpanel-wrap');if(w) w.style.display='none';}
 
-// ── 展開図 間仕切り断面 移動パネル ──
-function showMPPart(){
-  var w=document.getElementById('mpanel-wrap'); if(!w) return;
-  updMPPart(); w.style.display='block';
-}
-function hideMPPart(){
-  var w=document.getElementById('mpanel-wrap');
-  if(w){w.innerHTML='';w.style.display='none';}
-  facePartSelId=null;
-}
-function updMPPart(){
-  var p=planPartitions.find(function(p){return p.id===facePartSelId;}); if(!p) return;
-  var w=document.getElementById('mpanel-wrap'); if(!w) return;
-  var halfT=Math.round((p.t||roomData.wallT)/2);
-  var maxPos=p.axis==='v'?roomData.W:roomData.D;
-  var distL=p.pos-halfT, distR=maxPos-p.pos-halfT;
-  var label=p.axis==='v'?'縦壁 X:'+p.pos+'mm':'横壁 Y:'+p.pos+'mm';
-  var bS='height:40px;flex:1;border:1.5px solid rgba(30,45,64,0.2);border-radius:8px;background:var(--white);font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;';
-  var h=''
-    +'<div style="background:rgba(30,45,64,0.07);border:1px solid rgba(30,45,64,0.15);border-radius:12px;padding:10px 12px;margin-bottom:10px;">'
-      +'<div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px;">間仕切り断面　'+label+'</div>'
-      +'<div style="display:flex;gap:6px;margin-bottom:6px;">'
-        +'<button style="'+bS+'" onclick="moveFacePart(-100)">◀◀ 100</button>'
-        +'<button style="'+bS+'" onclick="moveFacePart(-10)">◀ 10</button>'
-        +'<button style="'+bS+'" onclick="moveFacePart(10)">10 ▶</button>'
-        +'<button style="'+bS+'" onclick="moveFacePart(100)">100 ▶▶</button>'
-      +'</div>'
-      +'<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);padding:0 2px;">'
-        +'<span>左端から '+distL+'mm</span>'
-        +'<span>右端から '+distR+'mm</span>'
-      +'</div>'
-      +'<div style="margin-top:8px;text-align:right;">'
-        +'<button onclick="hideMPPart();redraw();" style="font-size:11px;color:var(--text2);background:none;border:1px solid rgba(30,45,64,0.15);border-radius:6px;padding:3px 10px;cursor:pointer;">閉じる</button>'
-      +'</div>'
-    +'</div>';
-  w.innerHTML=h;
-}
-function moveFacePart(delta){
-  var p=planPartitions.find(function(p){return p.id===facePartSelId;}); if(!p) return;
-  pushHistory();
-  var halfT=Math.round((p.t||roomData.wallT)/2);
-  var maxPos=p.axis==='v'?roomData.W:roomData.D;
-  var newPos=p.pos+delta;
-  if(newPos-halfT<0||newPos+halfT>maxPos) return;
-  p.pos=newPos;
-  updMPPart(); redraw();
-}
-
 function updMP(){
   var op=getOps().find(function(o){return o.id===faceSelId[curFaceIdx];}); if(!op) return;
   var d=odists(op);
@@ -2412,72 +2125,12 @@ function updMP(){
         +'<div class="mpc-cell"><div class="mpc-lbl">高さ mm</div>'
         +'<input type="number" id="op-h-inp" value="'+op.h+'" inputmode="numeric" style="width:100%;height:32px;border:1.5px solid rgba(176,106,0,0.4);border-radius:6px;padding:0 6px;font-size:13px;font-family:inherit;color:var(--top);text-align:center;background:#fff;" oninput="resizeOp(&apos;h&apos;,this.value)"></div>'
       +'</div>'
-      +_doorAttrHTML(op)
     +'</div>';
   document.getElementById('mpanel-wrap').innerHTML=h;
   renderPlacedList();
 }
 
 function setMvStep(s){moveStep=s; if(curView==='ceil') updMPCeil(); else updMP();}
-
-// ドア属性UIのHTML生成
-function _doorAttrHTML(op){
-  var t=op.type;
-  var isDoor4=t==='ドア'||t==='親子ドア';
-  var isBoth=t==='両開きドア';
-  var isSlide=t==='引き違いドア'||t==='スライドドア';
-  if(!isDoor4&&!isBoth&&!isSlide) return '';
-
-  var bS='height:34px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;flex:1;';
-  var actS=bS+'border:none;background:var(--navy);color:#fff;';
-  var inactS=bS+'border:1.5px solid rgba(30,45,64,0.2);background:var(--white);color:var(--text);';
-
-  var html='<div style="margin-top:10px;border-top:1px solid rgba(30,45,64,0.1);padding-top:8px;">';
-  html+='<div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:6px;">📐 平面記号設定</div>';
-
-  if(isDoor4){
-    // 吊り元
-    html+='<div style="font-size:11px;color:var(--text2);margin-bottom:4px;">吊り元</div>';
-    html+='<div style="display:flex;gap:5px;margin-bottom:8px;">';
-    ['left','right'].forEach(function(v){
-      var lbl=v==='left'?'左吊り':'右吊り';
-      var act=(op.hinge||'left')===v;
-      html+='<button style="'+(act?actS:inactS)+'" onclick="setOpAttr(\'hinge\',\''+v+'\')">'+lbl+'</button>';
-    });
-    html+='</div>';
-    // 内外
-    html+='<div style="font-size:11px;color:var(--text2);margin-bottom:4px;">開き方向</div>';
-    html+='<div style="display:flex;gap:5px;">';
-    ['in','out'].forEach(function(v){
-      var lbl=v==='in'?'内開き':'外開き';
-      var act=(op.swing||'in')===v;
-      html+='<button style="'+(act?actS:inactS)+'" onclick="setOpAttr(\'swing\',\''+v+'\')">'+lbl+'</button>';
-    });
-    html+='</div>';
-  } else if(isBoth){
-    html+='<div style="font-size:11px;color:var(--text2);margin-bottom:4px;">開き方向</div>';
-    html+='<div style="display:flex;gap:5px;">';
-    ['in','out'].forEach(function(v){
-      var lbl=v==='in'?'内開き':'外開き';
-      var act=(op.swing||'in')===v;
-      html+='<button style="'+(act?actS:inactS)+'" onclick="setOpAttr(\'swing\',\''+v+'\')">'+lbl+'</button>';
-    });
-    html+='</div>';
-  } else if(isSlide){
-    html+='<div style="font-size:11px;color:var(--text2);">引き違い・スライド：平面図に引き線を表示</div>';
-  }
-  html+='</div>';
-  return html;
-}
-
-// 開口部属性変更（展開図パネルから）
-function setOpAttr(attr, val){
-  var op=getOps().find(function(o){return o.id===faceSelId[curFaceIdx];}); if(!op) return;
-  pushHistory();
-  op[attr]=val;
-  updMP();
-  redraw();
-}
 
 function resizeOp(axis,val){
   pushHistory();
@@ -2690,7 +2343,6 @@ function resizeEq(axis,val){
         var info2=_planSc(); if(!info2) return;
         var mmX=((_partDrag.sx-info2.ox)/info2.sc);
         var mmY=((_partDrag.sy-info2.oy)/info2.sc);
-        var rw=roomData.W*info2.sc, rd=roomData.D*info2.sc;
         var hit=false;
         var halfT=Math.round(roomData.wallT/2)+20;
         for(var pi=planPartitions.length-1;pi>=0;pi--){
@@ -2701,50 +2353,17 @@ function resizeEq(axis,val){
           } else {
             hit2=mmY>=p.pos-halfT&&mmY<=p.pos+halfT&&mmX>=p.start&&mmX<=p.start+p.len;
           }
-          if(hit2){ _planSelType='partition'; _planSelId=p.id; _planOpSelFi=null; _planOpSelId=null; hit=true; break; }
+          if(hit2){ _planSelType='partition'; _planSelId=p.id; hit=true; break; }
         }
         if(!hit){
           for(var ci=planColumns.length-1;ci>=0;ci--){
             var c=planColumns[ci];
             if(mmX>=c.x&&mmX<=c.x+c.w&&mmY>=c.y&&mmY<=c.y+c.d){
-              _planSelType='column'; _planSelId=c.id; _planOpSelFi=null; _planOpSelId=null; hit=true; break;
+              _planSelType='column'; _planSelId=c.id; hit=true; break;
             }
           }
         }
-        // 開口部タップ判定（壁面上）
-        if(!hit){
-          var sc2=info2.sc, ox2=info2.ox, oy2=info2.oy;
-          var Tpx2=roomData.wallT*sc2;
-          var tapPx=_partDrag.sx, tapPy=_partDrag.sy;
-          // rw/rdはすでにpx換算済み（roomData.W/D * sc2）
-          var faceTapCfg=[
-            {fi:0, wallPx:ox2,       wallPy:oy2-Tpx2, lenPx:rw, tPx:Tpx2, axis:'h'},
-            {fi:1, wallPx:ox2+rw,    wallPy:oy2,      lenPx:rd, tPx:Tpx2, axis:'v'},
-            {fi:2, wallPx:ox2,       wallPy:oy2+rd,   lenPx:rw, tPx:Tpx2, axis:'h'},
-            {fi:3, wallPx:ox2-Tpx2,  wallPy:oy2,      lenPx:rd, tPx:Tpx2, axis:'v'},
-          ];
-          for(var fi2=0;fi2<faceTapCfg.length&&!hit;fi2++){
-            var fc=faceTapCfg[fi2];
-            for(var oi=faceOpenings[fc.fi].length-1;oi>=0;oi--){
-              var op2=faceOpenings[fc.fi][oi];
-              var xR2=op2.x/faceW(fc.fi), wR2=op2.w/faceW(fc.fi);
-              var hx,hy,hw,hh;
-              if(fc.axis==='h'){
-                hx=fc.wallPx+xR2*fc.lenPx; hy=fc.wallPy;
-                hw=wR2*fc.lenPx; hh=fc.tPx;
-              } else {
-                hx=fc.wallPx; hy=fc.wallPy+xR2*fc.lenPx;
-                hw=fc.tPx; hh=wR2*fc.lenPx;
-              }
-              if(tapPx>=hx&&tapPx<=hx+hw&&tapPy>=hy&&tapPy<=hy+hh){
-                _planOpSelFi=fc.fi; _planOpSelId=op2.id;
-                _planSelType=null; _planSelId=null;
-                hit=true; break;
-              }
-            }
-          }
-        }
-        if(!hit){ _planSelType=null; _planSelId=null; _planOpSelFi=null; _planOpSelId=null; }
+        if(!hit){ _planSelType=null; _planSelId=null; }
         renderPlan();
       } else {
         // ドラッグ → 寸法線移動確定（_dimBaseをクリア）
@@ -2919,7 +2538,7 @@ document.addEventListener('click',function(e){
     if(px>=rx&&px<=rx+rw3&&py>=ry2&&py<=ry2+rh2){hit=o.id;break;}
   }
   if(hit!==null){
-    faceEqSelId[curFaceIdx]=null; facePartSelId=null; selOp(hit);
+    faceEqSelId[curFaceIdx]=null; selOp(hit);
   } else {
     var eqHit=null;
     for(var j=getEquips().length-1;j>=0;j--){
@@ -2928,50 +2547,10 @@ document.addEventListener('click',function(e){
       if(px>=erx&&px<=erx+erw&&py>=ery&&py<=ery+erh){eqHit=eq.id;break;}
     }
     if(eqHit!==null){
-      faceSelId[curFaceIdx]=null; facePartSelId=null; selEq(eqHit);
+      faceSelId[curFaceIdx]=null; selEq(eqHit);
     } else {
-      // 間仕切り断面タップ判定
-      var partHit=null;
-      var fi=curFaceIdx;
-      var T2=roomData.wallT;
-      planPartitions.forEach(function(p){
-        var secX=null, secW2=null;
-        if(fi===0||fi===2){
-          if(p.axis==='v'){
-            var touchesA=(p.start<=0), touchesC=(p.start+p.len>=roomData.D);
-            if((fi===0&&touchesA)||(fi===2&&touchesC)){
-              var posX2=fi===0?p.pos:(roomData.W-p.pos);
-              secX=ox+posX2*sc-(p.t||T2)*sc/2;
-              secW2=(p.t||T2)*sc;
-            }
-          }
-        } else {
-          if(p.axis==='h'){
-            var touchesB=(p.start+p.len>=roomData.W), touchesD=(p.start<=0);
-            if((fi===1&&touchesB)||(fi===3&&touchesD)){
-              var posInFace2=fi===1?p.pos:(roomData.D-p.pos);
-              secX=ox+posInFace2*sc-(p.t||T2)*sc/2;
-              secW2=(p.t||T2)*sc;
-            }
-          }
-        }
-        if(secX!==null){
-          var pad=Math.max(10, secW2);
-          if(px>=secX-pad&&px<=secX+secW2+pad&&py>=oy&&py<=oy+H*sc){
-            partHit=p.id;
-          }
-        }
-      });
-      if(partHit!==null){
-        faceSelId[curFaceIdx]=null; faceEqSelId[curFaceIdx]=null;
-        facePartSelId=partHit;
-        hideMP(); hideMPEq();
-        renderPlacedList(); showMPPart(); redraw();
-      } else {
-        faceSelId[curFaceIdx]=null; faceEqSelId[curFaceIdx]=null;
-        facePartSelId=null;
-        hideMP();hideMPEq();hideMPPart();renderPlacedList();redraw();
-      }
+      faceSelId[curFaceIdx]=null;faceEqSelId[curFaceIdx]=null;
+      hideMP();hideMPEq();renderPlacedList();redraw();
     }
   }
 });
@@ -3045,65 +2624,45 @@ function redraw(){
   }
 
   // 間仕切り断面（交差する壁を展開図に表示）
-  // 展開図は常に「室内から外壁を睨む」視点
-  // A面：左=D側(X=0)→右=B側(X=W)  → posをそのまま使用
-  // C面：左=B側(X=W)→右=D側(X=0)  → W-posに反転
-  // B面：左=A側(Y=0)→右=C側(Y=D)  → posをそのまま使用
-  // D面：左=C側(Y=D)→右=A側(Y=0)  → D-posに反転
   var faceIdx=curFaceIdx; // 0=A,1=B,2=C,3=D
   var T2=roomData.wallT;
   planPartitions.forEach(function(p){
     var secX=null, secW2=null;
     if(faceIdx===0||faceIdx===2){
-      // A面・C面：縦壁(v)が交差
+      // A面(上)・C面(下)：縦壁(v)が交差
       if(p.axis==='v'){
         var touchesA=(p.start<=0);
         var touchesC=(p.start+p.len>=roomData.D);
         if((faceIdx===0&&touchesA)||(faceIdx===2&&touchesC)){
-          // A面：そのまま / C面：W-posで反転
-          var posX=faceIdx===0 ? p.pos : (roomData.W-p.pos);
-          secX=ox+posX*sc-(p.t||T2)*sc/2;
+          secX=ox+p.pos*sc-(p.t||T2)*sc/2;
           secW2=(p.t||T2)*sc;
         }
       }
     } else {
-      // B面・D面：横壁(h)が交差
+      // B面(右)・D面(左)：横壁(h)が交差
       if(p.axis==='h'){
         var touchesB=(p.start+p.len>=roomData.W);
         var touchesD=(p.start<=0);
         if((faceIdx===1&&touchesB)||(faceIdx===3&&touchesD)){
-          // B面：そのまま / D面：D-posで反転
-          var posInFace=faceIdx===1 ? p.pos : (roomData.D-p.pos);
+          var posInFace=faceIdx===1?(roomData.D-p.pos):p.pos;
           secX=ox+posInFace*sc-(p.t||T2)*sc/2;
           secW2=(p.t||T2)*sc;
         }
       }
     }
     if(secX!==null){
-      var isSel=(p.id===facePartSelId);
       ctx.save();
       ctx.beginPath();ctx.rect(secX,oy,secW2,rh);ctx.clip();
-      ctx.fillStyle=isSel?'rgba(200,169,110,0.35)':'rgba(30,45,64,0.2)';
+      ctx.fillStyle='rgba(30,45,64,0.2)';
       ctx.fillRect(secX,oy,secW2,rh);
       // ハッチング
-      ctx.strokeStyle=isSel?'rgba(200,169,110,0.5)':'rgba(30,45,64,0.2)'; ctx.lineWidth=0.8;
+      ctx.strokeStyle='rgba(30,45,64,0.2)'; ctx.lineWidth=0.8;
       for(var hi=-rh;hi<secW2+rh;hi+=7){
         ctx.beginPath();ctx.moveTo(secX+hi,oy);ctx.lineTo(secX+hi+rh,oy+rh);ctx.stroke();
       }
       ctx.restore();
-      ctx.strokeStyle=isSel?'var(--accent)':'rgba(30,45,64,0.5)';
-      ctx.lineWidth=isSel?2:1;
+      ctx.strokeStyle='rgba(30,45,64,0.5)'; ctx.lineWidth=1;
       ctx.strokeRect(secX,oy,secW2,rh);
-      // 選択時：寸法ラベル
-      if(isSel){
-        ctx.fillStyle='rgba(200,169,110,0.9)';
-        ctx.font='bold 9px Meiryo,sans-serif';
-        ctx.textAlign='center'; ctx.textBaseline='top';
-        var halfT3=Math.round((p.t||T2)/2);
-        var posDisp=faceIdx===0||faceIdx===1?p.pos:(faceIdx===2?roomData.W-p.pos:roomData.D-p.pos);
-        ctx.fillText((posDisp-halfT3)+'mm', secX-16, oy+4);
-        ctx.fillText((posDisp-halfT3)+'mm', secX+secW2+16, oy+4);
-      }
     }
   });
 
@@ -3526,6 +3085,144 @@ function showWaToast(msg){
 renderMain();
 _updateUndoBtn();
 window.addEventListener('resize',function(){ setTimeout(redraw,50); });
+var _bleDevice    = null;
+var _bleChar      = null;
+var _bleConnected = false;
+var _bleTarget    = 'W'; // 'W'|'D'|'H'|'PL'
+
+// Bosch GLM BLE UUIDs（GLM 50-27CG）
+var BLE_SERVICE_UUID  = '00005301-0000-0041-4c50-534146455359';
+var BLE_CHAR_UUID     = '00005302-0000-0041-4c50-534146455359';
+
+function openBleModal(){
+  document.getElementById('ble-modal').classList.remove('hidden');
+  _updateBleUI();
+}
+function closeBleModal(e){
+  if(e&&e.target!==document.getElementById('ble-modal')) return;
+  document.getElementById('ble-modal').classList.add('hidden');
+}
+
+function setBleTarget(t){
+  _bleTarget=t;
+  ['W','D','H','PL'].forEach(function(k){
+    var b=document.getElementById('bt-'+k);
+    if(b) b.className='ble-target'+(k===t?' active':'');
+  });
+}
+
+function _updateBleUI(){
+  var dot=document.getElementById('ble-dot');
+  var txt=document.getElementById('ble-status-text');
+  var btn=document.getElementById('ble-connect-btn');
+  var lbl=document.getElementById('ble-label');
+  var icon=document.getElementById('ble-icon');
+  if(_bleConnected){
+    if(dot){ dot.style.background='#2db55d'; dot.style.boxShadow='0 0 6px #2db55d'; }
+    if(txt) txt.textContent=(_bleDevice?_bleDevice.name:'GLM')+' 接続中';
+    if(btn){ btn.textContent='接続済み'; btn.style.background='#2db55d'; }
+    if(lbl){ lbl.textContent='接続中'; lbl.style.color='#2db55d'; }
+    if(icon) icon.setAttribute('stroke','#2db55d');
+  } else {
+    if(dot){ dot.style.background='rgba(30,45,64,0.2)'; dot.style.boxShadow=''; }
+    if(txt) txt.textContent='未接続';
+    if(btn){ btn.textContent='接続'; btn.style.background='var(--navy)'; }
+    if(lbl){ lbl.textContent='GLM'; lbl.style.color='rgba(255,255,255,0.7)'; }
+    if(icon) icon.setAttribute('stroke','rgba(255,255,255,0.7)');
+  }
+}
+
+async function bleConnect(){
+  if(!navigator.bluetooth){
+    showWaToast('⚠ このブラウザはWeb Bluetooth非対応です（Chrome推奨）');
+    return;
+  }
+  var btn=document.getElementById('ble-connect-btn');
+  if(btn){ btn.textContent='スキャン中...'; btn.disabled=true; }
+  try {
+    _bleDevice = await navigator.bluetooth.requestDevice({
+      filters:[{namePrefix:'GLM'}],
+      optionalServices:[BLE_SERVICE_UUID]
+    });
+    _bleDevice.addEventListener('gattserverdisconnected', _onBleDisconnected);
+    var server  = await _bleDevice.gatt.connect();
+    var service = await server.getPrimaryService(BLE_SERVICE_UUID);
+    _bleChar    = await service.getCharacteristic(BLE_CHAR_UUID);
+    await _bleChar.startNotifications();
+    _bleChar.addEventListener('characteristicvaluechanged', _onBleValue);
+    _bleConnected = true;
+    _updateBleUI();
+    showWaToast('✅ GLM接続しました');
+  } catch(e) {
+    if(btn){ btn.textContent='接続'; btn.disabled=false; }
+    if(e.name!=='NotFoundError') showWaToast('接続失敗: '+e.message);
+    _updateBleUI();
+  }
+}
+
+function bleDisconnect(){
+  if(_bleDevice&&_bleDevice.gatt.connected){
+    _bleDevice.gatt.disconnect();
+  }
+  _onBleDisconnected();
+}
+
+function _onBleDisconnected(){
+  _bleConnected=false;
+  _bleChar=null;
+  _updateBleUI();
+  showWaToast('🔵 GLM切断しました');
+}
+
+function _onBleValue(e){
+  // GLM 50-27CGのデータ形式: バイト列から距離(mm)を取得
+  var val=e.target.value;
+  var bytes=new Uint8Array(val.buffer);
+  // Bosch GLMプロトコル: 先頭4バイトがリトルエンディアンで距離(0.1mm単位)
+  var raw=(bytes[3]<<24)|(bytes[2]<<16)|(bytes[1]<<8)|bytes[0];
+  var mm=Math.round(raw/10); // 0.1mm→mm
+  _applyBleValue(mm);
+}
+
+function bleInjectTest(){
+  var inp=document.getElementById('ble-test-input');
+  var mm=parseInt(inp?inp.value:3600)||3600;
+  _applyBleValue(mm);
+}
+
+function _applyBleValue(mm){
+  if(mm<=0||mm>50000) return;
+  var lastEl=document.getElementById('ble-last-val');
+  if(lastEl) lastEl.textContent=mm.toLocaleString()+' mm';
+
+  if(_bleTarget==='W'){
+    roomData.W=mm;
+    var el=document.getElementById('inp-W');
+    if(el) el.value=mm;
+  } else if(_bleTarget==='D'){
+    roomData.D=mm;
+    var el=document.getElementById('inp-D');
+    if(el) el.value=mm;
+  } else if(_bleTarget==='H'){
+    roomData.H=mm;
+    var el=document.getElementById('inp-H');
+    if(el) el.value=mm;
+  } else if(_bleTarget==='PL'){
+    // 間仕切り長さ：選択中の間仕切りに適用
+    if(_planSelId!==null&&_planSelType==='partition'){
+      var sp=planPartitions.find(function(p){return p.id===_planSelId;});
+      if(sp){ pushHistory(); sp.len=mm; }
+    } else {
+      showWaToast('先に平面図で間仕切りを選択してください');
+      return;
+    }
+  }
+  pushHistory();
+  renderMain();
+  showWaToast('📏 '+_bleTarget+' = '+mm.toLocaleString()+'mm をセットしました');
+}
+
+
 </script>
 </body>
 </html>
