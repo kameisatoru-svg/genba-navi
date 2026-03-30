@@ -2583,8 +2583,11 @@ function outlineConfirm(){
   });
 
   pushHistory();
-  roomData.W=Math.round(maxX-minX);
-  roomData.D=Math.round(maxY-minY);
+  roomData._innerW=Math.round(maxX-minX);
+  roomData._innerD=Math.round(maxY-minY);
+  // 外寸=内寸+壁厚（外向きT/2オフセット分×2）
+  roomData.W=Math.round(maxX-minX)+T;
+  roomData.D=Math.round(maxY-minY)+T;
   roomData.H=h;
   roomData._outline=newVerts.map(function(v){return{x:v.x-minX,y:v.y-minY};});
   roomData._setupMode=null;
@@ -3483,6 +3486,9 @@ function redrawCeil(){
   var mL=56, mR=20, mT=20, mB=64;
   var sc=Math.min((CW-mL-mR)/W, 370/D);
   var rw=W*sc, rd=D*sc, CH=rd+mT+mB;
+  var _hasInnerC=(roomData._innerW>0);
+  var iW=_hasInnerC?(roomData._innerW||W):W;
+  var iD=_hasInnerC?(roomData._innerD||D):D;
   var ox=mL, oy=mT;
   var ctx=setupCanvas(cv,CW,CH); ctx.clearRect(0,0,CW,CH);
 
@@ -3649,7 +3655,7 @@ function redrawCeil(){
   [ox,ox+rw].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY-4);ctx.lineTo(tx,dimY+4);ctx.stroke();});
   ctx.fillStyle='rgba(30,45,64,0.6)'; ctx.font='bold 11px Meiryo,sans-serif';
   ctx.textAlign='center'; ctx.textBaseline='top';
-  ctx.fillText(W.toLocaleString()+'mm',ox+rw/2,dimY+5);
+  ctx.fillText(iW.toLocaleString()+'mm',ox+rw/2,dimY+5);
 
   var dimX=ox-22;
   ctx.beginPath();ctx.moveTo(dimX,oy);ctx.lineTo(dimX,oy+rd);ctx.stroke();
@@ -3657,7 +3663,7 @@ function redrawCeil(){
   ctx.save(); ctx.translate(dimX-13,oy+rd/2); ctx.rotate(-Math.PI/2);
   ctx.textAlign='center'; ctx.fillStyle='rgba(30,45,64,0.6)';
   ctx.font='bold 11px Meiryo,sans-serif';
-  ctx.fillText(D.toLocaleString()+'mm',0,0); ctx.restore();
+  ctx.fillText(iD.toLocaleString()+'mm',0,0); ctx.restore();
 
   // 方位記号
   drawCompass(ctx, ox+rw+30, oy, 16);
