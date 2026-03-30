@@ -5254,14 +5254,18 @@ function bleDisconnect(){
   if(_bleDevice&&_bleDevice.gatt.connected){
     _bleDevice.gatt.disconnect();
   }
+  // _bleDeviceをnullにしてforget→再接続時に選択ダイアログが出る
+  if(_bleDevice&&_bleDevice.forget) _bleDevice.forget();
+  _bleDevice=null;
   _onBleDisconnected();
 }
 
 function _onBleDisconnected(){
   _bleConnected=false;
   _bleChar=null;
+  _bleDevice=null;
   _updateBleUI();
-  showWaToast('🔵 GLM切断しました');
+  showWaToast('GLM切断しました');
 }
 
 function _onBleValue(e){
