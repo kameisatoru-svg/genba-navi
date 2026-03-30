@@ -5066,10 +5066,12 @@ function projLoadAddRoom(){
     try{ localStorage.setItem('zumen_lastRoom', JSON.stringify({g:_projGenba,r:rv})); }catch(e){}
     _updateProjLabel();
     projAutoSave();
+    // 新規部屋はフォーム画面（セットアップ選択）から始める
+    _inFormScreen=true;
     curView='plan';
     var sel=document.getElementById('view-select');
     if(sel) sel.value='plan';
-    showWaToast('📂 部屋追加：'+_projGenba+'｜'+rv);
+    showWaToast('部屋追加：'+_projGenba+'｜'+rv);
   }
   closeProjPanel();
   renderMain();
@@ -5094,6 +5096,11 @@ function _resetData(){
   planColumns=[];planColSeq=0;
   planPartitions=[];planPartSeq=0;
   _undoStack=[];_redoStack=[];
+  // 外周モード関連リセット
+  _planMode='none';
+  _outlineVerts=[];_outlineClosed=false;_outlineSelEdge=null;_outlinePreview=null;
+  _outlineDims=[];_outlineAutoCorner=false;_outlineAdjIdx=null;_outlinePhase='input';
+  if(window._outline) window._outline=null;
 }
 
 // ── 内部：データ読込 ──
