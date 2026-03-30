@@ -2585,9 +2585,8 @@ function outlineConfirm(){
   pushHistory();
   roomData._innerW=Math.round(maxX-minX);
   roomData._innerD=Math.round(maxY-minY);
-  // 外寸=内寸+壁厚（外向きT/2オフセット分×2）
-  roomData.W=Math.round(maxX-minX)+T;
-  roomData.D=Math.round(maxY-minY)+T;
+  roomData.W=Math.round(maxX-minX);
+  roomData.D=Math.round(maxY-minY);
   roomData.H=h;
   roomData._outline=newVerts.map(function(v){return{x:v.x-minX,y:v.y-minY};});
   roomData._setupMode=null;
