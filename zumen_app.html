@@ -2787,48 +2787,58 @@ function redrawPlan(){
     });
   });
 
-  // ── 余白・スケール計算（2パス方式でキャンバス収まりを保証）──
+  // ── 余白・スケール計算（反復収束方式）──
+  // sc → Tpx → 必要mL/mB → sc縮小、を収束まで繰り返す
   var mR=20, mT=20;
   var _hasInnerRD=(roomData._innerW>0);
+  var _iWr=_hasInnerRD?(roomData._innerW||W):W;
+  var _iDr=_hasInnerRD?(roomData._innerD||D):D;
+  var _hasHPartR=planPartitions.some(function(p){return p.axis==='h';});
 
-  // ── パス1：暫定sc（mL/mB固定）でTpxを求めmL/mBを決定 ──
-  var _mL1=56, _mB1=56;
-  var _sc1=Math.max(Math.min((CW-_mL1-mR)/W, 370/D), 0.01);
-  var _Tpx1=T*_sc1;
-  // 間仕切りかわし追加余白
-  var _addB1=0;
-  var _hasHPart1=planPartitions.some(function(p){return p.axis==='h';});
-  if(_hasHPart1) _addB1=10; // 横壁下引き出し線とdYのかわし
-  planPartitions.forEach(function(p){
-    if(p.axis!=='v') return;
-    var dO1=(p.dimOffset||0)*_sc1;
-    var _poy1=_hasInnerRD?(mT+_Tpx1/2):mT;
-    var _outerB1=mT+((_hasInnerRD?(roomData._innerD||D):D)*_sc1)+_Tpx1;
-    var vY1=_poy1+(p.start+p.len/2)*_sc1+dO1;
-    var over1=vY1-(_outerB1+6);
-    if(over1>0) _addB1=Math.max(_addB1, over1+10);
-  });
-  // mL：Tpx+外周寸法幅(16)+テキスト(28)+余裕(4) = Tpx+48、ただし最低56
-  var mL=Math.max(56, Math.ceil(_Tpx1)+48);
-  var mB=Math.max(56, Math.ceil(_Tpx1)+42+_addB1);
-
-  // ── パス2：確定sc計算 ──
-  var sc=Math.min((CW-mL-mR)/W, 370/D);
-  // ドア弧余白確認
+  // 反復（最大5回で収束）
+  var mL=60, mB=60, sc=0.01;
+  for(var _iter=0;_iter<5;_iter++){
+    sc=Math.max(Math.min((CW-mL-mR)/W, 370/D), 0.01);
+    var _Tpx=T*sc;
+    var _outerB=mT+_iDr*sc+_Tpx;
+    var _poy=_hasInnerRD?(mT+_Tpx/2):mT;
+    // 必要mL: dX位置=ox-_Tpx-16、テキスト幅≈50px、左端=dX-13-25 >= 0
+    //         → mL >= _Tpx+16+13+25+4 = _Tpx+58
+    var _needML=Math.ceil(_Tpx)+58;
+    // 必要mB: dY位置=outerB+16+shift、テキスト高≈14px、下端=dY+14 <= CH
+    //         shift: 横壁あり→+10、縦壁dimOffset超過分
+    var _shiftB=_hasHPartR?10:0;
+    planPartitions.forEach(function(p){
+      if(p.axis!=='v') return;
+      var _dO=(p.dimOffset||0)*sc;
+      var _vY=_poy+(p.start+p.len/2)*sc+_dO;
+      var _ov=_vY-(_outerB+6);
+      if(_ov>0) _shiftB=Math.max(_shiftB,_ov+10);
+    });
+    // dY下端 = outerB+16+shiftB+14 = mT+_iDr*sc+_Tpx+30+shiftB
+    // これがCH=rd+mT+mB以内 → mB >= _Tpx+30+shiftB
+    var _needMB=Math.ceil(_Tpx)+30+_shiftB;
+    var _newML=Math.max(60,_needML);
+    var _newMB=Math.max(60,_needMB);
+    // ドア弧
+    var _needL2=_Tpx+maxArcL*sc+36, _needB2=_Tpx+maxArcD*sc+36;
+    _newML=Math.max(_newML,Math.ceil(_needL2));
+    _newMB=Math.max(_newMB,Math.ceil(_needB2));
+    if(Math.abs(_newML-mL)<1&&Math.abs(_newMB-mB)<1) break;
+    mL=_newML; mB=_newMB;
+  }
+  // 最終scでドア弧右・上の余白もチェック
   var Tpx0=T*sc;
-  var needL=Tpx0+maxArcL*sc+36, needR=Tpx0+maxArcR*sc+16;
-  var needT=Tpx0+maxArcU*sc+16, needB=Tpx0+maxArcD*sc+36;
-  var scL=needL>mL?sc*(mL/needL):sc, scR=needR>mR?sc*(mR/needR):sc;
-  var scT=needT>mT?sc*(mT/needT):sc, scB=needB>mB?sc*(mB/needB):sc;
-  sc=Math.max(Math.min(sc,scL,scR,scT,scB), 0.01);
+  var scR2=Tpx0+maxArcR*sc+16>mR?sc*(mR/(Tpx0+maxArcR*sc+16)):sc;
+  var scT2=Tpx0+maxArcU*sc+16>mT?sc*(mT/(Tpx0+maxArcU*sc+16)):sc;
+  sc=Math.max(Math.min(sc,scR2,scT2),0.01);
 
   var Tpx=T*sc;
   var rw=W*sc, rd=D*sc;
   var CH=rd+mT+mB;
   var ox=mL, oy=mT;
-  // 内寸基準原点（間仕切り座標系）
-  var iW=_hasInnerRD?(roomData._innerW||W):W;
-  var iD=_hasInnerRD?(roomData._innerD||D):D;
+  // 内寸基準原点
+  var iW=_iWr, iD=_iDr;
   var pox=_hasInnerRD?(ox+Tpx/2):ox;
   var poy=_hasInnerRD?(oy+Tpx/2):oy;
 
@@ -2990,24 +3000,22 @@ function redrawPlan(){
   ctx.fillStyle='rgba(30,45,64,0.75)';
   ctx.lineWidth=1;
 
-  // 外周寸法線かわし：引き出し線と外周寸法線の重なり防止
-  var _dimShiftB=0, _dimShiftL=0;
-  // 横壁がある → 下引き出し線がouterBに接するのでdYを10px外に
-  if(planPartitions.some(function(p){return p.axis==='h';})) _dimShiftB=10;
+  // 外周寸法線 dY（下）・dX（左）の位置決め
+  // かわし量: 横壁あり→+10px、縦壁dimOffset超過分
+  var _shiftBfin=_hasHPartR?10:0;
   planPartitions.forEach(function(p){
     if(p.axis!=='v') return;
-    var dOsc=(p.dimOffset||0)*sc;
-    var vMidY2=poy+(p.start+p.len/2)*sc+dOsc;
-    var overB2=vMidY2-(outerB+6);
-    if(overB2>0) _dimShiftB=Math.max(_dimShiftB, overB2+10);
+    var _dOf=(p.dimOffset||0)*sc;
+    var _vYf=poy+(p.start+p.len/2)*sc+_dOf;
+    var _ovf=_vYf-(outerB+6);
+    if(_ovf>0) _shiftBfin=Math.max(_shiftBfin,_ovf+10);
   });
-
-  var dY=Math.min(outerB+16+_dimShiftB, oy+rd+mB-18); // mB内に収める
+  // dY: outerBから shiftBfin+16 下に、かつCHを超えないようクランプ
+  var dY=Math.min(outerB+16+_shiftBfin, CH-18);
   ctx.beginPath();ctx.moveTo(outerL,dY);ctx.lineTo(outerR,dY);ctx.stroke();
   [outerL,outerR].forEach(function(tx){
     ctx.beginPath();ctx.moveTo(tx,dY-4);ctx.lineTo(tx,dY+4);ctx.stroke();
   });
-  // 補助線
   ctx.strokeStyle='rgba(30,45,64,0.25)'; ctx.lineWidth=0.7; ctx.setLineDash([2,3]);
   ctx.beginPath();ctx.moveTo(outerL,outerB+2);ctx.lineTo(outerL,dY+6);ctx.stroke();
   ctx.beginPath();ctx.moveTo(outerR,outerB+2);ctx.lineTo(outerR,dY+6);ctx.stroke();
@@ -3018,7 +3026,8 @@ function redrawPlan(){
   ctx.fillText(W.toLocaleString()+'mm', (outerL+outerR)/2, dY+5);
 
   // 左：D（外壁外面→外壁外面）
-  var dX=Math.max(outerL-16-_dimShiftL, 4+13); // mL内（x>=17）に収める
+  // dX: outerLから16左、かつx>=17に収める（テキスト縦書き幅確保）
+  var dX=Math.max(outerL-16, 17);
   ctx.beginPath();ctx.moveTo(dX,outerT);ctx.lineTo(dX,outerB);ctx.stroke();
   [outerT,outerB].forEach(function(ty){
     ctx.beginPath();ctx.moveTo(dX-4,ty);ctx.lineTo(dX+4,ty);ctx.stroke();
