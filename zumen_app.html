@@ -430,10 +430,7 @@ canvas{display:block;width:100%;}
 
   <!-- 編集 / 印刷モード -->
   <div class="mode-toggle">
-    <button class="mtb active" id="btn-edit" onclick="setMode('edit')" title="編集">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-    </button>
-    <button class="mtb" id="btn-print" onclick="setMode('print')" title="印刷">
+    <button class="mtb" id="btn-print" onclick="togglePrintMode()" title="印刷モード">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
     </button>
   </div>
@@ -770,11 +767,19 @@ function switchView(v){
   renderMain();
 }
 
+function togglePrintMode(){
+  drawMode = (drawMode==='print') ? 'edit' : 'print';
+  var btn=document.getElementById('btn-print');
+  if(btn) btn.className='mtb'+(drawMode==='print'?' active':'');
+  var del=document.getElementById('eq-del-btn'); if(del) del.style.display='none';
+  redraw();
+}
+
 function setMode(m){
   drawMode=m;
-  document.getElementById('btn-edit').className='mtb'+(m==='edit'?' active':'');
-  document.getElementById('btn-print').className='mtb'+(m==='print'?' active':'');
-  var btn=document.getElementById('eq-del-btn'); if(btn) btn.style.display='none';
+  var btn=document.getElementById('btn-print');
+  if(btn) btn.className='mtb'+(m==='print'?' active':'');
+  var del=document.getElementById('eq-del-btn'); if(del) del.style.display='none';
   redraw();
 }
 
