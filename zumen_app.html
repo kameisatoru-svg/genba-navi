@@ -405,7 +405,7 @@ canvas{display:block;width:100%;}
 
 <div class="header">
   <!-- 戻る -->
-  <button class="btn-back" onclick="goBackToIndex()" title="戻る">
+  <button class="btn-back" onclick="goBackToTop()" title="戻る">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
   </button>
 
@@ -421,10 +421,11 @@ canvas{display:block;width:100%;}
     </select>
   </div>
 
-  <!-- フォーム画面ボタン -->
-  <button id="proj-btn" onclick="goToFormScreen()" style="flex:1;min-width:0;height:38px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:10px;color:var(--white);font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;padding:0 10px;display:flex;align-items:center;gap:6px;overflow:hidden;">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
-    <span id="proj-label" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-align:left;">フォーム画面</span>
+  <!-- プロジェクト名（タップでロールダウン） -->
+  <button id="proj-btn" onclick="toggleProjPanel()" style="flex:1;min-width:0;height:38px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:10px;color:var(--white);font-size:11px;font-family:inherit;cursor:pointer;padding:0 8px;display:flex;align-items:center;gap:4px;overflow:hidden;">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <span id="proj-label" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-align:left;">未保存</span>
+    <span id="proj-arrow" style="font-size:9px;opacity:0.7;flex-shrink:0;">▼</span>
   </button>
 
   <!-- 編集 / 印刷モード -->
@@ -853,153 +854,46 @@ function renderPlan(){
     return;
   }
 
-  // ── フォーム画面（_inFormScreenフラグ、または未設定時）──
-  if(_inFormScreen||(W===0&&D===0&&H===0&&!roomData._setupMode&&!_projGenba)){
+  // ── 未設定時：作成方法の選択画面 ──
+  if(W===0&&D===0&&H===0&&!roomData._setupMode){
 
-    {
-      // localStorageから既存現場を取得してグループ化（更新日時降順）
-      var fKeys=[];
-      for(var fi=0;fi<localStorage.length;fi++){
-        var fk=localStorage.key(fi);
-        if(fk&&fk.indexOf(PROJ_PREFIX)===0) fKeys.push(fk);
-      }
-      fKeys.sort(function(a,b){
-        var da=0,db=0;
-        try{ da=JSON.parse(localStorage.getItem(a)).savedAt||0; }catch(e){}
-        try{ db=JSON.parse(localStorage.getItem(b)).savedAt||0; }catch(e){}
-        return db-da;
-      });
-      var fGroups={}, fGroupOrder=[];
-      fKeys.forEach(function(k){
-        var name=k.replace(PROJ_PREFIX,'');
-        var parts=name.split('|');
-        var fg=parts[0]||'', fr=parts[1]||'';
-        if(!fGroups[fg]){ fGroups[fg]=[]; fGroupOrder.push(fg); }
-        fGroups[fg].push(fr);
-      });
-
-      html+='<div style="padding:20px 16px;">';
-      html+='<div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:4px;">現場名・部屋名を入力してください</div>';
-      html+='<div style="font-size:12px;color:var(--text2);margin-bottom:16px;">作図データの保存先として使用します</div>';
-
-      // 既存現場カテゴリー
-      if(fGroupOrder.length>0){
-        // 検索窓
-        html+='<div style="position:relative;margin-bottom:10px;">';
-        html+='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
-        html+='<input id="form-search" type="text" placeholder="現場名・部屋名で検索" oninput="formSearch()" style="width:100%;height:38px;background:#fff;border:1px solid rgba(30,45,64,0.2);border-radius:8px;color:var(--navy);font-size:13px;font-family:inherit;padding:0 10px 0 32px;outline:none;box-sizing:border-box;">';
-        html+='</div>';
-
-        html+='<div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;letter-spacing:0.05em;">保存済みの現場から選ぶ</div>';
-        html+='<div id="form-genba-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;">';
-        fGroupOrder.forEach(function(fg){
-          var rooms=fGroups[fg];
-          var genbaId='fgg_'+fg.replace(/[^a-zA-Z0-9]/g,'_');
-          html+='<div class="form-genba-item" data-genba="'+fg.replace(/"/g,'&quot;')+'" style="border:1px solid rgba(30,45,64,0.15);border-radius:10px;overflow:hidden;">';
-          // 現場ヘッダー通常行
-          html+='<div id="'+genbaId+'_row" style="display:flex;align-items:center;background:rgba(30,45,64,0.05);">';
-          html+='<button onclick="formToggleGenba(\'fg_'+fg.replace(/[^a-zA-Z0-9]/g,'_')+'\')" style="flex:1;display:flex;align-items:center;gap:8px;padding:10px 12px;background:transparent;border:none;cursor:pointer;font-family:inherit;text-align:left;min-width:0;">';
-          html+='<span style="font-size:11px;color:var(--text2);transition:transform 0.2s;" id="arr_'+fg.replace(/[^a-zA-Z0-9]/g,'_')+'">▶</span>';
-          html+='<span style="display:flex;align-items:center;gap:5px;flex:1;min-width:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span style="font-size:14px;font-weight:700;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+fg+'</span></span>';
-          html+='<span style="font-size:11px;color:var(--text2);flex-shrink:0;">'+rooms.length+'室</span>';
-          html+='</button>';
-          html+='<button onclick="formShowGenbaDelConfirm(\''+genbaId+'\')" style="margin-right:10px;height:36px;width:36px;flex-shrink:0;border:1px solid rgba(229,53,53,0.35);border-radius:8px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;">';
-          html+='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#e53535" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>';
-          html+='</button>';
-          html+='</div>';
-          // 現場削除確認行
-          html+='<div id="'+genbaId+'_confirm" style="display:none;align-items:center;gap:10px;padding:10px 12px;background:rgba(229,53,53,0.07);border-top:1px solid rgba(229,53,53,0.2);">';
-          html+='<span style="flex:1;font-size:12px;color:#c0392b;">「'+fg+'」の全部屋を削除しますか？</span>';
-          html+='<button onclick="formHideGenbaDelConfirm(\''+genbaId+'\')" style="height:34px;padding:0 12px;border:1px solid rgba(30,45,64,0.2);border-radius:8px;background:#fff;color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit;">キャンセル</button>';
-          html+='<button onclick="formDeleteGenba(\''+fg.replace(/'/g,"\\'")+'\''+')" style="height:34px;padding:0 14px;border:none;border-radius:8px;background:#e53535;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">削除</button>';
-          html+='</div>';
-          // 部屋一覧（折りたたみ）
-          html+='<div id="fg_'+fg.replace(/[^a-zA-Z0-9]/g,'_')+'" style="display:none;">';
-          rooms.forEach(function(fr){
-            var rowId='fr_'+fg.replace(/[^a-zA-Z0-9]/g,'_')+'_'+fr.replace(/[^a-zA-Z0-9]/g,'_');
-            var isCur=(fg===_projGenba&&fr===_projRoom);
-            var bg=isCur?'rgba(200,169,110,0.12)':'#fff';
-            html+='<div class="form-room-item" data-genba="'+fg.replace(/"/g,'&quot;')+'" data-room="'+fr.replace(/"/g,'&quot;')+'" id="'+rowId+'_row" style="display:flex;align-items:center;gap:0;padding:10px 12px 10px 28px;background:'+bg+';border-top:1px solid rgba(30,45,64,0.08);">';
-            html+='<button onclick="formSelectRoom(\''+fg.replace(/'/g,"\\'")+'\',' +
-              '\''+fr.replace(/'/g,"\\'")+'\''+')" ';
-            html+='style="flex:1;display:flex;align-items:center;gap:6px;background:transparent;border:none;cursor:pointer;font-family:inherit;text-align:left;padding:4px 0;">';
-            html+='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="3" y="2" width="18" height="20" rx="1"/><path d="M15 12h.01"/></svg>';
-            html+='<span style="font-size:13px;color:var(--navy);">'+fr+'</span>';
-            if(isCur) html+='<span style="font-size:11px;color:var(--accent);margin-left:4px;">前回</span>';
-            html+='</button>';
-            html+='<button onclick="formShowDelConfirm(\''+rowId+'\')" ';
-            html+='style="margin-left:20px;height:36px;width:36px;flex-shrink:0;border:1px solid rgba(229,53,53,0.35);border-radius:8px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;">';
-            html+='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#e53535" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>';
-            html+='</button>';
-            html+='</div>';
-            html+='<div id="'+rowId+'_confirm" style="display:none;align-items:center;gap:10px;padding:10px 12px;background:rgba(229,53,53,0.07);border-top:1px solid rgba(229,53,53,0.2);">';
-            html+='<span style="flex:1;font-size:12px;color:#c0392b;">「'+fr+'」を削除しますか？</span>';
-            html+='<button onclick="formHideDelConfirm(\''+rowId+'\')" style="height:34px;padding:0 12px;border:1px solid rgba(30,45,64,0.2);border-radius:8px;background:#fff;color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit;">キャンセル</button>';
-            html+='<button onclick="formDeleteRoom(\''+fg.replace(/'/g,"\\'")+'\',' +
-              '\''+fr.replace(/'/g,"\\'")+'\''+')" ';
-            html+='style="height:34px;padding:0 14px;border:none;border-radius:8px;background:#e53535;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">削除</button>';
-            html+='</div>';
-          });
-          // 部屋追加ボタン（現場カテゴリー内）
-          html+='<button onclick="formShowAddRoom(\''+fg.replace(/'/g,"\\'")+'\''+')" ';
-          html+='style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 12px;border:none;border-top:1px solid rgba(200,169,110,0.2);background:rgba(200,169,110,0.04);cursor:pointer;font-family:inherit;">';
-          html+='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#b06a00" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
-          html+='<span style="font-size:13px;font-weight:700;color:#b06a00;">部屋追加</span>';
-          html+='</button>';
-          html+='</div>';
-          html+='</div>';
-        });
-        html+='</div>';
-
-        html+='<div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;letter-spacing:0.05em;">または新規入力</div>';
-      }
-
-      // 新規入力フォーム
-      html+='<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">';
+    // 現場名・部屋名が未入力なら先に入力させる
+    if(!_projGenba||!_projRoom){
+      html+='<div style="padding:24px 16px;">';
+      html+='<div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px;">現場名・部屋名を入力してください</div>';
+      html+='<div style="font-size:12px;color:var(--text2);margin-bottom:20px;">作図データの保存先として使用します</div>';
+      html+='<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">';
       html+='<div class="iw"><span>現場名</span><input type="text" id="setup-genba" value="'+(_projGenba||'')+'" placeholder="例：さくら苑" style="font-size:16px;height:48px;"></div>';
       html+='<div class="iw"><span>部屋名</span><input type="text" id="setup-room" value="'+(_projRoom||'')+'" placeholder="例：北側居室" style="font-size:16px;height:48px;"></div>';
       html+='</div>';
       html+='<button onclick="setupProjAndStart()" style="width:100%;height:48px;border:none;border-radius:12px;background:var(--navy);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">次へ →</button>';
       html+='</div>';
       if(area) area.innerHTML=html;
-
-      // 前回の現場を展開表示
-      if(_projGenba&&fGroups[_projGenba]){
-        var id='fg_'+_projGenba.replace(/[^a-zA-Z0-9]/g,'_');
-        var el=document.getElementById(id);
-        var ar=document.getElementById('arr_'+_projGenba.replace(/[^a-zA-Z0-9]/g,'_'));
-        if(el){ el.style.display='block'; }
-        if(ar){ ar.style.transform='rotate(90deg)'; }
-      }
       setTimeout(function(){ var el=document.getElementById('setup-genba'); if(el) el.focus(); },100);
       return;
-    } // end フォーム画面ブロック
-  }
+    }
 
-  // ── 作成方法の選択画面 ──
-  if(roomData._setupMode==='choose'){
-    html+='<div style="padding:24px 16px;">';
-    html+='<div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:4px;text-align:center;">部屋の作り方を選んでください</div>';
-    html+='<div style="font-size:12px;color:var(--text2);margin-bottom:20px;text-align:center;">'+(_projGenba||'')+'｜'+(_projRoom||'')+'</div>';
-    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">';
+    html+='<div style="padding:24px 0;">';
+    html+='<div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:16px;text-align:center;">部屋の作り方を選んでください</div>';
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">';
+    // 四角モード
     html+='<button onclick="startRectMode()" style="padding:20px 10px;border:2px solid rgba(30,45,64,0.2);border-radius:14px;background:var(--white);cursor:pointer;font-family:inherit;text-align:center;">';
     html+='<div style="font-size:28px;margin-bottom:8px;">□</div>';
-    html+='<div style="font-size:13px;font-weight:700;color:var(--navy);">平面図作成</div>';
+    html+='<div style="font-size:13px;font-weight:700;color:var(--navy);">四角で作る</div>';
     html+='<div style="font-size:11px;color:var(--text2);margin-top:4px;">W・D・H を入力</div>';
     html+='</button>';
+    // 外周モード
     html+='<button onclick="startOutlineMode()" style="padding:20px 10px;border:2px solid rgba(200,169,110,0.4);border-radius:14px;background:rgba(200,169,110,0.06);cursor:pointer;font-family:inherit;text-align:center;">';
-    html+='<div style="margin-bottom:8px;display:flex;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#b06a00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></div>';
+    html+='<div style="font-size:28px;margin-bottom:8px;">✏</div>';
     html+='<div style="font-size:13px;font-weight:700;color:#b06a00;">外周を描く</div>';
     html+='<div style="font-size:11px;color:var(--text2);margin-top:4px;">タップで頂点を作図</div>';
     html+='</button>';
-    html+='</div>';
-    html+='<button onclick="goToFormScreen()" style="width:100%;height:40px;border:1.5px solid rgba(30,45,64,0.2);border-radius:10px;background:transparent;color:var(--text2);font-size:13px;cursor:pointer;font-family:inherit;">← 現場を選び直す</button>';
-    html+='</div>';
+    html+='</div></div>';
     if(area) area.innerHTML=html;
     return;
   }
 
-  // ── 平面図作成：寸法入力画面（未確定時）──
+  // ── 四角モード：寸法入力画面（未確定時）──
   if(roomData._setupMode==='rect'&&(W===0||D===0||H===0)){
     html+='<div class="sec" style="margin-bottom:8px;">';
     html+='<div class="st" style="margin-bottom:12px;">部屋寸法を入力</div>';
@@ -1017,7 +911,7 @@ function renderPlan(){
     html+='<button onclick="roomData._setupMode=null;roomData.W=0;roomData.D=0;roomData.H=0;renderPlan();" style="height:44px;border:1.5px solid rgba(30,45,64,0.2);border-radius:10px;background:transparent;color:var(--text2);font-size:13px;cursor:pointer;font-family:inherit;">← 戻る</button>';
     html+='<button onclick="confirmRectMode()" style="height:44px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">確定</button>';
     html+='</div>';
-    html+='<button onclick="startOutlineMode()" style="width:100%;height:40px;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px;border:2px solid rgba(200,169,110,0.4);border-radius:10px;background:rgba(200,169,110,0.06);color:#b06a00;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b06a00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg> 外周を描くモードへ</button>';
+    html+='<button onclick="startOutlineMode()" style="width:100%;height:40px;margin-top:8px;border:2px solid rgba(200,169,110,0.4);border-radius:10px;background:rgba(200,169,110,0.06);color:#b06a00;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">✏ 外周を描くモードへ</button>';
     html+='</div>';
     if(area) area.innerHTML=html;
     return;
@@ -1043,11 +937,6 @@ function renderPlan(){
       [100,120,150].forEach(function(t){
         html+='<button class="wt-btn'+(T===t?' active':'')+'" onclick="setWallT('+t+')">'+t+'mm</button>';
       });
-      html+='</div>';
-      // 外周切替ボタン：平面図未確定（W=D=H=0）のときのみ表示
-      if(W===0&&D===0&&H===0){
-        html+='<button onclick="startOutlineMode()" style="width:100%;height:38px;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px;border:2px solid rgba(200,169,110,0.4);border-radius:10px;background:rgba(200,169,110,0.06);color:#b06a00;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b06a00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg> 外周を描くモードへ</button>';
-      }
       html+='</div></div>';
     }
     html+='</div>';
@@ -1065,12 +954,10 @@ function renderPlan(){
     html+='</div>';
     html+='<span style="font-size:11px;color:var(--text2);white-space:nowrap;">高さH <input type="number" id="inp-H" value="'+H+'" inputmode="numeric" style="width:60px;height:28px;border:1.5px solid rgba(30,45,64,0.2);border-radius:6px;padding:0 6px;font-size:12px;font-family:inherit;" oninput="onPlanDimChange()"> mm</span>';
     html+='</div>';
-    // 平面図切替ボタン：外周未確定のときのみ表示
-    if(!_outlineClosed){
-      html+='<button onclick="startRectMode()" style="width:100%;height:38px;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px;border:2px solid rgba(30,45,64,0.2);border-radius:10px;background:var(--white);color:var(--navy);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/></svg> 平面図へ</button>';
-    }
     html+='</div>';
   }
+
+  // canvas
   html+='<div class="canvas-wrap" style="position:relative">';
   html+='<div class="canvas-label" style="display:flex;align-items:center;gap:6px;">';
   html+='<span>平面図</span>';
@@ -1464,159 +1351,39 @@ function deletePlanSel(){
 }
 
 // 戻るボタン：現在の作図を保存してから現場ナビホームへ
-function goBackToIndex(){
+function goBackToTop(){
+  // 現在の作図を保存
   projAutoSave();
+  // 外周モード中なら終了ボタンを非表示に
+  var fb=document.getElementById('btn-outline-finish');
+  if(fb) fb.classList.add('hidden');
+  // 状態リセット（データは保持）
+  _planMode='none';
+  _outlineVerts=[]; _outlineClosed=false; _outlineSelEdge=null; _outlinePreview=null;
+  _outlineDims=[]; _outlineAutoCorner=false; _outlineAdjIdx=null; _outlinePhase='input';
+  _outlineLockEdges=new Set();
+  _editSelEdge=null; _editDragPt=null;
+  // 現場ナビホームへ（index.htmlへ遷移）
   window.location.href='index.html';
 }
 
-function goToFormScreen(){
-  // 現在の作業状態を保存してフォーム画面へ（データはリセットしない）
-  projAutoSave();
-  _inFormScreen=true;
-  curView='plan';
-  var sel=document.getElementById('view-select'); if(sel) sel.value='plan';
-  renderMain();
-}
-
-function formToggleGenba(id){
-  var el=document.getElementById(id);
-  var key=id.replace('fg_','');
-  var ar=document.getElementById('arr_'+key);
-  if(!el) return;
-  var open=el.style.display==='block';
-  el.style.display=open?'none':'block';
-  if(ar) ar.style.transform=open?'':'rotate(90deg)';
-}
-
-function formSearch(){
-  var kw=(document.getElementById('form-search')||{}).value||'';
-  kw=kw.trim();
-  // 現場カテゴリーと部屋行をキーワードで表示/非表示
-  var genbaItems=document.querySelectorAll('.form-genba-item');
-  genbaItems.forEach(function(gi){
-    var g=gi.getAttribute('data-genba')||'';
-    var roomItems=gi.querySelectorAll('.form-room-item');
-    if(!kw){
-      gi.style.display='';
-      roomItems.forEach(function(ri){ ri.style.display=''; });
-      return;
-    }
-    var anyRoom=false;
-    roomItems.forEach(function(ri){
-      var r=ri.getAttribute('data-room')||'';
-      var match=(g.indexOf(kw)>=0)||(r.indexOf(kw)>=0);
-      ri.style.display=match?'':'none';
-      if(match) anyRoom=true;
-    });
-    gi.style.display=(g.indexOf(kw)>=0||anyRoom)?'':'none';
-    // ヒットした現場は自動展開
-    if(kw&&(g.indexOf(kw)>=0||anyRoom)){
-      var fgId='fg_'+g.replace(/[^a-zA-Z0-9]/g,'_');
-      var fgEl=document.getElementById(fgId);
-      var arEl=document.getElementById('arr_'+g.replace(/[^a-zA-Z0-9]/g,'_'));
-      if(fgEl) fgEl.style.display='block';
-      if(arEl) arEl.style.transform='rotate(90deg)';
-    }
-  });
-}
-
-function formShowAddRoom(g){
-  // 指定現場の部屋を追加：現場名固定・部屋名だけ入力
-  var ge=document.getElementById('setup-genba');
-  var re=document.getElementById('setup-room');
-  if(ge){ ge.value=g; ge.readOnly=true; ge.style.background='rgba(30,45,64,0.06)'; ge.style.color='var(--text2)'; }
-  if(re){ re.value=''; }
-  // 入力欄へスクロール
-  var wrap=document.getElementById('setup-genba');
-  if(wrap) wrap.scrollIntoView({behavior:'smooth',block:'center'});
-  setTimeout(function(){ if(re) re.focus(); },300);
-}
-
-function formShowGenbaDelConfirm(genbaId){
-  var row=document.getElementById(genbaId+'_row');
-  var conf=document.getElementById(genbaId+'_confirm');
-  if(row) row.style.display='none';
-  if(conf) conf.style.display='flex';
-}
-function formHideGenbaDelConfirm(genbaId){
-  var row=document.getElementById(genbaId+'_row');
-  var conf=document.getElementById(genbaId+'_confirm');
-  if(row) row.style.display='flex';
-  if(conf) conf.style.display='none';
-}
-function formDeleteGenba(g){
-  // 現場に属する全部屋を削除
-  var keys=[];
-  for(var i=0;i<localStorage.length;i++){
-    var k=localStorage.key(i);
-    if(k&&k.indexOf(PROJ_PREFIX+g+'|')===0) keys.push(k);
-  }
-  keys.forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
-  if(g===_projGenba){
-    _projGenba=''; _projRoom='';
-    try{ localStorage.removeItem('zumen_lastRoom'); }catch(e){}
-  }
-  roomData={W:0,D:0,H:0,wallT:roomData.wallT||120,compassDeg:roomData.compassDeg||0,_setupMode:null};
-  renderMain();
-}
-
-function formShowDelConfirm(rowId){
-  var row=document.getElementById(rowId+'_row');
-  var conf=document.getElementById(rowId+'_confirm');
-  if(row) row.style.display='none';
-  if(conf) conf.style.display='flex';
-}
-function formHideDelConfirm(rowId){
-  var row=document.getElementById(rowId+'_row');
-  var conf=document.getElementById(rowId+'_confirm');
-  if(row) row.style.display='flex';
-  if(conf) conf.style.display='none';
-}
-function formDeleteRoom(g,r){
-  try{ localStorage.removeItem(_projKey(g,r)); }catch(e){}
-  if(g===_projGenba&&r===_projRoom){
-    _projGenba=''; _projRoom='';
-    try{ localStorage.removeItem('zumen_lastRoom'); }catch(e){}
-  }
-  // フォーム画面を再描画
-  roomData={W:0,D:0,H:0,wallT:roomData.wallT||120,compassDeg:roomData.compassDeg||0,_setupMode:null};
-  renderMain();
-}
-
-
-function formSelectRoom(g,r){
-  _inFormScreen=false;
-  var raw=localStorage.getItem(_projKey(g,r));
-  if(raw){
-    _loadData(g,r,raw);
-  } else {
-    _projGenba=g; _projRoom=r;
-    _updateProjLabel();
-    roomData._setupMode='choose';
-    renderPlan();
-  }
-}
-
-
 function setupProjAndStart(){
-  _inFormScreen=false;
   var g=document.getElementById('setup-genba');
   var r=document.getElementById('setup-room');
   var gv=(g?g.value.trim():'');
   var rv=(r?r.value.trim():'');
   if(!gv){ showWaToast('⚠ 現場名を入力してください'); return; }
   if(!rv){ showWaToast('⚠ 部屋名を入力してください'); return; }
-  // 既存データがあれば読込（作図画面へ直行）
+  // 既存データがあれば読込
   var raw=localStorage.getItem(_projKey(gv,rv));
   if(raw){
     _loadData(gv,rv,raw);
   } else {
-    // 新規：「平面図作成／外周を描く」選択画面へ
     _projGenba=gv; _projRoom=rv;
     _updateProjLabel();
-    roomData._setupMode='choose';
-    renderPlan();
+    projAutoSave();
   }
+  renderPlan();
 }
 
 function startRectMode(){
@@ -1673,11 +1440,7 @@ function _renderOutlineScreen(area, T, H){
   if(!_outlineClosed && _outlinePhase!=='edit'){
     // ボタン行（キャンバスの上）
     html+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">';
-    html+='<button onclick="backToChooseScreen()" style="height:36px;padding:0 12px;border:1px solid rgba(30,45,64,0.2);border-radius:8px;background:var(--white);color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit;">← 戻る</button>';
-    html+='<button onclick="startRectMode()" style="height:36px;padding:0 12px;border:2px solid rgba(30,45,64,0.2);border-radius:8px;background:var(--white);color:var(--navy);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">平面図へ</button>';
-    if(_outlineVerts.length>0){
-      html+='<button id="outline-undo-btn" onclick="outlineUndo()" style="height:36px;padding:0 12px;border:1px solid rgba(30,45,64,0.2);border-radius:8px;background:var(--white);font-size:12px;cursor:pointer;font-family:inherit;">1辺戻す</button>';
-    }
+    html+='<button id="outline-undo-btn" onclick="outlineUndo()" '+(_outlineVerts.length===0?'disabled':'')+' style="height:36px;padding:0 12px;border:1px solid rgba(30,45,64,0.2);border-radius:8px;background:var(--white);font-size:12px;cursor:pointer;font-family:inherit;opacity:'+(_outlineVerts.length===0?'0.35':'1')+';">戻す</button>';
     if(_outlineVerts.length>0){
       html+='<button onclick="outlineClear()" style="height:36px;padding:0 12px;border:1px solid rgba(229,53,53,0.3);border-radius:8px;background:transparent;color:#e53535;font-size:12px;cursor:pointer;font-family:inherit;">全消し</button>';
     }
@@ -2206,19 +1969,6 @@ function _initEditCv(){ // 旧関数（互換用・未使用）
 var _editSelEdge=null;    // 選択中の辺インデックス
 var _editDragPt=null;     // ドラッグ中の端点 {edgeIdx, pt:'start'|'end'}
 var _editDragStartPos=null;
-
-function backToChooseScreen(){
-  // 外周作図を中断して作図方法選択画面（choose）に戻る
-  _planMode='none';
-  _outlineVerts=[]; _outlineClosed=false; _outlineSelEdge=null; _outlinePreview=null;
-  _outlineDims=[]; _outlineAutoCorner=false; _outlineAdjIdx=null; _outlinePhase='input';
-  _outlineLockEdges=new Set();
-  var fb=document.getElementById('btn-outline-finish');
-  if(fb) fb.classList.add('hidden');
-  roomData.W=0; roomData.D=0; roomData.H=0;
-  roomData._setupMode='choose';
-  renderPlan();
-}
 
 function outlineEditBack(){
   // 頂点はそのまま保持して描画フェーズに戻る
@@ -4997,7 +4747,6 @@ function showWaToast(msg){
 
 var _projGenba = '';
 var _projRoom  = '';
-var _inFormScreen = false; // フォーム画面表示フラグ
 var PROJ_PREFIX = 'zumen_room_';
 
 function _projKey(g,r){ return PROJ_PREFIX+g+'|'+r; }
@@ -5008,8 +4757,8 @@ function _projLabel(){
 }
 
 function _updateProjLabel(){
-  // ボタンラベルは常に「フォーム画面」固定
-  // （proj-labelはgoToFormScreen用のボタンテキストとして使用）
+  var el=document.getElementById('proj-label');
+  if(el) el.textContent=_projLabel();
 }
 
 // ── 自動保存 ──
@@ -5137,9 +4886,8 @@ function _renderProjList(keyword){
     arrow.style.cssText='font-size:10px;color:rgba(255,255,255,0.5);transition:transform 0.2s;flex-shrink:0;';
     arrow.textContent='▶';
     var genbaLabel=document.createElement('span');
-    genbaLabel.style.cssText='flex:1;font-size:14px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:5px;';
-    genbaLabel.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>'
-      +'<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+g+'</span>';
+    genbaLabel.style.cssText='flex:1;font-size:14px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+    genbaLabel.textContent='🏠 '+g;
     var countBadge=document.createElement('span');
     countBadge.style.cssText='font-size:11px;color:rgba(255,255,255,0.4);flex-shrink:0;';
     countBadge.textContent=rooms.length+'室';
@@ -5182,9 +4930,8 @@ function _renderProjList(keyword){
         var roomRow=document.createElement('div');
         roomRow.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 10px 10px 22px;border-radius:8px;margin-top:4px;background:'+(isCurrent?'rgba(200,169,110,0.2)':'rgba(255,255,255,0.04)')+';';
         var roomLabel=document.createElement('span');
-        roomLabel.style.cssText='flex:1;font-size:14px;color:#fff;font-weight:'+(isCurrent?'700':'400')+';display:flex;align-items:center;gap:5px;';
-        roomLabel.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="3" y="2" width="18" height="20" rx="1"/><path d="M15 12h.01"/></svg>'
-          +'<span>'+r+'</span>';
+        roomLabel.style.cssText='flex:1;font-size:14px;color:#fff;font-weight:'+(isCurrent?'700':'400')+';';
+        roomLabel.textContent='🚪 '+r;
         roomRow.appendChild(roomLabel);
         if(!isCurrent){
           var loadBtn=document.createElement('button');
@@ -5345,8 +5092,7 @@ function _resetData(){
 function _loadData(g,r,raw){
   try{
     var d=JSON.parse(raw);
-    roomData=d.roomData||{W:0,D:0,H:0,wallT:120,compassDeg:0};
-    roomData._setupMode=null; // 読込後は必ずクリア
+    roomData=d.roomData||{W:3600,D:4500,H:2400,wallT:120,compassDeg:0};
     faceOpenings=d.faceOpenings||[[],[],[],[]];
     faceOidSeq=d.faceOidSeq||[0,0,0,0];
     faceEquips=d.faceEquips||[[],[],[],[]];
@@ -5394,17 +5140,16 @@ function _loadData(g,r,raw){
 
 renderMain();
 _updateUndoBtn();
-// ── 起動時：前回の現場名・部屋名をフォームの初期値としてセット（自動復元はしない） ──
-// 毎回フォームを通ることで「どの現場か」を意識させる。前回値は入力欄にプリセットするだけ。
+// ── 起動時：最後に使っていた現場・部屋を自動復元 ──
 (function(){
   try{
     var last=localStorage.getItem('zumen_lastRoom');
     if(last){
       var lr=JSON.parse(last);
-      if(lr.g) _projGenba=lr.g;
-      if(lr.r) _projRoom=lr.r;
-      // フォームに前回値を反映するためrenderMainを再描画
-      renderMain();
+      if(lr.g&&lr.r){
+        var raw=localStorage.getItem(_projKey(lr.g,lr.r));
+        if(raw){ _loadData(lr.g,lr.r,raw); }
+      }
     }
   }catch(e){}
 })();
@@ -5415,8 +5160,8 @@ var _bleConnected = false;
 var _bleTarget    = 'W'; // 'W'|'D'|'H'|'PL'
 
 // Bosch GLM BLE UUIDs（GLM 50-27CG）
-var BLE_SERVICE_UUID  = '00005301-0000-0041-4c50-534146455359';
-var BLE_CHAR_UUID     = '00005302-0000-0041-4c50-534146455359';
+var BLE_SERVICE_UUID  = '02a6c0d0-0451-4000-b000-fb3210111989';
+var BLE_CHAR_UUID     = '02a6c0d1-0451-4000-b000-fb3210111989';
 
 function openBleModal(){
   document.getElementById('ble-modal').classList.remove('hidden');
