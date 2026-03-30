@@ -2775,40 +2775,34 @@ function redrawPlan(){
   sc = Math.max(sc, 0.01);
 
   // ── 間仕切りdimOffsetによる余白拡張 ──
-  // 各間仕切りの寸法引き出し位置が外周寸法線より外に出る場合、余白を動的に拡大
-  // 外周寸法線: 下=outerB+16+textH≒outerB+30, 左=outerL-16-textW≒outerL-46
-  // ここではscが確定したあとで試算する（2パス目は不要、余白を先に計算）
+  // dimYrel = oy相対のdimY位置（=(p.start+p.len/2)*sc + dimOff）
+  // キャンバス下端まで: rd+mB が必要 → dimYrel+22 <= rd+mB
+  // キャンバス上端まで: dimYrel-14 >= 0
+  var _mB0=mB, _mT0=mT, _mR0=mR, _mL0=mL;
   var _dimExtraB=0, _dimExtraL=0, _dimExtraR=0, _dimExtraT=0;
   planPartitions.forEach(function(p){
-    if(!p.dimOffset) return;
-    var pt=Math.max(2,(p.t||T)*sc);
     var dimOff=(p.dimOffset||0)*sc;
     if(p.axis==='v'){
-      // 縦壁：dimYが上下に動く
-      var y1s=p.start*sc, y2s=(p.start+p.len)*sc;
-      var dimYs=(y1s+y2s)/2+dimOff;
-      // 下方向にはみ出す量（mB基準: outerB+16+24=outerB+40から）
-      var outerBs=D*sc+T*sc; // oy相対
-      var dimBottomEdge=dimYs+14; // テキスト下端
-      var needExtra=dimBottomEdge-(D*sc+mB-16); // outerB+16がdY
-      if(needExtra>0) _dimExtraB=Math.max(_dimExtraB, Math.ceil(needExtra)+16);
-      // 上方向にはみ出す量
-      var dimTopEdge=dimYs-14;
-      if(dimTopEdge<0) _dimExtraT=Math.max(_dimExtraT, Math.ceil(-dimTopEdge)+8);
+      // dimYrel: oy基準。下方向+で動く
+      var dimYrel=(p.start+p.len/2)*sc+dimOff;
+      // 下：dimYrel+22（テキスト14+余白8）がrd+mB_初期値に収まらなければ拡張
+      var extraB=dimYrel+22-(D*sc+_mB0);
+      if(extraB>0) _dimExtraB=Math.max(_dimExtraB, Math.ceil(extraB)+8);
+      // 上：dimYrel-14が0を下回れば拡張
+      var extraT=14-dimYrel;
+      if(extraT>0) _dimExtraT=Math.max(_dimExtraT, Math.ceil(extraT)+8);
     } else {
-      // 横壁：dimXが左右に動く
-      var x1s=p.start*sc, x2s=(p.start+p.len)*sc;
-      var dimXs=(x1s+x2s)/2+dimOff;
-      // 右方向
-      var dimRightEdge=dimXs+40;
-      var needExtraR=dimRightEdge-(W*sc+mR);
-      if(needExtraR>0) _dimExtraR=Math.max(_dimExtraR, Math.ceil(needExtraR)+8);
-      // 左方向
-      var dimLeftEdge=dimXs-40;
-      if(dimLeftEdge<0) _dimExtraL=Math.max(_dimExtraL, Math.ceil(-dimLeftEdge)+8);
+      // dimXrel: ox基準。右方向+で動く
+      var dimXrel=(p.start+p.len/2)*sc+dimOff;
+      // 右
+      var extraR=dimXrel+40-(W*sc+_mR0);
+      if(extraR>0) _dimExtraR=Math.max(_dimExtraR, Math.ceil(extraR)+8);
+      // 左
+      var extraL=40-dimXrel;
+      if(extraL>0) _dimExtraL=Math.max(_dimExtraL, Math.ceil(extraL)+8);
     }
   });
-  mB+=_dimExtraB; mT+=_dimExtraT; mR+=_dimExtraR; mL=Math.max(mL, mL+_dimExtraL);
+  mB+=_dimExtraB; mT+=_dimExtraT; mR+=_dimExtraR; mL+=_dimExtraL;
 
   var Tpx=T*sc;
   var rw=W*sc, rd=D*sc;
@@ -2923,10 +2917,8 @@ function redrawPlan(){
         var midX2=ox+p.pos*sc;
         var leftFaceX=midX2-pt/2, rightFaceX=midX2+pt/2;
         var y1=oy+p.start*sc, y2=oy+(p.start+p.len)*sc;
-        // dimYを外周寸法線の内側に収める（下限：outerB+16-20、上限：oy+8）
-        var _dYlim=oy+rd+Tpx+16-20; // 外周下寸法線より上20px
-        var _dYlimT=oy+8;            // キャンバス上端+8px
-        var dimY=Math.min(_dYlim, Math.max(_dYlimT, (y1+y2)/2+dimOff));
+        // dimYは自由（外周寸法線を越えて外側にも移動可能、キャンバスは自動拡張）
+        var dimY=(y1+y2)/2+dimOff;
         ctx.strokeStyle='rgba(30,45,64,'+dimAlpha+')'; ctx.lineWidth=0.8;
         ctx.beginPath();ctx.moveTo(ox,dimY);ctx.lineTo(leftFaceX,dimY);ctx.stroke();
         [ox,leftFaceX].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY-3);ctx.lineTo(tx,dimY+3);ctx.stroke();});
