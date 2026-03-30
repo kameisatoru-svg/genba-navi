@@ -5203,8 +5203,13 @@ function _updateBleUI(){
 }
 
 async function bleConnect(){
+  // 切断済みの場合はリロード
+  if(!_bleConnected && _bleDevice===null && document.getElementById('ble-connect-btn') && document.getElementById('ble-connect-btn').dataset.needReload==='1'){
+    location.reload();
+    return;
+  }
   if(!navigator.bluetooth){
-    showWaToast('⚠ このブラウザはWeb Bluetooth非対応です（Chrome推奨）');
+    showWaToast('このブラウザはWeb Bluetooth非対応です（Chrome推奨）');
     return;
   }
   var btn=document.getElementById('ble-connect-btn');
@@ -5260,7 +5265,7 @@ function bleDisconnect(){
   _updateBleUI();
   // 切断後はリロードしないと再接続できないためボタンをリロードに変える
   var btn=document.getElementById('ble-connect-btn');
-  if(btn){ btn.textContent='再接続（リロード）'; btn.onclick=function(){ location.reload(); }; }
+  if(btn){ btn.textContent='再接続'; btn.disabled=false; btn.dataset.needReload='1'; }
   showWaToast('GLM切断しました');
 }
 
@@ -5270,7 +5275,7 @@ function _onBleDisconnected(){
   _bleDevice=null;
   _updateBleUI();
   var btn=document.getElementById('ble-connect-btn');
-  if(btn){ btn.textContent='再接続（リロード）'; btn.onclick=function(){ location.reload(); }; }
+  if(btn){ btn.textContent='再接続'; btn.disabled=false; btn.dataset.needReload='1'; }
   showWaToast('GLM切断しました');
 }
 
