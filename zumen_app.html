@@ -2647,8 +2647,8 @@ function _planSc(){
   var Tpx=T*sc;
   var hasOutline=(roomData._innerW!=null);
   // 間仕切り座標系：外周モードは内壁面基準、四角モードはox基準（W=内寸として扱う）
-  var pox=hasOutline?(mL+Tpx):mL;
-  var poy=hasOutline?(mT+Tpx):mT;
+  var pox=hasOutline?(mL+Tpx/2):mL;
+  var poy=hasOutline?(mT+Tpx/2):mT;
   var iW=hasOutline?roomData._innerW:W;
   var iD=hasOutline?roomData._innerD:D;
   return{sc:sc, ox:mL, oy:mT, W:W, D:D, cv:cv,
@@ -2860,9 +2860,10 @@ function redrawPlan(){
   _makeInnerPath(ctx); ctx.stroke();
   ctx.restore();
 
-  // 間仕切り描画（pox/poy=内壁面or外壁基準、モード別）
-  var pox=ox+(roomData._innerW!=null?Tpx:0);
-  var poy=oy+(roomData._innerW!=null?Tpx:0);
+  // 間仕切り描画（pox/poy=内壁面基準）
+  // _outlineはshiftX=-minOX（外寸BBox左上基準）でT/2からスタートするのでTpx/2オフセット
+  var pox=ox+(roomData._innerW!=null?Tpx/2:0);
+  var poy=oy+(roomData._innerW!=null?Tpx/2:0);
   planPartitions.forEach(function(p){
     var pt=Math.max(2, (p.t||roomData.wallT)*sc);
     var isSel=(_planSelType==='partition'&&p.id===_planSelId);
