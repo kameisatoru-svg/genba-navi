@@ -2653,9 +2653,9 @@ function _calcLayout(cv){
   var sc=Math.max(Math.min((CW-mR-20)/W, 370/D), 0.01);
   var Tpx=T*sc;
 
-  // mL：壁厚+ドア弧左分のみ（外周寸法線は内側フォールバックで対応）
-  var mL=Math.max(20, Math.ceil(Tpx)+4);
-  if(maxArcL>0) mL=Math.max(mL, Math.ceil(Tpx+maxArcL*sc+4));
+  // mL：外周寸法線テキストが収まる余白を確保
+  var mL=Math.max(56, Math.ceil(Tpx)+59);
+  if(maxArcL>0) mL=Math.max(mL, Math.ceil(Tpx+maxArcL*sc+36));
 
   // shiftBをscale後の値で正確計算
   sc=Math.max(Math.min((CW-mL-mR)/W, 370/D), 0.01);
@@ -3009,37 +3009,28 @@ function redrawPlan(){
   ctx.strokeStyle='rgba(30,45,64,0.5)'; ctx.lineWidth=1;
   ctx.font='bold 11px Meiryo,sans-serif';
   ctx.textAlign='center'; ctx.textBaseline='top';
-  ctx.fillText(W.toLocaleString()+'mm', (outerL+outerR)/2, dY+5);
+  ctx.fillText(iW.toLocaleString()+'mm', (outerL+outerR)/2, dY+5);
 
   // 左：D（外壁外面→外壁外面）
-  // スペースが足りない場合は壁の内側（右）に描く
-  var _dXideal=outerL-16;
-  var _dXinside=(_dXideal < 4); // 壁外に描くスペースなし→内側モード
-  var dX=_dXinside ? (outerL+Tpx+6) : _dXideal;
-  console.log('dX debug: outerL='+outerL.toFixed(1)+' Tpx='+Tpx.toFixed(1)+' mL='+mL+' _dXideal='+_dXideal.toFixed(1)+' inside='+_dXinside+' dX='+dX.toFixed(1));
+  // 左：D（外壁外面→外壁外面）
+  var dX=outerL-16;
   ctx.strokeStyle='rgba(30,45,64,0.5)'; ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(dX,outerT);ctx.lineTo(dX,outerB);ctx.stroke();
   [outerT,outerB].forEach(function(ty){
     ctx.beginPath();ctx.moveTo(dX-4,ty);ctx.lineTo(dX+4,ty);ctx.stroke();
   });
-  // 補助線（内側モードは省略、外側モードのみ）
-  if(!_dXinside){
-    ctx.strokeStyle='rgba(30,45,64,0.25)'; ctx.lineWidth=0.7; ctx.setLineDash([2,3]);
-    ctx.beginPath();ctx.moveTo(outerL-2,outerT);ctx.lineTo(dX-6,outerT);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(outerL-2,outerB);ctx.lineTo(dX-6,outerB);ctx.stroke();
-    ctx.setLineDash([]);
-  }
+  ctx.strokeStyle='rgba(30,45,64,0.25)'; ctx.lineWidth=0.7; ctx.setLineDash([2,3]);
+  ctx.beginPath();ctx.moveTo(outerL-2,outerT);ctx.lineTo(dX-6,outerT);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(outerL-2,outerB);ctx.lineTo(dX-6,outerB);ctx.stroke();
+  ctx.setLineDash([]);
   ctx.strokeStyle='rgba(30,45,64,0.5)'; ctx.lineWidth=1;
   ctx.save();
-  // 内側モード：テキストをdXの右に、外側モード：dXの左に
-  var _dXtextX=_dXinside ? (dX+13) : (dX-13);
-  console.log('dX text debug: _dXtextX='+_dXtextX.toFixed(1)+' outerT='+outerT.toFixed(1)+' outerB='+outerB.toFixed(1)+' midY='+((outerT+outerB)/2).toFixed(1)+' CW='+CW+' CH='+CH);
-  ctx.translate(_dXtextX, (outerT+outerB)/2);
+  ctx.translate(dX-13,(outerT+outerB)/2);
   ctx.rotate(-Math.PI/2);
   ctx.font='bold 11px Meiryo,sans-serif';
   ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillStyle='rgba(30,45,64,0.75)';
-  ctx.fillText(D.toLocaleString()+'mm', 0, 0);
+  ctx.fillText(iD.toLocaleString()+'mm',0,0);
   ctx.restore();
 
   // ── 外周作図モード描画 ──
