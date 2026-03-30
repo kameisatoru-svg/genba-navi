@@ -2624,30 +2624,32 @@ function _planSc(){
   sc=Math.max(sc,0.01);
   
   // ── 間仕切り寸法線による外周寸法線の押し出し計算 ──
-  var baseOuterL = mL - T*sc - 16;
-  var baseOuterR = W*sc + T*sc + 16;
-  var baseOuterT = mT - T*sc - 16;
-  var baseOuterB = D*sc + T*sc + 16;
+  var Tpx=T*sc;
   var pushL=0, pushR=0, pushT=0, pushB=0;
   var MARGIN=20;
+  
+  var baseOuterDimL = mL - Tpx - 16;
+  var baseOuterDimR = mL + W*sc + Tpx + 16;
+  var baseOuterDimT = mT - Tpx - 16;
+  var baseOuterDimB = mT + D*sc + Tpx + 16;
   
   planPartitions.forEach(function(p){
     var dimOff=(p.dimOffset||0)*sc;
     if(p.axis==='h'){
-      var dimX_rel=(p.start+p.len/2)*sc+dimOff;
-      if(dimX_rel < baseOuterL+MARGIN){
-        pushL=Math.max(pushL, baseOuterL+MARGIN-dimX_rel);
+      var dimX = mL + (p.start+p.len/2)*sc + dimOff;
+      if(dimX < baseOuterDimL + MARGIN){
+        pushL = Math.max(pushL, baseOuterDimL + MARGIN - dimX);
       }
-      if(dimX_rel > baseOuterR-MARGIN){
-        pushR=Math.max(pushR, dimX_rel-(baseOuterR-MARGIN));
+      if(dimX > baseOuterDimR - MARGIN){
+        pushR = Math.max(pushR, dimX - (baseOuterDimR - MARGIN));
       }
     } else {
-      var dimY_rel=(p.start+p.len/2)*sc+dimOff;
-      if(dimY_rel < baseOuterT+MARGIN){
-        pushT=Math.max(pushT, baseOuterT+MARGIN-dimY_rel);
+      var dimY = mT + (p.start+p.len/2)*sc + dimOff;
+      if(dimY < baseOuterDimT + MARGIN){
+        pushT = Math.max(pushT, baseOuterDimT + MARGIN - dimY);
       }
-      if(dimY_rel > baseOuterB-MARGIN){
-        pushB=Math.max(pushB, dimY_rel-(baseOuterB-MARGIN));
+      if(dimY > baseOuterDimB - MARGIN){
+        pushB = Math.max(pushB, dimY - (baseOuterDimB - MARGIN));
       }
     }
   });
@@ -2810,38 +2812,39 @@ function redrawPlan(){
   sc = Math.max(sc, 0.01);
 
   // ── 間仕切り寸法線による外周寸法線の押し出し計算 ──
-  // 外周寸法線の基本位置（壁厚の外側16px）
-  var baseOuterL = 56 - roomData.wallT*sc - 16;  // ox相対での左外周寸法X
-  var baseOuterR = W*sc + roomData.wallT*sc + 16; // ox相対での右外周寸法X
-  var baseOuterT = 20 - roomData.wallT*sc - 16;  // oy相対での上外周寸法Y
-  var baseOuterB = D*sc + roomData.wallT*sc + 16; // oy相対での下外周寸法Y
-  
-  var pushL=0, pushR=0, pushT=0, pushB=0; // 外周寸法線を押し出す量
+  var Tpx=T*sc;
+  var pushL=0, pushR=0, pushT=0, pushB=0;
   var MARGIN=20; // 間仕切り寸法線は外周寸法線の内側20pxまで
+  
+  // 外周寸法線の基本位置（初期ox=56, oy=20基準、キャンバス座標）
+  var baseOuterDimL = mL - Tpx - 16;      // 左外周寸法線のX座標
+  var baseOuterDimR = mL + W*sc + Tpx + 16; // 右外周寸法線のX座標
+  var baseOuterDimT = mT - Tpx - 16;      // 上外周寸法線のY座標
+  var baseOuterDimB = mT + D*sc + Tpx + 16; // 下外周寸法線のY座標
   
   planPartitions.forEach(function(p){
     var dimOff=(p.dimOffset||0)*sc;
     if(p.axis==='h'){
-      // 横壁：dimXは(p.start+p.len/2)*sc + dimOff（ox相対）
-      var dimX_rel=(p.start+p.len/2)*sc+dimOff;
-      // 左側チェック：dimX_relがbaseOuterL+MARGINより左なら押し出す
-      if(dimX_rel < baseOuterL+MARGIN){
-        pushL=Math.max(pushL, baseOuterL+MARGIN-dimX_rel);
+      // 横壁：間仕切り寸法線のX座標（キャンバス座標）
+      var dimX = mL + (p.start+p.len/2)*sc + dimOff;
+      // 左側チェック：dimXがbaseOuterDimL+MARGINより左なら押し出す
+      if(dimX < baseOuterDimL + MARGIN){
+        pushL = Math.max(pushL, baseOuterDimL + MARGIN - dimX);
       }
-      // 右側チェック：dimX_relがbaseOuterR-MARGINより右なら押し出す
-      if(dimX_rel > baseOuterR-MARGIN){
-        pushR=Math.max(pushR, dimX_rel-(baseOuterR-MARGIN));
+      // 右側チェック：dimXがbaseOuterDimR-MARGINより右なら押し出す
+      if(dimX > baseOuterDimR - MARGIN){
+        pushR = Math.max(pushR, dimX - (baseOuterDimR - MARGIN));
       }
     } else {
-      // 縦壁：dimYは(p.start+p.len/2)*sc + dimOff（oy相対）
-      var dimY_rel=(p.start+p.len/2)*sc+dimOff;
+      // 縦壁：間仕切り寸法線のY座標（キャンバス座標）
+      var dimY = mT + (p.start+p.len/2)*sc + dimOff;
       // 上側チェック
-      if(dimY_rel < baseOuterT+MARGIN){
-        pushT=Math.max(pushT, baseOuterT+MARGIN-dimY_rel);
+      if(dimY < baseOuterDimT + MARGIN){
+        pushT = Math.max(pushT, baseOuterDimT + MARGIN - dimY);
       }
       // 下側チェック
-      if(dimY_rel > baseOuterB-MARGIN){
-        pushB=Math.max(pushB, dimY_rel-(baseOuterB-MARGIN));
+      if(dimY > baseOuterDimB - MARGIN){
+        pushB = Math.max(pushB, dimY - (baseOuterDimB - MARGIN));
       }
     }
   });
@@ -2852,7 +2855,6 @@ function redrawPlan(){
   mT += Math.ceil(pushT);
   mB += Math.ceil(pushB);
 
-  var Tpx=T*sc;
   var rw=W*sc, rd=D*sc;
   var CH=rd+mT+mB;
   var ox=mL, oy=mT;
