@@ -590,7 +590,6 @@ canvas{display:block;width:100%;}
         <span style="font-size:12px;color:var(--text2);">最後の受信値</span>
         <span id="ble-last-val" style="font-size:18px;font-weight:700;margin-left:auto;color:var(--navy);">—</span>
       </div>
-      <div id="ble-debug" style="font-size:10px;color:var(--text2);background:var(--bg);border-radius:8px;padding:8px 10px;margin-bottom:10px;word-break:break-all;min-height:28px;">受信待ち...</div>
       <div style="border-top:1px solid rgba(30,45,64,0.1);padding-top:12px;">
         <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;">🧪 テスト注入（実機なしで動作確認）</div>
         <div style="display:flex;gap:8px;">
@@ -602,8 +601,16 @@ canvas{display:block;width:100%;}
       </div>
     </div>
     <div style="padding:0 16px 16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <button id="ble-disconnect-btn" onclick="bleDisconnect()" style="height:42px;border:1.5px solid rgba(30,45,64,0.2);border-radius:10px;background:transparent;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">切断</button>
+      <button onclick="bleDisconnect()" style="height:42px;border:1.5px solid rgba(30,45,64,0.2);border-radius:10px;background:transparent;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">切断</button>
       <button onclick="closeBleModal(null)" style="height:42px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">閉じる</button>
+    </div>
+    <!-- デバッグログ欄 -->
+    <div style="padding:0 16px 16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:11px;font-weight:700;color:var(--text2);">デバッグログ</span>
+        <button onclick="document.getElementById('ble-debug').textContent=''" style="height:24px;padding:0 8px;border:1px solid rgba(30,45,64,0.2);border-radius:5px;background:transparent;font-size:10px;cursor:pointer;font-family:inherit;color:var(--text2);">クリア</button>
+      </div>
+      <pre id="ble-debug" style="margin:0;padding:8px;border-radius:8px;background:#0d1b2a;color:#7effa0;font-size:10px;line-height:1.5;min-height:80px;max-height:200px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;font-family:monospace;"></pre>
     </div>
   </div>
 </div>
@@ -5156,13 +5163,25 @@ _updateUndoBtn();
 })();
 window.addEventListener('resize',function(){ setTimeout(redraw,50); });
 var _bleDevice    = null;
-var _bleChar      = null;
+var _bleChars     = []; // 購読中のCharacteristic一覧
 var _bleConnected = false;
 var _bleTarget    = 'W'; // 'W'|'D'|'H'|'PL'
 
-// Bosch GLM BLE UUIDs（GLM 50-27CG）
-var BLE_SERVICE_UUID  = '02a6c0f0-0451-4000-b000-fb3210111989';
-var BLE_CHAR_UUID     = '02a6c0f4-0451-4000-b000-fb3210111989';
+// Bosch GLM 50-27CG 確認済みUUID
+var BLE_SVC_A  = '02a6c0d0-0451-4000-b000-fb3210111989'; // サービスA
+var BLE_CHAR_A1= '02a6c0d1-0451-4000-b000-fb3210111989'; // INDICATE,WRITE（メイン）
+var BLE_SVC_B  = '02a6c0f0-0451-4000-b000-fb3210111989'; // サービスB
+var BLE_CHAR_B1= '02a6c0f3-0451-4000-b000-fb3210111989'; // WRITE, WRITE NO RESPONSE
+var BLE_CHAR_B2= '02a6c0f4-0451-4000-b000-fb3210111989'; // NOTIFY, READ
+
+// 認証コマンド候補（順番に試す）
+var BLE_AUTH_CMDS = [
+  { label:'CMD-1', bytes:[0x01,0x04,0x00,0x05] },
+  { label:'CMD-2', bytes:[0x00,0x01,0x00,0x01] },
+  { label:'CMD-3', bytes:[0x02,0x00] },
+  { label:'CMD-4', bytes:[0x03,0x01,0x00,0x04] }
+];
+var _bleAuthIdx = 0; // 現在試しているコマンドのインデックス
 
 function openBleModal(){
   document.getElementById('ble-modal').classList.remove('hidden');
@@ -5203,93 +5222,180 @@ function _updateBleUI(){
 }
 
 async function bleConnect(){
-  // 切断済みの場合はリロード
-  if(!_bleConnected && _bleDevice===null && document.getElementById('ble-connect-btn') && document.getElementById('ble-connect-btn').dataset.needReload==='1'){
-    location.reload();
-    return;
-  }
   if(!navigator.bluetooth){
     showWaToast('このブラウザはWeb Bluetooth非対応です（Chrome推奨）');
     return;
   }
   var btn=document.getElementById('ble-connect-btn');
   if(btn){ btn.textContent='スキャン中...'; btn.disabled=true; }
+  _bleLog('--- 接続開始 ---');
   try {
     _bleDevice = await navigator.bluetooth.requestDevice({
       filters:[{namePrefix:'GLM'}],
-      optionalServices:['02a6c0d0-0451-4000-b000-fb3210111989','02a6c0f0-0451-4000-b000-fb3210111989']
+      optionalServices:[BLE_SVC_A, BLE_SVC_B]
     });
     _bleDevice.addEventListener('gattserverdisconnected', _onBleDisconnected);
+    _bleLog('デバイス: '+_bleDevice.name);
+
     var server = await _bleDevice.gatt.connect();
-    // 両サービスの全Characteristicを購読
-    var serviceUUIDs = [
-      '02a6c0d0-0451-4000-b000-fb3210111989',
-      '02a6c0f0-0451-4000-b000-fb3210111989'
-    ];
-    var subCount = 0;
-    for(var si=0; si<serviceUUIDs.length; si++){
+    _bleLog('GATT接続OK');
+    _bleChars = [];
+
+    // サービスA: CharA1 (INDICATE購読 + WRITE用に保持)
+    try {
+      var svcA = await server.getPrimaryService(BLE_SVC_A);
+      var chA1 = await svcA.getCharacteristic(BLE_CHAR_A1);
+      await chA1.startNotifications();
+      chA1.addEventListener('characteristicvaluechanged', function(e){ _onBleValue(e,'CharA1'); });
+      _bleChars.push(chA1);
+      _bleLog('CharA1 購読OK');
+    } catch(e){ _bleLog('CharA1 エラー: '+e.message); }
+
+    // サービスB: CharB2 (NOTIFY購読)
+    try {
+      var svcB = await server.getPrimaryService(BLE_SVC_B);
       try {
-        var svc = await server.getPrimaryService(serviceUUIDs[si]);
-        var chars = await svc.getCharacteristics();
-        for(var ci=0; ci<chars.length; ci++){
-          var ch = chars[ci];
-          var props = ch.properties;
-          if(props.notify || props.indicate){
-            try {
-              await ch.startNotifications();
-              ch.addEventListener('characteristicvaluechanged', _onBleValue);
-              if(!_bleChar) _bleChar = ch;
-              subCount++;
-            } catch(e2){}
-          }
-        }
-      } catch(e3){}
-    }
+        var chB1 = await svcB.getCharacteristic(BLE_CHAR_B1);
+        _bleChars.push(chB1); // WRITEのみ・購読なし
+        _bleLog('CharB1 取得OK（WRITE用）');
+      } catch(e){ _bleLog('CharB1 エラー: '+e.message); }
+      try {
+        var chB2 = await svcB.getCharacteristic(BLE_CHAR_B2);
+        await chB2.startNotifications();
+        chB2.addEventListener('characteristicvaluechanged', function(e){ _onBleValue(e,'CharB2'); });
+        _bleChars.push(chB2);
+        _bleLog('CharB2 購読OK');
+      } catch(e){ _bleLog('CharB2 エラー: '+e.message); }
+    } catch(e){ _bleLog('サービスB エラー: '+e.message); }
+
     _bleConnected = true;
     _updateBleUI();
-    showWaToast('GLM接続 (購読:'+subCount+'ch)');
+    showWaToast('GLM接続しました。認証コマンドを送信中...');
+
+    // 認証コマンドを順番に試す（2秒間隔）
+    _bleAuthIdx = 0;
+    _bleSendNextAuthCmd();
+
   } catch(e) {
     if(btn){ btn.textContent='接続'; btn.disabled=false; }
     if(e.name!=='NotFoundError') showWaToast('接続失敗: '+e.message);
+    _bleLog('接続失敗: '+e.message);
     _updateBleUI();
   }
+}
+
+// 認証コマンドを順番に送信（2秒間隔）
+function _bleSendNextAuthCmd(){
+  if(_bleAuthIdx >= BLE_AUTH_CMDS.length){
+    _bleLog('--- 全コマンド送信完了。デバッグログを確認してください ---');
+    showWaToast('全コマンド送信完了。ログを確認してください。');
+    return;
+  }
+  var cmd = BLE_AUTH_CMDS[_bleAuthIdx];
+  var charA1 = _bleChars.find(function(c){ return c.uuid===BLE_CHAR_A1; });
+  if(!charA1){
+    _bleLog('CharA1 なし→スキップ');
+    _bleAuthIdx++;
+    setTimeout(_bleSendNextAuthCmd, 500);
+    return;
+  }
+  var payload = new Uint8Array(cmd.bytes);
+  _bleLog('[送信] '+cmd.label+': '+Array.from(payload).map(function(b){return b.toString(16).padStart(2,'0');}).join(' '));
+  charA1.writeValue(payload).then(function(){
+    _bleLog('[送信OK] '+cmd.label);
+    _bleAuthIdx++;
+    setTimeout(_bleSendNextAuthCmd, 2000);
+  }).catch(function(e){
+    _bleLog('[送信NG] '+cmd.label+': '+e.message);
+    // CharB1でもリトライ
+    var charB1 = _bleChars.find(function(c){ return c.uuid===BLE_CHAR_B1; });
+    if(charB1){
+      charB1.writeValueWithoutResponse(payload).then(function(){
+        _bleLog('[B1 送信OK] '+cmd.label);
+      }).catch(function(e2){
+        _bleLog('[B1 送信NG] '+cmd.label+': '+e2.message);
+      });
+    }
+    _bleAuthIdx++;
+    setTimeout(_bleSendNextAuthCmd, 2000);
+  });
 }
 
 function bleDisconnect(){
   if(_bleDevice&&_bleDevice.gatt.connected){
     _bleDevice.gatt.disconnect();
   }
-  _bleConnected=false;
-  _bleChar=null;
-  _bleDevice=null;
-  _updateBleUI();
-  // 切断後はリロードしないと再接続できないためボタンをリロードに変える
-  var db=document.getElementById('ble-disconnect-btn');
-  if(db){ db.textContent='再接続'; db.style.background='var(--navy)'; db.style.color='#fff'; db.style.border='none'; db.setAttribute('onclick','location.reload()'); }
-  showWaToast('GLM切断しました');
+  _onBleDisconnected();
 }
 
 function _onBleDisconnected(){
   _bleConnected=false;
-  _bleChar=null;
-  _bleDevice=null;
+  _bleChars=[];
   _updateBleUI();
-  var db=document.getElementById('ble-disconnect-btn');
-  if(db){ db.textContent='再接続'; db.style.background='var(--navy)'; db.style.color='#fff'; db.style.border='none'; db.setAttribute('onclick','location.reload()'); }
   showWaToast('GLM切断しました');
 }
 
-function _onBleValue(e){
+function _onBleValue(e, charName){
   var val=e.target.value;
   var bytes=new Uint8Array(val.buffer);
-  // デバッグ：受信バイト列をそのまま表示
-  var hexStr=Array.from(bytes).map(function(b){return b.toString(16).padStart(2,'0');}).join(' ');
-  var dbgEl=document.getElementById('ble-debug');
-  if(dbgEl) dbgEl.textContent='受信['+bytes.length+'bytes]: '+hexStr;
-  // Bosch GLMプロトコル: 先頭4バイトがリトルエンディアンで距離(0.1mm単位)
-  var raw=(bytes[3]<<24)|(bytes[2]<<16)|(bytes[1]<<8)|bytes[0];
-  var mm=Math.round(raw/10); // 0.1mm→mm
-  _applyBleValue(mm);
+  var hex=Array.from(bytes).map(function(b){return b.toString(16).padStart(2,'0');}).join(' ');
+  _bleLog('[受信:'+charName+']['+bytes.length+'bytes] '+hex);
+
+  // c0 11 00 3a は接続確認パケット（測定値ではない）→スキップ
+  if(bytes.length===4 && bytes[0]===0xc0 && bytes[1]===0x11 && bytes[2]===0x00 && bytes[3]===0x3a){
+    _bleLog('  → 接続確認パケット（スキップ）');
+    return;
+  }
+
+  // 測定値パース試行（複数パターンをログに出力）
+  var mm = _tryParseMeasurement(bytes);
+  if(mm !== null){
+    _bleLog('  → 測定値確定: '+mm+' mm');
+    _applyBleValue(mm);
+  }
+}
+
+// 測定値パース（複数パターン試行・ログ出力のみ）
+function _tryParseMeasurement(bytes){
+  if(bytes.length < 3) return null;
+
+  // パターン1: bytes[2-5] リトルエンディアン / 0.01mm単位
+  if(bytes.length >= 6){
+    var r1 = bytes[2]|(bytes[3]<<8)|(bytes[4]<<16)|(bytes[5]<<24);
+    if(r1 > 0 && r1 < 50000000){
+      var m1=Math.round(r1/100);
+      if(m1>10&&m1<50000) _bleLog('  [P1候補] bytes[2-5]LE/0.01mm: '+m1+' mm');
+    }
+  }
+  // パターン2: bytes[1-4] リトルエンディアン / 0.1mm単位
+  if(bytes.length >= 5){
+    var r2 = bytes[1]|(bytes[2]<<8)|(bytes[3]<<16)|(bytes[4]<<24);
+    if(r2 > 0 && r2 < 5000000){
+      var m2=Math.round(r2/10);
+      if(m2>10&&m2<50000) _bleLog('  [P2候補] bytes[1-4]LE/0.1mm: '+m2+' mm');
+    }
+  }
+  // パターン3: bytes[0-3] ビッグエンディアン / 0.01mm単位
+  if(bytes.length >= 4){
+    var r3 = (bytes[0]<<24)|(bytes[1]<<16)|(bytes[2]<<8)|bytes[3];
+    if(r3 > 0 && r3 < 50000000){
+      var m3=Math.round(r3/100);
+      if(m3>10&&m3<50000) _bleLog('  [P3候補] bytes[0-3]BE/0.01mm: '+m3+' mm');
+    }
+  }
+
+  // ★ パターン確定後にここを return mm; に変更
+  return null;
+}
+
+// デバッグログ出力
+function _bleLog(msg){
+  var el=document.getElementById('ble-debug');
+  if(!el) return;
+  var ts=new Date().toTimeString().slice(0,8);
+  el.textContent='['+ts+'] '+msg+'\n'+el.textContent;
+  var lines=el.textContent.split('\n');
+  if(lines.length>60) el.textContent=lines.slice(0,60).join('\n');
 }
 
 function bleInjectTest(){
