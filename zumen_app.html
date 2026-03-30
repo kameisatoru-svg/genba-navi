@@ -2850,68 +2850,61 @@ function redrawPlan(){
       ctx.fillRect(px3,py3,pl2,pt);
       ctx.strokeRect(px3,py3,pl2,pt);
     }
-    // ── 選択中：確定後の寸法線 ──
-    if(isSel){
+    // ── 常時表示：確定後の寸法線（選択中は濃色・非選択は薄色）──
+    {
       var halfT=Math.round((p.t||roomData.wallT)/2);
       var dimOff=(p.dimOffset||0)*sc;
+      var dimAlpha=isSel?0.4:0.2;
+      var textAlpha=isSel?0.85:0.45;
+      var accentAlpha=isSel?1:0.5;
       ctx.save();
       if(p.axis==='h'){
-        // 横壁：壁中心Yに対して上下距離＋長さを表示
         var midY=oy+p.pos*sc;
         var topFaceY=midY-pt/2, botFaceY=midY+pt/2;
         var x1=ox+p.start*sc, x2=ox+(p.start+p.len)*sc;
         var dimX=(x1+x2)/2+dimOff;
-        // 上壁から上面まで
-        ctx.strokeStyle='rgba(30,45,64,0.4)'; ctx.lineWidth=0.8;
+        ctx.strokeStyle='rgba(30,45,64,'+dimAlpha+')'; ctx.lineWidth=0.8;
         ctx.beginPath();ctx.moveTo(dimX,oy);ctx.lineTo(dimX,topFaceY);ctx.stroke();
         [oy,topFaceY].forEach(function(ty){ctx.beginPath();ctx.moveTo(dimX-3,ty);ctx.lineTo(dimX+3,ty);ctx.stroke();});
-        // 下面から下壁まで
         var botWallY=oy+rd;
         ctx.beginPath();ctx.moveTo(dimX,botFaceY);ctx.lineTo(dimX,botWallY);ctx.stroke();
         [botFaceY,botWallY].forEach(function(ty){ctx.beginPath();ctx.moveTo(dimX-3,ty);ctx.lineTo(dimX+3,ty);ctx.stroke();});
-        // 距離テキスト
-        ctx.fillStyle='rgba(30,45,64,0.85)'; ctx.font='bold 10px Meiryo,sans-serif';
+        ctx.fillStyle='rgba(30,45,64,'+textAlpha+')'; ctx.font='bold 10px Meiryo,sans-serif';
         ctx.save(); ctx.translate(dimX-10,oy+(topFaceY-oy)/2); ctx.rotate(-Math.PI/2);
         ctx.textAlign='center'; ctx.textBaseline='middle';
         ctx.fillText((p.pos-halfT)+'mm',0,0); ctx.restore();
         ctx.save(); ctx.translate(dimX-10,botFaceY+(botWallY-botFaceY)/2); ctx.rotate(-Math.PI/2);
         ctx.textAlign='center'; ctx.textBaseline='middle';
         ctx.fillText((roomData.D-p.pos-halfT)+'mm',0,0); ctx.restore();
-        // 長さ
         var lenMm=p.len;
         if(lenMm>0){
-          ctx.strokeStyle='rgba(200,169,110,0.8)'; ctx.lineWidth=0.8;
+          ctx.strokeStyle='rgba(200,169,110,'+accentAlpha+')'; ctx.lineWidth=0.8;
           ctx.beginPath();ctx.moveTo(x1,topFaceY-8);ctx.lineTo(x2,topFaceY-8);ctx.stroke();
           [x1,x2].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,topFaceY-11);ctx.lineTo(tx,topFaceY-5);ctx.stroke();});
-          ctx.fillStyle='rgba(200,169,110,1)'; ctx.textAlign='center'; ctx.textBaseline='bottom';
+          ctx.fillStyle='rgba(200,169,110,'+accentAlpha+')'; ctx.textAlign='center'; ctx.textBaseline='bottom';
           ctx.fillText(lenMm.toLocaleString()+'mm',(x1+x2)/2,topFaceY-10);
         }
       } else {
-        // 縦壁：壁中心Xに対して左右距離＋長さを表示
         var midX2=ox+p.pos*sc;
         var leftFaceX=midX2-pt/2, rightFaceX=midX2+pt/2;
         var y1=oy+p.start*sc, y2=oy+(p.start+p.len)*sc;
         var dimY=(y1+y2)/2+dimOff;
-        // 左壁から左面まで
-        ctx.strokeStyle='rgba(30,45,64,0.4)'; ctx.lineWidth=0.8;
+        ctx.strokeStyle='rgba(30,45,64,'+dimAlpha+')'; ctx.lineWidth=0.8;
         ctx.beginPath();ctx.moveTo(ox,dimY);ctx.lineTo(leftFaceX,dimY);ctx.stroke();
         [ox,leftFaceX].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY-3);ctx.lineTo(tx,dimY+3);ctx.stroke();});
-        // 右面から右壁まで
         var rightWallX=ox+rw;
         ctx.beginPath();ctx.moveTo(rightFaceX,dimY);ctx.lineTo(rightWallX,dimY);ctx.stroke();
         [rightFaceX,rightWallX].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY-3);ctx.lineTo(tx,dimY+3);ctx.stroke();});
-        // 距離テキスト
-        ctx.fillStyle='rgba(30,45,64,0.85)'; ctx.font='bold 10px Meiryo,sans-serif';
+        ctx.fillStyle='rgba(30,45,64,'+textAlpha+')'; ctx.font='bold 10px Meiryo,sans-serif';
         ctx.textAlign='center'; ctx.textBaseline='bottom';
         ctx.fillText((p.pos-halfT)+'mm',ox+(leftFaceX-ox)/2,dimY-4);
         ctx.fillText((roomData.W-p.pos-halfT)+'mm',rightFaceX+(rightWallX-rightFaceX)/2,dimY-4);
-        // 長さ
         var lenMm2=p.len;
         if(lenMm2>0){
-          ctx.strokeStyle='rgba(200,169,110,0.8)'; ctx.lineWidth=0.8;
+          ctx.strokeStyle='rgba(200,169,110,'+accentAlpha+')'; ctx.lineWidth=0.8;
           ctx.beginPath();ctx.moveTo(rightFaceX+8,y1);ctx.lineTo(rightFaceX+8,y2);ctx.stroke();
           [y1,y2].forEach(function(ty){ctx.beginPath();ctx.moveTo(rightFaceX+5,ty);ctx.lineTo(rightFaceX+11,ty);ctx.stroke();});
-          ctx.fillStyle='rgba(200,169,110,1)'; ctx.textAlign='left'; ctx.textBaseline='middle';
+          ctx.fillStyle='rgba(200,169,110,'+accentAlpha+')'; ctx.textAlign='left'; ctx.textBaseline='middle';
           ctx.fillText(lenMm2.toLocaleString()+'mm',rightFaceX+14,(y1+y2)/2);
         }
       }
