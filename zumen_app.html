@@ -1361,8 +1361,8 @@ function goBackToTop(){
   _outlineDims=[]; _outlineAutoCorner=false; _outlineAdjIdx=null; _outlinePhase='input';
   _outlineLockEdges=new Set();
   _editSelEdge=null; _editDragPt=null;
-  // 現場ナビホームへ（index.htmlへ遷移）
-  window.location.href='index.html';
+  // 現場ナビホームへ
+  history.back();
 }
 
 function setupProjAndStart(){
@@ -2942,7 +2942,7 @@ function redrawPlan(){
 
   // ══════════════════════════════════════════
   //  寸法線：外周の外・固定余白内に配置
-  //  外壁外面基準・1層（W・D）
+  //  内壁面基準・1層（W・D）
   // ══════════════════════════════════════════
   var outerL=ox-Tpx, outerR=ox+rw+Tpx;
   var outerT=oy-Tpx, outerB=oy+rd+Tpx;
@@ -2951,36 +2951,36 @@ function redrawPlan(){
   ctx.fillStyle='rgba(30,45,64,0.75)';
   ctx.lineWidth=1;
 
-  // 下：W（外壁外面→外壁外面）
+  // 下：W（内壁面→内壁面）
   var dY=outerB+16;
-  ctx.beginPath();ctx.moveTo(outerL,dY);ctx.lineTo(outerR,dY);ctx.stroke();
-  [outerL,outerR].forEach(function(tx){
+  ctx.beginPath();ctx.moveTo(ox,dY);ctx.lineTo(ox+rw,dY);ctx.stroke();
+  [ox,ox+rw].forEach(function(tx){
     ctx.beginPath();ctx.moveTo(tx,dY-4);ctx.lineTo(tx,dY+4);ctx.stroke();
   });
   // 補助線
   ctx.strokeStyle='rgba(30,45,64,0.25)'; ctx.lineWidth=0.7; ctx.setLineDash([2,3]);
-  ctx.beginPath();ctx.moveTo(outerL,outerB+2);ctx.lineTo(outerL,dY+6);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(outerR,outerB+2);ctx.lineTo(outerR,dY+6);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(ox,oy+rd+2);ctx.lineTo(ox,dY+6);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(ox+rw,oy+rd+2);ctx.lineTo(ox+rw,dY+6);ctx.stroke();
   ctx.setLineDash([]);
   ctx.strokeStyle='rgba(30,45,64,0.5)'; ctx.lineWidth=1;
   ctx.font='bold 11px Meiryo,sans-serif';
   ctx.textAlign='center'; ctx.textBaseline='top';
-  ctx.fillText(W.toLocaleString()+'mm', (outerL+outerR)/2, dY+5);
+  ctx.fillText(W.toLocaleString()+'mm', ox+rw/2, dY+5);
 
-  // 左：D（外壁外面→外壁外面）
+  // 左：D（内壁面→内壁面）
   var dX=outerL-16;
-  ctx.beginPath();ctx.moveTo(dX,outerT);ctx.lineTo(dX,outerB);ctx.stroke();
-  [outerT,outerB].forEach(function(ty){
+  ctx.beginPath();ctx.moveTo(dX,oy);ctx.lineTo(dX,oy+rd);ctx.stroke();
+  [oy,oy+rd].forEach(function(ty){
     ctx.beginPath();ctx.moveTo(dX-4,ty);ctx.lineTo(dX+4,ty);ctx.stroke();
   });
   // 補助線
   ctx.strokeStyle='rgba(30,45,64,0.25)'; ctx.lineWidth=0.7; ctx.setLineDash([2,3]);
-  ctx.beginPath();ctx.moveTo(outerL-2,outerT);ctx.lineTo(dX-6,outerT);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(outerL-2,outerB);ctx.lineTo(dX-6,outerB);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(ox-2,oy);ctx.lineTo(dX-6,oy);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(ox-2,oy+rd);ctx.lineTo(dX-6,oy+rd);ctx.stroke();
   ctx.setLineDash([]);
   ctx.strokeStyle='rgba(30,45,64,0.5)'; ctx.lineWidth=1;
   ctx.save();
-  ctx.translate(dX-13, (outerT+outerB)/2);
+  ctx.translate(dX-13, oy+rd/2);
   ctx.rotate(-Math.PI/2);
   ctx.font='bold 11px Meiryo,sans-serif';
   ctx.textAlign='center'; ctx.textBaseline='middle';
@@ -4998,6 +4998,23 @@ function _resetData(){
   planColumns=[];planColSeq=0;
   planPartitions=[];planPartSeq=0;
   _undoStack=[];_redoStack=[];
+  // 平面図モード・選択状態
+  _planMode='none';
+  _planSelType=null; _planSelId=null;
+  _partPending=null;
+  // 外周作図関連
+  _outlineVerts=[]; _outlineClosed=false;
+  _outlineSelEdge=null; _outlinePreview=null;
+  _outlineDims=[]; _outlineAutoCorner=false;
+  _outlineAdjIdx=null; _outlinePhase='input';
+  _outlineLockEdges=new Set();
+  _outlineStartX=0; _outlineStartY=0;
+  _outlineDrawSc=1;
+  // 編集フェーズ
+  _editSelEdge=null; _editDragPt=null;
+  // ヘッダーの「終了」ボタンを隠す
+  var fb=document.getElementById('btn-outline-finish');
+  if(fb) fb.classList.add('hidden');
 }
 
 // ── 内部：データ読込 ──
