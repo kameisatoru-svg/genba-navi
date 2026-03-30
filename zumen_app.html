@@ -590,15 +590,6 @@ canvas{display:block;width:100%;}
         <span style="font-size:12px;color:var(--text2);">最後の受信値</span>
         <span id="ble-last-val" style="font-size:18px;font-weight:700;margin-left:auto;color:var(--navy);">—</span>
       </div>
-      <div style="border-top:1px solid rgba(30,45,64,0.1);padding-top:12px;">
-        <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;">🧪 テスト注入（実機なしで動作確認）</div>
-        <div style="display:flex;gap:8px;">
-          <input id="ble-test-input" type="number" value="3600" inputmode="numeric"
-            style="flex:1;height:38px;border:1.5px solid rgba(30,45,64,0.2);border-radius:8px;padding:0 10px;font-size:14px;font-family:inherit;outline:none;">
-          <button onclick="bleInjectTest()" style="height:38px;padding:0 14px;border:none;border-radius:8px;background:var(--accent);color:var(--navy);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">注入</button>
-        </div>
-        <div style="font-size:11px;color:var(--text2);margin-top:6px;">単位: mm で入力してください</div>
-      </div>
     </div>
     <div style="padding:0 16px 16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
       <button onclick="bleDisconnect()" style="height:42px;border:1.5px solid rgba(30,45,64,0.2);border-radius:10px;background:transparent;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">切断</button>
@@ -5418,12 +5409,6 @@ function _bleLog(msg){
   el.textContent='['+ts+'] '+msg+'\n'+el.textContent;
   var lines=el.textContent.split('\n');
   if(lines.length>60) el.textContent=lines.slice(0,60).join('\n');
-}
-
-function bleInjectTest(){
-  var inp=document.getElementById('ble-test-input');
-  var mm=parseInt(inp?inp.value:3600)||3600;
-  _applyBleValue(mm);
 }
 
 function _applyBleValue(mm){
