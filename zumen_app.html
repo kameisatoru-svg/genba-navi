@@ -2622,6 +2622,7 @@ function _planSc(){
   var scT=needT>mT?sc*(mT/needT):sc, scB=needB>mB?sc*(mB/needB):sc;
   sc=Math.min(sc,scL,scR,scT,scB);
   sc=Math.max(sc,0.01);
+  
   return{sc:sc, ox:mL, oy:mT, W:W, D:D, cv:cv};
 }
 
@@ -2774,36 +2775,6 @@ function redrawPlan(){
   sc = Math.min(sc, scL, scR, scT, scB);
   sc = Math.max(sc, 0.01);
 
-  // ── 間仕切りdimOffsetによる余白拡張 ──
-  // dimYrel = oy相対のdimY位置（=(p.start+p.len/2)*sc + dimOff）
-  // キャンバス下端まで: rd+mB が必要 → dimYrel+22 <= rd+mB
-  // キャンバス上端まで: dimYrel-14 >= 0
-  var _mB0=mB, _mT0=mT, _mR0=mR, _mL0=mL;
-  var _dimExtraB=0, _dimExtraL=0, _dimExtraR=0, _dimExtraT=0;
-  planPartitions.forEach(function(p){
-    var dimOff=(p.dimOffset||0)*sc;
-    if(p.axis==='v'){
-      // dimYrel: oy基準。下方向+で動く
-      var dimYrel=(p.start+p.len/2)*sc+dimOff;
-      // 下：dimYrel+22（テキスト14+余白8）がrd+mB_初期値に収まらなければ拡張
-      var extraB=dimYrel+22-(D*sc+_mB0);
-      if(extraB>0) _dimExtraB=Math.max(_dimExtraB, Math.ceil(extraB)+8);
-      // 上：dimYrel-14が0を下回れば拡張
-      var extraT=14-dimYrel;
-      if(extraT>0) _dimExtraT=Math.max(_dimExtraT, Math.ceil(extraT)+8);
-    } else {
-      // dimXrel: ox基準。右方向+で動く
-      var dimXrel=(p.start+p.len/2)*sc+dimOff;
-      // 右
-      var extraR=dimXrel+40-(W*sc+_mR0);
-      if(extraR>0) _dimExtraR=Math.max(_dimExtraR, Math.ceil(extraR)+8);
-      // 左
-      var extraL=40-dimXrel;
-      if(extraL>0) _dimExtraL=Math.max(_dimExtraL, Math.ceil(extraL)+8);
-    }
-  });
-  mB+=_dimExtraB; mT+=_dimExtraT; mR+=_dimExtraR; mL+=_dimExtraL;
-
   var Tpx=T*sc;
   var rw=W*sc, rd=D*sc;
   var CH=rd+mT+mB;
@@ -2891,7 +2862,11 @@ function redrawPlan(){
         var midY=oy+p.pos*sc;
         var topFaceY=midY-pt/2, botFaceY=midY+pt/2;
         var x1=ox+p.start*sc, x2=ox+(p.start+p.len)*sc;
-        var dimX=(x1+x2)/2+dimOff;
+        var dimX_raw=(x1+x2)/2+dimOff;
+        // 外周寸法線の内側24pxに制限（左側：ox-Tpx-16、右側：ox+rw+Tpx+16）
+        var outerDimL=ox-Tpx-16+24; // 左外周寸法線の24px内側
+        var outerDimR=ox+rw+Tpx+16-24; // 右外周寸法線の24px内側
+        var dimX=Math.max(outerDimL, Math.min(outerDimR, dimX_raw));
         ctx.strokeStyle='rgba(30,45,64,'+dimAlpha+')'; ctx.lineWidth=0.8;
         ctx.beginPath();ctx.moveTo(dimX,oy);ctx.lineTo(dimX,topFaceY);ctx.stroke();
         [oy,topFaceY].forEach(function(ty){ctx.beginPath();ctx.moveTo(dimX-3,ty);ctx.lineTo(dimX+3,ty);ctx.stroke();});
@@ -2917,8 +2892,11 @@ function redrawPlan(){
         var midX2=ox+p.pos*sc;
         var leftFaceX=midX2-pt/2, rightFaceX=midX2+pt/2;
         var y1=oy+p.start*sc, y2=oy+(p.start+p.len)*sc;
-        // dimYは自由（外周寸法線を越えて外側にも移動可能、キャンバスは自動拡張）
-        var dimY=(y1+y2)/2+dimOff;
+        // dimYは外周寸法線の内側24pxに制限
+        var dimY_raw=(y1+y2)/2+dimOff;
+        var outerDimT=oy-Tpx-16+24; // 上外周寸法線の24px内側
+        var outerDimB=oy+rd+Tpx+16-24; // 下外周寸法線の24px内側
+        var dimY=Math.max(outerDimT, Math.min(outerDimB, dimY_raw));
         ctx.strokeStyle='rgba(30,45,64,'+dimAlpha+')'; ctx.lineWidth=0.8;
         ctx.beginPath();ctx.moveTo(ox,dimY);ctx.lineTo(leftFaceX,dimY);ctx.stroke();
         [ox,leftFaceX].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY-3);ctx.lineTo(tx,dimY+3);ctx.stroke();});
@@ -4114,7 +4092,12 @@ function redrawPlanWithDrag(){
     var posYmm=posYsnap;
     var botDistMm=roomData.D-posYmm;
     ctx.strokeStyle='rgba(30,45,64,0.4)'; ctx.lineWidth=0.8;
-    var dimX3=(x1+x2)/2;
+    var dimX3_raw=(x1+x2)/2;
+    // 外周寸法線の内側24pxに制限
+    var rw=roomData.W*info.sc;
+    var outerDimL=info.ox-Tpx-16+24;
+    var outerDimR=info.ox+rw+Tpx+16-24;
+    var dimX3=Math.max(outerDimL, Math.min(outerDimR, dimX3_raw));
     ctx.beginPath();ctx.moveTo(dimX3,info.oy);ctx.lineTo(dimX3,topFaceY);ctx.stroke();
     [info.oy,topFaceY].forEach(function(ty){ctx.beginPath();ctx.moveTo(dimX3-3,ty);ctx.lineTo(dimX3+3,ty);ctx.stroke();});
     var botWallY=info.oy+roomData.D*info.sc;
@@ -4146,7 +4129,12 @@ function redrawPlanWithDrag(){
     var posXmm=posXsnap;
     var rightDistMm=roomData.W-posXmm;
     ctx.strokeStyle='rgba(30,45,64,0.4)'; ctx.lineWidth=0.8;
-    var dimY3=(y1+y2)/2;
+    var dimY3_raw=(y1+y2)/2;
+    // 外周寸法線の内側24pxに制限
+    var rd=roomData.D*info.sc;
+    var outerDimT=info.oy-Tpx-16+24;
+    var outerDimB=info.oy+rd+Tpx+16-24;
+    var dimY3=Math.max(outerDimT, Math.min(outerDimB, dimY3_raw));
     ctx.beginPath();ctx.moveTo(info.ox,dimY3);ctx.lineTo(leftFaceX,dimY3);ctx.stroke();
     [info.ox,leftFaceX].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY3-3);ctx.lineTo(tx,dimY3+3);ctx.stroke();});
     var rightWallX=info.ox+roomData.W*info.sc;
