@@ -2621,8 +2621,11 @@ function confirmPartPending(){
   if(!_partPending) return;
   pushHistory();
   planPartSeq++;
-  planPartitions.push({id:planPartSeq, axis:_partPending.axis, pos:_partPending.pos, start:_partPending.start, len:_partPending.len, t:roomData.wallT, dimOffset:0});
+  var newId=planPartSeq;
+  planPartitions.push({id:newId, axis:_partPending.axis, pos:_partPending.pos, start:_partPending.start, len:_partPending.len, t:roomData.wallT, dimOffset:0});
   _partPending=null;
+  _planSelType='partition';
+  _planSelId=newId;
   renderPlan();
 }
 
