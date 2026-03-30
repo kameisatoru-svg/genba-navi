@@ -2623,42 +2623,6 @@ function _planSc(){
   sc=Math.min(sc,scL,scR,scT,scB);
   sc=Math.max(sc,0.01);
   
-  // ── 間仕切り寸法線による外周寸法線の押し出し計算 ──
-  var Tpx=T*sc;
-  var pushL=0, pushR=0, pushT=0, pushB=0;
-  var MARGIN=20;
-  
-  var baseOuterDimL = mL - Tpx - 16;
-  var baseOuterDimR = mL + W*sc + Tpx + 16;
-  var baseOuterDimT = mT - Tpx - 16;
-  var baseOuterDimB = mT + D*sc + Tpx + 16;
-  
-  planPartitions.forEach(function(p){
-    var dimOff=(p.dimOffset||0)*sc;
-    if(p.axis==='h'){
-      var dimX = mL + (p.start+p.len/2)*sc + dimOff;
-      if(dimX < baseOuterDimL + MARGIN){
-        pushL = Math.max(pushL, baseOuterDimL + MARGIN - dimX);
-      }
-      if(dimX > baseOuterDimR - MARGIN){
-        pushR = Math.max(pushR, dimX - (baseOuterDimR - MARGIN));
-      }
-    } else {
-      var dimY = mT + (p.start+p.len/2)*sc + dimOff;
-      if(dimY < baseOuterDimT + MARGIN){
-        pushT = Math.max(pushT, baseOuterDimT + MARGIN - dimY);
-      }
-      if(dimY > baseOuterDimB - MARGIN){
-        pushB = Math.max(pushB, dimY - (baseOuterDimB - MARGIN));
-      }
-    }
-  });
-  
-  mL += Math.ceil(pushL);
-  mR += Math.ceil(pushR);
-  mT += Math.ceil(pushT);
-  mB += Math.ceil(pushB);
-  
   return{sc:sc, ox:mL, oy:mT, W:W, D:D, cv:cv};
 }
 
@@ -2811,50 +2775,7 @@ function redrawPlan(){
   sc = Math.min(sc, scL, scR, scT, scB);
   sc = Math.max(sc, 0.01);
 
-  // ── 間仕切り寸法線による外周寸法線の押し出し計算 ──
   var Tpx=T*sc;
-  var pushL=0, pushR=0, pushT=0, pushB=0;
-  var MARGIN=20; // 間仕切り寸法線は外周寸法線の内側20pxまで
-  
-  // 外周寸法線の基本位置（初期ox=56, oy=20基準、キャンバス座標）
-  var baseOuterDimL = mL - Tpx - 16;      // 左外周寸法線のX座標
-  var baseOuterDimR = mL + W*sc + Tpx + 16; // 右外周寸法線のX座標
-  var baseOuterDimT = mT - Tpx - 16;      // 上外周寸法線のY座標
-  var baseOuterDimB = mT + D*sc + Tpx + 16; // 下外周寸法線のY座標
-  
-  planPartitions.forEach(function(p){
-    var dimOff=(p.dimOffset||0)*sc;
-    if(p.axis==='h'){
-      // 横壁：間仕切り寸法線のX座標（キャンバス座標）
-      var dimX = mL + (p.start+p.len/2)*sc + dimOff;
-      // 左側チェック：dimXがbaseOuterDimL+MARGINより左なら押し出す
-      if(dimX < baseOuterDimL + MARGIN){
-        pushL = Math.max(pushL, baseOuterDimL + MARGIN - dimX);
-      }
-      // 右側チェック：dimXがbaseOuterDimR-MARGINより右なら押し出す
-      if(dimX > baseOuterDimR - MARGIN){
-        pushR = Math.max(pushR, dimX - (baseOuterDimR - MARGIN));
-      }
-    } else {
-      // 縦壁：間仕切り寸法線のY座標（キャンバス座標）
-      var dimY = mT + (p.start+p.len/2)*sc + dimOff;
-      // 上側チェック
-      if(dimY < baseOuterDimT + MARGIN){
-        pushT = Math.max(pushT, baseOuterDimT + MARGIN - dimY);
-      }
-      // 下側チェック
-      if(dimY > baseOuterDimB - MARGIN){
-        pushB = Math.max(pushB, dimY - (baseOuterDimB - MARGIN));
-      }
-    }
-  });
-  
-  // 余白に押し出し量を加算
-  mL += Math.ceil(pushL);
-  mR += Math.ceil(pushR);
-  mT += Math.ceil(pushT);
-  mB += Math.ceil(pushB);
-
   var rw=W*sc, rd=D*sc;
   var CH=rd+mT+mB;
   var ox=mL, oy=mT;
@@ -3015,18 +2936,67 @@ function redrawPlan(){
   });
 
   // ══════════════════════════════════════════
-  //  寸法線：外周の外・固定余白内に配置
+  //  寸法線：外周の外・間仕切り寸法線との間隔を保つ
   //  内壁面基準・1層（W・D）
   // ══════════════════════════════════════════
   var outerL=ox-Tpx, outerR=ox+rw+Tpx;
   var outerT=oy-Tpx, outerB=oy+rd+Tpx;
+
+  // ── 間仕切り寸法線の最も外側の位置を計算 ──
+  var MARGIN=20; // 外周寸法線と間仕切り寸法線の最小間隔
+  var minDimX=Infinity, maxDimX=-Infinity;
+  var minDimY=Infinity, maxDimY=-Infinity;
+  
+  planPartitions.forEach(function(p){
+    var dimOff=(p.dimOffset||0)*sc;
+    if(p.axis==='h'){
+      var dimX=(p.start+p.len/2)*sc+dimOff;
+      minDimX=Math.min(minDimX, dimX);
+      maxDimX=Math.max(maxDimX, dimX);
+    } else {
+      var dimY=(p.start+p.len/2)*sc+dimOff;
+      minDimY=Math.min(minDimY, dimY);
+      maxDimY=Math.max(maxDimY, dimY);
+    }
+  });
+  
+  // 外周寸法線の位置を決定（間仕切り寸法線がなければ基本位置、あれば+MARGIN）
+  var baseOffsetL=16, baseOffsetR=16, baseOffsetT=16, baseOffsetB=16;
+  var dX_offset = baseOffsetL;
+  var dY_offset = baseOffsetB;
+  var dX_offsetR = baseOffsetR; // 右側用（将来拡張用）
+  var dY_offsetT = baseOffsetT;  // 上側用（将来拡張用）
+  
+  if(minDimX < Infinity){
+    // 横壁の間仕切り寸法線がある
+    // 左側：間仕切り寸法線の最小X（ox相対）がMARGIN以内なら外周寸法線を押し出す
+    if(minDimX < baseOffsetL + MARGIN){
+      dX_offset = minDimX - MARGIN;
+    }
+    // 右側：間仕切り寸法線の最大X（ox相対）がrw-MARGIN以上なら外周寸法線を押し出す
+    if(maxDimX > rw - baseOffsetR - MARGIN){
+      dX_offsetR = rw - maxDimX + MARGIN;
+    }
+  }
+  
+  if(minDimY < Infinity){
+    // 縦壁の間仕切り寸法線がある
+    // 上側
+    if(minDimY < baseOffsetT + MARGIN){
+      dY_offsetT = minDimY - MARGIN;
+    }
+    // 下側
+    if(maxDimY > rd - baseOffsetB - MARGIN){
+      dY_offset = maxDimY - rd + MARGIN;
+    }
+  }
 
   ctx.strokeStyle='rgba(30,45,64,0.5)';
   ctx.fillStyle='rgba(30,45,64,0.75)';
   ctx.lineWidth=1;
 
   // 下：W（内壁面→内壁面）
-  var dY=outerB+16;
+  var dY=outerB+dY_offset;
   ctx.beginPath();ctx.moveTo(ox,dY);ctx.lineTo(ox+rw,dY);ctx.stroke();
   [ox,ox+rw].forEach(function(tx){
     ctx.beginPath();ctx.moveTo(tx,dY-4);ctx.lineTo(tx,dY+4);ctx.stroke();
@@ -3042,7 +3012,7 @@ function redrawPlan(){
   ctx.fillText(W.toLocaleString()+'mm', ox+rw/2, dY+5);
 
   // 左：D（内壁面→内壁面）
-  var dX=outerL-16;
+  var dX=outerL-dX_offset;
   ctx.beginPath();ctx.moveTo(dX,oy);ctx.lineTo(dX,oy+rd);ctx.stroke();
   [oy,oy+rd].forEach(function(ty){
     ctx.beginPath();ctx.moveTo(dX-4,ty);ctx.lineTo(dX+4,ty);ctx.stroke();
