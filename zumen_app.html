@@ -3022,23 +3022,31 @@ function redrawPlan(){
   ctx.fillText(W.toLocaleString()+'mm', (outerL+outerR)/2, dY+5);
 
   // 左：D（外壁外面→外壁外面）
-  // dX: outerLから16左、かつx>=17に収める（テキスト縦書き幅確保）
-  var dX=Math.max(outerL-16, 17);
+  // スペースが足りない場合は壁の内側（右）に描く
+  var _dXideal=outerL-16;
+  var _dXinside=(_dXideal < 4); // 壁外に描くスペースなし→内側モード
+  var dX=_dXinside ? (outerL+Tpx+6) : _dXideal;
+  ctx.strokeStyle='rgba(30,45,64,0.5)'; ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(dX,outerT);ctx.lineTo(dX,outerB);ctx.stroke();
   [outerT,outerB].forEach(function(ty){
     ctx.beginPath();ctx.moveTo(dX-4,ty);ctx.lineTo(dX+4,ty);ctx.stroke();
   });
-  // 補助線
-  ctx.strokeStyle='rgba(30,45,64,0.25)'; ctx.lineWidth=0.7; ctx.setLineDash([2,3]);
-  ctx.beginPath();ctx.moveTo(outerL-2,outerT);ctx.lineTo(dX-6,outerT);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(outerL-2,outerB);ctx.lineTo(dX-6,outerB);ctx.stroke();
-  ctx.setLineDash([]);
+  // 補助線（内側モードは省略、外側モードのみ）
+  if(!_dXinside){
+    ctx.strokeStyle='rgba(30,45,64,0.25)'; ctx.lineWidth=0.7; ctx.setLineDash([2,3]);
+    ctx.beginPath();ctx.moveTo(outerL-2,outerT);ctx.lineTo(dX-6,outerT);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(outerL-2,outerB);ctx.lineTo(dX-6,outerB);ctx.stroke();
+    ctx.setLineDash([]);
+  }
   ctx.strokeStyle='rgba(30,45,64,0.5)'; ctx.lineWidth=1;
   ctx.save();
-  ctx.translate(dX-13, (outerT+outerB)/2);
+  // 内側モード：テキストをdXの右に、外側モード：dXの左に
+  var _dXtextX=_dXinside ? (dX+13) : (dX-13);
+  ctx.translate(_dXtextX, (outerT+outerB)/2);
   ctx.rotate(-Math.PI/2);
   ctx.font='bold 11px Meiryo,sans-serif';
   ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle='rgba(30,45,64,0.75)';
   ctx.fillText(D.toLocaleString()+'mm', 0, 0);
   ctx.restore();
 
