@@ -2925,8 +2925,9 @@ function redrawPlan(){
       var hBotY=poy+p.pos*sc+pt2/2;
       var wallTopY=poy;
       var wallBotY=poy+iD*sc;
-      var topDist=Math.round(p.pos-halfT2);
-      var botDist=Math.round(iD-p.pos-halfT2);
+      var halfPt=Math.round((p.t||roomData.wallT)/2);
+      var topDist=Math.round(p.pos-halfPt);
+      var botDist=Math.round(iD-p.pos-halfPt);
       if(topDist>0){
         ctx.beginPath();ctx.moveTo(hMidX,wallTopY);ctx.lineTo(hMidX,hTopY);ctx.stroke();
         [wallTopY,hTopY].forEach(function(ty){ctx.beginPath();ctx.moveTo(hMidX-3,ty);ctx.lineTo(hMidX+3,ty);ctx.stroke();});
@@ -2947,8 +2948,9 @@ function redrawPlan(){
       var vRgtX=pox+p.pos*sc+pt2/2;
       var wallLftX=pox;
       var wallRgtX=pox+iW*sc;
-      var lftDist=Math.round(p.pos-halfT2);
-      var rgtDist=Math.round(iW-p.pos-halfT2);
+      var halfPt=Math.round((p.t||roomData.wallT)/2);
+      var lftDist=Math.round(p.pos-halfPt);
+      var rgtDist=Math.round(iW-p.pos-halfPt);
       if(lftDist>0){
         ctx.beginPath();ctx.moveTo(wallLftX,vMidY);ctx.lineTo(vLftX,vMidY);ctx.stroke();
         [wallLftX,vLftX].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,vMidY-3);ctx.lineTo(tx,vMidY+3);ctx.stroke();});
@@ -4169,10 +4171,10 @@ function redrawPlanWithDrag(){
     ctx.fillStyle='rgba(30,45,64,0.85)'; ctx.font='bold 10px Meiryo,sans-serif';
     ctx.save(); ctx.translate(dimX3-10,_poyD+(topFaceY-_poyD)/2); ctx.rotate(-Math.PI/2);
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText((posYmm-halfT)+'mm',0,0); ctx.restore();
+    ctx.fillText(Math.round(posYmm-halfT)+'mm',0,0); ctx.restore();
     ctx.save(); ctx.translate(dimX3-10,botFaceY+(botWallY-botFaceY)/2); ctx.rotate(-Math.PI/2);
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText((botDistMm-halfT)+'mm',0,0); ctx.restore();
+    ctx.fillText(Math.round(botDistMm-halfT)+'mm',0,0); ctx.restore();
     var lenMm=Math.abs(exSnap-sxSnap);
     if(lenMm>0){
       ctx.strokeStyle='rgba(200,169,110,0.8)'; ctx.lineWidth=0.8;
@@ -4201,8 +4203,8 @@ function redrawPlanWithDrag(){
     [rightFaceX,rightWallX].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY3-3);ctx.lineTo(tx,dimY3+3);ctx.stroke();});
     ctx.fillStyle='rgba(30,45,64,0.85)'; ctx.font='bold 10px Meiryo,sans-serif';
     ctx.textAlign='center'; ctx.textBaseline='bottom';
-    ctx.fillText((posXmm-halfT)+'mm',_poxD+(leftFaceX-_poxD)/2,dimY3-4);
-    ctx.fillText((rightDistMm-halfT)+'mm',rightFaceX+(rightWallX-rightFaceX)/2,dimY3-4);
+    ctx.fillText(Math.round(posXmm-halfT)+'mm',_poxD+(leftFaceX-_poxD)/2,dimY3-4);
+    ctx.fillText(Math.round(rightDistMm-halfT)+'mm',rightFaceX+(rightWallX-rightFaceX)/2,dimY3-4);
     var lenMm2=Math.abs(eySnap-sySnap);
     if(lenMm2>0){
       ctx.strokeStyle='rgba(200,169,110,0.8)'; ctx.lineWidth=0.8;
