@@ -2787,50 +2787,40 @@ function redrawPlan(){
     });
   });
 
-  // ── 余白：間仕切りdimOffsetによる追加余白を先行計算 ──
-  // まず暫定scで間仕切りかわし量を推定し、mL/mBに加算してからsc確定
-  var mL0=56, mR=20, mT=20, mB0=56;
-  var sc0=Math.min((CW-mL0-mR)/W, 370/D);
-  sc0=Math.max(sc0,0.01);
+  // ── 余白・スケール計算（2パス方式でキャンバス収まりを保証）──
+  var mR=20, mT=20;
   var _hasInnerRD=(roomData._innerW>0);
-  var iW0=_hasInnerRD?(roomData._innerW||W):W;
-  var iD0=_hasInnerRD?(roomData._innerD||D):D;
-  var Tpx0a=T*sc0;
-  var pox0=_hasInnerRD?(mL0+Tpx0a/2):mL0;
-  var poy0=_hasInnerRD?(mT+Tpx0a/2):mT;
-  // 縦壁の引き出し線がpox0（内寸左端）まで延びる → outerL0より左に出る量
-  var outerL0=mL0-Tpx0a;
-  var outerB0=mT+iD0*sc0+Tpx0a;
-  var _addL=0, _addB=0;
-  // 横壁がある → 下引き出し線がouterBに接するため mB に余裕を追加
-  if(planPartitions.some(function(p){return p.axis==='h';})) _addB=8;
+
+  // ── パス1：暫定sc（mL/mB固定）でTpxを求めmL/mBを決定 ──
+  var _mL1=56, _mB1=56;
+  var _sc1=Math.max(Math.min((CW-_mL1-mR)/W, 370/D), 0.01);
+  var _Tpx1=T*_sc1;
+  // 間仕切りかわし追加余白
+  var _addB1=0;
+  var _hasHPart1=planPartitions.some(function(p){return p.axis==='h';});
+  if(_hasHPart1) _addB1=10; // 横壁下引き出し線とdYのかわし
   planPartitions.forEach(function(p){
-    var dOsc0=(p.dimOffset||0)*sc0;
-    if(p.axis==='v'){
-      // 縦壁のdimOffsetでY位置がouterB0を超える場合
-      var vBaseY0=poy0+(p.start+p.len/2)*sc0+dOsc0;
-      var overB0=vBaseY0-(outerB0+6);
-      if(overB0>0) _addB=Math.max(_addB, overB0+8);
-    }
+    if(p.axis!=='v') return;
+    var dO1=(p.dimOffset||0)*_sc1;
+    var _poy1=_hasInnerRD?(mT+_Tpx1/2):mT;
+    var _outerB1=mT+((_hasInnerRD?(roomData._innerD||D):D)*_sc1)+_Tpx1;
+    var vY1=_poy1+(p.start+p.len/2)*_sc1+dO1;
+    var over1=vY1-(_outerB1+6);
+    if(over1>0) _addB1=Math.max(_addB1, over1+10);
   });
-  var mL=mL0+_addL;
-  var mB=mB0+_addB;
+  // mL：Tpx+外周寸法幅(16)+テキスト(28)+余裕(4) = Tpx+48、ただし最低56
+  var mL=Math.max(56, Math.ceil(_Tpx1)+48);
+  var mB=Math.max(56, Math.ceil(_Tpx1)+42+_addB1);
 
-  // 確定sc計算
+  // ── パス2：確定sc計算 ──
   var sc=Math.min((CW-mL-mR)/W, 370/D);
-
-  // ドア弧・外周寸法線が余白に収まるか確認
+  // ドア弧余白確認
   var Tpx0=T*sc;
-  var needL = Tpx0 + maxArcL*sc + 36;
-  var needR = Tpx0 + maxArcR*sc + 16;
-  var needT = Tpx0 + maxArcU*sc + 16;
-  var needB = Tpx0 + maxArcD*sc + 36;
-  var scL = needL>mL ? sc*(mL/needL) : sc;
-  var scR = needR>mR ? sc*(mR/needR) : sc;
-  var scT = needT>mT ? sc*(mT/needT) : sc;
-  var scB = needB>mB ? sc*(mB/needB) : sc;
-  sc = Math.min(sc, scL, scR, scT, scB);
-  sc = Math.max(sc, 0.01);
+  var needL=Tpx0+maxArcL*sc+36, needR=Tpx0+maxArcR*sc+16;
+  var needT=Tpx0+maxArcU*sc+16, needB=Tpx0+maxArcD*sc+36;
+  var scL=needL>mL?sc*(mL/needL):sc, scR=needR>mR?sc*(mR/needR):sc;
+  var scT=needT>mT?sc*(mT/needT):sc, scB=needB>mB?sc*(mB/needB):sc;
+  sc=Math.max(Math.min(sc,scL,scR,scT,scB), 0.01);
 
   var Tpx=T*sc;
   var rw=W*sc, rd=D*sc;
@@ -3002,20 +2992,17 @@ function redrawPlan(){
 
   // 外周寸法線かわし：引き出し線と外周寸法線の重なり防止
   var _dimShiftB=0, _dimShiftL=0;
-  // 横壁がある → 下引き出し線が outerB に接するため dY を常に8px外側に出す
-  var _hasHPart=planPartitions.some(function(p){return p.axis==='h';});
-  if(_hasHPart) _dimShiftB=8;
+  // 横壁がある → 下引き出し線がouterBに接するのでdYを10px外に
+  if(planPartitions.some(function(p){return p.axis==='h';})) _dimShiftB=10;
   planPartitions.forEach(function(p){
+    if(p.axis!=='v') return;
     var dOsc=(p.dimOffset||0)*sc;
-    if(p.axis==='v'){
-      // 縦壁の引き出し線Y位置がdimOffsetでouterBを超えた場合
-      var vMidY2=poy+(p.start+p.len/2)*sc+dOsc;
-      var overB2=vMidY2-(outerB+6);
-      if(overB2>0) _dimShiftB=Math.max(_dimShiftB, overB2+8);
-    }
+    var vMidY2=poy+(p.start+p.len/2)*sc+dOsc;
+    var overB2=vMidY2-(outerB+6);
+    if(overB2>0) _dimShiftB=Math.max(_dimShiftB, overB2+10);
   });
 
-  var dY=outerB+16+_dimShiftB;
+  var dY=Math.min(outerB+16+_dimShiftB, oy+rd+mB-18); // mB内に収める
   ctx.beginPath();ctx.moveTo(outerL,dY);ctx.lineTo(outerR,dY);ctx.stroke();
   [outerL,outerR].forEach(function(tx){
     ctx.beginPath();ctx.moveTo(tx,dY-4);ctx.lineTo(tx,dY+4);ctx.stroke();
@@ -3031,7 +3018,7 @@ function redrawPlan(){
   ctx.fillText(W.toLocaleString()+'mm', (outerL+outerR)/2, dY+5);
 
   // 左：D（外壁外面→外壁外面）
-  var dX=outerL-16-_dimShiftL;
+  var dX=Math.max(outerL-16-_dimShiftL, 4+13); // mL内（x>=17）に収める
   ctx.beginPath();ctx.moveTo(dX,outerT);ctx.lineTo(dX,outerB);ctx.stroke();
   [outerT,outerB].forEach(function(ty){
     ctx.beginPath();ctx.moveTo(dX-4,ty);ctx.lineTo(dX+4,ty);ctx.stroke();
