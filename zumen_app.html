@@ -5254,10 +5254,14 @@ function bleDisconnect(){
   if(_bleDevice&&_bleDevice.gatt.connected){
     _bleDevice.gatt.disconnect();
   }
-  // _bleDeviceをnullにしてforget→再接続時に選択ダイアログが出る
-  if(_bleDevice&&_bleDevice.forget) _bleDevice.forget();
+  _bleConnected=false;
+  _bleChar=null;
   _bleDevice=null;
-  _onBleDisconnected();
+  _updateBleUI();
+  // 切断後はリロードしないと再接続できないためボタンをリロードに変える
+  var btn=document.getElementById('ble-connect-btn');
+  if(btn){ btn.textContent='再接続（リロード）'; btn.onclick=function(){ location.reload(); }; }
+  showWaToast('GLM切断しました');
 }
 
 function _onBleDisconnected(){
@@ -5265,6 +5269,8 @@ function _onBleDisconnected(){
   _bleChar=null;
   _bleDevice=null;
   _updateBleUI();
+  var btn=document.getElementById('ble-connect-btn');
+  if(btn){ btn.textContent='再接続（リロード）'; btn.onclick=function(){ location.reload(); }; }
   showWaToast('GLM切断しました');
 }
 
