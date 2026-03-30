@@ -602,7 +602,7 @@ canvas{display:block;width:100%;}
       </div>
     </div>
     <div style="padding:0 16px 16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <button onclick="bleDisconnect()" style="height:42px;border:1.5px solid rgba(30,45,64,0.2);border-radius:10px;background:transparent;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">切断</button>
+      <button id="ble-disconnect-btn" onclick="bleDisconnect()" style="height:42px;border:1.5px solid rgba(30,45,64,0.2);border-radius:10px;background:transparent;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">切断</button>
       <button onclick="closeBleModal(null)" style="height:42px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">閉じる</button>
     </div>
   </div>
@@ -5264,8 +5264,8 @@ function bleDisconnect(){
   _bleDevice=null;
   _updateBleUI();
   // 切断後はリロードしないと再接続できないためボタンをリロードに変える
-  var btn=document.getElementById('ble-connect-btn');
-  if(btn){ btn.textContent='再接続'; btn.disabled=false; btn.dataset.needReload='1'; }
+  var db=document.getElementById('ble-disconnect-btn');
+  if(db){ db.textContent='再接続'; db.style.background='var(--navy)'; db.style.color='#fff'; db.style.border='none'; db.setAttribute('onclick','location.reload()'); }
   showWaToast('GLM切断しました');
 }
 
@@ -5274,8 +5274,8 @@ function _onBleDisconnected(){
   _bleChar=null;
   _bleDevice=null;
   _updateBleUI();
-  var btn=document.getElementById('ble-connect-btn');
-  if(btn){ btn.textContent='再接続'; btn.disabled=false; btn.dataset.needReload='1'; }
+  var db=document.getElementById('ble-disconnect-btn');
+  if(db){ db.textContent='再接続'; db.style.background='var(--navy)'; db.style.color='#fff'; db.style.border='none'; db.setAttribute('onclick','location.reload()'); }
   showWaToast('GLM切断しました');
 }
 
