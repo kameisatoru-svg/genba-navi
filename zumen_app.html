@@ -2621,12 +2621,8 @@ function confirmPartPending(){
   if(!_partPending) return;
   pushHistory();
   planPartSeq++;
-  var newId=planPartSeq;
-  planPartitions.push({id:newId, axis:_partPending.axis, pos:_partPending.pos, start:_partPending.start, len:_partPending.len, t:roomData.wallT, dimOffset:0});
+  planPartitions.push({id:planPartSeq, axis:_partPending.axis, pos:_partPending.pos, start:_partPending.start, len:_partPending.len, t:roomData.wallT, dimOffset:0});
   _partPending=null;
-  _planMode='none';
-  _planSelType='partition';
-  _planSelId=newId;
   renderPlan();
 }
 
@@ -2909,7 +2905,7 @@ function redrawPlan(){
       ctx.strokeRect(px3,py3,pl2,pt);
     }
 
-    // 寸法引き出し線（常時表示）
+    // 寸法引き出し線（壁面からの距離のみ常時表示）
     {
       var iW2=roomData._innerW!=null?roomData._innerW:W;
       var iD2=roomData._innerD!=null?roomData._innerD:D;
@@ -2930,11 +2926,6 @@ function redrawPlan(){
         ctx.beginPath();ctx.moveTo(midX+Tpx3/2,dimY4);ctx.lineTo(rightWallX,dimY4);ctx.stroke();
         [midX+Tpx3/2,rightWallX].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY4-3);ctx.lineTo(tx,dimY4+3);ctx.stroke();});
         ctx.fillText((iW2-p.pos)+'mm',midX+Tpx3/2+(rightWallX-midX-Tpx3/2)/2,dimY4-3);
-        ctx.strokeStyle='rgba(200,169,110,0.8)'; ctx.lineWidth=0.8;
-        ctx.beginPath();ctx.moveTo(midX+Tpx3/2+8,topY);ctx.lineTo(midX+Tpx3/2+8,botY);ctx.stroke();
-        [topY,botY].forEach(function(ty){ctx.beginPath();ctx.moveTo(midX+Tpx3/2+5,ty);ctx.lineTo(midX+Tpx3/2+11,ty);ctx.stroke();});
-        ctx.fillStyle='rgba(200,169,110,1)'; ctx.textAlign='left'; ctx.textBaseline='middle';
-        ctx.fillText(p.len+'mm',midX+Tpx3/2+14,(topY+botY)/2);
       } else {
         var midY=poy+p.pos*sc;
         var leftX=pox+p.start*sc;
@@ -2955,11 +2946,6 @@ function redrawPlan(){
         ctx.textAlign='center'; ctx.textBaseline='middle';
         ctx.fillStyle='rgba(30,45,64,0.75)'; ctx.font='bold 10px Meiryo,sans-serif';
         ctx.fillText((iD2-p.pos)+'mm',0,0); ctx.restore();
-        ctx.strokeStyle='rgba(200,169,110,0.8)'; ctx.lineWidth=0.8;
-        ctx.beginPath();ctx.moveTo(leftX,midY-Tpx3/2-8);ctx.lineTo(rightX,midY-Tpx3/2-8);ctx.stroke();
-        [leftX,rightX].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,midY-Tpx3/2-11);ctx.lineTo(tx,midY-Tpx3/2-5);ctx.stroke();});
-        ctx.fillStyle='rgba(200,169,110,1)'; ctx.textAlign='center'; ctx.textBaseline='bottom';
-        ctx.fillText(p.len+'mm',(leftX+rightX)/2,midY-Tpx3/2-10);
       }
     }
   });
