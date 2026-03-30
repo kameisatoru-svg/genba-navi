@@ -1084,10 +1084,11 @@ function renderPlan(){
 
       // 吸着チェック：posの左面・右面が既存直交壁の面と一致
       function isPosSnapped(face){
-        // 外周壁
+        var iW2=(roomData._innerW!=null)?roomData._innerW:roomData.W;
+        var iD2=(roomData._innerD!=null)?roomData._innerD:roomData.D;
         if(face===0) return true;
-        if(isV && face===roomData.W) return true;
-        if(!isV && face===roomData.D) return true;
+        if(isV && face===iW2) return true;
+        if(!isV && face===iD2) return true;
         // 直交壁の面と一致するか
         // 縦壁(v)のposX → 既存横壁(h)の左面・右面（p.start, p.start+p.len）と比較
         // 横壁(h)のposY → 既存縦壁(v)の上面・下面（p.start, p.start+p.len）と比較
@@ -1208,10 +1209,9 @@ function renderPlan(){
 var _colPending = null; // ダイアログ表示中の仮データ {corner, face, offset, x, y}
 
 function _detectColType(mmX, mmY){
-  // タップ位置mmX/mmYから柱種別を判定
-  // コーナー・壁面・内部のどれかを返す
-  var W=roomData.W, D=roomData.D;
-  var thresh=50; // 壁から50mm以内で吸着判定
+  var W=(roomData._innerW!=null)?roomData._innerW:roomData.W;
+  var D=(roomData._innerD!=null)?roomData._innerD:roomData.D;
+  var thresh=50;
 
   var nearLeft  = mmX < thresh;
   var nearRight = mmX > W-thresh;
@@ -1312,8 +1312,10 @@ function movePart(delta){
   pushHistory();
   var newPos=sp.pos+delta;
   var halfT=Math.round((sp.t||roomData.wallT)/2);
+  var iW=(roomData._innerW!=null)?roomData._innerW:roomData.W;
+  var iD=(roomData._innerD!=null)?roomData._innerD:roomData.D;
   // 外周壁内に収まるよう制限
-  var maxPos=sp.axis==='v'?roomData.W:roomData.D;
+  var maxPos=sp.axis==='v'?iW:iD;
   if(newPos-halfT<0||newPos+halfT>maxPos) return;
   sp.pos=newPos;
   renderPlan();
@@ -1361,8 +1363,8 @@ function goBackToTop(){
   _outlineDims=[]; _outlineAutoCorner=false; _outlineAdjIdx=null; _outlinePhase='input';
   _outlineLockEdges=new Set();
   _editSelEdge=null; _editDragPt=null;
-  // 現場ナビホームへ
-  history.back();
+  // 現場ナビホームへ（index.htmlへ遷移）
+  window.location.href='index.html';
 }
 
 function setupProjAndStart(){
@@ -1616,7 +1618,7 @@ var _outlineDims=[];
 var _outlineIsDrawing=false;
 var _outlineStartX=0, _outlineStartY=0;
 var _outlineAutoCorner=false;
-var _outlineAdjIdx=null;      // リセット時にnullクリアで使用
+var _outlineAdjIdx=null;      // 旧変数（互換用・未使用）
 var _outlinePhase='input';    // 'input' | 'check'
 var _outlineLockEdges=new Set(); // 守る辺のインデックスSet
 
@@ -1962,6 +1964,8 @@ function _editOnOvUp(e){
   _editDragPt=null;
 }
 
+function _initEditCv(){ // 旧関数（互換用・未使用）
+}
 var _editSelEdge=null;    // 選択中の辺インデックス
 var _editDragPt=null;     // ドラッグ中の端点 {edgeIdx, pt:'start'|'end'}
 var _editDragStartPos=null;
@@ -2162,6 +2166,22 @@ function _editUp(e){
   e.preventDefault();
   _editDragPt=null;
   _editDragStartPos=null;
+}
+
+function outlineAutoClose(){ // 旧関数（互換用）
+  if(_outlineVerts.length<3) return;
+  // 最後の頂点を最初の頂点に強制スナップ（同一視）
+  // → 最後の頂点は削除して最初の頂点で閉じる
+  var first=_outlineVerts[0];
+  var last=_outlineVerts[_outlineVerts.length-1];
+  var dist=Math.sqrt(Math.pow(last.x-first.x,2)+Math.pow(last.y-first.y,2));
+  // 最後の頂点が最初の頂点にほぼ重なっていれば削除
+  if(dist<20*(window.devicePixelRatio||1)){
+    _outlineVerts.pop();
+  }
+  _outlineClosed=true;
+  _outlineDims=new Array(_outlineVerts.length).fill(0);
+  renderPlan();
 }
 
 function outlineCancelMode(){
@@ -2434,16 +2454,14 @@ function _innerToOuter(dim){
   return dim + roomData.wallT;
 }
 
-// 誤差計算：各辺の外寸（内寸+T）の符号付き合計
-// 閉じた外周では 横成分合計=0、縦成分合計=0 が正解
+// 誤差計算：各辺の内寸の符号付き合計（閉じた外周なら横=0・縦=0が正解）
 function _outlineCalcError(){
   var xSum=0, ySum=0;
   for(var i=0;i<_outlineDims.length;i++){
     var dir=_outlineEdgeDir(i);
     var sign=_outlineEdgeSign(i);
-    var outerDim=_innerToOuter(_outlineDims[i]);
-    if(dir==='h') xSum += sign * outerDim;
-    else          ySum += sign * outerDim;
+    if(dir==='h') xSum += sign * _outlineDims[i];
+    else          ySum += sign * _outlineDims[i];
   }
   return {xErr: Math.round(xSum), yErr: Math.round(ySum)};
 }
@@ -2528,41 +2546,64 @@ function outlineConfirm(){
   var h=roomData.H||0;
   if(!h){ showWaToast('⚠ 高さ H を入力してください'); return; }
 
-  // 吸収辺がある場合は内寸を自動調整
   var absorbIdx=_outlineCalcAbsorbIdx();
   if(absorbIdx!==null){
     var adjDim=_outlineCalcAbsorbDim(absorbIdx);
     if(adjDim!==null) _outlineDims[absorbIdx]=adjDim;
   }
 
-  // 各辺の角度（スケッチから）＋内寸で頂点を再計算（仮起点0,0）
+  // 内寸頂点を再計算
   var T=roomData.wallT;
-  var newVerts=[{x:0,y:0}];
+  var innerVerts=[{x:0,y:0}];
   for(var j=0;j<_outlineDims.length;j++){
     var sv1=_outlineVerts[j], sv2=_outlineVerts[j+1];
     if(!sv1||!sv2) continue;
     var sdx=sv2.x-sv1.x, sdy=sv2.y-sv1.y;
     var ang=Math.atan2(sdy,sdx);
     var snapAng=Math.round(ang*180/Math.PI/15)*15*Math.PI/180;
-    var prev=newVerts[newVerts.length-1];
-    newVerts.push({
-      x: Math.round(prev.x + Math.cos(snapAng)*_outlineDims[j]),
-      y: Math.round(prev.y + Math.sin(snapAng)*_outlineDims[j])
+    var prev=innerVerts[innerVerts.length-1];
+    innerVerts.push({
+      x:Math.round(prev.x+Math.cos(snapAng)*_outlineDims[j]),
+      y:Math.round(prev.y+Math.sin(snapAng)*_outlineDims[j])
     });
   }
 
-  // バウンディングボックスでW・D算出
-  var minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
-  newVerts.forEach(function(v){
-    minX=Math.min(minX,v.x); minY=Math.min(minY,v.y);
-    maxX=Math.max(maxX,v.x); maxY=Math.max(maxY,v.y);
-  });
+  // 内寸ポリゴンを外向きT/2オフセットして外寸BBox(W・D)算出
+  function signedArea(pts){
+    var a=0,n=pts.length;
+    for(var i=0;i<n;i++){var j=(i+1)%n;a+=(pts[i].x*pts[j].y-pts[j].x*pts[i].y);}
+    return a/2;
+  }
+  function offsetPolygon(pts,d){
+    var n=pts.length,sa=signedArea(pts),sign=(sa>0)?1:-1,result=[];
+    for(var i=0;i<n;i++){
+      var prev=pts[(i-1+n)%n],curr=pts[i],next=pts[(i+1)%n];
+      var ax=curr.x-prev.x,ay=curr.y-prev.y,bx=next.x-curr.x,by=next.y-curr.y;
+      var la=Math.sqrt(ax*ax+ay*ay)||1,lb=Math.sqrt(bx*bx+by*by)||1;
+      var na={x:ay/la,y:-ax/la},nb={x:by/lb,y:-bx/lb};
+      var mx=na.x+nb.x,my=na.y+nb.y,ml=Math.sqrt(mx*mx+my*my)||1;
+      var cosA=na.x*nb.x+na.y*nb.y;
+      var miterLen=Math.min(1/Math.sqrt((1+cosA)/2)||1,4);
+      result.push({x:Math.round(curr.x+sign*(mx/ml)*d*miterLen),y:Math.round(curr.y+sign*(my/ml)*d*miterLen)});
+    }
+    return result;
+  }
+  var outerVerts=offsetPolygon(innerVerts,T/2);
+  var minOX=Infinity,minOY=Infinity,maxOX=-Infinity,maxOY=-Infinity;
+  outerVerts.forEach(function(v){minOX=Math.min(minOX,v.x);minOY=Math.min(minOY,v.y);maxOX=Math.max(maxOX,v.x);maxOY=Math.max(maxOY,v.y);});
+  var shiftX=-minOX,shiftY=-minOY;
+
+  // 内寸BBox
+  var inMinX=Infinity,inMinY=Infinity,inMaxX=-Infinity,inMaxY=-Infinity;
+  innerVerts.forEach(function(v){inMinX=Math.min(inMinX,v.x);inMinY=Math.min(inMinY,v.y);inMaxX=Math.max(inMaxX,v.x);inMaxY=Math.max(inMaxY,v.y);});
 
   pushHistory();
-  roomData.W=Math.round(maxX-minX);
-  roomData.D=Math.round(maxY-minY);
+  roomData.W=Math.round(maxOX-minOX);
+  roomData.D=Math.round(maxOY-minOY);
   roomData.H=h;
-  roomData._outline=newVerts.map(function(v){return{x:v.x-minX,y:v.y-minY};});
+  roomData._innerW=Math.round(inMaxX-inMinX);
+  roomData._innerD=Math.round(inMaxY-inMinY);
+  roomData._outline=innerVerts.map(function(v){return{x:Math.round(v.x+shiftX),y:Math.round(v.y+shiftY)};});
   roomData._setupMode=null;
   _outlineVerts=[]; _outlineClosed=false; _outlineSelEdge=null; _outlinePreview=null;
   _outlineDims=[]; _outlineAutoCorner=false; _outlineAdjIdx=null; _outlinePhase='input';
@@ -2581,12 +2622,10 @@ function confirmPartPending(){
   pushHistory();
   planPartSeq++;
   planPartitions.push({id:planPartSeq, axis:_partPending.axis, pos:_partPending.pos, start:_partPending.start, len:_partPending.len, t:roomData.wallT, dimOffset:0});
-  // 確定後、追加した壁を選択状態にして寸法線を表示
-  _planSelType='partition';
-  _planSelId=planPartSeq;
   _partPending=null;
   renderPlan();
 }
+
 function cancelPartPending(){
   _partPending=null;
   renderPlan();
@@ -2600,36 +2639,47 @@ function removePlanPartition(id){
 
 function _planSc(){
   var cv=document.getElementById('zumen-cv'); if(!cv) return null;
-  var W=roomData.W, D=roomData.D, T=roomData.wallT;
+  var W=roomData.W, D=roomData.D;
+  var T=roomData.wallT;
   var CW=cv.offsetWidth||340;
   var mL=56,mR=20,mT=20,mB=56;
   var sc=Math.min((CW-mL-mR)/W,370/D);
-  // redrawPlan()と同じドア弧縮小補正（scを統一するため）
-  var maxArcU=0,maxArcD=0,maxArcL=0,maxArcR=0;
-  [{fi:0,dir:'U'},{fi:2,dir:'D'},{fi:1,dir:'R'},{fi:3,dir:'L'}].forEach(function(f){
-    faceOpenings[f.fi].forEach(function(op){
-      if(!isDoor(op.type)) return;
-      if(f.dir==='U') maxArcU=Math.max(maxArcU,op.w);
-      if(f.dir==='D') maxArcD=Math.max(maxArcD,op.w);
-      if(f.dir==='L') maxArcL=Math.max(maxArcL,op.w);
-      if(f.dir==='R') maxArcR=Math.max(maxArcR,op.w);
+  // renderPlanと同じsc縮小ロジック
+  try{
+    var Tpx0=T*sc;
+    var maxArcU=0,maxArcD=0,maxArcL=0,maxArcR=0;
+    [{fi:0,dir:'U'},{fi:2,dir:'D'},{fi:1,dir:'R'},{fi:3,dir:'L'}].forEach(function(f){
+      faceOpenings[f.fi].forEach(function(op){
+        if(!isDoor(op.type)) return;
+        if(f.dir==='U') maxArcU=Math.max(maxArcU,op.w);
+        if(f.dir==='D') maxArcD=Math.max(maxArcD,op.w);
+        if(f.dir==='L') maxArcL=Math.max(maxArcL,op.w);
+        if(f.dir==='R') maxArcR=Math.max(maxArcR,op.w);
+      });
     });
-  });
-  var Tpx0=T*sc;
-  var needL=Tpx0+maxArcL*sc+36, needR=Tpx0+maxArcR*sc+16;
-  var needT=Tpx0+maxArcU*sc+16, needB=Tpx0+maxArcD*sc+36;
-  var scL=needL>mL?sc*(mL/needL):sc, scR=needR>mR?sc*(mR/needR):sc;
-  var scT=needT>mT?sc*(mT/needT):sc, scB=needB>mB?sc*(mB/needB):sc;
-  sc=Math.min(sc,scL,scR,scT,scB);
-  sc=Math.max(sc,0.01);
-  
-  return{sc:sc, ox:mL, oy:mT, W:W, D:D, cv:cv};
+    var needL=Tpx0+maxArcL*sc+36, needR=Tpx0+maxArcR*sc+16;
+    var needT=Tpx0+maxArcU*sc+16, needB=Tpx0+maxArcD*sc+36;
+    var scL=needL>mL?sc*(mL/needL):sc;
+    var scR=needR>mR?sc*(mR/needR):sc;
+    var scT=needT>mT?sc*(mT/needT):sc;
+    var scB=needB>mB?sc*(mB/needB):sc;
+    sc=Math.min(sc,scL,scR,scT,scB);
+    sc=Math.max(sc,0.01);
+  }catch(e){}
+  var Tpx=T*sc;
+  var hasOutline=(roomData._innerW!=null);
+  var pox=hasOutline?(mL+Tpx/2):mL;
+  var poy=hasOutline?(mT+Tpx/2):mT;
+  var iW=hasOutline?roomData._innerW:W;
+  var iD=hasOutline?roomData._innerD:D;
+  return{sc:sc, ox:mL, oy:mT, W:W, D:D, cv:cv,
+         pox:pox, poy:poy, iW:iW, iD:iD, T:T, Tpx:Tpx, hasOutline:hasOutline};
 }
 
 function _snapMm(px, info){
   return{
-    x:Math.max(0,Math.min(info.W, Math.round((px.x-info.ox)/info.sc/10)*10)),
-    y:Math.max(0,Math.min(info.D, Math.round((px.y-info.oy)/info.sc/10)*10))
+    x:Math.max(0,Math.min(info.iW, Math.round((px.x-info.pox)/info.sc/10)*10)),
+    y:Math.max(0,Math.min(info.iD, Math.round((px.y-info.poy)/info.sc/10)*10))
   };
 }
 
@@ -2757,17 +2807,18 @@ function redrawPlan(){
     });
   });
 
-  // ── 余白初期値 ──
+  // ── 固定キャンバス高さ（315/Dベース）＋余白固定 ──
   var mL=56, mR=20, mT=20, mB=56;
   // 基準スケール（固定CHに合わせる）
   var sc=Math.min((CW-mL-mR)/W, 370/D);
 
   // ドア弧・外周寸法線が余白に収まるか確認し、収まらなければscを縮小
   var Tpx0=T*sc;
-  var needL = Tpx0 + maxArcL*sc + 36;
+  var needL = Tpx0 + maxArcL*sc + 36; // 左に必要なpx（弧+寸法線）
   var needR = Tpx0 + maxArcR*sc + 16;
   var needT = Tpx0 + maxArcU*sc + 16;
   var needB = Tpx0 + maxArcD*sc + 36;
+  // 余白が足りない場合はscを縮小して収める
   var scL = needL>mL ? sc*(mL/needL) : sc;
   var scR = needR>mR ? sc*(mR/needR) : sc;
   var scT = needT>mT ? sc*(mT/needT) : sc;
@@ -2830,7 +2881,10 @@ function redrawPlan(){
   _makeInnerPath(ctx); ctx.stroke();
   ctx.restore();
 
-  // 間仕切り描画
+  // 間仕切り描画（pox/poy=内壁面基準）
+  // _outlineはshiftX=-minOX（外寸BBox左上基準）でT/2からスタートするのでTpx/2オフセット
+  var pox=ox+(roomData._innerW!=null?Tpx/2:0);
+  var poy=oy+(roomData._innerW!=null?Tpx/2:0);
   planPartitions.forEach(function(p){
     var pt=Math.max(2, (p.t||roomData.wallT)*sc);
     var isSel=(_planSelType==='partition'&&p.id===_planSelId);
@@ -2838,77 +2892,62 @@ function redrawPlan(){
     ctx.strokeStyle=isSel?'#c8a96e':'rgba(30,45,64,0.4)';
     ctx.lineWidth=isSel?2:1;
     if(p.axis==='v'){
-      var px2=ox+p.pos*sc-pt/2;
-      var py2=oy+p.start*sc;
+      var px2=pox+p.pos*sc-pt/2;
+      var py2=poy+p.start*sc;
       var pl=p.len*sc;
       ctx.fillRect(px2,py2,pt,pl);
       ctx.strokeRect(px2,py2,pt,pl);
     } else {
-      var px3=ox+p.start*sc;
-      var py3=oy+p.pos*sc-pt/2;
+      var px3=pox+p.start*sc;
+      var py3=poy+p.pos*sc-pt/2;
       var pl2=p.len*sc;
       ctx.fillRect(px3,py3,pl2,pt);
       ctx.strokeRect(px3,py3,pl2,pt);
     }
-    // ── 常時表示：確定後の寸法線（選択中は濃色・非選択は薄色）──
+
+    // 寸法引き出し線（壁面からの距離のみ常時表示）
     {
-      var halfT=Math.round((p.t||roomData.wallT)/2);
-      var dimOff=(p.dimOffset||0)*sc;
-      var dimAlpha=isSel?0.2:0.4;
-      var textAlpha=isSel?0.45:0.85;
-      var accentAlpha=isSel?0.5:1;
-      ctx.save();
-      if(p.axis==='h'){
-        var midY=oy+p.pos*sc;
-        var topFaceY=midY-pt/2, botFaceY=midY+pt/2;
-        var x1=ox+p.start*sc, x2=ox+(p.start+p.len)*sc;
-        var dimX=(x1+x2)/2+dimOff;
-        ctx.strokeStyle='rgba(30,45,64,'+dimAlpha+')'; ctx.lineWidth=0.8;
-        ctx.beginPath();ctx.moveTo(dimX,oy);ctx.lineTo(dimX,topFaceY);ctx.stroke();
-        [oy,topFaceY].forEach(function(ty){ctx.beginPath();ctx.moveTo(dimX-3,ty);ctx.lineTo(dimX+3,ty);ctx.stroke();});
-        var botWallY=oy+rd;
-        ctx.beginPath();ctx.moveTo(dimX,botFaceY);ctx.lineTo(dimX,botWallY);ctx.stroke();
-        [botFaceY,botWallY].forEach(function(ty){ctx.beginPath();ctx.moveTo(dimX-3,ty);ctx.lineTo(dimX+3,ty);ctx.stroke();});
-        ctx.fillStyle='rgba(30,45,64,'+textAlpha+')'; ctx.font='bold 10px Meiryo,sans-serif';
-        ctx.save(); ctx.translate(dimX-10,oy+(topFaceY-oy)/2); ctx.rotate(-Math.PI/2);
-        ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.fillText((p.pos-halfT)+'mm',0,0); ctx.restore();
-        ctx.save(); ctx.translate(dimX-10,botFaceY+(botWallY-botFaceY)/2); ctx.rotate(-Math.PI/2);
-        ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.fillText((roomData.D-p.pos-halfT)+'mm',0,0); ctx.restore();
-        var lenMm=p.len;
-        if(lenMm>0){
-          ctx.strokeStyle='rgba(200,169,110,'+accentAlpha+')'; ctx.lineWidth=0.8;
-          ctx.beginPath();ctx.moveTo(x1,topFaceY-8);ctx.lineTo(x2,topFaceY-8);ctx.stroke();
-          [x1,x2].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,topFaceY-11);ctx.lineTo(tx,topFaceY-5);ctx.stroke();});
-          ctx.fillStyle='rgba(200,169,110,'+accentAlpha+')'; ctx.textAlign='center'; ctx.textBaseline='bottom';
-          ctx.fillText(lenMm.toLocaleString()+'mm',(x1+x2)/2,topFaceY-10);
-        }
-      } else {
-        var midX2=ox+p.pos*sc;
-        var leftFaceX=midX2-pt/2, rightFaceX=midX2+pt/2;
-        var y1=oy+p.start*sc, y2=oy+(p.start+p.len)*sc;
-        var dimY=(y1+y2)/2+dimOff;
-        ctx.strokeStyle='rgba(30,45,64,'+dimAlpha+')'; ctx.lineWidth=0.8;
-        ctx.beginPath();ctx.moveTo(ox,dimY);ctx.lineTo(leftFaceX,dimY);ctx.stroke();
-        [ox,leftFaceX].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY-3);ctx.lineTo(tx,dimY+3);ctx.stroke();});
-        var rightWallX=ox+rw;
-        ctx.beginPath();ctx.moveTo(rightFaceX,dimY);ctx.lineTo(rightWallX,dimY);ctx.stroke();
-        [rightFaceX,rightWallX].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY-3);ctx.lineTo(tx,dimY+3);ctx.stroke();});
-        ctx.fillStyle='rgba(30,45,64,'+textAlpha+')'; ctx.font='bold 10px Meiryo,sans-serif';
+      var iW2=roomData._innerW!=null?roomData._innerW:W;
+      var iD2=roomData._innerD!=null?roomData._innerD:D;
+      var Tpx3=Math.max(2,roomData.wallT*sc);
+      var dimOff=(p.dimOffset||0)*sc; // 寸法線位置オフセット（px）
+      ctx.strokeStyle='rgba(30,45,64,0.4)'; ctx.lineWidth=0.8;
+      ctx.fillStyle='rgba(30,45,64,0.75)'; ctx.font='bold 10px Meiryo,sans-serif';
+      if(p.axis==='v'){
+        var midX=pox+p.pos*sc;
+        var topY=poy+p.start*sc;
+        var botY=poy+(p.start+p.len)*sc;
+        var dimY4=(topY+botY)/2 + dimOff; // dimOffset反映
+        var leftWallX=pox;
+        var rightWallX=pox+iW2*sc;
+        ctx.beginPath();ctx.moveTo(leftWallX,dimY4);ctx.lineTo(midX-Tpx3/2,dimY4);ctx.stroke();
+        [leftWallX,midX-Tpx3/2].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY4-3);ctx.lineTo(tx,dimY4+3);ctx.stroke();});
         ctx.textAlign='center'; ctx.textBaseline='bottom';
-        ctx.fillText((p.pos-halfT)+'mm',ox+(leftFaceX-ox)/2,dimY-4);
-        ctx.fillText((roomData.W-p.pos-halfT)+'mm',rightFaceX+(rightWallX-rightFaceX)/2,dimY-4);
-        var lenMm2=p.len;
-        if(lenMm2>0){
-          ctx.strokeStyle='rgba(200,169,110,'+accentAlpha+')'; ctx.lineWidth=0.8;
-          ctx.beginPath();ctx.moveTo(rightFaceX+8,y1);ctx.lineTo(rightFaceX+8,y2);ctx.stroke();
-          [y1,y2].forEach(function(ty){ctx.beginPath();ctx.moveTo(rightFaceX+5,ty);ctx.lineTo(rightFaceX+11,ty);ctx.stroke();});
-          ctx.fillStyle='rgba(200,169,110,'+accentAlpha+')'; ctx.textAlign='left'; ctx.textBaseline='middle';
-          ctx.fillText(lenMm2.toLocaleString()+'mm',rightFaceX+14,(y1+y2)/2);
-        }
+        ctx.fillText(p.pos+'mm',leftWallX+(midX-Tpx3/2-leftWallX)/2,dimY4-3);
+        ctx.beginPath();ctx.moveTo(midX+Tpx3/2,dimY4);ctx.lineTo(rightWallX,dimY4);ctx.stroke();
+        [midX+Tpx3/2,rightWallX].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY4-3);ctx.lineTo(tx,dimY4+3);ctx.stroke();});
+        ctx.fillText((iW2-p.pos)+'mm',midX+Tpx3/2+(rightWallX-midX-Tpx3/2)/2,dimY4-3);
+      } else {
+        var midY=poy+p.pos*sc;
+        var leftX=pox+p.start*sc;
+        var rightX=pox+(p.start+p.len)*sc;
+        var dimX4=(leftX+rightX)/2 + dimOff; // dimOffset反映
+        var topWallY=poy;
+        var botWallY=poy+iD2*sc;
+        ctx.beginPath();ctx.moveTo(dimX4,topWallY);ctx.lineTo(dimX4,midY-Tpx3/2);ctx.stroke();
+        [topWallY,midY-Tpx3/2].forEach(function(ty){ctx.beginPath();ctx.moveTo(dimX4-3,ty);ctx.lineTo(dimX4+3,ty);ctx.stroke();});
+        ctx.save(); ctx.translate(dimX4-10,topWallY+(midY-Tpx3/2-topWallY)/2); ctx.rotate(-Math.PI/2);
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillStyle='rgba(30,45,64,0.75)'; ctx.font='bold 10px Meiryo,sans-serif';
+        ctx.fillText(p.pos+'mm',0,0); ctx.restore();
+        ctx.strokeStyle='rgba(30,45,64,0.4)'; ctx.lineWidth=0.8;
+        ctx.beginPath();ctx.moveTo(dimX4,midY+Tpx3/2);ctx.lineTo(dimX4,botWallY);ctx.stroke();
+        [midY+Tpx3/2,botWallY].forEach(function(ty){ctx.beginPath();ctx.moveTo(dimX4-3,ty);ctx.lineTo(dimX4+3,ty);ctx.stroke();});
+        ctx.save(); ctx.translate(dimX4-10,midY+Tpx3/2+(botWallY-midY-Tpx3/2)/2); ctx.rotate(-Math.PI/2);
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillStyle='rgba(30,45,64,0.75)'; ctx.font='bold 10px Meiryo,sans-serif';
+        ctx.fillText((iD2-p.pos)+'mm',0,0); ctx.restore();
       }
-      ctx.restore();
     }
   });
 
@@ -2936,125 +2975,49 @@ function redrawPlan(){
   });
 
   // ══════════════════════════════════════════
-  //  寸法線：外周の外・間仕切り寸法線との間隔を保つ
-  //  内壁面基準・1層（W・D）
+  //  寸法線：外周の外・固定余白内に配置（表示値は内寸）
   // ══════════════════════════════════════════
-  var outerL=ox-Tpx, outerR=ox+rw+Tpx;
-  var outerT=oy-Tpx, outerB=oy+rd+Tpx;
-
-  // ── 間仕切り寸法線の最も外側の位置を計算 ──
-  var MARGIN=20; // 外周寸法線と間仕切り寸法線の最小間隔
-  var minDimX=Infinity, maxDimX=-Infinity;
-  var minDimY=Infinity, maxDimY=-Infinity;
-  
-  planPartitions.forEach(function(p){
-    var dimOff=(p.dimOffset||0)*sc;
-    if(p.axis==='h'){
-      var dimX=(p.start+p.len/2)*sc+dimOff;
-      minDimX=Math.min(minDimX, dimX);
-      maxDimX=Math.max(maxDimX, dimX);
-    } else {
-      var dimY=(p.start+p.len/2)*sc+dimOff;
-      minDimY=Math.min(minDimY, dimY);
-      maxDimY=Math.max(maxDimY, dimY);
-    }
-  });
-  
-  // 外周寸法線の位置を決定（間仕切り寸法線がなければ基本位置、あれば+MARGIN）
-  var baseOffsetL=16, baseOffsetR=16, baseOffsetT=16, baseOffsetB=16;
-  var dX_offset = baseOffsetL;
-  var dY_offset = baseOffsetB;
-  var dX_offsetR = baseOffsetR;
-  var dY_offsetT = baseOffsetT;
-  
-  var extraL=0, extraR=0, extraT=0, extraB=0; // キャンバス拡張量
-  
-  if(minDimX < Infinity){
-    // 横壁の間仕切り寸法線がある
-    // 左側：間仕切り寸法線の最小X（ox相対）がMARGIN以内なら外周寸法線を押し出す
-    if(minDimX < baseOffsetL + MARGIN){
-      var pushOut = baseOffsetL + MARGIN - minDimX; // 押し出す量（正の値）
-      dX_offset = baseOffsetL + pushOut;
-      extraL = Math.ceil(pushOut);
-    }
-    // 右側：間仕切り寸法線の最大X（ox相対）がrw-MARGIN以上なら外周寸法線を押し出す
-    if(maxDimX > rw - baseOffsetR - MARGIN){
-      var pushOut2 = maxDimX - (rw - baseOffsetR - MARGIN);
-      dX_offsetR = baseOffsetR + pushOut2;
-      extraR = Math.ceil(pushOut2);
-    }
-  }
-  
-  if(minDimY < Infinity){
-    // 縦壁の間仕切り寸法線がある
-    // 上側
-    if(minDimY < baseOffsetT + MARGIN){
-      var pushOut3 = baseOffsetT + MARGIN - minDimY;
-      dY_offsetT = baseOffsetT + pushOut3;
-      extraT = Math.ceil(pushOut3);
-    }
-    // 下側
-    if(maxDimY > rd - baseOffsetB - MARGIN){
-      var pushOut4 = maxDimY - (rd - baseOffsetB - MARGIN);
-      dY_offset = baseOffsetB + pushOut4;
-      extraB = Math.ceil(pushOut4);
-    }
-  }
-  
-  // キャンバス拡張
-  if(extraL>0 || extraR>0 || extraT>0 || extraB>0){
-    mL += extraL;
-    mR += extraR;
-    mT += extraT;
-    mB += extraB;
-    ox = mL;
-    oy = mT;
-    CH = rd + mT + mB;
-    
-    // キャンバス再設定
-    ctx = setupCanvas(cv, CW, CH);
-    ctx.clearRect(0, 0, CW, CH);
-  }
-  // ox, oyが更新された後、元の描画フローに戻る
+  var innerL=ox+Tpx, innerR=ox+rw-Tpx;
+  var innerT=oy+Tpx, innerB=oy+rd-Tpx;
+  var dispW=(roomData._innerW!=null)?roomData._innerW:W;
+  var dispD=(roomData._innerD!=null)?roomData._innerD:D;
 
   ctx.strokeStyle='rgba(30,45,64,0.5)';
   ctx.fillStyle='rgba(30,45,64,0.75)';
   ctx.lineWidth=1;
 
-  // 下：W（内壁面→内壁面）
-  var dY=outerB+dY_offset;
-  ctx.beginPath();ctx.moveTo(ox,dY);ctx.lineTo(ox+rw,dY);ctx.stroke();
-  [ox,ox+rw].forEach(function(tx){
+  // 下：内壁面→内壁面
+  var dY=oy+rd+16;
+  ctx.beginPath();ctx.moveTo(innerL,dY);ctx.lineTo(innerR,dY);ctx.stroke();
+  [innerL,innerR].forEach(function(tx){
     ctx.beginPath();ctx.moveTo(tx,dY-4);ctx.lineTo(tx,dY+4);ctx.stroke();
   });
-  // 補助線
   ctx.strokeStyle='rgba(30,45,64,0.25)'; ctx.lineWidth=0.7; ctx.setLineDash([2,3]);
-  ctx.beginPath();ctx.moveTo(ox,oy+rd+2);ctx.lineTo(ox,dY+6);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(ox+rw,oy+rd+2);ctx.lineTo(ox+rw,dY+6);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(innerL,innerB+2);ctx.lineTo(innerL,dY+6);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(innerR,innerB+2);ctx.lineTo(innerR,dY+6);ctx.stroke();
   ctx.setLineDash([]);
   ctx.strokeStyle='rgba(30,45,64,0.5)'; ctx.lineWidth=1;
   ctx.font='bold 11px Meiryo,sans-serif';
   ctx.textAlign='center'; ctx.textBaseline='top';
-  ctx.fillText(W.toLocaleString()+'mm', ox+rw/2, dY+5);
+  ctx.fillText(dispW.toLocaleString()+'mm', (innerL+innerR)/2, dY+5);
 
-  // 左：D（内壁面→内壁面）
-  var dX=outerL-dX_offset;
-  ctx.beginPath();ctx.moveTo(dX,oy);ctx.lineTo(dX,oy+rd);ctx.stroke();
-  [oy,oy+rd].forEach(function(ty){
+  // 左：内壁面→内壁面
+  var dX=ox-16;
+  ctx.beginPath();ctx.moveTo(dX,innerT);ctx.lineTo(dX,innerB);ctx.stroke();
+  [innerT,innerB].forEach(function(ty){
     ctx.beginPath();ctx.moveTo(dX-4,ty);ctx.lineTo(dX+4,ty);ctx.stroke();
   });
-  // 補助線
   ctx.strokeStyle='rgba(30,45,64,0.25)'; ctx.lineWidth=0.7; ctx.setLineDash([2,3]);
-  ctx.beginPath();ctx.moveTo(ox-2,oy);ctx.lineTo(dX-6,oy);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(ox-2,oy+rd);ctx.lineTo(dX-6,oy+rd);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(innerL-2,innerT);ctx.lineTo(dX-6,innerT);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(innerL-2,innerB);ctx.lineTo(dX-6,innerB);ctx.stroke();
   ctx.setLineDash([]);
   ctx.strokeStyle='rgba(30,45,64,0.5)'; ctx.lineWidth=1;
   ctx.save();
-  ctx.translate(dX-13, oy+rd/2);
+  ctx.translate(dX-13, (innerT+innerB)/2);
   ctx.rotate(-Math.PI/2);
   ctx.font='bold 11px Meiryo,sans-serif';
   ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText(D.toLocaleString()+'mm', 0, 0);
+  ctx.fillText(dispD.toLocaleString()+'mm', 0, 0);
   ctx.restore();
 
   // ── 外周作図モード描画 ──
@@ -3129,11 +3092,11 @@ function redrawPlan(){
     ctx.fillStyle='rgba(30,45,64,0.25)';
     ctx.strokeStyle='rgba(30,45,64,0.6)'; ctx.lineWidth=1; ctx.setLineDash([4,3]);
     if(_partPending.axis==='v'){
-      ctx.fillRect(ox+_partPending.pos*sc-Tpx2/2, oy+_partPending.start*sc, Tpx2, _partPending.len*sc);
-      ctx.strokeRect(ox+_partPending.pos*sc-Tpx2/2, oy+_partPending.start*sc, Tpx2, _partPending.len*sc);
+      ctx.fillRect(pox+_partPending.pos*sc-Tpx2/2, poy+_partPending.start*sc, Tpx2, _partPending.len*sc);
+      ctx.strokeRect(pox+_partPending.pos*sc-Tpx2/2, poy+_partPending.start*sc, Tpx2, _partPending.len*sc);
     } else {
-      ctx.fillRect(ox+_partPending.start*sc, oy+_partPending.pos*sc-Tpx2/2, _partPending.len*sc, Tpx2);
-      ctx.strokeRect(ox+_partPending.start*sc, oy+_partPending.pos*sc-Tpx2/2, _partPending.len*sc, Tpx2);
+      ctx.fillRect(pox+_partPending.start*sc, poy+_partPending.pos*sc-Tpx2/2, _partPending.len*sc, Tpx2);
+      ctx.strokeRect(pox+_partPending.start*sc, poy+_partPending.pos*sc-Tpx2/2, _partPending.len*sc, Tpx2);
     }
     ctx.setLineDash([]);
   }
@@ -3666,14 +3629,16 @@ function redrawCeil(){
     ctx.restore();
   });
 
-  // 寸法線
+  // 寸法線（内寸表示）
+  var dispWc=(roomData._innerW!=null)?roomData._innerW:W;
+  var dispDc=(roomData._innerD!=null)?roomData._innerD:D;
   var dimY=oy+rd+30;
   ctx.strokeStyle='rgba(30,45,64,0.45)'; ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(ox,dimY);ctx.lineTo(ox+rw,dimY);ctx.stroke();
   [ox,ox+rw].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY-4);ctx.lineTo(tx,dimY+4);ctx.stroke();});
   ctx.fillStyle='rgba(30,45,64,0.6)'; ctx.font='bold 11px Meiryo,sans-serif';
   ctx.textAlign='center'; ctx.textBaseline='top';
-  ctx.fillText(W.toLocaleString()+'mm',ox+rw/2,dimY+5);
+  ctx.fillText(dispWc.toLocaleString()+'mm',ox+rw/2,dimY+5);
 
   var dimX=ox-22;
   ctx.beginPath();ctx.moveTo(dimX,oy);ctx.lineTo(dimX,oy+rd);ctx.stroke();
@@ -3681,7 +3646,7 @@ function redrawCeil(){
   ctx.save(); ctx.translate(dimX-13,oy+rd/2); ctx.rotate(-Math.PI/2);
   ctx.textAlign='center'; ctx.fillStyle='rgba(30,45,64,0.6)';
   ctx.font='bold 11px Meiryo,sans-serif';
-  ctx.fillText(D.toLocaleString()+'mm',0,0); ctx.restore();
+  ctx.fillText(dispDc.toLocaleString()+'mm',0,0); ctx.restore();
 
   // 方位記号
   drawCompass(ctx, ox+rw+30, oy, 16);
@@ -4031,8 +3996,8 @@ function resizeEq(axis,val){
       if(dx<10&&dy<10){
         // タップ → 選択
         var info2=_planSc(); if(!info2) return;
-        var mmX=((_partDrag.sx-info2.ox)/info2.sc);
-        var mmY=((_partDrag.sy-info2.oy)/info2.sc);
+        var mmX=((_partDrag.sx-info2.pox)/info2.sc);
+        var mmY=((_partDrag.sy-info2.poy)/info2.sc);
         var hit=false;
         var halfT=Math.round(roomData.wallT/2)+20;
         for(var pi=planPartitions.length-1;pi>=0;pi--){
@@ -4099,24 +4064,24 @@ function _calcPartSnap(info){
   var SNAP=50;
   var result={};
   if(_planMode==='part_h'){
-    var startX=_snapToOuterWall(Math.min(s.x,e.x),info.W,SNAP);
-    var endX=_snapToOuterWall(Math.max(s.x,e.x),info.W,SNAP);
-    if(startX!==0&&startX!==info.W) startX=_snapEndToPartition(startX,'x',SNAP);
-    if(endX!==0&&endX!==info.W) endX=_snapEndToPartition(endX,'x',SNAP);
+    var startX=_snapToOuterWall(Math.min(s.x,e.x),info.iW,SNAP);
+    var endX=_snapToOuterWall(Math.max(s.x,e.x),info.iW,SNAP);
+    if(startX!==0&&startX!==info.iW) startX=_snapEndToPartition(startX,'x',SNAP);
+    if(endX!==0&&endX!==info.iW) endX=_snapEndToPartition(endX,'x',SNAP);
     var posY=Math.round((s.y+e.y)/2/10)*10;
-    posY=_snapToOuterWall(posY,info.D,SNAP);
-    if(posY!==0&&posY!==info.D) posY=_snapEndToPartition(posY,'pos_y',SNAP);
+    posY=_snapToOuterWall(posY,info.iD,SNAP);
+    if(posY!==0&&posY!==info.iD) posY=_snapEndToPartition(posY,'pos_y',SNAP);
     result={axis:'h',pos:posY,start:Math.min(startX,endX),len:Math.abs(endX-startX),
       sxSnap:Math.min(startX,endX),exSnap:Math.max(startX,endX),posYsnap:posY,
       sySnap:0,eySnap:0,posXsnap:0};
   } else {
-    var startY=_snapToOuterWall(Math.min(s.y,e.y),info.D,SNAP);
-    var endY=_snapToOuterWall(Math.max(s.y,e.y),info.D,SNAP);
-    if(startY!==0&&startY!==info.D) startY=_snapEndToPartition(startY,'y',SNAP);
-    if(endY!==0&&endY!==info.D) endY=_snapEndToPartition(endY,'y',SNAP);
+    var startY=_snapToOuterWall(Math.min(s.y,e.y),info.iD,SNAP);
+    var endY=_snapToOuterWall(Math.max(s.y,e.y),info.iD,SNAP);
+    if(startY!==0&&startY!==info.iD) startY=_snapEndToPartition(startY,'y',SNAP);
+    if(endY!==0&&endY!==info.iD) endY=_snapEndToPartition(endY,'y',SNAP);
     var posX=Math.round((s.x+e.x)/2/10)*10;
-    posX=_snapToOuterWall(posX,info.W,SNAP);
-    if(posX!==0&&posX!==info.W) posX=_snapEndToPartition(posX,'pos_x',SNAP);
+    posX=_snapToOuterWall(posX,info.iW,SNAP);
+    if(posX!==0&&posX!==info.iW) posX=_snapEndToPartition(posX,'pos_x',SNAP);
     result={axis:'v',pos:posX,start:Math.min(startY,endY),len:Math.abs(endY-startY),
       sySnap:Math.min(startY,endY),eySnap:Math.max(startY,endY),posXsnap:posX,
       sxSnap:0,exSnap:0,posYsnap:0};
@@ -4149,29 +4114,29 @@ function redrawPlanWithDrag(){
   var halfT=Math.round(roomData.wallT/2);
 
   if(isH){
-    var x1=info.ox+sxSnap*info.sc;
-    var x2=info.ox+exSnap*info.sc;
-    var snapMidY=info.oy+posYsnap*info.sc;
+    var x1=info.pox+sxSnap*info.sc;
+    var x2=info.pox+exSnap*info.sc;
+    var snapMidY=info.poy+posYsnap*info.sc;
     var Tpx2=Math.max(2,roomData.wallT*info.sc);
     ctx.fillRect(x1, snapMidY-Tpx2/2, x2-x1, Tpx2);
     ctx.strokeRect(x1, snapMidY-Tpx2/2, x2-x1, Tpx2);
     var topFaceY=snapMidY-Tpx2/2, botFaceY=snapMidY+Tpx2/2;
     var posYmm=posYsnap;
-    var botDistMm=roomData.D-posYmm;
+    var botDistMm=info.iD-posYmm;
     ctx.strokeStyle='rgba(30,45,64,0.4)'; ctx.lineWidth=0.8;
     var dimX3=(x1+x2)/2;
-    ctx.beginPath();ctx.moveTo(dimX3,info.oy);ctx.lineTo(dimX3,topFaceY);ctx.stroke();
-    [info.oy,topFaceY].forEach(function(ty){ctx.beginPath();ctx.moveTo(dimX3-3,ty);ctx.lineTo(dimX3+3,ty);ctx.stroke();});
-    var botWallY=info.oy+roomData.D*info.sc;
+    ctx.beginPath();ctx.moveTo(dimX3,info.poy);ctx.lineTo(dimX3,topFaceY);ctx.stroke();
+    [info.poy,topFaceY].forEach(function(ty){ctx.beginPath();ctx.moveTo(dimX3-3,ty);ctx.lineTo(dimX3+3,ty);ctx.stroke();});
+    var botWallY=info.poy+info.iD*info.sc;
     ctx.beginPath();ctx.moveTo(dimX3,botFaceY);ctx.lineTo(dimX3,botWallY);ctx.stroke();
     [botFaceY,botWallY].forEach(function(ty){ctx.beginPath();ctx.moveTo(dimX3-3,ty);ctx.lineTo(dimX3+3,ty);ctx.stroke();});
     ctx.fillStyle='rgba(30,45,64,0.85)'; ctx.font='bold 10px Meiryo,sans-serif';
-    ctx.save(); ctx.translate(dimX3-10,info.oy+(topFaceY-info.oy)/2); ctx.rotate(-Math.PI/2);
+    ctx.save(); ctx.translate(dimX3-10,info.poy+(topFaceY-info.poy)/2); ctx.rotate(-Math.PI/2);
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText((posYmm-halfT)+'mm',0,0); ctx.restore();
+    ctx.fillText(posYmm+'mm',0,0); ctx.restore();
     ctx.save(); ctx.translate(dimX3-10,botFaceY+(botWallY-botFaceY)/2); ctx.rotate(-Math.PI/2);
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText((botDistMm-halfT)+'mm',0,0); ctx.restore();
+    ctx.fillText(botDistMm+'mm',0,0); ctx.restore();
     var lenMm=Math.abs(exSnap-sxSnap);
     if(lenMm>0){
       ctx.strokeStyle='rgba(200,169,110,0.8)'; ctx.lineWidth=0.8;
@@ -4181,26 +4146,26 @@ function redrawPlanWithDrag(){
       ctx.fillText(lenMm.toLocaleString()+'mm',(x1+x2)/2,snapMidY-Tpx2/2-10);
     }
   } else {
-    var y1=info.oy+sySnap*info.sc;
-    var y2=info.oy+eySnap*info.sc;
-    var snapMidX=info.ox+posXsnap*info.sc;
+    var y1=info.poy+sySnap*info.sc;
+    var y2=info.poy+eySnap*info.sc;
+    var snapMidX=info.pox+posXsnap*info.sc;
     var Tpx3=Math.max(2,roomData.wallT*info.sc);
     ctx.fillRect(snapMidX-Tpx3/2, y1, Tpx3, y2-y1);
     ctx.strokeRect(snapMidX-Tpx3/2, y1, Tpx3, y2-y1);
     var leftFaceX=snapMidX-Tpx3/2, rightFaceX=snapMidX+Tpx3/2;
     var posXmm=posXsnap;
-    var rightDistMm=roomData.W-posXmm;
+    var rightDistMm=info.iW-posXmm;
     ctx.strokeStyle='rgba(30,45,64,0.4)'; ctx.lineWidth=0.8;
     var dimY3=(y1+y2)/2;
-    ctx.beginPath();ctx.moveTo(info.ox,dimY3);ctx.lineTo(leftFaceX,dimY3);ctx.stroke();
-    [info.ox,leftFaceX].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY3-3);ctx.lineTo(tx,dimY3+3);ctx.stroke();});
-    var rightWallX=info.ox+roomData.W*info.sc;
+    ctx.beginPath();ctx.moveTo(info.pox,dimY3);ctx.lineTo(leftFaceX,dimY3);ctx.stroke();
+    [info.pox,leftFaceX].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY3-3);ctx.lineTo(tx,dimY3+3);ctx.stroke();});
+    var rightWallX=info.pox+info.iW*info.sc;
     ctx.beginPath();ctx.moveTo(rightFaceX,dimY3);ctx.lineTo(rightWallX,dimY3);ctx.stroke();
     [rightFaceX,rightWallX].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY3-3);ctx.lineTo(tx,dimY3+3);ctx.stroke();});
     ctx.fillStyle='rgba(30,45,64,0.85)'; ctx.font='bold 10px Meiryo,sans-serif';
     ctx.textAlign='center'; ctx.textBaseline='bottom';
-    ctx.fillText((posXmm-halfT)+'mm',info.ox+(leftFaceX-info.ox)/2,dimY3-4);
-    ctx.fillText((rightDistMm-halfT)+'mm',rightFaceX+(rightWallX-rightFaceX)/2,dimY3-4);
+    ctx.fillText(posXmm+'mm',info.pox+(leftFaceX-info.pox)/2,dimY3-4);
+    ctx.fillText(rightDistMm+'mm',rightFaceX+(rightWallX-rightFaceX)/2,dimY3-4);
     var lenMm2=Math.abs(eySnap-sySnap);
     if(lenMm2>0){
       ctx.strokeStyle='rgba(200,169,110,0.8)'; ctx.lineWidth=0.8;
@@ -4909,70 +4874,126 @@ function _renderProjList(keyword){
   groupOrder.forEach(function(g){
     var rooms=groups[g];
     var isCurrentGenba=(g===_projGenba);
-    // 現場名行
+
+    var genbaWrap=document.createElement('div');
+    genbaWrap.style.cssText='margin-bottom:4px;';
+
     var genbaRow=document.createElement('div');
-    genbaRow.style.cssText='padding:8px 10px;border-radius:8px;margin-bottom:2px;background:'+(isCurrentGenba?'rgba(200,169,110,0.15)':'rgba(255,255,255,0.05)')+';border:1px solid '+(isCurrentGenba?'rgba(200,169,110,0.4)':'transparent')+';cursor:pointer;';
+    genbaRow.style.cssText='display:flex;align-items:center;gap:8px;padding:10px;border-radius:8px;background:'+(isCurrentGenba?'rgba(200,169,110,0.15)':'rgba(255,255,255,0.05)')+';border:1px solid '+(isCurrentGenba?'rgba(200,169,110,0.4)':'transparent')+';cursor:pointer;';
     var genbaInner=document.createElement('div');
-    genbaInner.style.cssText='display:flex;align-items:center;gap:6px;';
+    genbaInner.style.cssText='display:flex;align-items:center;gap:6px;flex:1;min-width:0;';
     var arrow=document.createElement('span');
-    arrow.style.cssText='font-size:10px;color:rgba(255,255,255,0.5);transition:transform 0.2s;';
+    arrow.style.cssText='font-size:10px;color:rgba(255,255,255,0.5);transition:transform 0.2s;flex-shrink:0;';
     arrow.textContent='▶';
     var genbaLabel=document.createElement('span');
-    genbaLabel.style.cssText='flex:1;font-size:13px;font-weight:700;color:#fff;';
+    genbaLabel.style.cssText='flex:1;font-size:14px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
     genbaLabel.textContent='🏠 '+g;
     var countBadge=document.createElement('span');
-    countBadge.style.cssText='font-size:10px;color:rgba(255,255,255,0.4);';
+    countBadge.style.cssText='font-size:11px;color:rgba(255,255,255,0.4);flex-shrink:0;';
     countBadge.textContent=rooms.length+'室';
-    genbaInner.appendChild(arrow);
-    genbaInner.appendChild(genbaLabel);
-    genbaInner.appendChild(countBadge);
+    genbaInner.appendChild(arrow); genbaInner.appendChild(genbaLabel); genbaInner.appendChild(countBadge);
     genbaRow.appendChild(genbaInner);
 
-    // 部屋一覧（折りたたみ）
+    var genbaDelBtn=document.createElement('button');
+    genbaDelBtn.textContent='🗑';
+    genbaDelBtn.style.cssText='height:36px;width:36px;border:none;border-radius:8px;background:rgba(229,53,53,0.35);color:#fff;font-size:15px;cursor:pointer;flex-shrink:0;';
+    genbaDelBtn.onclick=function(e){ e.stopPropagation(); genbaRow.style.display='none'; genbaConfirmRow.style.display='flex'; };
+    genbaRow.appendChild(genbaDelBtn);
+
+    var genbaConfirmRow=document.createElement('div');
+    genbaConfirmRow.style.cssText='display:none;align-items:center;gap:10px;padding:10px;border-radius:8px;background:rgba(229,53,53,0.18);border:1px solid rgba(229,53,53,0.5);';
+    var genbaConfirmMsg=document.createElement('span');
+    genbaConfirmMsg.style.cssText='flex:1;font-size:12px;color:#fff;';
+    genbaConfirmMsg.textContent='「'+g+'」の全部屋を削除しますか？';
+    genbaConfirmRow.appendChild(genbaConfirmMsg);
+    var genbaCancelBtn=document.createElement('button');
+    genbaCancelBtn.textContent='キャンセル';
+    genbaCancelBtn.style.cssText='height:36px;padding:0 12px;border:1px solid rgba(255,255,255,0.35);border-radius:8px;background:transparent;color:#fff;font-size:12px;cursor:pointer;flex-shrink:0;font-family:inherit;';
+    genbaCancelBtn.onclick=function(e){ e.stopPropagation(); genbaConfirmRow.style.display='none'; genbaRow.style.display='flex'; };
+    genbaConfirmRow.appendChild(genbaCancelBtn);
+    var genbaExecBtn=document.createElement('button');
+    genbaExecBtn.textContent='削除';
+    genbaExecBtn.style.cssText='height:36px;padding:0 14px;border:none;border-radius:8px;background:rgba(229,53,53,0.8);color:#fff;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;font-family:inherit;';
+    genbaExecBtn.onclick=function(e){ e.stopPropagation(); projDeleteGenba(g); };
+    genbaConfirmRow.appendChild(genbaExecBtn);
+    genbaWrap.appendChild(genbaRow);
+    genbaWrap.appendChild(genbaConfirmRow);
+
     var roomList=document.createElement('div');
     roomList.style.cssText='overflow:hidden;max-height:0;transition:max-height 0.2s;';
-    var expanded=isCurrentGenba; // 現在の現場は展開済み
-    if(expanded){ roomList.style.maxHeight='400px'; arrow.style.transform='rotate(90deg)'; }
+    var expanded=isCurrentGenba;
+    if(expanded){ roomList.style.maxHeight='600px'; arrow.style.transform='rotate(90deg)'; }
 
     rooms.forEach(function(r){
       (function(g,r){
         var isCurrent=(g===_projGenba&&r===_projRoom);
         var roomRow=document.createElement('div');
-        roomRow.style.cssText='display:flex;align-items:center;gap:8px;padding:7px 10px 7px 22px;border-radius:6px;margin-top:2px;background:'+(isCurrent?'rgba(200,169,110,0.2)':'rgba(255,255,255,0.04)')+';cursor:pointer;';
-
+        roomRow.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 10px 10px 22px;border-radius:8px;margin-top:4px;background:'+(isCurrent?'rgba(200,169,110,0.2)':'rgba(255,255,255,0.04)')+';';
         var roomLabel=document.createElement('span');
-        roomLabel.style.cssText='flex:1;font-size:12px;color:#fff;font-weight:'+(isCurrent?'700':'400')+';';
+        roomLabel.style.cssText='flex:1;font-size:14px;color:#fff;font-weight:'+(isCurrent?'700':'400')+';';
         roomLabel.textContent='🚪 '+r;
-        if(!isCurrent) roomLabel.onclick=function(){ projLoadExisting(g,r); };
         roomRow.appendChild(roomLabel);
-
-        var status=document.createElement('span');
-        status.style.cssText='font-size:10px;color:'+(isCurrent?'var(--accent)':'rgba(255,255,255,0.4)')+';flex-shrink:0;';
-        status.textContent=isCurrent?'表示中':'読込';
-        if(!isCurrent) status.onclick=function(){ projLoadExisting(g,r); };
-        roomRow.appendChild(status);
-
+        if(!isCurrent){
+          var loadBtn=document.createElement('button');
+          loadBtn.textContent='読込';
+          loadBtn.style.cssText='height:36px;padding:0 14px;border:1px solid rgba(255,255,255,0.35);border-radius:8px;background:transparent;color:#fff;font-size:13px;cursor:pointer;flex-shrink:0;font-family:inherit;';
+          loadBtn.onclick=function(e){ e.stopPropagation(); projLoadExisting(g,r); };
+          roomRow.appendChild(loadBtn);
+        } else {
+          var curTag=document.createElement('span');
+          curTag.style.cssText='font-size:11px;color:var(--accent);flex-shrink:0;';
+          curTag.textContent='表示中';
+          roomRow.appendChild(curTag);
+        }
         var delBtn=document.createElement('button');
         delBtn.textContent='🗑';
-        delBtn.style.cssText='height:28px;width:28px;border:none;border-radius:6px;background:rgba(229,53,53,0.3);color:#fff;font-size:12px;cursor:pointer;flex-shrink:0;';
-        delBtn.onclick=function(e){ e.stopPropagation(); projDeleteRoom(g,r); };
+        delBtn.style.cssText='height:36px;width:36px;border:none;border-radius:8px;background:rgba(229,53,53,0.35);color:#fff;font-size:15px;cursor:pointer;flex-shrink:0;';
+        delBtn.onclick=function(e){ e.stopPropagation(); roomRow.style.display='none'; confirmRow.style.display='flex'; };
         roomRow.appendChild(delBtn);
 
+        var confirmRow=document.createElement('div');
+        confirmRow.style.cssText='display:none;align-items:center;gap:10px;padding:10px 10px 10px 22px;border-radius:8px;margin-top:4px;background:rgba(229,53,53,0.18);border:1px solid rgba(229,53,53,0.5);';
+        var confirmMsg=document.createElement('span');
+        confirmMsg.style.cssText='flex:1;font-size:13px;color:#fff;';
+        confirmMsg.textContent='本当に削除しますか？';
+        confirmRow.appendChild(confirmMsg);
+        var cancelBtn=document.createElement('button');
+        cancelBtn.textContent='キャンセル';
+        cancelBtn.style.cssText='height:36px;padding:0 12px;border:1px solid rgba(255,255,255,0.35);border-radius:8px;background:transparent;color:#fff;font-size:12px;cursor:pointer;flex-shrink:0;font-family:inherit;';
+        cancelBtn.onclick=function(e){ e.stopPropagation(); confirmRow.style.display='none'; roomRow.style.display='flex'; };
+        confirmRow.appendChild(cancelBtn);
+        var execBtn=document.createElement('button');
+        execBtn.textContent='削除';
+        execBtn.style.cssText='height:36px;padding:0 14px;border:none;border-radius:8px;background:rgba(229,53,53,0.8);color:#fff;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;font-family:inherit;';
+        execBtn.onclick=function(e){ e.stopPropagation(); projDeleteRoom(g,r); };
+        confirmRow.appendChild(execBtn);
         roomList.appendChild(roomRow);
+        roomList.appendChild(confirmRow);
       })(g,r);
     });
 
-    genbaRow.appendChild(roomList);
-
-    // 現場名タップで展開/折りたたみ
+    genbaWrap.appendChild(roomList);
     genbaInner.onclick=function(){
       expanded=!expanded;
-      roomList.style.maxHeight=expanded?'400px':'0';
+      roomList.style.maxHeight=expanded?'600px':'0';
       arrow.style.transform=expanded?'rotate(90deg)':'';
     };
-
-    list.appendChild(genbaRow);
+    list.appendChild(genbaWrap);
   });
+}
+
+function projDeleteGenba(g){
+  var keys=[];
+  for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k&&k.indexOf(PROJ_PREFIX+g+'|')===0) keys.push(k); }
+  keys.forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
+  showWaToast('🗑 「'+g+'」の全部屋を削除しました');
+  if(g===_projGenba){
+    _projGenba=''; _projRoom='';
+    try{ localStorage.removeItem('zumen_lastRoom'); }catch(e){}
+    _updateProjLabel(); _resetData(); curView='plan';
+    var sel=document.getElementById('view-select'); if(sel) sel.value='plan';
+    closeProjPanel(); renderMain();
+  } else { _renderProjList(''); }
 }
 
 function projDeleteRoom(g,r){
@@ -4981,16 +5002,11 @@ function projDeleteRoom(g,r){
   showWaToast('🗑 「'+label+'」を削除しました');
   if(g===_projGenba&&r===_projRoom){
     _projGenba=''; _projRoom='';
-    _updateProjLabel();
-    _resetData();
-    curView='plan';
-    var sel=document.getElementById('view-select');
-    if(sel) sel.value='plan';
-    closeProjPanel();
-    renderMain();
-  } else {
-    _renderProjList('');
-  }
+    try{ localStorage.removeItem('zumen_lastRoom'); }catch(e){}
+    _updateProjLabel(); _resetData(); curView='plan';
+    var sel=document.getElementById('view-select'); if(sel) sel.value='plan';
+    closeProjPanel(); renderMain();
+  } else { _renderProjList(''); }
 }
 
 function projSearch(){
@@ -5014,6 +5030,7 @@ function projLoadNew(){
   } else {
     _resetData();
     _projGenba=gv; _projRoom=rv;
+    try{ localStorage.setItem('zumen_lastRoom', JSON.stringify({g:gv,r:rv})); }catch(e){}
     _updateProjLabel();
     projAutoSave();
     curView='plan';
@@ -5038,6 +5055,7 @@ function projLoadAddRoom(){
   } else {
     _resetData();
     _projRoom=rv;
+    try{ localStorage.setItem('zumen_lastRoom', JSON.stringify({g:_projGenba,r:rv})); }catch(e){}
     _updateProjLabel();
     projAutoSave();
     curView='plan';
@@ -5068,30 +5086,13 @@ function _resetData(){
   planColumns=[];planColSeq=0;
   planPartitions=[];planPartSeq=0;
   _undoStack=[];_redoStack=[];
-  // 平面図モード・選択状態
-  _planMode='none';
-  _planSelType=null; _planSelId=null;
-  _partPending=null;
-  // 外周作図関連
-  _outlineVerts=[]; _outlineClosed=false;
-  _outlineSelEdge=null; _outlinePreview=null;
-  _outlineDims=[]; _outlineAutoCorner=false;
-  _outlineAdjIdx=null; _outlinePhase='input';
-  _outlineLockEdges=new Set();
-  _outlineStartX=0; _outlineStartY=0;
-  _outlineDrawSc=1;
-  // 編集フェーズ
-  _editSelEdge=null; _editDragPt=null;
-  // ヘッダーの「終了」ボタンを隠す
-  var fb=document.getElementById('btn-outline-finish');
-  if(fb) fb.classList.add('hidden');
 }
 
 // ── 内部：データ読込 ──
 function _loadData(g,r,raw){
   try{
     var d=JSON.parse(raw);
-    roomData=d.roomData||{W:3600,D:4500,H:2400,wallT:120,compassDeg:0};
+    roomData=d.roomData||{W:0,D:0,H:0,wallT:120,compassDeg:0};
     faceOpenings=d.faceOpenings||[[],[],[],[]];
     faceOidSeq=d.faceOidSeq||[0,0,0,0];
     faceEquips=d.faceEquips||[[],[],[],[]];
@@ -5128,6 +5129,7 @@ function _loadData(g,r,raw){
     var sel=document.getElementById('view-select');
     if(sel) sel.value='plan';
     _projGenba=g; _projRoom=r;
+    try{ localStorage.setItem('zumen_lastRoom', JSON.stringify({g:g,r:r})); }catch(e){}
     _updateProjLabel();
     renderMain();
     showWaToast('📂 読込：'+g+'｜'+r);
@@ -5138,6 +5140,20 @@ function _loadData(g,r,raw){
 
 renderMain();
 _updateUndoBtn();
+// ── 起動時：前回の現場名・部屋名をフォームの初期値としてセット（自動復元はしない） ──
+// 毎回フォームを通ることで「どの現場か」を意識させる。前回値は入力欄にプリセットするだけ。
+(function(){
+  try{
+    var last=localStorage.getItem('zumen_lastRoom');
+    if(last){
+      var lr=JSON.parse(last);
+      if(lr.g) _projGenba=lr.g;
+      if(lr.r) _projRoom=lr.r;
+      // フォームに前回値を反映するためrenderMainを再描画
+      renderMain();
+    }
+  }catch(e){}
+})();
 window.addEventListener('resize',function(){ setTimeout(redraw,50); });
 var _bleDevice    = null;
 var _bleChar      = null;
