@@ -2623,6 +2623,40 @@ function _planSc(){
   sc=Math.min(sc,scL,scR,scT,scB);
   sc=Math.max(sc,0.01);
   
+  // ── 間仕切り寸法線による外周寸法線の押し出し計算 ──
+  var baseOuterL = mL - T*sc - 16;
+  var baseOuterR = W*sc + T*sc + 16;
+  var baseOuterT = mT - T*sc - 16;
+  var baseOuterB = D*sc + T*sc + 16;
+  var pushL=0, pushR=0, pushT=0, pushB=0;
+  var MARGIN=20;
+  
+  planPartitions.forEach(function(p){
+    var dimOff=(p.dimOffset||0)*sc;
+    if(p.axis==='h'){
+      var dimX_rel=(p.start+p.len/2)*sc+dimOff;
+      if(dimX_rel < baseOuterL+MARGIN){
+        pushL=Math.max(pushL, baseOuterL+MARGIN-dimX_rel);
+      }
+      if(dimX_rel > baseOuterR-MARGIN){
+        pushR=Math.max(pushR, dimX_rel-(baseOuterR-MARGIN));
+      }
+    } else {
+      var dimY_rel=(p.start+p.len/2)*sc+dimOff;
+      if(dimY_rel < baseOuterT+MARGIN){
+        pushT=Math.max(pushT, baseOuterT+MARGIN-dimY_rel);
+      }
+      if(dimY_rel > baseOuterB-MARGIN){
+        pushB=Math.max(pushB, dimY_rel-(baseOuterB-MARGIN));
+      }
+    }
+  });
+  
+  mL += Math.ceil(pushL);
+  mR += Math.ceil(pushR);
+  mT += Math.ceil(pushT);
+  mB += Math.ceil(pushB);
+  
   return{sc:sc, ox:mL, oy:mT, W:W, D:D, cv:cv};
 }
 
@@ -2775,6 +2809,49 @@ function redrawPlan(){
   sc = Math.min(sc, scL, scR, scT, scB);
   sc = Math.max(sc, 0.01);
 
+  // ── 間仕切り寸法線による外周寸法線の押し出し計算 ──
+  // 外周寸法線の基本位置（壁厚の外側16px）
+  var baseOuterL = 56 - roomData.wallT*sc - 16;  // ox相対での左外周寸法X
+  var baseOuterR = W*sc + roomData.wallT*sc + 16; // ox相対での右外周寸法X
+  var baseOuterT = 20 - roomData.wallT*sc - 16;  // oy相対での上外周寸法Y
+  var baseOuterB = D*sc + roomData.wallT*sc + 16; // oy相対での下外周寸法Y
+  
+  var pushL=0, pushR=0, pushT=0, pushB=0; // 外周寸法線を押し出す量
+  var MARGIN=20; // 間仕切り寸法線は外周寸法線の内側20pxまで
+  
+  planPartitions.forEach(function(p){
+    var dimOff=(p.dimOffset||0)*sc;
+    if(p.axis==='h'){
+      // 横壁：dimXは(p.start+p.len/2)*sc + dimOff（ox相対）
+      var dimX_rel=(p.start+p.len/2)*sc+dimOff;
+      // 左側チェック：dimX_relがbaseOuterL+MARGINより左なら押し出す
+      if(dimX_rel < baseOuterL+MARGIN){
+        pushL=Math.max(pushL, baseOuterL+MARGIN-dimX_rel);
+      }
+      // 右側チェック：dimX_relがbaseOuterR-MARGINより右なら押し出す
+      if(dimX_rel > baseOuterR-MARGIN){
+        pushR=Math.max(pushR, dimX_rel-(baseOuterR-MARGIN));
+      }
+    } else {
+      // 縦壁：dimYは(p.start+p.len/2)*sc + dimOff（oy相対）
+      var dimY_rel=(p.start+p.len/2)*sc+dimOff;
+      // 上側チェック
+      if(dimY_rel < baseOuterT+MARGIN){
+        pushT=Math.max(pushT, baseOuterT+MARGIN-dimY_rel);
+      }
+      // 下側チェック
+      if(dimY_rel > baseOuterB-MARGIN){
+        pushB=Math.max(pushB, dimY_rel-(baseOuterB-MARGIN));
+      }
+    }
+  });
+  
+  // 余白に押し出し量を加算
+  mL += Math.ceil(pushL);
+  mR += Math.ceil(pushR);
+  mT += Math.ceil(pushT);
+  mB += Math.ceil(pushB);
+
   var Tpx=T*sc;
   var rw=W*sc, rd=D*sc;
   var CH=rd+mT+mB;
@@ -2862,11 +2939,7 @@ function redrawPlan(){
         var midY=oy+p.pos*sc;
         var topFaceY=midY-pt/2, botFaceY=midY+pt/2;
         var x1=ox+p.start*sc, x2=ox+(p.start+p.len)*sc;
-        var dimX_raw=(x1+x2)/2+dimOff;
-        // 外周寸法線の内側24pxに制限（左側：ox-Tpx-16、右側：ox+rw+Tpx+16）
-        var outerDimL=ox-Tpx-16+24; // 左外周寸法線の24px内側
-        var outerDimR=ox+rw+Tpx+16-24; // 右外周寸法線の24px内側
-        var dimX=Math.max(outerDimL, Math.min(outerDimR, dimX_raw));
+        var dimX=(x1+x2)/2+dimOff;
         ctx.strokeStyle='rgba(30,45,64,'+dimAlpha+')'; ctx.lineWidth=0.8;
         ctx.beginPath();ctx.moveTo(dimX,oy);ctx.lineTo(dimX,topFaceY);ctx.stroke();
         [oy,topFaceY].forEach(function(ty){ctx.beginPath();ctx.moveTo(dimX-3,ty);ctx.lineTo(dimX+3,ty);ctx.stroke();});
@@ -2892,11 +2965,7 @@ function redrawPlan(){
         var midX2=ox+p.pos*sc;
         var leftFaceX=midX2-pt/2, rightFaceX=midX2+pt/2;
         var y1=oy+p.start*sc, y2=oy+(p.start+p.len)*sc;
-        // dimYは外周寸法線の内側24pxに制限
-        var dimY_raw=(y1+y2)/2+dimOff;
-        var outerDimT=oy-Tpx-16+24; // 上外周寸法線の24px内側
-        var outerDimB=oy+rd+Tpx+16-24; // 下外周寸法線の24px内側
-        var dimY=Math.max(outerDimT, Math.min(outerDimB, dimY_raw));
+        var dimY=(y1+y2)/2+dimOff;
         ctx.strokeStyle='rgba(30,45,64,'+dimAlpha+')'; ctx.lineWidth=0.8;
         ctx.beginPath();ctx.moveTo(ox,dimY);ctx.lineTo(leftFaceX,dimY);ctx.stroke();
         [ox,leftFaceX].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY-3);ctx.lineTo(tx,dimY+3);ctx.stroke();});
@@ -4092,12 +4161,7 @@ function redrawPlanWithDrag(){
     var posYmm=posYsnap;
     var botDistMm=roomData.D-posYmm;
     ctx.strokeStyle='rgba(30,45,64,0.4)'; ctx.lineWidth=0.8;
-    var dimX3_raw=(x1+x2)/2;
-    // 外周寸法線の内側24pxに制限
-    var rw=roomData.W*info.sc;
-    var outerDimL=info.ox-Tpx-16+24;
-    var outerDimR=info.ox+rw+Tpx+16-24;
-    var dimX3=Math.max(outerDimL, Math.min(outerDimR, dimX3_raw));
+    var dimX3=(x1+x2)/2;
     ctx.beginPath();ctx.moveTo(dimX3,info.oy);ctx.lineTo(dimX3,topFaceY);ctx.stroke();
     [info.oy,topFaceY].forEach(function(ty){ctx.beginPath();ctx.moveTo(dimX3-3,ty);ctx.lineTo(dimX3+3,ty);ctx.stroke();});
     var botWallY=info.oy+roomData.D*info.sc;
@@ -4129,12 +4193,7 @@ function redrawPlanWithDrag(){
     var posXmm=posXsnap;
     var rightDistMm=roomData.W-posXmm;
     ctx.strokeStyle='rgba(30,45,64,0.4)'; ctx.lineWidth=0.8;
-    var dimY3_raw=(y1+y2)/2;
-    // 外周寸法線の内側24pxに制限
-    var rd=roomData.D*info.sc;
-    var outerDimT=info.oy-Tpx-16+24;
-    var outerDimB=info.oy+rd+Tpx+16-24;
-    var dimY3=Math.max(outerDimT, Math.min(outerDimB, dimY3_raw));
+    var dimY3=(y1+y2)/2;
     ctx.beginPath();ctx.moveTo(info.ox,dimY3);ctx.lineTo(leftFaceX,dimY3);ctx.stroke();
     [info.ox,leftFaceX].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY3-3);ctx.lineTo(tx,dimY3+3);ctx.stroke();});
     var rightWallX=info.ox+roomData.W*info.sc;
