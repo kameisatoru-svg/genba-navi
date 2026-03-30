@@ -5169,19 +5169,12 @@ var _bleTarget    = 'W'; // 'W'|'D'|'H'|'PL'
 
 // Bosch GLM 50-27CG 確認済みUUID
 var BLE_SVC_A  = '02a6c0d0-0451-4000-b000-fb3210111989'; // サービスA
-var BLE_CHAR_A1= '02a6c0d1-0451-4000-b000-fb3210111989'; // INDICATE,WRITE（メイン）
 var BLE_SVC_B  = '02a6c0f0-0451-4000-b000-fb3210111989'; // サービスB
-var BLE_CHAR_B1= '02a6c0f3-0451-4000-b000-fb3210111989'; // WRITE, WRITE NO RESPONSE
-var BLE_CHAR_B2= '02a6c0f4-0451-4000-b000-fb3210111989'; // NOTIFY, READ
-
-// 認証コマンド候補（順番に試す）
-var BLE_AUTH_CMDS = [
-  { label:'CMD-1', bytes:[0x01,0x04,0x00,0x05] },
-  { label:'CMD-2', bytes:[0x00,0x01,0x00,0x01] },
-  { label:'CMD-3', bytes:[0x02,0x00] },
-  { label:'CMD-4', bytes:[0x03,0x01,0x00,0x04] }
-];
-var _bleAuthIdx = 0; // 現在試しているコマンドのインデックス
+// サービスB Characteristics（nRF Connect実機確認済み）
+var BLE_CHAR_F1= '02a6c0f1-0451-4000-b000-fb3210111989'; // NOTIFY,WRITE,WRITE NO RESPONSE ★本命
+var BLE_CHAR_F2= '02a6c0f2-0451-4000-b000-fb3210111989'; // NOTIFY,WRITE,WRITE NO RESPONSE
+var BLE_CHAR_F3= '02a6c0f3-0451-4000-b000-fb3210111989'; // WRITE, WRITE NO RESPONSE
+var BLE_CHAR_F4= '02a6c0f4-0451-4000-b000-fb3210111989'; // NOTIFY, READ
 
 function openBleModal(){
   document.getElementById('ble-modal').classList.remove('hidden');
@@ -5241,40 +5234,61 @@ async function bleConnect(){
     _bleLog('GATT接続OK');
     _bleChars = [];
 
-    // サービスA: CharA1 (INDICATE購読 + WRITE用に保持)
+    // サービスA（全Char自動検出）
     try {
       var svcA = await server.getPrimaryService(BLE_SVC_A);
-      var chA1 = await svcA.getCharacteristic(BLE_CHAR_A1);
-      await chA1.startNotifications();
-      chA1.addEventListener('characteristicvaluechanged', function(e){ _onBleValue(e,'CharA1'); });
-      _bleChars.push(chA1);
-      _bleLog('CharA1 購読OK');
-    } catch(e){ _bleLog('CharA1 エラー: '+e.message); }
+      var charsA = await svcA.getCharacteristics();
+      for(var i=0;i<charsA.length;i++){
+        var ch=charsA[i];
+        var props=[];
+        if(ch.properties.notify) props.push('N');
+        if(ch.properties.indicate) props.push('I');
+        if(ch.properties.write) props.push('W');
+        _bleLog('SvcA: '+ch.uuid.slice(-8)+' ['+props.join(',')+']');
+        if(ch.properties.notify||ch.properties.indicate){
+          try{
+            await ch.startNotifications();
+            var lbl='SvcA-'+ch.uuid.slice(-4);
+            ch.addEventListener('characteristicvaluechanged',(function(l){
+              return function(e){ _onBleValue(e,l); };
+            })(lbl));
+            _bleChars.push(ch);
+            _bleLog('  購読OK: '+lbl);
+          }catch(e2){_bleLog('  購読NG: '+e2.message);}
+        }
+      }
+    } catch(e){ _bleLog('SvcA エラー: '+e.message); }
 
-    // サービスB: CharB2 (NOTIFY購読)
+    // サービスB：F1〜F4全取得、NOTIFY系は購読
     try {
       var svcB = await server.getPrimaryService(BLE_SVC_B);
-      try {
-        var chB1 = await svcB.getCharacteristic(BLE_CHAR_B1);
-        _bleChars.push(chB1); // WRITEのみ・購読なし
-        _bleLog('CharB1 取得OK（WRITE用）');
-      } catch(e){ _bleLog('CharB1 エラー: '+e.message); }
-      try {
-        var chB2 = await svcB.getCharacteristic(BLE_CHAR_B2);
-        await chB2.startNotifications();
-        chB2.addEventListener('characteristicvaluechanged', function(e){ _onBleValue(e,'CharB2'); });
-        _bleChars.push(chB2);
-        _bleLog('CharB2 購読OK');
-      } catch(e){ _bleLog('CharB2 エラー: '+e.message); }
-    } catch(e){ _bleLog('サービスB エラー: '+e.message); }
+      var bDefs=[
+        {uuid:BLE_CHAR_F1,label:'CharF1'},
+        {uuid:BLE_CHAR_F2,label:'CharF2'},
+        {uuid:BLE_CHAR_F3,label:'CharF3'},
+        {uuid:BLE_CHAR_F4,label:'CharF4'}
+      ];
+      for(var j=0;j<bDefs.length;j++){
+        var def=bDefs[j];
+        try{
+          var c=await svcB.getCharacteristic(def.uuid);
+          _bleChars.push(c);
+          if(c.properties.notify||c.properties.indicate){
+            await c.startNotifications();
+            c.addEventListener('characteristicvaluechanged',(function(l){
+              return function(e){ _onBleValue(e,l); };
+            })(def.label));
+            _bleLog(def.label+' 購読OK');
+          } else {
+            _bleLog(def.label+' 取得OK(WRITE用)');
+          }
+        }catch(e){ _bleLog(def.label+' エラー: '+e.message); }
+      }
+    } catch(e){ _bleLog('SvcB エラー: '+e.message); }
 
     _bleConnected = true;
     _updateBleUI();
-    showWaToast('GLM接続しました。認証コマンドを送信中...');
-
-    // 認証コマンドを順番に試す（2秒間隔）
-    _bleAuthIdx = 0;
-    _bleSendNextAuthCmd();
+    showWaToast('GLM接続しました。測定ボタンを押してください');
 
   } catch(e) {
     if(btn){ btn.textContent='接続'; btn.disabled=false; }
@@ -5282,43 +5296,6 @@ async function bleConnect(){
     _bleLog('接続失敗: '+e.message);
     _updateBleUI();
   }
-}
-
-// 認証コマンドを順番に送信（2秒間隔）
-function _bleSendNextAuthCmd(){
-  if(_bleAuthIdx >= BLE_AUTH_CMDS.length){
-    _bleLog('--- 全コマンド送信完了。デバッグログを確認してください ---');
-    showWaToast('全コマンド送信完了。ログを確認してください。');
-    return;
-  }
-  var cmd = BLE_AUTH_CMDS[_bleAuthIdx];
-  var charA1 = _bleChars.find(function(c){ return c.uuid===BLE_CHAR_A1; });
-  if(!charA1){
-    _bleLog('CharA1 なし→スキップ');
-    _bleAuthIdx++;
-    setTimeout(_bleSendNextAuthCmd, 500);
-    return;
-  }
-  var payload = new Uint8Array(cmd.bytes);
-  _bleLog('[送信] '+cmd.label+': '+Array.from(payload).map(function(b){return b.toString(16).padStart(2,'0');}).join(' '));
-  charA1.writeValue(payload).then(function(){
-    _bleLog('[送信OK] '+cmd.label);
-    _bleAuthIdx++;
-    setTimeout(_bleSendNextAuthCmd, 2000);
-  }).catch(function(e){
-    _bleLog('[送信NG] '+cmd.label+': '+e.message);
-    // CharB1でもリトライ
-    var charB1 = _bleChars.find(function(c){ return c.uuid===BLE_CHAR_B1; });
-    if(charB1){
-      charB1.writeValueWithoutResponse(payload).then(function(){
-        _bleLog('[B1 送信OK] '+cmd.label);
-      }).catch(function(e2){
-        _bleLog('[B1 送信NG] '+cmd.label+': '+e2.message);
-      });
-    }
-    _bleAuthIdx++;
-    setTimeout(_bleSendNextAuthCmd, 2000);
-  });
 }
 
 function bleDisconnect(){
