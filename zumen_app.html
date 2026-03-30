@@ -2904,6 +2904,65 @@ function redrawPlan(){
       ctx.fillRect(px3,py3,pl2,pt);
       ctx.strokeRect(px3,py3,pl2,pt);
     }
+
+    // 選択時の寸法引き出し線
+    if(isSel){
+      var iW2=roomData._innerW!=null?roomData._innerW:W;
+      var iD2=roomData._innerD!=null?roomData._innerD:D;
+      var Tpx3=Math.max(2,roomData.wallT*sc);
+      ctx.strokeStyle='rgba(30,45,64,0.4)'; ctx.lineWidth=0.8;
+      ctx.fillStyle='rgba(30,45,64,0.85)'; ctx.font='bold 10px Meiryo,sans-serif';
+      if(p.axis==='v'){
+        var midX=pox+p.pos*sc;
+        var topY=poy+p.start*sc;
+        var botY=poy+(p.start+p.len)*sc;
+        var dimY4=(topY+botY)/2;
+        var leftWallX=pox;
+        var rightWallX=pox+iW2*sc;
+        // 左側：内壁面→壁左面
+        ctx.beginPath();ctx.moveTo(leftWallX,dimY4);ctx.lineTo(midX-Tpx3/2,dimY4);ctx.stroke();
+        [leftWallX,midX-Tpx3/2].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY4-3);ctx.lineTo(tx,dimY4+3);ctx.stroke();});
+        ctx.textAlign='center'; ctx.textBaseline='bottom';
+        ctx.fillText(p.pos+'mm', leftWallX+(midX-Tpx3/2-leftWallX)/2, dimY4-4);
+        // 右側：壁右面→内壁面
+        ctx.beginPath();ctx.moveTo(midX+Tpx3/2,dimY4);ctx.lineTo(rightWallX,dimY4);ctx.stroke();
+        [midX+Tpx3/2,rightWallX].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY4-3);ctx.lineTo(tx,dimY4+3);ctx.stroke();});
+        ctx.fillText((iW2-p.pos)+'mm', midX+Tpx3/2+(rightWallX-midX-Tpx3/2)/2, dimY4-4);
+        // 長さ
+        ctx.strokeStyle='rgba(200,169,110,0.8)';
+        ctx.beginPath();ctx.moveTo(midX+Tpx3/2+8,topY);ctx.lineTo(midX+Tpx3/2+8,botY);ctx.stroke();
+        [topY,botY].forEach(function(ty){ctx.beginPath();ctx.moveTo(midX+Tpx3/2+5,ty);ctx.lineTo(midX+Tpx3/2+11,ty);ctx.stroke();});
+        ctx.fillStyle='rgba(200,169,110,1)'; ctx.textAlign='left'; ctx.textBaseline='middle';
+        ctx.fillText(p.len+'mm', midX+Tpx3/2+14, (topY+botY)/2);
+      } else {
+        var midY=poy+p.pos*sc;
+        var leftX=pox+p.start*sc;
+        var rightX=pox+(p.start+p.len)*sc;
+        var dimX4=(leftX+rightX)/2;
+        var topWallY=poy;
+        var botWallY=poy+iD2*sc;
+        // 上側：内壁面→壁上面
+        ctx.beginPath();ctx.moveTo(dimX4,topWallY);ctx.lineTo(dimX4,midY-Tpx3/2);ctx.stroke();
+        [topWallY,midY-Tpx3/2].forEach(function(ty){ctx.beginPath();ctx.moveTo(dimX4-3,ty);ctx.lineTo(dimX4+3,ty);ctx.stroke();});
+        ctx.save(); ctx.translate(dimX4-10,topWallY+(midY-Tpx3/2-topWallY)/2); ctx.rotate(-Math.PI/2);
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillStyle='rgba(30,45,64,0.85)'; ctx.font='bold 10px Meiryo,sans-serif';
+        ctx.fillText(p.pos+'mm',0,0); ctx.restore();
+        // 下側：壁下面→内壁面
+        ctx.beginPath();ctx.moveTo(dimX4,midY+Tpx3/2);ctx.lineTo(dimX4,botWallY);ctx.stroke();
+        [midY+Tpx3/2,botWallY].forEach(function(ty){ctx.beginPath();ctx.moveTo(dimX4-3,ty);ctx.lineTo(dimX4+3,ty);ctx.stroke();});
+        ctx.save(); ctx.translate(dimX4-10,midY+Tpx3/2+(botWallY-midY-Tpx3/2)/2); ctx.rotate(-Math.PI/2);
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillStyle='rgba(30,45,64,0.85)'; ctx.font='bold 10px Meiryo,sans-serif';
+        ctx.fillText((iD2-p.pos)+'mm',0,0); ctx.restore();
+        // 長さ
+        ctx.strokeStyle='rgba(200,169,110,0.8)'; ctx.lineWidth=0.8;
+        ctx.beginPath();ctx.moveTo(leftX,midY-Tpx3/2-8);ctx.lineTo(rightX,midY-Tpx3/2-8);ctx.stroke();
+        [leftX,rightX].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,midY-Tpx3/2-11);ctx.lineTo(tx,midY-Tpx3/2-5);ctx.stroke();});
+        ctx.fillStyle='rgba(200,169,110,1)'; ctx.textAlign='center'; ctx.textBaseline='bottom';
+        ctx.fillText(p.len+'mm',(leftX+rightX)/2, midY-Tpx3/2-10);
+      }
+    }
   });
 
   // 柱描画
