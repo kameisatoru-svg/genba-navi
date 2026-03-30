@@ -5189,6 +5189,10 @@ function setBleTarget(t){
     var b=document.getElementById('bt-'+k);
     if(b) b.className='ble-target'+(k===t?' active':'');
   });
+  // 受信済みの値があれば即座に反映
+  if(window._bleLastMm && window._bleLastMm > 0){
+    _applyBleValue(window._bleLastMm);
+  }
 }
 
 function _updateBleUI(){
