@@ -2910,13 +2910,14 @@ function redrawPlan(){
       var iW2=roomData._innerW!=null?roomData._innerW:W;
       var iD2=roomData._innerD!=null?roomData._innerD:D;
       var Tpx3=Math.max(2,roomData.wallT*sc);
+      var dimOff=(p.dimOffset||0)*sc; // 寸法線位置オフセット（px）
       ctx.strokeStyle='rgba(30,45,64,0.4)'; ctx.lineWidth=0.8;
       ctx.fillStyle='rgba(30,45,64,0.75)'; ctx.font='bold 10px Meiryo,sans-serif';
       if(p.axis==='v'){
         var midX=pox+p.pos*sc;
         var topY=poy+p.start*sc;
         var botY=poy+(p.start+p.len)*sc;
-        var dimY4=(topY+botY)/2;
+        var dimY4=(topY+botY)/2 + dimOff; // dimOffset反映
         var leftWallX=pox;
         var rightWallX=pox+iW2*sc;
         ctx.beginPath();ctx.moveTo(leftWallX,dimY4);ctx.lineTo(midX-Tpx3/2,dimY4);ctx.stroke();
@@ -2930,7 +2931,7 @@ function redrawPlan(){
         var midY=poy+p.pos*sc;
         var leftX=pox+p.start*sc;
         var rightX=pox+(p.start+p.len)*sc;
-        var dimX4=(leftX+rightX)/2;
+        var dimX4=(leftX+rightX)/2 + dimOff; // dimOffset反映
         var topWallY=poy;
         var botWallY=poy+iD2*sc;
         ctx.beginPath();ctx.moveTo(dimX4,topWallY);ctx.lineTo(dimX4,midY-Tpx3/2);ctx.stroke();
