@@ -4136,9 +4136,9 @@ function redrawPlanWithDrag(){
   var sySnap=snap.sySnap, eySnap=snap.eySnap, posXsnap=snap.posXsnap;
   var halfT=Math.round(roomData.wallT/2);
 
+  var _poxD=info.pox||info.ox;
+  var _poyD=info.poy||info.oy;
   if(isH){
-    var _poxD=info.pox||info.ox;
-    var _poyD=info.poy||info.oy;
     var x1=_poxD+sxSnap*info.sc;
     var x2=_poxD+exSnap*info.sc;
     var snapMidY=_poyD+posYsnap*info.sc;
@@ -4147,7 +4147,7 @@ function redrawPlanWithDrag(){
     ctx.strokeRect(x1, snapMidY-Tpx2/2, x2-x1, Tpx2);
     var topFaceY=snapMidY-Tpx2/2, botFaceY=snapMidY+Tpx2/2;
     var posYmm=posYsnap;
-    var botDistMm=roomData.D-posYmm;
+    var botDistMm=(info.iD||roomData.D)-posYmm;
     ctx.strokeStyle='rgba(30,45,64,0.4)'; ctx.lineWidth=0.8;
     var dimX3=(x1+x2)/2;
     ctx.beginPath();ctx.moveTo(dimX3,_poyD);ctx.lineTo(dimX3,topFaceY);ctx.stroke();
@@ -4180,7 +4180,7 @@ function redrawPlanWithDrag(){
     ctx.strokeRect(snapMidX-Tpx3/2, y1, Tpx3, y2-y1);
     var leftFaceX=snapMidX-Tpx3/2, rightFaceX=snapMidX+Tpx3/2;
     var posXmm=posXsnap;
-    var rightDistMm=roomData.W-posXmm;
+    var rightDistMm=(info.iW||roomData.W)-posXmm;
     ctx.strokeStyle='rgba(30,45,64,0.4)'; ctx.lineWidth=0.8;
     var dimY3=(y1+y2)/2;
     ctx.beginPath();ctx.moveTo(_poxD,dimY3);ctx.lineTo(leftFaceX,dimY3);ctx.stroke();
