@@ -2642,33 +2642,24 @@ function _calcLayout(cv){
     });
   });
 
-  // ── sc計算：必要余白を満たすscを直接求める ──
-  // 左余白の必要量: Tpx + 16(dXオフセット) + 13(translate) + 25(テキスト半幅) + 5(余裕) = Tpx+59
-  //   → mL = Tpx+59 = T*sc+59  → sc = (CW-mR-59-T*sc)/W  →  sc*(W+T) = CW-mR-59
-  //   → sc_L = (CW-mR-59)/(W+T)
-  // 下余白: Tpx + 16 + shiftB + 14 + 4 = Tpx + 34 + shiftB
-  //   → mB = Tpx+34+shiftB  → sc_B から mBを確定してからCH計算
+  // ── sc計算 ──
+  // mLは壁厚+ドア弧のみ（外周寸法線分は含めない→内側フォールバックで対応）
+  // sc_D=370/D（高さ基準）、sc_W=(CW-mR-Tpx-16)/W（幅基準、最低限の左余白）
+  // → scはまず370/Dで試算し、Tpx確定後にmLを決定
 
-  // shiftBをscale独立で推定（dimOffset単位はmm）
   var shiftB=hasHPart?10:0;
-  // ※dimOffsetのscale後値は後で正確計算するが、まず0で近似
-  
-  // sc候補を計算
-  var sc_L=(CW-mR-59)/(W+T);          // 左余白から
-  var sc_D=370/D;                      // 高さから（固定370/D）
-  var sc_W=(CW-mR-20)/W;              // 幅から（mL=20最小時）
-  // ドア弧
-  var sc_arcL=maxArcL>0?(CW-mR-36-T*0.001)/(W+maxArcL):Infinity; // 近似
-  
-  var sc=Math.min(sc_L, sc_D);
-  sc=Math.max(sc, 0.01);
 
-  // このscでTpxを確定し、正確なmL/mBを計算
+  // 初回sc推定（mL=20の仮定）
+  var sc=Math.max(Math.min((CW-mR-20)/W, 370/D), 0.01);
   var Tpx=T*sc;
-  var mL=Math.ceil(Tpx)+59;
-  if(maxArcL>0) mL=Math.max(mL, Math.ceil(Tpx+maxArcL*sc+36));
+
+  // mL：壁厚+ドア弧左分のみ（外周寸法線は内側フォールバックで対応）
+  var mL=Math.max(20, Math.ceil(Tpx)+4);
+  if(maxArcL>0) mL=Math.max(mL, Math.ceil(Tpx+maxArcL*sc+4));
 
   // shiftBをscale後の値で正確計算
+  sc=Math.max(Math.min((CW-mL-mR)/W, 370/D), 0.01);
+  Tpx=T*sc;
   var poyFin=hasInner?(mT+Tpx/2):mT;
   var outerBfin=mT+iD*sc+Tpx;
   planPartitions.forEach(function(p){
@@ -2679,11 +2670,10 @@ function _calcLayout(cv){
   });
   var mB=Math.ceil(Tpx)+34+shiftB;
   if(maxArcD>0) mB=Math.max(mB, Math.ceil(Tpx+maxArcD*sc+36));
-  mL=Math.max(mL,60); mB=Math.max(mB,60);
+  mL=Math.max(mL,20); mB=Math.max(mB,56);
 
-  // mLが変わったのでscを再確定
+  // 最終sc確定
   sc=Math.max(Math.min((CW-mL-mR)/W, 370/D), 0.01);
-  // 右・上ドア弧でscを縮小
   Tpx=T*sc;
   if(maxArcR>0&&Tpx+maxArcR*sc>mR) sc=Math.max(sc*(mR/(Tpx+maxArcR*sc+16)),0.01);
   if(maxArcU>0&&Tpx+maxArcU*sc>mT) sc=Math.max(sc*(mT/(Tpx+maxArcU*sc+16)),0.01);
