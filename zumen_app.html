@@ -5215,14 +5215,34 @@ async function bleConnect(){
       optionalServices:['02a6c0d0-0451-4000-b000-fb3210111989','02a6c0f0-0451-4000-b000-fb3210111989']
     });
     _bleDevice.addEventListener('gattserverdisconnected', _onBleDisconnected);
-    var server  = await _bleDevice.gatt.connect();
-    var service = await server.getPrimaryService(BLE_SERVICE_UUID);
-    _bleChar    = await service.getCharacteristic(BLE_CHAR_UUID);
-    await _bleChar.startNotifications();
-    _bleChar.addEventListener('characteristicvaluechanged', _onBleValue);
+    var server = await _bleDevice.gatt.connect();
+    // 両サービスの全Characteristicを購読
+    var serviceUUIDs = [
+      '02a6c0d0-0451-4000-b000-fb3210111989',
+      '02a6c0f0-0451-4000-b000-fb3210111989'
+    ];
+    var subCount = 0;
+    for(var si=0; si<serviceUUIDs.length; si++){
+      try {
+        var svc = await server.getPrimaryService(serviceUUIDs[si]);
+        var chars = await svc.getCharacteristics();
+        for(var ci=0; ci<chars.length; ci++){
+          var ch = chars[ci];
+          var props = ch.properties;
+          if(props.notify || props.indicate){
+            try {
+              await ch.startNotifications();
+              ch.addEventListener('characteristicvaluechanged', _onBleValue);
+              if(!_bleChar) _bleChar = ch;
+              subCount++;
+            } catch(e2){}
+          }
+        }
+      } catch(e3){}
+    }
     _bleConnected = true;
     _updateBleUI();
-    showWaToast('✅ GLM接続しました');
+    showWaToast('GLM接続 (購読:'+subCount+'ch)');
   } catch(e) {
     if(btn){ btn.textContent='接続'; btn.disabled=false; }
     if(e.name!=='NotFoundError') showWaToast('接続失敗: '+e.message);
