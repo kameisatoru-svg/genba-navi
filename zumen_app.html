@@ -2581,10 +2581,12 @@ function confirmPartPending(){
   pushHistory();
   planPartSeq++;
   planPartitions.push({id:planPartSeq, axis:_partPending.axis, pos:_partPending.pos, start:_partPending.start, len:_partPending.len, t:roomData.wallT, dimOffset:0});
+  // 確定後、追加した壁を選択状態にして寸法線を表示
+  _planSelType='partition';
+  _planSelId=planPartSeq;
   _partPending=null;
   renderPlan();
 }
-
 function cancelPartPending(){
   _partPending=null;
   renderPlan();
