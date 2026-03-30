@@ -2644,9 +2644,30 @@ function _planSc(){
   var CW=cv.offsetWidth||340;
   var mL=56,mR=20,mT=20,mB=56;
   var sc=Math.min((CW-mL-mR)/W,370/D);
+  // renderPlanと同じsc縮小ロジック
+  try{
+    var Tpx0=T*sc;
+    var maxArcU=0,maxArcD=0,maxArcL=0,maxArcR=0;
+    [{fi:0,dir:'U'},{fi:2,dir:'D'},{fi:1,dir:'R'},{fi:3,dir:'L'}].forEach(function(f){
+      faceOpenings[f.fi].forEach(function(op){
+        if(!isDoor(op.type)) return;
+        if(f.dir==='U') maxArcU=Math.max(maxArcU,op.w);
+        if(f.dir==='D') maxArcD=Math.max(maxArcD,op.w);
+        if(f.dir==='L') maxArcL=Math.max(maxArcL,op.w);
+        if(f.dir==='R') maxArcR=Math.max(maxArcR,op.w);
+      });
+    });
+    var needL=Tpx0+maxArcL*sc+36, needR=Tpx0+maxArcR*sc+16;
+    var needT=Tpx0+maxArcU*sc+16, needB=Tpx0+maxArcD*sc+36;
+    var scL=needL>mL?sc*(mL/needL):sc;
+    var scR=needR>mR?sc*(mR/needR):sc;
+    var scT=needT>mT?sc*(mT/needT):sc;
+    var scB=needB>mB?sc*(mB/needB):sc;
+    sc=Math.min(sc,scL,scR,scT,scB);
+    sc=Math.max(sc,0.01);
+  }catch(e){}
   var Tpx=T*sc;
   var hasOutline=(roomData._innerW!=null);
-  // 間仕切り座標系：外周モードは内壁面基準、四角モードはox基準（W=内寸として扱う）
   var pox=hasOutline?(mL+Tpx/2):mL;
   var poy=hasOutline?(mT+Tpx/2):mT;
   var iW=hasOutline?roomData._innerW:W;
