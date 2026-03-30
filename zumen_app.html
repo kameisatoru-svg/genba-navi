@@ -3016,6 +3016,7 @@ function redrawPlan(){
   var _dXideal=outerL-16;
   var _dXinside=(_dXideal < 4); // 壁外に描くスペースなし→内側モード
   var dX=_dXinside ? (outerL+Tpx+6) : _dXideal;
+  console.log('dX debug: outerL='+outerL.toFixed(1)+' Tpx='+Tpx.toFixed(1)+' mL='+mL+' _dXideal='+_dXideal.toFixed(1)+' inside='+_dXinside+' dX='+dX.toFixed(1));
   ctx.strokeStyle='rgba(30,45,64,0.5)'; ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(dX,outerT);ctx.lineTo(dX,outerB);ctx.stroke();
   [outerT,outerB].forEach(function(ty){
@@ -3032,6 +3033,7 @@ function redrawPlan(){
   ctx.save();
   // 内側モード：テキストをdXの右に、外側モード：dXの左に
   var _dXtextX=_dXinside ? (dX+13) : (dX-13);
+  console.log('dX text debug: _dXtextX='+_dXtextX.toFixed(1)+' outerT='+outerT.toFixed(1)+' outerB='+outerB.toFixed(1)+' midY='+((outerT+outerB)/2).toFixed(1)+' CW='+CW+' CH='+CH);
   ctx.translate(_dXtextX, (outerT+outerB)/2);
   ctx.rotate(-Math.PI/2);
   ctx.font='bold 11px Meiryo,sans-serif';
