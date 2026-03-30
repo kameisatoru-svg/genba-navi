@@ -5245,6 +5245,8 @@ async function bleConnect(){
         if(ch.properties.indicate) props.push('I');
         if(ch.properties.write) props.push('W');
         _bleLog('SvcA: '+ch.uuid.slice(-8)+' ['+props.join(',')+']');
+        // WRITE系も含め全部保持
+        _bleChars.push(ch);
         if(ch.properties.notify||ch.properties.indicate){
           try{
             await ch.startNotifications();
@@ -5252,7 +5254,6 @@ async function bleConnect(){
             ch.addEventListener('characteristicvaluechanged',(function(l){
               return function(e){ _onBleValue(e,l); };
             })(lbl));
-            _bleChars.push(ch);
             _bleLog('  購読OK: '+lbl);
           }catch(e2){_bleLog('  購読NG: '+e2.message);}
         }
@@ -5288,7 +5289,10 @@ async function bleConnect(){
 
     _bleConnected = true;
     _updateBleUI();
-    showWaToast('GLM接続しました。測定ボタンを押してください');
+
+    // ロギング開始コマンドを送信（ボタン押下で測定値を通知させる）
+    // C0 55 02 01 00 1A = MT-Protocol logging start
+    await _bleSendLoggingStart();
 
   } catch(e) {
     if(btn){ btn.textContent='接続'; btn.disabled=false; }
@@ -5312,57 +5316,91 @@ function _onBleDisconnected(){
   showWaToast('GLM切断しました');
 }
 
+// ロギング開始コマンド送信（C0 55 02 01 00 1A）
+// 02a6c0d1（WRITE）に送信→ボタン押下で測定値がINDICATE通知される
+async function _bleSendLoggingStart(){
+  var LOGGING_CMD = new Uint8Array([0xC0, 0x55, 0x02, 0x01, 0x00, 0x1A]);
+  // 02a6c0d1を探す
+  var charD1 = _bleChars.find(function(c){
+    return c.uuid === '02a6c0d1-0451-4000-b000-fb3210111989';
+  });
+  if(!charD1){
+    // CharF3(02a6c0f3)でも試す
+    charD1 = _bleChars.find(function(c){
+      return c.uuid === BLE_CHAR_F3;
+    });
+  }
+  if(!charD1){
+    _bleLog('WRITE用Char未取得→ロギングコマンド送信不可');
+    showWaToast('GLM接続しました（ロギング待機中）');
+    return;
+  }
+  var hex = Array.from(LOGGING_CMD).map(function(b){return b.toString(16).padStart(2,'0');}).join(' ');
+  _bleLog('[送信] ロギング開始: '+hex);
+  try {
+    await charD1.writeValue(LOGGING_CMD);
+    _bleLog('[送信OK] ロギング開始');
+    showWaToast('GLM接続しました。測定ボタンを押してください');
+  } catch(e) {
+    _bleLog('[送信NG] '+e.message+' → writeWithoutResponse試行');
+    try {
+      await charD1.writeValueWithoutResponse(LOGGING_CMD);
+      _bleLog('[送信OK] ロギング開始(NoResp)');
+      showWaToast('GLM接続しました。測定ボタンを押してください');
+    } catch(e2){
+      _bleLog('[送信NG2] '+e2.message);
+      showWaToast('GLM接続しました（コマンド送信失敗）');
+    }
+  }
+}
+
 function _onBleValue(e, charName){
   var val=e.target.value;
   var bytes=new Uint8Array(val.buffer);
   var hex=Array.from(bytes).map(function(b){return b.toString(16).padStart(2,'0');}).join(' ');
   _bleLog('[受信:'+charName+']['+bytes.length+'bytes] '+hex);
 
-  // c0 11 00 3a は接続確認パケット（測定値ではない）→スキップ
-  if(bytes.length===4 && bytes[0]===0xc0 && bytes[1]===0x11 && bytes[2]===0x00 && bytes[3]===0x3a){
-    _bleLog('  → 接続確認パケット（スキップ）');
+  // C0 11 00 3A = ハートビート → スキップ
+  if(bytes.length===4 && bytes[0]===0xc0 && bytes[1]===0x11){
+    _bleLog('  → ハートビート（スキップ）');
     return;
   }
 
-  // 測定値パース試行（複数パターンをログに出力）
-  var mm = _tryParseMeasurement(bytes);
-  if(mm !== null){
-    _bleLog('  → 測定値確定: '+mm+' mm');
-    _applyBleValue(mm);
-  }
-}
-
-// 測定値パース（複数パターン試行・ログ出力のみ）
-function _tryParseMeasurement(bytes){
-  if(bytes.length < 3) return null;
-
-  // パターン1: bytes[2-5] リトルエンディアン / 0.01mm単位
-  if(bytes.length >= 6){
-    var r1 = bytes[2]|(bytes[3]<<8)|(bytes[4]<<16)|(bytes[5]<<24);
-    if(r1 > 0 && r1 < 50000000){
-      var m1=Math.round(r1/100);
-      if(m1>10&&m1<50000) _bleLog('  [P1候補] bytes[2-5]LE/0.01mm: '+m1+' mm');
+  // MT-Protocol測定値パケット: C0 55 ヘッダー
+  // bytes[7-10]: IEEE-754 float LE (メートル単位)
+  if(bytes.length >= 11 && bytes[0]===0xc0 && bytes[1]===0x55){
+    var statusByte = bytes[3];
+    _bleLog('  → MT-Protocol: status='+statusByte.toString(16));
+    if(statusByte === 0x06 || statusByte === 0x08 || statusByte === 0x0a){
+      // IEEE-754 float LE: bytes[7-10]
+      var buf = new ArrayBuffer(4);
+      var view = new DataView(buf);
+      view.setUint8(0, bytes[7]);
+      view.setUint8(1, bytes[8]);
+      view.setUint8(2, bytes[9]);
+      view.setUint8(3, bytes[10]);
+      var meters = view.getFloat32(0, true); // little endian
+      var mm = Math.round(meters * 1000);
+      _bleLog('  → 測定値: '+meters.toFixed(4)+'m = '+mm+'mm');
+      if(mm > 0 && mm < 50000){
+        _applyBleValue(mm);
+      }
+    } else {
+      _bleLog('  → 無効な測定（status≠06）');
     }
+    return;
   }
-  // パターン2: bytes[1-4] リトルエンディアン / 0.1mm単位
-  if(bytes.length >= 5){
-    var r2 = bytes[1]|(bytes[2]<<8)|(bytes[3]<<16)|(bytes[4]<<24);
-    if(r2 > 0 && r2 < 5000000){
-      var m2=Math.round(r2/10);
-      if(m2>10&&m2<50000) _bleLog('  [P2候補] bytes[1-4]LE/0.1mm: '+m2+' mm');
-    }
-  }
-  // パターン3: bytes[0-3] ビッグエンディアン / 0.01mm単位
+
+  // 未知のパケット: パターン候補をログ出力
   if(bytes.length >= 4){
-    var r3 = (bytes[0]<<24)|(bytes[1]<<16)|(bytes[2]<<8)|bytes[3];
-    if(r3 > 0 && r3 < 50000000){
-      var m3=Math.round(r3/100);
-      if(m3>10&&m3<50000) _bleLog('  [P3候補] bytes[0-3]BE/0.01mm: '+m3+' mm');
-    }
+    var buf2 = new ArrayBuffer(4);
+    var view2 = new DataView(buf2);
+    view2.setUint8(0, bytes[0]);
+    view2.setUint8(1, bytes[1]);
+    view2.setUint8(2, bytes[2]);
+    view2.setUint8(3, bytes[3]);
+    _bleLog('  → 未知パケット（解析待ち）');
   }
-
-  // ★ パターン確定後にここを return mm; に変更
-  return null;
 }
 
 // デバッグログ出力
