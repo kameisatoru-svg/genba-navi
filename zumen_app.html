@@ -5161,8 +5161,8 @@ var _bleConnected = false;
 var _bleTarget    = 'W'; // 'W'|'D'|'H'|'PL'
 
 // Bosch GLM BLE UUIDs（GLM 50-27CG）
-var BLE_SERVICE_UUID  = '02a6c0d0-0451-4000-b000-fb3210111989';
-var BLE_CHAR_UUID     = '02a6c0d1-0451-4000-b000-fb3210111989';
+var BLE_SERVICE_UUID  = '02a6c0f0-0451-4000-b000-fb3210111989';
+var BLE_CHAR_UUID     = '02a6c0f4-0451-4000-b000-fb3210111989';
 
 function openBleModal(){
   document.getElementById('ble-modal').classList.remove('hidden');
@@ -5212,7 +5212,7 @@ async function bleConnect(){
   try {
     _bleDevice = await navigator.bluetooth.requestDevice({
       filters:[{namePrefix:'GLM'}],
-      optionalServices:[BLE_SERVICE_UUID]
+      optionalServices:['02a6c0d0-0451-4000-b000-fb3210111989','02a6c0f0-0451-4000-b000-fb3210111989']
     });
     _bleDevice.addEventListener('gattserverdisconnected', _onBleDisconnected);
     var server  = await _bleDevice.gatt.connect();
