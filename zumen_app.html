@@ -2964,18 +2964,24 @@ function redrawPlan(){
   var baseOffsetL=16, baseOffsetR=16, baseOffsetT=16, baseOffsetB=16;
   var dX_offset = baseOffsetL;
   var dY_offset = baseOffsetB;
-  var dX_offsetR = baseOffsetR; // 右側用（将来拡張用）
-  var dY_offsetT = baseOffsetT;  // 上側用（将来拡張用）
+  var dX_offsetR = baseOffsetR;
+  var dY_offsetT = baseOffsetT;
+  
+  var extraL=0, extraR=0, extraT=0, extraB=0; // キャンバス拡張量
   
   if(minDimX < Infinity){
     // 横壁の間仕切り寸法線がある
     // 左側：間仕切り寸法線の最小X（ox相対）がMARGIN以内なら外周寸法線を押し出す
     if(minDimX < baseOffsetL + MARGIN){
-      dX_offset = minDimX - MARGIN;
+      var pushOut = baseOffsetL + MARGIN - minDimX; // 押し出す量（正の値）
+      dX_offset = baseOffsetL + pushOut;
+      extraL = Math.ceil(pushOut);
     }
     // 右側：間仕切り寸法線の最大X（ox相対）がrw-MARGIN以上なら外周寸法線を押し出す
     if(maxDimX > rw - baseOffsetR - MARGIN){
-      dX_offsetR = rw - maxDimX + MARGIN;
+      var pushOut2 = maxDimX - (rw - baseOffsetR - MARGIN);
+      dX_offsetR = baseOffsetR + pushOut2;
+      extraR = Math.ceil(pushOut2);
     }
   }
   
@@ -2983,13 +2989,33 @@ function redrawPlan(){
     // 縦壁の間仕切り寸法線がある
     // 上側
     if(minDimY < baseOffsetT + MARGIN){
-      dY_offsetT = minDimY - MARGIN;
+      var pushOut3 = baseOffsetT + MARGIN - minDimY;
+      dY_offsetT = baseOffsetT + pushOut3;
+      extraT = Math.ceil(pushOut3);
     }
     // 下側
     if(maxDimY > rd - baseOffsetB - MARGIN){
-      dY_offset = maxDimY - rd + MARGIN;
+      var pushOut4 = maxDimY - (rd - baseOffsetB - MARGIN);
+      dY_offset = baseOffsetB + pushOut4;
+      extraB = Math.ceil(pushOut4);
     }
   }
+  
+  // キャンバス拡張
+  if(extraL>0 || extraR>0 || extraT>0 || extraB>0){
+    mL += extraL;
+    mR += extraR;
+    mT += extraT;
+    mB += extraB;
+    ox = mL;
+    oy = mT;
+    CH = rd + mT + mB;
+    
+    // キャンバス再設定
+    ctx = setupCanvas(cv, CW, CH);
+    ctx.clearRect(0, 0, CW, CH);
+  }
+  // ox, oyが更新された後、元の描画フローに戻る
 
   ctx.strokeStyle='rgba(30,45,64,0.5)';
   ctx.fillStyle='rgba(30,45,64,0.75)';
