@@ -26,8 +26,8 @@ body{
 
 /* ── ヘッダー ── */
 .header{
-  background:var(--navy);height:60px;
-  display:flex;align-items:center;padding:0 10px;gap:5px;flex-shrink:0;
+  background:var(--navy);height:54px;
+  display:flex;align-items:center;padding:0 10px;gap:6px;flex-shrink:0;
 }
 .btn-back{
   width:44px;height:44px;border:none;background:transparent;
@@ -39,10 +39,10 @@ body{
 
 /* 図面種別セレクト */
 .view-select-wrap{
-  position:relative;flex:1;max-width:175px;
+  position:relative;flex:0 0 auto;
 }
 .view-select{
-  width:100%;height:38px;
+  height:38px;
   background:rgba(255,255,255,0.12);
   border:1px solid rgba(255,255,255,0.25);
   border-radius:10px;color:var(--white);
@@ -50,40 +50,77 @@ body{
   padding:0 26px 0 10px;cursor:pointer;
   -webkit-appearance:none;appearance:none;outline:none;
 }
-.view-select option{
-  background:#ffffff;
-  color:#1e2d40;
-}
+.view-select option{background:#ffffff;color:#1e2d40;}
 .view-select-wrap::after{
   content:'▼';position:absolute;right:8px;top:50%;transform:translateY(-50%);
   font-size:9px;color:rgba(255,255,255,0.7);pointer-events:none;
 }
 
-/* モードトグル（編集/印刷） */
-.mode-toggle{display:flex;gap:2px;background:rgba(255,255,255,0.1);border-radius:10px;padding:2px;margin-left:auto;}
-.mtb{
-  width:40px;height:40px;border:none;border-radius:8px;
-  background:transparent;color:rgba(255,255,255,0.75);
-  font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;
-  display:flex;align-items:center;justify-content:center;
+/* キャンバスエリア（ヘッダーとボトムバーの間を100%使用） */
+.cv-main-wrap{
+  flex:1;position:relative;overflow-y:auto;background:var(--bg);
+  -webkit-overflow-scrolling:touch;
 }
-.mtb svg{display:block;}
-.mtb.active{background:var(--accent);color:var(--navy);}
-.mtb.active svg{stroke:var(--navy);}
 
-/* Undo/Redoトグル */
-.undo-toggle{display:flex;gap:2px;background:rgba(255,255,255,0.1);border-radius:10px;padding:2px;margin-left:0;}
-.utb{
-  width:40px;height:40px;border:none;border-radius:8px;
-  background:transparent;color:#ffffff;
+/* Undo/Redoオーバーレイ（キャンバス左上） */
+.ur-overlay{
+  position:absolute;top:10px;left:10px;z-index:10;
+  display:flex;gap:5px;
+}
+.ur-overlay-btn{
+  width:42px;height:42px;border-radius:10px;
+  background:rgba(255,255,255,0.92);
+  border:1px solid rgba(30,45,64,0.15);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+}
+.ur-overlay-btn:active{background:rgba(255,255,255,0.7);}
+.ur-overlay-btn svg{display:block;}
+
+/* ── ドロワー ── */
+.drawer{
+  background:#f5f2ec;
+  border-top:2px solid var(--accent);
+  border-radius:14px 14px 0 0;
+  flex-shrink:0;
+  max-height:60vh;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.drawer.hidden{display:none;}
+.drawer-handle{
+  height:18px;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;cursor:pointer;
+}
+.drawer-op{padding:10px 14px 8px;}
+.drawer-list{padding:6px 14px 10px;border-top:1px solid rgba(30,45,64,0.08);}
+
+/* ── ボトムバー ── */
+.bottom-bar{
+  background:var(--navy);height:64px;
+  display:flex;align-items:center;padding:0 8px;gap:4px;
+  flex-shrink:0;border-top:2px solid var(--accent);
+}
+.bb-btn{
+  flex:1;height:52px;border-radius:10px;
+  background:rgba(255,255,255,0.07);
+  border:1px solid rgba(255,255,255,0.1);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:3px;
   cursor:pointer;font-family:inherit;
-  display:flex;align-items:center;justify-content:center;
-  transition:opacity 0.15s;
 }
-.utb:active{background:rgba(255,255,255,0.15);}
-.utb svg{display:block;}
+.bb-btn:active{background:rgba(255,255,255,0.15);}
+.bb-btn.active{background:rgba(200,169,110,0.22);border-color:var(--accent);}
+.bb-btn.mode-active{background:var(--accent);border-color:var(--accent);}
+.bb-lbl{font-size:10px;color:rgba(255,255,255,0.65);font-weight:700;line-height:1;}
+.bb-btn.active .bb-lbl{color:var(--accent);}
+.bb-btn.mode-active .bb-lbl{color:var(--navy);}
+.bb-sep{width:1px;height:36px;background:rgba(255,255,255,0.15);flex-shrink:0;margin:0 2px;}
 
-/* 割付・出力ボタン */
+/* ── スクロールエリア（旧・後方互換のため残す） ── */
+.scroll-area{display:none;}
+
+/* 割付・出力ボタン（旧スタイル・後方互換） */
 .btn-do-print{
   height:38px;padding:0 10px;border:1.5px solid var(--accent);border-radius:10px;
   background:transparent;color:var(--accent);font-size:12px;font-weight:700;
@@ -91,13 +128,6 @@ body{
   display:flex;align-items:center;gap:4px;
 }
 .btn-do-print:active{background:rgba(200,169,110,0.2);}
-
-/* ── スクロールエリア ── */
-.scroll-area{
-  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
-  padding:14px 14px max(20px,env(safe-area-inset-bottom));
-  touch-action:pan-y;
-}
 
 /* ── 共通 ── */
 .st{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px;letter-spacing:0.03em;}
@@ -125,10 +155,10 @@ body{
 
 /* ── canvas ── */
 .canvas-wrap{
-  background:var(--white);border-radius:14px;
-  border:1.5px solid rgba(30,45,64,0.1);overflow:hidden;
-  box-shadow:0 2px 8px rgba(30,45,64,0.07);
-  margin-bottom:12px;position:relative;
+  background:var(--white);
+  position:relative;
+  width:100%;height:100%;
+  overflow:hidden;
 }
 .canvas-label{
   font-size:11px;font-weight:700;color:var(--text2);
@@ -394,13 +424,9 @@ canvas{display:block;width:100%;}
 /* ── 印刷スタイル ── */
 @media print{
   body{position:static;height:auto;overflow:visible;background:#fff;}
-  .header,.scroll-area > .sec,.dim-card,.plan-info-card,
-  #mpanel-wrap,.mode-toggle,.btn-do-print,.btn-back,
-  .acc-hd,#placed-list{display:none!important;}
-  .scroll-area{overflow:visible;padding:0;}
-  .canvas-wrap{border:none;box-shadow:none;border-radius:0;}
-  .canvas-label{display:none;}
-  #eq-del-btn{display:none!important;}
+  .header,.bottom-bar,.drawer,.ur-overlay,#eq-del-btn{display:none!important;}
+  .cv-main-wrap{overflow:visible;height:auto;}
+  .canvas-wrap{border:none;box-shadow:none;border-radius:0;height:auto;}
 }
 </style>
 </head>
@@ -411,7 +437,6 @@ canvas{display:block;width:100%;}
   <button class="btn-back" onclick="goBackToTop()" title="戻る">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
   </button>
-
   <!-- 図面種別セレクト -->
   <div class="view-select-wrap">
     <select class="view-select" id="view-select" onchange="switchView(this.value)">
@@ -423,55 +448,50 @@ canvas{display:block;width:100%;}
       <option value="ceil">天井図</option>
     </select>
   </div>
-
-  <!-- プロジェクト名（タップでロールダウン） -->
-  <button id="proj-btn" onclick="toggleProjPanel()" style="flex:1;min-width:0;height:38px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:10px;color:var(--white);font-size:11px;font-family:inherit;cursor:pointer;padding:0 8px;display:flex;align-items:center;gap:4px;overflow:hidden;">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+  <!-- 現場名（タップでプロジェクトパネル） -->
+  <button id="proj-btn" onclick="toggleProjPanel()" style="flex:1;min-width:0;height:38px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:10px;color:var(--white);font-size:11px;font-family:inherit;cursor:pointer;padding:0 10px;display:flex;align-items:center;gap:4px;overflow:hidden;">
     <span id="proj-label" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-align:left;">未保存</span>
     <span id="proj-arrow" style="font-size:9px;opacity:0.7;flex-shrink:0;">▼</span>
   </button>
-
-  <!-- 編集 / 印刷モード -->
-  <div class="mode-toggle">
-    <button class="mtb" id="btn-print" onclick="togglePrintMode()" title="印刷モード">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-    </button>
-  </div>
-
-  <!-- Undo / Redo -->
-  <div class="undo-toggle">
-    <button class="utb" id="btn-undo" onclick="doUndo()" title="元に戻す">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M3 13C5 8 9.5 5 15 5a9 9 0 0 1 9 9 9 9 0 0 1-9 9c-3.5 0-6.5-1.5-8.5-4"/></svg>
-    </button>
-    <button class="utb" id="btn-redo" onclick="doRedo()" title="やり直す">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M21 13c-2 5-6.5 8-12 8a9 9 0 0 1-9-9 9 9 0 0 1 9-9c3.5 0 6.5 1.5 8.5 4"/></svg>
-    </button>
-  </div>
-
-  <!-- GLM Bluetooth接続ボタン -->
-  <button class="btn-do-print" id="ble-btn" onclick="openBleModal()" style="background:rgba(255,255,255,0.08);padding:0 10px;gap:5px;">
+  <!-- GLM -->
+  <button id="ble-btn" onclick="openBleModal()" style="width:52px;height:38px;border:1px solid rgba(255,255,255,0.2);border-radius:10px;background:rgba(255,255,255,0.08);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;flex-shrink:0;">
     <svg id="ble-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"/>
     </svg>
-    <span id="ble-label" style="font-size:11px;color:rgba(255,255,255,0.7);">GLM</span>
+    <span id="ble-label" style="font-size:9px;color:rgba(255,255,255,0.7);font-weight:700;">GLM</span>
   </button>
-
-  <!-- 割付 -->
-  <button class="btn-do-print" onclick="openWaritsukeModal()" style="background:rgba(200,169,110,0.15);">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M2 4h20M6 4v16M18 4v16M6 12h12"/></svg>
-    割付
-  </button>
-
-  <!-- 出力 -->
-  <button class="btn-do-print" onclick="doPrint()">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-    出力
-  </button>
-
   <!-- 外周終了ボタン（外周作図モード中のみ表示） -->
-  <button id="btn-outline-finish" onclick="outlineFinish()" class="hidden" style="height:38px;padding:0 10px;border:none;border-radius:10px;background:#c8a96e;color:var(--navy);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;">
+  <button id="btn-outline-finish" onclick="outlineFinish()" class="hidden" style="height:38px;padding:0 12px;border:none;border-radius:10px;background:var(--accent);color:var(--navy);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;">
     終了
   </button>
+</div>
+
+<!-- キャンバスメインエリア -->
+<div class="cv-main-wrap" id="cv-main-wrap">
+  <!-- Undo/Redoオーバーレイ -->
+  <div class="ur-overlay">
+    <button class="ur-overlay-btn" id="btn-undo" onclick="doUndo()" title="元に戻す">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1e2d40" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M3 13C5 8 9.5 5 15 5a9 9 0 0 1 9 9 9 9 0 0 1-9 9c-3.5 0-6.5-1.5-8.5-4"/></svg>
+    </button>
+    <button class="ur-overlay-btn" id="btn-redo" onclick="doRedo()" title="やり直す">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1e2d40" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M21 13c-2 5-6.5 8-12 8a9 9 0 0 1-9-9 9 9 0 0 1 9-9c3.5 0 6.5 1.5 8.5 4"/></svg>
+    </button>
+  </div>
+  <!-- キャンバス（JSで動的に挿入） -->
+  <div id="main-canvas-area"></div>
+</div>
+
+<!-- ドロワー -->
+<div class="drawer hidden" id="main-drawer">
+  <div class="drawer-handle" onclick="toggleDrawer()">
+    <div style="width:36px;height:4px;background:rgba(30,45,64,0.2);border-radius:2px;"></div>
+  </div>
+  <div id="drawer-content"></div>
+</div>
+
+<!-- ボトムバー -->
+<div class="bottom-bar" id="bottom-bar">
+  <!-- JSで動的に生成 -->
 </div>
 
 <!-- 柱配置ダイアログ -->
@@ -509,7 +529,7 @@ canvas{display:block;width:100%;}
 </div>
 
 <!-- ── 案件パネル（ロールダウン） ── -->
-<div id="proj-panel" class="hidden" style="position:fixed;top:60px;left:0;right:0;z-index:90;background:var(--navy);border-bottom:2px solid var(--accent);padding:12px 14px;box-shadow:0 6px 24px rgba(10,20,35,0.5);">
+<div id="proj-panel" class="hidden" style="position:fixed;top:54px;left:0;right:0;z-index:90;background:var(--navy);border-bottom:2px solid var(--accent);padding:12px 14px;box-shadow:0 6px 24px rgba(10,20,35,0.5);">
 
   <!-- メインビュー -->
   <div id="proj-view-main">
@@ -606,7 +626,6 @@ canvas{display:block;width:100%;}
   </div>
 </div>
 
-<div class="scroll-area" id="main-area"></div>
 
 <script>
 // ══════════════════════════════════════════
@@ -839,10 +858,301 @@ function saveCurrentInputs(){
 function renderMain(){
   var sel=document.getElementById('view-select');
   if(sel&&sel.value!==curView) sel.value=curView;
-
+  _renderBottomBar();
+  _closeDrawer();
   if(curView==='plan')       renderPlan();
   else if(curView==='ceil')  renderCeil();
   else                       renderFace();
+}
+
+// ── ボトムバー生成 ──
+function _renderBottomBar(){
+  var bar=document.getElementById('bottom-bar');
+  if(!bar) return;
+  var h='';
+  if(curView==='plan'){
+    var modes=[['none','通常'],['column','柱'],['part_v','縦壁'],['part_h','横壁']];
+    modes.forEach(function(md){
+      var on=_planMode===md[0];
+      var cls='bb-btn'+(on?' mode-active':'');
+      var stroke=on?'#1e2d40':'rgba(255,255,255,0.7)';
+      h+='<button class="'+cls+'" data-mode="'+md[0]+'" onclick="setPlanMode(this.dataset.mode)">';
+      h+='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="'+stroke+'" stroke-width="2">'+_bbIcon(md[0])+'</svg>';
+      h+='<span class="bb-lbl">'+md[1]+'</span></button>';
+    });
+    h+='<div class="bb-sep"></div>';
+    var tabs=[['dim','寸法'],['list','リスト'],['output','出力']];
+    tabs.forEach(function(tb){
+      var drawerVisible=!document.getElementById('main-drawer').classList.contains('hidden');
+      var on=_drawerTab===tb[0]&&drawerVisible;
+      var cls='bb-btn'+(on?' active':'');
+      var stroke=on?'var(--accent)':'rgba(255,255,255,0.65)';
+      h+='<button class="'+cls+'" data-tab="'+tb[0]+'" onclick="_openDrawerTab(this.dataset.tab)">';
+      h+='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="'+stroke+'" stroke-width="2">'+_bbIcon(tb[0])+'</svg>';
+      h+='<span class="bb-lbl">'+tb[1]+'</span></button>';
+    });
+  } else if(curView==='ceil'){
+    var tabs=[['ceil_add','器具追加'],['list','リスト'],['output','出力']];
+    tabs.forEach(function(tb){
+      var drawerVisible=!document.getElementById('main-drawer').classList.contains('hidden');
+      var on=_drawerTab===tb[0]&&drawerVisible;
+      var cls='bb-btn'+(on?' active':'');
+      var stroke=on?'var(--accent)':'rgba(255,255,255,0.65)';
+      h+='<button class="'+cls+'" data-tab="'+tb[0]+'" onclick="_openDrawerTab(this.dataset.tab)">';
+      h+='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="'+stroke+'" stroke-width="2">'+_bbIcon(tb[0])+'</svg>';
+      h+='<span class="bb-lbl">'+tb[1]+'</span></button>';
+    });
+  } else {
+    var tabs=[['opening','開口部'],['equip','設備'],['list','リスト'],['waritsuke','割付'],['output','出力']];
+    tabs.forEach(function(tb){
+      var drawerVisible=!document.getElementById('main-drawer').classList.contains('hidden');
+      var on=_drawerTab===tb[0]&&drawerVisible;
+      var cls='bb-btn'+(on?' active':'');
+      var stroke=on?'var(--accent)':'rgba(255,255,255,0.65)';
+      h+='<button class="'+cls+'" data-tab="'+tb[0]+'" onclick="_openDrawerTab(this.dataset.tab)">';
+      h+='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="'+stroke+'" stroke-width="2">'+_bbIcon(tb[0])+'</svg>';
+      h+='<span class="bb-lbl">'+tb[1]+'</span></button>';
+    });
+  }
+  bar.innerHTML=h;
+}
+function _bbIcon(key){
+  var icons={
+    'none':'<rect x="3" y="3" width="18" height="18" rx="2"/>',
+    'column':'<rect x="8" y="8" width="8" height="8"/>',
+    'part_v':'<line x1="12" y1="3" x2="12" y2="21"/><line x1="8" y1="3" x2="8" y2="21"/>',
+    'part_h':'<line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="8" x2="21" y2="8"/>',
+    'dim':'<line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="18" x2="20" y2="18"/><line x1="12" y1="6" x2="12" y2="18"/>',
+    'list':'<line x1="8" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="8" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.5" fill="currentColor"/><circle cx="4" cy="12" r="1.5" fill="currentColor"/><circle cx="4" cy="18" r="1.5" fill="currentColor"/>',
+    'output':'<polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
+    'opening':'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+    'equip':'<circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>',
+    'waritsuke':'<path d="M2 20h20M2 4h20M6 4v16M18 4v16M6 12h12"/>',
+    'ceil_add':'<circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>'
+  };
+  return icons[key]||'<circle cx="12" cy="12" r="5"/>';
+}
+
+// ── ドロワー制御 ──
+var _drawerTab='';
+function _openDrawerTab(tab){
+  if(_drawerTab===tab && !document.getElementById('main-drawer').classList.contains('hidden')){
+    _closeDrawer(); return;
+  }
+  _drawerTab=tab;
+  _renderDrawerContent();
+  document.getElementById('main-drawer').classList.remove('hidden');
+  _renderBottomBar();
+}
+function _closeDrawer(){
+  document.getElementById('main-drawer').classList.add('hidden');
+  _drawerTab='';
+}
+function toggleDrawer(){
+  var d=document.getElementById('main-drawer');
+  if(d.classList.contains('hidden')) return;
+  _closeDrawer();
+  _renderBottomBar();
+}
+
+function _renderDrawerContent(){
+  var el=document.getElementById('drawer-content');
+  if(!el) return;
+  var h='';
+  if(_drawerTab==='dim'){
+    h=_drawerDim();
+  } else if(_drawerTab==='list'){
+    h=_drawerList();
+  } else if(_drawerTab==='output'){
+    h=_drawerOutput();
+  } else if(_drawerTab==='opening'){
+    h=_drawerOpening();
+  } else if(_drawerTab==='equip'){
+    h=_drawerEquip();
+  } else if(_drawerTab==='waritsuke'){
+    h='<div class="drawer-op"><button onclick="openWaritsukeModal();_closeDrawer();" style="width:100%;height:52px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">割付アプリへ送信</button></div>';
+  } else if(_drawerTab==='ceil_add'){
+    h=_drawerCeilAdd();
+  }
+  el.innerHTML=h;
+}
+
+// 寸法タブ
+function _drawerDim(){
+  var W=roomData.W,D=roomData.D,H=roomData.H,T=roomData.wallT;
+  var h='<div class="drawer-op">';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;">';
+  ['W','D','H'].forEach(function(k){
+    var v=k==='W'?W:k==='D'?D:H;
+    h+='<div style="background:#fff;border-radius:9px;border:1.5px solid rgba(30,45,64,0.15);padding:8px;text-align:center;">'
+      +'<div style="font-size:10px;color:#5a6a7a;margin-bottom:2px;">'+k+' mm</div>'
+      +'<input data-dim="'+k+'" type="number" value="'+v+'" inputmode="numeric" '
+      +'style="width:100%;border:none;outline:none;font-size:20px;font-weight:700;color:#1e2d40;text-align:center;background:transparent;font-family:inherit;" '
+      +'oninput="onDrwDimChange(this.dataset.dim,this.value)"></div>';
+  });
+  h+='</div>';
+  // 壁厚
+  h+='<div style="display:flex;gap:6px;margin-bottom:8px;">';
+  [100,120,150].forEach(function(t){
+    var on=T===t;
+    h+='<button onclick="setWallT('+t+');_renderDrawerContent();" style="flex:1;height:40px;border-radius:9px;border:1px solid rgba(30,45,64,0.15);background:'+(on?'#1e2d40':'#fff')+';color:'+(on?'#fff':'#5a6a7a')+';font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">'+t+'mm</button>';
+  });
+  h+='</div>';
+  // 内寸情報（小さく）
+  var iW=roomData._innerW||W, iD=roomData._innerD||D;
+  h+='<div style="font-size:10px;color:#9a9a9a;text-align:center;">内寸 '+iW.toLocaleString()+'×'+iD.toLocaleString()+' mm　'+((iW/1000)*(iD/1000)).toFixed(2)+'㎡</div>';
+  h+='</div>';
+  return h;
+}
+
+function onDrwDimChange(key,val){
+  var v=parseFloat(val)||0;
+  if(key==='W') roomData.W=v;
+  else if(key==='D') roomData.D=v;
+  else if(key==='H') roomData.H=v;
+  redrawPlan();
+}
+
+// 開口部タブ
+function _drawerOpening(){
+  var doors=[
+    {label:'片開き',w:900,h:2100},{label:'親子',w:1200,h:2100},
+    {label:'両開き',w:1800,h:2100},{label:'引き違い',w:1800,h:2100},{label:'スライド',w:900,h:2100}
+  ];
+  var windows=[
+    {label:'中連窓',w:1600,h:1100},{label:'掃出し窓',w:1600,h:2100},
+    {label:'排煙窓',w:1200,h:600},{label:'縦滑り窓',w:600,h:1100},{label:'嵌め殺し窓',w:900,h:1100}
+  ];
+  var h='<div class="drawer-op">';
+  h+='<div style="font-size:10px;font-weight:700;color:#5a6a7a;margin-bottom:6px;">ドア</div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:8px;">';
+  doors.forEach(function(o){
+    h+='<button data-label="'+o.label+'" data-w="'+o.w+'" data-h="'+o.h+'" '
+      +'onclick="addOp(this.dataset.label,parseInt(this.dataset.w),parseInt(this.dataset.h));_closeDrawer();" '
+      +'style="background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:8px 3px;text-align:center;cursor:pointer;font-family:inherit;">'
+      +'<div style="font-size:11px;font-weight:700;color:#1e2d40;">＋ '+o.label+'</div>'
+      +'<div style="font-size:9px;color:#9a9a9a;margin-top:2px;">'+o.w+'×'+o.h+'</div></button>';
+  });
+  h+='</div>';
+  h+='<div style="font-size:10px;font-weight:700;color:#5a6a7a;margin-bottom:6px;">窓</div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;">';
+  windows.forEach(function(o){
+    h+='<button data-label="'+o.label+'" data-w="'+o.w+'" data-h="'+o.h+'" '
+      +'onclick="addOp(this.dataset.label,parseInt(this.dataset.w),parseInt(this.dataset.h));_closeDrawer();" '
+      +'style="background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:8px 3px;text-align:center;cursor:pointer;font-family:inherit;">'
+      +'<div style="font-size:11px;font-weight:700;color:#1e2d40;">＋ '+o.label+'</div>'
+      +'<div style="font-size:9px;color:#9a9a9a;margin-top:2px;">'+o.w+'×'+o.h+'</div></button>';
+  });
+  h+='</div></div>';
+  h+=_drawerOpList();
+  return h;
+}
+// 設備タブ
+function _drawerEquip(){
+  var h='<div class="drawer-op"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">';
+  EQ_TYPES.forEach(function(eq){
+    h+='<button data-eqid="'+eq.id+'" onclick="addEq(this.dataset.eqid);_closeDrawer();" '
+      +'style="background:#fff;border-radius:9px;border:1px solid rgba(30,45,64,0.12);padding:10px 4px;text-align:center;cursor:pointer;font-family:inherit;">'
+      +'<div style="font-size:18px;margin-bottom:3px;">'+eq.icon+'</div>'
+      +'<div style="font-size:11px;color:#1e2d40;font-weight:700;">'+eq.label+'</div></button>';
+  });
+  h+='</div></div>';
+  return h;
+}
+// 天井器具タブ
+function _drawerCeilAdd(){
+  var h='<div class="drawer-op"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">';
+  CEIL_TYPES.forEach(function(ct){
+    h+='<button data-ctid="'+ct.id+'" onclick="addCeilPart(this.dataset.ctid);_closeDrawer();" '
+      +'style="background:#fff;border-radius:9px;border:1px solid rgba(30,45,64,0.12);padding:10px 4px;text-align:center;cursor:pointer;font-family:inherit;">'
+      +'<div style="font-size:18px;margin-bottom:3px;">'+ct.icon+'</div>'
+      +'<div style="font-size:11px;color:#1e2d40;font-weight:700;">'+ct.label+'</div></button>';
+  });
+  h+='</div></div>';
+  return h;
+}
+// 出力タブ
+function _drawerOutput(){
+  return '<div class="drawer-op" style="display:flex;flex-direction:column;gap:8px;">'+
+    '<button onclick="doPrint();_closeDrawer();" style="height:52px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">印刷・出力</button>'+
+    '</div>';
+}
+
+// リストタブ（ビュー別）
+function _drawerList(){
+  if(curView==='plan') return _drawerPlanList();
+  if(curView==='ceil') return _drawerCeilList();
+  return _drawerOpList();
+}
+
+function _drawerPlanList(){
+  var h='<div class="drawer-op">';
+  if(planColumns.length===0&&planPartitions.length===0){
+    h+='<div style="font-size:12px;color:#9a9a9a;text-align:center;padding:10px 0;">配置なし</div>';
+  }
+  planColumns.forEach(function(c){
+    var sel=planColSelId===c.id;
+    var bc=sel?'var(--accent)':'rgba(30,45,64,0.1)';
+    h+='<div data-colid="'+c.id+'" data-type="column" '
+      +'onclick="var id=parseInt(this.dataset.colid);planColSelId=id;_planSelId=id;_planSelType=this.dataset.type;redrawPlan();_renderDrawerContent();" '
+      +'style="background:#fff;border-radius:8px;border:1.5px solid '+bc+';padding:8px 12px;margin-bottom:5px;display:flex;align-items:center;gap:8px;cursor:pointer;">'
+      +'<div style="flex:1;font-size:12px;font-weight:700;color:#1e2d40;">柱 '+c.w+'×'+c.d+'mm</div>'
+      +'<button data-colid="'+c.id+'" data-type="column" '
+      +'onclick="event.stopPropagation();var id=parseInt(this.dataset.colid);planColSelId=id;_planSelId=id;_planSelType=this.dataset.type;deletePlanSel();" '
+      +'style="font-size:10px;color:#e53535;background:none;border:1px solid rgba(229,53,53,0.3);border-radius:5px;padding:2px 8px;cursor:pointer;">削除</button></div>';
+  });
+  planPartitions.forEach(function(p){
+    var sel=_planSelId===p.id;
+    var bc=sel?'var(--accent)':'rgba(30,45,64,0.1)';
+    var label=p.axis==='v'?'縦壁':'横壁';
+    h+='<div data-partid="'+p.id+'" data-type="partition" '
+      +'onclick="var id=parseInt(this.dataset.partid);_planSelId=id;_planSelType=this.dataset.type;redrawPlan();_renderDrawerContent();" '
+      +'style="background:#fff;border-radius:8px;border:1.5px solid '+bc+';padding:8px 12px;margin-bottom:5px;display:flex;align-items:center;gap:8px;cursor:pointer;">'
+      +'<div style="flex:1;font-size:12px;font-weight:700;color:#1e2d40;">'+label+' '+p.len+'mm</div>'
+      +'<button data-partid="'+p.id+'" data-type="partition" '
+      +'onclick="event.stopPropagation();var id=parseInt(this.dataset.partid);_planSelId=id;_planSelType=this.dataset.type;deletePlanSel();" '
+      +'style="font-size:10px;color:#e53535;background:none;border:1px solid rgba(229,53,53,0.3);border-radius:5px;padding:2px 8px;cursor:pointer;">削除</button></div>';
+  });
+  h+='</div>';
+  return h;
+}
+function _drawerOpList(){
+  var fi=curFaceIdx;
+  var ops=faceOpenings[fi]||[];
+  var eqs=faceEquips[fi]||[];
+  if(ops.length===0&&eqs.length===0) return '<div class="drawer-list"><div style="font-size:12px;color:#9a9a9a;text-align:center;padding:10px 0;">配置なし</div></div>';
+  var h='<div class="drawer-list">';
+  ops.forEach(function(op){
+    var sel=faceSelId[fi]===op.id;
+    h+='<div onclick="faceSelId['+fi+']='+op.id+';redraw();_renderDrawerContent();" style="background:#fff;border-radius:8px;border:1.5px solid '+(sel?'var(--cop)':'rgba(30,45,64,0.1)')+';padding:7px 10px;margin-bottom:4px;display:flex;align-items:center;gap:8px;cursor:pointer;">'+
+      '<div style="flex:1;"><div style="font-size:12px;font-weight:700;color:#1e2d40;">'+op.label+'</div>'+
+      '<div style="font-size:10px;color:#9a9a9a;">左端から '+op.x.toLocaleString()+'mm</div></div>'+
+      '<button onclick="event.stopPropagation();faceSelId['+fi+']='+op.id+';delSelOp();" style="font-size:10px;color:#e53535;background:none;border:1px solid rgba(229,53,53,0.3);border-radius:5px;padding:2px 8px;cursor:pointer;">削除</button></div>';
+  });
+  eqs.forEach(function(eq){
+    var sel=faceEqSelId[fi]===eq.id;
+    h+='<div onclick="faceEqSelId['+fi+']='+eq.id+';redraw();_renderDrawerContent();" style="background:#fff;border-radius:8px;border:1.5px solid '+(sel?'var(--ceq)':'rgba(30,45,64,0.1)')+';padding:7px 10px;margin-bottom:4px;display:flex;align-items:center;gap:8px;cursor:pointer;">'+
+      '<div style="font-size:18px;">'+eq.icon+'</div>'+
+      '<div style="flex:1;"><div style="font-size:12px;font-weight:700;color:#1e2d40;">'+eq.label+'</div>'+
+      '<div style="font-size:10px;color:#9a9a9a;">左端から '+eq.x.toLocaleString()+'mm</div></div>'+
+      '<button onclick="event.stopPropagation();faceEqSelId['+fi+']='+eq.id+';delSelEq();" style="font-size:10px;color:#e53535;background:none;border:1px solid rgba(229,53,53,0.3);border-radius:5px;padding:2px 8px;cursor:pointer;">削除</button></div>';
+  });
+  h+='</div>';
+  return h;
+}
+
+function _drawerCeilList(){
+  if(ceilParts.length===0) return '<div class="drawer-list"><div style="font-size:12px;color:#9a9a9a;text-align:center;padding:10px 0;">配置なし</div></div>';
+  var h='<div class="drawer-list">';
+  ceilParts.forEach(function(c){
+    var sel=ceilSelId===c.id;
+    h+='<div onclick="ceilSelId='+c.id+';redrawCeil();_renderDrawerContent();" style="background:#fff;border-radius:8px;border:1.5px solid '+(sel?'var(--ceil)':'rgba(30,45,64,0.1)')+';padding:7px 10px;margin-bottom:4px;display:flex;align-items:center;gap:8px;cursor:pointer;">'+
+      '<div style="font-size:18px;">'+c.icon+'</div>'+
+      '<div style="flex:1;font-size:12px;font-weight:700;color:#1e2d40;">'+c.label+'</div>'+
+      '<button onclick="event.stopPropagation();ceilSelId='+c.id+';delSelCeil();" style="font-size:10px;color:#e53535;background:none;border:1px solid rgba(229,53,53,0.3);border-radius:5px;padding:2px 8px;cursor:pointer;">削除</button></div>';
+  });
+  h+='</div>';
+  return h;
 }
 
 // ══════════════════════════════════════════
@@ -852,7 +1162,7 @@ function renderMain(){
 function renderPlan(){
   var W=roomData.W,D=roomData.D,H=roomData.H,T=roomData.wallT;
   var dimOpen=roomData._dimOpen!==false;
-  var area=document.getElementById('main-area');
+  var area=document.getElementById('main-canvas-area');
   var html='';
 
   // ── 外周作図モード：専用画面 ──
@@ -1006,207 +1316,9 @@ function renderPlan(){
   html+='</div>';
   html+='<canvas id="zumen-cv"></canvas></div>';
 
-  // 平面図モード切替
-  html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:10px;">';
-  [['none','通常'],['column','柱'],['part_v','縦壁'],['part_h','横壁']].forEach(function(m){
-    var active=_planMode===m[0];
-    var s=active
-      ?'height:42px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;'
-      :'height:42px;border:1.5px solid rgba(30,45,64,0.2);border-radius:10px;background:var(--white);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;';
-    html+='<button style="'+s+'" onclick="setPlanMode(\''+m[0]+'\')">'+m[1]+'</button>';
-  });
-  html+='</div>';
-
-  // 外周作図モード操作バー
-  if(_planMode==='outline'){
-    html+='<div style="background:rgba(200,169,110,0.08);border:1px solid rgba(200,169,110,0.35);border-radius:10px;padding:10px 14px;margin-bottom:10px;">';
-    html+='<div style="font-size:12px;font-weight:700;color:#b06a00;margin-bottom:8px;">外周作図モード</div>';
-    if(_outlineVerts.length===0){
-      html+='<div style="font-size:12px;color:var(--text2);">キャンバスをタップして最初の頂点を打ってください</div>';
-    } else {
-      html+='<div style="font-size:12px;color:var(--text2);margin-bottom:8px;">頂点: '+_outlineVerts.length+'点　';
-      if(_outlineVerts.length>=3) html+='最初の頂点付近をタップで閉じる';
-      else html+='続けてタップして頂点を追加';
-      html+='</div>';
-      // 辺の寸法一覧
-      if(_outlineVerts.length>=2){
-        html+='<div style="margin-bottom:8px;">';
-        for(var ei=0;ei<_outlineVerts.length;ei++){
-          var v1=_outlineVerts[ei];
-          var v2=_outlineVerts[(ei+1)%_outlineVerts.length];
-          if(ei===_outlineVerts.length-1&&!_outlineClosed) break;
-          var dx2=v2.x-v1.x, dy2=v2.y-v1.y;
-          var len2=Math.round(Math.sqrt(dx2*dx2+dy2*dy2));
-          var ang2=Math.round(Math.atan2(-dy2,dx2)*180/Math.PI);
-          var isSelEdge=_outlineSelEdge===ei;
-          html+='<div onclick="selectOutlineEdge('+ei+')" style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;margin-bottom:3px;background:'+(isSelEdge?'rgba(200,169,110,0.2)':'rgba(255,255,255,0.7)')+';border:1px solid '+(isSelEdge?'rgba(200,169,110,0.5)':'rgba(30,45,64,0.1)')+';cursor:pointer;">';
-          html+='<span style="font-size:11px;color:var(--text2);flex-shrink:0;">辺'+(ei+1)+'</span>';
-          html+='<span style="font-size:12px;font-weight:700;flex:1;">'+len2+'mm</span>';
-          html+='<span style="font-size:10px;color:var(--text2);">'+ang2+'°</span>';
-          if(isSelEdge){
-            html+='<button onclick="event.stopPropagation();openOutlineDimInput('+ei+')" style="height:26px;padding:0 8px;border:none;border-radius:5px;background:var(--accent);color:var(--navy);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">寸法入力</button>';
-            html+='<button onclick="event.stopPropagation();outlineDimFromBle('+ei+')" style="height:26px;padding:0 8px;border:none;border-radius:5px;background:var(--navy);color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">GLM</button>';
-          }
-          html+='</div>';
-        }
-        html+='</div>';
-      }
-      html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
-      if(_outlineClosed){
-        html+='<button onclick="outlineClear()" style="height:38px;border:1px solid rgba(229,53,53,0.4);border-radius:8px;background:transparent;color:#e53535;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">やり直す</button>';
-        html+='<button onclick="outlineConfirm()" style="height:38px;border:none;border-radius:8px;background:var(--accent);color:var(--navy);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">外周を確定</button>';
-      } else {
-        html+='<button onclick="outlineUndo()" style="height:38px;border:1px solid rgba(30,45,64,0.2);border-radius:8px;background:var(--white);color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit;">← 戻す</button>';
-        html+='<button onclick="outlineClear()" style="height:38px;border:1px solid rgba(229,53,53,0.4);border-radius:8px;background:transparent;color:#e53535;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">クリア</button>';
-      }
-      html+='</div>';
-    }
-    html+='</div>';
-  }
-  if(_planMode==='none'&&_planSelId!==null){
-    var selLabel='';
-    var sp=null;
-    if(_planSelType==='partition'){
-      sp=planPartitions.find(function(p){return p.id===_planSelId;});
-      if(sp) selLabel=(sp.axis==='v'?'縦壁':'横壁')+' ('+sp.len+'mm)';
-    } else if(_planSelType==='column'){
-      var sc2=planColumns.find(function(c){return c.id===_planSelId;});
-      if(sc2) selLabel='柱 '+sc2.w+'×'+sc2.d+'mm';
-    }
-    html+='<div style="background:rgba(200,169,110,0.1);border:1px solid rgba(200,169,110,0.4);border-radius:10px;margin-bottom:12px;overflow:hidden;">';
-    html+='<div style="display:flex;align-items:center;gap:8px;padding:10px 14px;">';
-    html+='<span style="font-size:13px;flex:1;font-weight:600;">'+selLabel+'</span>';
-    html+='<button onclick="deletePlanSel()" style="height:36px;padding:0 14px;border:none;border-radius:8px;background:#e53535;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">削除</button>';
-    html+='</div>';
-
-    // 間仕切りのみ：垂直方向（壁の軸に対して90度）位置移動＋吸着ランプ
-    if(sp){
-      var isV=sp.axis==='v';
-      var T5=sp.t||roomData.wallT;
-      var halfT5=Math.round(T5/2);
-      // 現在のpos（壁の中心）
-      var posVal=sp.pos;
-      var posLabel=isV?'左右位置 (X)':'上下位置 (Y)';
-      var posDisp=posVal+'mm';
-
-      // 吸着チェック：posの左面・右面が既存直交壁の面と一致
-      function isPosSnapped(face){
-        var iW2=(roomData._innerW!=null)?roomData._innerW:roomData.W;
-        var iD2=(roomData._innerD!=null)?roomData._innerD:roomData.D;
-        if(face===0) return true;
-        if(isV && face===iW2) return true;
-        if(!isV && face===iD2) return true;
-        // 直交壁の面と一致するか
-        // 縦壁(v)のposX → 既存横壁(h)の左面・右面（p.start, p.start+p.len）と比較
-        // 横壁(h)のposY → 既存縦壁(v)の上面・下面（p.start, p.start+p.len）と比較
-        var snapped=false;
-        planPartitions.forEach(function(p2){
-          if(p2.id===sp.id) return;
-          if(isV && p2.axis==='h'){
-            if(face===p2.start||face===p2.start+p2.len) snapped=true;
-          }
-          if(!isV && p2.axis==='v'){
-            if(face===p2.start||face===p2.start+p2.len) snapped=true;
-          }
-        });
-        return snapped;
-      }
-      var leftFaceSnap=isPosSnapped(posVal-halfT5);
-      var rightFaceSnap=isPosSnapped(posVal+halfT5);
-      var anySnap=leftFaceSnap||rightFaceSnap;
-
-      var litS='display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:middle;';
-      var bS='height:36px;padding:0 16px;border:1.5px solid rgba(30,45,64,0.2);border-radius:8px;background:var(--white);font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;';
-
-      html+='<div style="padding:0 14px 12px;display:flex;flex-direction:column;gap:8px;">';
-      // ランプ＋位置表示
-      html+='<div style="display:flex;align-items:center;gap:6px;">';
-      html+='<span style="'+litS+'background:'+(anySnap?'#2db55d':'rgba(30,45,64,0.2)')+';'+(anySnap?'box-shadow:0 0 6px #2db55d;':'')+'"></span>';
-      html+='<span style="font-size:12px;color:var(--text2);">'+posLabel+'</span>';
-      html+='<span style="font-size:12px;font-weight:700;margin-left:auto;">'+posDisp+'</span>';
-      html+='</div>';
-      // ＋／－ボタン
-      html+='<div style="display:flex;gap:8px;">';
-      html+='<button style="'+bS+'flex:1;" onclick="movePart(-10)">－ 10mm</button>';
-      html+='<button style="'+bS+'flex:1;" onclick="movePart(10)">＋ 10mm</button>';
-      html+='</div>';
-      html+='</div>';
-    }
-    html+='</div>';
-  }
-
-  // 間仕切り確定バー（縦壁・横壁モード選択中は常時表示）
-  if(_planMode==='part_v'||_planMode==='part_h'){
-    html+='<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(30,45,64,0.06);border-radius:10px;margin-bottom:12px;">';
-    html+='<span style="font-size:13px;flex:1;color:var(--text2);">'+(_partPending?'再ドラッグで調整できます':'平面図をドラッグして引いてください')+'</span>';
-    if(_partPending){
-      html+='<button onclick="cancelPartPending()" style="height:36px;padding:0 12px;border:1.5px solid rgba(30,45,64,0.2);border-radius:8px;background:var(--white);color:var(--text2);font-size:13px;cursor:pointer;font-family:inherit;">取消</button>';
-      html+='<button onclick="confirmPartPending()" style="height:36px;padding:0 14px;border:none;border-radius:8px;background:var(--navy);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">確定</button>';
-    }
-    html+='</div>';
-  }
-
-  // 寸法カード
-  html+='<div class="plan-info-card">';
-  html+='<div class="dc"><div class="dl">幅 W</div><div class="dv" id="dv-W">'+W.toLocaleString()+'mm</div></div>';
-  html+='<div class="dc"><div class="dl">奥行 D</div><div class="dv" id="dv-D">'+D.toLocaleString()+'mm</div></div>';
-  html+='<div class="dc"><div class="dl">高さ H</div><div class="dv" id="dv-H">'+H.toLocaleString()+'mm</div></div>';
-  html+='<div class="dc"><div class="dl">床面積</div><div class="dv" id="dv-A">'+((W/1000)*(D/1000)).toFixed(2)+'㎡</div></div>';
-  html+='</div>';
-
-  // ── 柱セクション ──
-  html+='<div class="sec"><div class="st">柱</div>';
-  html+='<div style="font-size:12px;color:var(--text2);padding:4px 0 10px;">「柱を置く」モードで平面図の壁面・コーナー付近をタップして配置</div>';
-  if(planColumns.length>0){
-    html+='<div>';
-    planColumns.forEach(function(c){
-      var label='';
-      if(c.corner){label={tl:'左上',tr:'右上',bl:'左下',br:'右下'}[c.corner]+'コーナー';}
-      else if(c.face){label=c.face+'面　端から'+c.offset+'mm';}
-      html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;margin-bottom:4px;background:var(--white);border:1.5px solid rgba(30,45,64,0.1);">';
-      html+='<span style="font-size:13px;font-weight:600;">柱 '+c.w+'×'+c.d+'mm</span>';
-      html+='<span style="font-size:11px;color:var(--text2);">'+label+'</span>';
-      html+='<button onclick="removePlanCol('+c.id+')" style="margin-left:auto;font-size:11px;color:var(--text2);background:none;border:1px solid rgba(30,45,64,0.15);border-radius:5px;padding:2px 7px;cursor:pointer;">削除</button>';
-      html+='</div>';
-    });
-    html+='</div>';
-  }
-  html+='</div>';
-
-  // ── 間仕切りセクション ──
-  html+='<div class="sec"><div class="st">間仕切り壁　<span style="font-size:11px;font-weight:400;color:var(--text2);">「間仕切り」モードで平面図をドラッグして追加</span></div>';
-  if(planPartitions.length>0){
-    html+='<div style="margin-bottom:6px;">';
-    planPartitions.forEach(function(p){
-      var label=p.axis==='v'
-        ?'縦壁　X:'+p.pos+'mm　長さ:'+p.len+'mm'
-        :'横壁　Y:'+p.pos+'mm　長さ:'+p.len+'mm';
-      html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;margin-bottom:4px;background:var(--white);border:1.5px solid rgba(30,45,64,0.1);">';
-      html+='<span style="font-size:12px;flex:1;">'+label+'</span>';
-      html+='<button onclick="removePlanPartition('+p.id+')" style="font-size:11px;color:var(--text2);background:none;border:1px solid rgba(30,45,64,0.15);border-radius:5px;padding:2px 7px;cursor:pointer;">削除</button>';
-      html+='</div>';
-    });
-    html+='</div>';
-  } else {
-    html+='<div style="font-size:12px;color:var(--text2);padding:4px 0 8px;">まだ間仕切りがありません</div>';
-  }
-  html+='</div>';
-
-  // 展開図への案内
-  html+='<div style="background:rgba(200,169,110,0.1);border:1px solid rgba(200,169,110,0.4);border-radius:12px;padding:12px 14px;margin-bottom:14px;">';
-  html+='<div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:6px;">展開図へ移動して部品を配置</div>';
-  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">';
-  ['A','B','C','D'].forEach(function(f,i){
-    var cnt=faceOpenings[i].length+faceEquips[i].length;
-    html+='<button onclick="goFace(\''+f+'\')" style="padding:8px;border:1.5px solid rgba(30,45,64,0.15);border-radius:8px;background:var(--white);font-size:12px;font-family:inherit;cursor:pointer;text-align:left;color:var(--text);">';
-    html+='<span style="font-weight:700;color:var(--navy);">'+FACE_LABEL[f]+'</span>';
-    html+=(cnt>0?'　<span style="font-size:10px;background:var(--navy);color:#fff;border-radius:8px;padding:1px 5px;">'+cnt+'件</span>':'');
-    html+='</button>';
-  });
-  html+='</div></div>';
-
-  document.getElementById('main-area').innerHTML=html;
+  document.getElementById('main-canvas-area').innerHTML=html;
   setTimeout(redrawPlan,30);
+  if(_drawerTab) _renderDrawerContent();
 }
 
 // ══════════════════════════════════════════
@@ -3208,79 +3320,14 @@ function drawCompass(ctx, cx, cy, r){
 
 function renderFace(){
   var fi=curFaceIdx;
-  var W=faceW(fi), H=faceH();
   var face=FACES[fi];
   var html='';
-
-  // 寸法表示（roomから自動）
-  html+='<div class="sec">';
-  html+='<div class="st">'+FACE_LABEL[face]+'　寸法（平面図から自動）</div>';
-  html+='<div style="background:var(--white);border-radius:10px;border:1.5px solid rgba(30,45,64,0.12);padding:10px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
-  html+='<div class="dc"><div class="dl">幅</div><div class="dv">'+W.toLocaleString()+'mm</div></div>';
-  html+='<div class="dc"><div class="dl">高さ</div><div class="dv">'+H.toLocaleString()+'mm</div></div>';
-  html+='</div>';
-  html+='<div style="margin-top:6px;font-size:11px;color:var(--text2);">幅・高さを変更する場合は平面図で編集してください</div>';
-  html+='</div>';
-
-  // 開口部アコーディオン
-  html+='<div class="acc-hd" id="acc-op-hd" onclick="toggleAcc(\'op\')">';
-  html+='開口部<span class="acc-badge" id="acc-op-badge">'+getOps().length+'</span>';
-  html+='<span class="acc-arrow">▼</span></div>';
-  html+='<div class="acc-body" id="acc-op-body">';
-  html+='<div class="st" style="margin:6px 0 4px">ドア</div><div class="aor">';
-  html+='<button class="aob" onclick="addOp(\'ドア\',900,2100)">＋ 片開き<br><span style="font-size:10px">900×2100</span></button>';
-  html+='<button class="aob" onclick="addOp(\'親子ドア\',1200,2100)">＋ 親子<br><span style="font-size:10px">1200×2100</span></button>';
-  html+='<button class="aob" onclick="addOp(\'両開きドア\',1800,2100)">＋ 両開き<br><span style="font-size:10px">1800×2100</span></button>';
-  html+='</div><div class="aor" style="margin-bottom:10px">';
-  html+='<button class="aob" onclick="addOp(\'引き違いドア\',1800,2100)">＋ 引き違い<br><span style="font-size:10px">1800×2100</span></button>';
-  html+='<button class="aob" onclick="addOp(\'スライドドア\',900,2100)">＋ スライド<br><span style="font-size:10px">900×2100</span></button>';
-  html+='<div></div></div>';
-  html+='<div class="st" style="margin:6px 0 4px">窓</div><div class="aor">';
-  html+='<button class="aob" onclick="addOp(\'窓（中連）\',1600,1100)">＋ 中連<br><span style="font-size:10px">1600×1100</span></button>';
-  html+='<button class="aob" onclick="addOp(\'窓（掃出）\',1600,2100)">＋ 掃出し<br><span style="font-size:10px">1600×2100</span></button>';
-  html+='<button class="aob" onclick="addOp(\'排煙窓\',1200,600)">＋ 排煙<br><span style="font-size:10px">1200×600</span></button>';
-  html+='</div><div class="aor" style="margin-bottom:10px">';
-  html+='<button class="aob" onclick="addOp(\'縦滑り窓\',600,1100)">＋ 縦滑り<br><span style="font-size:10px">600×1100</span></button>';
-  html+='<button class="aob" onclick="addOp(\'横滑り窓\',1200,600)">＋ 横滑り<br><span style="font-size:10px">1200×600</span></button>';
-  html+='<button class="aob" onclick="addOp(\'出窓\',1800,1100)">＋ 出窓<br><span style="font-size:10px">1800×1100</span></button>';
-  html+='</div><div class="aor" style="margin-bottom:4px">';
-  html+='<button class="aob" onclick="addOp(\'ジャロジー\',900,600)">＋ ジャロジー<br><span style="font-size:10px">900×600</span></button>';
-  html+='<button class="aob" onclick="addOp(\'嵌め殺し\',900,1100)">＋ 嵌め殺し<br><span style="font-size:10px">900×1100</span></button>';
-  html+='<div></div></div></div>';
-
-  // 設備記号アコーディオン
-  html+='<div class="acc-hd" id="acc-eq-hd" onclick="toggleAcc(\'eq\')">';
-  html+='設備記号<span class="acc-badge" id="acc-eq-badge">'+getEquips().length+'</span>';
-  html+='<span class="acc-arrow">▼</span></div>';
-  html+='<div class="acc-body" id="acc-eq-body">';
-  html+='<div class="eq-grid">';
-  EQ_TYPES.forEach(function(eq){
-    html+='<button class="eq-btn" onclick="addEq(\''+eq.id+'\')"><span class="eq-icon">'+eq.icon+'</span>'+eq.label+'</button>';
-  });
-  html+='</div></div>';
-
-  // canvas
   html+='<div class="canvas-wrap" style="position:relative">';
-  html+='<div class="canvas-label">展開図　'+FACE_LABEL[face]+'　（タップで選択）</div>';
   html+='<canvas id="zumen-cv"></canvas>';
   html+='<button id="eq-del-btn" onclick="delSelEq()">✕ 削除</button></div>';
-
-  // 移動パネル
-  html+='<div id="mpanel-wrap"></div>';
-
-  // 配置済みリスト
-  html+='<div id="placed-list"></div>';
-
-  // 寸法カード
-  html+='<div class="dim-card">';
-  html+='<div class="dc"><div class="dl">幅</div><div class="dv">'+W.toLocaleString()+'mm</div></div>';
-  html+='<div class="dc"><div class="dl">高さ</div><div class="dv">'+H.toLocaleString()+'mm</div></div>';
-  html+='<div class="dc"><div class="dl">面積</div><div class="dv">'+((W/1000)*(H/1000)).toFixed(2)+'m²</div></div>';
-  html+='</div>';
-
-  document.getElementById('main-area').innerHTML=html;
-  renderPlacedList();
+  document.getElementById('main-canvas-area').innerHTML=html;
   setTimeout(redraw, 30);
+  if(_drawerTab) _renderDrawerContent();
 }
 
 // ══════════════════════════════════════════
@@ -3288,42 +3335,13 @@ function renderFace(){
 // ══════════════════════════════════════════
 
 function renderCeil(){
-  var W=roomData.W, D=roomData.D;
   var html='';
-
-  // 天井器具アコーディオン
-  html+='<div class="acc-hd" id="acc-ceil-hd" onclick="toggleAcc(\'ceil\')">';
-  html+='天井器具<span class="acc-badge" id="acc-ceil-badge">'+ceilParts.length+'</span>';
-  html+='<span class="acc-arrow">▼</span></div>';
-  html+='<div class="acc-body" id="acc-ceil-body">';
-  html+='<div class="ceil-grid">';
-  CEIL_TYPES.forEach(function(ct){
-    html+='<button class="ceil-btn" onclick="addCeilPart(\''+ct.id+'\')"><span class="eq-icon">'+ct.icon+'</span>'+ct.label+'</button>';
-  });
-  html+='</div></div>';
-
-  // canvas
   html+='<div class="canvas-wrap" style="position:relative">';
-  html+='<div class="canvas-label">天井図　<span style="font-size:10px;color:var(--text2)">W'+W.toLocaleString()+'×D'+D.toLocaleString()+'mm</span></div>';
   html+='<canvas id="zumen-cv"></canvas>';
   html+='<button id="eq-del-btn" onclick="delSelCeil()">✕ 削除</button></div>';
-
-  // 移動パネル
-  html+='<div id="mpanel-wrap"></div>';
-
-  // 配置済みリスト
-  html+='<div id="placed-list"></div>';
-
-  // 寸法カード
-  html+='<div class="dim-card">';
-  html+='<div class="dc"><div class="dl">幅 W</div><div class="dv">'+W.toLocaleString()+'mm</div></div>';
-  html+='<div class="dc"><div class="dl">奥行 D</div><div class="dv">'+D.toLocaleString()+'mm</div></div>';
-  html+='<div class="dc"><div class="dl">床面積</div><div class="dv">'+((W/1000)*(D/1000)).toFixed(2)+'㎡</div></div>';
-  html+='</div>';
-
-  document.getElementById('main-area').innerHTML=html;
-  renderCeilPlacedList();
+  document.getElementById('main-canvas-area').innerHTML=html;
   setTimeout(redrawCeil, 30);
+  if(_drawerTab) _renderDrawerContent();
 }
 
 // ══════════════════════════════════════════
