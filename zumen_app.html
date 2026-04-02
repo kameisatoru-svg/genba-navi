@@ -999,11 +999,56 @@ function _drawerOpening(){
     {label:'排煙窓',w:1200,h:600},{label:'縦滑り窓',w:600,h:1100},{label:'嵌め殺し窓',w:900,h:1100}
   ];
   var h='<div class="drawer-op">';
+
+  // 選択中部品の操作UI
+  var selId=faceSelId[curFaceIdx];
+  var selOp2=selId!==null?getOps().find(function(o){return o.id===selId;}):null;
+  if(selOp2){
+    var W=getW(),H=getH();
+    var d={left:selOp2.x,right:W-selOp2.x-selOp2.w,bottom:selOp2.y,top:H-selOp2.y-selOp2.h};
+    h+='<div style="background:rgba(200,169,110,0.1);border:1.5px solid rgba(200,169,110,0.4);border-radius:10px;padding:10px;margin-bottom:10px;">';
+    h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">';
+    h+='<span style="flex:1;font-size:13px;font-weight:700;color:#b06a00;">'+selOp2.type+'</span>';
+    h+='<button onclick="removeOp('+selId+')" style="height:30px;padding:0 10px;border:1px solid rgba(229,53,53,0.5);border-radius:7px;background:transparent;color:#e53535;font-size:11px;cursor:pointer;font-family:inherit;">削除</button>';
+    h+='</div>';
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">';
+    h+='<div style="background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:6px;text-align:center;">'
+      +'<div style="font-size:9px;color:#5a6a7a;margin-bottom:2px;">幅 mm</div>'
+      +'<input type="number" value="'+selOp2.w+'" inputmode="numeric" style="width:100%;border:none;outline:none;font-size:16px;font-weight:700;color:#1e2d40;text-align:center;background:transparent;font-family:inherit;" oninput="resizeOp(\'w\',parseInt(this.value)||0)"></div>';
+    h+='<div style="background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:6px;text-align:center;">'
+      +'<div style="font-size:9px;color:#5a6a7a;margin-bottom:2px;">高さ mm</div>'
+      +'<input type="number" value="'+selOp2.h+'" inputmode="numeric" style="width:100%;border:none;outline:none;font-size:16px;font-weight:700;color:#1e2d40;text-align:center;background:transparent;font-family:inherit;" oninput="resizeOp(\'h\',parseInt(this.value)||0)"></div>';
+    h+='</div>';
+    h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:6px;">';
+    h+='<div style="text-align:center;"><div style="font-size:9px;color:#5a6a7a;">左端から</div><div style="font-size:12px;font-weight:700;color:#1e2d40;">'+d.left+'mm</div></div>';
+    h+='<div style="text-align:center;"><div style="font-size:9px;color:#5a6a7a;">右端から</div><div style="font-size:12px;font-weight:700;color:#1e2d40;">'+d.right+'mm</div></div>';
+    h+='<div style="text-align:center;"><div style="font-size:9px;color:#5a6a7a;">床から</div><div style="font-size:12px;font-weight:700;color:#1e2d40;">'+d.bottom+'mm</div></div>';
+    h+='<div style="text-align:center;"><div style="font-size:9px;color:#5a6a7a;">天端から</div><div style="font-size:12px;font-weight:700;color:#1e2d40;">'+d.top+'mm</div></div>';
+    h+='</div>';
+    // 移動ステップ
+    var steps=[10,100,300];
+    h+='<div style="display:flex;gap:4px;margin-bottom:6px;">';
+    steps.forEach(function(s){
+      var on=moveStep===s;
+      h+='<button onclick="setMvStep('+s+')" style="flex:1;height:28px;border-radius:6px;border:1px solid rgba(30,45,64,0.15);background:'+(on?'#1e2d40':'#fff')+';color:'+(on?'#fff':'#5a6a7a')+';font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">'+s+'mm</button>';
+    });
+    h+='</div>';
+    // 十字移動
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;width:120px;margin:0 auto;">';
+    h+='<div></div><button onclick="movOp(0,1)" style="height:32px;border-radius:6px;border:1px solid rgba(30,45,64,0.15);background:#fff;cursor:pointer;font-size:14px;">▲</button><div></div>';
+    h+='<button onclick="movOp(-1,0)" style="height:32px;border-radius:6px;border:1px solid rgba(30,45,64,0.15);background:#fff;cursor:pointer;font-size:14px;">◀</button>';
+    h+='<div></div>';
+    h+='<button onclick="movOp(1,0)" style="height:32px;border-radius:6px;border:1px solid rgba(30,45,64,0.15);background:#fff;cursor:pointer;font-size:14px;">▶</button>';
+    h+='<div></div><button onclick="movOp(0,-1)" style="height:32px;border-radius:6px;border:1px solid rgba(30,45,64,0.15);background:#fff;cursor:pointer;font-size:14px;">▼</button><div></div>';
+    h+='</div>';
+    h+='</div>';
+  }
+
   h+='<div style="font-size:10px;font-weight:700;color:#5a6a7a;margin-bottom:6px;">ドア</div>';
   h+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:8px;">';
   doors.forEach(function(o){
     h+='<button data-label="'+o.label+'" data-w="'+o.w+'" data-h="'+o.h+'" '
-      +'onclick="addOp(this.dataset.label,parseInt(this.dataset.w),parseInt(this.dataset.h));_closeDrawer();" '
+      +'onclick="addOp(this.dataset.label,parseInt(this.dataset.w),parseInt(this.dataset.h));" '
       +'style="background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:8px 3px;text-align:center;cursor:pointer;font-family:inherit;">'
       +'<div style="font-size:11px;font-weight:700;color:#1e2d40;">＋ '+o.label+'</div>'
       +'<div style="font-size:9px;color:#9a9a9a;margin-top:2px;">'+o.w+'×'+o.h+'</div></button>';
@@ -1013,7 +1058,7 @@ function _drawerOpening(){
   h+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;">';
   windows.forEach(function(o){
     h+='<button data-label="'+o.label+'" data-w="'+o.w+'" data-h="'+o.h+'" '
-      +'onclick="addOp(this.dataset.label,parseInt(this.dataset.w),parseInt(this.dataset.h));_closeDrawer();" '
+      +'onclick="addOp(this.dataset.label,parseInt(this.dataset.w),parseInt(this.dataset.h));" '
       +'style="background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:8px 3px;text-align:center;cursor:pointer;font-family:inherit;">'
       +'<div style="font-size:11px;font-weight:700;color:#1e2d40;">＋ '+o.label+'</div>'
       +'<div style="font-size:9px;color:#9a9a9a;margin-top:2px;">'+o.w+'×'+o.h+'</div></button>';
@@ -3574,7 +3619,7 @@ function addOp(type,w,h2){
   var id=faceOidSeq[curFaceIdx];
   getOps().push({id:id,type:type,w:w,h:h2,x:x,y:y});
   faceSelId[curFaceIdx]=id;
-  _renderDrawerContent(); redraw();
+  _openDrawerTab('opening'); redraw();
 }
 
 function removeOp(id){
@@ -3599,7 +3644,7 @@ function resizeOp(axis,val){
   var W=getW(),H=getH();
   if(axis==='w') op.w=Math.min(v,W-op.x);
   else op.h=Math.min(v,H-op.y);
-  redraw();
+  _renderDrawerContent(); redraw();
 }
 
 function movOp(dx,dy){
@@ -3608,7 +3653,7 @@ function movOp(dx,dy){
   var W=getW(),H=getH();
   op.x=Math.max(0,Math.min(W-op.w,op.x+dx*moveStep));
   op.y=Math.max(0,Math.min(H-op.h,op.y+dy*moveStep));
-  updMP(); redraw();
+  _renderDrawerContent(); redraw();
 }
 
 function addEq(typeId){
@@ -3645,6 +3690,15 @@ function selEq(id){
   faceSelId[curFaceIdx]=null;
   _renderDrawerContent(); redraw();
 }
+
+function selOp(id){
+  faceSelId[curFaceIdx]=id;
+  faceEqSelId[curFaceIdx]=null;
+  _openDrawerTab('opening');
+  redraw();
+}
+
+function updMP(){ /* 旧mpanel削除済み・不要 */ }
 
 function eqdists(eq){
   var W=getW(),H=getH();
@@ -3989,9 +4043,14 @@ document.addEventListener('click',function(e){
   var r=cv.getBoundingClientRect();
   var px=e.clientX-r.left,py=e.clientY-r.top;
   var W=getW(),H=getH();
-  var mL=48,mR=16,mT=16;
-  var sc=Math.min((cv.offsetWidth-mL-mR)/W,275/H);
-  var ox=mL,oy=mT,hit=null;
+  var wrap=document.getElementById('cv-main-wrap');
+  var CW=wrap?wrap.offsetWidth:(cv.offsetWidth||340);
+  var CH=wrap?wrap.offsetHeight:500;
+  var PAD=60;
+  var sc=Math.min((CW-PAD*2)/W,(CH-PAD*2)/H);
+  var ox=Math.round((CW-W*sc)/2);
+  var oy=Math.round((CH-H*sc)/2);
+  var hit=null;
   for(var i=getOps().length-1;i>=0;i--){
     var o=getOps()[i];
     var rx=ox+o.x*sc,ry2=oy+(H-o.y-o.h)*sc,rw3=o.w*sc,rh2=o.h*sc;
@@ -4074,12 +4133,6 @@ function redraw(){
   // 壁面背景
   ctx.fillStyle='#f9f8f6'; ctx.fillRect(ox,oy,rw,rh);
 
-  // 900mmグリッド
-  ctx.strokeStyle='rgba(30,45,64,0.07)'; ctx.lineWidth=0.8; ctx.setLineDash([3,4]);
-  for(var x=900;x<W;x+=900){var gx=ox+x*sc;ctx.beginPath();ctx.moveTo(gx,oy);ctx.lineTo(gx,oy+rh);ctx.stroke();}
-  for(var y=900;y<H;y+=900){var gy=oy+(H-y)*sc;ctx.beginPath();ctx.moveTo(ox,gy);ctx.lineTo(ox+rw,gy);ctx.stroke();}
-  ctx.setLineDash([]);
-
   // 巾木ゾーン
   var habakiH=60,habakiY=oy+rh-habakiH*sc;
   if(habakiH*sc>4){
@@ -4132,12 +4185,12 @@ function redraw(){
     }
   });
 
-  // 開口部
-  getOps().forEach(function(op){ drawOpening(ctx,op,ox,oy,W,H,sc); });
-
-  // 外形線
+  // 外形線（開口部より先に描く）
   ctx.strokeStyle='rgba(30,45,64,0.85)'; ctx.lineWidth=2;
   ctx.strokeRect(ox,oy,rw,rh);
+
+  // 開口部
+  getOps().forEach(function(op){ drawOpening(ctx,op,ox,oy,W,H,sc); });
 
   // 設備記号
   getEquips().forEach(function(eq){ drawEquip(ctx,eq,ox,oy,W,H,sc); });
@@ -4173,11 +4226,11 @@ function drawOpening(ctx,op,ox,oy,W,H,sc){
   var rx=ox+op.x*sc, ry2=oy+(H-op.y-op.h)*sc, rw3=op.w*sc, rh2=op.h*sc;
   var rcx=rx+rw3/2, rcy=ry2+rh2/2;
   var sel=op.id===faceSelId[curFaceIdx];
-  var col=sel?'#b06a00':'rgba(40,40,40,0.8)';
-  var lw=sel?2:1.5;
+  var col=sel?'#b06a00':'#c8a96e';
+  var lw=sel?2.5:1.5;
   ctx.save();
   ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=lw;
-  ctx.fillStyle='#ffffff'; ctx.fillRect(rx,ry2,rw3,rh2);
+  ctx.fillStyle='#f9f8f6'; ctx.fillRect(rx,ry2,rw3,rh2);
   ctx.strokeStyle=col; ctx.fillStyle=col;
   var t=op.type;
 
