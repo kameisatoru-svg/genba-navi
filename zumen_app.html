@@ -1251,87 +1251,8 @@ function renderPlan(){
     return;
   }
 
-  // 寸法入力（矩形モード時のみ表示）
-  if(_planMode!=='outline'){
-    html+='<div class="sec" style="margin-bottom:8px;">';
-    html+='<div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleDimPanel()">';
-    html+='<div class="st" style="margin-bottom:0;">部屋寸法・壁厚</div>';
-    html+='<div style="font-size:11px;color:var(--text2);display:flex;align-items:center;gap:6px;">';
-    if(!dimOpen) html+='<span>W'+W.toLocaleString()+' D'+D.toLocaleString()+' H'+H.toLocaleString()+' T'+T+'</span>';
-    html+='<span style="font-size:14px;">'+(dimOpen?'▲':'▼')+'</span>';
-    html+='</div></div>';
-    if(dimOpen){
-      html+='<div style="margin-top:8px;">';
-      html+='<div class="r3" style="margin-bottom:8px;">';
-      html+='<div class="iw"><span>幅 W mm</span><input type="number" id="inp-W" value="'+W+'" inputmode="numeric" oninput="onPlanDimChange()"></div>';
-      html+='<div class="iw"><span>奥行 D mm</span><input type="number" id="inp-D" value="'+D+'" inputmode="numeric" oninput="onPlanDimChange()"></div>';
-      html+='<div class="iw"><span>高さ H mm</span><input type="number" id="inp-H" value="'+H+'" inputmode="numeric" oninput="onPlanDimChange()"></div>';
-      html+='</div>';
-      html+='<div class="wt-btns">';
-      [100,120,150].forEach(function(t){
-        html+='<button class="wt-btn'+(T===t?' active':'')+'" onclick="setWallT('+t+')">'+t+'mm</button>';
-      });
-      html+='</div></div>';
-    }
-    html+='</div>';
-  }
-
-  // 外周モード時：壁厚＋高さのみ表示
-  if(_planMode==='outline'){
-    html+='<div class="sec" style="margin-bottom:8px;padding:10px 14px;">';
-    html+='<div style="display:flex;align-items:center;gap:10px;">';
-    html+='<span class="st" style="margin-bottom:0;flex-shrink:0;">壁厚</span>';
-    html+='<div class="wt-btns" style="flex:1;">';
-    [100,120,150].forEach(function(t){
-      html+='<button class="wt-btn'+(T===t?' active':'')+'" onclick="setWallT('+t+')">'+t+'mm</button>';
-    });
-    html+='</div>';
-    html+='<span style="font-size:11px;color:var(--text2);white-space:nowrap;">高さH <input type="number" id="inp-H" value="'+H+'" inputmode="numeric" style="width:60px;height:28px;border:1.5px solid rgba(30,45,64,0.2);border-radius:6px;padding:0 6px;font-size:12px;font-family:inherit;" oninput="onPlanDimChange()"> mm</span>';
-    html+='</div>';
-    html+='</div>';
-  }
-
-  // canvas
-  html+='<div class="canvas-wrap" style="position:relative">';
-  html+='<div class="canvas-label" style="display:flex;align-items:center;gap:6px;">';
-  html+='<span>平面図</span>';
-  if(_projGenba||_projRoom){
-    html+='<span style="font-size:10px;font-weight:700;color:var(--navy);background:rgba(200,169,110,0.2);border:1px solid rgba(200,169,110,0.4);border-radius:5px;padding:1px 7px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(_projGenba?_projGenba:'') +(_projRoom?'｜'+_projRoom:'')+'</span>';
-  }
-  html+='<span style="font-size:10px;color:var(--text2)">W'+W.toLocaleString()+'×D'+D.toLocaleString()+'mm</span>';
-  html+='<span class="canvas-label-badge">壁厚'+T+'mm</span>';
-  // ABCD方位ピクト
-  html+='<span style="margin-left:auto;display:flex;align-items:center;gap:3px;">';
-  html+='<svg width="46" height="46" viewBox="0 0 46 46" style="display:block;flex-shrink:0;">';
-  html+='<rect x="12" y="12" width="22" height="22" fill="none" stroke="rgba(30,45,64,0.5)" stroke-width="1.5"/>';
-  html+='<text x="23" y="9" text-anchor="middle" font-size="8" font-weight="700" font-family="Meiryo,sans-serif" fill="rgba(30,45,64,0.7)">A</text>';
-  html+='<text x="23" y="41" text-anchor="middle" font-size="8" font-weight="700" font-family="Meiryo,sans-serif" fill="rgba(30,45,64,0.7)">C</text>';
-  html+='<text x="40" y="25" text-anchor="middle" font-size="8" font-weight="700" font-family="Meiryo,sans-serif" fill="rgba(30,45,64,0.7)">B</text>';
-  html+='<text x="6" y="25" text-anchor="middle" font-size="8" font-weight="700" font-family="Meiryo,sans-serif" fill="rgba(30,45,64,0.7)">D</text>';
-  html+='</svg>';
-  // 方位コンパス（◀ コンパス ▶ 横並び）
-  var deg=roomData.compassDeg||0;
-  var rad=deg*Math.PI/180;
-  var cx=18,cy=18,r=12;
-  var nx=cx+r*Math.sin(rad),ny=cy-r*Math.cos(rad);
-  var sx2=cx-r*Math.sin(rad),sy2=cy+r*Math.cos(rad);
-  var lx=cx+3.5*Math.cos(rad),ly=cy+3.5*Math.sin(rad);
-  var rx2=cx-3.5*Math.cos(rad),ry2=cy-3.5*Math.sin(rad);
-  var nlx=cx+(r+4)*Math.sin(rad),nly=cy-(r+4)*Math.cos(rad);
-  html+='<button onclick="rotateCompass(-1)" style="width:26px;height:36px;border:1px solid rgba(30,45,64,0.2);border-radius:6px;background:var(--white);font-size:12px;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;flex-shrink:0;">◀</button>';
-  html+='<div style="display:flex;flex-direction:column;align-items:center;gap:1px;flex-shrink:0;">';
-  html+='<svg width="36" height="36" viewBox="0 0 36 36" style="display:block;">';
-  html+='<circle cx="18" cy="18" r="15" fill="rgba(30,45,64,0.06)" stroke="rgba(30,45,64,0.3)" stroke-width="1"/>';
-  html+='<polygon points="'+nx.toFixed(1)+','+ny.toFixed(1)+' '+lx.toFixed(1)+','+ly.toFixed(1)+' '+sx2.toFixed(1)+','+sy2.toFixed(1)+' '+rx2.toFixed(1)+','+ry2.toFixed(1)+'" fill="rgba(30,45,64,0.85)"/>';
-  html+='<polygon points="'+sx2.toFixed(1)+','+sy2.toFixed(1)+' '+lx.toFixed(1)+','+ly.toFixed(1)+' '+nx.toFixed(1)+','+ny.toFixed(1)+' '+rx2.toFixed(1)+','+ry2.toFixed(1)+'" fill="rgba(30,45,64,0.2)"/>';
-  html+='<text x="'+nlx.toFixed(1)+'" y="'+nly.toFixed(1)+'" text-anchor="middle" dominant-baseline="middle" font-size="7" font-weight="700" font-family="Meiryo,sans-serif" fill="rgba(30,45,64,0.9)">N</text>';
-  html+='</svg>';
-  html+='<span style="font-size:9px;color:var(--text2);">'+deg+'°</span>';
-  html+='</div>';
-  html+='<button onclick="rotateCompass(1)" style="width:26px;height:36px;border:1px solid rgba(30,45,64,0.2);border-radius:6px;background:var(--white);font-size:12px;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;flex-shrink:0;">▶</button>';
-  html+='</span>';
-  html+='</div>';
-  html+='<canvas id="zumen-cv"></canvas></div>';
+  // canvas（キャンバスのみ）
+  html+='<div class="canvas-wrap"><canvas id="zumen-cv"></canvas></div>';
 
   _setFormMode(false);
   document.getElementById('main-canvas-area').innerHTML=html;
