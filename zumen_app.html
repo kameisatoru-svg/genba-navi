@@ -5240,12 +5240,23 @@ function _onBleDisconnected(){
 }
 
 function _onBleValue(e){
-  // GLM 50-27CGのデータ形式: バイト列から距離(mm)を取得
   var val=e.target.value;
   var bytes=new Uint8Array(val.buffer);
-  // Bosch GLMプロトコル: 先頭4バイトがリトルエンディアンで距離(0.1mm単位)
-  var raw=(bytes[3]<<24)|(bytes[2]<<16)|(bytes[1]<<8)|bytes[0];
-  var mm=Math.round(raw/10); // 0.1mm→mm
+
+  // MT-Protocol: C0 55ヘッダー確認
+  if(bytes.length<2) return;
+  if(bytes[0]!==0xC0||bytes[1]!==0x55) return;
+
+  // 常時送られてくる確認フレーム（C0 55 xx xx ...）→ ble-dotを緑に光らせる
+  var dot=document.getElementById('ble-dot');
+  if(dot){ dot.style.background='#2db55d'; dot.style.boxShadow='0 0 6px #2db55d'; }
+
+  // 測定値フレーム: bytes[3]=06（有効）、bytes[7-10]=IEEE-754 float LE（メートル）
+  if(bytes.length<11) return;
+  if(bytes[3]!==0x06) return;
+  var view=new DataView(val.buffer);
+  var meters=view.getFloat32(7,true); // リトルエンディアン
+  var mm=Math.round(meters*1000);
   _applyBleValue(mm);
 }
 
