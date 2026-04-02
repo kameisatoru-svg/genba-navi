@@ -430,10 +430,7 @@ canvas{display:block;width:100%;}
 
   <!-- 編集 / 印刷モード -->
   <div class="mode-toggle">
-    <button class="mtb active" id="btn-edit" onclick="setMode('edit')" title="編集">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-    </button>
-    <button class="mtb" id="btn-print" onclick="setMode('print')" title="印刷">
+    <button class="mtb" id="btn-print" onclick="togglePrintMode()" title="印刷モード">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
     </button>
   </div>
@@ -590,11 +587,18 @@ canvas{display:block;width:100%;}
         <span style="font-size:12px;color:var(--text2);">最後の受信値</span>
         <span id="ble-last-val" style="font-size:18px;font-weight:700;margin-left:auto;color:var(--navy);">—</span>
       </div>
-
     </div>
     <div style="padding:0 16px 16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
       <button onclick="bleDisconnect()" style="height:42px;border:1.5px solid rgba(30,45,64,0.2);border-radius:10px;background:transparent;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">切断</button>
       <button onclick="closeBleModal(null)" style="height:42px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">閉じる</button>
+    </div>
+    <!-- デバッグログ欄 -->
+    <div style="padding:0 16px 16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:11px;font-weight:700;color:var(--text2);">デバッグログ</span>
+        <button onclick="document.getElementById('ble-debug').textContent=''" style="height:24px;padding:0 8px;border:1px solid rgba(30,45,64,0.2);border-radius:5px;background:transparent;font-size:10px;cursor:pointer;font-family:inherit;color:var(--text2);">クリア</button>
+      </div>
+      <pre id="ble-debug" style="margin:0;padding:8px;border-radius:8px;background:#0d1b2a;color:#7effa0;font-size:10px;line-height:1.5;min-height:80px;max-height:200px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;font-family:monospace;"></pre>
     </div>
   </div>
 </div>
@@ -763,11 +767,19 @@ function switchView(v){
   renderMain();
 }
 
+function togglePrintMode(){
+  drawMode = (drawMode==='print') ? 'edit' : 'print';
+  var btn=document.getElementById('btn-print');
+  if(btn) btn.className='mtb'+(drawMode==='print'?' active':'');
+  var del=document.getElementById('eq-del-btn'); if(del) del.style.display='none';
+  redraw();
+}
+
 function setMode(m){
   drawMode=m;
-  document.getElementById('btn-edit').className='mtb'+(m==='edit'?' active':'');
-  document.getElementById('btn-print').className='mtb'+(m==='print'?' active':'');
-  var btn=document.getElementById('eq-del-btn'); if(btn) btn.style.display='none';
+  var btn=document.getElementById('btn-print');
+  if(btn) btn.className='mtb'+(m==='print'?' active':'');
+  var del=document.getElementById('eq-del-btn'); if(del) del.style.display='none';
   redraw();
 }
 
@@ -5050,10 +5062,12 @@ function projLoadAddRoom(){
     try{ localStorage.setItem('zumen_lastRoom', JSON.stringify({g:_projGenba,r:rv})); }catch(e){}
     _updateProjLabel();
     projAutoSave();
+    // 新規部屋はフォーム画面（セットアップ選択）から始める
+    _inFormScreen=true;
     curView='plan';
     var sel=document.getElementById('view-select');
     if(sel) sel.value='plan';
-    showWaToast('📂 部屋追加：'+_projGenba+'｜'+rv);
+    showWaToast('部屋追加：'+_projGenba+'｜'+rv);
   }
   closeProjPanel();
   renderMain();
@@ -5078,6 +5092,11 @@ function _resetData(){
   planColumns=[];planColSeq=0;
   planPartitions=[];planPartSeq=0;
   _undoStack=[];_redoStack=[];
+  // 外周モード関連リセット
+  _planMode='none';
+  _outlineVerts=[];_outlineClosed=false;_outlineSelEdge=null;_outlinePreview=null;
+  _outlineDims=[];_outlineAutoCorner=false;_outlineAdjIdx=null;_outlinePhase='input';
+  if(window._outline) window._outline=null;
 }
 
 // ── 内部：データ読込 ──
@@ -5147,15 +5166,18 @@ _updateUndoBtn();
 })();
 window.addEventListener('resize',function(){ setTimeout(redraw,50); });
 var _bleDevice    = null;
-var _bleChar      = null;
+var _bleChars     = []; // 購読中のCharacteristic一覧
 var _bleConnected = false;
-var _bleTarget    = null; // null=未選択（使い捨てワンショット方式）
+var _bleTarget    = 'W'; // 'W'|'D'|'H'|'PL'
 
-// Bosch GLM BLE UUIDs（GLM 50-27CG）
-// Bosch GLM 50-27CG JP版（3601K72U50）実機確認済みUUID
-var BLE_SVC_A   = '02a6c0d0-0451-4000-b000-fb3210111989';
-var BLE_CHAR_A1 = '02a6c0d1-0451-4000-b000-fb3210111989'; // INDICATE/WRITE（測定値）
-var BLE_SVC_B   = '02a6c0f0-0451-4000-b000-fb3210111989';
+// Bosch GLM 50-27CG 確認済みUUID
+var BLE_SVC_A  = '02a6c0d0-0451-4000-b000-fb3210111989'; // サービスA
+var BLE_SVC_B  = '02a6c0f0-0451-4000-b000-fb3210111989'; // サービスB
+// サービスB Characteristics（nRF Connect実機確認済み）
+var BLE_CHAR_F1= '02a6c0f1-0451-4000-b000-fb3210111989'; // NOTIFY,WRITE,WRITE NO RESPONSE ★本命
+var BLE_CHAR_F2= '02a6c0f2-0451-4000-b000-fb3210111989'; // NOTIFY,WRITE,WRITE NO RESPONSE
+var BLE_CHAR_F3= '02a6c0f3-0451-4000-b000-fb3210111989'; // WRITE, WRITE NO RESPONSE
+var BLE_CHAR_F4= '02a6c0f4-0451-4000-b000-fb3210111989'; // NOTIFY, READ
 
 function openBleModal(){
   document.getElementById('ble-modal').classList.remove('hidden');
@@ -5172,6 +5194,10 @@ function setBleTarget(t){
     var b=document.getElementById('bt-'+k);
     if(b) b.className='ble-target'+(k===t?' active':'');
   });
+  // 受信済みの値があれば即座に反映
+  if(window._bleLastMm && window._bleLastMm > 0){
+    _applyBleValue(window._bleLastMm);
+  }
 }
 
 function _updateBleUI(){
@@ -5197,30 +5223,88 @@ function _updateBleUI(){
 
 async function bleConnect(){
   if(!navigator.bluetooth){
-    showWaToast('⚠ このブラウザはWeb Bluetooth非対応です（Chrome推奨）');
+    showWaToast('このブラウザはWeb Bluetooth非対応です（Chrome推奨）');
     return;
   }
   var btn=document.getElementById('ble-connect-btn');
   if(btn){ btn.textContent='スキャン中...'; btn.disabled=true; }
+  _bleLog('--- 接続開始 ---');
   try {
     _bleDevice = await navigator.bluetooth.requestDevice({
       filters:[{namePrefix:'GLM'}],
       optionalServices:[BLE_SVC_A, BLE_SVC_B]
     });
     _bleDevice.addEventListener('gattserverdisconnected', _onBleDisconnected);
-    var server   = await _bleDevice.gatt.connect();
-    var serviceA = await server.getPrimaryService(BLE_SVC_A);
-    _bleChar     = await serviceA.getCharacteristic(BLE_CHAR_A1);
-    // MT-Protocol起動コマンド送信（C0 55 02 01 00 1A）
-    await _bleChar.writeValue(new Uint8Array([0xC0,0x55,0x02,0x01,0x00,0x1A]));
-    await _bleChar.startNotifications();
-    _bleChar.addEventListener('characteristicvaluechanged', _onBleValue);
+    _bleLog('デバイス: '+_bleDevice.name);
+
+    var server = await _bleDevice.gatt.connect();
+    _bleLog('GATT接続OK');
+    _bleChars = [];
+
+    // サービスA（全Char自動検出）
+    try {
+      var svcA = await server.getPrimaryService(BLE_SVC_A);
+      var charsA = await svcA.getCharacteristics();
+      for(var i=0;i<charsA.length;i++){
+        var ch=charsA[i];
+        var props=[];
+        if(ch.properties.notify) props.push('N');
+        if(ch.properties.indicate) props.push('I');
+        if(ch.properties.write) props.push('W');
+        _bleLog('SvcA: '+ch.uuid.slice(-8)+' ['+props.join(',')+']');
+        // WRITE系も含め全部保持
+        _bleChars.push(ch);
+        if(ch.properties.notify||ch.properties.indicate){
+          try{
+            await ch.startNotifications();
+            var lbl='SvcA-'+ch.uuid.slice(-4);
+            ch.addEventListener('characteristicvaluechanged',(function(l){
+              return function(e){ _onBleValue(e,l); };
+            })(lbl));
+            _bleLog('  購読OK: '+lbl);
+          }catch(e2){_bleLog('  購読NG: '+e2.message);}
+        }
+      }
+    } catch(e){ _bleLog('SvcA エラー: '+e.message); }
+
+    // サービスB：F1〜F4全取得、NOTIFY系は購読
+    try {
+      var svcB = await server.getPrimaryService(BLE_SVC_B);
+      var bDefs=[
+        {uuid:BLE_CHAR_F1,label:'CharF1'},
+        {uuid:BLE_CHAR_F2,label:'CharF2'},
+        {uuid:BLE_CHAR_F3,label:'CharF3'},
+        {uuid:BLE_CHAR_F4,label:'CharF4'}
+      ];
+      for(var j=0;j<bDefs.length;j++){
+        var def=bDefs[j];
+        try{
+          var c=await svcB.getCharacteristic(def.uuid);
+          _bleChars.push(c);
+          if(c.properties.notify||c.properties.indicate){
+            await c.startNotifications();
+            c.addEventListener('characteristicvaluechanged',(function(l){
+              return function(e){ _onBleValue(e,l); };
+            })(def.label));
+            _bleLog(def.label+' 購読OK');
+          } else {
+            _bleLog(def.label+' 取得OK(WRITE用)');
+          }
+        }catch(e){ _bleLog(def.label+' エラー: '+e.message); }
+      }
+    } catch(e){ _bleLog('SvcB エラー: '+e.message); }
+
     _bleConnected = true;
     _updateBleUI();
-    showWaToast('✅ GLM接続しました');
+
+    // ロギング開始コマンドを送信（ボタン押下で測定値を通知させる）
+    // C0 55 02 01 00 1A = MT-Protocol logging start
+    await _bleSendLoggingStart();
+
   } catch(e) {
     if(btn){ btn.textContent='接続'; btn.disabled=false; }
     if(e.name!=='NotFoundError') showWaToast('接続失敗: '+e.message);
+    _bleLog('接続失敗: '+e.message);
     _updateBleUI();
   }
 }
@@ -5234,62 +5318,127 @@ function bleDisconnect(){
 
 function _onBleDisconnected(){
   _bleConnected=false;
-  _bleChar=null;
+  _bleChars=[];
   _updateBleUI();
-  showWaToast('🔵 GLM切断しました');
+  showWaToast('GLM切断しました');
 }
 
-function _onBleValue(e){
+// ロギング開始コマンド送信（C0 55 02 01 00 1A）
+// 02a6c0d1（WRITE）に送信→ボタン押下で測定値がINDICATE通知される
+async function _bleSendLoggingStart(){
+  var LOGGING_CMD = new Uint8Array([0xC0, 0x55, 0x02, 0x01, 0x00, 0x1A]);
+  // 02a6c0d1を探す
+  var charD1 = _bleChars.find(function(c){
+    return c.uuid === '02a6c0d1-0451-4000-b000-fb3210111989';
+  });
+  if(!charD1){
+    // CharF3(02a6c0f3)でも試す
+    charD1 = _bleChars.find(function(c){
+      return c.uuid === BLE_CHAR_F3;
+    });
+  }
+  if(!charD1){
+    _bleLog('WRITE用Char未取得→ロギングコマンド送信不可');
+    showWaToast('GLM接続しました（ロギング待機中）');
+    return;
+  }
+  var hex = Array.from(LOGGING_CMD).map(function(b){return b.toString(16).padStart(2,'0');}).join(' ');
+  _bleLog('[送信] ロギング開始: '+hex);
+  try {
+    await charD1.writeValue(LOGGING_CMD);
+    _bleLog('[送信OK] ロギング開始');
+    showWaToast('GLM接続しました。測定ボタンを押してください');
+  } catch(e) {
+    _bleLog('[送信NG] '+e.message+' → writeWithoutResponse試行');
+    try {
+      await charD1.writeValueWithoutResponse(LOGGING_CMD);
+      _bleLog('[送信OK] ロギング開始(NoResp)');
+      showWaToast('GLM接続しました。測定ボタンを押してください');
+    } catch(e2){
+      _bleLog('[送信NG2] '+e2.message);
+      showWaToast('GLM接続しました（コマンド送信失敗）');
+    }
+  }
+}
+
+function _onBleValue(e, charName){
   var val=e.target.value;
   var bytes=new Uint8Array(val.buffer);
+  var hex=Array.from(bytes).map(function(b){return b.toString(16).padStart(2,'0');}).join(' ');
+  _bleLog('[受信:'+charName+']['+bytes.length+'bytes] '+hex);
 
-  // MT-Protocol: C0 55ヘッダー確認
-  if(bytes.length<2) return;
-  if(bytes[0]!==0xC0||bytes[1]!==0x55) return;
+  // C0 11 00 3A = ハートビート → スキップ
+  if(bytes.length===4 && bytes[0]===0xc0 && bytes[1]===0x11){
+    _bleLog('  → ハートビート（スキップ）');
+    return;
+  }
 
-  // 常時送られてくる確認フレーム（C0 55 xx xx ...）→ ble-dotを緑に光らせる
-  var dot=document.getElementById('ble-dot');
-  if(dot){ dot.style.background='#2db55d'; dot.style.boxShadow='0 0 6px #2db55d'; }
+  // MT-Protocol測定値パケット: C0 55 ヘッダー
+  // bytes[7-10]: IEEE-754 float LE (メートル単位)
+  if(bytes.length >= 11 && bytes[0]===0xc0 && bytes[1]===0x55){
+    var statusByte = bytes[3];
+    _bleLog('  → MT-Protocol: status='+statusByte.toString(16));
+    if(statusByte === 0x06 || statusByte === 0x08 || statusByte === 0x0a){
+      // IEEE-754 float LE: bytes[7-10]
+      var buf = new ArrayBuffer(4);
+      var view = new DataView(buf);
+      view.setUint8(0, bytes[7]);
+      view.setUint8(1, bytes[8]);
+      view.setUint8(2, bytes[9]);
+      view.setUint8(3, bytes[10]);
+      var meters = view.getFloat32(0, true); // little endian
+      var mm = Math.round(meters * 1000);
+      _bleLog('  → 測定値: '+meters.toFixed(4)+'m = '+mm+'mm');
+      if(mm > 0 && mm < 50000){
+        _applyBleValue(mm);
+      }
+    } else {
+      _bleLog('  → 無効な測定（status≠06）');
+    }
+    return;
+  }
 
-  // 測定値フレーム: bytes[3]=06（有効）、bytes[7-10]=IEEE-754 float LE（メートル）
-  if(bytes.length<11) return;
-  if(bytes[3]!==0x06) return;
-  var view=new DataView(val.buffer);
-  var meters=view.getFloat32(7,true); // リトルエンディアン
-  var mm=Math.round(meters*1000);
-  _applyBleValue(mm);
+  // 未知のパケット: パターン候補をログ出力
+  if(bytes.length >= 4){
+    var buf2 = new ArrayBuffer(4);
+    var view2 = new DataView(buf2);
+    view2.setUint8(0, bytes[0]);
+    view2.setUint8(1, bytes[1]);
+    view2.setUint8(2, bytes[2]);
+    view2.setUint8(3, bytes[3]);
+    _bleLog('  → 未知パケット（解析待ち）');
+  }
 }
 
+// デバッグログ出力
+function _bleLog(msg){
+  var el=document.getElementById('ble-debug');
+  if(!el) return;
+  var ts=new Date().toTimeString().slice(0,8);
+  el.textContent='['+ts+'] '+msg+'\n'+el.textContent;
+  var lines=el.textContent.split('\n');
+  if(lines.length>60) el.textContent=lines.slice(0,60).join('\n');
+}
 
 function _applyBleValue(mm){
   if(mm<=0||mm>50000) return;
-  window._bleLastMm=mm; // ターゲット不問で最終値として保存（外周作図モード用）
+  window._bleLastMm=mm; // 外周作図モードでも使えるよう保存
   var lastEl=document.getElementById('ble-last-val');
   if(lastEl) lastEl.textContent=mm.toLocaleString()+' mm';
 
-  // 未選択なら値を保存するだけで何も反映しない（ワンショット方式）
-  if(!_bleTarget) return;
-
-  var usedTarget=_bleTarget;
-  _bleTarget=null; // 即リセット：使い捨て
-  ['W','D','H','PL'].forEach(function(k){
-    var b=document.getElementById('bt-'+k);
-    if(b) b.className='ble-target';
-  });
-
-  if(usedTarget==='W'){
+  if(_bleTarget==='W'){
     roomData.W=mm;
     var el=document.getElementById('inp-W');
     if(el) el.value=mm;
-  } else if(usedTarget==='D'){
+  } else if(_bleTarget==='D'){
     roomData.D=mm;
     var el=document.getElementById('inp-D');
     if(el) el.value=mm;
-  } else if(usedTarget==='H'){
+  } else if(_bleTarget==='H'){
     roomData.H=mm;
     var el=document.getElementById('inp-H');
     if(el) el.value=mm;
-  } else if(usedTarget==='PL'){
+  } else if(_bleTarget==='PL'){
     // 間仕切り長さ：選択中の間仕切りに適用
     if(_planSelId!==null&&_planSelType==='partition'){
       var sp=planPartitions.find(function(p){return p.id===_planSelId;});
@@ -5301,7 +5450,7 @@ function _applyBleValue(mm){
   }
   pushHistory();
   renderMain();
-  showWaToast('📏 '+usedTarget+' = '+mm.toLocaleString()+'mm をセットしました');
+  showWaToast('📏 '+_bleTarget+' = '+mm.toLocaleString()+'mm をセットしました');
 }
 
 
