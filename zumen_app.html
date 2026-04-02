@@ -3226,20 +3226,20 @@ function addCeilPart(typeId){
   x=Math.max(0,Math.min(W-cw,x)); y=Math.max(0,Math.min(D-ch,y));
   ceilParts.push({id:ceilSeq,typeId:typeId,label:ct.label,icon:ct.icon,w:cw,h:ch,x:x,y:y});
   ceilSelId=ceilSeq;
-  renderCeilPlacedList(); redrawCeil();
+  _renderDrawerContent(); redrawCeil();
 }
 
 function removeCeilPart(id){
   pushHistory();
   ceilParts=ceilParts.filter(function(c){return c.id!==id;});
-  if(ceilSelId===id){ceilSelId=null; hideMPCeil();}
+  if(ceilSelId===id){ceilSelId=null;}
   var btn=document.getElementById('eq-del-btn'); if(btn) btn.style.display='none';
-  renderCeilPlacedList(); redrawCeil();
+  _renderDrawerContent(); redrawCeil();
 }
 
 function selCeil(id){
   ceilSelId=id;
-  renderCeilPlacedList(); redrawCeil();
+  _renderDrawerContent(); redrawCeil();
 }
 
 function delSelCeil(){
@@ -3284,7 +3284,7 @@ function updMPCeil(){
       +'</div>'
     +'</div>';
   document.getElementById('mpanel-wrap').innerHTML=h;
-  renderCeilPlacedList();
+  _renderDrawerContent();
 }
 
 function movCeil(dx,dy){
@@ -3329,32 +3329,61 @@ function updateCeilDelBtn(){
 
 function redrawCeil(){
   var cv=document.getElementById('zumen-cv'); if(!cv) return;
-  var W=roomData.W, D=roomData.D;
+  var W=roomData.W, D=roomData.D, T=roomData.wallT;
   var wrap=document.getElementById('cv-main-wrap');
   var CW=wrap?wrap.offsetWidth:(cv.offsetWidth||340);
   var CH_avail=wrap?wrap.offsetHeight:500;
   var PAD=30;
-  var mL=PAD,mR=PAD,mT=PAD,mB=PAD;
-  var scW=(CW-mL-mR)/W, scH=(CH_avail-mT-mB)/D;
+  // 壁厚分の余白を確保（平面図と同じロジック）
+  var scW=(CW-PAD*2)/W, scH=(CH_avail-PAD*2)/D;
   var sc=Math.min(scW,scH);
+  var Tpx=T*sc;
+  var needL=Tpx+PAD, needR=Tpx+PAD, needT=Tpx+PAD, needB=Tpx+PAD;
+  var scL=needL>PAD?sc*(PAD/needL):sc, scR=needR>PAD?sc*(PAD/needR):sc;
+  var scT=needT>PAD?sc*(PAD/needT):sc, scB=needB>PAD?sc*(PAD/needB):sc;
+  sc=Math.max(Math.min(sc,scL,scR,scT,scB),0.01);
+  Tpx=T*sc;
   var rw=W*sc, rd=D*sc;
   var CH=CH_avail;
   var ox=Math.round((CW-rw)/2);
   var oy=Math.round((CH-rd)/2);
   var ctx=setupCanvas(cv,CW,CH); ctx.clearRect(0,0,CW,CH);
 
-  // 背景
-  ctx.fillStyle='#f0f4f8'; ctx.fillRect(ox,oy,rw,rd);
+  // 内法パスヘルパー（天井図は矩形固定）
+  function _ceilInnerPath(ctx){
+    ctx.beginPath(); ctx.rect(ox,oy,rw,rd);
+  }
 
-  // グリッド（900mm）
+  // 外壁：内法パスを壁厚×2の太線でストローク
+  ctx.save();
+  ctx.lineJoin='miter'; ctx.miterLimit=10;
+  ctx.lineWidth=Tpx*2;
+  ctx.strokeStyle='rgba(30,45,64,0.7)';
+  _ceilInnerPath(ctx); ctx.stroke();
+  ctx.restore();
+
+  // 内法を白で塗りつぶし
+  ctx.fillStyle='#f0f4f8';
+  _ceilInnerPath(ctx); ctx.fill();
+
+  // グリッド（内法クリップ）
+  ctx.save();
+  _ceilInnerPath(ctx); ctx.clip();
   ctx.strokeStyle='rgba(30,45,64,0.06)'; ctx.lineWidth=0.7; ctx.setLineDash([3,4]);
   for(var x=900;x<W;x+=900){var gx=ox+x*sc;ctx.beginPath();ctx.moveTo(gx,oy);ctx.lineTo(gx,oy+rd);ctx.stroke();}
   for(var d=900;d<D;d+=900){var gd=oy+d*sc;ctx.beginPath();ctx.moveTo(ox,gd);ctx.lineTo(ox+rw,gd);ctx.stroke();}
   ctx.setLineDash([]);
+  ctx.restore();
 
-  // 外形線
-  ctx.strokeStyle='rgba(30,45,64,0.85)'; ctx.lineWidth=2;
-  ctx.strokeRect(ox,oy,rw,rd);
+  // 内法輪郭線（細）
+  ctx.strokeStyle='rgba(30,45,64,0.6)'; ctx.lineWidth=1;
+  _ceilInnerPath(ctx); ctx.stroke();
+  // 外壁外面輪郭線（太）
+  ctx.save();
+  ctx.lineJoin='miter'; ctx.miterLimit=10;
+  ctx.strokeStyle='rgba(30,45,64,0.95)'; ctx.lineWidth=2.5;
+  _ceilInnerPath(ctx); ctx.stroke();
+  ctx.restore();
 
   // 天井器具
   ceilParts.forEach(function(cp){
@@ -3518,8 +3547,6 @@ function redrawCeil(){
   ctx.font='bold 11px Meiryo,sans-serif';
   ctx.fillText(dispDc.toLocaleString()+'mm',0,0); ctx.restore();
 
-  // 方位記号
-  drawCompass(ctx, ox+rw+30, oy, 16);
 }
 
 // ══════════════════════════════════════════
@@ -3547,14 +3574,14 @@ function addOp(type,w,h2){
   var id=faceOidSeq[curFaceIdx];
   getOps().push({id:id,type:type,w:w,h:h2,x:x,y:y});
   faceSelId[curFaceIdx]=id;
-  renderPlacedList(); redraw();
+  _renderDrawerContent(); redraw();
 }
 
 function removeOp(id){
   pushHistory();
   faceOpenings[curFaceIdx]=faceOpenings[curFaceIdx].filter(function(o){return o.id!==id;});
-  if(faceSelId[curFaceIdx]===id){faceSelId[curFaceIdx]=null;hideMP();}
-  renderPlacedList(); redraw();
+  if(faceSelId[curFaceIdx]===id){faceSelId[curFaceIdx]=null;}
+  _renderDrawerContent(); redraw();
 }
 
 function odists(op){
@@ -3602,21 +3629,21 @@ function addEq(typeId){
   getEquips().push({id:id,typeId:typeId,label:eq.label,icon:eq.icon,w:ew,h:eh,x:x,y:y});
   faceEqSelId[curFaceIdx]=id;
   faceSelId[curFaceIdx]=null;
-  renderPlacedList(); redraw();
+  _renderDrawerContent(); redraw();
 }
 
 function removeEq(id){
   pushHistory();
   faceEquips[curFaceIdx]=faceEquips[curFaceIdx].filter(function(e){return e.id!==id;});
-  if(faceEqSelId[curFaceIdx]===id){faceEqSelId[curFaceIdx]=null;hideMPEq();}
+  if(faceEqSelId[curFaceIdx]===id){faceEqSelId[curFaceIdx]=null;}
   var btn=document.getElementById('eq-del-btn'); if(btn) btn.style.display='none';
-  renderPlacedList(); redraw();
+  _renderDrawerContent(); redraw();
 }
 
 function selEq(id){
   faceEqSelId[curFaceIdx]=id;
   faceSelId[curFaceIdx]=null;
-  renderPlacedList(); redraw();
+  _renderDrawerContent(); redraw();
 }
 
 function eqdists(eq){
@@ -3676,7 +3703,7 @@ function updMPEq(){
       +'</div>'
     +'</div>';
   document.getElementById('mpanel-wrap').innerHTML=h;
-  renderPlacedList();
+  _renderDrawerContent();
 }
 
 function movEq(dx,dy){
@@ -3983,7 +4010,7 @@ document.addEventListener('click',function(e){
       faceSelId[curFaceIdx]=null; selEq(eqHit);
     } else {
       faceSelId[curFaceIdx]=null;faceEqSelId[curFaceIdx]=null;
-      hideMP();hideMPEq();renderPlacedList();redraw();
+      _renderDrawerContent();redraw();
     }
   }
 });
@@ -4006,7 +4033,7 @@ document.addEventListener('click',function(e){
     if(px>=erx&&px<=erx+erw&&py>=ery&&py<=ery+erd){hit=cp.id;break;}
   }
   if(hit!==null){selCeil(hit);}
-  else{ceilSelId=null;hideMPCeil();renderCeilPlacedList();redrawCeil();}
+  else{ceilSelId=null;_renderDrawerContent();redrawCeil();}
 });
 
 // ══════════════════════════════════════════
@@ -4033,7 +4060,7 @@ function redraw(){
   var wrap=document.getElementById('cv-main-wrap');
   var CW=wrap?wrap.offsetWidth:(cv.offsetWidth||340);
   var CH_avail=wrap?wrap.offsetHeight:500;
-  var PAD=drawMode==='print'?60:30;
+  var PAD=drawMode==='print'?60:60;
   var mL=PAD,mR=PAD,mT=PAD,mB=PAD;
   var scW=(CW-mL-mR)/W, scH=(CH_avail-mT-mB)/H;
   var sc=Math.min(scW,scH);
