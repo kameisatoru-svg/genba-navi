@@ -71,19 +71,6 @@ body{
 }
 
 /* Undo/Redoオーバーレイ（キャンバス左上） */
-.ur-overlay{
-  position:absolute;top:10px;left:10px;z-index:10;
-  display:flex;gap:5px;
-}
-.ur-overlay-btn{
-  width:42px;height:42px;border-radius:10px;
-  background:rgba(255,255,255,0.92);
-  border:1px solid rgba(30,45,64,0.15);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;
-}
-.ur-overlay-btn:active{background:rgba(255,255,255,0.7);}
-.ur-overlay-btn svg{display:block;}
 
 /* ── ドロワー ── */
 .drawer{
@@ -126,7 +113,6 @@ body{
 .bb-sep{width:1px;height:36px;background:rgba(255,255,255,0.15);flex-shrink:0;margin:0 2px;}
 
 /* ── スクロールエリア（旧・後方互換のため残す） ── */
-.scroll-area{display:none;}
 
 /* 割付・出力ボタン（旧スタイル・後方互換） */
 .btn-do-print{
@@ -153,13 +139,8 @@ body{
 .sec{margin-bottom:16px;}
 
 /* 壁厚ボタン */
-.wt-btns{display:flex;gap:6px;}
-.wt-btn{
-  flex:1;height:36px;border:1.5px solid rgba(30,45,64,0.15);
-  border-radius:8px;background:var(--white);color:var(--text2);
-  font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;
-}
-.wt-btn.active{border-color:var(--accent);background:rgba(200,169,110,0.12);color:var(--navy);}
+
+
 
 /* ── canvas ── */
 .canvas-wrap{
@@ -167,57 +148,17 @@ body{
   position:absolute;inset:0;
   overflow:hidden;
 }
-.canvas-label{
-  font-size:11px;font-weight:700;color:var(--text2);
-  padding:8px 14px;border-bottom:1px solid rgba(30,45,64,0.07);
-  letter-spacing:0.04em;display:flex;align-items:center;justify-content:space-between;
-}
-.canvas-label-badge{
-  font-size:10px;background:var(--navy);color:#fff;
-  border-radius:10px;padding:1px 7px;
-}
 canvas{display:block;width:100%;}
 
 
 #zumen-cv{touch-action:none;}
 
 /* ── 寸法カード ── */
-.dim-card{
-  background:var(--white);border-radius:12px;
-  border:1.5px solid rgba(30,45,64,0.08);padding:12px 14px;
-  display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;
-  margin-bottom:14px;
-}
-.dc{text-align:center;}
-.dl{font-size:10px;color:var(--text2);margin-bottom:2px;}
-.dv{font-size:15px;font-weight:700;color:var(--navy);}
+
 
 /* ── 開口部ボタン群 ── */
-.aor{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;}
-.aob{
-  padding:11px 4px;border:1.5px solid rgba(30,45,64,0.12);
-  border-radius:10px;background:var(--white);color:var(--text2);
-  font-size:12px;cursor:pointer;text-align:center;line-height:1.5;font-family:inherit;
-}
-.aob:active{background:var(--bg);}
 
 /* ── アコーディオン ── */
-.acc-hd{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:10px 14px;background:var(--white);border-radius:12px;
-  border:1.5px solid rgba(30,45,64,0.1);cursor:pointer;margin-bottom:6px;
-  font-size:13px;font-weight:700;color:var(--text);
-  box-shadow:0 1px 3px rgba(30,45,64,0.06);
-}
-.acc-hd:active{background:var(--bg);}
-.acc-hd .acc-arrow{font-size:11px;color:var(--text2);transition:transform 0.2s;}
-.acc-hd.open .acc-arrow{transform:rotate(180deg);}
-.acc-hd .acc-badge{
-  font-size:10px;background:var(--navy);color:#fff;
-  border-radius:10px;padding:1px 7px;margin-left:6px;
-}
-.acc-body{display:none;margin-bottom:10px;}
-.acc-body.open{display:block;}
 
 /* ── 開口リスト ── */
 .oi{
@@ -234,10 +175,6 @@ canvas{display:block;width:100%;}
 }
 
 /* ── コンパクト移動パネル ── */
-.mpanel-compact{border-radius:12px;padding:10px 12px;margin-bottom:10px;}
-.mpanel-compact.cop{background:var(--bop);border:1px solid var(--cop);}
-.mpanel-compact.ceq{background:var(--beq);border:1px solid var(--ceq);}
-.mpanel-compact.cceil{background:var(--bceil);border:1px solid var(--ceil);}
 .mpc-title{font-size:12px;font-weight:700;margin-bottom:8px;}
 .mpc-title.cop{color:var(--top);}
 .mpc-title.ceq{color:var(--teq);}
@@ -269,13 +206,6 @@ canvas{display:block;width:100%;}
 .mps.act-ceil{border-color:var(--ceil);background:var(--bceil);color:var(--tceil);font-weight:700;}
 
 /* ── 設備記号 ── */
-.eq-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;}
-.eq-btn{
-  padding:12px 4px;border:1.5px solid rgba(30,45,64,0.12);
-  border-radius:10px;background:var(--white);color:var(--text2);
-  font-size:11px;cursor:pointer;text-align:center;line-height:1.6;font-family:inherit;
-}
-.eq-btn:active{background:var(--bg);}
 .eq-icon{font-size:18px;display:block;margin-bottom:2px;}
 
 /* 設備リスト */
@@ -304,20 +234,8 @@ canvas{display:block;width:100%;}
 }
 
 /* ── 平面図専用 ── */
-.plan-info-card{
-  background:var(--white);border-radius:12px;border:1.5px solid rgba(30,45,64,0.08);
-  padding:12px 14px;margin-bottom:14px;
-  display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;
-}
 
 /* ── 天井図専用 ── */
-.ceil-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;}
-.ceil-btn{
-  padding:11px 4px;border:1.5px solid rgba(30,45,64,0.12);
-  border-radius:10px;background:var(--white);color:var(--text2);
-  font-size:11px;cursor:pointer;text-align:center;line-height:1.6;font-family:inherit;
-}
-.ceil-btn:active{background:var(--bg);}
 
 /* ── 柱配置ダイアログ ── */
 .col-dialog-overlay{
@@ -622,14 +540,7 @@ canvas{display:block;width:100%;}
       <button onclick="bleDisconnect()" style="height:42px;border:1.5px solid rgba(30,45,64,0.2);border-radius:10px;background:transparent;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">切断</button>
       <button onclick="closeBleModal(null)" style="height:42px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">閉じる</button>
     </div>
-    <!-- デバッグログ欄 -->
-    <div style="padding:0 16px 16px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-        <span style="font-size:11px;font-weight:700;color:var(--text2);">デバッグログ</span>
-        <button onclick="document.getElementById('ble-debug').textContent=''" style="height:24px;padding:0 8px;border:1px solid rgba(30,45,64,0.2);border-radius:5px;background:transparent;font-size:10px;cursor:pointer;font-family:inherit;color:var(--text2);">クリア</button>
-      </div>
-      <pre id="ble-debug" style="margin:0;padding:8px;border-radius:8px;background:#0d1b2a;color:#7effa0;font-size:10px;line-height:1.5;min-height:80px;max-height:200px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;font-family:monospace;"></pre>
-    </div>
+
   </div>
 </div>
 
@@ -796,21 +707,7 @@ function switchView(v){
   renderMain();
 }
 
-function togglePrintMode(){
-  drawMode = (drawMode==='print') ? 'edit' : 'print';
-  var btn=document.getElementById('btn-print');
-  if(btn) btn.className='mtb'+(drawMode==='print'?' active':'');
-  var del=document.getElementById('eq-del-btn'); if(del) del.style.display='none';
-  redraw();
-}
 
-function setMode(m){
-  drawMode=m;
-  var btn=document.getElementById('btn-print');
-  if(btn) btn.className='mtb'+(m==='print'?' active':'');
-  var del=document.getElementById('eq-del-btn'); if(del) del.style.display='none';
-  redraw();
-}
 
 function doPrint(){
   setMode('print');
@@ -876,52 +773,119 @@ function renderMain(){
 function _renderBottomBar(){
   var bar=document.getElementById('bottom-bar');
   if(!bar) return;
-  var h='';
-  if(curView==='plan'){
-    var modes=[['none','通常'],['column','柱'],['part_v','縦壁'],['part_h','横壁']];
-    modes.forEach(function(md){
-      var on=_planMode===md[0];
-      var cls='bb-btn'+(on?' mode-active':'');
-      var stroke=on?'#1e2d40':'rgba(255,255,255,0.7)';
-      h+='<button class="'+cls+'" data-mode="'+md[0]+'" onclick="setPlanMode(this.dataset.mode)">';
-      h+='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="'+stroke+'" stroke-width="2">'+_bbIcon(md[0])+'</svg>';
-      h+='<span class="bb-lbl">'+md[1]+'</span></button>';
-    });
-    h+='<div class="bb-sep"></div>';
-    var tabs=[['dim','寸法'],['list','リスト'],['output','出力']];
-    tabs.forEach(function(tb){
-      var drawerVisible=!document.getElementById('main-drawer').classList.contains('hidden');
-      var on=_drawerTab===tb[0]&&drawerVisible;
-      var cls='bb-btn'+(on?' active':'');
-      var stroke=on?'var(--accent)':'rgba(255,255,255,0.65)';
-      h+='<button class="'+cls+'" data-tab="'+tb[0]+'" onclick="_openDrawerTab(this.dataset.tab)">';
-      h+='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="'+stroke+'" stroke-width="2">'+_bbIcon(tb[0])+'</svg>';
-      h+='<span class="bb-lbl">'+tb[1]+'</span></button>';
-    });
-  } else if(curView==='ceil'){
-    var tabs=[['ceil_add','器具追加'],['list','リスト'],['output','出力']];
-    tabs.forEach(function(tb){
-      var drawerVisible=!document.getElementById('main-drawer').classList.contains('hidden');
-      var on=_drawerTab===tb[0]&&drawerVisible;
-      var cls='bb-btn'+(on?' active':'');
-      var stroke=on?'var(--accent)':'rgba(255,255,255,0.65)';
-      h+='<button class="'+cls+'" data-tab="'+tb[0]+'" onclick="_openDrawerTab(this.dataset.tab)">';
-      h+='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="'+stroke+'" stroke-width="2">'+_bbIcon(tb[0])+'</svg>';
-      h+='<span class="bb-lbl">'+tb[1]+'</span></button>';
-    });
-  } else {
-    var tabs=[['opening','開口部'],['equip','設備'],['list','リスト'],['waritsuke','割付'],['output','出力']];
-    tabs.forEach(function(tb){
-      var drawerVisible=!document.getElementById('main-drawer').classList.contains('hidden');
-      var on=_drawerTab===tb[0]&&drawerVisible;
-      var cls='bb-btn'+(on?' active':'');
-      var stroke=on?'var(--accent)':'rgba(255,255,255,0.65)';
-      h+='<button class="'+cls+'" data-tab="'+tb[0]+'" onclick="_openDrawerTab(this.dataset.tab)">';
-      h+='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="'+stroke+'" stroke-width="2">'+_bbIcon(tb[0])+'</svg>';
-      h+='<span class="bb-lbl">'+tb[1]+'</span></button>';
-    });
+  var currentView=bar.dataset.view||'';
+  if(currentView!==curView){
+    var h='';
+    if(curView==='plan'){
+      // 平面図：「通常」ボタン1つ＋区切り＋タブ
+      h+='<button class="bb-btn" data-mode="none" onclick="_togglePlanModeDrawer()">';
+      h+='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2">'+_bbIcon('none')+'</svg>';
+      h+='<span class="bb-lbl">通常</span></button>';
+      h+='<div class="bb-sep"></div>';
+      var tabs=[['dim','寸法'],['list','リスト'],['output','出力']];
+      tabs.forEach(function(tb){
+        h+='<button class="bb-btn" data-tab="'+tb[0]+'" onclick="_openDrawerTab(this.dataset.tab)">';
+        h+='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="2">'+_bbIcon(tb[0])+'</svg>';
+        h+='<span class="bb-lbl">'+tb[1]+'</span></button>';
+      });
+    } else if(curView==='ceil'){
+      var tabs=[['ceil_add','器具追加'],['list','リスト'],['output','出力']];
+      tabs.forEach(function(tb){
+        h+='<button class="bb-btn" data-tab="'+tb[0]+'" onclick="_openDrawerTab(this.dataset.tab)">';
+        h+='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="2">'+_bbIcon(tb[0])+'</svg>';
+        h+='<span class="bb-lbl">'+tb[1]+'</span></button>';
+      });
+    } else {
+      var tabs=[['opening','開口部'],['equip','設備'],['list','リスト'],['waritsuke','割付'],['output','出力']];
+      tabs.forEach(function(tb){
+        h+='<button class="bb-btn" data-tab="'+tb[0]+'" onclick="_openDrawerTab(this.dataset.tab)">';
+        h+='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="2">'+_bbIcon(tb[0])+'</svg>';
+        h+='<span class="bb-lbl">'+tb[1]+'</span></button>';
+      });
+    }
+    bar.innerHTML=h;
+    bar.dataset.view=curView;
   }
-  bar.innerHTML=h;
+  // classだけ更新
+  var btns=bar.querySelectorAll('.bb-btn');
+  btns.forEach(function(btn){
+    var mode=btn.dataset.mode;
+    var tab=btn.dataset.tab;
+    btn.classList.remove('mode-active','active');
+    var svg=btn.querySelector('svg');
+    if(mode!==undefined){
+      // 通常ボタン：モードドロワーが開いている時に光る
+      var on=_drawerTab==='planmode';
+      if(on){ btn.classList.add('mode-active'); }
+      if(svg) svg.setAttribute('stroke', on?'#1e2d40':'rgba(255,255,255,0.7)');
+    } else if(tab!==undefined){
+      var on=_drawerTab===tab;
+      if(on){ btn.classList.add('active'); }
+      if(svg) svg.setAttribute('stroke', on?'var(--accent)':'rgba(255,255,255,0.65)');
+    }
+  });
+}
+
+// 平面図モード選択ドロワーのトグル
+function _togglePlanModeDrawer(){
+  if(_drawerTab==='planmode'){
+    setPlanMode('none');
+    _closeDrawer();
+    _updatePlanModeHint();
+  } else {
+    _drawerTab='planmode';
+    document.getElementById('main-drawer').classList.remove('hidden');
+    _renderPlanModeDrawer();
+    _renderBottomBar();
+  }
+}
+
+// モード選択ドロワーの中身を描画
+function _renderPlanModeDrawer(){
+  var el=document.getElementById('drawer-content');
+  if(!el) return;
+  var modes=[['none','通常','タップ・ドラッグして操作'],['column','柱','壁面・コーナーをタップ'],['part_v','縦壁','ドラッグで縦間仕切り'],['part_h','横壁','ドラッグで横間仕切り']];
+  var h='<div class="drawer-op" style="padding:8px 14px;">';
+  // 1列4つ横並び
+  h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">';
+  modes.forEach(function(m){
+    var on=_planMode===m[0];
+    var bg=on?'var(--navy)':'#fff';
+    var col=on?'#fff':'#1e2d40';
+    var bc=on?'var(--navy)':'rgba(30,45,64,0.15)';
+    h+='<button data-mode="'+m[0]+'" onclick="setPlanMode(this.dataset.mode);_renderPlanModeDrawer();_renderBottomBar();_updatePlanModeHint();" ';
+    h+='style="height:48px;border:1.5px solid '+bc+';border-radius:10px;background:'+bg+';color:'+col+';font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">';
+    h+=m[1]+'</button>';
+  });
+  h+='</div></div>';
+  el.innerHTML=h;
+  // キャンバス上のヒントを更新
+  _updatePlanModeHint();
+}
+
+// キャンバス上に選択中モードのヒントをオーバーレイ表示
+function _updatePlanModeHint(){
+  var hints={
+    'none':'通常モード：タップで選択・ドラッグで移動',
+    'column':'柱モード：壁面・コーナー付近をタップして配置',
+    'part_v':'縦壁モード：平面図をドラッグして縦方向の間仕切りを引く',
+    'part_h':'横壁モード：平面図をドラッグして横方向の間仕切りを引く'
+  };
+  var wrap=document.getElementById('cv-main-wrap');
+  if(!wrap) return;
+  var existing=document.getElementById('plan-mode-hint');
+  // planmodeドロワーが開いている時だけ表示
+  if(_drawerTab!=='planmode'){
+    if(existing) existing.remove();
+    return;
+  }
+  if(!existing){
+    existing=document.createElement('div');
+    existing.id='plan-mode-hint';
+    existing.style.cssText='position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(30,45,64,0.82);color:#fff;font-size:11px;font-weight:600;padding:6px 14px;border-radius:20px;pointer-events:none;z-index:5;white-space:nowrap;';
+    wrap.appendChild(existing);
+  }
+  existing.textContent=hints[_planMode]||'';
 }
 function _bbIcon(key){
   var icons={
@@ -947,13 +911,15 @@ function _openDrawerTab(tab){
     _closeDrawer(); return;
   }
   _drawerTab=tab;
-  _renderDrawerContent();
+  // ドロワーを先に表示してからボトムバー更新（アクティブ判定のため）
   document.getElementById('main-drawer').classList.remove('hidden');
+  _renderDrawerContent();
   _renderBottomBar();
 }
 function _closeDrawer(){
   document.getElementById('main-drawer').classList.add('hidden');
   _drawerTab='';
+  _renderBottomBar();
 }
 function toggleDrawer(){
   var d=document.getElementById('main-drawer');
@@ -966,7 +932,9 @@ function _renderDrawerContent(){
   var el=document.getElementById('drawer-content');
   if(!el) return;
   var h='';
-  if(_drawerTab==='dim'){
+  if(_drawerTab==='planmode'){
+    _renderPlanModeDrawer(); return;
+  } else if(_drawerTab==='dim'){
     h=_drawerDim();
   } else if(_drawerTab==='list'){
     h=_drawerList();
@@ -1485,6 +1453,7 @@ function setPlanMode(mode){
   _planSelType=null; _planSelId=null;
   if(mode!=='outline'){ _outlineVerts=[]; _outlinePreview=null; _outlineClosed=false; _outlineSelEdge=null; }
   renderPlan();
+  _renderBottomBar();
 }
 
 // ══════════════════════════════════════════
@@ -2810,10 +2779,6 @@ function _snapToOuterWall(val, max, SNAP){
   return val;
 }
 
-function toggleDimPanel(){
-  roomData._dimOpen=roomData._dimOpen===false?true:false;
-  renderPlan();
-}
 
 function rotateCompass(dir){
   roomData.compassDeg=((roomData.compassDeg||0)+dir*15+360)%360;
@@ -2834,23 +2799,6 @@ function setWallT(t){
   renderPlan();
 }
 
-function onPlanDimChange(){
-  var w=parseFloat(document.getElementById('inp-W').value)||0;
-  var d=parseFloat(document.getElementById('inp-D').value)||0;
-  var h=parseFloat(document.getElementById('inp-H').value)||0;
-  if(w>0) roomData.W=w;
-  if(d>0) roomData.D=d;
-  if(h>0) roomData.H=h;
-  var dW=document.getElementById('dv-W');
-  var dD=document.getElementById('dv-D');
-  var dH=document.getElementById('dv-H');
-  var dA=document.getElementById('dv-A');
-  if(dW) dW.textContent=roomData.W.toLocaleString()+'mm';
-  if(dD) dD.textContent=roomData.D.toLocaleString()+'mm';
-  if(dH) dH.textContent=roomData.H.toLocaleString()+'mm';
-  if(dA) dA.textContent=((roomData.W/1000)*(roomData.D/1000)).toFixed(2)+'㎡';
-  redrawPlan();
-}
 
 // ══════════════════════════════════════════
 //  平面図canvas描画
@@ -3316,7 +3264,7 @@ function addCeilPart(typeId){
   x=Math.max(0,Math.min(W-cw,x)); y=Math.max(0,Math.min(D-ch,y));
   ceilParts.push({id:ceilSeq,typeId:typeId,label:ct.label,icon:ct.icon,w:cw,h:ch,x:x,y:y});
   ceilSelId=ceilSeq;
-  renderCeilPlacedList(); showMPCeil(); redrawCeil(); updateCeilBadge();
+  renderCeilPlacedList(); redrawCeil();
 }
 
 function removeCeilPart(id){
@@ -3324,12 +3272,12 @@ function removeCeilPart(id){
   ceilParts=ceilParts.filter(function(c){return c.id!==id;});
   if(ceilSelId===id){ceilSelId=null; hideMPCeil();}
   var btn=document.getElementById('eq-del-btn'); if(btn) btn.style.display='none';
-  renderCeilPlacedList(); redrawCeil(); updateCeilBadge();
+  renderCeilPlacedList(); redrawCeil();
 }
 
 function selCeil(id){
   ceilSelId=id;
-  renderCeilPlacedList(); showMPCeil(); redrawCeil();
+  renderCeilPlacedList(); redrawCeil();
 }
 
 function delSelCeil(){
@@ -3337,34 +3285,8 @@ function delSelCeil(){
   removeCeilPart(ceilSelId);
 }
 
-function updateCeilBadge(){
-  var b=document.getElementById('acc-ceil-badge'); if(b) b.textContent=ceilParts.length;
-}
 
-function renderCeilPlacedList(){
-  var el=document.getElementById('placed-list'); if(!el) return;
-  var h='';
-  ceilParts.forEach(function(c){
-    var s=c.id===ceilSelId;
-    h+='<div class="ei'+(s?' sel-ceil':'')+'" onclick="selCeil('+c.id+')">';
-    h+='<div class="ei-sym">'+c.icon+'</div>';
-    h+='<div class="ei-info"><div class="ei-name">'+c.label+'</div>';
-    h+='<div class="ei-pos">X:'+c.x+'mm　Y:'+c.y+'mm</div></div>';
-    h+='<button class="db-eq" onclick="event.stopPropagation();removeCeilPart('+c.id+')">削除</button>';
-    h+='</div>';
-  });
-  el.innerHTML=h;
-}
 
-function showMPCeil(){
-  var w=document.getElementById('mpanel-wrap'); if(!w) return;
-  updMPCeil(); w.style.display='block';
-  updateCeilDelBtn();
-}
-function hideMPCeil(){
-  var w=document.getElementById('mpanel-wrap'); if(w){w.innerHTML='';w.style.display='none';}
-  var btn=document.getElementById('eq-del-btn'); if(btn) btn.style.display='none';
-}
 
 function updMPCeil(){
   var cp=ceilParts.find(function(c){return c.id===ceilSelId;}); if(!cp) return;
@@ -3419,7 +3341,7 @@ function resizeCeil(axis,val){
   var v=parseInt(val)||0; if(v<10) return;
   if(axis==='w') cp.w=Math.min(v,roomData.W-cp.x);
   else cp.h=Math.min(v,roomData.D-cp.y);
-  updateCeilDelBtn(); redrawCeil(); renderCeilPlacedList();
+  updateCeilDelBtn(); redrawCeil();
 }
 
 function updateCeilDelBtn(){
@@ -3647,44 +3569,8 @@ function getH(){ return faceH(); }
 function getOps(){ return faceOpenings[curFaceIdx]; }
 function getEquips(){ return faceEquips[curFaceIdx]; }
 
-function renderPlacedList(){
-  var el=document.getElementById('placed-list'); if(!el) return;
-  var h='';
-  getOps().forEach(function(op){
-    var s=op.id===faceSelId[curFaceIdx], d=odists(op);
-    h+='<div class="oi'+(s?' sel-op':'')+'" onclick="selOp('+op.id+')">';
-    h+='<button class="db" onclick="event.stopPropagation();removeOp('+op.id+')">削除</button>';
-    h+='<div class="on">'+op.type+'　'+op.w+'×'+op.h+'mm</div>';
-    h+='<div class="op-dist">左:'+op.x+'mm　右:'+d.right+'mm　床:'+d.bottom+'mm　天端:'+d.top+'mm</div>';
-    h+='</div>';
-  });
-  getEquips().forEach(function(eq){
-    var s=eq.id===faceEqSelId[curFaceIdx];
-    h+='<div class="ei'+(s?' sel-eq':'')+'" onclick="selEq('+eq.id+')">';
-    h+='<div class="ei-sym">'+eq.icon+'</div>';
-    h+='<div class="ei-info"><div class="ei-name">'+eq.label+'</div>';
-    h+='<div class="ei-pos">左:'+Math.round(eq.x+eq.w/2)+'mm　床CL:'+Math.round(eq.y+eq.h/2)+'mm</div></div>';
-    h+='<button class="db-eq" onclick="event.stopPropagation();removeEq('+eq.id+')">削除</button>';
-    h+='</div>';
-  });
-  el.innerHTML=h;
-}
 
-function toggleAcc(key){
-  var hd=document.getElementById('acc-'+key+'-hd');
-  var bd=document.getElementById('acc-'+key+'-body');
-  if(!hd||!bd) return;
-  var isOpen=bd.classList.contains('open');
-  if(isOpen){bd.classList.remove('open');hd.classList.remove('open');}
-  else{bd.classList.add('open');hd.classList.add('open');}
-}
 
-function updateAccBadge(){
-  var ob=document.getElementById('acc-op-badge');
-  var eb=document.getElementById('acc-eq-badge');
-  if(ob) ob.textContent=getOps().length;
-  if(eb) eb.textContent=getEquips().length;
-}
 
 function addOp(type,w,h2){
   pushHistory();
@@ -3699,14 +3585,14 @@ function addOp(type,w,h2){
   var id=faceOidSeq[curFaceIdx];
   getOps().push({id:id,type:type,w:w,h:h2,x:x,y:y});
   faceSelId[curFaceIdx]=id;
-  renderPlacedList(); redraw(); showMP(); updateAccBadge();
+  renderPlacedList(); redraw();
 }
 
 function removeOp(id){
   pushHistory();
   faceOpenings[curFaceIdx]=faceOpenings[curFaceIdx].filter(function(o){return o.id!==id;});
   if(faceSelId[curFaceIdx]===id){faceSelId[curFaceIdx]=null;hideMP();}
-  renderPlacedList(); redraw(); updateAccBadge();
+  renderPlacedList(); redraw();
 }
 
 function odists(op){
@@ -3714,51 +3600,6 @@ function odists(op){
   return{left:op.x,right:W-op.x-op.w,bottom:op.y,top:H-op.y-op.h};
 }
 
-function selOp(id){faceSelId[curFaceIdx]=id;renderPlacedList();showMP();}
-
-function showMP(){
-  var w=document.getElementById('mpanel-wrap'); if(!w) return;
-  updMP(); w.style.display='block';
-  var cv=document.getElementById('zumen-cv');
-  if(cv) setTimeout(function(){cv.scrollIntoView({behavior:'smooth',block:'nearest'});},50);
-}
-function hideMP(){var w=document.getElementById('mpanel-wrap');if(w) w.style.display='none';}
-
-function updMP(){
-  var op=getOps().find(function(o){return o.id===faceSelId[curFaceIdx];}); if(!op) return;
-  var d=odists(op);
-  var steps=[10,100,300].map(function(s){
-    return '<button class="mps'+(moveStep===s?' act-op':'')+'" onclick="setMvStep('+s+')">'+s+'mm</button>';
-  }).join('');
-  var h=''
-    +'<div class="mpanel-compact cop">'
-      +'<div class="mpc-title cop">'+op.type+'</div>'
-      +'<div class="mpc-body">'
-        +'<div class="mpc-pos">'
-          +'<div class="mpc-cell"><div class="mpc-lbl">左端から</div><div class="mpc-val cop">'+op.x+'mm</div></div>'
-          +'<div class="mpc-cell"><div class="mpc-lbl">右端から</div><div class="mpc-val cop">'+d.right+'mm</div></div>'
-          +'<div class="mpc-cell"><div class="mpc-lbl">床から</div><div class="mpc-val cop">'+d.bottom+'mm</div></div>'
-          +'<div class="mpc-cell"><div class="mpc-lbl">天端から</div><div class="mpc-val cop">'+d.top+'mm</div></div>'
-        +'</div>'
-        +'<div class="mpc-ctrl">'
-          +'<div class="mpc-dpad">'
-            +'<div></div><button class="mpb" onclick="movOp(0,1)">▲</button><div></div>'
-            +'<button class="mpb" onclick="movOp(-1,0)">◀</button><div style="width:36px"></div><button class="mpb" onclick="movOp(1,0)">▶</button>'
-            +'<div></div><button class="mpb" onclick="movOp(0,-1)">▼</button><div></div>'
-          +'</div>'
-          +'<div class="mpc-steps">'+steps+'</div>'
-        +'</div>'
-      +'</div>'
-      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">'
-        +'<div class="mpc-cell"><div class="mpc-lbl">幅 mm</div>'
-        +'<input type="number" id="op-w-inp" value="'+op.w+'" inputmode="numeric" style="width:100%;height:32px;border:1.5px solid rgba(176,106,0,0.4);border-radius:6px;padding:0 6px;font-size:13px;font-family:inherit;color:var(--top);text-align:center;background:#fff;" oninput="resizeOp(&apos;w&apos;,this.value)"></div>'
-        +'<div class="mpc-cell"><div class="mpc-lbl">高さ mm</div>'
-        +'<input type="number" id="op-h-inp" value="'+op.h+'" inputmode="numeric" style="width:100%;height:32px;border:1.5px solid rgba(176,106,0,0.4);border-radius:6px;padding:0 6px;font-size:13px;font-family:inherit;color:var(--top);text-align:center;background:#fff;" oninput="resizeOp(&apos;h&apos;,this.value)"></div>'
-      +'</div>'
-    +'</div>';
-  document.getElementById('mpanel-wrap').innerHTML=h;
-  renderPlacedList();
-}
 
 function setMvStep(s){moveStep=s; if(curView==='ceil') updMPCeil(); else updMP();}
 
@@ -3769,7 +3610,7 @@ function resizeOp(axis,val){
   var W=getW(),H=getH();
   if(axis==='w') op.w=Math.min(v,W-op.x);
   else op.h=Math.min(v,H-op.y);
-  redraw(); renderPlacedList(); updateAccBadge();
+  redraw();
 }
 
 function movOp(dx,dy){
@@ -3799,7 +3640,7 @@ function addEq(typeId){
   getEquips().push({id:id,typeId:typeId,label:eq.label,icon:eq.icon,w:ew,h:eh,x:x,y:y});
   faceEqSelId[curFaceIdx]=id;
   faceSelId[curFaceIdx]=null;
-  renderPlacedList(); showMPEq(); redraw(); updateAccBadge();
+  renderPlacedList(); redraw();
 }
 
 function removeEq(id){
@@ -3807,13 +3648,13 @@ function removeEq(id){
   faceEquips[curFaceIdx]=faceEquips[curFaceIdx].filter(function(e){return e.id!==id;});
   if(faceEqSelId[curFaceIdx]===id){faceEqSelId[curFaceIdx]=null;hideMPEq();}
   var btn=document.getElementById('eq-del-btn'); if(btn) btn.style.display='none';
-  renderPlacedList(); redraw(); updateAccBadge();
+  renderPlacedList(); redraw();
 }
 
 function selEq(id){
   faceEqSelId[curFaceIdx]=id;
   faceSelId[curFaceIdx]=null;
-  renderPlacedList(); showMPEq(); redraw(); updateAccBadge();
+  renderPlacedList(); redraw();
 }
 
 function eqdists(eq){
@@ -3821,17 +3662,6 @@ function eqdists(eq){
   return{left:eq.x,right:W-eq.x-eq.w,bottom:eq.y,top:H-eq.y-eq.h};
 }
 
-function showMPEq(){
-  var w=document.getElementById('mpanel-wrap'); if(!w) return;
-  updMPEq(); w.style.display='block';
-  var cv=document.getElementById('zumen-cv');
-  if(cv) setTimeout(function(){cv.scrollIntoView({behavior:'smooth',block:'nearest'});},50);
-  updateDelBtn();
-}
-function hideMPEq(){
-  var w=document.getElementById('mpanel-wrap'); if(w){w.innerHTML='';w.style.display='none';}
-  var btn=document.getElementById('eq-del-btn'); if(btn) btn.style.display='none';
-}
 function delSelEq(){var id=faceEqSelId[curFaceIdx]; if(id===null) return; removeEq(id);}
 
 function updateDelBtn(){
@@ -3904,7 +3734,7 @@ function resizeEq(axis,val){
   var W=getW(),H=getH();
   if(axis==='w') eq.w=Math.min(v,W-eq.x);
   else eq.h=Math.min(v,H-eq.y);
-  updateDelBtn(); redraw(); renderPlacedList();
+  updateDelBtn(); redraw();
 }
 
 // canvasドラッグ（平面図）間仕切り追加
@@ -5261,17 +5091,14 @@ async function bleConnect(){
   }
   var btn=document.getElementById('ble-connect-btn');
   if(btn){ btn.textContent='スキャン中...'; btn.disabled=true; }
-  _bleLog('--- 接続開始 ---');
   try {
     _bleDevice = await navigator.bluetooth.requestDevice({
       filters:[{namePrefix:'GLM'}],
       optionalServices:[BLE_SVC_A, BLE_SVC_B]
     });
     _bleDevice.addEventListener('gattserverdisconnected', _onBleDisconnected);
-    _bleLog('デバイス: '+_bleDevice.name);
 
     var server = await _bleDevice.gatt.connect();
-    _bleLog('GATT接続OK');
     _bleChars = [];
 
     // サービスA（全Char自動検出）
@@ -5284,7 +5111,6 @@ async function bleConnect(){
         if(ch.properties.notify) props.push('N');
         if(ch.properties.indicate) props.push('I');
         if(ch.properties.write) props.push('W');
-        _bleLog('SvcA: '+ch.uuid.slice(-8)+' ['+props.join(',')+']');
         // WRITE系も含め全部保持
         _bleChars.push(ch);
         if(ch.properties.notify||ch.properties.indicate){
@@ -5294,11 +5120,12 @@ async function bleConnect(){
             ch.addEventListener('characteristicvaluechanged',(function(l){
               return function(e){ _onBleValue(e,l); };
             })(lbl));
-            _bleLog('  購読OK: '+lbl);
-          }catch(e2){_bleLog('  購読NG: '+e2.message);}
+          }catch(e2){
+}
         }
       }
-    } catch(e){ _bleLog('SvcA エラー: '+e.message); }
+    } catch(e){
+ }
 
     // サービスB：F1〜F4全取得、NOTIFY系は購読
     try {
@@ -5319,13 +5146,13 @@ async function bleConnect(){
             c.addEventListener('characteristicvaluechanged',(function(l){
               return function(e){ _onBleValue(e,l); };
             })(def.label));
-            _bleLog(def.label+' 購読OK');
           } else {
-            _bleLog(def.label+' 取得OK(WRITE用)');
           }
-        }catch(e){ _bleLog(def.label+' エラー: '+e.message); }
+        }catch(e){
+ }
       }
-    } catch(e){ _bleLog('SvcB エラー: '+e.message); }
+    } catch(e){
+ }
 
     _bleConnected = true;
     _updateBleUI();
@@ -5337,7 +5164,6 @@ async function bleConnect(){
   } catch(e) {
     if(btn){ btn.textContent='接続'; btn.disabled=false; }
     if(e.name!=='NotFoundError') showWaToast('接続失敗: '+e.message);
-    _bleLog('接続失敗: '+e.message);
     _updateBleUI();
   }
 }
@@ -5371,24 +5197,18 @@ async function _bleSendLoggingStart(){
     });
   }
   if(!charD1){
-    _bleLog('WRITE用Char未取得→ロギングコマンド送信不可');
     showWaToast('GLM接続しました（ロギング待機中）');
     return;
   }
   var hex = Array.from(LOGGING_CMD).map(function(b){return b.toString(16).padStart(2,'0');}).join(' ');
-  _bleLog('[送信] ロギング開始: '+hex);
   try {
     await charD1.writeValue(LOGGING_CMD);
-    _bleLog('[送信OK] ロギング開始');
     showWaToast('GLM接続しました。測定ボタンを押してください');
   } catch(e) {
-    _bleLog('[送信NG] '+e.message+' → writeWithoutResponse試行');
     try {
       await charD1.writeValueWithoutResponse(LOGGING_CMD);
-      _bleLog('[送信OK] ロギング開始(NoResp)');
       showWaToast('GLM接続しました。測定ボタンを押してください');
     } catch(e2){
-      _bleLog('[送信NG2] '+e2.message);
       showWaToast('GLM接続しました（コマンド送信失敗）');
     }
   }
@@ -5398,11 +5218,9 @@ function _onBleValue(e, charName){
   var val=e.target.value;
   var bytes=new Uint8Array(val.buffer);
   var hex=Array.from(bytes).map(function(b){return b.toString(16).padStart(2,'0');}).join(' ');
-  _bleLog('[受信:'+charName+']['+bytes.length+'bytes] '+hex);
 
   // C0 11 00 3A = ハートビート → スキップ
   if(bytes.length===4 && bytes[0]===0xc0 && bytes[1]===0x11){
-    _bleLog('  → ハートビート（スキップ）');
     return;
   }
 
@@ -5410,7 +5228,6 @@ function _onBleValue(e, charName){
   // bytes[7-10]: IEEE-754 float LE (メートル単位)
   if(bytes.length >= 11 && bytes[0]===0xc0 && bytes[1]===0x55){
     var statusByte = bytes[3];
-    _bleLog('  → MT-Protocol: status='+statusByte.toString(16));
     if(statusByte === 0x06 || statusByte === 0x08 || statusByte === 0x0a){
       // IEEE-754 float LE: bytes[7-10]
       var buf = new ArrayBuffer(4);
@@ -5421,12 +5238,10 @@ function _onBleValue(e, charName){
       view.setUint8(3, bytes[10]);
       var meters = view.getFloat32(0, true); // little endian
       var mm = Math.round(meters * 1000);
-      _bleLog('  → 測定値: '+meters.toFixed(4)+'m = '+mm+'mm');
       if(mm > 0 && mm < 50000){
         _applyBleValue(mm);
       }
     } else {
-      _bleLog('  → 無効な測定（status≠06）');
     }
     return;
   }
@@ -5439,19 +5254,9 @@ function _onBleValue(e, charName){
     view2.setUint8(1, bytes[1]);
     view2.setUint8(2, bytes[2]);
     view2.setUint8(3, bytes[3]);
-    _bleLog('  → 未知パケット（解析待ち）');
   }
 }
 
-// デバッグログ出力
-function _bleLog(msg){
-  var el=document.getElementById('ble-debug');
-  if(!el) return;
-  var ts=new Date().toTimeString().slice(0,8);
-  el.textContent='['+ts+'] '+msg+'\n'+el.textContent;
-  var lines=el.textContent.split('\n');
-  if(lines.length>60) el.textContent=lines.slice(0,60).join('\n');
-}
 
 function _applyBleValue(mm){
   if(mm<=0||mm>50000) return;
