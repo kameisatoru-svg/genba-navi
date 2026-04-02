@@ -58,8 +58,16 @@ body{
 
 /* キャンバスエリア（ヘッダーとボトムバーの間を100%使用） */
 .cv-main-wrap{
-  flex:1;position:relative;overflow-y:auto;background:var(--bg);
-  -webkit-overflow-scrolling:touch;
+  flex:1;position:relative;overflow:hidden;background:var(--bg);
+}
+#main-canvas-area{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+}
+#main-canvas-area.form-mode{
+  position:relative;inset:auto;
+  overflow-y:auto;
+  height:100%;
 }
 
 /* Undo/Redoオーバーレイ（キャンバス左上） */
@@ -156,8 +164,7 @@ body{
 /* ── canvas ── */
 .canvas-wrap{
   background:var(--white);
-  position:relative;
-  width:100%;height:100%;
+  position:absolute;inset:0;
   overflow:hidden;
 }
 .canvas-label{
@@ -448,11 +455,20 @@ canvas{display:block;width:100%;}
       <option value="ceil">天井図</option>
     </select>
   </div>
-  <!-- 現場名（タップでプロジェクトパネル） -->
-  <button id="proj-btn" onclick="toggleProjPanel()" style="flex:1;min-width:0;height:38px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:10px;color:var(--white);font-size:11px;font-family:inherit;cursor:pointer;padding:0 10px;display:flex;align-items:center;gap:4px;overflow:hidden;">
+  <!-- 現場名（タップでプロジェクトパネル）：縮小版 -->
+  <button id="proj-btn" onclick="toggleProjPanel()" style="flex:1;min-width:0;max-width:160px;height:38px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:10px;color:var(--white);font-size:11px;font-family:inherit;cursor:pointer;padding:0 8px;display:flex;align-items:center;gap:3px;overflow:hidden;">
     <span id="proj-label" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-align:left;">未保存</span>
     <span id="proj-arrow" style="font-size:9px;opacity:0.7;flex-shrink:0;">▼</span>
   </button>
+  <!-- Undo/Redo（現場名とGLMの間） -->
+  <div style="display:flex;gap:3px;flex-shrink:0;">
+    <button id="btn-undo" onclick="doUndo()" title="元に戻す" style="width:38px;height:38px;border:1px solid rgba(255,255,255,0.2);border-radius:9px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M3 13C5 8 9.5 5 15 5a9 9 0 0 1 9 9 9 9 0 0 1-9 9c-3.5 0-6.5-1.5-8.5-4"/></svg>
+    </button>
+    <button id="btn-redo" onclick="doRedo()" title="やり直す" style="width:38px;height:38px;border:1px solid rgba(255,255,255,0.2);border-radius:9px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M21 13c-2 5-6.5 8-12 8a9 9 0 0 1-9-9 9 9 0 0 1 9-9c3.5 0 6.5 1.5 8.5 4"/></svg>
+    </button>
+  </div>
   <!-- GLM -->
   <button id="ble-btn" onclick="openBleModal()" style="width:52px;height:38px;border:1px solid rgba(255,255,255,0.2);border-radius:10px;background:rgba(255,255,255,0.08);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;flex-shrink:0;">
     <svg id="ble-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -468,15 +484,6 @@ canvas{display:block;width:100%;}
 
 <!-- キャンバスメインエリア -->
 <div class="cv-main-wrap" id="cv-main-wrap">
-  <!-- Undo/Redoオーバーレイ -->
-  <div class="ur-overlay">
-    <button class="ur-overlay-btn" id="btn-undo" onclick="doUndo()" title="元に戻す">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1e2d40" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M3 13C5 8 9.5 5 15 5a9 9 0 0 1 9 9 9 9 0 0 1-9 9c-3.5 0-6.5-1.5-8.5-4"/></svg>
-    </button>
-    <button class="ur-overlay-btn" id="btn-redo" onclick="doRedo()" title="やり直す">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1e2d40" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M21 13c-2 5-6.5 8-12 8a9 9 0 0 1-9-9 9 9 0 0 1 9-9c3.5 0 6.5 1.5 8.5 4"/></svg>
-    </button>
-  </div>
   <!-- キャンバス（JSで動的に挿入） -->
   <div id="main-canvas-area"></div>
 </div>
@@ -1159,6 +1166,13 @@ function _drawerCeilList(){
 //  平面図パネル
 // ══════════════════════════════════════════
 
+function _setFormMode(on){
+  var a=document.getElementById('main-canvas-area');
+  if(!a) return;
+  if(on){ a.classList.add('form-mode'); }
+  else  { a.classList.remove('form-mode'); }
+}
+
 function renderPlan(){
   var W=roomData.W,D=roomData.D,H=roomData.H,T=roomData.wallT;
   var dimOpen=roomData._dimOpen!==false;
@@ -1185,6 +1199,7 @@ function renderPlan(){
       html+='</div>';
       html+='<button onclick="setupProjAndStart()" style="width:100%;height:48px;border:none;border-radius:12px;background:var(--navy);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">次へ →</button>';
       html+='</div>';
+      _setFormMode(true);
       if(area) area.innerHTML=html;
       setTimeout(function(){ var el=document.getElementById('setup-genba'); if(el) el.focus(); },100);
       return;
@@ -1206,6 +1221,7 @@ function renderPlan(){
     html+='<div style="font-size:11px;color:var(--text2);margin-top:4px;">タップで頂点を作図</div>';
     html+='</button>';
     html+='</div></div>';
+    _setFormMode(true);
     if(area) area.innerHTML=html;
     return;
   }
@@ -1230,6 +1246,7 @@ function renderPlan(){
     html+='</div>';
     html+='<button onclick="startOutlineMode()" style="width:100%;height:40px;margin-top:8px;border:2px solid rgba(200,169,110,0.4);border-radius:10px;background:rgba(200,169,110,0.06);color:#b06a00;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">✏ 外周を描くモードへ</button>';
     html+='</div>';
+    _setFormMode(true);
     if(area) area.innerHTML=html;
     return;
   }
@@ -1316,6 +1333,7 @@ function renderPlan(){
   html+='</div>';
   html+='<canvas id="zumen-cv"></canvas></div>';
 
+  _setFormMode(false);
   document.getElementById('main-canvas-area').innerHTML=html;
   setTimeout(redrawPlan,30);
   if(_drawerTab) _renderDrawerContent();
@@ -1553,6 +1571,7 @@ function setPlanMode(mode){
 // ══════════════════════════════════════════
 
 function _renderOutlineScreen(area, T, H){
+  _setFormMode(true);
   var html='';
 
   // フェーズ1：スケッチ中（editでもclosedでもない）
@@ -2912,7 +2931,9 @@ function onPlanDimChange(){
 function redrawPlan(){
   var cv=document.getElementById('zumen-cv'); if(!cv) return;
   var W=roomData.W, D=roomData.D, T=roomData.wallT;
-  var CW=cv.offsetWidth||340;
+  var wrap=document.getElementById('cv-main-wrap');
+  var CW=wrap?wrap.offsetWidth:(cv.offsetWidth||340);
+  var CH_avail=wrap?wrap.offsetHeight:(cv.offsetHeight||500);
 
   // ── ドア弧の最大はみ出し量（mm）を事前計算 ──
   var maxArcU=0,maxArcD=0,maxArcL=0,maxArcR=0;
@@ -2926,18 +2947,19 @@ function redrawPlan(){
     });
   });
 
-  // ── 固定キャンバス高さ（315/Dベース）＋余白固定 ──
+  // ── 余白固定・スケールをエリア全体に合わせる ──
   var mL=56, mR=20, mT=20, mB=56;
-  // 基準スケール（固定CHに合わせる）
-  var sc=Math.min((CW-mL-mR)/W, 370/D);
+  // 幅・高さ両方に合わせたスケールで常にエリアを最大利用
+  var scW=(CW-mL-mR)/W;
+  var scH=(CH_avail-mT-mB)/D;
+  var sc=Math.min(scW, scH);
 
   // ドア弧・外周寸法線が余白に収まるか確認し、収まらなければscを縮小
   var Tpx0=T*sc;
-  var needL = Tpx0 + maxArcL*sc + 36; // 左に必要なpx（弧+寸法線）
+  var needL = Tpx0 + maxArcL*sc + 36;
   var needR = Tpx0 + maxArcR*sc + 16;
   var needT = Tpx0 + maxArcU*sc + 16;
   var needB = Tpx0 + maxArcD*sc + 36;
-  // 余白が足りない場合はscを縮小して収める
   var scL = needL>mL ? sc*(mL/needL) : sc;
   var scR = needR>mR ? sc*(mR/needR) : sc;
   var scT = needT>mT ? sc*(mT/needT) : sc;
@@ -2947,8 +2969,9 @@ function redrawPlan(){
 
   var Tpx=T*sc;
   var rw=W*sc, rd=D*sc;
-  var CH=rd+mT+mB;
-  var ox=mL, oy=mT;
+  // CH: エリア全体を使う（最低限 rd+余白）
+  var CH=Math.max(CH_avail, rd+mT+mB);
+  var ox=mL, oy=Math.round((CH-rd)/2); // 縦中央寄せ
 
   var ctx=setupCanvas(cv,CW,CH);
   ctx.clearRect(0,0,CW,CH);
@@ -3491,11 +3514,15 @@ function updateCeilDelBtn(){
 function redrawCeil(){
   var cv=document.getElementById('zumen-cv'); if(!cv) return;
   var W=roomData.W, D=roomData.D;
-  var CW=cv.offsetWidth||340;
+  var wrap=document.getElementById('cv-main-wrap');
+  var CW=wrap?wrap.offsetWidth:(cv.offsetWidth||340);
+  var CH_avail=wrap?wrap.offsetHeight:500;
   var mL=56, mR=20, mT=20, mB=64;
-  var sc=Math.min((CW-mL-mR)/W, 370/D);
-  var rw=W*sc, rd=D*sc, CH=rd+mT+mB;
-  var ox=mL, oy=mT;
+  var scW=(CW-mL-mR)/W, scH=(CH_avail-mT-mB)/D;
+  var sc=Math.min(scW,scH);
+  var rw=W*sc, rd=D*sc;
+  var CH=Math.max(CH_avail,rd+mT+mB);
+  var ox=mL, oy=Math.round((CH-rd)/2);
   var ctx=setupCanvas(cv,CW,CH); ctx.clearRect(0,0,CW,CH);
 
   // 背景
@@ -4277,11 +4304,15 @@ function redraw(){
   if(curView==='ceil'){ redrawCeil(); return; }
   var cv=document.getElementById('zumen-cv'); if(!cv) return;
   var W=getW(),H=getH();
-  var CW=cv.offsetWidth||340;
+  var wrap=document.getElementById('cv-main-wrap');
+  var CW=wrap?wrap.offsetWidth:(cv.offsetWidth||340);
+  var CH_avail=wrap?wrap.offsetHeight:500;
   var mL=48,mR=drawMode==='print'?80:16,mT=16,mB=drawMode==='print'?70:40;
-  var sc=Math.min((CW-mL-mR)/W,275/H);
-  var rw=W*sc,rh=H*sc,CH=rh+mT+mB;
-  var ox=mL,oy=mT;
+  var scW=(CW-mL-mR)/W, scH=(CH_avail-mT-mB)/H;
+  var sc=Math.min(scW,scH);
+  var rw=W*sc,rh=H*sc;
+  var CH=Math.max(CH_avail,rh+mT+mB);
+  var ox=mL,oy=Math.round((CH-rh)/2);
   var ctx=setupCanvas(cv,CW,CH);
   ctx.clearRect(0,0,CW,CH);
 
