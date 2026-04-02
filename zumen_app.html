@@ -583,8 +583,8 @@ canvas{display:block;width:100%;}
         <button class="ble-target"        id="bt-H"  onclick="setBleTarget('H')">高さ H</button>
         <button class="ble-target"        id="bt-PL" onclick="setBleTarget('PL')">間仕切り長さ</button>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;background:var(--bg);margin-bottom:14px;">
-        <span style="font-size:12px;color:var(--text2);">最後の受信値</span>
+      <div onclick="bleApplyLastVal()" style="display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;background:var(--bg);margin-bottom:14px;cursor:pointer;border:1.5px solid transparent;" id="ble-last-frame">
+        <span style="font-size:12px;color:var(--text2);">最後の受信値（タップで反映）</span>
         <span id="ble-last-val" style="font-size:18px;font-weight:700;margin-left:auto;color:var(--navy);">—</span>
       </div>
     </div>
@@ -5168,7 +5168,7 @@ window.addEventListener('resize',function(){ setTimeout(redraw,50); });
 var _bleDevice    = null;
 var _bleChars     = []; // 購読中のCharacteristic一覧
 var _bleConnected = false;
-var _bleTarget    = 'W'; // 'W'|'D'|'H'|'PL'
+var _bleTarget    = null; // null=未選択（ワンショット方式：ボタンタップで1回だけ反映→即リセット）
 
 // Bosch GLM 50-27CG 確認済みUUID
 var BLE_SVC_A  = '02a6c0d0-0451-4000-b000-fb3210111989'; // サービスA
@@ -5194,10 +5194,22 @@ function setBleTarget(t){
     var b=document.getElementById('bt-'+k);
     if(b) b.className='ble-target'+(k===t?' active':'');
   });
-  // 受信済みの値があれば即座に反映
-  if(window._bleLastMm && window._bleLastMm > 0){
-    _applyBleValue(window._bleLastMm);
+  // 受信値フレームをハイライト（選択中であることを示す）
+  var frame=document.getElementById('ble-last-frame');
+  if(frame) frame.style.borderColor=t?'var(--accent)':'transparent';
+}
+
+// 「最後の受信値」フレームタップ → 選択中のフィールドに反映
+function bleApplyLastVal(){
+  if(!_bleTarget){
+    showWaToast('先にW・D・H・間仕切り長さを選択してください');
+    return;
   }
+  if(!window._bleLastMm || window._bleLastMm<=0){
+    showWaToast('まだ測定値を受信していません');
+    return;
+  }
+  _applyBleValue(window._bleLastMm);
 }
 
 function _updateBleUI(){
@@ -5422,9 +5434,12 @@ function _bleLog(msg){
 
 function _applyBleValue(mm){
   if(mm<=0||mm>50000) return;
-  window._bleLastMm=mm; // 外周作図モードでも使えるよう保存
+  window._bleLastMm=mm; // 常に最新値を保存（外周作図モード・受信値フレーム共用）
   var lastEl=document.getElementById('ble-last-val');
   if(lastEl) lastEl.textContent=mm.toLocaleString()+' mm';
+
+  // _bleTargetが未選択なら値の保存・表示のみ（フレームタップ待ち）
+  if(!_bleTarget) return;
 
   if(_bleTarget==='W'){
     roomData.W=mm;
@@ -5439,7 +5454,6 @@ function _applyBleValue(mm){
     var el=document.getElementById('inp-H');
     if(el) el.value=mm;
   } else if(_bleTarget==='PL'){
-    // 間仕切り長さ：選択中の間仕切りに適用
     if(_planSelId!==null&&_planSelType==='partition'){
       var sp=planPartitions.find(function(p){return p.id===_planSelId;});
       if(sp){ pushHistory(); sp.len=mm; }
@@ -5448,9 +5462,18 @@ function _applyBleValue(mm){
       return;
     }
   }
+  var applied=_bleTarget;
+  // 反映後は選択解除
+  _bleTarget=null;
+  ['W','D','H','PL'].forEach(function(k){
+    var b=document.getElementById('bt-'+k);
+    if(b) b.className='ble-target';
+  });
+  var frame=document.getElementById('ble-last-frame');
+  if(frame) frame.style.borderColor='transparent';
   pushHistory();
   renderMain();
-  showWaToast('📏 '+_bleTarget+' = '+mm.toLocaleString()+'mm をセットしました');
+  showWaToast('📏 '+applied+' = '+mm.toLocaleString()+'mm をセットしました');
 }
 
 
