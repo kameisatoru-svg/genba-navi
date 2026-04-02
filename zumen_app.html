@@ -2779,9 +2779,13 @@ function _planSc(){
   var cv=document.getElementById('zumen-cv'); if(!cv) return null;
   var W=roomData.W, D=roomData.D;
   var T=roomData.wallT;
-  var CW=cv.offsetWidth||340;
-  var mL=56,mR=20,mT=20,mB=56;
-  var sc=Math.min((CW-mL-mR)/W,370/D);
+  var wrap=document.getElementById('cv-main-wrap');
+  var CW=wrap?wrap.offsetWidth:(cv.offsetWidth||340);
+  var CH_avail=wrap?wrap.offsetHeight:500;
+  var PAD=30;
+  var mL=Math.max(PAD,56),mR=PAD,mT=PAD,mB=PAD;
+  var scW=(CW-mL-mR)/W, scH=(CH_avail-mT-mB)/D;
+  var sc=Math.min(scW,scH);
   // renderPlanと同じsc縮小ロジック
   try{
     var Tpx0=T*sc;
@@ -2795,8 +2799,8 @@ function _planSc(){
         if(f.dir==='R') maxArcR=Math.max(maxArcR,op.w);
       });
     });
-    var needL=Tpx0+maxArcL*sc+36, needR=Tpx0+maxArcR*sc+16;
-    var needT=Tpx0+maxArcU*sc+16, needB=Tpx0+maxArcD*sc+36;
+    var needL=Tpx0+maxArcL*sc+PAD, needR=Tpx0+maxArcR*sc+PAD;
+    var needT=Tpx0+maxArcU*sc+PAD, needB=Tpx0+maxArcD*sc+PAD;
     var scL=needL>mL?sc*(mL/needL):sc;
     var scR=needR>mR?sc*(mR/needR):sc;
     var scT=needT>mT?sc*(mT/needT):sc;
@@ -2805,12 +2809,15 @@ function _planSc(){
     sc=Math.max(sc,0.01);
   }catch(e){}
   var Tpx=T*sc;
+  var rw=W*sc, rd=D*sc;
+  var ox=Math.round((CW-rw)/2);
+  var oy=Math.round((CH_avail-rd)/2);
   var hasOutline=(roomData._innerW!=null);
-  var pox=hasOutline?(mL+Tpx/2):mL;
-  var poy=hasOutline?(mT+Tpx/2):mT;
+  var pox=hasOutline?(ox+Tpx/2):ox;
+  var poy=hasOutline?(oy+Tpx/2):oy;
   var iW=hasOutline?roomData._innerW:W;
   var iD=hasOutline?roomData._innerD:D;
-  return{sc:sc, ox:mL, oy:mT, W:W, D:D, cv:cv,
+  return{sc:sc, ox:ox, oy:oy, W:W, D:D, cv:cv,
          pox:pox, poy:poy, iW:iW, iD:iD, T:T, Tpx:Tpx, hasOutline:hasOutline};
 }
 
@@ -2947,19 +2954,22 @@ function redrawPlan(){
     });
   });
 
-  // ── 余白固定・スケールをエリア全体に合わせる ──
-  var mL=56, mR=20, mT=20, mB=56;
-  // 幅・高さ両方に合わせたスケールで常にエリアを最大利用
+  // ── 余白・スケール・中央寄せ ──
+  // 基本余白：寸法線用に最低限確保（30pxはFold5で約15mm相当）
+  var PAD=30;
+  var mL=Math.max(PAD,56), mR=PAD, mT=PAD, mB=PAD;
+
+  // 幅・高さ両方に合わせたスケール
   var scW=(CW-mL-mR)/W;
   var scH=(CH_avail-mT-mB)/D;
   var sc=Math.min(scW, scH);
 
   // ドア弧・外周寸法線が余白に収まるか確認し、収まらなければscを縮小
   var Tpx0=T*sc;
-  var needL = Tpx0 + maxArcL*sc + 36;
-  var needR = Tpx0 + maxArcR*sc + 16;
-  var needT = Tpx0 + maxArcU*sc + 16;
-  var needB = Tpx0 + maxArcD*sc + 36;
+  var needL = Tpx0 + maxArcL*sc + PAD;
+  var needR = Tpx0 + maxArcR*sc + PAD;
+  var needT = Tpx0 + maxArcU*sc + PAD;
+  var needB = Tpx0 + maxArcD*sc + PAD;
   var scL = needL>mL ? sc*(mL/needL) : sc;
   var scR = needR>mR ? sc*(mR/needR) : sc;
   var scT = needT>mT ? sc*(mT/needT) : sc;
@@ -2969,9 +2979,10 @@ function redrawPlan(){
 
   var Tpx=T*sc;
   var rw=W*sc, rd=D*sc;
-  // CH: エリア全体を使う（最低限 rd+余白）
-  var CH=Math.max(CH_avail, rd+mT+mB);
-  var ox=mL, oy=Math.round((CH-rd)/2); // 縦中央寄せ
+  var CH=CH_avail; // エリア高さを固定
+  // 図面を縦横ともに中央寄せ
+  var ox=Math.round((CW-rw)/2);
+  var oy=Math.round((CH-rd)/2);
 
   var ctx=setupCanvas(cv,CW,CH);
   ctx.clearRect(0,0,CW,CH);
@@ -3517,12 +3528,14 @@ function redrawCeil(){
   var wrap=document.getElementById('cv-main-wrap');
   var CW=wrap?wrap.offsetWidth:(cv.offsetWidth||340);
   var CH_avail=wrap?wrap.offsetHeight:500;
-  var mL=56, mR=20, mT=20, mB=64;
+  var PAD=30;
+  var mL=PAD,mR=PAD,mT=PAD,mB=PAD;
   var scW=(CW-mL-mR)/W, scH=(CH_avail-mT-mB)/D;
   var sc=Math.min(scW,scH);
   var rw=W*sc, rd=D*sc;
-  var CH=Math.max(CH_avail,rd+mT+mB);
-  var ox=mL, oy=Math.round((CH-rd)/2);
+  var CH=CH_avail;
+  var ox=Math.round((CW-rw)/2);
+  var oy=Math.round((CH-rd)/2);
   var ctx=setupCanvas(cv,CW,CH); ctx.clearRect(0,0,CW,CH);
 
   // 背景
@@ -4307,12 +4320,14 @@ function redraw(){
   var wrap=document.getElementById('cv-main-wrap');
   var CW=wrap?wrap.offsetWidth:(cv.offsetWidth||340);
   var CH_avail=wrap?wrap.offsetHeight:500;
-  var mL=48,mR=drawMode==='print'?80:16,mT=16,mB=drawMode==='print'?70:40;
+  var PAD=drawMode==='print'?60:30;
+  var mL=PAD,mR=PAD,mT=PAD,mB=PAD;
   var scW=(CW-mL-mR)/W, scH=(CH_avail-mT-mB)/H;
   var sc=Math.min(scW,scH);
   var rw=W*sc,rh=H*sc;
-  var CH=Math.max(CH_avail,rh+mT+mB);
-  var ox=mL,oy=Math.round((CH-rh)/2);
+  var CH=CH_avail;
+  var ox=Math.round((CW-rw)/2);
+  var oy=Math.round((CH-rh)/2);
   var ctx=setupCanvas(cv,CW,CH);
   ctx.clearRect(0,0,CW,CH);
 
