@@ -961,7 +961,7 @@ function _drawerDim(){
     var v=k==='W'?W:k==='D'?D:H;
     h+='<div style="background:#fff;border-radius:9px;border:1.5px solid rgba(30,45,64,0.15);padding:8px;text-align:center;">'
       +'<div style="font-size:10px;color:#5a6a7a;margin-bottom:2px;">'+k+' mm</div>'
-      +'<input data-dim="'+k+'" type="number" value="'+v+'" inputmode="numeric" '
+      +'<input data-dim="'+k+'" type="number" value="'+(v||'')+'" placeholder="0" inputmode="numeric" '
       +'style="width:100%;border:none;outline:none;font-size:20px;font-weight:700;color:#1e2d40;text-align:center;background:transparent;font-family:inherit;" '
       +'oninput="onDrwDimChange(this.dataset.dim,this.value)"></div>';
   });
@@ -1153,7 +1153,7 @@ function renderPlan(){
     return;
   }
 
-  // ── 未設定時：作成方法の選択画面 ──
+  // ── 未設定時：現場名・部屋名が未入力なら入力画面 ──
   if(W===0&&D===0&&H===0&&!roomData._setupMode){
 
     // 現場名・部屋名が未入力なら先に入力させる
@@ -1173,49 +1173,11 @@ function renderPlan(){
       return;
     }
 
-    html+='<div style="padding:24px 0;">';
-    html+='<div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:16px;text-align:center;">部屋の作り方を選んでください</div>';
-    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">';
-    // 四角モード
-    html+='<button onclick="startRectMode()" style="padding:20px 10px;border:2px solid rgba(30,45,64,0.2);border-radius:14px;background:var(--white);cursor:pointer;font-family:inherit;text-align:center;">';
-    html+='<div style="font-size:28px;margin-bottom:8px;">□</div>';
-    html+='<div style="font-size:13px;font-weight:700;color:var(--navy);">四角で作る</div>';
-    html+='<div style="font-size:11px;color:var(--text2);margin-top:4px;">W・D・H を入力</div>';
-    html+='</button>';
-    // 外周モード
-    html+='<button onclick="startOutlineMode()" style="padding:20px 10px;border:2px solid rgba(200,169,110,0.4);border-radius:14px;background:rgba(200,169,110,0.06);cursor:pointer;font-family:inherit;text-align:center;">';
-    html+='<div style="font-size:28px;margin-bottom:8px;">✏</div>';
-    html+='<div style="font-size:13px;font-weight:700;color:#b06a00;">外周を描く</div>';
-    html+='<div style="font-size:11px;color:var(--text2);margin-top:4px;">タップで頂点を作図</div>';
-    html+='</button>';
-    html+='</div></div>';
-    _setFormMode(true);
+    // 現場名・部屋名あり→直接キャンバスへ（寸法はドロワーで入力）
+    html+='<div class="canvas-wrap"><canvas id="zumen-cv"></canvas></div>';
+    _setFormMode(false);
     if(area) area.innerHTML=html;
-    return;
-  }
-
-  // ── 四角モード：寸法入力画面（未確定時）──
-  if(roomData._setupMode==='rect'&&(W===0||D===0||H===0)){
-    html+='<div class="sec" style="margin-bottom:8px;">';
-    html+='<div class="st" style="margin-bottom:12px;">部屋寸法を入力</div>';
-    html+='<div class="r3" style="margin-bottom:12px;">';
-    html+='<div class="iw"><span>幅 W mm</span><input type="number" id="inp-W-setup" value="" placeholder="3600" inputmode="numeric" style="font-size:16px;"></div>';
-    html+='<div class="iw"><span>奥行 D mm</span><input type="number" id="inp-D-setup" value="" placeholder="4500" inputmode="numeric" style="font-size:16px;"></div>';
-    html+='<div class="iw"><span>高さ H mm</span><input type="number" id="inp-H-setup" value="" placeholder="2400" inputmode="numeric" style="font-size:16px;"></div>';
-    html+='</div>';
-    html+='<div class="wt-btns" style="margin-bottom:12px;">';
-    [100,120,150].forEach(function(t){
-      html+='<button class="wt-btn'+(T===t?' active':'')+'" onclick="setWallT('+t+')">'+t+'mm</button>';
-    });
-    html+='</div>';
-    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
-    html+='<button onclick="roomData._setupMode=null;roomData.W=0;roomData.D=0;roomData.H=0;renderPlan();" style="height:44px;border:1.5px solid rgba(30,45,64,0.2);border-radius:10px;background:transparent;color:var(--text2);font-size:13px;cursor:pointer;font-family:inherit;">← 戻る</button>';
-    html+='<button onclick="confirmRectMode()" style="height:44px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">確定</button>';
-    html+='</div>';
-    html+='<button onclick="startOutlineMode()" style="width:100%;height:40px;margin-top:8px;border:2px solid rgba(200,169,110,0.4);border-radius:10px;background:rgba(200,169,110,0.06);color:#b06a00;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">✏ 外周を描くモードへ</button>';
-    html+='</div>';
-    _setFormMode(true);
-    if(area) area.innerHTML=html;
+    setTimeout(function(){ redrawPlan(); _openDrawerTab('dim'); }, 30);
     return;
   }
 
