@@ -5152,8 +5152,10 @@ var _bleConnected = false;
 var _bleTarget    = null; // null=未選択（使い捨てワンショット方式）
 
 // Bosch GLM BLE UUIDs（GLM 50-27CG）
-var BLE_SERVICE_UUID  = '00005301-0000-0041-4c50-534146455359';
-var BLE_CHAR_UUID     = '00005302-0000-0041-4c50-534146455359';
+// Bosch GLM 50-27CG JP版（3601K72U50）実機確認済みUUID
+var BLE_SVC_A   = '02a6c0d0-0451-4000-b000-fb3210111989';
+var BLE_CHAR_A1 = '02a6c0d1-0451-4000-b000-fb3210111989'; // INDICATE/WRITE（測定値）
+var BLE_SVC_B   = '02a6c0f0-0451-4000-b000-fb3210111989';
 
 function openBleModal(){
   document.getElementById('ble-modal').classList.remove('hidden');
@@ -5203,12 +5205,14 @@ async function bleConnect(){
   try {
     _bleDevice = await navigator.bluetooth.requestDevice({
       filters:[{namePrefix:'GLM'}],
-      optionalServices:[BLE_SERVICE_UUID]
+      optionalServices:[BLE_SVC_A, BLE_SVC_B]
     });
     _bleDevice.addEventListener('gattserverdisconnected', _onBleDisconnected);
-    var server  = await _bleDevice.gatt.connect();
-    var service = await server.getPrimaryService(BLE_SERVICE_UUID);
-    _bleChar    = await service.getCharacteristic(BLE_CHAR_UUID);
+    var server   = await _bleDevice.gatt.connect();
+    var serviceA = await server.getPrimaryService(BLE_SVC_A);
+    _bleChar     = await serviceA.getCharacteristic(BLE_CHAR_A1);
+    // MT-Protocol起動コマンド送信（C0 55 02 01 00 1A）
+    await _bleChar.writeValue(new Uint8Array([0xC0,0x55,0x02,0x01,0x00,0x1A]));
     await _bleChar.startNotifications();
     _bleChar.addEventListener('characteristicvaluechanged', _onBleValue);
     _bleConnected = true;
