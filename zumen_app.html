@@ -367,18 +367,21 @@ canvas{display:block;width:100%;}
 
 /* ── GLM BLEモーダル ── */
 .ble-overlay{
-  position:fixed;inset:0;background:rgba(10,20,35,0.6);
-  z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;
+  position:fixed;inset:0;background:rgba(10,20,35,0.4);
+  z-index:100;pointer-events:none;
 }
 .ble-overlay.hidden{display:none;}
 .ble-box{
-  background:var(--white);border-radius:16px;width:100%;max-width:360px;
+  background:var(--white);border-radius:16px;width:calc(100% - 40px);max-width:360px;
   box-shadow:0 8px 32px rgba(10,20,35,0.3);overflow:hidden;
+  position:fixed;top:80px;left:50%;transform:translateX(-50%);
+  pointer-events:auto;
 }
 .ble-head{
   background:var(--navy);padding:14px 18px;
   font-size:15px;font-weight:700;color:var(--white);
   display:flex;align-items:center;gap:8px;
+  cursor:move;user-select:none;-webkit-user-select:none;
 }
 .ble-body{padding:16px 16px 4px;}
 .ble-target{
@@ -565,8 +568,8 @@ canvas{display:block;width:100%;}
 
 <!-- ── GLM BLE モーダル ── -->
 <div class="ble-overlay hidden" id="ble-modal" onclick="closeBleModal(event)">
-  <div class="ble-box">
-    <div class="ble-head">
+  <div class="ble-box" id="ble-box">
+    <div class="ble-head" id="ble-head">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"/></svg>
       GLM Bluetooth連携
     </div>
@@ -5180,12 +5183,45 @@ var BLE_CHAR_F3= '02a6c0f3-0451-4000-b000-fb3210111989'; // WRITE, WRITE NO RESP
 var BLE_CHAR_F4= '02a6c0f4-0451-4000-b000-fb3210111989'; // NOTIFY, READ
 
 function openBleModal(){
-  document.getElementById('ble-modal').classList.remove('hidden');
+  var modal=document.getElementById('ble-modal');
+  var box=document.getElementById('ble-box');
+  modal.classList.remove('hidden');
+  box.style.left='50%';
+  box.style.top='80px';
+  box.style.transform='translateX(-50%)';
   _updateBleUI();
+  _bleModalDragInit();
 }
 function closeBleModal(e){
   if(e&&e.currentTarget!==e.target) return;
   document.getElementById('ble-modal').classList.add('hidden');
+}
+function _bleModalDragInit(){
+  var head=document.getElementById('ble-head');
+  var box=document.getElementById('ble-box');
+  if(!head||!box) return;
+  head.onpointerdown=function(e){
+    e.preventDefault();
+    var rect=box.getBoundingClientRect();
+    box.style.left=rect.left+'px';
+    box.style.top=rect.top+'px';
+    box.style.transform='none';
+    var startX=e.clientX-rect.left;
+    var startY=e.clientY-rect.top;
+    head.setPointerCapture(e.pointerId);
+    head.onpointermove=function(ev){
+      var x=ev.clientX-startX;
+      var y=ev.clientY-startY;
+      x=Math.max(0,Math.min(window.innerWidth-box.offsetWidth,x));
+      y=Math.max(0,Math.min(window.innerHeight-box.offsetHeight,y));
+      box.style.left=x+'px';
+      box.style.top=y+'px';
+    };
+    head.onpointerup=function(){
+      head.onpointermove=null;
+      head.onpointerup=null;
+    };
+  };
 }
 
 function setBleTarget(t){
