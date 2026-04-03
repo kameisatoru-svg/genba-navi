@@ -2799,7 +2799,9 @@ function _planSc(){
   var T=roomData.wallT;
   var wrap=document.getElementById('cv-main-wrap');
   var CW=wrap?wrap.offsetWidth:(cv.offsetWidth||340);
-  var CH_avail=wrap?wrap.offsetHeight:500;
+  var header2=document.querySelector('.header');
+  var headerH2=header2?header2.offsetHeight:54;
+  var CH_avail=window.innerHeight-headerH2;
   var PAD=30;
   var mL=Math.max(PAD,56),mR=PAD,mT=PAD,mB=PAD;
   var scW=(CW-mL-mR)/W, scH=(CH_avail-mT-mB)/D;
@@ -2937,7 +2939,10 @@ function redrawPlan(){
   var W=roomData.W, D=roomData.D, T=roomData.wallT;
   var wrap=document.getElementById('cv-main-wrap');
   var CW=wrap?wrap.offsetWidth:(cv.offsetWidth||340);
-  var CH_avail=wrap?wrap.offsetHeight:(cv.offsetHeight||500);
+  // ドロワー開閉に影響されないよう、ヘッダー下からの固定高さを使う
+  var header=document.querySelector('.header');
+  var headerH=header?header.offsetHeight:54;
+  var CH_avail=window.innerHeight-headerH;
 
   // ── ドア弧の最大はみ出し量（mm）を事前計算 ──
   var maxArcU=0,maxArcD=0,maxArcL=0,maxArcR=0;
