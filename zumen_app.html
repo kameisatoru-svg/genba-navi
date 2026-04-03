@@ -919,7 +919,7 @@ function _openDrawerTab(tab){
   var drawer=document.getElementById('main-drawer');
   drawer.classList.remove('hidden');
   // 開口部・設備タブは高さ固定（操作UIが見える高さ）・スクロール可
-  if(tab==='opening'||tab==='equip'){
+  if(tab==='opening'||tab==='equip'||tab==='list'){
     drawer.style.maxHeight='220px';
     drawer.style.overflowY='auto';
   } else {
@@ -936,6 +936,8 @@ function _closeDrawer(){
   drawer.style.overflowY='';
   _drawerTab='';
   _renderBottomBar();
+  // 平面図で開口部を選択中だったらクリア
+  if(_planSelType==='opening'){ _planSelType=null; _planSelId=null; }
   // ドロワー消滅後にレイアウトが確定してからキャンバスを再描画
   setTimeout(redraw, 0);
 }
@@ -1225,6 +1227,33 @@ function _drawerPlanList(){
       +'onclick="event.stopPropagation();var id=parseInt(this.dataset.partid);_planSelId=id;_planSelType=this.dataset.type;deletePlanSel();" '
       +'style="font-size:10px;color:#e53535;background:none;border:1px solid rgba(229,53,53,0.3);border-radius:5px;padding:2px 8px;cursor:pointer;">削除</button></div>';
   });
+  // ドア一覧（全4面）
+  var faceLabels=['A面（上壁）','B面（右壁）','C面（下壁）','D面（左壁）'];
+  [0,1,2,3].forEach(function(fi){
+    (faceOpenings[fi]||[]).forEach(function(op){
+      if(!isDoor(op.type)) return;
+      var sel=(_planSelType==='opening'&&_planSelId===op.id);
+      var bc2=sel?'#b06a00':'rgba(30,45,64,0.1)';
+      var hn=op.hinge||'left', sw=op.swing||'in';
+      var dirLabel=(hn==='left'?'左吊':'右吊')+'・'+(sw==='in'?'内開':'外開');
+      var oid=op.id;
+      h+='<div style="background:#fff;border-radius:8px;border:1.5px solid '+bc2+';padding:8px 12px;margin-bottom:5px;display:flex;align-items:center;gap:8px;">';
+      h+='<div style="flex:1;cursor:pointer;" onclick="_planSelType=\'opening\';_planSelId='+oid+';redrawPlan();_renderDrawerContent();">';
+      h+='<div style="font-size:12px;font-weight:700;color:#1e2d40;">'+op.type+'</div>';
+      h+='<div style="font-size:10px;color:#9a9a9a;">'+faceLabels[fi]+'　'+op.w+'mm</div>';
+      h+='</div>';
+      h+='<button onclick="event.stopPropagation();cycleOpDir('+oid+')" style="height:44px;padding:0 8px;border-radius:9px;border:1.5px solid rgba(30,45,64,0.2);background:#fff;color:#1e2d40;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">'+dirLabel+'</button>';
+      h+='<button onclick="event.stopPropagation();removeOpByIdFi('+oid+','+fi+')" style="height:44px;padding:0 8px;border-radius:9px;border:1.5px solid rgba(229,53,53,0.4);background:transparent;color:#e53535;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">削除</button>';
+      h+='</div>';
+    });
+  });
+  if(planColumns.length===0&&planPartitions.length===0){
+    var hasDoor2=false;
+    [0,1,2,3].forEach(function(fi){ (faceOpenings[fi]||[]).forEach(function(op){ if(isDoor(op.type)) hasDoor2=true; }); });
+    if(!hasDoor2){
+      return '<div class="drawer-op"><div style="font-size:12px;color:#9a9a9a;text-align:center;padding:10px 0;">配置なし</div></div>';
+    }
+  }
   h+='</div>';
   return h;
 }
@@ -3228,68 +3257,164 @@ function redrawPlan(){
 
 
 function drawPlanOpenings(ctx, ox, oy, rw, rd, Tpx, sc){
-  // A面(idx=0)：上壁 D方向が面の幅なので openingのxはW方向
-  // 各面の開口部を平面図的に描画
-  var faceConfigs=[
-    // {fi, axis:'h'or'v', wallX, wallY, wallLen, wallT, dir:1=外方向}
-    {fi:0, wallX:ox,      wallY:oy-Tpx, wallLen:rw,  wallT:Tpx, axis:'h', ydir:-1}, // A上
-    {fi:1, wallX:ox+rw,   wallY:oy,     wallLen:rd,  wallT:Tpx, axis:'v', xdir:1},  // B右
-    {fi:2, wallX:ox,      wallY:oy+rd,  wallLen:rw,  wallT:Tpx, axis:'h', ydir:1},  // C下
-    {fi:3, wallX:ox-Tpx,  wallY:oy,     wallLen:rd,  wallT:Tpx, axis:'v', xdir:-1}, // D左
+  /*
+   * 弧の角度整理（吊り元を中心とする1/4円弧）:
+   *
+   * 水平壁: 吊り元(hingeX, arcBaseY)、半径ropw
+   *   戸先 = 開口の逆端X（left→右、right→左）
+   *   終点 = (hingeX, arcBaseY + swingY*ropw)
+   *   left吊り(戸先右=0°スタート):
+   *     swingY>0(下): arc(0, π/2)
+   *     swingY<0(上): arc(0, -π/2, true)
+   *   right吊り(戸先左=π°スタート):
+   *     swingY>0(下): arc(π, π/2, true)
+   *     swingY<0(上): arc(π, -π/2, false)
+   *
+   * 垂直壁: 吊り元(arcBaseX, hingeY)、半径ropd  ← 水平をX↔Y入替
+   *   戸先 = 開口の逆端Y（left→下、right→上）
+   *   終点 = (arcBaseX + swingX*ropd, hingeY)
+   *   left吊り(戸先下=π/2°スタート):
+   *     swingX<0(左): arc(π/2, π)
+   *     swingX>0(右): arc(π/2, 0, true)
+   *   right吊り(戸先上=-π/2°スタート):
+   *     swingX<0(左): arc(-π/2, π, false) = arc(-π/2, -π, true) → arc(3π/2,π,true)だが簡潔に:
+   *     swingX<0(左): arc(-π/2, -Math.PI, true)
+   *     swingX>0(右): arc(-π/2, 0)
+   */
+  var DT = Math.min(40*sc, Tpx);
+  var PI = Math.PI;
+
+  var faceConfigs = [
+    {fi:0, axis:'h', wallLen:rw, wallX:ox,     wallY:oy-Tpx, innerY:oy,    outerY:oy-Tpx},
+    {fi:1, axis:'v', wallLen:rd, wallX:ox+rw,  wallY:oy,     innerX:ox+rw, outerX:ox+rw+Tpx},
+    {fi:2, axis:'h', wallLen:rw, wallX:ox,     wallY:oy+rd,  innerY:oy+rd, outerY:oy+rd+Tpx},
+    {fi:3, axis:'v', wallLen:rd, wallX:ox-Tpx, wallY:oy,     innerX:ox,    outerX:ox-Tpx},
   ];
+
+  // 水平壁の弧1本
+  function arcH(cx, cy, r, hn, swingY){
+    ctx.beginPath(); ctx.moveTo(cx, cy);
+    if(hn==='left'){
+      if(swingY>0) ctx.arc(cx,cy,r, 0,    PI/2);        // 右→下
+      else         ctx.arc(cx,cy,r, 0,   -PI/2, true);  // 右→上
+    } else {
+      if(swingY>0) ctx.arc(cx,cy,r, PI,  PI/2, true);   // 左→下
+      else         ctx.arc(cx,cy,r, PI, -PI/2, false);  // 左→上
+    }
+    ctx.stroke();
+  }
+
+  // 垂直壁の弧1本（水平をX↔Y入替）
+  function arcV(cx, cy, r, hn, swingX){
+    ctx.beginPath(); ctx.moveTo(cx, cy);
+    if(hn==='left'){
+      // 戸先=下(PI/2スタート)
+      if(swingX<0) ctx.arc(cx,cy,r,  PI/2, PI);         // 下→左
+      else         ctx.arc(cx,cy,r,  PI/2, 0,  true);   // 下→右
+    } else {
+      // 戸先=上(-PI/2スタート)
+      if(swingX<0) ctx.arc(cx,cy,r, -PI/2, -PI, true);  // 上→左
+      else         ctx.arc(cx,cy,r, -PI/2, 0);           // 上→右
+    }
+    ctx.stroke();
+  }
+
   faceConfigs.forEach(function(cfg){
     faceOpenings[cfg.fi].forEach(function(op){
-      var xRatio=op.x/faceW(cfg.fi);
-      var wRatio=op.w/faceW(cfg.fi);
-      var col=(op.id===faceSelId[cfg.fi])?'#b06a00':'rgba(40,40,40,0.85)';
+      var sel = (_planSelType==='opening'&&op.id===_planSelId)||(op.id===faceSelId[cfg.fi]);
+      var col = sel ? '#b06a00' : 'rgba(40,40,40,0.85)';
+      var lw  = sel ? 2.0 : 1.5;
       ctx.save();
-      ctx.strokeStyle=col; ctx.fillStyle='#ffffff'; ctx.lineWidth=1.5;
+      ctx.strokeStyle=col; ctx.lineWidth=lw;
+
+      var xRatio = op.x / faceW(cfg.fi);
+      var wRatio = op.w / faceW(cfg.fi);
+      var hn = op.hinge||'left';
+      var sw = op.swing||'in';
+      var isPC = (op.type==='親子ドア');
+
       if(cfg.axis==='h'){
-        var rx=cfg.wallX+xRatio*cfg.wallLen;
-        var ropw=wRatio*cfg.wallLen;
-        // 開口白抜き
-        ctx.fillRect(rx, cfg.wallY, ropw, cfg.wallT);
-        // ドア系は弧、窓系は二重線
+        var rx   = cfg.wallX + xRatio*cfg.wallLen;
+        var ropw = wRatio*cfg.wallLen;
+        var midY = cfg.wallY + Tpx/2;
+        var isTopWall = (cfg.fi===0);
+        var arcBaseY = sw==='in' ? cfg.innerY : cfg.outerY;
+        // swingY: A内→下+1, C内→上-1, A外→上-1, C外→下+1
+        var swingY = (sw==='in') ? (isTopWall?1:-1) : (isTopWall?-1:1);
+
         if(isDoor(op.type)){
-          // ドアの平面表記：弧
+          ctx.fillStyle='#f9f8f6'; ctx.fillRect(rx,cfg.wallY,ropw,Tpx);
           ctx.strokeStyle=col;
-          ctx.strokeRect(rx, cfg.wallY, ropw, cfg.wallT);
-          ctx.beginPath();
-          if(cfg.ydir<0){
-            ctx.moveTo(rx,cfg.wallY+cfg.wallT);
-            ctx.arc(rx,cfg.wallY+cfg.wallT, ropw, -Math.PI/2, 0);
+          ctx.beginPath(); ctx.moveTo(rx,cfg.outerY); ctx.lineTo(rx+ropw,cfg.outerY); ctx.stroke();
+          ctx.lineWidth=lw*1.2;
+          ctx.beginPath(); ctx.moveTo(rx,midY-DT/2); ctx.lineTo(rx+ropw,midY-DT/2); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(rx,midY+DT/2); ctx.lineTo(rx+ropw,midY+DT/2); ctx.stroke();
+          ctx.lineWidth=lw;
+          ctx.beginPath(); ctx.moveTo(rx,cfg.innerY); ctx.lineTo(rx+ropw,cfg.innerY); ctx.stroke();
+          ctx.setLineDash([3,2]);
+          if(!isPC){
+            var hingeX = hn==='left' ? rx : rx+ropw;
+            arcH(hingeX, arcBaseY, ropw, hn, swingY);
+            ctx.beginPath(); ctx.moveTo(hingeX,arcBaseY); ctx.lineTo(hingeX,arcBaseY+swingY*ropw); ctx.stroke();
           } else {
-            ctx.moveTo(rx,cfg.wallY);
-            ctx.arc(rx,cfg.wallY, ropw, 0, Math.PI/2);
+            var pW=ropw*2/3, cW=ropw*1/3;
+            var pHX = hn==='left' ? rx : rx+ropw;
+            var cHX = hn==='left' ? rx+ropw : rx;
+            arcH(pHX, arcBaseY, pW, hn, swingY);
+            ctx.beginPath(); ctx.moveTo(pHX,arcBaseY); ctx.lineTo(pHX,arcBaseY+swingY*pW); ctx.stroke();
+            var cHn = hn==='left'?'right':'left';
+            arcH(cHX, arcBaseY, cW, cHn, swingY);
+            ctx.beginPath(); ctx.moveTo(cHX,arcBaseY); ctx.lineTo(cHX,arcBaseY+swingY*cW); ctx.stroke();
           }
-          ctx.setLineDash([3,2]); ctx.stroke(); ctx.setLineDash([]);
+          ctx.setLineDash([]);
         } else {
-          // 窓：外枠＋内枠
-          ctx.strokeRect(rx, cfg.wallY, ropw, cfg.wallT);
-          var gi=Tpx*0.25;
-          ctx.lineWidth=0.8;
-          ctx.strokeRect(rx+gi, cfg.wallY+gi, ropw-gi*2, cfg.wallT-gi*2);
+          ctx.fillStyle='#f9f8f6'; ctx.fillRect(rx,cfg.wallY,ropw,Tpx);
+          ctx.strokeStyle=col;
+          ctx.strokeRect(rx,cfg.wallY,ropw,Tpx);
+          var gi=Tpx*0.25; ctx.lineWidth=0.8;
+          ctx.strokeRect(rx+gi,cfg.wallY+gi,ropw-gi*2,Tpx-gi*2);
         }
+
       } else {
-        var ry=cfg.wallY+xRatio*cfg.wallLen;
-        var ropd=wRatio*cfg.wallLen;
-        ctx.fillRect(cfg.wallX, ry, cfg.wallT, ropd);
+        var ry   = cfg.wallY + xRatio*cfg.wallLen;
+        var ropd = wRatio*cfg.wallLen;
+        var midX = cfg.wallX + Tpx/2;
+        var isRightWall = (cfg.fi===1);
+        var arcBaseX = sw==='in' ? cfg.innerX : cfg.outerX;
+        // swingX: B内→左-1, D内→右+1, B外→右+1, D外→左-1
+        var swingX = (sw==='in') ? (isRightWall?-1:1) : (isRightWall?1:-1);
+
         if(isDoor(op.type)){
-          ctx.strokeRect(cfg.wallX, ry, cfg.wallT, ropd);
-          ctx.beginPath();
-          if(cfg.xdir>0){
-            ctx.moveTo(cfg.wallX, ry);
-            ctx.arc(cfg.wallX, ry, ropd, 0, Math.PI/2);
+          ctx.fillStyle='#f9f8f6'; ctx.fillRect(cfg.wallX,ry,Tpx,ropd);
+          ctx.strokeStyle=col;
+          ctx.beginPath(); ctx.moveTo(cfg.outerX,ry); ctx.lineTo(cfg.outerX,ry+ropd); ctx.stroke();
+          ctx.lineWidth=lw*1.2;
+          ctx.beginPath(); ctx.moveTo(midX-DT/2,ry); ctx.lineTo(midX-DT/2,ry+ropd); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(midX+DT/2,ry); ctx.lineTo(midX+DT/2,ry+ropd); ctx.stroke();
+          ctx.lineWidth=lw;
+          ctx.beginPath(); ctx.moveTo(cfg.innerX,ry); ctx.lineTo(cfg.innerX,ry+ropd); ctx.stroke();
+          ctx.setLineDash([3,2]);
+          if(!isPC){
+            var hingeY = hn==='left' ? ry : ry+ropd;
+            arcV(arcBaseX, hingeY, ropd, hn, swingX);
+            ctx.beginPath(); ctx.moveTo(arcBaseX,hingeY); ctx.lineTo(arcBaseX+swingX*ropd,hingeY); ctx.stroke();
           } else {
-            ctx.moveTo(cfg.wallX+cfg.wallT, ry);
-            ctx.arc(cfg.wallX+cfg.wallT, ry, ropd, Math.PI/2, Math.PI);
+            var pD=ropd*2/3, cD=ropd*1/3;
+            var pHY = hn==='left' ? ry : ry+ropd;
+            var cHY = hn==='left' ? ry+ropd : ry;
+            arcV(arcBaseX, pHY, pD, hn, swingX);
+            ctx.beginPath(); ctx.moveTo(arcBaseX,pHY); ctx.lineTo(arcBaseX+swingX*pD,pHY); ctx.stroke();
+            var cHn = hn==='left'?'right':'left';
+            arcV(arcBaseX, cHY, cD, cHn, swingX);
+            ctx.beginPath(); ctx.moveTo(arcBaseX,cHY); ctx.lineTo(arcBaseX+swingX*cD,cHY); ctx.stroke();
           }
-          ctx.setLineDash([3,2]); ctx.stroke(); ctx.setLineDash([]);
+          ctx.setLineDash([]);
         } else {
-          ctx.strokeRect(cfg.wallX, ry, cfg.wallT, ropd);
-          var gi2=Tpx*0.25;
-          ctx.lineWidth=0.8;
-          ctx.strokeRect(cfg.wallX+gi2, ry+gi2, cfg.wallT-gi2*2, ropd-gi2*2);
+          ctx.fillStyle='#f9f8f6'; ctx.fillRect(cfg.wallX,ry,Tpx,ropd);
+          ctx.strokeStyle=col;
+          ctx.strokeRect(cfg.wallX,ry,Tpx,ropd);
+          var gi2=Tpx*0.25; ctx.lineWidth=0.8;
+          ctx.strokeRect(cfg.wallX+gi2,ry+gi2,Tpx-gi2*2,ropd-gi2*2);
         }
       }
       ctx.restore();
@@ -3750,9 +3875,14 @@ function addOp(type,w,h2){
   var isSweep=type==='窓（掃出）';
   var y=isDoor2||isSweep?0:Math.max(0,Math.min(H-h2,Math.round((H-h2*1.5)/10)*10));
   y=Math.max(0,Math.min(H-h2,y));
-  faceOidSeq[curFaceIdx]++;
-  var id=faceOidSeq[curFaceIdx];
-  getOps().push({id:id,type:type,w:w,h:h2,x:x,y:y});
+  // 全面通しの連番でid採番（面間の重複を防ぐ）
+  var maxId=0;
+  [0,1,2,3].forEach(function(fi){
+    (faceOpenings[fi]||[]).forEach(function(o){ if(o.id>maxId) maxId=o.id; });
+  });
+  var id=maxId+1;
+  faceOidSeq[curFaceIdx]=id;
+  getOps().push({id:id,type:type,w:w,h:h2,x:x,y:y,hinge:'left',swing:'in'});
   faceSelId[curFaceIdx]=id;
   _openDrawerTab('opening'); redraw();
 }
@@ -3782,6 +3912,57 @@ function resizeOp(axis,val){
   _renderDrawerContent(); redraw();
 }
 
+// 4パターン循環: 左吊内開→右吊内開→左吊外開→右吊外開→左吊内開...
+function cycleOpDir(opid){
+  var op=null;
+  // 平面図の場合は全面から探す
+  [0,1,2,3].forEach(function(fi){
+    if(op) return;
+    var found=(faceOpenings[fi]||[]).find(function(o){return o.id===opid;});
+    if(found) op=found;
+  });
+  if(!op) return;
+  var hn=op.hinge||'left', sw=op.swing||'in';
+  // 循環: 左吊内開→右吊内開→右吊外開→左吊外開→左吊内開
+  if(hn==='left'&&sw==='in'){  op.hinge='right'; op.swing='in';  }
+  else if(hn==='right'&&sw==='in'){ op.hinge='right'; op.swing='out'; }
+  else if(hn==='right'&&sw==='out'){ op.hinge='left'; op.swing='out'; }
+  else { op.hinge='left'; op.swing='in'; }
+  _planSelType='opening'; _planSelId=opid;
+  redrawPlan(); _renderDrawerContent();
+}
+function removeOpByIdFi(opId, fi){
+  pushHistory();
+  faceOpenings[fi]=faceOpenings[fi].filter(function(o){return o.id!==opId;});
+  if(_planSelId===opId){_planSelType=null;_planSelId=null;}
+  _renderDrawerContent(); redrawPlan();
+}
+function setHinge(v){
+  // 平面図での選択中開口部
+  if(curView==='plan'&&_planSelType==='opening'){
+    var planOp=null;
+    [{fi:0},{fi:1},{fi:2},{fi:3}].forEach(function(f){
+      var found=faceOpenings[f.fi].find(function(o){return o.id===_planSelId;});
+      if(found) planOp=found;
+    });
+    if(planOp){planOp.hinge=v; _renderDrawerContent(); redrawPlan(); return;}
+  }
+  var op=getOps().find(function(o){return o.id===faceSelId[curFaceIdx];}); if(!op) return;
+  op.hinge=v; _renderDrawerContent(); redraw();
+}
+function setSwing(v){
+  // 平面図での選択中開口部
+  if(curView==='plan'&&_planSelType==='opening'){
+    var planOp=null;
+    [{fi:0},{fi:1},{fi:2},{fi:3}].forEach(function(f){
+      var found=faceOpenings[f.fi].find(function(o){return o.id===_planSelId;});
+      if(found) planOp=found;
+    });
+    if(planOp){planOp.swing=v; _renderDrawerContent(); redrawPlan(); return;}
+  }
+  var op=getOps().find(function(o){return o.id===faceSelId[curFaceIdx];}); if(!op) return;
+  op.swing=v; _renderDrawerContent(); redraw();
+}
 function movOp(dx,dy){
   pushHistory();
   var op=getOps().find(function(o){return o.id===faceSelId[curFaceIdx];}); if(!op) return;
@@ -4013,8 +4194,45 @@ function resizeEq(axis,val){
             }
           }
         }
+        // 開口部（ドア）のヒット判定
+        if(!hit){
+          var info3=_planSc(); if(info3){
+            var _rw3=info3.iW*info3.sc, _rd3=info3.iD*info3.sc;
+            var faceConfigs3=[
+              {fi:0,axis:'h',wallX:info3.pox,wallY:info3.poy-info3.Tpx,wallLen:_rw3,wallT:info3.Tpx},
+              {fi:1,axis:'v',wallX:info3.pox+_rw3,wallY:info3.poy,wallLen:_rd3,wallT:info3.Tpx},
+              {fi:2,axis:'h',wallX:info3.pox,wallY:info3.poy+_rd3,wallLen:_rw3,wallT:info3.Tpx},
+              {fi:3,axis:'v',wallX:info3.pox-info3.Tpx,wallY:info3.poy,wallLen:_rd3,wallT:info3.Tpx},
+            ];
+            var tapX=_partDrag.sx, tapY=_partDrag.sy;
+            outerLoop:
+            for(var fc3=0;fc3<faceConfigs3.length;fc3++){
+              var cfg3=faceConfigs3[fc3];
+              var ops3=faceOpenings[cfg3.fi]||[];
+              for(var oi3=ops3.length-1;oi3>=0;oi3--){
+                var op3=ops3[oi3];
+                var xr=op3.x/faceW(cfg3.fi), wr=op3.w/faceW(cfg3.fi);
+                var rx3,ry3,rw3,rh3;
+                if(cfg3.axis==='h'){
+                  rx3=cfg3.wallX+xr*cfg3.wallLen; rw3=wr*cfg3.wallLen;
+                  ry3=cfg3.wallY; rh3=cfg3.wallT;
+                } else {
+                  rx3=cfg3.wallX; rw3=cfg3.wallT;
+                  ry3=cfg3.wallY+xr*cfg3.wallLen; rh3=wr*cfg3.wallLen;
+                }
+                var pad3=10;
+                if(tapX>=rx3-pad3&&tapX<=rx3+rw3+pad3&&tapY>=ry3-pad3&&tapY<=ry3+rh3+pad3){
+                  _planSelType='opening'; _planSelId=op3.id; hit=true;
+                  _openDrawerTab('list');
+                  break outerLoop;
+                }
+              }
+            }
+          }
+        }
         if(!hit){ _planSelType=null; _planSelId=null; }
-        renderPlan();
+        if(_planSelType!=='opening') renderPlan();
+        else redrawPlan();
       } else {
         // ドラッグ → 寸法線移動確定（_dimBaseをクリア）
         if(_planSelType==='partition'&&_planSelId!==null){
