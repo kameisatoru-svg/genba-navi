@@ -78,14 +78,19 @@ body{
   border-top:2px solid var(--accent);
   border-radius:14px 14px 0 0;
   flex-shrink:0;
-  max-height:60vh;
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
+  max-height:72vh;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
 }
 .drawer.hidden{display:none;}
 .drawer-handle{
   height:18px;display:flex;align-items:center;justify-content:center;
   flex-shrink:0;cursor:pointer;
+}
+#drawer-content{
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  display:flex;flex-direction:column;
 }
 .drawer-op{padding:10px 14px 8px;}
 .drawer-list{padding:6px 14px 10px;border-top:1px solid rgba(30,45,64,0.08);}
@@ -1006,42 +1011,52 @@ function _drawerOpening(){
   if(selOp2){
     var W=getW(),H=getH();
     var d={left:selOp2.x,right:W-selOp2.x-selOp2.w,bottom:selOp2.y,top:H-selOp2.y-selOp2.h};
-    h+='<div style="background:rgba(200,169,110,0.1);border:1.5px solid rgba(200,169,110,0.4);border-radius:10px;padding:10px;margin-bottom:10px;">';
-    h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">';
-    h+='<span style="flex:1;font-size:13px;font-weight:700;color:#b06a00;">'+selOp2.type+'</span>';
-    h+='<button onclick="removeOp('+selId+')" style="height:30px;padding:0 10px;border:1px solid rgba(229,53,53,0.5);border-radius:7px;background:transparent;color:#e53535;font-size:11px;cursor:pointer;font-family:inherit;">削除</button>';
+    var BW='52px'; // タップボタン基本サイズ（Fold5対応）
+    h='<div style="display:flex;flex-direction:column;height:100%;overflow:hidden;">';
+    // ── 操作フレーム（固定・スクロールしない） ──
+    h+='<div style="flex-shrink:0;background:rgba(200,169,110,0.1);border-bottom:1.5px solid rgba(200,169,110,0.4);padding:10px 14px;">';
+    // タイトル＋削除ボタン
+    h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">';
+    h+='<span style="flex:1;font-size:14px;font-weight:700;color:#b06a00;">'+selOp2.type+'</span>';
+    h+='<button onclick="removeOp('+selId+')" style="height:44px;padding:0 18px;border:1.5px solid rgba(229,53,53,0.5);border-radius:10px;background:transparent;color:#e53535;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">削除</button>';
     h+='</div>';
-    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">';
-    h+='<div style="background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:6px;text-align:center;">'
-      +'<div style="font-size:9px;color:#5a6a7a;margin-bottom:2px;">幅 mm</div>'
-      +'<input type="number" value="'+selOp2.w+'" inputmode="numeric" style="width:100%;border:none;outline:none;font-size:16px;font-weight:700;color:#1e2d40;text-align:center;background:transparent;font-family:inherit;" oninput="resizeOp(\'w\',parseInt(this.value)||0)"></div>';
-    h+='<div style="background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:6px;text-align:center;">'
-      +'<div style="font-size:9px;color:#5a6a7a;margin-bottom:2px;">高さ mm</div>'
-      +'<input type="number" value="'+selOp2.h+'" inputmode="numeric" style="width:100%;border:none;outline:none;font-size:16px;font-weight:700;color:#1e2d40;text-align:center;background:transparent;font-family:inherit;" oninput="resizeOp(\'h\',parseInt(this.value)||0)"></div>';
+    // 十字ボタン＋ステップボタン（横並び）
+    h+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">';
+    // 十字（大きく）
+    h+='<div style="display:grid;grid-template-columns:'+BW+' '+BW+' '+BW+';grid-template-rows:'+BW+' '+BW+' '+BW+';gap:4px;flex-shrink:0;">';
+    var bs='height:'+BW+';width:'+BW+';border-radius:10px;border:1.5px solid rgba(30,45,64,0.2);background:#fff;cursor:pointer;font-size:18px;font-weight:700;color:#1e2d40;';
+    h+='<div></div><button onclick="movOp(0,1)" style="'+bs+'">▲</button><div></div>';
+    h+='<button onclick="movOp(-1,0)" style="'+bs+'">◀</button><div></div><button onclick="movOp(1,0)" style="'+bs+'">▶</button>';
+    h+='<div></div><button onclick="movOp(0,-1)" style="'+bs+'">▼</button><div></div>';
     h+='</div>';
-    h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:6px;">';
-    h+='<div style="text-align:center;"><div style="font-size:9px;color:#5a6a7a;">左端から</div><div style="font-size:12px;font-weight:700;color:#1e2d40;">'+d.left+'mm</div></div>';
-    h+='<div style="text-align:center;"><div style="font-size:9px;color:#5a6a7a;">右端から</div><div style="font-size:12px;font-weight:700;color:#1e2d40;">'+d.right+'mm</div></div>';
-    h+='<div style="text-align:center;"><div style="font-size:9px;color:#5a6a7a;">床から</div><div style="font-size:12px;font-weight:700;color:#1e2d40;">'+d.bottom+'mm</div></div>';
-    h+='<div style="text-align:center;"><div style="font-size:9px;color:#5a6a7a;">天端から</div><div style="font-size:12px;font-weight:700;color:#1e2d40;">'+d.top+'mm</div></div>';
-    h+='</div>';
-    // 移動ステップ
+    // ステップボタン（縦並び・大きく）
+    h+='<div style="display:flex;flex-direction:column;gap:4px;flex:1;">';
     var steps=[10,100,300];
-    h+='<div style="display:flex;gap:4px;margin-bottom:6px;">';
     steps.forEach(function(s){
       var on=moveStep===s;
-      h+='<button onclick="setMvStep('+s+')" style="flex:1;height:28px;border-radius:6px;border:1px solid rgba(30,45,64,0.15);background:'+(on?'#1e2d40':'#fff')+';color:'+(on?'#fff':'#5a6a7a')+';font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">'+s+'mm</button>';
+      h+='<button onclick="setMvStep('+s+')" style="width:100%;height:44px;border-radius:10px;border:1.5px solid rgba(30,45,64,0.15);background:'+(on?'#1e2d40':'#fff')+';color:'+(on?'#fff':'#5a6a7a')+';font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">'+s+' mm</button>';
     });
     h+='</div>';
-    // 十字移動
-    h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;width:120px;margin:0 auto;">';
-    h+='<div></div><button onclick="movOp(0,1)" style="height:32px;border-radius:6px;border:1px solid rgba(30,45,64,0.15);background:#fff;cursor:pointer;font-size:14px;">▲</button><div></div>';
-    h+='<button onclick="movOp(-1,0)" style="height:32px;border-radius:6px;border:1px solid rgba(30,45,64,0.15);background:#fff;cursor:pointer;font-size:14px;">◀</button>';
-    h+='<div></div>';
-    h+='<button onclick="movOp(1,0)" style="height:32px;border-radius:6px;border:1px solid rgba(30,45,64,0.15);background:#fff;cursor:pointer;font-size:14px;">▶</button>';
-    h+='<div></div><button onclick="movOp(0,-1)" style="height:32px;border-radius:6px;border:1px solid rgba(30,45,64,0.15);background:#fff;cursor:pointer;font-size:14px;">▼</button><div></div>';
     h+='</div>';
+    // 幅・高さ入力（コンパクト・表示メイン）
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">';
+    h+='<div style="background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:5px 8px;text-align:center;">'
+      +'<div style="font-size:9px;color:#5a6a7a;">幅 mm</div>'
+      +'<input type="number" value="'+selOp2.w+'" inputmode="numeric" style="width:100%;border:none;outline:none;font-size:15px;font-weight:700;color:#1e2d40;text-align:center;background:transparent;font-family:inherit;" oninput="resizeOp(\'w\',parseInt(this.value)||0)"></div>';
+    h+='<div style="background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:5px 8px;text-align:center;">'
+      +'<div style="font-size:9px;color:#5a6a7a;">高さ mm</div>'
+      +'<input type="number" value="'+selOp2.h+'" inputmode="numeric" style="width:100%;border:none;outline:none;font-size:15px;font-weight:700;color:#1e2d40;text-align:center;background:transparent;font-family:inherit;" oninput="resizeOp(\'h\',parseInt(this.value)||0)"></div>';
     h+='</div>';
+    // 位置情報（小さく・表示のみ）
+    h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;">';
+    h+='<div style="text-align:center;"><div style="font-size:8px;color:#9a9a9a;">左端から</div><div style="font-size:11px;font-weight:700;color:#5a6a7a;">'+d.left+'mm</div></div>';
+    h+='<div style="text-align:center;"><div style="font-size:8px;color:#9a9a9a;">右端から</div><div style="font-size:11px;font-weight:700;color:#5a6a7a;">'+d.right+'mm</div></div>';
+    h+='<div style="text-align:center;"><div style="font-size:8px;color:#9a9a9a;">床から</div><div style="font-size:11px;font-weight:700;color:#5a6a7a;">'+d.bottom+'mm</div></div>';
+    h+='<div style="text-align:center;"><div style="font-size:8px;color:#9a9a9a;">天端から</div><div style="font-size:11px;font-weight:700;color:#5a6a7a;">'+d.top+'mm</div></div>';
+    h+='</div>';
+    h+='</div>'; // 操作フレーム終わり
+    // スクロールエリア（部品追加ボタン＋リスト）
+    h+='<div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 14px;">';
   }
 
   h+='<div style="font-size:10px;font-weight:700;color:#5a6a7a;margin-bottom:6px;">ドア</div>';
@@ -1065,6 +1080,7 @@ function _drawerOpening(){
   });
   h+='</div></div>';
   h+=_drawerOpList();
+  if(selOp2) h+='</div></div>'; // スクロールエリア＋flex wrapper閉じ
   return h;
 }
 // 設備タブ
