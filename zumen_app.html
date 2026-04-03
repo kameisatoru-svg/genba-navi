@@ -991,12 +991,12 @@ function onDrwDimChange(key,val){
 // 開口部タブ
 function _drawerOpening(){
   var doors=[
-    {label:'片開き',w:900,h:2100},{label:'親子',w:1200,h:2100},
-    {label:'両開き',w:1800,h:2100},{label:'引き違い',w:1800,h:2100},{label:'スライド',w:900,h:2100}
+    {label:'ドア',w:900,h:2100,disp:'片開き'},{label:'親子ドア',w:1200,h:2100,disp:'親子'},
+    {label:'両開きドア',w:1800,h:2100,disp:'両開き'},{label:'引き違いドア',w:1800,h:2100,disp:'引き違い'},{label:'スライドドア',w:900,h:2100,disp:'スライド'}
   ];
   var windows=[
-    {label:'中連窓',w:1600,h:1100},{label:'掃出し窓',w:1600,h:2100},
-    {label:'排煙窓',w:1200,h:600},{label:'縦滑り窓',w:600,h:1100},{label:'嵌め殺し窓',w:900,h:1100}
+    {label:'窓（中連）',w:1600,h:1100,disp:'中連窓'},{label:'窓（掃出）',w:1600,h:2100,disp:'掃出し窓'},
+    {label:'排煙窓',w:1200,h:600,disp:'排煙窓'},{label:'縦滑り窓',w:600,h:1100,disp:'縦滑り'},{label:'嵌め殺し',w:900,h:1100,disp:'嵌め殺し'}
   ];
   var h='<div class="drawer-op">';
 
@@ -1050,7 +1050,7 @@ function _drawerOpening(){
     h+='<button data-label="'+o.label+'" data-w="'+o.w+'" data-h="'+o.h+'" '
       +'onclick="addOp(this.dataset.label,parseInt(this.dataset.w),parseInt(this.dataset.h));" '
       +'style="background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:8px 3px;text-align:center;cursor:pointer;font-family:inherit;">'
-      +'<div style="font-size:11px;font-weight:700;color:#1e2d40;">＋ '+o.label+'</div>'
+      +'<div style="font-size:11px;font-weight:700;color:#1e2d40;">＋ '+o.disp+'</div>'
       +'<div style="font-size:9px;color:#9a9a9a;margin-top:2px;">'+o.w+'×'+o.h+'</div></button>';
   });
   h+='</div>';
@@ -1060,7 +1060,7 @@ function _drawerOpening(){
     h+='<button data-label="'+o.label+'" data-w="'+o.w+'" data-h="'+o.h+'" '
       +'onclick="addOp(this.dataset.label,parseInt(this.dataset.w),parseInt(this.dataset.h));" '
       +'style="background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:8px 3px;text-align:center;cursor:pointer;font-family:inherit;">'
-      +'<div style="font-size:11px;font-weight:700;color:#1e2d40;">＋ '+o.label+'</div>'
+      +'<div style="font-size:11px;font-weight:700;color:#1e2d40;">＋ '+o.disp+'</div>'
       +'<div style="font-size:9px;color:#9a9a9a;margin-top:2px;">'+o.w+'×'+o.h+'</div></button>';
   });
   h+='</div></div>';
@@ -1145,7 +1145,7 @@ function _drawerOpList(){
   ops.forEach(function(op){
     var sel=faceSelId[fi]===op.id;
     h+='<div onclick="faceSelId['+fi+']='+op.id+';redraw();_renderDrawerContent();" style="background:#fff;border-radius:8px;border:1.5px solid '+(sel?'var(--cop)':'rgba(30,45,64,0.1)')+';padding:7px 10px;margin-bottom:4px;display:flex;align-items:center;gap:8px;cursor:pointer;">'+
-      '<div style="flex:1;"><div style="font-size:12px;font-weight:700;color:#1e2d40;">'+op.label+'</div>'+
+      '<div style="flex:1;"><div style="font-size:12px;font-weight:700;color:#1e2d40;">'+op.type+'</div>'+
       '<div style="font-size:10px;color:#9a9a9a;">左端から '+op.x.toLocaleString()+'mm</div></div>'+
       '<button onclick="event.stopPropagation();faceSelId['+fi+']='+op.id+';delSelOp();" style="font-size:10px;color:#e53535;background:none;border:1px solid rgba(229,53,53,0.3);border-radius:5px;padding:2px 8px;cursor:pointer;">削除</button></div>';
   });
@@ -3706,6 +3706,7 @@ function eqdists(eq){
 }
 
 function delSelEq(){var id=faceEqSelId[curFaceIdx]; if(id===null) return; removeEq(id);}
+function delSelOp(){var id=faceSelId[curFaceIdx]; if(id===null) return; removeOp(id);}
 
 function updateDelBtn(){
   var btn=document.getElementById('eq-del-btn');
