@@ -87,6 +87,8 @@ body{
 .drawer-handle{
   height:10px;display:flex;align-items:center;justify-content:center;
   flex-shrink:0;cursor:pointer;
+  position:sticky;top:0;z-index:1;
+  background:#f5f2ec;
 }
 #drawer-content{
 }
@@ -916,8 +918,8 @@ function _openDrawerTab(tab){
   _drawerTab=tab;
   var drawer=document.getElementById('main-drawer');
   drawer.classList.remove('hidden');
-  // 開口部タブのみ高さ固定（位置情報下の区切り線まで）・スクロール可
-  if(tab==='opening'){
+  // 開口部・設備タブは高さ固定（操作UIが見える高さ）・スクロール可
+  if(tab==='opening'||tab==='equip'){
     drawer.style.maxHeight='220px';
     drawer.style.overflowY='auto';
   } else {
@@ -934,6 +936,8 @@ function _closeDrawer(){
   drawer.style.overflowY='';
   _drawerTab='';
   _renderBottomBar();
+  // ドロワー消滅後にレイアウトが確定してからキャンバスを再描画
+  setTimeout(redraw, 0);
 }
 function toggleDrawer(){
   var d=document.getElementById('main-drawer');
@@ -1101,14 +1105,70 @@ function _drawerOpening(){
 }
 // 設備タブ
 function _drawerEquip(){
-  var h='<div class="drawer-op"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">';
+  var selId=faceEqSelId[curFaceIdx];
+  var selEq2=selId!==null?getEquips().find(function(e){return e.id===selId;}):null;
+  var h='<div class="drawer-op">';
+
+  if(selEq2){
+    var W=getW(),H=getH();
+    var d={left:selEq2.x,right:W-selEq2.x-selEq2.w,bottom:selEq2.y,top:H-selEq2.y-selEq2.h};
+    var BW='52px';
+    var arrowStyle='height:'+BW+';width:'+BW+';border-radius:10px;border:1.5px solid rgba(30,45,64,0.2);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;';
+    function arrowBtn(dir,oc){
+      var paths={'up':'M12 8l-6 6h12z','down':'M12 16l6-6H6z','left':'M8 12l6-6v12z','right':'M16 12l-6 6V6z'};
+      return '<button onclick="'+oc+'" style="'+arrowStyle+'"><svg width="44" height="44" viewBox="0 0 24 24" fill="#1e2d40"><path d="'+paths[dir]+'"/></svg></button>';
+    }
+    var customOn=(moveStep!==10&&moveStep!==100&&moveStep!==300);
+    h='<div class="drawer-op" style="padding:8px 14px;">';
+    h+='<div style="display:flex;align-items:flex-start;gap:10px;">';
+    // 十字
+    h+='<div style="display:grid;grid-template-columns:'+BW+' '+BW+' '+BW+';grid-template-rows:'+BW+' '+BW+' '+BW+';gap:4px;flex-shrink:0;">';
+    h+='<div></div>'+arrowBtn('up','movEq(0,1)')+'<div></div>';
+    h+=arrowBtn('left','movEq(-1,0)')+'<div></div>'+arrowBtn('right','movEq(1,0)');
+    h+='<div></div>'+arrowBtn('down','movEq(0,-1)')+'<div></div>';
+    h+='</div>';
+    // 右カラム
+    h+='<div style="flex:1;display:flex;flex-direction:column;gap:3px;">';
+    // 行1：ステップ
+    h+='<div style="display:flex;gap:4px;">';
+    [10,100,300].forEach(function(s){
+      var on=moveStep===s;
+      h+='<button onclick="setMvStep('+s+')" style="flex:1;height:44px;border-radius:10px;border:1.5px solid rgba(30,45,64,0.15);background:'+(on?'#1e2d40':'#fff')+';color:'+(on?'#fff':'#5a6a7a')+';font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">'+s+'</button>';
+    });
+    h+='<input id="eq-step-custom" type="number" value="'+(customOn?moveStep:'')+'" placeholder="自由" inputmode="numeric" '
+      +'style="flex:1;height:44px;border-radius:10px;border:1.5px solid rgba(30,45,64,0.15);background:'+(customOn?'#1e2d40':'#fff')+';color:'+(customOn?'#fff':'#1e2d40')+';font-size:12px;font-weight:700;text-align:center;font-family:inherit;min-width:0;" '
+      +'oninput="var v=parseInt(this.value)||0;if(v>0)setMvStep(v);">';
+    h+='</div>';
+    // 行2：幅＋高さ＋削除
+    h+='<div style="display:flex;gap:4px;align-items:stretch;">';
+    h+='<div style="flex:1;background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:3px 4px;text-align:center;"><div style="font-size:8px;color:#5a6a7a;">幅 mm</div><input type="number" value="'+selEq2.w+'" inputmode="numeric" style="width:100%;border:none;outline:none;font-size:13px;font-weight:700;color:#1e2d40;text-align:center;background:transparent;font-family:inherit;" oninput="resizeEq(\'w\',parseInt(this.value)||0)"></div>';
+    h+='<div style="flex:1;background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:3px 4px;text-align:center;"><div style="font-size:8px;color:#5a6a7a;">高さ mm</div><input type="number" value="'+selEq2.h+'" inputmode="numeric" style="width:100%;border:none;outline:none;font-size:13px;font-weight:700;color:#1e2d40;text-align:center;background:transparent;font-family:inherit;" oninput="resizeEq(\'h\',parseInt(this.value)||0)"></div>';
+    h+='<button onclick="removeEq('+selId+')" style="height:44px;padding:0 10px;border:1.5px solid rgba(229,53,53,0.5);border-radius:10px;background:transparent;color:#e53535;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">削除</button>';
+    h+='</div>';
+    // 行3：位置情報
+    h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;">';
+    h+='<div style="text-align:center;"><div style="font-size:8px;color:#9a9a9a;">左端から</div><div style="font-size:11px;font-weight:700;color:#5a6a7a;">'+d.left+'mm</div></div>';
+    h+='<div style="text-align:center;"><div style="font-size:8px;color:#9a9a9a;">右端から</div><div style="font-size:11px;font-weight:700;color:#5a6a7a;">'+d.right+'mm</div></div>';
+    h+='<div style="text-align:center;"><div style="font-size:8px;color:#9a9a9a;">床から</div><div style="font-size:11px;font-weight:700;color:#5a6a7a;">'+d.bottom+'mm</div></div>';
+    h+='<div style="text-align:center;"><div style="font-size:8px;color:#9a9a9a;">天端から</div><div style="font-size:11px;font-weight:700;color:#5a6a7a;">'+d.top+'mm</div></div>';
+    h+='</div>';
+    h+='</div></div>';
+    h+='<div style="display:flex;align-items:center;justify-content:center;padding:2px 0;">';
+    h+='<span style="font-size:12px;font-weight:700;color:#1a6aaa;">'+selEq2.label+'</span>';
+    h+='</div>';
+    h+='<div style="border-top:1px solid rgba(30,45,64,0.1);margin-bottom:0;"></div>';
+  }
+
+  h+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">';
   EQ_TYPES.forEach(function(eq){
-    h+='<button data-eqid="'+eq.id+'" onclick="addEq(this.dataset.eqid);_closeDrawer();" '
+    h+='<button data-eqid="'+eq.id+'" onclick="addEq(this.dataset.eqid);" '
       +'style="background:#fff;border-radius:9px;border:1px solid rgba(30,45,64,0.12);padding:10px 4px;text-align:center;cursor:pointer;font-family:inherit;">'
       +'<div style="font-size:18px;margin-bottom:3px;">'+eq.icon+'</div>'
       +'<div style="font-size:11px;color:#1e2d40;font-weight:700;">'+eq.label+'</div></button>';
   });
-  h+='</div></div>';
+  h+='</div>';
+  if(selEq2) h+='</div>'; // drawer-op閉じ
+  else h+='</div>';
   return h;
 }
 // 天井器具タブ
@@ -2932,6 +2992,9 @@ function redrawPlan(){
   // 開口部
   drawPlanOpenings(ctx, ox, oy, rw, rd, Tpx, sc);
 
+  // 設備
+  drawPlanEquips(ctx, ox, oy, rw, rd, Tpx, sc);
+
   // 内法輪郭線（細）
   ctx.strokeStyle='rgba(30,45,64,0.6)'; ctx.lineWidth=1;
   _makeInnerPath(ctx); ctx.stroke();
@@ -3229,6 +3292,46 @@ function drawPlanOpenings(ctx, ox, oy, rw, rd, Tpx, sc){
           ctx.strokeRect(cfg.wallX+gi2, ry+gi2, cfg.wallT-gi2*2, ropd-gi2*2);
         }
       }
+      ctx.restore();
+    });
+  });
+}
+
+function drawPlanEquips(ctx, ox, oy, rw, rd, Tpx, sc){
+  // 各面の設備を平面図の壁内側にシンボルで描画
+  var faceConfigs=[
+    {fi:0, axis:'h', wallInnerY:oy,       wallLen:rw, sign:1},  // A上壁・内側は下
+    {fi:1, axis:'v', wallInnerX:ox+rw,    wallLen:rd, sign:-1}, // B右壁・内側は左
+    {fi:2, axis:'h', wallInnerY:oy+rd,    wallLen:rw, sign:-1}, // C下壁・内側は上
+    {fi:3, axis:'v', wallInnerX:ox,       wallLen:rd, sign:1},  // D左壁・内側は右
+  ];
+  var SZ=Math.max(8, Tpx*0.7); // シンボルサイズ（壁厚の70%、最小8px）
+  var MARGIN=Tpx*0.5;          // 壁内面からの距離
+  faceConfigs.forEach(function(cfg){
+    faceEquips[cfg.fi].forEach(function(eq){
+      var xRatio=(eq.x+eq.w/2)/faceW(cfg.fi); // 設備中心のx比率
+      var sel=(eq.id===faceEqSelId[cfg.fi]);
+      var col=sel?'#1a6aaa':'rgba(26,106,170,0.7)';
+      ctx.save();
+      ctx.strokeStyle=col; ctx.fillStyle=sel?'rgba(26,106,170,0.2)':'rgba(26,106,170,0.08)';
+      ctx.lineWidth=sel?1.8:1.2;
+      var cx, cy;
+      if(cfg.axis==='h'){
+        cx=cfg.axis==='h'?(ox+xRatio*rw):0;
+        cx=ox+xRatio*rw;
+        cy=cfg.wallInnerY+cfg.sign*MARGIN+cfg.sign*SZ/2;
+      } else {
+        cx=cfg.wallInnerX+cfg.sign*MARGIN+cfg.sign*SZ/2;
+        cy=oy+xRatio*rd;
+      }
+      // 小さい四角シンボル
+      ctx.fillRect(cx-SZ/2, cy-SZ/2, SZ, SZ);
+      ctx.strokeRect(cx-SZ/2, cy-SZ/2, SZ, SZ);
+      // ラベル（設備名の頭文字）
+      ctx.fillStyle=col;
+      ctx.font='bold '+Math.max(6,SZ*0.55)+'px Meiryo,sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(eq.label.charAt(0), cx, cy);
       ctx.restore();
     });
   });
@@ -3667,7 +3770,7 @@ function odists(op){
 }
 
 
-function setMvStep(s){moveStep=s; if(curView==='ceil') updMPCeil(); else updMP();}
+function setMvStep(s){moveStep=s; if(curView==='ceil') updMPCeil(); else updMP(); _renderDrawerContent();}
 
 function resizeOp(axis,val){
   pushHistory();
@@ -3706,7 +3809,7 @@ function addEq(typeId){
   getEquips().push({id:id,typeId:typeId,label:eq.label,icon:eq.icon,w:ew,h:eh,x:x,y:y});
   faceEqSelId[curFaceIdx]=id;
   faceSelId[curFaceIdx]=null;
-  _renderDrawerContent(); redraw();
+  _openDrawerTab('equip'); redraw();
 }
 
 function removeEq(id){
@@ -3720,7 +3823,8 @@ function removeEq(id){
 function selEq(id){
   faceEqSelId[curFaceIdx]=id;
   faceSelId[curFaceIdx]=null;
-  _renderDrawerContent(); redraw();
+  _openDrawerTab('equip');
+  redraw();
 }
 
 function selOp(id){
@@ -3799,8 +3903,7 @@ function movEq(dx,dy){
   var W=getW(),H=getH();
   eq.x=Math.max(0,Math.min(W-eq.w,eq.x+dx*moveStep));
   eq.y=Math.max(0,Math.min(H-eq.h,eq.y+dy*moveStep));
-  updMPEq(); redraw();
-  setTimeout(updateDelBtn,30);
+  _renderDrawerContent(); redraw();
 }
 
 function resizeEq(axis,val){
@@ -4084,19 +4187,27 @@ document.addEventListener('click',function(e){
   var ox=Math.round((CW-W*sc)/2);
   var oy=Math.round((CH-H*sc)/2);
   var hit=null;
-  for(var i=getOps().length-1;i>=0;i--){
-    var o=getOps()[i];
-    var rx=ox+o.x*sc,ry2=oy+(H-o.y-o.h)*sc,rw3=o.w*sc,rh2=o.h*sc;
-    if(px>=rx&&px<=rx+rw3&&py>=ry2&&py<=ry2+rh2){hit=o.id;break;}
+  // equipタブ中は開口部タップを無視・openingタブ中は設備タップを無視
+  if(_drawerTab!=='equip'){
+    for(var i=getOps().length-1;i>=0;i--){
+      var o=getOps()[i];
+      var rx=ox+o.x*sc,ry2=oy+(H-o.y-o.h)*sc,rw3=o.w*sc,rh2=o.h*sc;
+      if(px>=rx&&px<=rx+rw3&&py>=ry2&&py<=ry2+rh2){hit=o.id;break;}
+    }
   }
   if(hit!==null){
     faceEqSelId[curFaceIdx]=null; selOp(hit);
   } else {
     var eqHit=null;
-    for(var j=getEquips().length-1;j>=0;j--){
-      var eq=getEquips()[j];
-      var erx=ox+eq.x*sc,ery=oy+(H-eq.y-eq.h)*sc,erw=eq.w*sc,erh=eq.h*sc;
-      if(px>=erx&&px<=erx+erw&&py>=ery&&py<=ery+erh){eqHit=eq.id;break;}
+    if(_drawerTab!=='opening'){
+      for(var j=getEquips().length-1;j>=0;j--){
+        var eq=getEquips()[j];
+        var erx=ox+eq.x*sc,ery=oy+(H-eq.y-eq.h)*sc,erw=eq.w*sc,erh=eq.h*sc;
+        // 描画サイズが小さい設備（コンセント等）のために最小44pxのタップ領域を保証
+        var minTap=44;
+        var padX=Math.max(0,(minTap-erw)/2), padY=Math.max(0,(minTap-erh)/2);
+        if(px>=erx-padX&&px<=erx+erw+padX&&py>=ery-padY&&py<=ery+erh+padY){eqHit=eq.id;break;}
+      }
     }
     if(eqHit!==null){
       faceSelId[curFaceIdx]=null; selEq(eqHit);
