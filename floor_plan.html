@@ -7,7 +7,7 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;overflow:hidden;background:#1a1a1a;font-family:'Meiryo','Yu Gothic',system-ui,sans-serif;}
-#app{display:flex;flex-direction:column;height:100vh;max-width:720px;margin:0 auto;background:#f8f8f6;position:relative;overflow:hidden;}
+#app{display:flex;flex-direction:column;height:100%;width:100%;background:#f8f8f6;position:relative;overflow:hidden;}
 
 /* キャンバスエリア */
 #canvas-area{flex:1;position:relative;min-height:0;background:#f0f0ec;}
@@ -57,7 +57,7 @@ html,body{height:100%;overflow:hidden;background:#1a1a1a;font-family:'Meiryo','Y
 #panel{
   position:absolute;bottom:60px;left:0;right:0;
   background:#fff;border-top:0.5px solid #ddd;
-  z-index:30;max-height:62%;overflow-y:auto;
+  z-index:30;max-height:288px;overflow-y:auto;
 }
 #panel.hidden{display:none;}
 #panel-header{
@@ -302,30 +302,24 @@ var GN = (function(){
   var CA=document.getElementById('canvas-area');
   var WCX_R=100,WCY_R=100,WR=72,WRI=28;
   var TCH={a:false,l:null,pd:null,pm:null};
+  var PAN={active:false,x:0,y:0}; // 中ボタンパン用
   var ET=null;
   var nextWallId=1;
 
   // アプリ状態
-  // ── デバッグ用サンプルデータ（作業完了後に削除） ──
-  var _DBG_W=9000,_DBG_D=6000;
-  var _DBG_SEGS=[
-    {angle:0,  len:_DBG_W,dx:_DBG_W,dy:0,      isFinal:true},
-    {angle:90, len:_DBG_D,dx:0,      dy:_DBG_D, isFinal:true},
-    {angle:180,len:_DBG_W,dx:-_DBG_W,dy:0,      isFinal:true},
-    {angle:270,len:_DBG_D,dx:0,      dy:-_DBG_D,isFinal:true},
-  ];
-  var _DBG_PTS=[
-    {x:0,y:0},{x:_DBG_W,y:0},{x:_DBG_W,y:_DBG_D},{x:0,y:_DBG_D},{x:0,y:0}
-  ];
-  // ── ここまでデバッグ用 ──
-
+  var _W=9000,_D=6000;
   var S={
     name:'テスト現場',str:'RC',ct:'skeleton',ch:2800,
-    gW:_DBG_W,gH:_DBG_D,thr:100,
+    gW:_W,gH:_D,thr:100,
     phase:'confirmed',
-    segs:_DBG_SEGS,pts:_DBG_PTS,
+    segs:[
+      {angle:0,  len:_W,dx:_W, dy:0,  isFinal:true},
+      {angle:90, len:_D,dx:0,  dy:_D, isFinal:true},
+      {angle:180,len:_W,dx:-_W,dy:0,  isFinal:true},
+      {angle:270,len:_D,dx:0,  dy:-_D,isFinal:true},
+    ],
+    pts:[{x:0,y:0},{x:_W,y:0},{x:_W,y:_D},{x:0,y:_D},{x:0,y:0}],
     cerr:{dx:0,dy:0,total:0,abs:'distributed'},
-    // 辺選択モード（閉じる前）
     selectingSegs:false,
     lockedSegs:[],
     closeAngleDeg:0,
@@ -387,10 +381,11 @@ var GN = (function(){
     return{dx:Math.round(dx),dy:Math.round(dy),total:Math.round(Math.sqrt(dx*dx+dy*dy))};
   }
   function gnCalcView(w,h,offY){
-    var mg=52,aW=CA.offsetWidth,aH=CA.offsetHeight-(offY||0);
+    var mg=30,aW=CA.offsetWidth,aH=CA.offsetHeight-(offY||0);
+    if(aW<=0)aW=816;if(aH<=0)aH=600; // フォールバック
     S.vSC=Math.min((aW-mg*2)/w,(aH-mg*2)/h,3);
-    S.vOX=mg+(aW-mg*2-w*S.vSC)/2;
-    S.vOY=mg+(aH-mg*2-h*S.vSC)/2+(offY?10:0);
+    S.vOX=Math.round(mg+(aW-mg*2-w*S.vSC)/2);
+    S.vOY=Math.round(mg+(aH-mg*2-h*S.vSC)/2);
   }
   function skelBounds(){
     var dp=gnDrawPts();if(dp.length<2)return null;
@@ -399,8 +394,23 @@ var GN = (function(){
   }
 
   // 部屋自動生成
+  // 壁のfrom/toを考慮：セルをその境界で分断する壁が存在するかチェック
+  function wallSplitsCell(type,coord,from,to,cellMin,cellMax,cellCoord){
+    // cellCoordはセルの該当軸の範囲（cellMin〜cellMax）
+    // 壁がセルを通過するか：coordがセルのcoord範囲内 AND from/toがcellCoord範囲に重なる
+    if(type==='V'){
+      // 縦壁：coord=x座標、from/to=y範囲
+      // セルのx範囲(cellMin〜cellMax)をcoordが分断し、壁のy範囲がセルのy範囲(cellCoord)に重なる
+      return coord>cellMin&&coord<cellMax&&from<cellCoord[1]&&to>cellCoord[0];
+    }else{
+      // 横壁：coord=y座標、from/to=x範囲
+      return coord>cellMin&&coord<cellMax&&from<cellCoord[1]&&to>cellCoord[0];
+    }
+  }
+
   function updateRooms(){
     var b=skelBounds();if(!b)return;
+    // 全壁のcoordを軸として候補グリッドを作る
     var vx=S.walls.filter(function(w){return w.type==='V';}).map(function(w){return w.coord;});
     var hy=S.walls.filter(function(w){return w.type==='H';}).map(function(w){return w.coord;});
     vx=Array.from(new Set(vx)).sort(function(a,b2){return a-b2;});
@@ -412,15 +422,28 @@ var GN = (function(){
     S.rooms=[];
     for(var i=0;i<xs.length-1;i++){
       for(var j=0;j<ys.length-1;j++){
-        var key=xs[i]+'_'+ys[j]+'_'+xs[i+1]+'_'+ys[j+1];
-        var w2=xs[i+1]-xs[i],h2=ys[j+1]-ys[j];
+        var x0=xs[i],x1=xs[i+1],y0=ys[j],y1=ys[j+1];
+        // このセルを実際に分断する壁があるかチェック
+        // 縦方向：x0〜x1の間にfrom/toがy0〜y1に重なる縦壁
+        var splitByV=S.walls.some(function(w){
+          return w.type==='V'&&w.coord>x0&&w.coord<x1&&w.from<y1&&w.to>y0;
+        });
+        // 横方向：y0〜y1の間にfrom/toがx0〜x1に重なる横壁
+        var splitByH=S.walls.some(function(w){
+          return w.type==='H'&&w.coord>y0&&w.coord<y1&&w.from<x1&&w.to>x0;
+        });
+        // セルを分断する壁がある場合はスキップ（より小さいセルで処理される）
+        if(splitByV||splitByH)continue;
+        // このセルの境界に壁が存在するかチェック（セルが実際に囲まれているか）
+        var key=x0+'_'+y0+'_'+x1+'_'+y1;
+        var w2=x1-x0,h2=y1-y0;
         var area=Math.round(w2*h2/1000000*100)/100;
         if(existing[key]){
-          S.rooms.push(Object.assign({},existing[key],{x:xs[i],y:ys[j],w:w2,h:h2,area:area}));
+          S.rooms.push(Object.assign({},existing[key],{x:x0,y:y0,w:w2,h:h2,area:area}));
         }else{
           S.rooms.push({
             id:'r'+(Date.now()+Math.random()|0),key:key,
-            name:'',x:xs[i],y:ys[j],w:w2,h:h2,area:area,
+            name:'',x:x0,y:y0,w:w2,h:h2,area:area,
             ch:S.ch,
             mat:{floor:'',ceiling:'',wall:''},
           });
@@ -446,8 +469,16 @@ var GN = (function(){
     if(S.phase==='confirmed'){
       var dp=gnDrawPts();
       var xs=dp.map(function(p){return p.x;}),ys=dp.map(function(p){return p.y;});
-      gnCalcView(gnMax(xs)-gnMin(xs)||1000,gnMax(ys)-gnMin(ys)||1000);
-      S.vOX-=gnMin(xs)*S.vSC;S.vOY-=gnMin(ys)*S.vSC;
+      var W=gnMax(xs)-gnMin(xs)||1000,H=gnMax(ys)-gnMin(ys)||1000;
+      var mg=20;
+      var aW=CA.offsetWidth||816;
+      // canvas-areaの実高さ：window.innerHeightからボトムバー(60px)を引く
+      var bbEl=document.getElementById('bottombar');
+      var bbH=bbEl?bbEl.offsetHeight:60;
+      var aH=(window.innerHeight-bbH)||500;
+      S.vSC=Math.min((aW-mg*2)/W,(aH-mg*2)/H,3);
+      S.vOX=Math.round(mg+(aW-mg*2-W*S.vSC)/2 - gnMin(xs)*S.vSC);
+      S.vOY=Math.round(mg+(aH-mg*2-H*S.vSC)/2 - gnMin(ys)*S.vSC);
     }else{gnCalcView(S.gW,S.gH,190);}
     gnPaint();
   }
@@ -736,9 +767,27 @@ var GN = (function(){
     S.vOX=mx-(mx-S.vOX)*(nsc/S.vSC);S.vOY=my-(my-S.vOY)*(nsc/S.vSC);S.vSC=nsc;
     document.getElementById('fitview-btn').style.display='block';gnPaint();
   },{passive:false});
-  CV.addEventListener('mousedown',onCVDown);
-  CV.addEventListener('mousemove',onCVMove);
-  CV.addEventListener('mouseup',onCVUp);
+  CV.addEventListener('mousedown',function(e){
+    // 中ボタン（button=1）でパン開始
+    if(e.button===1){e.preventDefault();PAN.active=true;PAN.x=e.clientX;PAN.y=e.clientY;CV.style.cursor='grab';return;}
+    onCVDown(e);
+  });
+  CV.addEventListener('mousemove',function(e){
+    if(PAN.active){
+      var r=CV.getBoundingClientRect(),sx=CV.width/r.width;
+      S.vOX+=(e.clientX-PAN.x)*sx;S.vOY+=(e.clientY-PAN.y)*sx;
+      PAN.x=e.clientX;PAN.y=e.clientY;
+      document.getElementById('fitview-btn').style.display='block';gnPaint();
+      return;
+    }
+    onCVMove(e);
+  });
+  CV.addEventListener('mouseup',function(e){
+    if(PAN.active){PAN.active=false;CV.style.cursor='default';return;}
+    onCVUp(e);
+  });
+  // 中ボタンのデフォルト動作（スクロール）を抑制
+  CV.addEventListener('auxclick',function(e){if(e.button===1)e.preventDefault();});
 
   function onCVDown(e){
     // 辺タップ選択モード（守りたい寸法を選ぶ）
@@ -769,13 +818,27 @@ var GN = (function(){
       var b=skelBounds();
       if(!b||mmx<b.minX||mmx>b.maxX||mmy<b.minY||mmy>b.maxY)return;
       if(S.addWallStep===0){
+        // 1点目
         S.addWallP1={x:mmx,y:mmy};S.addWallStep=1;gnPaint(p);
       }else{
-        var dx=Math.abs(mmx-S.addWallP1.x),dy=Math.abs(mmy-S.addWallP1.y);
-        var isV=dy>=dx,b2=skelBounds();
-        var w2=isV
-          ?{id:'w'+(nextWallId++),type:'V',coord:S.addWallP1.x,from:Math.max(b2.minY,Math.min(S.addWallP1.y,mmy)),to:Math.min(b2.maxY,Math.max(S.addWallP1.y,mmy)),thick:100}
-          :{id:'w'+(nextWallId++),type:'H',coord:S.addWallP1.y,from:Math.max(b2.minX,Math.min(S.addWallP1.x,mmx)),to:Math.min(b2.maxX,Math.max(S.addWallP1.x,mmx)),thick:100};
+        // 2点目：V/Hはボタンで指定済み
+        var b2=skelBounds();
+        var w2;
+        if(S.addWallMode==='V'){
+          // 縦壁：x座標=1点目のx、y範囲=1点目〜2点目
+          w2={id:'w'+(nextWallId++),type:'V',
+            coord:S.addWallP1.x,
+            from:Math.max(b2.minY,Math.min(S.addWallP1.y,mmy)),
+            to:Math.min(b2.maxY,Math.max(S.addWallP1.y,mmy)),
+            thick:100};
+        }else{
+          // 横壁：y座標=1点目のy、x範囲=1点目〜2点目
+          w2={id:'w'+(nextWallId++),type:'H',
+            coord:S.addWallP1.y,
+            from:Math.max(b2.minX,Math.min(S.addWallP1.x,mmx)),
+            to:Math.min(b2.maxX,Math.max(S.addWallP1.x,mmx)),
+            thick:100};
+        }
         S.walls.push(w2);S.addWallStep=0;S.addWallP1=null;
         updateRooms();
         if(!document.getElementById('panel').classList.contains('hidden'))openPanel('partition');
@@ -1302,8 +1365,11 @@ var GN = (function(){
   }
 
   // 間仕切り操作
-  function toggleAddWall(){
-    S.addWallMode=!S.addWallMode;S.addWallStep=0;S.addWallP1=null;S.selectedWall=null;
+  function toggleAddWall(type){
+    // 同じタイプを再押しでOFF、違うタイプはそちらに切替
+    if(S.addWallMode===type){S.addWallMode=false;}
+    else{S.addWallMode=type;}
+    S.addWallStep=0;S.addWallP1=null;S.selectedWall=null;
     CV.style.cursor=S.addWallMode?'crosshair':'default';
     openPanel('partition');gnPaint();
   }
@@ -1327,10 +1393,11 @@ var GN = (function(){
     S.layerVis[key]=!S.layerVis[key];openPanel('layer');gnPaint();
   }
 
-  // 起動
-  CV.width=CA.offsetWidth;CV.height=CA.offsetHeight;
-  // デバッグ：確定済み外周で起動
-  updateRooms();fitView();setMode('partition');
+  // 起動（rAFで1フレーム待ってからCA.offsetWidthを取得）
+  requestAnimationFrame(function(){
+    CV.width=CA.offsetWidth;CV.height=CA.offsetHeight;
+    updateRooms();fitView();setMode('partition');
+  });
 
   return {
     fitView:fitView,addSeg:addSeg,tryClose:tryClose,undoSeg:undoSeg,
