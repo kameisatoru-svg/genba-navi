@@ -330,10 +330,11 @@ var GN = (function(){
     walls:[],
     selectedWall:null,
     addWallMode:false,   // 'draw' or false
-    addWallStep:0,       // 0=待機 1=1点目確定・ドラッグ中
-    addWallP1:null,      // 1点目座標（スナップ済み）
+    addWallStep:0,       // 0=カーソル追従中 1=始点確定・終点待ち
+    addWallP1:null,      // 始点（確定後）
     addWallDragging:false,
-    addWallCur:null,     // ドラッグ中の現在座標
+    addWallSnap:null,    // カーソル位置のスナップ候補（常に更新）
+    addWallCur:null,     // 終点プレビュー座標
     addWallDir:null,     // 確定した壁方向('V'or'H')
     wallDrag:false,
     wallDragStart:0,
@@ -853,49 +854,42 @@ var GN = (function(){
       var b=skelBounds();
       if(!b)return;
       var raw={x:gnMX(p.x),y:gnMY(p.y)};
-      var snp=snapToSkeleton(raw.x,raw.y);
-      if(snp.x<b.minX||snp.x>b.maxX||snp.y<b.minY||snp.y>b.maxY)return;
       if(S.addWallStep===0){
-        // 1タップ目：始点確定・壁方向確定
-        S.addWallP1={x:snp.x,y:snp.y};
-        // wallDirがnullの場合：外周の近い辺から判定
+        // 1タップ目：スナップ位置があればスナップ、なければカーソル位置をそのまま使う
+        var snp=S.addWallSnap||snapToSkeleton(raw.x,raw.y);
+        var p1x=snp.snapped?snp.x:snap50(raw.x);
+        var p1y=snp.snapped?snp.y:snap50(raw.y);
+        S.addWallP1={x:p1x,y:p1y};
+        // 壁方向：スナップした辺から決める、なければ外周の最近辺から決める
         var wd=snp.wallDir;
         if(!wd){
           var bb=skelBounds();
-          var distH=Math.min(Math.abs(snp.y-bb.minY),Math.abs(snp.y-bb.maxY));
-          var distV=Math.min(Math.abs(snp.x-bb.minX),Math.abs(snp.x-bb.maxX));
-          wd=distH<=distV?'V':'H'; // 横辺に近い→縦壁、縦辺に近い→横壁
+          var dH=Math.min(Math.abs(p1y-bb.minY),Math.abs(p1y-bb.maxY));
+          var dV=Math.min(Math.abs(p1x-bb.minX),Math.abs(p1x-bb.maxX));
+          wd=dH<=dV?'V':'H';
         }
         S.addWallDir=wd;
         S.addWallStep=1;
-        S.addWallDragging=false;
-        S.addWallCur={x:snp.x,y:snp.y};
+        S.addWallCur={x:p1x,y:p1y};
       }else if(S.addWallStep===1){
         // 2タップ目：終点確定・壁生成
         var dir=S.addWallDir;
-        var ex,ey;
-        if(dir==='V'){
-          var snpE=snapToSkeleton(S.addWallP1.x,raw.y);
-          ey=snpE.snapped&&snpE.edgeType==='H'?snpE.y:snap50(raw.y);
-          ex=S.addWallP1.x;
-        }else{
-          var snpE2=snapToSkeleton(raw.x,S.addWallP1.y);
-          ex=snpE2.snapped&&snpE2.edgeType==='V'?snpE2.x:snap50(raw.x);
-          ey=S.addWallP1.y;
-        }
-        var len=dir==='V'?Math.abs(ey-S.addWallP1.y):Math.abs(ex-S.addWallP1.x);
+        var p2=S.addWallCur||{x:raw.x,y:raw.y};
+        var ex2=p2.x,ey2=p2.y;
+        var len=dir==='V'?Math.abs(ey2-S.addWallP1.y):Math.abs(ex2-S.addWallP1.x);
         if(len>50){
           var w2=dir==='V'
             ?{id:'w'+(nextWallId++),type:'V',coord:S.addWallP1.x,
-              from:Math.max(b.minY,Math.min(S.addWallP1.y,ey)),
-              to:Math.min(b.maxY,Math.max(S.addWallP1.y,ey)),thick:100}
+              from:Math.max(b.minY,Math.min(S.addWallP1.y,ey2)),
+              to:Math.min(b.maxY,Math.max(S.addWallP1.y,ey2)),thick:100}
             :{id:'w'+(nextWallId++),type:'H',coord:S.addWallP1.y,
-              from:Math.max(b.minX,Math.min(S.addWallP1.x,ex)),
-              to:Math.min(b.maxX,Math.max(S.addWallP1.x,ex)),thick:100};
+              from:Math.max(b.minX,Math.min(S.addWallP1.x,ex2)),
+              to:Math.min(b.maxX,Math.max(S.addWallP1.x,ex2)),thick:100};
           S.walls.push(w2);updateRooms();
           if(!document.getElementById('panel').classList.contains('hidden'))openPanel('partition');
         }
-        S.addWallStep=0;S.addWallP1=null;S.addWallDir=null;S.addWallCur=null;
+        // 次の壁をすぐ引けるようにstep=0に戻す（モードは継続）
+        S.addWallStep=0;S.addWallP1=null;S.addWallDir=null;S.addWallCur=null;S.addWallSnap=null;
       }
       gnPaint(p);
       return;
@@ -916,11 +910,14 @@ var GN = (function(){
     var p=getPos(e);
     S.lastCursorPx=p;
     if(S.mode==='partition'){
-      // 壁追加モード：カーソル位置でプレビュー更新
+      // 壁追加モード：常にカーソル追従
       if(S.addWallMode){
         var raw2={x:gnMX(p.x),y:gnMY(p.y)};
-        if(S.addWallStep===1&&S.addWallP1){
-          // 1点目確定済み：終点プレビュー
+        if(S.addWallStep===0){
+          // 始点未確定：スナップ候補を更新するだけ
+          S.addWallSnap=snapToSkeleton(raw2.x,raw2.y);
+        }else if(S.addWallStep===1&&S.addWallP1){
+          // 始点確定済み：終点プレビュー更新
           var dir2=S.addWallDir;
           if(dir2==='V'){
             var snpP=snapToSkeleton(S.addWallP1.x,raw2.y);
@@ -963,15 +960,20 @@ var GN = (function(){
     CTX2.beginPath();CTX2.moveTo(0,cpx.y);CTX2.lineTo(CV.width,cpx.y);CTX2.stroke();
     CTX2.setLineDash([]);CTX2.globalAlpha=1;
 
-    // スナップ候補（壁追加待機中）
+    // スナップ候補表示
     var snpDisp=null;
-    if(S.addWallMode&&!S.addWallDragging){
-      snpDisp=snapToSkeleton(mmx,mmy);
-      if(snpDisp.snapped){
+    if(S.addWallMode&&S.addWallStep===0){
+      // step0：カーソル位置のスナップ候補を赤丸で表示
+      snpDisp=S.addWallSnap;
+      if(snpDisp&&snpDisp.snapped){
         CTX2.strokeStyle='#E24B4A';CTX2.lineWidth=2.5;
         CTX2.beginPath();CTX2.arc(gnPX(snpDisp.x),gnPY(snpDisp.y),9,0,Math.PI*2);CTX2.stroke();
         CTX2.fillStyle='rgba(226,75,74,0.15)';CTX2.fill();
       }
+    }else if(S.addWallMode&&S.addWallStep===1&&S.addWallP1){
+      // step1：始点を赤丸で常時表示
+      CTX2.fillStyle='#E24B4A';
+      CTX2.beginPath();CTX2.arc(gnPX(S.addWallP1.x),gnPY(S.addWallP1.y),7,0,Math.PI*2);CTX2.fill();
     }
 
     // XY座標ラベル：スナップ時は赤丸から離す
@@ -1480,7 +1482,7 @@ var GN = (function(){
   // 間仕切り操作
   function toggleAddWall(){
     S.addWallMode=S.addWallMode?false:'draw';
-    S.addWallStep=0;S.addWallP1=null;S.addWallDragging=false;S.addWallCur=null;S.addWallDir=null;
+    S.addWallStep=0;S.addWallP1=null;S.addWallDragging=false;S.addWallCur=null;S.addWallDir=null;S.addWallSnap=null;
     S.selectedWall=null;
     CV.style.cursor=S.addWallMode?'crosshair':'default';
     openPanel('partition');gnPaint();
