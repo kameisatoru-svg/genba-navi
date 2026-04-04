@@ -315,6 +315,7 @@ var GN = (function(){
     // 辺選択モード（閉じる前）
     selectingSegs:false,
     lockedSegs:[],    // 守る辺のインデックス（gnRealSegs()基準）
+    closeAngleDeg:null, // 閉じる辺の確定角度
     vSC:1,vOX:40,vOY:40,
     wAng:0,wDrag:false,
     mode:'skeleton',
@@ -481,123 +482,53 @@ var GN = (function(){
     return Math.round(Math.abs(len));
   }
 
+  // ========== 閉じるフロー ==========
+  // Step1: 「閉じる」ボタン → 角度選択ダイアログ
   function tryClose(){
     if(gnRealSegs().length<3){gnErr('もう少し辺を追加してください');return;}
-    // 辺選択モード開始
-    S.selectingSegs=true;
-    S.lockedSegs=[];
-    document.getElementById('wheel-overlay').classList.add('hidden');
-    gnPaint();
-    gnShowSegSelectUI();
-  }
-
-  // 辺選択UI表示
-  function gnShowSegSelectUI(){
-    document.getElementById('panel').classList.remove('hidden');
-    document.getElementById('panel-title').textContent='守りたい寸法を選ぶ';
-    var rs=gnRealSegs();
-    var maxLock=rs.length-1; // 最低1辺は調整用に残す
-    var locked=S.lockedSegs;
-    var canMore=locked.length<maxLock;
-    var html2='<div class="note" style="margin-bottom:12px;">守りたい寸法の辺をタップしてください（複数選択可）。<br>選択した辺はそのまま保持されます。</div>';
-    if(!canMore){
-      html2+='<div style="font-size:12px;color:#c33;font-weight:500;margin-bottom:10px;">これ以上選択できません（調整辺が必要です）</div>';
-    }
-    html2+='<div style="margin-bottom:12px;">';
-    rs.forEach(function(s,i){
-      var isLocked=locked.indexOf(i)>=0;
-      var dp=gnDrawPts();
-      var pa=dp[i],pb=dp[i+1]||dp[0];
-      var dirLabel=s.angle===0?'→右':s.angle===90?'↓下':s.angle===180?'←左':s.angle===270?'↑上':s.angle+'°';
-      html2+='<div onclick="GN.toggleLockSeg('+i+')" style="'
-        +'display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:6px;'
-        +'border-radius:8px;cursor:pointer;border:2px solid '+(isLocked?'#b87d00':'#ddd')+';'
-        +'background:'+(isLocked?'#fff8e6':'#fafafa')+';'
-        +((!canMore&&!isLocked)?'opacity:0.4;pointer-events:none;':'')
-        +'">'
-        +'<div style="width:14px;height:14px;border-radius:50%;background:'+(isLocked?'#b87d00':'#ccc')+'"></div>'
-        +'<span style="font-size:13px;font-weight:'+(isLocked?'600':'400')+';color:'+(isLocked?'#b87d00':'#333')+';">'
-        +'辺'+(i+1)+'　'+dirLabel+'　<b>'+s.len+'mm</b></span>'
-        +(isLocked?'<span style="margin-left:auto;font-size:11px;color:#b87d00;">🔒 守る</span>':'')
-        +'</div>';
-    });
-    html2+='</div>';
-    html2+='<div class="btn-row">'
-      +'<button class="abtn primary" onclick="GN.doCloseWithLocks()">この寸法を守って閉じる</button>'
-      +'<button class="abtn" onclick="GN.cancelSegSelect()">作図に戻る</button>'
-      +'</div>';
-    document.getElementById('panel-body').innerHTML=html2;
-  }
-
-  function toggleLockSeg(idx){
-    var i=S.lockedSegs.indexOf(idx);
-    var rs=gnRealSegs();
-    var maxLock=rs.length-1;
-    if(i>=0){
-      S.lockedSegs.splice(i,1);
-    }else{
-      if(S.lockedSegs.length>=maxLock){return;}
-      S.lockedSegs.push(idx);
-    }
-    gnPaint();
-    gnShowSegSelectUI();
-  }
-
-  function cancelSegSelect(){
-    S.selectingSegs=false;S.lockedSegs=[];
-    document.getElementById('panel').classList.add('hidden');
-    document.getElementById('wheel-overlay').classList.remove('hidden');
-    gnPaint();
-  }
-
-  function doCloseWithLocks(){
-    S.selectingSegs=false;
     var e=gnCloseErr();
     if(e.total>S.thr){gnShowErrDlg(e);return;}
     gnShowAngleDlg(e);
   }
 
+  // 誤差超過ダイアログ
   function gnShowErrDlg(e){
     document.getElementById('dlg-title').textContent='寸法を確認してください';
     document.getElementById('dlg-content').innerHTML=
       '<div class="dialog-err">残差 <b>'+e.total+'mm</b>（許容：'+S.thr+'mm）<br>'
-      +'X:'+(e.dx>0?'+':'')+e.dx+'mm　Y:'+(e.dy>0?'+':'')+e.dy+'mm<br>'
+      +'X方向：<b>'+(e.dx>0?'+':'')+e.dx+'mm</b>　Y方向：<b>'+(e.dy>0?'+':'')+e.dy+'mm</b><br>'
       +'レーザー測定を確認してください。</div>'
       +'<div class="dialog-body">「1辺戻す」で修正するか、強制的に閉じることもできます。</div>';
-    document.getElementById('dlg-btns').innerHTML=
-      '<button class="dbtn danger" onclick="GN.closeDlg()">作図に戻る</button>'
-      +'<button class="dbtn" onclick="GN.forceCloseDirect()" style="font-size:11px;">強制的に閉じる</button>';
+    document.getElementById('dlg-btns').innerHTML='';
+    var btns=document.getElementById('dlg-btns');
+    var b1=document.createElement('button');
+    b1.className='dbtn danger';b1.textContent='作図に戻る';
+    b1.addEventListener('click',function(){closeDlg();});
+    var b2=document.createElement('button');
+    b2.className='dbtn';b2.textContent='強制的に閉じる';b2.style.fontSize='11px';
+    b2.addEventListener('click',function(){forceCloseDirect();});
+    btns.appendChild(b1);btns.appendChild(b2);
     document.getElementById('close-dialog').classList.remove('hidden');
   }
 
+  // Step2: 角度選択ダイアログ（閉じる辺の内角・残差X/Y表示）
   function gnShowAngleDlg(e){
-    var actualDeg=gnFinalAngle();   // 閉じる辺の絶対角度（0〜360）
+    var actualDeg=gnFinalAngle();
     var snapDeg=gnNearestSnap(actualDeg);
-
-    // 最後の辺の方向
     var rs=gnRealSegs();
     var lastSeg=rs[rs.length-1];
     var lastDeg=lastSeg?((lastSeg.angle%360+360)%360):0;
+    var fromDeg=(lastDeg+180)%360;
 
-    // 内角 = 最後の辺の進行方向と、閉じる辺の方向がなす内側の角
-    // 進行方向の逆（来た方向）と閉じる辺の差が内角
-    var fromDeg=(lastDeg+180)%360; // 最後の辺の逆方向（来た方向）
-    var rawInner=actualDeg-fromDeg;
-    // -180〜180に正規化
-    while(rawInner>180)rawInner-=360;
-    while(rawInner<-180)rawInner+=360;
-    var innerActual=Math.round(Math.abs(rawInner)*10)/10;
-
-    // スナップ内角
-    var rawInnerSnap=snapDeg-fromDeg;
-    while(rawInnerSnap>180)rawInnerSnap-=360;
-    while(rawInnerSnap<-180)rawInnerSnap+=360;
-    var innerSnap=Math.round(Math.abs(rawInnerSnap)*10)/10;
-
-    // ずれ
+    function calcInner(deg){
+      var raw=deg-fromDeg;
+      while(raw>180)raw-=360;
+      while(raw<-180)raw+=360;
+      return Math.round(Math.abs(raw)*10)/10;
+    }
+    var innerActual=calcInner(actualDeg);
+    var innerSnap=calcInner(snapDeg);
     var diff=Math.round(Math.abs(innerActual-innerSnap)*10)/10;
-
-    // X/Y残差
     var xDisp=(e.dx>0?'+':'')+e.dx;
     var yDisp=(e.dy>0?'+':'')+e.dy;
 
@@ -605,40 +536,168 @@ var GN = (function(){
     document.getElementById('dlg-content').innerHTML=
       '<div class="dialog-ok">'
       +'最後の角の内角：<b>'+innerActual+'°</b>'
-      +(diff>0?'　（直角から <b>'+diff+'°</b> のずれ）':'　（ぴったり）')+'<br>'
-      +'X方向の残差：<b>'+xDisp+'mm</b>　Y方向の残差：<b>'+yDisp+'mm</b>'
+      +(diff>0?'　（直角から <b>'+diff+'°</b> ずれ）':'　（ぴったり直角）')+'<br>'
+      +'X方向の残差：<b>'+xDisp+'mm</b>　　Y方向の残差：<b>'+yDisp+'mm</b>'
       +'</div>'
-      +'<div class="dialog-body">最終辺をどちらで結びますか？</div>';
-    var snapJ=JSON.stringify({deg:snapDeg,e:e}).replace(/"/g,'&quot;');
-    var actJ=JSON.stringify({deg:actualDeg,e:e}).replace(/"/g,'&quot;');
-    document.getElementById('dlg-btns').innerHTML=
-      '<button class="dbtn success" onclick="GN.closeWithSnap(\''+snapJ+'\')">'
-        +innerSnap+'°に補正して閉じる</button>'
-      +'<button class="dbtn" onclick="GN.closeWithActual(\''+actJ+'\')">'
-        +innerActual+'°このまま結ぶ</button>'
-      +'<button class="dbtn danger" onclick="GN.closeDlg()">作図に戻る</button>';
+      +'<div class="dialog-body">最終辺の角度を選んでください。<br>次に守りたい辺をキャンバス上でタップします。</div>';
+
+    var btns=document.getElementById('dlg-btns');
+    btns.innerHTML='';
+
+    // 90°補正ボタン（差がある場合のみ）
+    if(diff>0){
+      var b1=document.createElement('button');
+      b1.className='dbtn success';
+      b1.textContent=innerSnap+'°に補正して次へ';
+      b1.addEventListener('click',function(){gnStartSegSelect(snapDeg,e);});
+      btns.appendChild(b1);
+    }
+    // 実角度ボタン
+    var b2=document.createElement('button');
+    b2.className='dbtn';
+    b2.textContent=innerActual+'°このまま次へ';
+    b2.addEventListener('click',function(){gnStartSegSelect(actualDeg,e);});
+    btns.appendChild(b2);
+    // 戻るボタン
+    var b3=document.createElement('button');
+    b3.className='dbtn danger';b3.textContent='作図に戻る';
+    b3.addEventListener('click',function(){closeDlg();});
+    btns.appendChild(b3);
+
     document.getElementById('close-dialog').classList.remove('hidden');
+  }
+
+  // Step3: 角度確定 → キャンバスタップで辺選択モードへ
+  function gnStartSegSelect(angleDeg, e){
+    S.closeAngleDeg=angleDeg;
+    S._closeErr=e;
+    S.selectingSegs=true;
+    S.lockedSegs=[];
+    closeDlg();
+    document.getElementById('wheel-overlay').classList.add('hidden');
+    // キャンバス下部に「確定して閉じる」バーを表示
+    gnShowSegSelectBar();
+    gnPaint();
+  }
+
+  // 辺選択中のバー表示（キャンバス内ではなくパネルを薄く使う）
+  function gnShowSegSelectBar(){
+    var rs=gnRealSegs();
+    // X/Y残差から調整可能辺の説明
+    var e=S._closeErr;
+    var xTxt=e.dx!==0?'X方向残差'+e.dx+'mm':'';
+    var yTxt=e.dy!==0?'Y方向残差'+e.dy+'mm':'';
+    var errTxt=[xTxt,yTxt].filter(Boolean).join('　');
+    var panel=document.getElementById('panel');
+    panel.classList.remove('hidden');
+    document.getElementById('panel-title').textContent='守りたい辺をキャンバスでタップ';
+    var pb=document.getElementById('panel-body');
+    pb.innerHTML=
+      '<div class="note">寸法を変えたくない辺をキャンバス上で直接タップ。<br>'
+      +'<span style="color:#b87d00;">🔒 金色</span>＝守る　<span style="color:#534AB7;">青</span>＝調整可（残差を吸収）<br>'
+      +(errTxt?'<b>'+errTxt+'</b>':'')+'</div>'
+      +'<div style="font-size:11px;color:#888;margin-bottom:8px;">選択数：<span id="lock-count">0</span> / '+(rs.length-1)+'辺（最低1辺は調整辺として残してください）</div>'
+      +'<div class="btn-row">'
+      +'<button class="abtn primary" id="btn-do-close">確定して閉じる</button>'
+      +'<button class="abtn danger" id="btn-cancel-close">作図に戻る</button>'
+      +'</div>';
+    document.getElementById('btn-do-close').addEventListener('click',function(){doCloseWithLocks();});
+    document.getElementById('btn-cancel-close').addEventListener('click',function(){cancelSegSelect();});
+  }
+
+  // 選択カウント更新
+  function gnUpdLockCount(){
+    var el=document.getElementById('lock-count');
+    if(el)el.textContent=S.lockedSegs.length;
+  }
+
+  // キャンバス上の辺タップによるトグル（onCVDownから呼ばれる）
+  function toggleLockSeg(idx){
+    var i=S.lockedSegs.indexOf(idx);
+    var rs=gnRealSegs();
+    var maxLock=rs.length-1;
+    if(i>=0){
+      S.lockedSegs.splice(i,1);
+    }else{
+      if(S.lockedSegs.length>=maxLock){gnErr('これ以上選択できません（調整辺が必要です）');return;}
+      S.lockedSegs.push(idx);
+    }
+    gnUpdLockCount();
+    gnPaint();
+  }
+
+  function cancelSegSelect(){
+    S.selectingSegs=false;S.lockedSegs=[];S.closeAngleDeg=null;S._closeErr=null;
+    document.getElementById('panel').classList.add('hidden');
+    document.getElementById('wheel-overlay').classList.remove('hidden');
+    gnPaint();
+  }
+
+  // Step4: 残差をX/Y別に調整辺へ分配して確定
+  function doCloseWithLocks(){
+    S.selectingSegs=false;
+    var angleDeg=S.closeAngleDeg;
+    var e=S._closeErr;
+    var rs=gnRealSegs();
+
+    // 調整辺（守らない辺）のインデックス
+    var adjIdxs=[];
+    for(var i=0;i<rs.length;i++){
+      if(S.lockedSegs.indexOf(i)<0)adjIdxs.push(i);
+    }
+
+    // X/Y残差をそれぞれの方向の調整辺に均等分配
+    var adjX=adjIdxs.filter(function(i){var a=(rs[i].angle%360+360)%360;return a===0||a===180;});
+    var adjY=adjIdxs.filter(function(i){var a=(rs[i].angle%360+360)%360;return a===90||a===270;});
+
+    if(e.dx!==0&&adjX.length===0){gnErr('X方向の調整辺がありません。守る辺を減らしてください。');S.selectingSegs=true;gnShowSegSelectBar();gnPaint();return;}
+    if(e.dy!==0&&adjY.length===0){gnErr('Y方向の調整辺がありません。守る辺を減らしてください。');S.selectingSegs=true;gnShowSegSelectBar();gnPaint();return;}
+
+    // 各調整辺に残差を分配（整数mmで）
+    var xUnit=e.dx!==0?Math.round(e.dx/adjX.length):0;
+    var yUnit=e.dy!==0?Math.round(e.dy/adjY.length):0;
+    // 端数を最初の辺に集約
+    var xRem=e.dx-xUnit*adjX.length;
+    var yRem=e.dy-yUnit*adjY.length;
+
+    // ptsを再計算
+    var newPts=[{x:0,y:0}];
+    var cx=0,cy=0;
+    for(var j=0;j<rs.length;j++){
+      var seg=rs[j];
+      var a=(seg.angle%360+360)%360;
+      var addX=0,addY=0;
+      var xai=adjX.indexOf(j),yai=adjY.indexOf(j);
+      if(xai>=0){addX=xUnit+(xai===0?xRem:0);}
+      if(yai>=0){addY=yUnit+(yai===0?yRem:0);}
+      var ndx=seg.dx+addX;
+      var ndy=seg.dy+addY;
+      var nlen=Math.round(Math.sqrt(ndx*ndx+ndy*ndy));
+      rs[j]=Object.assign({},seg,{dx:ndx,dy:ndy,len:nlen});
+      cx+=ndx;cy+=ndy;
+      newPts.push({x:Math.round(cx),y:Math.round(cy)});
+    }
+    S.segs=rs;
+    S.pts=newPts;
+
+    // 最終辺（閉じる辺）を追加
+    var last=newPts[newPts.length-1];
+    var t=gnCloseTgt();
+    var fdx=t.x-last.x,fdy=t.y-last.y;
+    var flen=Math.round(Math.sqrt(fdx*fdx+fdy*fdy));
+    S.segs.push({angle:Math.round(angleDeg),len:flen,dx:Math.round(fdx),dy:Math.round(fdy),isFinal:true});
+    S.pts.push({x:t.x,y:t.y});
+    S.cerr={dx:0,dy:0,total:0,abs:'adjusted'};
+    S.closeAngleDeg=null;S._closeErr=null;
+    gnFinish();
   }
 
   function closeDlg(){document.getElementById('close-dialog').classList.add('hidden');}
 
-  // スナップ角度で閉じる（直角補正等）
-  function closeWithSnap(json){
-    var obj=JSON.parse(json);
-    gnAddFinalAndFinish(obj.deg,obj.e);
-  }
-  // 実際の角度でそのまま閉じる
-  function closeWithActual(json){
-    var obj=JSON.parse(json);
-    gnAddFinalAndFinish(obj.deg,obj.e);
-  }
-
-  // 最終辺を追加して確定
+  // 最終辺を直接追加して確定（強制クローズ用）
   function gnAddFinalAndFinish(angleDeg,e){
     var last=S.pts[S.pts.length-1];
     var t=gnCloseTgt();
-    // 最終辺を実際の基準点座標に向けて追加
-    var r2=gnRad(angleDeg);
     var dx2=t.x-last.x,dy2=t.y-last.y;
     var len=Math.round(Math.sqrt(dx2*dx2+dy2*dy2));
     S.segs.push({angle:Math.round(angleDeg),len:len,dx:Math.round(dx2),dy:Math.round(dy2),isFinal:true});
@@ -660,10 +719,14 @@ var GN = (function(){
     gnFinish();
   }
   // 後方互換
+  function closeWithSnap(json){var obj=typeof json==='string'?JSON.parse(json):json;gnStartSegSelect(obj.deg,obj.e);}
+  function closeWithActual(json){var obj=typeof json==='string'?JSON.parse(json):json;gnStartSegSelect(obj.deg,obj.e);}
   function confirmClose(e){if(typeof e==='string')e=JSON.parse(e);gnAddFinalAndFinish(gnFinalAngle(),e);}
   function forceClose(){forceCloseDirect();}
+
   function gnFinish(){
     S.phase='confirmed';closeDlg();
+    document.getElementById('panel').classList.add('hidden');
     document.getElementById('wheel-overlay').classList.add('hidden');
     document.getElementById('fitview-btn').style.display='none';
     updateRooms();fitView();openPanel('skeleton');
@@ -713,7 +776,34 @@ var GN = (function(){
   CV.addEventListener('mousemove',onCVMove);
   CV.addEventListener('mouseup',onCVUp);
 
+  // キャンバス上の辺ヒットテスト（selectingSegs用）
+  function hitSeg(px,py){
+    var dp=gnDrawPts();
+    var rs=gnRealSegs();
+    var HIT=18; // タップ許容px
+    for(var i=0;i<rs.length;i++){
+      var pa=dp[i],pb=dp[i+1]||(dp[0]);
+      if(!pa||!pb)continue;
+      var ax=gnPX(pa.x),ay=gnPY(pa.y),bx=gnPX(pb.x),by=gnPY(pb.y);
+      // 点と線分の距離
+      var dx=bx-ax,dy=by-ay,len2=dx*dx+dy*dy;
+      if(len2===0)continue;
+      var t=Math.max(0,Math.min(1,((px-ax)*dx+(py-ay)*dy)/len2));
+      var nx=ax+t*dx,ny=ay+t*dy;
+      var dist=Math.sqrt((px-nx)*(px-nx)+(py-ny)*(py-ny));
+      if(dist<HIT)return i;
+    }
+    return -1;
+  }
+
   function onCVDown(e){
+    // 辺選択モード中はキャンバスタップで辺をトグル
+    if(S.selectingSegs){
+      var p=getPos(e);
+      var idx=hitSeg(p.x,p.y);
+      if(idx>=0)toggleLockSeg(idx);
+      return;
+    }
     if(S.mode!=='partition')return;
     var p=getPos(e);
     var mmx=snap50(gnMX(p.x)),mmy=snap50(gnMY(p.y));
@@ -928,7 +1018,7 @@ var GN = (function(){
       });
       // タップ可能エリアの案内
       CTX.fillStyle='rgba(0,0,0,0.5)';CTX.font='bold 12px sans-serif';CTX.textAlign='center';
-      CTX.fillText('パネルから守りたい辺を選んでください',CV.width/2,CV.height-16);
+      CTX.fillText('辺を直接タップ → 🔒 守る / もう一度タップ → 解除',CV.width/2,CV.height-16);
     }
 
     // 間仕切り壁（確定後）
