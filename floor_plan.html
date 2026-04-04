@@ -306,19 +306,32 @@ var GN = (function(){
   var nextWallId=1;
 
   // アプリ状態
+  // ── デバッグ用サンプルデータ（作業完了後に削除） ──
+  var _DBG_W=9000,_DBG_D=6000;
+  var _DBG_SEGS=[
+    {angle:0,  len:_DBG_W,dx:_DBG_W,dy:0,      isFinal:true},
+    {angle:90, len:_DBG_D,dx:0,      dy:_DBG_D, isFinal:true},
+    {angle:180,len:_DBG_W,dx:-_DBG_W,dy:0,      isFinal:true},
+    {angle:270,len:_DBG_D,dx:0,      dy:-_DBG_D,isFinal:true},
+  ];
+  var _DBG_PTS=[
+    {x:0,y:0},{x:_DBG_W,y:0},{x:_DBG_W,y:_DBG_D},{x:0,y:_DBG_D},{x:0,y:0}
+  ];
+  // ── ここまでデバッグ用 ──
+
   var S={
-    name:'',str:'RC',ct:'skeleton',ch:2800,
-    gW:0,gH:0,thr:100,
-    phase:'setup',
-    segs:[],pts:[{x:0,y:0}],
-    cerr:null,
+    name:'テスト現場',str:'RC',ct:'skeleton',ch:2800,
+    gW:_DBG_W,gH:_DBG_D,thr:100,
+    phase:'confirmed',
+    segs:_DBG_SEGS,pts:_DBG_PTS,
+    cerr:{dx:0,dy:0,total:0,abs:'distributed'},
     // 辺選択モード（閉じる前）
     selectingSegs:false,
     lockedSegs:[],
     closeAngleDeg:0,
     vSC:1,vOX:40,vOY:40,
     wAng:0,wDrag:false,
-    mode:'skeleton',
+    mode:'partition',
     // 間仕切り
     walls:[],
     selectedWall:null,
@@ -678,7 +691,9 @@ var GN = (function(){
     S.phase='confirmed';closeDlg();
     document.getElementById('wheel-overlay').classList.add('hidden');
     document.getElementById('fitview-btn').style.display='none';
-    updateRooms();fitView();openPanel('skeleton');
+    updateRooms();fitView();
+    // 外周確定後は自動で間仕切りモードへ
+    setMode('partition');
   }
 
   // タッチ・ピンチ
@@ -1138,8 +1153,14 @@ var GN = (function(){
     var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
     var url=URL.createObjectURL(blob);
     var a=document.createElement('a');
-    a.href=url;a.download=(S.name||'floor_plan')+'_data.json';a.click();
-    URL.revokeObjectURL(url);
+    a.href=url;a.download=(S.name||'floor_plan')+'_data.json';
+    a.style.display='none';
+    document.body.appendChild(a);
+    var sx=window.scrollX,sy=window.scrollY;
+    a.click();
+    window.scrollTo(sx,sy);
+    document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url);},1000);
   }
 
   // パネル
@@ -1191,41 +1212,8 @@ var GN = (function(){
   }
 
   function panelPartition(){
-    return '<div class="btn-row" style="margin-bottom:10px;">'
-      +'<button class="abtn '+(S.addWallMode?'warn':'primary')+'" onclick="GN.toggleAddWall()">'
-      +(S.addWallMode?'✕ 追加モード終了':'＋ 壁を追加')+'</button>'
-      +(S.selectedWall?'<button class="abtn danger" onclick="GN.deleteWall()">選択壁を削除</button>':'')
-      +'</div>'
-      +(S.walls.length>0
-        ?'<div class="sdiv">間仕切り壁（'+S.walls.length+'本）</div>'
-        +S.walls.map(function(w2,i){
-          return '<div class="wall-item">'
-            +'<span>'+(w2.type==='V'?'縦壁 x='+w2.coord:'横壁 y='+w2.coord)+'mm　('+(w2.from)+'〜'+(w2.to)+')</span>'
-            +'<button class="wall-del" onclick="GN.deleteWallById(\''+w2.id+'\')">×</button>'
-            +'</div>';
-        }).join('')
-        :'<div style="font-size:11px;color:#888;">壁がありません。「壁を追加」で追加してください。</div>')
-      +(S.rooms.length>0
-        ?'<div class="sdiv" style="margin-top:12px;">自動生成された部屋（'+S.rooms.length+'室）</div>'
-        +S.rooms.map(function(r,i){
-          return '<div class="room-card">'
-            +'<div class="room-card-hd">'+(r.name||'部屋'+(i+1))+'　<span style="font-size:10px;color:#888;">'+r.w+'×'+r.h+'mm　'+r.area+'㎡</span></div>'
-            +'<div class="f-row" style="margin-bottom:6px;">'
-            +'<span class="f-label">部屋名</span>'
-            +'<input type="text" value="'+r.name+'" placeholder="例：ミーティングルーム" onchange="GN.updateRoom(\''+r.id+'\',\'name\',this.value)">'
-            +'</div>'
-            +'<div class="f-row" style="margin-bottom:6px;">'
-            +'<span class="f-label">天井高</span>'
-            +'<input type="number" value="'+r.ch+'" step="50" style="max-width:90px;" onchange="GN.updateRoom(\''+r.id+'\',\'ch\',parseInt(this.value))">'
-            +'<span class="f-unit">mm</span>'
-            +'</div>'
-            +'<div class="f-row" style="margin-bottom:0;">'
-            +'<span class="f-label">床材</span>'
-            +'<input type="text" value="'+r.mat.floor+'" placeholder="例：フロアタイル NT-31901" onchange="GN.updateRoomMat(\''+r.id+'\',\'floor\',this.value)">'
-            +'</div>'
-            +'</div>';
-        }).join('')
-        :'');
+    var modeV=S.addWallMode==='V',modeH=S.addWallMode==='H';
+    return '<div class="btn-row" style="margin-bottom:6px;">'      +'<button class="abtn '+(modeV?'warn':'primary')+'" onclick="GN.toggleAddWall(\'V\')">'      +(modeV?'✕ 縦壁モード終了':'｜ 縦壁を追加')+'</button>'      +'<button class="abtn '+(modeH?'warn':'primary')+'" onclick="GN.toggleAddWall(\'H\')">'      +(modeH?'✕ 横壁モード終了':'― 横壁を追加')+'</button>'      +(S.selectedWall?'<button class="abtn danger" onclick="GN.deleteWall()">選択壁を削除</button>':'')      +'</div>'      +(S.addWallMode?'<div style="font-size:11px;color:#0f6e56;padding:2px 0 8px;">'        +(modeV?'縦壁：キャンバスをタップ → X座標に外周端まで伸長':'横壁：キャンバスをタップ → Y座標に外周端まで伸長')        +'</div>':'')      +(S.walls.length>0        ?'<div class="sdiv">間仕切り壁（'+S.walls.length+'本）</div>'        +S.walls.map(function(w2,i){          return '<div class="wall-item">'            +'<span>'+(w2.type==='V'?'縦壁 x='+w2.coord:'横壁 y='+w2.coord)+'mm</span>'            +'<button class="wall-del" onclick="GN.deleteWallById(\''+w2.id+'\')">×</button>'            +'</div>';        }).join('')        :'<div style="font-size:11px;color:#888;">壁がありません。追加ボタンで追加してください。</div>')      +(S.rooms.length>0        ?'<div class="sdiv" style="margin-top:12px;">自動生成された部屋（'+S.rooms.length+'室）</div>'        +S.rooms.map(function(r,i){          return '<div class="room-card">'            +'<div class="room-card-hd">'+(r.name||'部屋'+(i+1))+'　<span style="font-size:10px;color:#888;">'+r.w+'×'+r.h+'mm　'+r.area+'㎡</span></div>'            +'<div class="f-row" style="margin-bottom:6px;">'            +'<span class="f-label">部屋名</span>'            +'<input type="text" value="'+r.name+'" placeholder="例：ミーティングルーム" onchange="GN.updateRoom(\''+r.id+'\',\'name\',this.value)">'            +'</div>'            +'<div class="f-row" style="margin-bottom:6px;">'            +'<span class="f-label">天井高</span>'            +'<input type="number" value="'+r.ch+'" step="50" style="max-width:90px;" onchange="GN.updateRoom(\''+r.id+'\',\'ch\',parseInt(this.value))">'            +'<span class="f-unit">mm</span>'            +'</div>'            +'<div class="f-row" style="margin-bottom:0;">'            +'<span class="f-label">床材</span>'            +'<input type="text" value="'+r.mat.floor+'" placeholder="例：フロアタイル NT-31901" onchange="GN.updateRoomMat(\''+r.id+'\',\'floor\',this.value)">'            +'</div>'            +'</div>';        }).join('')        :'');
   }
 
   function panelLayer(){
@@ -1341,7 +1329,8 @@ var GN = (function(){
 
   // 起動
   CV.width=CA.offsetWidth;CV.height=CA.offsetHeight;
-  gnPaint();setMode('skeleton');
+  // デバッグ：確定済み外周で起動
+  updateRooms();fitView();setMode('partition');
 
   return {
     fitView:fitView,addSeg:addSeg,tryClose:tryClose,undoSeg:undoSeg,
