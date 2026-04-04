@@ -334,6 +334,7 @@ var GN = (function(){
     addWallP1:null,      // 1点目座標（スナップ済み）
     addWallDragging:false,
     addWallCur:null,     // ドラッグ中の現在座標
+    addWallDir:null,     // 確定した壁方向('V'or'H')
     wallDrag:false,
     wallDragStart:0,
     wallDragMouse:0,
@@ -455,41 +456,35 @@ var GN = (function(){
   }
 
   // 外周・既存壁へのスナップ
-  // px座標を渡すと近くの外周辺・既存壁coord上の点にスナップしたmm座標を返す
-  var SNAP_MM=300; // スナップ距離(mm)
+  var SNAP_MM=800; // スナップ距離(mm) - 広めに設定
   function snapToSkeleton(mmx,mmy){
-    var b=skelBounds();if(!b)return{x:mmx,y:mmy,snapped:false};
-    var rx=mmx,ry=mmy,snapped=false;
+    var b=skelBounds();if(!b)return{x:mmx,y:mmy,snapped:false,edgeType:null};
+    var rx=mmx,ry=mmy,snapped=false,edgeType=null;
     var best=SNAP_MM*SNAP_MM;
-    // 外周の4辺
     var edges=[
       {type:'H',coord:b.minY,from:b.minX,to:b.maxX},
       {type:'H',coord:b.maxY,from:b.minX,to:b.maxX},
       {type:'V',coord:b.minX,from:b.minY,to:b.maxY},
       {type:'V',coord:b.maxX,from:b.minY,to:b.maxY},
     ];
-    // 既存壁も追加
     S.walls.forEach(function(w){edges.push(w);});
     edges.forEach(function(e){
       if(e.type==='H'){
-        // 横辺：y=e.coord上でxを制限
         var dy=(mmy-e.coord)*(mmy-e.coord);
-        if(dy<best){
-          var cx=Math.max(e.from,Math.min(e.to,mmx));
-          var d=dy+(mmx-cx)*(mmx-cx);
-          if(d<best){best=d;rx=cx;ry=e.coord;snapped=true;}
-        }
+        var cx=Math.max(e.from,Math.min(e.to,mmx));
+        var d=dy+(mmx-cx)*(mmx-cx);
+        if(d<best){best=d;rx=cx;ry=e.coord;snapped=true;edgeType='H';}
       }else{
-        // 縦辺：x=e.coord上でyを制限
         var dx=(mmx-e.coord)*(mmx-e.coord);
-        if(dx<best){
-          var cy=Math.max(e.from,Math.min(e.to,mmy));
-          var d2=dx+(mmy-cy)*(mmy-cy);
-          if(d2<best){best=d2;rx=e.coord;ry=cy;snapped=true;}
-        }
+        var cy=Math.max(e.from,Math.min(e.to,mmy));
+        var d2=dx+(mmy-cy)*(mmy-cy);
+        if(d2<best){best=d2;rx=e.coord;ry=cy;snapped=true;edgeType='V';}
       }
     });
-    return{x:rx,y:ry,snapped:snapped};
+    // edgeType:'H'の辺にスナップ → 垂直壁を引く(wallDir:'V')
+    // edgeType:'V'の辺にスナップ → 水平壁を引く(wallDir:'H')
+    var wallDir=edgeType==='H'?'V':edgeType==='V'?'H':null;
+    return{x:rx,y:ry,snapped:snapped,edgeType:edgeType,wallDir:wallDir};
   }
 
   // 壁ヒットテスト
@@ -859,16 +854,50 @@ var GN = (function(){
       if(!b)return;
       var raw={x:gnMX(p.x),y:gnMY(p.y)};
       var snp=snapToSkeleton(raw.x,raw.y);
-      // 外周の外側はスキップ
       if(snp.x<b.minX||snp.x>b.maxX||snp.y<b.minY||snp.y>b.maxY)return;
       if(S.addWallStep===0){
-        // 1点目確定（スナップ済み）→ドラッグ開始
+        // 1タップ目：始点確定・壁方向確定
         S.addWallP1={x:snp.x,y:snp.y};
+        // wallDirがnullの場合：外周の近い辺から判定
+        var wd=snp.wallDir;
+        if(!wd){
+          var bb=skelBounds();
+          var distH=Math.min(Math.abs(snp.y-bb.minY),Math.abs(snp.y-bb.maxY));
+          var distV=Math.min(Math.abs(snp.x-bb.minX),Math.abs(snp.x-bb.maxX));
+          wd=distH<=distV?'V':'H'; // 横辺に近い→縦壁、縦辺に近い→横壁
+        }
+        S.addWallDir=wd;
         S.addWallStep=1;
-        S.addWallDragging=true;
+        S.addWallDragging=false;
         S.addWallCur={x:snp.x,y:snp.y};
-        gnPaint(p);
+      }else if(S.addWallStep===1){
+        // 2タップ目：終点確定・壁生成
+        var dir=S.addWallDir;
+        var ex,ey;
+        if(dir==='V'){
+          var snpE=snapToSkeleton(S.addWallP1.x,raw.y);
+          ey=snpE.snapped&&snpE.edgeType==='H'?snpE.y:snap50(raw.y);
+          ex=S.addWallP1.x;
+        }else{
+          var snpE2=snapToSkeleton(raw.x,S.addWallP1.y);
+          ex=snpE2.snapped&&snpE2.edgeType==='V'?snpE2.x:snap50(raw.x);
+          ey=S.addWallP1.y;
+        }
+        var len=dir==='V'?Math.abs(ey-S.addWallP1.y):Math.abs(ex-S.addWallP1.x);
+        if(len>50){
+          var w2=dir==='V'
+            ?{id:'w'+(nextWallId++),type:'V',coord:S.addWallP1.x,
+              from:Math.max(b.minY,Math.min(S.addWallP1.y,ey)),
+              to:Math.min(b.maxY,Math.max(S.addWallP1.y,ey)),thick:100}
+            :{id:'w'+(nextWallId++),type:'H',coord:S.addWallP1.y,
+              from:Math.max(b.minX,Math.min(S.addWallP1.x,ex)),
+              to:Math.min(b.maxX,Math.max(S.addWallP1.x,ex)),thick:100};
+          S.walls.push(w2);updateRooms();
+          if(!document.getElementById('panel').classList.contains('hidden'))openPanel('partition');
+        }
+        S.addWallStep=0;S.addWallP1=null;S.addWallDir=null;S.addWallCur=null;
       }
+      gnPaint(p);
       return;
     }
     var hit=hitWall(p.x,p.y);
@@ -887,10 +916,20 @@ var GN = (function(){
     var p=getPos(e);
     S.lastCursorPx=p;
     if(S.mode==='partition'){
-      // 壁追加ドラッグ中
-      if(S.addWallMode&&S.addWallDragging&&S.addWallP1){
-        var raw={x:gnMX(p.x),y:gnMY(p.y)};
-        S.addWallCur={x:raw.x,y:raw.y};
+      // 壁追加モード：カーソル位置でプレビュー更新
+      if(S.addWallMode){
+        var raw2={x:gnMX(p.x),y:gnMY(p.y)};
+        if(S.addWallStep===1&&S.addWallP1){
+          // 1点目確定済み：終点プレビュー
+          var dir2=S.addWallDir;
+          if(dir2==='V'){
+            var snpP=snapToSkeleton(S.addWallP1.x,raw2.y);
+            S.addWallCur={x:S.addWallP1.x,y:snpP.snapped&&snpP.edgeType==='H'?snpP.y:raw2.y};
+          }else if(dir2==='H'){
+            var snpP2=snapToSkeleton(raw2.x,S.addWallP1.y);
+            S.addWallCur={x:snpP2.snapped&&snpP2.edgeType==='V'?snpP2.x:raw2.x,y:S.addWallP1.y};
+          }
+        }
         gnPaint(p);return;
       }
       // 壁移動ドラッグ
@@ -907,35 +946,8 @@ var GN = (function(){
     }
   }
   function onCVUp(e){
-    // 壁追加ドラッグ終了→壁確定
-    if(S.addWallMode&&S.addWallDragging&&S.addWallP1&&S.addWallCur){
-      var p1=S.addWallP1,p2=S.addWallCur;
-      var dx=Math.abs(p2.x-p1.x),dy=Math.abs(p2.y-p1.y);
-      var b2=skelBounds();
-      if(b2&&(dx>50||dy>50)){
-        var w2;
-        if(dy>=dx){
-          // 縦壁：x=p1.x固定、y範囲=p1.y〜p2.y
-          w2={id:'w'+(nextWallId++),type:'V',
-            coord:p1.x,
-            from:Math.max(b2.minY,Math.min(p1.y,p2.y)),
-            to:Math.min(b2.maxY,Math.max(p1.y,p2.y)),
-            thick:100};
-        }else{
-          // 横壁：y=p1.y固定、x範囲=p1.x〜p2.x
-          w2={id:'w'+(nextWallId++),type:'H',
-            coord:p1.y,
-            from:Math.max(b2.minX,Math.min(p1.x,p2.x)),
-            to:Math.min(b2.maxX,Math.max(p1.x,p2.x)),
-            thick:100};
-        }
-        S.walls.push(w2);
-        updateRooms();
-        if(!document.getElementById('panel').classList.contains('hidden'))openPanel('partition');
-      }
-      S.addWallStep=0;S.addWallP1=null;S.addWallDragging=false;S.addWallCur=null;
-      gnPaint();return;
-    }
+    // 壁追加はタップ方式（Down時に処理済み）なのでUpでは何もしない
+    if(S.addWallMode){return;}
     // 壁移動終了
     if(S.wallDrag){updateRooms();if(!document.getElementById('panel').classList.contains('hidden'))openPanel('partition');}
     S.wallDrag=false;
@@ -950,49 +962,66 @@ var GN = (function(){
     CTX2.beginPath();CTX2.moveTo(cpx.x,0);CTX2.lineTo(cpx.x,CV.height);CTX2.stroke();
     CTX2.beginPath();CTX2.moveTo(0,cpx.y);CTX2.lineTo(CV.width,cpx.y);CTX2.stroke();
     CTX2.setLineDash([]);CTX2.globalAlpha=1;
+
+    // スナップ候補（壁追加待機中）
+    var snpDisp=null;
+    if(S.addWallMode&&!S.addWallDragging){
+      snpDisp=snapToSkeleton(mmx,mmy);
+      if(snpDisp.snapped){
+        CTX2.strokeStyle='#E24B4A';CTX2.lineWidth=2.5;
+        CTX2.beginPath();CTX2.arc(gnPX(snpDisp.x),gnPY(snpDisp.y),9,0,Math.PI*2);CTX2.stroke();
+        CTX2.fillStyle='rgba(226,75,74,0.15)';CTX2.fill();
+      }
+    }
+
+    // XY座標ラベル：スナップ時は赤丸から離す
     var txt='x='+mmx+'  y='+mmy;
     CTX2.font='bold 11px monospace';
     var tw=CTX2.measureText(txt).width,pad=5,lh=16;
-    var lx=cpx.x+10,ly=cpx.y-24;
-    if(lx+tw+pad*2>CV.width)lx=cpx.x-tw-pad*2-10;
-    if(ly<10)ly=cpx.y+10;
+    var lx,ly;
+    if(snpDisp&&snpDisp.snapped){
+      // スナップ中：赤丸の右下に30px離してラベルを出す
+      lx=gnPX(snpDisp.x)+30;ly=gnPY(snpDisp.y)+30;
+      if(lx+tw+pad*2>CV.width)lx=gnPX(snpDisp.x)-tw-pad*2-30;
+      if(ly+lh+pad>CV.height)ly=gnPY(snpDisp.y)-30-lh-pad;
+    }else{
+      lx=cpx.x+10;ly=cpx.y-24;
+      if(lx+tw+pad*2>CV.width)lx=cpx.x-tw-pad*2-10;
+      if(ly<10)ly=cpx.y+10;
+    }
     CTX2.fillStyle='rgba(255,255,255,0.88)';
     CTX2.beginPath();CTX2.roundRect(lx,ly,tw+pad*2,lh+pad,4);CTX2.fill();
     CTX2.strokeStyle=C.cur;CTX2.lineWidth=0.8;CTX2.stroke();
     CTX2.fillStyle=C.cur;CTX2.fillText(txt,lx+pad,ly+lh);
-    // 壁追加ドラッグ中プレビュー
-    if(S.addWallMode&&S.addWallDragging&&S.addWallP1&&S.addWallCur){
+
+    // 壁追加プレビュー（1点目確定後・2タップ目待ち）
+    if(S.addWallMode&&S.addWallStep===1&&S.addWallP1&&S.addWallCur){
       var p1=S.addWallP1,p2=S.addWallCur;
-      var adx=Math.abs(p2.x-p1.x),ady=Math.abs(p2.y-p1.y);
-      var isV=ady>=adx;
-      // 1点目マーカー
-      CTX2.fillStyle=C.cur;CTX2.beginPath();CTX2.arc(gnPX(p1.x),gnPY(p1.y),5,0,Math.PI*2);CTX2.fill();
+      var dir=S.addWallDir;
+      var isV=dir==='V';
+      var ex=isV?p1.x:p2.x;
+      var ey=isV?p2.y:p1.y;
+      // 始点マーカー
+      CTX2.fillStyle='#E24B4A';
+      CTX2.beginPath();CTX2.arc(gnPX(p1.x),gnPY(p1.y),7,0,Math.PI*2);CTX2.fill();
       // プレビューライン
-      CTX2.strokeStyle=C.cur;CTX2.lineWidth=2.5;CTX2.setLineDash([8,4]);
-      CTX2.beginPath();
-      if(isV){CTX2.moveTo(gnPX(p1.x),gnPY(p1.y));CTX2.lineTo(gnPX(p1.x),gnPY(p2.y));}
-      else{CTX2.moveTo(gnPX(p1.x),gnPY(p1.y));CTX2.lineTo(gnPX(p2.x),gnPY(p1.y));}
+      CTX2.strokeStyle='#E24B4A';CTX2.lineWidth=2.5;CTX2.setLineDash([8,4]);
+      CTX2.beginPath();CTX2.moveTo(gnPX(p1.x),gnPY(p1.y));CTX2.lineTo(gnPX(ex),gnPY(ey));
       CTX2.stroke();CTX2.setLineDash([]);
+      // 終点マーカー
+      CTX2.strokeStyle='#E24B4A';CTX2.lineWidth=2;
+      CTX2.beginPath();CTX2.arc(gnPX(ex),gnPY(ey),6,0,Math.PI*2);CTX2.stroke();
       // 距離ラベル
-      var dist=Math.round(isV?ady:adx);
-      var dtxt=(isV?'縦壁':'横壁')+' '+dist+'mm';
+      var dist=Math.round(isV?Math.abs(ey-p1.y):Math.abs(ex-p1.x));
+      var dtxt=(isV?'縦':'横')+' '+dist+'mm';
       CTX2.font='bold 11px monospace';
       var dtw=CTX2.measureText(dtxt).width;
-      var dlx=isV?gnPX(p1.x)+10:(gnPX(p1.x)+gnPX(p2.x))/2-dtw/2;
-      var dly=isV?(gnPY(p1.y)+gnPY(p2.y))/2:gnPY(p1.y)-18;
+      var dlx=isV?gnPX(p1.x)+14:(gnPX(p1.x)+gnPX(ex))/2-dtw/2;
+      var dly=isV?(gnPY(p1.y)+gnPY(ey))/2-8:gnPY(p1.y)-22;
       CTX2.fillStyle='rgba(255,255,255,0.92)';
       CTX2.beginPath();CTX2.roundRect(dlx-4,dly-14,dtw+8,18,4);CTX2.fill();
-      CTX2.strokeStyle=C.cur;CTX2.lineWidth=0.8;CTX2.stroke();
-      CTX2.fillStyle=C.cur;CTX2.fillText(dtxt,dlx,dly);
-    }
-    // 追加モード待機中：スナップ候補を表示
-    else if(S.addWallMode&&!S.addWallDragging){
-      var snp=snapToSkeleton(mmx,mmy);
-      if(snp.snapped){
-        CTX2.strokeStyle='#E24B4A';CTX2.lineWidth=2;
-        CTX2.beginPath();CTX2.arc(gnPX(snp.x),gnPY(snp.y),8,0,Math.PI*2);CTX2.stroke();
-        CTX2.fillStyle='rgba(226,75,74,0.15)';CTX2.fill();
-      }
+      CTX2.strokeStyle='#E24B4A';CTX2.lineWidth=0.8;CTX2.stroke();
+      CTX2.fillStyle='#E24B4A';CTX2.fillText(dtxt,dlx,dly);
     }
     CTX2.restore();
   }
@@ -1179,6 +1208,10 @@ var GN = (function(){
     // カーソルオーバーレイ（間仕切りモード）
     if(S.mode==='partition'&&S.phase==='confirmed'){
       drawCursorOverlay(CTX,cpx||S.lastCursorPx);
+    }
+    // 壁追加プレビュー（mousemoveなしでも表示するためgnPaintでも描画）
+    if(S.addWallMode&&S.addWallStep===1&&S.addWallP1&&S.addWallCur&&!(cpx||S.lastCursorPx)){
+      drawCursorOverlay(CTX,null);
     }
 
     gnUpdStatus();
@@ -1447,7 +1480,7 @@ var GN = (function(){
   // 間仕切り操作
   function toggleAddWall(){
     S.addWallMode=S.addWallMode?false:'draw';
-    S.addWallStep=0;S.addWallP1=null;S.addWallDragging=false;S.addWallCur=null;
+    S.addWallStep=0;S.addWallP1=null;S.addWallDragging=false;S.addWallCur=null;S.addWallDir=null;
     S.selectedWall=null;
     CV.style.cursor=S.addWallMode?'crosshair':'default';
     openPanel('partition');gnPaint();
