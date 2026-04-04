@@ -457,11 +457,13 @@ var GN = (function(){
   }
 
   // 外周・既存壁へのスナップ
-  var SNAP_MM=800; // スナップ距離(mm) - 広めに設定
+  // 辺の垂直方向のみ吸着（平行方向はカーソルのまま）
+  // 水平辺(H) → Yだけ吸着・Xは自由 → wallDir:'V'（縦壁）
+  // 垂直辺(V) → Xだけ吸着・Yは自由 → wallDir:'H'（横壁）
+  var SNAP_PX=40; // スナップ距離（px）
   function snapToSkeleton(mmx,mmy){
-    var b=skelBounds();if(!b)return{x:mmx,y:mmy,snapped:false,edgeType:null};
-    var rx=mmx,ry=mmy,snapped=false,edgeType=null;
-    var best=SNAP_MM*SNAP_MM;
+    var b=skelBounds();if(!b)return{x:mmx,y:mmy,snapped:false,edgeType:null,wallDir:null};
+    var thresh=SNAP_PX/S.vSC; // px→mm
     var edges=[
       {type:'H',coord:b.minY,from:b.minX,to:b.maxX},
       {type:'H',coord:b.maxY,from:b.minX,to:b.maxX},
@@ -469,23 +471,27 @@ var GN = (function(){
       {type:'V',coord:b.maxX,from:b.minY,to:b.maxY},
     ];
     S.walls.forEach(function(w){edges.push(w);});
+    var best=Infinity,bestEdge=null;
     edges.forEach(function(e){
       if(e.type==='H'){
-        var dy=(mmy-e.coord)*(mmy-e.coord);
-        var cx=Math.max(e.from,Math.min(e.to,mmx));
-        var d=dy+(mmx-cx)*(mmx-cx);
-        if(d<best){best=d;rx=cx;ry=e.coord;snapped=true;edgeType='H';}
+        var dy=Math.abs(mmy-e.coord);
+        if(dy<thresh&&dy<best){best=dy;bestEdge=e;}
       }else{
-        var dx=(mmx-e.coord)*(mmx-e.coord);
-        var cy=Math.max(e.from,Math.min(e.to,mmy));
-        var d2=dx+(mmy-cy)*(mmy-cy);
-        if(d2<best){best=d2;rx=e.coord;ry=cy;snapped=true;edgeType='V';}
+        var dx=Math.abs(mmx-e.coord);
+        if(dx<thresh&&dx<best){best=dx;bestEdge=e;}
       }
     });
-    // edgeType:'H'の辺にスナップ → 垂直壁を引く(wallDir:'V')
-    // edgeType:'V'の辺にスナップ → 水平壁を引く(wallDir:'H')
-    var wallDir=edgeType==='H'?'V':edgeType==='V'?'H':null;
-    return{x:rx,y:ry,snapped:snapped,edgeType:edgeType,wallDir:wallDir};
+    if(!bestEdge)return{x:mmx,y:mmy,snapped:false,edgeType:null,wallDir:null};
+    var rx,ry,et=bestEdge.type;
+    if(et==='H'){
+      // 水平辺：Yだけ吸着、Xはカーソルのまま（50mmグリッド）
+      rx=snap50(mmx); ry=bestEdge.coord;
+    }else{
+      // 垂直辺：Xだけ吸着、Yはカーソルのまま（50mmグリッド）
+      rx=bestEdge.coord; ry=snap50(mmy);
+    }
+    var wallDir=et==='H'?'V':'H';
+    return{x:rx,y:ry,snapped:true,edgeType:et,wallDir:wallDir};
   }
 
   // 壁ヒットテスト
@@ -1156,21 +1162,103 @@ var GN = (function(){
       CTX.fillStyle=guideCol;CTX.fillText(guide,CV.width/2,CV.height-21);
     }
 
-    // 間仕切り壁（確定後）
+    // 間仕切り壁（確定後）- 包絡処理付き
     if(S.phase==='confirmed'&&S.layerVis.partition){
+      // 壁矩形をmm座標で返す
+      function wRect(w){
+        var h=(w.thick||100)/2;
+        return w.type==='V'
+          ?{x1:w.coord-h,y1:w.from,x2:w.coord+h,y2:w.to}
+          :{x1:w.from,y1:w.coord-h,x2:w.to,y2:w.coord+h};
+      }
+      // 2矩形の交差矩形
+      function wIntersect(a,b){
+        var x1=Math.max(a.x1,b.x1),y1=Math.max(a.y1,b.y1);
+        var x2=Math.min(a.x2,b.x2),y2=Math.min(a.y2,b.y2);
+        return(x1<x2&&y1<y2)?{x1:x1,y1:y1,x2:x2,y2:y2}:null;
+      }
+      // 線分[a,b]から矩形[rMin,rMax]と重なる区間を除いた残りを返す
+      function subtractRange(a,b,rMin,rMax){
+        // 区間[a,b]から[rMin,rMax]を除く → 残りの区間リスト
+        var segs=[];
+        if(rMin>a)segs.push([a,Math.min(b,rMin)]);
+        if(rMax<b)segs.push([Math.max(a,rMax),b]);
+        if(!segs.length&&(rMin<=a&&rMax>=b))return[];// 全部消える
+        return segs.length?segs:[[a,b]];
+      }
+
+      // STEP1：全壁をfill（交差部含め）
       S.walls.forEach(function(w2){
         var isSel=w2===S.selectedWall;
-        var thick=100;
         CTX.fillStyle=isSel?C.partSelF:C.partF;
+        var r=wRect(w2);
+        CTX.fillRect(gnPX(r.x1),gnPY(r.y1),(r.x2-r.x1)*S.vSC,(r.y2-r.y1)*S.vSC);
+      });
+
+      // STEP2：各壁の外周輪郭を包絡考慮してstroke
+      S.walls.forEach(function(w2){
+        var isSel=w2===S.selectedWall;
         CTX.strokeStyle=isSel?C.partSel:C.part;
         CTX.lineWidth=isSel?2.5:1.5;
-        if(w2.type==='V'){
-          CTX.fillRect(gnPX(w2.coord-thick/2),gnPY(w2.from),(thick)*S.vSC,(w2.to-w2.from)*S.vSC);
-          CTX.strokeRect(gnPX(w2.coord-thick/2),gnPY(w2.from),(thick)*S.vSC,(w2.to-w2.from)*S.vSC);
-        }else{
-          CTX.fillRect(gnPX(w2.from),gnPY(w2.coord-thick/2),(w2.to-w2.from)*S.vSC,(thick)*S.vSC);
-          CTX.strokeRect(gnPX(w2.from),gnPY(w2.coord-thick/2),(w2.to-w2.from)*S.vSC,(thick)*S.vSC);
+        var r=wRect(w2);
+        // この壁と交差する他壁の矩形リスト
+        var others=[];
+        S.walls.forEach(function(o){
+          if(o===w2)return;
+          var ix=wIntersect(r,wRect(o));
+          if(ix)others.push(ix);
+        });
+        // 4辺それぞれを描画（交差部分をカット）
+        // 上辺(y=r.y1)：x方向の線
+        // 下辺(y=r.y2)：x方向の線
+        // 左辺(x=r.x1)：y方向の線
+        // 右辺(x=r.x2)：y方向の線
+        function drawHSegs(y,xa,xb){
+          // y座標の水平線[xa,xb]を、othersで隠れる区間を除いて描く
+          var segs=[[xa,xb]];
+          others.forEach(function(ix){
+            if(ix.y1<=y&&ix.y2>=y){
+              // この水平線はixで遮られる
+              var newSegs=[];
+              segs.forEach(function(seg){
+                var rem=subtractRange(seg[0],seg[1],ix.x1,ix.x2);
+                rem.forEach(function(s){newSegs.push(s);});
+              });
+              segs=newSegs;
+            }
+          });
+          segs.forEach(function(seg){
+            if(seg[1]-seg[0]<1)return;
+            CTX.beginPath();
+            CTX.moveTo(gnPX(seg[0]),gnPY(y));
+            CTX.lineTo(gnPX(seg[1]),gnPY(y));
+            CTX.stroke();
+          });
         }
+        function drawVSegs(x,ya,yb){
+          var segs=[[ya,yb]];
+          others.forEach(function(ix){
+            if(ix.x1<=x&&ix.x2>=x){
+              var newSegs=[];
+              segs.forEach(function(seg){
+                var rem=subtractRange(seg[0],seg[1],ix.y1,ix.y2);
+                rem.forEach(function(s){newSegs.push(s);});
+              });
+              segs=newSegs;
+            }
+          });
+          segs.forEach(function(seg){
+            if(seg[1]-seg[0]<1)return;
+            CTX.beginPath();
+            CTX.moveTo(gnPX(x),gnPY(seg[0]));
+            CTX.lineTo(gnPX(x),gnPY(seg[1]));
+            CTX.stroke();
+          });
+        }
+        drawHSegs(r.y1,r.x1,r.x2); // 上辺
+        drawHSegs(r.y2,r.x1,r.x2); // 下辺
+        drawVSegs(r.x1,r.y1,r.y2); // 左辺
+        drawVSegs(r.x2,r.y1,r.y2); // 右辺
       });
     }
 
