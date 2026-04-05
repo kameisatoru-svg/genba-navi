@@ -1,130 +1,125 @@
-# floor_plan.html 設計思想
-## 株式会社アート・レイズ
+# floor_plan.html 引き継ぎ手順書
+## 更新：2026/4/5 セッション
 
 ---
 
-## ■ 誕生の経緯
+## ■ 本セッションの作業内容
 
-未来システム熊本オフィスのGemini構想（matplotlibワイヤーフレーム→Geminiパース）
-→ ウィジェットでインタラクティブ平面図を実験
-→ 「ウィジェットでは限界」→ **floor_plan.htmlとして本格実装**
+### 1. 角度壁モード（／ボタン）のバグ修正・機能改善
 
----
+**修正前の問題：**
+- ／ボタン押下後、角度ホイールオーバーレイが表示されなかった（CSSが未定義＋パネルz-index:30がオーバーレイz-index:20を覆い隠していた）
+- 外周・既存壁へのスナップが効かなかった（`snapToSkeleton`未呼出）
+- 赤丸スナップ候補表示がなかった（`drawCursorOverlay`が+モード専用だった）
+- 2点目タップ時にホイール角度が無視されフリーに線が引かれた（射影処理なし）
 
-## ■ 根本設計思想
+**修正内容：**
+- `#angle-wall-overlay`にCSS追加（`position:absolute;bottom:60px;z-index:20`）
+- `toggleAngleWall()`：ON時はパネルを`hidden`にしてオーバーレイを表示、OFF時はオーバーレイを閉じてパネルを再表示
+- `setMode()`：partition以外に切替時に`addWallAngleMode`・`AWState`・オーバーレイもリセット
+- `awOnTap()`：始点・終点ともに`snapToSkeleton`を通す（スナップ優先、フォールバックは10mmグリッド）
+- `awOnTap()`step1：タップ位置をホイール角度方向に射影（`proj=dx*cosA+dy*sinA`）して終点を算出
+- `awOnTap()`：始点・終点を`skelBounds()`の範囲内にクリップ（外周を突き抜けない）
+- `onCVMove()`：角度壁モード中も`S.addWallSnap=snapToSkeleton()`を更新してrepaint
+- `drawCursorOverlay()`：角度壁モードstep0で赤丸スナップ候補表示、step1で始点赤丸＋終点スナップ赤丸を表示
+- プレビュー描画：カーソル位置を角度方向に射影した点へ破線＋終点マーカー＋距離ラベル表示
 
-**「内法ポリゴンが唯一の真実」**
+### 2. 斜め壁の描画方式変更
 
-- 実測した内寸がそのまま座標になる
-- 外壁厚は外に向かって膨らむだけ・内法座標は変わらない
-- 外壁：内面=座標・外側に厚み／間仕切り：センター=座標・両側にthick/2ずつ
-- RC造の柱型も外周に含めて測る（多角形外周）
-- コーナーは包絡処理（外面ライン交点）でハッチング表現
+**修正前：** 法線オフセットの4角形（`aQuad`）でfill+stroke → 包絡処理がAABBベースで不正確（V/H壁の輪郭線が消える問題）
 
----
+**修正後：** センター線から法線方向にthick/2ずつ振り分けた2本平行線＋端部キャップ
+- **fill**: 4角形（中心線の法線ベクトル`(-dy/len, dx/len)`でオフセット）を半透明塗り
+- **stroke**: 上辺・下辺・端部キャップの4辺を独立描画
+- **包絡**: V/H壁との交差部はCanvas `clip('evenodd')`で除外
 
-## ■ 4つの設計軸（機能追加時は必ずこれで判断）
+**削除したコード：**
+- `aQuad()`・`aAABB()`・`quadHIntersect()`・`quadVIntersect()`（不要になった）
+- V/H壁のSTEP2でのA壁クワッド交差判定（A壁は壁厚描画でもV/H壁の輪郭をカットしない）
 
-| 軸 | 目的 |
-|---|---|
-| Gemini構想 | JSON出力がGeminiプロンプトに直接使える形 |
-| データ性能 | 面積・壁面積・素材が正確にJSON出力できる |
-| 印刷性能 | 包絡・ハッチング・寸法線で提出図面として使える |
-| Fold5現場対応 | タップ最小44px・GLM BLE連携・縦使い |
+### 3. 包絡処理の構造（現在の3ステップ）
 
----
+```
+STEP1: fill
+  - V/H壁：矩形fillRect
+  - A壁：法線オフセット4角形path fill
 
-## ■ 絶対ルール
+STEP2: V/H壁のstroke（包絡付き）
+  - 各辺をsubtractRangeで他V/H壁との交差部をカット
+  - A壁との交差は考慮しない（A壁の線はV/H壁の輪郭に影響しない）
 
-### ファイル操作
-- 作業ベース：かめさんがアップロードしたファイルを使う
-- `/mnt/project/`は参照禁止（読取専用・古い）
-- GitHubからweb_fetchできない場合もアップロードで対応
-
-### デプロイフロー
-1. 私がファイル出力（present_files）
-2. かめさんがダウンロード → Coworkで上書き → push.bat実行
-3. 必要なら30秒後にweb_fetchで確認
-
-### 構文チェック（修正後は必須）
-```bash
-node -e "
-const fs=require('fs');
-const html=fs.readFileSync('/home/claude/floor_plan.html','utf8');
-const start=html.indexOf('<script>')+8;
-const end=html.lastIndexOf('</script>');
-fs.writeFileSync('/tmp/fp_test.js',html.slice(start,end));
-" && node --check /tmp/fp_test.js && echo '構文OK'
+STEP3: A壁のstroke
+  - センター振り分け4辺（上辺・下辺・端部キャップ×2）を独立描画
+  - V/H壁矩形との交差部はclip('evenodd')で除外
 ```
 
-### 設計ルール
-- 角度：0°=右・90°=下・180°=左・270°=上
-- 内角表示（外角225°等は絶対に出さない）
-- onclick属性にJSONを渡さない → JSでイベントリスナーを直接設定
-- 絵文字アイコン使用可（🔒等）
-- パネルはキャンバスに被せない（flexの子要素・max-height:288pxでスクロール）
-
 ---
 
-## ■ APIリファレンス（GN名前空間）
+## ■ 壁データ構造
 
+### V/H壁（直交壁）
 ```javascript
-// 外周操作
-GN.startDraw() / GN.addSeg() / GN.undoSeg() / GN.tryClose()
-GN.gnReset() / GN.backToDraw() / GN.editSkel() / GN.fitView()
+{id:'w1', type:'V', coord:3000, from:0, to:6000, thick:70}
+// type:'V' → 縦壁（x=coord固定、y方向にfrom〜to）
+// type:'H' → 横壁（y=coord固定、x方向にfrom〜to）
+```
 
-// 閉じるフロー
-GN.startLockMode(deg) / GN.toggleLockSeg(idx) / GN.gnCanLockMore(idx)
-GN.cancelSegSelect() / GN.doCloseWithLocks() / GN.closeDlg()
-
-// パネル・モード
-GN.openPanel(mode) / GN.closePanel() / GN.setMode(m)
-
-// 設定セッター
-GN.setName(v) / GN.setStr(v) / GN.setCt(v) / GN.setCh(v)
-GN.setGW(v) / GN.setGH(v) / GN.setThr(v)
-GN.setSkelThick(v) / GN.setPartThick(v)
-
-// 間仕切り
-GN.toggleAddWall()       // +モードトグル
-GN.toggleAngleWall()     // ／モードトグル
-GN.deleteWall() / GN.deleteWallById(id)
-
-// 部屋・レイヤー・出力
-GN.updateRoom(id,k,v) / GN.updateRoomMat(id,k,v)
-GN.mergeSelectedRooms() / GN.toggleLayer(key) / GN.exportJSON()
+### A壁（斜め壁）
+```javascript
+{id:'w2', type:'A', x1:1000, y1:2000, x2:4000, y2:5000, angle:45, len:4243, thick:70}
+// x1,y1=始点、x2,y2=終点（センター線）
+// angle=ホイールで選んだ角度（15°ステップ）
+// thick=壁厚（壁追加時のS.partThickを保存）
 ```
 
 ---
 
-## ■ 状態オブジェクト（S）主要プロパティ
+## ■ 角度壁モードの操作フロー
 
-```javascript
-// フェーズ・外周
-S.phase          // 'setup' | 'drawing' | 'confirmed'
-S.segs[]         // 辺データ配列
-S.pts[]          // 頂点座標配列
-S.cerr           // 閉じた時の誤差記録
+1. 間仕切りパネルの「／」ボタンタップ → `toggleAngleWall()`
+2. パネルが閉じて角度壁オーバーレイ表示（ホイール＋案内テキスト）
+3. ホイールで角度選択（15°ステップ、ドラッグ操作）
+4. キャンバスで1点目タップ → スナップ吸着 → `AWState.step=1`
+5. キャンバスで2点目タップ → 角度方向に射影 → 壁生成
+6. step=0に戻り次の壁を連続で引ける
+7. 「✕終了」ボタンで／モードOFF → パネル再表示
 
-// 間仕切り
-S.walls[]        // 壁配列（V/H/A）
-S.selectedWall   // 選択中の壁ID
-S.wallDrag       // ドラッグ中フラグ
-S.addWallMode    // false | 'draw'（+モード）
-S.addWallAngleMode // false | true（／モード）
-S.addWallStep    // 0=1点目待ち 1=2点目待ち
-S.addWallP1      // 1点目座標
-S.addWallDir     // 'V' | 'H'
-S.addWallSnap    // スナップ候補
-S.addWallCur     // プレビュー終点
-S.skelThick      // 外周壁厚（デフォルト150mm）
-S.partThick      // 間仕切り壁厚（デフォルト70mm）
+---
 
-// 部屋・レイヤー
-S.rooms[]        // 部屋配列（key,x,y,w,h,area,lx,ly）
-S.selectedRooms[]// 選択中部屋のkeyリスト
-S.layerVis{}     // レイヤー表示フラグ
+## ■ 現在の実装状況
 
-// 閉じるフロー
-S.closeAngleDeg / S.lockedSegs[] / S.selectingSegs
-```
+### 実装済み
+- 外周入力・閉じるフロー
+- 間仕切り直交壁（+ボタン）：2タップ追加・外壁スナップ・壁厚選択（70/90/125mm LGS）・包絡処理
+- 間仕切り斜め壁（／ボタン）：角度ホイール・スナップ・角度拘束・外周クリップ・センター振り分け壁厚描画・V/H壁との包絡
+- フラッドフィル部屋自動生成（L字3部屋対応・最大セル中心にラベル表示）
+- 部屋タップ選択・面積合算表示
+- 部屋名・天井高・床材の編集
+- 壁ドラッグ移動（10mmグリッドスナップ）
+- レイヤーON/OFF
+- JSON出力
+- Fold5デバイスフレームビューア
+
+### 次の実装予定
+- 開口部（ドア・窓）
+- GLM BLE連携
+- 数値直接入力
+- 印刷出力
+
+---
+
+## ■ 既知の制限事項
+
+- 斜め壁同士の包絡は未対応（A案：斜め壁⇔直交壁のみ対応）
+- 斜め壁はフラッドフィル部屋生成に参加しない（V/H壁のみでグリッド分割）
+- 斜め壁のドラッグ移動は未実装（V/H壁のみ対応）
+- 斜め壁の壁リスト表示は「斜壁 45° 4243mm」形式
+
+---
+
+## ■ 注意点（次セッション向け）
+
+- `angle-wall-overlay`はパネル（z-index:30）より下（z-index:20）なので、／モードON時は必ずパネルをhiddenにすること
+- `S.addWallMode`（+）と`S.addWallAngleMode`（／）は排他。片方ONで他方OFF
+- A壁の`thick`は壁追加時の`S.partThick`を保存。描画時は`w.thick||S.partThick||70`でフォールバック
+- スナップ距離は`SNAP_PX=20`px、グリッドは`snap10`（10mm単位）
