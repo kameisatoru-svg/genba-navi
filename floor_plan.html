@@ -63,7 +63,9 @@ html,body{height:100%;overflow:hidden;background:#1a1a1a;font-family:'Meiryo','Y
 }
 .ble-head{
   background:#1e2d40;padding:14px 18px;font-size:15px;font-weight:700;color:#fff;
-  display:flex;align-items:center;gap:8px;cursor:move;user-select:none;-webkit-user-select:none;
+  display:flex;align-items:center;gap:8px;cursor:move;
+  user-select:none;-webkit-user-select:none;
+  touch-action:none;
 }
 .ble-body{padding:16px 16px 4px;}
 /* GLMボトムバーボタン */
@@ -2040,16 +2042,19 @@ var GN = (function(){
     if(!head||!box)return;
     head.onpointerdown=function(e){
       e.preventDefault();
+      e.stopPropagation();
       var rect=box.getBoundingClientRect();
       box.style.left=rect.left+'px'; box.style.top=rect.top+'px'; box.style.transform='none';
       var sx=e.clientX-rect.left, sy=e.clientY-rect.top;
-      head.setPointerCapture(e.pointerId);
+      try{ head.setPointerCapture(e.pointerId); }catch(err){}
       head.onpointermove=function(ev){
+        ev.preventDefault();
         var x=Math.max(0,Math.min(window.innerWidth-box.offsetWidth,ev.clientX-sx));
         var y=Math.max(0,Math.min(window.innerHeight-box.offsetHeight,ev.clientY-sy));
         box.style.left=x+'px'; box.style.top=y+'px';
       };
       head.onpointerup=function(){ head.onpointermove=null; head.onpointerup=null; };
+      head.onpointercancel=function(){ head.onpointermove=null; head.onpointerup=null; head.onpointercancel=null; };
     };
   }
   function _updateBleUI(){
