@@ -1670,8 +1670,8 @@ var GN = (function(){
   document.getElementById('len-val').addEventListener('keydown', function(e){if(e.key==='Enter')addSeg();});
   window.addEventListener('resize',function(){gnPaint();});
 
-  function addSeg(){
-    var len=parseInt(document.getElementById('len-val').value);
+  function addSeg(forceMm){
+    var len=forceMm||parseInt(document.getElementById('len-val').value);
     if(!len||len<=0){gnErr('長さを入力してください');return;}
     var a=gnSnap(S.wAng),r2=gnRad(a),last=S.pts[S.pts.length-1];
     S.pts.push({x:Math.round(last.x+Math.cos(r2)*len),y:Math.round(last.y+Math.sin(r2)*len)});
@@ -2172,10 +2172,8 @@ var GN = (function(){
     var bbBtn=document.getElementById('bb-ble');
     if(bbBtn){bbBtn.classList.add('ble-flash');setTimeout(function(){bbBtn.classList.remove('ble-flash');},450);}
     if(S.phase==='drawing'){
-      var el=document.getElementById('len-val');
-      if(el) el.value=mm;
       gnToast('📏 '+mm.toLocaleString()+' mm → 自動確定');
-      setTimeout(function(){addSeg();},80);
+      addSeg(mm);
     }else{
       var el=document.getElementById('len-val');
       if(el) el.value=mm;
