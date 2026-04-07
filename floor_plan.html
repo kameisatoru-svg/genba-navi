@@ -75,11 +75,6 @@ html,body{height:100%;overflow:hidden;background:#1a1a1a;font-family:'Meiryo','Y
   background:#fff;border-top:0.5px solid #ddd;z-index:20;padding:12px 0 10px;
 }
 #wheel-overlay.hidden{display:none;}
-#angle-wall-overlay{
-  position:absolute;bottom:60px;left:0;right:0;
-  background:#fff;border-top:0.5px solid #ddd;z-index:20;padding:12px 0 10px;
-}
-#angle-wall-overlay.hidden{display:none;}
 #wheel-inner{display:flex;align-items:center;gap:14px;padding:0 14px;}
 #wheel-canvas{display:block;flex-shrink:0;touch-action:none;}
 #wheel-right{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0;}
@@ -160,6 +155,40 @@ html,body{height:100%;overflow:hidden;background:#1a1a1a;font-family:'Meiryo','Y
   padding:6px 10px;background:#f8f8f8;border-radius:6px;line-height:1.7;
 }
 
+/* ── GLM BLEモーダル ── */
+.ble-overlay{
+  position:fixed;inset:0;background:rgba(10,20,35,0.4);
+  z-index:100;pointer-events:none;
+}
+.ble-overlay.hidden{display:none;}
+.ble-box{
+  background:#fff;border-radius:16px;width:calc(100% - 40px);max-width:360px;
+  box-shadow:0 8px 32px rgba(10,20,35,0.3);overflow:hidden;
+  position:fixed;top:80px;left:50%;transform:translateX(-50%);
+  pointer-events:auto;
+}
+.ble-head{
+  background:#1e2d40;padding:14px 18px;
+  font-size:15px;font-weight:700;color:#fff;
+  display:flex;align-items:center;gap:8px;
+  cursor:move;user-select:none;-webkit-user-select:none;
+}
+.ble-body{padding:16px 16px 4px;}
+.ble-target{
+  height:40px;border:1.5px solid rgba(30,45,64,0.2);border-radius:10px;
+  background:#fff;color:#1e2d40;font-size:13px;font-weight:600;
+  cursor:pointer;font-family:inherit;
+}
+.ble-target.active{background:#1e2d40;color:#fff;border-color:#1e2d40;}
+
+/* GLMボトムバーボタン */
+#bb-ble .bb-icon{background:#f2f2f2;}
+#bb-ble.ble-connected .bb-icon{background:#e6f9f0;}
+#bb-ble.ble-connected .bb-label{color:#0f6e56;}
+#bb-ble.ble-connected .bb-icon svg{stroke:#0f6e56;}
+@keyframes ble-flash{0%{background:#b7f0d8;}100%{background:#e6f9f0;}}
+#bb-ble.ble-flash .bb-icon{animation:ble-flash 0.4s ease-out;}
+
 /* 間仕切りパネル用 */
 .wall-item{
   display:flex;align-items:center;justify-content:space-between;
@@ -215,21 +244,6 @@ html,body{height:100%;overflow:hidden;background:#1a1a1a;font-family:'Meiryo','Y
 
 
 
-  <!-- 角度壁オーバーレイ -->
-  <div id="angle-wall-overlay" class="hidden">
-    <div id="wheel-inner">
-      <canvas id="aw-wheel-canvas" width="200" height="200"></canvas>
-      <div id="wheel-right">
-        <div id="aw-angle-disp">0°</div>
-        <div id="aw-dir-disp">→ 右方向</div>
-        <div class="wbtn-row">
-          <div style="font-size:11px;color:#0f6e56;padding:4px 0;">角度を選んでキャンバスで2点タップ</div>
-          <button class="wbtn danger" onclick="GN.toggleAngleWall()">✕ 終了</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- 閉じるダイアログ -->
   <div id="close-dialog" class="hidden">
     <div id="close-dialog-box">
@@ -261,6 +275,14 @@ html,body{height:100%;overflow:hidden;background:#1a1a1a;font-family:'Meiryo','Y
       <div class="bb-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg></div>
       <span class="bb-label">設定</span>
     </button>
+    <button class="bb-btn" id="bb-ble" onclick="GN.openBleModal()">
+      <div class="bb-icon">
+        <svg id="ble-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"/>
+        </svg>
+      </div>
+      <span class="bb-label" id="ble-label">GLM</span>
+    </button>
   </div>
 
   <!-- パネル -->
@@ -271,6 +293,36 @@ html,body{height:100%;overflow:hidden;background:#1a1a1a;font-family:'Meiryo','Y
     </div>
     <div id="panel-body"></div>
   </div>
+
+  <!-- ── GLM BLE モーダル ── -->
+  <div class="ble-overlay hidden" id="ble-modal" onclick="GN.closeBleModal(event)">
+    <div class="ble-box" id="ble-box">
+      <div class="ble-head" id="ble-head">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"/></svg>
+        GLM Bluetooth連携
+      </div>
+      <div class="ble-body">
+        <div id="ble-status-bar" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;background:#f8f8f6;margin-bottom:14px;">
+          <span id="ble-dot" style="width:10px;height:10px;border-radius:50%;background:rgba(30,45,64,0.2);flex-shrink:0;"></span>
+          <span id="ble-status-text" style="font-size:13px;flex:1;color:#666;">未接続</span>
+          <button id="ble-connect-btn" onclick="GN.bleConnect()" style="height:34px;padding:0 14px;border:none;border-radius:8px;background:#1e2d40;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">接続</button>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:#666;margin-bottom:8px;">最後の受信値</div>
+        <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;background:#f8f8f6;margin-bottom:14px;" id="ble-last-frame">
+          <span style="font-size:12px;color:#888;">受信待機中...</span>
+          <span id="ble-last-val" style="font-size:22px;font-weight:700;margin-left:auto;color:#1e2d40;">—</span>
+        </div>
+        <div style="font-size:11px;color:#888;padding:0 2px 12px;line-height:1.7;">
+          外周作図中に測定ボタンを押すと辺の長さが自動確定されます。
+        </div>
+      </div>
+      <div style="padding:0 16px 16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <button onclick="GN.bleDisconnect()" style="height:42px;border:1.5px solid rgba(30,45,64,0.2);border-radius:10px;background:transparent;color:#555;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">切断</button>
+        <button onclick="GN.closeBleModal(null)" style="height:42px;border:none;border-radius:10px;background:#1e2d40;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">閉じる</button>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -356,8 +408,6 @@ var GN = (function(){
     addWallSnap:null,    // カーソル位置のスナップ候補（常に更新）
     addWallCur:null,     // 終点プレビュー座標
     addWallDir:null,     // 確定した壁方向('V'or'H')
-    addWallAngle:0,      // 角度壁モードの角度(deg)
-    addWallAngleMode:false, // trueのとき角度壁モード
     wallDrag:false,
     wallDragStart:0,
     wallDragMouse:0,
@@ -367,7 +417,7 @@ var GN = (function(){
     selectedRooms:[],  // 選択中の部屋idリスト
     // 壁厚
     skelThick:150,  // 外周壁厚(mm)
-    partThick:70,  // 間仕切り壁厚(mm) デフォルト70mm
+    partThick:100,  // 間仕切り壁厚(mm)
     // レイヤー表示
     layerVis:{skeleton:true,partition:true,opening:true,ceiling:true,lighting:true,electrical:true,sanitary:true,hvac:true,furniture:true,dimension:true},
   };
@@ -381,12 +431,7 @@ var GN = (function(){
   function setGH(v){S.gH=parseInt(v)||0;}
   function setThr(v){S.thr=parseInt(v)||100;}
   function setSkelThick(v){S.skelThick=parseInt(v)||150;gnPaint();}
-  function setPartThick(v){
-    S.partThick=parseInt(v)||70;
-    // addWallModeは維持したままパネルだけ更新
-    if(!document.getElementById('panel').classList.contains('hidden'))openPanel('partition');
-    gnPaint();
-  }
+  function setPartThick(v){S.partThick=parseInt(v)||100;gnPaint();}
 
   // ユーティリティ
   function gnPX(m){return S.vOX+m*S.vSC;}
@@ -398,12 +443,23 @@ var GN = (function(){
   function gnMax(a){return a.reduce(function(m,v){return v>m?v:m;},-Infinity);}
   function gnMin(a){return a.reduce(function(m,v){return v<m?v:m;},Infinity);}
   function snap50(v){return Math.round(v/50)*50;}
-  function snap10(v){return Math.round(v/10)*10;}
 
   function gnErr(msg){
     var el=document.getElementById('err-bar');
     el.textContent=msg;el.style.display='block';
     clearTimeout(ET);ET=setTimeout(function(){el.style.display='none';},3000);
+  }
+  function gnToast(msg){
+    var el=document.getElementById('err-bar');
+    el.textContent=msg;
+    el.style.display='block';
+    el.style.background='rgba(15,110,86,0.92)';
+    el.style.color='#fff';
+    el.style.borderColor='transparent';
+    clearTimeout(ET);ET=setTimeout(function(){
+      el.style.display='none';
+      el.style.background='';el.style.color='';el.style.borderColor='';
+    },2500);
   }
   function gnDirLbl(deg){
     var d=(((deg%360)+360)%360);
@@ -494,22 +550,12 @@ var GN = (function(){
       var key=gx0+'_'+gy0+'_'+gx1+'_'+gy1;
       var rw=gx1-gx0,rh=gy1-gy0;
       var area=Math.round(rw*rh/1000000*100)/100;
-      // 最大面積セルを求める（㎡表示位置に使う）
-      var labelCell=cells[group[0]];
-      var maxCellArea=0;
-      group.forEach(function(gi){
-        var c2=cells[gi];
-        var ca=(c2.x1-c2.x0)*(c2.y1-c2.y0);
-        if(ca>maxCellArea){maxCellArea=ca;labelCell=c2;}
-      });
-      var lx=(labelCell.x0+labelCell.x1)/2;
-      var ly=(labelCell.y0+labelCell.y1)/2;
       if(existing[key]){
-        S.rooms.push(Object.assign({},existing[key],{x:gx0,y:gy0,w:rw,h:rh,area:area,lx:lx,ly:ly}));
+        S.rooms.push(Object.assign({},existing[key],{x:gx0,y:gy0,w:rw,h:rh,area:area}));
       }else{
         S.rooms.push({
           id:'r'+(Date.now()+Math.random()|0),key:key,
-          name:'',x:gx0,y:gy0,w:rw,h:rh,area:area,lx:lx,ly:ly,
+          name:'',x:gx0,y:gy0,w:rw,h:rh,area:area,
           ch:S.ch,
           mat:{floor:'',ceiling:'',wall:''},
         });
@@ -521,7 +567,7 @@ var GN = (function(){
   // 辺の垂直方向のみ吸着（平行方向はカーソルのまま）
   // 水平辺(H) → Yだけ吸着・Xは自由 → wallDir:'V'（縦壁）
   // 垂直辺(V) → Xだけ吸着・Yは自由 → wallDir:'H'（横壁）
-  var SNAP_PX=20; // スナップ距離（px）
+  var SNAP_PX=40; // スナップ距離（px）
   function snapToSkeleton(mmx,mmy){
     var b=skelBounds();if(!b)return{x:mmx,y:mmy,snapped:false,edgeType:null,wallDir:null};
     var thresh=SNAP_PX/S.vSC; // px→mm
@@ -545,11 +591,11 @@ var GN = (function(){
     if(!bestEdge)return{x:mmx,y:mmy,snapped:false,edgeType:null,wallDir:null};
     var rx,ry,et=bestEdge.type;
     if(et==='H'){
-      // 水平辺：Yだけ吸着、Xはカーソルのまま（10mmグリッド）
-      rx=snap10(mmx); ry=bestEdge.coord;
+      // 水平辺：Yだけ吸着、Xはカーソルのまま（50mmグリッド）
+      rx=snap50(mmx); ry=bestEdge.coord;
     }else{
-      // 垂直辺：Xだけ吸着、Yはカーソルのまま（10mmグリッド）
-      rx=bestEdge.coord; ry=snap10(mmy);
+      // 垂直辺：Xだけ吸着、Yはカーソルのまま（50mmグリッド）
+      rx=bestEdge.coord; ry=snap50(mmy);
     }
     var wallDir=et==='H'?'V':'H';
     return{x:rx,y:ry,snapped:true,edgeType:et,wallDir:wallDir};
@@ -561,16 +607,7 @@ var GN = (function(){
     for(var i=S.walls.length-1;i>=0;i--){
       var w=S.walls[i];
       if(w.type==='V'){if(Math.abs(mmx-w.coord)<HIT&&mmy>=w.from-HIT&&mmy<=w.to+HIT)return w;}
-      else if(w.type==='H'){if(Math.abs(mmy-w.coord)<HIT&&mmx>=w.from-HIT&&mmx<=w.to+HIT)return w;}
-      else if(w.type==='A'){
-        // 線分との距離判定
-        var dx=w.x2-w.x1,dy=w.y2-w.y1,len=Math.sqrt(dx*dx+dy*dy);
-        if(len<1)continue;
-        var t=((mmx-w.x1)*dx+(mmy-w.y1)*dy)/(len*len);
-        t=Math.max(0,Math.min(1,t));
-        var cx=w.x1+t*dx,cy=w.y1+t*dy;
-        if(Math.sqrt((mmx-cx)**2+(mmy-cy)**2)<HIT)return w;
-      }
+      else{if(Math.abs(mmy-w.coord)<HIT&&mmx>=w.from-HIT&&mmx<=w.to+HIT)return w;}
     }
     return null;
   }
@@ -925,9 +962,7 @@ var GN = (function(){
     }
     if(S.mode!=='partition')return;
     var p=getPos(e);
-    var mmx=snap10(gnMX(p.x)),mmy=snap10(gnMY(p.y));
-    // 角度壁モード
-    if(S.addWallAngleMode){awOnTap(p);return;}
+    var mmx=snap50(gnMX(p.x)),mmy=snap50(gnMY(p.y));
     if(S.addWallMode){
       var b=skelBounds();
       if(!b)return;
@@ -935,8 +970,8 @@ var GN = (function(){
       if(S.addWallStep===0){
         // 1タップ目：スナップ位置があればスナップ、なければカーソル位置をそのまま使う
         var snp=S.addWallSnap||snapToSkeleton(raw.x,raw.y);
-        var p1x=snp.snapped?snp.x:snap10(raw.x);
-        var p1y=snp.snapped?snp.y:snap10(raw.y);
+        var p1x=snp.snapped?snp.x:snap50(raw.x);
+        var p1y=snp.snapped?snp.y:snap50(raw.y);
         S.addWallP1={x:p1x,y:p1y};
         // 壁方向：スナップした辺から決める、なければ外周の最近辺から決める
         var wd=snp.wallDir;
@@ -1042,20 +1077,14 @@ var GN = (function(){
         }
         gnPaint(p);return;
       }
-      // 角度壁モード：スナップ候補を更新
-      if(S.addWallAngleMode){
-        var rawA={x:gnMX(p.x),y:gnMY(p.y)};
-        S.addWallSnap=snapToSkeleton(rawA.x,rawA.y);
-        gnPaint(p);return;
-      }
-      // 壁移動ドラッグ（10mm単位）
+      // 壁移動ドラッグ
       if(S.wallDrag&&S.selectedWall){
         var w2=S.selectedWall;
         var delta=w2.type==='V'?(p.x-S.wallDragMouse)/S.vSC:(p.y-S.wallDragMouse)/S.vSC;
         var b=skelBounds();
-        var nc=snap10(S.wallDragStart+delta);
-        if(w2.type==='V')w2.coord=Math.max(b.minX+10,Math.min(b.maxX-10,nc));
-        else w2.coord=Math.max(b.minY+10,Math.min(b.maxY-10,nc));
+        var nc=snap50(S.wallDragStart+delta);
+        if(w2.type==='V')w2.coord=Math.max(b.minX+50,Math.min(b.maxX-50,nc));
+        else w2.coord=Math.max(b.minY+50,Math.min(b.maxY-50,nc));
         updateRooms();
       }
       gnPaint(p);
@@ -1082,25 +1111,7 @@ var GN = (function(){
     // スナップ候補表示
     var snpDisp=null;
     if(S.addWallMode&&S.addWallStep===0){
-      // +モード step0：カーソル位置のスナップ候補を赤丸で表示
-      snpDisp=S.addWallSnap;
-      if(snpDisp&&snpDisp.snapped){
-        CTX2.strokeStyle='#E24B4A';CTX2.lineWidth=2.5;
-        CTX2.beginPath();CTX2.arc(gnPX(snpDisp.x),gnPY(snpDisp.y),9,0,Math.PI*2);CTX2.stroke();
-        CTX2.fillStyle='rgba(226,75,74,0.15)';CTX2.fill();
-      }
-    }else if(S.addWallAngleMode&&AWState.step===0){
-      // ／モード step0：カーソル位置のスナップ候補を赤丸で表示
-      snpDisp=S.addWallSnap;
-      if(snpDisp&&snpDisp.snapped){
-        CTX2.strokeStyle='#E24B4A';CTX2.lineWidth=2.5;
-        CTX2.beginPath();CTX2.arc(gnPX(snpDisp.x),gnPY(snpDisp.y),9,0,Math.PI*2);CTX2.stroke();
-        CTX2.fillStyle='rgba(226,75,74,0.15)';CTX2.fill();
-      }
-    }else if(S.addWallAngleMode&&AWState.step===1&&AWState.p1){
-      // ／モード step1：始点を赤丸で常時表示＋終点にもスナップ赤丸
-      CTX2.fillStyle='#E24B4A';
-      CTX2.beginPath();CTX2.arc(gnPX(AWState.p1.x),gnPY(AWState.p1.y),7,0,Math.PI*2);CTX2.fill();
+      // step0：カーソル位置のスナップ候補を赤丸で表示
       snpDisp=S.addWallSnap;
       if(snpDisp&&snpDisp.snapped){
         CTX2.strokeStyle='#E24B4A';CTX2.lineWidth=2.5;
@@ -1108,7 +1119,7 @@ var GN = (function(){
         CTX2.fillStyle='rgba(226,75,74,0.15)';CTX2.fill();
       }
     }else if(S.addWallMode&&S.addWallStep===1&&S.addWallP1){
-      // +モード step1：始点を赤丸で常時表示
+      // step1：始点を赤丸で常時表示
       CTX2.fillStyle='#E24B4A';
       CTX2.beginPath();CTX2.arc(gnPX(S.addWallP1.x),gnPY(S.addWallP1.y),7,0,Math.PI*2);CTX2.fill();
     }
@@ -1218,19 +1229,15 @@ var GN = (function(){
         // 塗りは通常のまま
         CTX.fillStyle=C.roomFills[i%C.roomFills.length];
         CTX.fillRect(gnPX(r.x),gnPY(r.y),r.w*S.vSC,r.h*S.vSC);
-        // ㎡表示位置：最大セル中心(lx/ly)を優先、なければ境界ボックス中心
-        var clx=r.lx!=null?r.lx:r.x+r.w/2;
-        var cly=r.ly!=null?r.ly:r.y+r.h/2;
-        var cy=gnPY(cly);
-        var cx=gnPX(clx);
+        var cy=gnPY(r.y+r.h/2);
         if(r.name){
           CTX.fillStyle=C.lbl;CTX.font='11px sans-serif';CTX.textAlign='center';
-          CTX.fillText(r.name,cx,cy-6);
+          CTX.fillText(r.name,gnPX(r.x+r.w/2),cy-6);
         }
         // 選択中は㎡数を紫・太字
         CTX.fillStyle=isSel?'#534AB7':C.dim;
         CTX.font=(isSel?'bold ':'')+'10px sans-serif';CTX.textAlign='center';
-        CTX.fillText(r.area+'㎡',cx,cy+(r.name?8:0));
+        CTX.fillText(r.area+'㎡',gnPX(r.x+r.w/2),cy+(r.name?8:0));
       });
 
     }
@@ -1323,9 +1330,9 @@ var GN = (function(){
       CTX.fillStyle=guideCol;CTX.fillText(guide,CV.width/2,CV.height-21);
     }
 
-    // 間仕切り壁（確定後）- 包絡処理付き（斜め壁⇔直交壁対応）
+    // 間仕切り壁（確定後）- 包絡処理付き
     if(S.phase==='confirmed'&&S.layerVis.partition){
-      // V/H壁の矩形をmm座標で返す
+      // 壁矩形をmm座標で返す
       function wRect(w){
         var h=(w.thick||100)/2;
         return w.type==='V'
@@ -1340,54 +1347,46 @@ var GN = (function(){
       }
       // 線分[a,b]から矩形[rMin,rMax]と重なる区間を除いた残りを返す
       function subtractRange(a,b,rMin,rMax){
+        // 区間[a,b]から[rMin,rMax]を除く → 残りの区間リスト
         var segs=[];
         if(rMin>a)segs.push([a,Math.min(b,rMin)]);
         if(rMax<b)segs.push([Math.max(a,rMax),b]);
-        if(!segs.length&&(rMin<=a&&rMax>=b))return[];
+        if(!segs.length&&(rMin<=a&&rMax>=b))return[];// 全部消える
         return segs.length?segs:[[a,b]];
       }
 
-      // STEP1：V/H壁をfill
-      S.walls.filter(function(w){return w.type!=='A';}).forEach(function(w2){
+      // STEP1：全壁をfill（交差部含め）
+      S.walls.forEach(function(w2){
         var isSel=w2===S.selectedWall;
         CTX.fillStyle=isSel?C.partSelF:C.partF;
         var r=wRect(w2);
         CTX.fillRect(gnPX(r.x1),gnPY(r.y1),(r.x2-r.x1)*S.vSC,(r.y2-r.y1)*S.vSC);
       });
-      // A壁fill（センター振り分けの四角形）
-      S.walls.filter(function(w){return w.type==='A';}).forEach(function(w){
-        var isSel=w===S.selectedWall;
-        var t=(w.thick||S.partThick||70)/2;
-        var dx=w.x2-w.x1,dy=w.y2-w.y1;
-        var len=Math.sqrt(dx*dx+dy*dy);if(len<1)return;
-        var nx=(-dy/len)*t,ny=(dx/len)*t;
-        CTX.fillStyle=isSel?C.partSelF:C.partF;
-        CTX.beginPath();
-        CTX.moveTo(gnPX(w.x1+nx),gnPY(w.y1+ny));
-        CTX.lineTo(gnPX(w.x2+nx),gnPY(w.y2+ny));
-        CTX.lineTo(gnPX(w.x2-nx),gnPY(w.y2-ny));
-        CTX.lineTo(gnPX(w.x1-nx),gnPY(w.y1-ny));
-        CTX.closePath();CTX.fill();
-      });
 
-      // STEP2：V/H壁の包絡stroke
-      S.walls.filter(function(w){return w.type!=='A';}).forEach(function(w2){
+      // STEP2：各壁の外周輪郭を包絡考慮してstroke
+      S.walls.forEach(function(w2){
         var isSel=w2===S.selectedWall;
         CTX.strokeStyle=isSel?C.partSel:C.part;
         CTX.lineWidth=isSel?2.5:1.5;
         var r=wRect(w2);
-        // この壁と交差する他のV/H壁の矩形リスト
+        // この壁と交差する他壁の矩形リスト
         var others=[];
         S.walls.forEach(function(o){
-          if(o===w2||o.type==='A')return;
-          var ix2=wIntersect(r,wRect(o));
-          if(ix2)others.push(ix2);
+          if(o===w2)return;
+          var ix=wIntersect(r,wRect(o));
+          if(ix)others.push(ix);
         });
+        // 4辺それぞれを描画（交差部分をカット）
+        // 上辺(y=r.y1)：x方向の線
+        // 下辺(y=r.y2)：x方向の線
+        // 左辺(x=r.x1)：y方向の線
+        // 右辺(x=r.x2)：y方向の線
         function drawHSegs(y,xa,xb){
+          // y座標の水平線[xa,xb]を、othersで隠れる区間を除いて描く
           var segs=[[xa,xb]];
-          // V/H壁の矩形でカット
           others.forEach(function(ix){
             if(ix.y1<=y&&ix.y2>=y){
+              // この水平線はixで遮られる
               var newSegs=[];
               segs.forEach(function(seg){
                 var rem=subtractRange(seg[0],seg[1],ix.x1,ix.x2);
@@ -1398,7 +1397,10 @@ var GN = (function(){
           });
           segs.forEach(function(seg){
             if(seg[1]-seg[0]<1)return;
-            CTX.beginPath();CTX.moveTo(gnPX(seg[0]),gnPY(y));CTX.lineTo(gnPX(seg[1]),gnPY(y));CTX.stroke();
+            CTX.beginPath();
+            CTX.moveTo(gnPX(seg[0]),gnPY(y));
+            CTX.lineTo(gnPX(seg[1]),gnPY(y));
+            CTX.stroke();
           });
         }
         function drawVSegs(x,ya,yb){
@@ -1415,89 +1417,17 @@ var GN = (function(){
           });
           segs.forEach(function(seg){
             if(seg[1]-seg[0]<1)return;
-            CTX.beginPath();CTX.moveTo(gnPX(x),gnPY(seg[0]));CTX.lineTo(gnPX(x),gnPY(seg[1]));CTX.stroke();
+            CTX.beginPath();
+            CTX.moveTo(gnPX(x),gnPY(seg[0]));
+            CTX.lineTo(gnPX(x),gnPY(seg[1]));
+            CTX.stroke();
           });
         }
-        drawHSegs(r.y1,r.x1,r.x2);
-        drawHSegs(r.y2,r.x1,r.x2);
-        drawVSegs(r.x1,r.y1,r.y2);
-        drawVSegs(r.x2,r.y1,r.y2);
+        drawHSegs(r.y1,r.x1,r.x2); // 上辺
+        drawHSegs(r.y2,r.x1,r.x2); // 下辺
+        drawVSegs(r.x1,r.y1,r.y2); // 左辺
+        drawVSegs(r.x2,r.y1,r.y2); // 右辺
       });
-
-      // STEP3：A壁のstroke（センター振り分け2本線＋端部キャップ、V/H壁交差部はclipで除外）
-      S.walls.filter(function(w){return w.type==='A';}).forEach(function(w){
-        var isSel=w===S.selectedWall;
-        CTX.strokeStyle=isSel?C.partSel:C.part;
-        CTX.lineWidth=isSel?2.5:1.5;
-        var t=(w.thick||S.partThick||70)/2;
-        var dx=w.x2-w.x1,dy=w.y2-w.y1;
-        var len=Math.sqrt(dx*dx+dy*dy);if(len<1)return;
-        var nx=(-dy/len)*t,ny=(dx/len)*t;
-        // 4頂点
-        var q=[
-          {x:w.x1+nx,y:w.y1+ny},{x:w.x2+nx,y:w.y2+ny},
-          {x:w.x2-nx,y:w.y2-ny},{x:w.x1-nx,y:w.y1-ny}
-        ];
-        // 交差するV/H壁の矩形リスト
-        var vhRects=[];
-        S.walls.forEach(function(o){
-          if(o===w||o.type==='A')return;
-          var or2=wRect(o);
-          var aMinX=Math.min(q[0].x,q[1].x,q[2].x,q[3].x);
-          var aMaxX=Math.max(q[0].x,q[1].x,q[2].x,q[3].x);
-          var aMinY=Math.min(q[0].y,q[1].y,q[2].y,q[3].y);
-          var aMaxY=Math.max(q[0].y,q[1].y,q[2].y,q[3].y);
-          if(aMaxX>=or2.x1&&aMinX<=or2.x2&&aMaxY>=or2.y1&&aMinY<=or2.y2)vhRects.push(or2);
-        });
-        function drawQuad(){
-          // 辺1（上辺）：q[0]→q[1]
-          CTX.beginPath();CTX.moveTo(gnPX(q[0].x),gnPY(q[0].y));CTX.lineTo(gnPX(q[1].x),gnPY(q[1].y));CTX.stroke();
-          // 辺2（端部キャップ）：q[1]→q[2]
-          CTX.beginPath();CTX.moveTo(gnPX(q[1].x),gnPY(q[1].y));CTX.lineTo(gnPX(q[2].x),gnPY(q[2].y));CTX.stroke();
-          // 辺3（下辺）：q[2]→q[3]
-          CTX.beginPath();CTX.moveTo(gnPX(q[2].x),gnPY(q[2].y));CTX.lineTo(gnPX(q[3].x),gnPY(q[3].y));CTX.stroke();
-          // 辺4（端部キャップ）：q[3]→q[0]
-          CTX.beginPath();CTX.moveTo(gnPX(q[3].x),gnPY(q[3].y));CTX.lineTo(gnPX(q[0].x),gnPY(q[0].y));CTX.stroke();
-        }
-        if(vhRects.length===0){
-          drawQuad();
-        }else{
-          CTX.save();
-          CTX.beginPath();
-          CTX.rect(0,0,CV.width,CV.height);
-          vhRects.forEach(function(vr){
-            var rx=gnPX(vr.x1),ry=gnPY(vr.y1),rw2=(vr.x2-vr.x1)*S.vSC,rh2=(vr.y2-vr.y1)*S.vSC;
-            CTX.moveTo(rx,ry);CTX.lineTo(rx,ry+rh2);CTX.lineTo(rx+rw2,ry+rh2);CTX.lineTo(rx+rw2,ry);CTX.closePath();
-          });
-          CTX.clip('evenodd');
-          drawQuad();
-          CTX.restore();
-        }
-      });
-    }
-    // 角度壁モードのプレビュー
-    if(S.addWallAngleMode&&AWState.step===1&&AWState.p1){
-      var cp=S.lastCursorPx;
-      if(cp){
-        var rawEx=gnMX(cp.x),rawEy=gnMY(cp.y);
-        var angDeg2=((AWState.ang%360+360)%360);
-        var angRad2=gnRad(angDeg2);
-        var cosA2=Math.cos(angRad2),sinA2=Math.sin(angRad2);
-        var pdx=rawEx-AWState.p1.x,pdy=rawEy-AWState.p1.y;
-        var proj2=pdx*cosA2+pdy*sinA2;
-        var pex=AWState.p1.x+cosA2*proj2;
-        var pey=AWState.p1.y+sinA2*proj2;
-        CTX.strokeStyle='#E24B4A';CTX.lineWidth=2;CTX.setLineDash([8,4]);
-        CTX.beginPath();CTX.moveTo(gnPX(AWState.p1.x),gnPY(AWState.p1.y));
-        CTX.lineTo(gnPX(pex),gnPY(pey));CTX.stroke();CTX.setLineDash([]);
-        CTX.fillStyle='#E24B4A';
-        CTX.beginPath();CTX.arc(gnPX(AWState.p1.x),gnPY(AWState.p1.y),6,0,Math.PI*2);CTX.fill();
-        CTX.strokeStyle='#E24B4A';CTX.lineWidth=2;
-        CTX.beginPath();CTX.arc(gnPX(pex),gnPY(pey),6,0,Math.PI*2);CTX.stroke();
-        var dist=Math.round(Math.abs(proj2));
-        CTX.font='bold 11px monospace';CTX.fillStyle='#E24B4A';CTX.textAlign='center';
-        CTX.fillText(dist+'mm',(gnPX(AWState.p1.x)+gnPX(pex))/2,(gnPY(AWState.p1.y)+gnPY(pey))/2-10);
-      }
     }
 
     // 作図中プレビュー・残差
@@ -1712,20 +1642,12 @@ var GN = (function(){
 
   function panelPartition(){
     var drawing=S.addWallMode==='draw';
-    var thickOpts=[{v:70,label:'70'},{v:90,label:'90'},{v:125,label:'125'}];
-    var thickBtns=thickOpts.map(function(t){
-      var sel=S.partThick===t.v;
-      return '<button class="abtn' +(sel?' primary':'')+' " style="padding:0 10px;min-width:44px;" onclick="event.stopPropagation();GN.setPartThick('+t.v+')">' +t.label+'</button>';
-    }).join('');
     return '<div class="btn-row" style="margin-bottom:6px;">'
-      +'<button class="abtn '+(drawing?'warn':'primary')+'" style="padding:0 14px;font-size:16px;" onclick="GN.toggleAddWall()">+</button>'
-      +'<button class="abtn '+(S.addWallAngleMode?'warn':'primary')+'" style="padding:0 14px;font-size:16px;" onclick="event.stopPropagation();GN.toggleAngleWall()">／</button>'
-      +thickBtns
-      +(S.selectedWall?'<button class="abtn danger" onclick="GN.deleteWall()">削除</button>':'')
+      +'<button class="abtn '+(drawing?'warn':'primary')+'" onclick="GN.toggleAddWall()">'
+      +(drawing?'✕ 壁追加終了':'+ 壁を追加')+'</button>'
+      +(S.selectedWall?'<button class="abtn danger" onclick="GN.deleteWall()">選択壁を削除</button>':'')
       +'</div>'
-      +'<div style="font-size:10px;color:#888;margin-bottom:6px;">'
-      +thickOpts.map(function(t){return t.v+'mm='+(t.v===70?'LGS45+PB12.5':t.v===90?'LGS65+PB12.5':'LGS100+PB12.5');}).join('　')
-      +'</div>'      +(S.walls.length>0        ?'<div class="sdiv">間仕切り壁（'+S.walls.length+'本）</div>'        +S.walls.map(function(w2,i){          return '<div class="wall-item">'            +'<span>'+(w2.type==='V'?'縦壁 x='+w2.coord+'mm':w2.type==='H'?'横壁 y='+w2.coord+'mm':'斜壁 '+w2.angle+'° '+w2.len+'mm')+'</span>'            +'<button class="wall-del" onclick="GN.deleteWallById(\''+w2.id+'\')">×</button>'            +'</div>';        }).join('')        :'<div style="font-size:11px;color:#888;">壁がありません。追加ボタンで追加してください。</div>')      +(S.rooms.length>0        ?'<div class="sdiv" style="margin-top:12px;">自動生成された部屋（'+S.rooms.length+'室）</div>'        +S.rooms.map(function(r,i){          return '<div class="room-card">'            +'<div class="room-card-hd">'+(r.name||'部屋'+(i+1))+'　<span style="font-size:10px;color:#888;">'+r.w+'×'+r.h+'mm　'+r.area+'㎡</span></div>'            +'<div class="f-row" style="margin-bottom:6px;">'            +'<span class="f-label">部屋名</span>'            +'<input type="text" value="'+r.name+'" placeholder="例：ミーティングルーム" onchange="GN.updateRoom(\''+r.id+'\',\'name\',this.value)">'            +'</div>'            +'<div class="f-row" style="margin-bottom:6px;">'            +'<span class="f-label">天井高</span>'            +'<input type="number" value="'+r.ch+'" step="50" style="max-width:90px;" onchange="GN.updateRoom(\''+r.id+'\',\'ch\',parseInt(this.value))">'            +'<span class="f-unit">mm</span>'            +'</div>'            +'<div class="f-row" style="margin-bottom:0;">'            +'<span class="f-label">床材</span>'            +'<input type="text" value="'+r.mat.floor+'" placeholder="例：フロアタイル NT-31901" onchange="GN.updateRoomMat(\''+r.id+'\',\'floor\',this.value)">'            +'</div>'            +'</div>';        }).join('')        :'');
+      +(drawing?'<div style="font-size:11px;color:#0f6e56;padding:2px 0 8px;">外周または既存壁をタップ → ドラッグで壁を引く</div>':'')      +(S.walls.length>0        ?'<div class="sdiv">間仕切り壁（'+S.walls.length+'本）</div>'        +S.walls.map(function(w2,i){          return '<div class="wall-item">'            +'<span>'+(w2.type==='V'?'縦壁 x='+w2.coord:'横壁 y='+w2.coord)+'mm</span>'            +'<button class="wall-del" onclick="GN.deleteWallById(\''+w2.id+'\')">×</button>'            +'</div>';        }).join('')        :'<div style="font-size:11px;color:#888;">壁がありません。追加ボタンで追加してください。</div>')      +(S.rooms.length>0        ?'<div class="sdiv" style="margin-top:12px;">自動生成された部屋（'+S.rooms.length+'室）</div>'        +S.rooms.map(function(r,i){          return '<div class="room-card">'            +'<div class="room-card-hd">'+(r.name||'部屋'+(i+1))+'　<span style="font-size:10px;color:#888;">'+r.w+'×'+r.h+'mm　'+r.area+'㎡</span></div>'            +'<div class="f-row" style="margin-bottom:6px;">'            +'<span class="f-label">部屋名</span>'            +'<input type="text" value="'+r.name+'" placeholder="例：ミーティングルーム" onchange="GN.updateRoom(\''+r.id+'\',\'name\',this.value)">'            +'</div>'            +'<div class="f-row" style="margin-bottom:6px;">'            +'<span class="f-label">天井高</span>'            +'<input type="number" value="'+r.ch+'" step="50" style="max-width:90px;" onchange="GN.updateRoom(\''+r.id+'\',\'ch\',parseInt(this.value))">'            +'<span class="f-unit">mm</span>'            +'</div>'            +'<div class="f-row" style="margin-bottom:0;">'            +'<span class="f-label">床材</span>'            +'<input type="text" value="'+r.mat.floor+'" placeholder="例：フロアタイル NT-31901" onchange="GN.updateRoomMat(\''+r.id+'\',\'floor\',this.value)">'            +'</div>'            +'</div>';        }).join('')        :'');
   }
 
   function panelLayer(){
@@ -1799,7 +1721,7 @@ var GN = (function(){
     ['skeleton','partition','opening','layer','setting'].forEach(function(k){
       var el=document.getElementById('bb-'+k);if(el)el.classList.toggle('active',k===m);
     });
-    if(m!=='partition'){S.addWallMode=false;S.addWallStep=0;S.addWallP1=null;S.addWallAngleMode=false;AWState.step=0;AWState.p1=null;CV.style.cursor='default';document.getElementById('angle-wall-overlay').classList.add('hidden');}
+    if(m!=='partition'){S.addWallMode=false;S.addWallStep=0;S.addWallP1=null;CV.style.cursor='default';}
     openPanel(m);gnPaint();
   }
   function startDraw(){
@@ -1823,116 +1745,8 @@ var GN = (function(){
   }
 
   // 間仕切り操作
-  // 角度壁ホイール
-  var AWCV=null,AWCX=null;
-  var AWState={ang:0,drag:false,p1:null,step:0};
-  function awInit(){
-    if(AWCV)return;
-    AWCV=document.getElementById('aw-wheel-canvas');
-    AWCX=AWCV.getContext('2d');
-    AWCV.addEventListener('mousedown',function(e){AWState.drag=true;awAngle(e);awPaintWheel();});
-    AWCV.addEventListener('mousemove',function(e){if(!AWState.drag)return;awAngle(e);awPaintWheel();});
-    AWCV.addEventListener('mouseup',function(){AWState.drag=false;});
-    AWCV.addEventListener('touchstart',function(e){e.preventDefault();AWState.drag=true;awAngle(e);awPaintWheel();},{passive:false});
-    AWCV.addEventListener('touchmove',function(e){e.preventDefault();if(!AWState.drag)return;awAngle(e);awPaintWheel();},{passive:false});
-    AWCV.addEventListener('touchend',function(){AWState.drag=false;});
-  }
-  function awAngle(e){
-    var r=AWCV.getBoundingClientRect(),sx=AWCV.width/r.width;
-    var ex=e.touches?(e.touches[0].clientX-r.left)*sx:(e.clientX-r.left)*sx;
-    var ey=e.touches?(e.touches[0].clientY-r.top)*sx:(e.clientY-r.top)*sx;
-    AWState.ang=Math.round(Math.atan2(ey-100,ex-100)*180/Math.PI/15)*15;
-    document.getElementById('aw-angle-disp').textContent=((AWState.ang%360+360)%360)+'°';
-    document.getElementById('aw-dir-disp').textContent=gnDirLbl(((AWState.ang%360+360)%360));
-  }
-  function awPaintWheel(){
-    if(!AWCX)return;
-    AWCX.clearRect(0,0,200,200);
-    AWCX.fillStyle=C.wTr;AWCX.beginPath();AWCX.arc(100,100,86,0,Math.PI*2);AWCX.fill();
-    for(var a=0;a<360;a+=15){
-      var sn=((AWState.ang%360+360)%360)===a;
-      AWCX.fillStyle=C.wAF;AWCX.globalAlpha=sn?1:0.2;
-      AWCX.beginPath();AWCX.moveTo(100,100);AWCX.arc(100,100,84,gnRad(a-7.4),gnRad(a+7.4));AWCX.closePath();AWCX.fill();
-      AWCX.globalAlpha=1;
-    }
-    var rn=gnRad(AWState.ang),imj=true;
-    AWCX.strokeStyle=C.wNd;AWCX.lineWidth=2.5;
-    AWCX.beginPath();AWCX.moveTo(100+Math.cos(rn)*28,100+Math.sin(rn)*28);
-    AWCX.lineTo(100+Math.cos(rn)*72,100+Math.sin(rn)*72);AWCX.stroke();
-    AWCX.save();AWCX.translate(100+Math.cos(rn)*72,100+Math.sin(rn)*72);AWCX.rotate(rn);
-    AWCX.fillStyle=C.wNd;AWCX.beginPath();AWCX.moveTo(9,0);AWCX.lineTo(-5,-4);AWCX.lineTo(-5,4);AWCX.closePath();AWCX.fill();AWCX.restore();
-    AWCX.fillStyle=C.wCn;AWCX.beginPath();AWCX.arc(100,100,28,0,Math.PI*2);AWCX.fill();
-    AWCX.fillStyle=C.wTx;AWCX.font='bold 12px monospace';AWCX.textAlign='center';AWCX.textBaseline='middle';
-    AWCX.fillText(((AWState.ang%360+360)%360)+'°',100,100);
-  }
-
-  // 角度壁のタップ処理（onCVDownから呼ばれる）
-  function awOnTap(p){
-    var raw={x:gnMX(p.x),y:gnMY(p.y)};
-    var snp=S.addWallSnap||snapToSkeleton(raw.x,raw.y);
-    var mmx=snp.snapped?snp.x:snap10(raw.x);
-    var mmy=snp.snapped?snp.y:snap10(raw.y);
-    // 外周枠にクリップ
-    var b=skelBounds();
-    if(b){mmx=Math.max(b.minX,Math.min(b.maxX,mmx));mmy=Math.max(b.minY,Math.min(b.maxY,mmy));}
-    if(AWState.step===0){
-      AWState.p1={x:mmx,y:mmy};AWState.step=1;
-      S.addWallSnap=null;
-      gnPaint(p);
-    }else{
-      // 2点目：ホイール角度方向に射影して壁確定
-      var p1=AWState.p1;
-      var angDeg=((AWState.ang%360+360)%360);
-      var angRad=gnRad(angDeg);
-      var cosA=Math.cos(angRad),sinA=Math.sin(angRad);
-      var dx=mmx-p1.x,dy=mmy-p1.y;
-      var proj=dx*cosA+dy*sinA;
-      var ex=Math.round(p1.x+cosA*proj);
-      var ey=Math.round(p1.y+sinA*proj);
-      // 終点も外周枠にクリップ
-      if(b){ex=Math.max(b.minX,Math.min(b.maxX,ex));ey=Math.max(b.minY,Math.min(b.maxY,ey));}
-      var len=Math.round(Math.sqrt((ex-p1.x)*(ex-p1.x)+(ey-p1.y)*(ey-p1.y)));
-      if(len>10){
-        S.walls.push({id:'w'+(nextWallId++),type:'A',
-          x1:p1.x,y1:p1.y,x2:ex,y2:ey,
-          angle:angDeg,len:len,thick:S.partThick||70});
-        updateRooms();
-        if(!document.getElementById('panel').classList.contains('hidden'))openPanel('partition');
-      }
-      AWState.step=0;AWState.p1=null;S.addWallSnap=null;
-      gnPaint(p);
-    }
-  }
-
-  function toggleAngleWall(){
-    S.addWallAngleMode=!S.addWallAngleMode;
-    if(S.addWallAngleMode){
-      // ／ON：＋は切る・パネルを閉じてオーバーレイを表示
-      S.addWallMode=false;S.addWallStep=0;S.addWallP1=null;
-      CV.style.cursor='crosshair';
-      AWState.step=0;AWState.p1=null;S.addWallSnap=null;
-      awInit();
-      document.getElementById('panel').classList.add('hidden');
-      document.getElementById('angle-wall-overlay').classList.remove('hidden');
-      setTimeout(function(){awPaintWheel();},50);
-    }else{
-      // ／OFF：オーバーレイを閉じてパネルを開く
-      CV.style.cursor='default';
-      document.getElementById('angle-wall-overlay').classList.add('hidden');
-      AWState.step=0;AWState.p1=null;S.addWallSnap=null;
-      openPanel('partition');
-    }
-    gnPaint();
-  }
-
   function toggleAddWall(){
     S.addWallMode=S.addWallMode?false:'draw';
-    if(S.addWallMode){
-      // ＋ON：／は切る
-      S.addWallAngleMode=false;
-      document.getElementById('angle-wall-overlay').classList.add('hidden');
-      AWState.step=0;AWState.p1=null;
-    }
     S.addWallStep=0;S.addWallP1=null;S.addWallDragging=false;S.addWallCur=null;S.addWallDir=null;S.addWallSnap=null;
     S.selectedWall=null;
     CV.style.cursor=S.addWallMode?'crosshair':'default';
@@ -1958,6 +1772,252 @@ var GN = (function(){
     S.layerVis[key]=!S.layerVis[key];openPanel('layer');gnPaint();
   }
 
+  // ─── BLE (Bosch GLM 50-27CG) ─────────────────────────────────────────
+  var BLE_SVC_A   = '02a6c0d0-0451-4000-b000-fb3210111989';
+  var BLE_SVC_B   = '02a6c0f0-0451-4000-b000-fb3210111989';
+  var BLE_CHAR_F1 = '02a6c0f1-0451-4000-b000-fb3210111989';
+  var BLE_CHAR_F2 = '02a6c0f2-0451-4000-b000-fb3210111989';
+  var BLE_CHAR_F3 = '02a6c0f3-0451-4000-b000-fb3210111989';
+  var BLE_CHAR_F4 = '02a6c0f4-0451-4000-b000-fb3210111989';
+  var _bleDevice    = null;
+  var _bleChars     = [];
+  var _bleConnected = false;
+
+  function openBleModal(){
+    var modal=document.getElementById('ble-modal');
+    var box=document.getElementById('ble-box');
+    modal.classList.remove('hidden');
+    box.style.left='50%';
+    box.style.top='80px';
+    box.style.transform='translateX(-50%)';
+    _updateBleUI();
+    _bleModalDragInit();
+  }
+  function closeBleModal(e){
+    if(e&&e.currentTarget!==e.target)return;
+    document.getElementById('ble-modal').classList.add('hidden');
+  }
+  function _bleModalDragInit(){
+    var head=document.getElementById('ble-head');
+    var box=document.getElementById('ble-box');
+    if(!head||!box)return;
+    head.onpointerdown=function(e){
+      e.preventDefault();
+      var rect=box.getBoundingClientRect();
+      box.style.left=rect.left+'px';
+      box.style.top=rect.top+'px';
+      box.style.transform='none';
+      var startX=e.clientX-rect.left;
+      var startY=e.clientY-rect.top;
+      head.setPointerCapture(e.pointerId);
+      head.onpointermove=function(ev){
+        var x=ev.clientX-startX;
+        var y=ev.clientY-startY;
+        x=Math.max(0,Math.min(window.innerWidth-box.offsetWidth,x));
+        y=Math.max(0,Math.min(window.innerHeight-box.offsetHeight,y));
+        box.style.left=x+'px';
+        box.style.top=y+'px';
+      };
+      head.onpointerup=function(){
+        head.onpointermove=null;
+        head.onpointerup=null;
+      };
+    };
+  }
+
+  function _updateBleUI(){
+    var dot  = document.getElementById('ble-dot');
+    var txt  = document.getElementById('ble-status-text');
+    var btn  = document.getElementById('ble-connect-btn');
+    var lbl  = document.getElementById('ble-label');
+    var icon = document.getElementById('ble-icon');
+    var bbBtn= document.getElementById('bb-ble');
+    if(_bleConnected){
+      if(dot){  dot.style.background='#2db55d'; dot.style.boxShadow='0 0 6px #2db55d'; }
+      if(txt)   txt.textContent=(_bleDevice?_bleDevice.name:'GLM')+' 接続中';
+      if(btn){  btn.textContent='接続済み'; btn.style.background='#2db55d'; }
+      if(lbl){  lbl.textContent='接続中'; lbl.style.color='#0f6e56'; }
+      if(icon)  icon.setAttribute('stroke','#0f6e56');
+      if(bbBtn) bbBtn.classList.add('ble-connected');
+    }else{
+      if(dot){  dot.style.background='rgba(30,45,64,0.2)'; dot.style.boxShadow=''; }
+      if(txt)   txt.textContent='未接続';
+      if(btn){  btn.textContent='接続'; btn.style.background='#1e2d40'; btn.disabled=false; }
+      if(lbl){  lbl.textContent='GLM'; lbl.style.color='#888'; }
+      if(icon)  icon.setAttribute('stroke','#666');
+      if(bbBtn) bbBtn.classList.remove('ble-connected');
+    }
+  }
+
+  async function bleConnect(){
+    if(!navigator.bluetooth){
+      gnErr('Web Bluetooth非対応（Chrome推奨）');
+      return;
+    }
+    var btn=document.getElementById('ble-connect-btn');
+    if(btn){ btn.textContent='スキャン中...'; btn.disabled=true; }
+    try{
+      _bleDevice=await navigator.bluetooth.requestDevice({
+        filters:[{namePrefix:'GLM'}],
+        optionalServices:[BLE_SVC_A,BLE_SVC_B]
+      });
+      _bleDevice.addEventListener('gattserverdisconnected',_onBleDisconnected);
+
+      var server=await _bleDevice.gatt.connect();
+      _bleChars=[];
+
+      // サービスA（全Char自動検出）
+      try{
+        var svcA=await server.getPrimaryService(BLE_SVC_A);
+        var charsA=await svcA.getCharacteristics();
+        for(var i=0;i<charsA.length;i++){
+          var ch=charsA[i];
+          _bleChars.push(ch);
+          if(ch.properties.notify||ch.properties.indicate){
+            try{
+              await ch.startNotifications();
+              var lbl2='SvcA-'+ch.uuid.slice(-4);
+              ch.addEventListener('characteristicvaluechanged',(function(l){
+                return function(e){ _onBleValue(e,l); };
+              })(lbl2));
+            }catch(e2){}
+          }
+        }
+      }catch(e){}
+
+      // サービスB：F1〜F4全取得、NOTIFY系は購読
+      try{
+        var svcB=await server.getPrimaryService(BLE_SVC_B);
+        var bDefs=[
+          {uuid:BLE_CHAR_F1,label:'CharF1'},
+          {uuid:BLE_CHAR_F2,label:'CharF2'},
+          {uuid:BLE_CHAR_F3,label:'CharF3'},
+          {uuid:BLE_CHAR_F4,label:'CharF4'}
+        ];
+        for(var j=0;j<bDefs.length;j++){
+          var def=bDefs[j];
+          try{
+            var c=await svcB.getCharacteristic(def.uuid);
+            _bleChars.push(c);
+            if(c.properties.notify||c.properties.indicate){
+              await c.startNotifications();
+              c.addEventListener('characteristicvaluechanged',(function(l){
+                return function(e){ _onBleValue(e,l); };
+              })(def.label));
+            }
+          }catch(e){}
+        }
+      }catch(e){}
+
+      _bleConnected=true;
+      _updateBleUI();
+      await _bleSendLoggingStart();
+
+    }catch(e){
+      if(btn){ btn.textContent='接続'; btn.disabled=false; }
+      if(e.name!=='NotFoundError') gnErr('接続失敗: '+e.message);
+      _updateBleUI();
+    }
+  }
+
+  function bleDisconnect(){
+    if(_bleDevice&&_bleDevice.gatt.connected){
+      _bleDevice.gatt.disconnect();
+    }
+    _onBleDisconnected();
+  }
+
+  function _onBleDisconnected(){
+    _bleConnected=false;
+    _bleChars=[];
+    _updateBleUI();
+    gnErr('GLM切断しました');
+  }
+
+  // ロギング開始コマンド送信（C0 55 02 01 00 1A）
+  // 02a6c0d1（WRITE）に送信→ボタン押下で測定値がINDICATE通知される
+  async function _bleSendLoggingStart(){
+    var LOGGING_CMD=new Uint8Array([0xC0,0x55,0x02,0x01,0x00,0x1A]);
+    var charD1=_bleChars.find(function(c){
+      return c.uuid==='02a6c0d1-0451-4000-b000-fb3210111989';
+    });
+    if(!charD1){
+      charD1=_bleChars.find(function(c){ return c.uuid===BLE_CHAR_F3; });
+    }
+    if(!charD1){
+      gnToast('GLM接続しました（ロギング待機中）');
+      return;
+    }
+    try{
+      await charD1.writeValue(LOGGING_CMD);
+      gnToast('GLM接続しました。測定ボタンを押してください');
+    }catch(e){
+      try{
+        await charD1.writeValueWithoutResponse(LOGGING_CMD);
+        gnToast('GLM接続しました。測定ボタンを押してください');
+      }catch(e2){
+        gnToast('GLM接続しました（コマンド送信失敗）');
+      }
+    }
+  }
+
+  function _onBleValue(e, charName){
+    var val=e.target.value;
+    var bytes=new Uint8Array(val.buffer);
+
+    // C0 11 00 3A = ハートビート → スキップ
+    if(bytes.length===4&&bytes[0]===0xc0&&bytes[1]===0x11) return;
+
+    // MT-Protocol測定値パケット: C0 55 ヘッダー
+    // bytes[7-10]: IEEE-754 float LE (メートル単位)
+    if(bytes.length>=11&&bytes[0]===0xc0&&bytes[1]===0x55){
+      var statusByte=bytes[3];
+      if(statusByte===0x06||statusByte===0x08||statusByte===0x0a){
+        var buf=new ArrayBuffer(4);
+        var view=new DataView(buf);
+        view.setUint8(0,bytes[7]);
+        view.setUint8(1,bytes[8]);
+        view.setUint8(2,bytes[9]);
+        view.setUint8(3,bytes[10]);
+        var meters=view.getFloat32(0,true); // little endian
+        var mm=Math.round(meters*1000);
+        if(mm>0&&mm<50000){
+          _applyBleValue(mm);
+        }
+      }
+      return;
+    }
+  }
+
+  function _applyBleValue(mm){
+    if(mm<=0||mm>50000) return;
+
+    // 受信値表示更新
+    var lastEl=document.getElementById('ble-last-val');
+    if(lastEl) lastEl.textContent=mm.toLocaleString()+' mm';
+
+    // ボトムバーGLMボタンをフラッシュ
+    var bbBtn=document.getElementById('bb-ble');
+    if(bbBtn){
+      bbBtn.classList.add('ble-flash');
+      setTimeout(function(){ bbBtn.classList.remove('ble-flash'); },450);
+    }
+
+    // 外周作図中：len-valにセットして自動確定
+    if(S.phase==='drawing'){
+      var el=document.getElementById('len-val');
+      if(el) el.value=mm;
+      gnToast('📏 '+mm.toLocaleString()+' mm → 自動確定');
+      setTimeout(function(){ addSeg(); },80);
+    }else{
+      // 作図中以外は値を入れるだけ
+      var el=document.getElementById('len-val');
+      if(el) el.value=mm;
+      gnToast('📏 '+mm.toLocaleString()+' mm 受信');
+    }
+  }
+  // ──────────────────────────────────────────────────────────────────────
+
   // 起動（rAFで1フレーム待ってからCA.offsetWidthを取得）
   requestAnimationFrame(function(){
     CV.width=CA.offsetWidth;CV.height=CA.offsetHeight;
@@ -1974,8 +2034,9 @@ var GN = (function(){
     startDraw:startDraw,gnReset:gnReset,backToDraw:backToDraw,editSkel:editSkel,
     exportJSON:exportJSON,
     setName:setName,setStr:setStr,setCt:setCt,setCh:setCh,setGW:setGW,setGH:setGH,setThr:setThr,setSkelThick:setSkelThick,setPartThick:setPartThick,
-    toggleAddWall:toggleAddWall,toggleAngleWall:toggleAngleWall,deleteWall:deleteWall,deleteWallById:deleteWallById,
+    toggleAddWall:toggleAddWall,deleteWall:deleteWall,deleteWallById:deleteWallById,
     updateRoom:updateRoom,updateRoomMat:updateRoomMat,toggleLayer:toggleLayer,
+    openBleModal:openBleModal,closeBleModal:closeBleModal,bleConnect:bleConnect,bleDisconnect:bleDisconnect,
   };
 })();
 </script>
