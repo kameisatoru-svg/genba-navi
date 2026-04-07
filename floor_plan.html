@@ -11,6 +11,7 @@ html,body{height:100%;overflow:hidden;background:#1a1a1a;font-family:'Meiryo','Y
 
 /* キャンバスエリア */
 #canvas-area{flex:1;position:relative;min-height:0;background:#f0f0ec;}
+#canvas-area.overlay-open{padding-bottom:140px;}
 #cv{display:block;touch-action:none;}
 
 /* ステータスバー */
@@ -636,6 +637,17 @@ var GN = (function(){
   }
 
   // ビュー
+  function showOverlay(id){
+    document.getElementById(id).classList.remove('hidden');
+    CA.classList.add('overlay-open');
+  }
+  function hideOverlay(id){
+    document.getElementById(id).classList.add('hidden');
+    // 両方hiddenになったらクラス除去
+    var wh=document.getElementById('wheel-overlay').classList.contains('hidden');
+    var ah=document.getElementById('angle-wall-overlay').classList.contains('hidden');
+    if(wh&&ah) CA.classList.remove('overlay-open');
+  }
   function fitView(){
     if(S.phase==='setup'||!S.gW)return;
     if(S.phase==='confirmed'){
@@ -774,7 +786,7 @@ var GN = (function(){
     S.selectingSegs=true;
     S.lockedSegs=[];
     closeDlg();
-    document.getElementById('wheel-overlay').classList.add('hidden');
+    hideOverlay('wheel-overlay');
     gnPaint();
     var bar=document.getElementById('lock-bar');
     if(!bar){
@@ -794,7 +806,7 @@ var GN = (function(){
     S.selectingSegs=false;S.lockedSegs=[];
     var bar=document.getElementById('lock-bar');
     if(bar)bar.style.display='none';
-    document.getElementById('wheel-overlay').classList.remove('hidden');
+    showOverlay('wheel-overlay');
     gnPaint();
   }
 
@@ -892,7 +904,7 @@ var GN = (function(){
   function forceClose(){forceCloseDirect();}
   function gnFinish(){
     S.phase='confirmed';closeDlg();
-    document.getElementById('wheel-overlay').classList.add('hidden');
+    hideOverlay('wheel-overlay');
     document.getElementById('fitview-btn').style.display='none';
     updateRooms();fitView();
     // 外周確定後は自動で間仕切りモードへ
@@ -1876,17 +1888,17 @@ var GN = (function(){
   }
   function closePanel(){
     document.getElementById('panel').classList.add('hidden');
-    if(S.phase==='drawing')document.getElementById('wheel-overlay').classList.remove('hidden');
+    if(S.phase==='drawing')showOverlay('wheel-overlay');
   }
   function backToDraw(){
     document.getElementById('panel').classList.add('hidden');
-    document.getElementById('wheel-overlay').classList.remove('hidden');
+    showOverlay('wheel-overlay');
     setTimeout(function(){document.getElementById('len-val').focus();},100);
   }
   function editSkel(){
     S.phase='drawing';
     document.getElementById('panel').classList.add('hidden');
-    document.getElementById('wheel-overlay').classList.remove('hidden');
+    showOverlay('wheel-overlay');
     gnCalcView(S.gW,S.gH,190);gnUpdWheel();
     setTimeout(function(){document.getElementById('len-val').focus();},100);
   }
@@ -1895,7 +1907,7 @@ var GN = (function(){
     ['skeleton','partition','opening','layer','setting'].forEach(function(k){
       var el=document.getElementById('bb-'+k);if(el)el.classList.toggle('active',k===m);
     });
-    if(m!=='partition'){S.addWallMode=false;S.addWallStep=0;S.addWallP1=null;S.addWallAngleMode=false;AWState.step=0;AWState.p1=null;CV.style.cursor='default';document.getElementById('angle-wall-overlay').classList.add('hidden');}
+    if(m!=='partition'){S.addWallMode=false;S.addWallStep=0;S.addWallP1=null;S.addWallAngleMode=false;AWState.step=0;AWState.p1=null;CV.style.cursor='default';hideOverlay('angle-wall-overlay');}
     openPanel(m);gnPaint();
   }
   function startDraw(){
@@ -1904,7 +1916,7 @@ var GN = (function(){
     S.phase='drawing';S.segs=[];S.pts=[{x:0,y:0}];S.cerr=null;
     gnCalcView(S.gW,S.gH,190);
     document.getElementById('panel').classList.add('hidden');
-    document.getElementById('wheel-overlay').classList.remove('hidden');
+    showOverlay('wheel-overlay');
     document.getElementById('fitview-btn').style.display='none';
     gnUpdWheel();gnPaint();
   }
@@ -1913,7 +1925,7 @@ var GN = (function(){
     S.phase='setup';S.segs=[];S.pts=[{x:0,y:0}];
     S.gW=0;S.gH=0;S.cerr=null;
     S.walls=[];S.rooms=[];S.selectedWall=null;S.selectedRooms=[];S.addWallMode=false;
-    document.getElementById('wheel-overlay').classList.add('hidden');
+    hideOverlay('wheel-overlay');
     document.getElementById('fitview-btn').style.display='none';
     gnPaint();openPanel('skeleton');
   }
@@ -2016,12 +2028,12 @@ var GN = (function(){
       AWState.step=0;AWState.p1=null;AWState.snapTip=null;S.addWallSnap=null;
       awInit();
       document.getElementById('panel').classList.add('hidden');
-      document.getElementById('angle-wall-overlay').classList.remove('hidden');
+      showOverlay('angle-wall-overlay');
       setTimeout(function(){awPaintWheel();},50);
     }else{
       // ／OFF：オーバーレイを閉じてパネルを開く
       CV.style.cursor='default';
-      document.getElementById('angle-wall-overlay').classList.add('hidden');
+      hideOverlay('angle-wall-overlay');
       AWState.step=0;AWState.p1=null;AWState.snapTip=null;S.addWallSnap=null;
       openPanel('partition');
     }
@@ -2033,7 +2045,7 @@ var GN = (function(){
     if(S.addWallMode){
       // ＋ON：／は切る
       S.addWallAngleMode=false;
-      document.getElementById('angle-wall-overlay').classList.add('hidden');
+      hideOverlay('angle-wall-overlay');
       AWState.step=0;AWState.p1=null;
     }
     S.addWallStep=0;S.addWallP1=null;S.addWallDragging=false;S.addWallCur=null;S.addWallDir=null;S.addWallSnap=null;
