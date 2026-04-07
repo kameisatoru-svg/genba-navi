@@ -95,36 +95,36 @@ html,body{height:100%;overflow:hidden;background:#1a1a1a;font-family:'Meiryo','Y
 /* ホイールオーバーレイ */
 #wheel-overlay{
   position:absolute;bottom:60px;left:0;right:0;
-  background:#fff;border-top:0.5px solid #ddd;z-index:20;padding:12px 0 10px;
+  background:#fff;border-top:0.5px solid #ddd;z-index:20;padding:6px 0 6px;
 }
 #wheel-overlay.hidden{display:none;}
 #angle-wall-overlay{
   position:absolute;bottom:60px;left:0;right:0;
-  background:#fff;border-top:0.5px solid #ddd;z-index:20;padding:12px 0 10px;
+  background:#fff;border-top:0.5px solid #ddd;z-index:20;padding:6px 0 6px;
 }
 #angle-wall-overlay.hidden{display:none;}
-#wheel-inner{display:flex;align-items:center;gap:14px;padding:0 14px;}
+#wheel-inner{display:flex;align-items:center;gap:8px;padding:0 10px;}
 #wheel-canvas{display:block;flex-shrink:0;touch-action:none;}
-#wheel-right{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0;}
-#angle-disp{font-size:26px;font-weight:500;font-family:monospace;color:#222;line-height:1;}
-#dir-disp{font-size:12px;color:#888;}
-.len-row{display:flex;align-items:center;gap:8px;}
+#wheel-right{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;}
+#angle-disp{font-size:16px;font-weight:500;font-family:monospace;color:#222;line-height:1;}
+#dir-disp{font-size:10px;color:#888;}
+.len-row{display:flex;align-items:center;gap:6px;}
 #len-val{
-  flex:1;height:52px;font-size:22px;font-weight:500;
-  border:0.5px solid #ccc;border-radius:10px;padding:0 12px;
+  flex:1;height:36px;font-size:16px;font-weight:500;
+  border:0.5px solid #ccc;border-radius:8px;padding:0 8px;
   background:#fff;color:#222;text-align:right;min-width:0;font-family:monospace;
 }
-.wbtn-row{display:flex;gap:8px;flex-wrap:wrap;}
+.wbtn-row{display:flex;gap:6px;flex-wrap:wrap;}
 .wbtn{
-  height:44px;border-radius:22px;border:0.5px solid #ddd;
-  background:#f5f5f5;color:#333;font-size:12px;cursor:pointer;
-  padding:0 16px;white-space:nowrap;font-family:inherit;
+  height:32px;border-radius:16px;border:0.5px solid #ddd;
+  background:#f5f5f5;color:#333;font-size:11px;cursor:pointer;
+  padding:0 12px;white-space:nowrap;font-family:inherit;
 }
 .wbtn.primary{background:#534AB7;color:#fff;border-color:#534AB7;}
 .wbtn.success{background:#2d7d3a;color:#fff;border-color:#2d7d3a;}
 .wbtn.danger{color:#c33;border-color:#fbb;}
 .wbtn:disabled{opacity:0.35;cursor:default;}
-.seg-list{max-height:36px;overflow-y:auto;}
+.seg-list{max-height:24px;overflow-y:auto;}
 .seg-row{font-size:10px;color:#888;font-family:monospace;padding:1px 0;}
 
 /* 基準点オーバーレイ */
@@ -218,13 +218,13 @@ html,body{height:100%;overflow:hidden;background:#1a1a1a;font-family:'Meiryo','Y
   <!-- ホイールオーバーレイ -->
   <div id="wheel-overlay" class="hidden">
     <div id="wheel-inner">
-      <canvas id="wheel-canvas" width="200" height="200"></canvas>
+      <canvas id="wheel-canvas" width="80" height="80"></canvas>
       <div id="wheel-right">
         <div id="angle-disp">0°</div>
         <div id="dir-disp">→ 右方向</div>
         <div class="len-row">
           <input type="number" id="len-val" placeholder="長さ mm" min="0" step="1">
-          <button class="wbtn primary" style="height:52px;padding:0 16px;font-size:13px;" onclick="GN.addSeg()">確定</button>
+          <button class="wbtn primary" style="height:36px;padding:0 12px;font-size:12px;" onclick="GN.addSeg()">確定</button>
         </div>
         <div class="wbtn-row">
           <button class="wbtn success" id="btn-close-poly" disabled onclick="GN.tryClose()">閉じる</button>
@@ -241,7 +241,7 @@ html,body{height:100%;overflow:hidden;background:#1a1a1a;font-family:'Meiryo','Y
   <!-- 角度壁オーバーレイ -->
   <div id="angle-wall-overlay" class="hidden">
     <div id="wheel-inner">
-      <canvas id="aw-wheel-canvas" width="200" height="200"></canvas>
+      <canvas id="aw-wheel-canvas" width="80" height="80"></canvas>
       <div id="wheel-right">
         <div id="aw-angle-disp">0°</div>
         <div id="aw-dir-disp">→ 右方向</div>
@@ -378,7 +378,7 @@ var GN = (function(){
   var WCV=document.getElementById('wheel-canvas');
   var WCX=WCV.getContext('2d');
   var CA=document.getElementById('canvas-area');
-  var WCX_R=100,WCY_R=100,WR=72,WRI=28;
+  var WCX_R=40,WCY_R=40,WR=28,WRI=10;
   var TCH={a:false,l:null,pd:null,pm:null};
   var PAN={active:false,x:0,y:0}; // 中ボタンパン用
   var ET=null;
@@ -1662,28 +1662,29 @@ var GN = (function(){
 
   // ホイール描画
   function gnPaintWheel(){
-    WCX.clearRect(0,0,200,200);
-    WCX.fillStyle=C.wTr;WCX.beginPath();WCX.arc(WCX_R,WCY_R,WR+14,0,Math.PI*2);WCX.fill();
+    WCX.clearRect(0,0,80,80);
+    WCX.fillStyle=C.wTr;WCX.beginPath();WCX.arc(WCX_R,WCY_R,WR+6,0,Math.PI*2);WCX.fill();
     for(var a=0;a<360;a+=STEP){
       var isn=gnSnap(S.wAng)===a;WCX.fillStyle=C.wAF;WCX.globalAlpha=isn?1:0.2;
-      WCX.beginPath();WCX.moveTo(WCX_R,WCY_R);WCX.arc(WCX_R,WCY_R,WR+12,gnRad(a-STEP/2+1),gnRad(a+STEP/2-1));WCX.closePath();WCX.fill();WCX.globalAlpha=1;
+      WCX.beginPath();WCX.moveTo(WCX_R,WCY_R);WCX.arc(WCX_R,WCY_R,WR+5,gnRad(a-STEP/2+1),gnRad(a+STEP/2-1));WCX.closePath();WCX.fill();WCX.globalAlpha=1;
     }
     for(var a2=0;a2<360;a2+=STEP){
       var r2=gnRad(a2),imj=a2%90===0;
       WCX.strokeStyle=imj?C.wTM:C.wTk;WCX.lineWidth=imj?2:1;
-      WCX.beginPath();WCX.moveTo(WCX_R+Math.cos(r2)*(WR+14-(imj?12:6)),WCY_R+Math.sin(r2)*(WR+14-(imj?12:6)));
-      WCX.lineTo(WCX_R+Math.cos(r2)*(WR+14),WCY_R+Math.sin(r2)*(WR+14));WCX.stroke();
-      if(imj){WCX.fillStyle=C.wLb;WCX.font='10px monospace';WCX.textAlign='center';WCX.textBaseline='middle';
-        WCX.fillText({0:'0',90:'90',180:'180',270:'270'}[a2],WCX_R+Math.cos(r2)*(WR+30),WCY_R+Math.sin(r2)*(WR+30));}
+      WCX.beginPath();WCX.moveTo(WCX_R+Math.cos(r2)*(WR+6-(imj?5:3)),WCY_R+Math.sin(r2)*(WR+6-(imj?5:3)));
+      WCX.lineTo(WCX_R+Math.cos(r2)*(WR+6),WCY_R+Math.sin(r2)*(WR+6));WCX.stroke();
+      if(imj){WCX.fillStyle=C.wLb;WCX.font='7px monospace';WCX.textAlign='center';WCX.textBaseline='middle';
+        WCX.fillText({0:'0',90:'90',180:'180',270:'270'}[a2],WCX_R+Math.cos(r2)*(WR+14),WCY_R+Math.sin(r2)*(WR+14));}
     }
     var sn=gnSnap(S.wAng),rn=gnRad(sn);
-    WCX.strokeStyle=C.wNd;WCX.lineWidth=2.5;
+    WCX.strokeStyle=C.wNd;WCX.lineWidth=2;
     WCX.beginPath();WCX.moveTo(WCX_R+Math.cos(rn)*WRI,WCY_R+Math.sin(rn)*WRI);WCX.lineTo(WCX_R+Math.cos(rn)*WR,WCY_R+Math.sin(rn)*WR);WCX.stroke();
     WCX.save();WCX.translate(WCX_R+Math.cos(rn)*WR,WCY_R+Math.sin(rn)*WR);WCX.rotate(rn);
-    WCX.fillStyle=C.wNd;WCX.beginPath();WCX.moveTo(9,0);WCX.lineTo(-5,-4);WCX.lineTo(-5,4);WCX.closePath();WCX.fill();WCX.restore();
+    WCX.fillStyle=C.wNd;WCX.beginPath();WCX.moveTo(5,0);WCX.lineTo(-3,-2.5);WCX.lineTo(-3,2.5);WCX.closePath();WCX.fill();WCX.restore();
     WCX.fillStyle=C.wCn;WCX.beginPath();WCX.arc(WCX_R,WCY_R,WRI,0,Math.PI*2);WCX.fill();
-    WCX.fillStyle=C.wTx;WCX.font='bold 14px monospace';WCX.textAlign='center';WCX.textBaseline='middle';WCX.fillText(sn+'°',WCX_R,WCY_R);
+    WCX.fillStyle=C.wTx;WCX.font='bold 9px monospace';WCX.textAlign='center';WCX.textBaseline='middle';WCX.fillText(sn+'°',WCX_R,WCY_R);
   }
+
   function gnUpdWheel(){
     gnPaintWheel();
     document.getElementById('angle-disp').textContent=gnSnap(S.wAng)+'°';
@@ -1940,23 +1941,23 @@ var GN = (function(){
   }
   function awPaintWheel(){
     if(!AWCX)return;
-    AWCX.clearRect(0,0,200,200);
-    AWCX.fillStyle=C.wTr;AWCX.beginPath();AWCX.arc(100,100,86,0,Math.PI*2);AWCX.fill();
+    AWCX.clearRect(0,0,80,80);
+    AWCX.fillStyle=C.wTr;AWCX.beginPath();AWCX.arc(40,40,34,0,Math.PI*2);AWCX.fill();
     for(var a=0;a<360;a+=15){
       var sn=((AWState.ang%360+360)%360)===a;
       AWCX.fillStyle=C.wAF;AWCX.globalAlpha=sn?1:0.2;
-      AWCX.beginPath();AWCX.moveTo(100,100);AWCX.arc(100,100,84,gnRad(a-7.4),gnRad(a+7.4));AWCX.closePath();AWCX.fill();
+      AWCX.beginPath();AWCX.moveTo(40,40);AWCX.arc(40,40,33,gnRad(a-7.4),gnRad(a+7.4));AWCX.closePath();AWCX.fill();
       AWCX.globalAlpha=1;
     }
     var rn=gnRad(AWState.ang),imj=true;
-    AWCX.strokeStyle=C.wNd;AWCX.lineWidth=2.5;
-    AWCX.beginPath();AWCX.moveTo(100+Math.cos(rn)*28,100+Math.sin(rn)*28);
-    AWCX.lineTo(100+Math.cos(rn)*72,100+Math.sin(rn)*72);AWCX.stroke();
-    AWCX.save();AWCX.translate(100+Math.cos(rn)*72,100+Math.sin(rn)*72);AWCX.rotate(rn);
-    AWCX.fillStyle=C.wNd;AWCX.beginPath();AWCX.moveTo(9,0);AWCX.lineTo(-5,-4);AWCX.lineTo(-5,4);AWCX.closePath();AWCX.fill();AWCX.restore();
-    AWCX.fillStyle=C.wCn;AWCX.beginPath();AWCX.arc(100,100,28,0,Math.PI*2);AWCX.fill();
-    AWCX.fillStyle=C.wTx;AWCX.font='bold 12px monospace';AWCX.textAlign='center';AWCX.textBaseline='middle';
-    AWCX.fillText(((AWState.ang%360+360)%360)+'°',100,100);
+    AWCX.strokeStyle=C.wNd;AWCX.lineWidth=2;
+    AWCX.beginPath();AWCX.moveTo(40+Math.cos(rn)*11,40+Math.sin(rn)*11);
+    AWCX.lineTo(40+Math.cos(rn)*28,40+Math.sin(rn)*28);AWCX.stroke();
+    AWCX.save();AWCX.translate(40+Math.cos(rn)*28,40+Math.sin(rn)*28);AWCX.rotate(rn);
+    AWCX.fillStyle=C.wNd;AWCX.beginPath();AWCX.moveTo(5,0);AWCX.lineTo(-3,-2.5);AWCX.lineTo(-3,2.5);AWCX.closePath();AWCX.fill();AWCX.restore();
+    AWCX.fillStyle=C.wCn;AWCX.beginPath();AWCX.arc(40,40,11,0,Math.PI*2);AWCX.fill();
+    AWCX.fillStyle=C.wTx;AWCX.font='bold 9px monospace';AWCX.textAlign='center';AWCX.textBaseline='middle';
+    AWCX.fillText(((AWState.ang%360+360)%360)+'°',40,40);
   }
 
   // 角度壁のタップ処理（onCVDownから呼ばれる）
