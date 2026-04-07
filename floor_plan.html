@@ -1103,7 +1103,31 @@ var GN = (function(){
       // 角度壁モード：スナップ候補を更新
       if(S.addWallAngleMode){
         var rawA={x:gnMX(p.x),y:gnMY(p.y)};
-        S.addWallSnap=snapToSkeleton(rawA.x,rawA.y);
+        if(AWState.step===1&&AWState.p1){
+          // step1：先端点（角度方向に射影した点）をスナップ対象にする
+          var angDeg3=((AWState.ang%360+360)%360);
+          var angRad3=gnRad(angDeg3);
+          var cosA3=Math.cos(angRad3),sinA3=Math.sin(angRad3);
+          var pdx3=rawA.x-AWState.p1.x,pdy3=rawA.y-AWState.p1.y;
+          var proj3=pdx3*cosA3+pdy3*sinA3;
+          var tipX=AWState.p1.x+cosA3*proj3;
+          var tipY=AWState.p1.y+sinA3*proj3;
+          // 先端点でスナップ判定
+          var snpTip=snapToSkeleton(tipX,tipY);
+          if(snpTip.snapped){
+            // スナップした点から逆算してprojを求め、先端を吸着
+            var snapDx=snpTip.x-AWState.p1.x,snapDy=snpTip.y-AWState.p1.y;
+            var snapProj=snapDx*cosA3+snapDy*sinA3;
+            AWState.snapTip={x:AWState.p1.x+cosA3*snapProj,y:AWState.p1.y+sinA3*snapProj,snapped:true};
+          }else{
+            AWState.snapTip=null;
+          }
+          S.addWallSnap=snpTip;
+        }else{
+          // step0：カーソル位置でスナップ（始点吸着）
+          S.addWallSnap=snapToSkeleton(rawA.x,rawA.y);
+          AWState.snapTip=null;
+        }
         gnPaint(p);return;
       }
       // 壁移動ドラッグ（10mm単位）
@@ -1545,13 +1569,24 @@ var GN = (function(){
         var proj2=pdx*cosA2+pdy*sinA2;
         var pex=AWState.p1.x+cosA2*proj2;
         var pey=AWState.p1.y+sinA2*proj2;
+        // 先端スナップが効いていれば吸着先端を使う
+        if(AWState.snapTip&&AWState.snapTip.snapped){
+          pex=AWState.snapTip.x; pey=AWState.snapTip.y;
+          proj2=Math.sqrt((pex-AWState.p1.x)*(pex-AWState.p1.x)+(pey-AWState.p1.y)*(pey-AWState.p1.y));
+        }
         CTX.strokeStyle='#E24B4A';CTX.lineWidth=2;CTX.setLineDash([8,4]);
         CTX.beginPath();CTX.moveTo(gnPX(AWState.p1.x),gnPY(AWState.p1.y));
         CTX.lineTo(gnPX(pex),gnPY(pey));CTX.stroke();CTX.setLineDash([]);
         CTX.fillStyle='#E24B4A';
         CTX.beginPath();CTX.arc(gnPX(AWState.p1.x),gnPY(AWState.p1.y),6,0,Math.PI*2);CTX.fill();
-        CTX.strokeStyle='#E24B4A';CTX.lineWidth=2;
-        CTX.beginPath();CTX.arc(gnPX(pex),gnPY(pey),6,0,Math.PI*2);CTX.stroke();
+        // 先端：スナップ時は大きい塗りつぶし円、通常は空白円
+        if(AWState.snapTip&&AWState.snapTip.snapped){
+          CTX.fillStyle='#E24B4A';
+          CTX.beginPath();CTX.arc(gnPX(pex),gnPY(pey),8,0,Math.PI*2);CTX.fill();
+        }else{
+          CTX.strokeStyle='#E24B4A';CTX.lineWidth=2;
+          CTX.beginPath();CTX.arc(gnPX(pex),gnPY(pey),6,0,Math.PI*2);CTX.stroke();
+        }
         var dist=Math.round(Math.abs(proj2));
         CTX.font='bold 11px monospace';CTX.fillStyle='#E24B4A';CTX.textAlign='center';
         CTX.fillText(dist+'mm',(gnPX(AWState.p1.x)+gnPX(pex))/2,(gnPY(AWState.p1.y)+gnPY(pey))/2-10);
@@ -1883,7 +1918,7 @@ var GN = (function(){
   // 間仕切り操作
   // 角度壁ホイール
   var AWCV=null,AWCX=null;
-  var AWState={ang:0,drag:false,p1:null,step:0};
+  var AWState={ang:0,drag:false,p1:null,step:0,snapTip:null};
   function awInit(){
     if(AWCV)return;
     AWCV=document.getElementById('aw-wheel-canvas');
@@ -1939,14 +1974,21 @@ var GN = (function(){
       gnPaint(p);
     }else{
       // 2点目：ホイール角度方向に射影して壁確定
+      // snapTipが効いていればそちらを優先
       var p1=AWState.p1;
       var angDeg=((AWState.ang%360+360)%360);
       var angRad=gnRad(angDeg);
       var cosA=Math.cos(angRad),sinA=Math.sin(angRad);
-      var dx=mmx-p1.x,dy=mmy-p1.y;
-      var proj=dx*cosA+dy*sinA;
-      var ex=Math.round(p1.x+cosA*proj);
-      var ey=Math.round(p1.y+sinA*proj);
+      var ex,ey;
+      if(AWState.snapTip&&AWState.snapTip.snapped){
+        ex=Math.round(AWState.snapTip.x);
+        ey=Math.round(AWState.snapTip.y);
+      }else{
+        var dx=mmx-p1.x,dy=mmy-p1.y;
+        var proj=dx*cosA+dy*sinA;
+        ex=Math.round(p1.x+cosA*proj);
+        ey=Math.round(p1.y+sinA*proj);
+      }
       // 終点も外周枠にクリップ
       if(b){ex=Math.max(b.minX,Math.min(b.maxX,ex));ey=Math.max(b.minY,Math.min(b.maxY,ey));}
       var len=Math.round(Math.sqrt((ex-p1.x)*(ex-p1.x)+(ey-p1.y)*(ey-p1.y)));
@@ -1957,7 +1999,7 @@ var GN = (function(){
         updateRooms();
         if(!document.getElementById('panel').classList.contains('hidden'))openPanel('partition');
       }
-      AWState.step=0;AWState.p1=null;S.addWallSnap=null;
+      AWState.step=0;AWState.p1=null;AWState.snapTip=null;S.addWallSnap=null;
       gnPaint(p);
     }
   }
@@ -1968,7 +2010,7 @@ var GN = (function(){
       // ／ON：＋は切る・パネルを閉じてオーバーレイを表示
       S.addWallMode=false;S.addWallStep=0;S.addWallP1=null;
       CV.style.cursor='crosshair';
-      AWState.step=0;AWState.p1=null;S.addWallSnap=null;
+      AWState.step=0;AWState.p1=null;AWState.snapTip=null;S.addWallSnap=null;
       awInit();
       document.getElementById('panel').classList.add('hidden');
       document.getElementById('angle-wall-overlay').classList.remove('hidden');
@@ -1977,7 +2019,7 @@ var GN = (function(){
       // ／OFF：オーバーレイを閉じてパネルを開く
       CV.style.cursor='default';
       document.getElementById('angle-wall-overlay').classList.add('hidden');
-      AWState.step=0;AWState.p1=null;S.addWallSnap=null;
+      AWState.step=0;AWState.p1=null;AWState.snapTip=null;S.addWallSnap=null;
       openPanel('partition');
     }
     gnPaint();
