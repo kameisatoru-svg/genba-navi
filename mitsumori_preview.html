@@ -125,9 +125,9 @@ tr.dragging{opacity:0.4;}
 .doc-page .estimate-table thead th{background:#555!important;color:#fff!important;padding:6px 8px;font-weight:700;font-size:11.5px;letter-spacing:0.05em;border-right:1px solid #666;}
 .doc-page .estimate-table thead th:first-child{text-align:left;}
 .doc-page .estimate-table thead th:not(:first-child){text-align:right;}
-.doc-page .estimate-table tbody tr{border-bottom:1px solid #bbb;height:var(--row-min-h,28px);}
+.doc-page .estimate-table tbody tr{border-bottom:1px solid #bbb;}
 .doc-page .estimate-table tbody tr:nth-child(even){background:#f4f4f4!important;}
-.doc-page .estimate-table tbody td{padding:6px 8px;vertical-align:middle;color:#111;border-right:1px solid #bbb;}
+.doc-page .estimate-table tbody td{padding:9px 10px;height:52px;vertical-align:middle;color:#111;border-right:1px solid #bbb;}
 .doc-page .estimate-table tbody td:first-child{text-align:left;}
 .doc-page .estimate-table tbody td:not(:first-child){text-align:right;}
 .doc-page .estimate-table .subtotal-row td{background:#e8e8e8!important;font-weight:700;font-size:13px;}
@@ -238,7 +238,7 @@ const TMPL_CSS = `
   .estimate-table thead th:not(:first-child){text-align:right;}
   .estimate-table tbody tr{border-bottom:1px solid var(--border);}
   .estimate-table tbody tr:nth-child(even){background:var(--even)!important;}
-  .estimate-table tbody td{padding:9px 10px;vertical-align:middle;color:var(--text);border-right:1px solid var(--border);}
+  .estimate-table tbody td{padding:9px 10px;height:52px;vertical-align:middle;color:var(--text);border-right:1px solid var(--border);}
   .estimate-table tbody td:first-child{text-align:left;}
   .estimate-table tbody td:not(:first-child){text-align:right;}
   .estimate-table .subtotal-row td{background:var(--subtotal-bg)!important;font-weight:700;font-size:13px;}
@@ -261,7 +261,7 @@ const TMPL_CSS = `
   .detail-table thead th:not(:first-child){text-align:right;}
   .detail-table tbody tr{border-bottom:1px solid var(--border);}
   .detail-table tbody tr:nth-child(even){background:var(--even)!important;}
-  .detail-table tbody td{padding:5px 8px;vertical-align:middle;border-right:1px solid var(--border);}
+  .detail-table tbody td{padding:9px 10px;height:52px;vertical-align:middle;border-right:1px solid var(--border);}
   .detail-table tbody td:first-child{text-align:left;}
   .detail-table tbody td:not(:first-child){text-align:right;}
   .detail-table .section-header td{background:var(--band-dark)!important;color:var(--white)!important;font-weight:700;font-size:11.5px;padding:4px 8px;}
@@ -1187,11 +1187,15 @@ function buildDocHTML(){
   const tblStyle=tblFsStyle?`style="width:100%;border-collapse:collapse;font-size:${tblFsStyle};margin-bottom:8px;border:1px solid var(--border-dark)"`:'style="width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:8px;border:1px solid var(--border-dark)"';
 
   if(mode==='flat'){
-    const rows=flatItems.map(it=>`<tr>
-      <td ${tdStyleL}>${it.name}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
-      <td ${tdStyle}>${it.qty}</td><td ${tdStyle}>${it.unit}</td>
-      <td ${tdStyle}>${fmt(it.price)}</td><td ${tdStyle}>${fmt(it.qty*it.price)}</td>
-    </tr>`).join('');
+    const rows=flatItems.map(it=>{
+      const isEmpty=!it.name&&!it.unit&&(!it.qty||it.qty==0)&&(!it.price||it.price==0);
+      return `<tr>
+        <td ${tdStyleL}>${it.name}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+        <td ${tdStyle}>${isEmpty?'':it.qty}</td><td ${tdStyle}>${it.unit||''}</td>
+        <td ${tdStyle}>${isEmpty||!it.price||it.price==0?'':fmt(it.price)}</td>
+        <td ${tdStyle}>${isEmpty||!it.qty||!it.price||it.price==0?'':fmt(it.qty*it.price)}</td>
+      </tr>`;
+    }).join('');
     tableHtml=`<table class="estimate-table" ${tblStyle}>
       <thead><tr>
         <th ${thStyle} style="width:42%;text-align:left;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">工事内容</th>
@@ -1299,16 +1303,16 @@ ${(()=>{
     g.items.forEach(it=>{
       const amt=(it.qty&&it.price&&it.price!='0'&&it.price!==0)?fmt(parseFloat(it.qty)*parseFloat(it.price)):'';
       allRows+=`<tr>
-        <td style="text-align:left;padding:6px 8px;">${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
-        <td style="text-align:right;padding:6px 8px;">${it.qty||''}</td>
-        <td style="text-align:right;padding:6px 8px;">${it.unit||''}</td>
-        <td style="text-align:right;padding:6px 8px;">${(it.price&&it.price!='0'&&it.price!==0)?fmt(it.price):''}</td>
-        <td style="text-align:right;padding:6px 8px;">${amt}</td>
+        <td style="text-align:left;padding:9px 10px;height:52px;">${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+        <td style="text-align:right;padding:9px 10px;height:52px;">${it.qty||''}</td>
+        <td style="text-align:right;padding:9px 10px;height:52px;">${it.unit||''}</td>
+        <td style="text-align:right;padding:9px 10px;height:52px;">${(it.price&&it.price!='0'&&it.price!==0)?fmt(it.price):''}</td>
+        <td style="text-align:right;padding:9px 10px;height:52px;">${amt}</td>
       </tr>`;
     });
     allRows+=`<tr class="subtotal-row">
-      <td colspan="4" style="text-align:right;padding:6px 8px;background:#e8e8e8;font-weight:700;">小　計</td>
-      <td style="text-align:right;padding:6px 8px;background:#e8e8e8;font-weight:700;">${fmt(gSub)}</td>
+      <td colspan="4" style="text-align:right;padding:9px 10px;background:#e8e8e8;font-weight:700;">小　計</td>
+      <td style="text-align:right;padding:9px 10px;background:#e8e8e8;font-weight:700;">${fmt(gSub)}</td>
     </tr>`;
   });
   return `<div class="page page-break">
