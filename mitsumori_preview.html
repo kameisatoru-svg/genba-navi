@@ -1356,4 +1356,13 @@ const editor=document.querySelector('.editor');
 let isResizing=false,startX=0,startW=0;
 resizer.addEventListener('mousedown',e=>{isResizing=true;startX=e.clientX;startW=editor.offsetWidth;resizer.classList.add('dragging');document.body.style.cursor='col-resize';document.body.style.userSelect='none';});
 document.addEventListener('mousemove',e=>{if(!isResizing)return;const w=Math.max(320,Math.min(window.innerWidth*0.7,startW+(e.clientX-startX)));editor.style.width=w+'px';scalePreview();});
-document.addEventListener('mouseup',()=>{if(!isResizing)return;isRe
+document.addEventListener('mouseup',()=>{if(!isResizing)return;isResizing=false;resizer.classList.remove('dragging');document.body.style.cursor='';document.body.style.userSelect='';});
+
+// ── 初期化 ──
+document.getElementById('hakkoDate').value=new Date().toISOString().split('T')[0];
+renderEditor();
+render();
+window.addEventListener('resize',scalePreview);
+</script>
+</body>
+</html>
