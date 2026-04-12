@@ -63,7 +63,7 @@ body{font-family:"Meiryo","Yu Gothic",sans-serif;background:var(--bg);height:100
 .group-del-btn:hover{color:var(--red);}
 .group-items-table{width:100%;min-width:400px;border-collapse:collapse;font-size:11px;table-layout:fixed;}
 .group-items-table th{background:#f0f2f4;color:var(--navy);padding:4px 5px;font-weight:500;font-size:10px;border-bottom:1px solid var(--border);}
-.group-items-table td{border-bottom:1px solid #eee;padding:2px 2px;vertical-align:middle;}
+.group-items-table td{border-bottom:1px solid #eee;padding:9px 2px;height:52px;vertical-align:middle;}
 .group-items-table td input{width:100%;border:1px solid transparent;border-radius:2px;padding:3px 4px;font-size:11px;font-family:inherit;background:transparent;min-width:0;color:#111;}
 .group-items-table td input[type=number]{-moz-appearance:textfield;}
 .group-items-table td input[type=number]::-webkit-inner-spin-button,
@@ -274,19 +274,19 @@ let nebiki = 0;        // 値引き額
 
 // ── フラット用データ ──
 const flatItems = [
-  {name:'足場架け払い',qty:204,unit:'㎡',price:1700,note:'',pageBreak:false},
-  {name:'飛散防止メッシュシート',qty:204,unit:'㎡',price:380,note:'',pageBreak:false},
-  {name:'高圧洗浄',qty:170,unit:'㎡',price:480,note:'',pageBreak:false},
-  {name:'養生費',qty:1,unit:'式',price:57000,note:'',pageBreak:false},
-  {name:'シーリング打替え',qty:119,unit:'m',price:1700,note:'',pageBreak:false},
-  {name:'外壁下塗り（シーラー）',qty:144,unit:'㎡',price:1150,note:'',pageBreak:false},
-  {name:'外壁中塗り（シリコン塗料）',qty:144,unit:'㎡',price:1700,note:'',pageBreak:false},
-  {name:'外壁上塗り（シリコン塗料）',qty:144,unit:'㎡',price:1700,note:'',pageBreak:false},
-  {name:'軒天塗装',qty:20,unit:'㎡',price:2300,note:'',pageBreak:false},
-  {name:'破風板・鼻隠し塗装',qty:34,unit:'m',price:1550,note:'',pageBreak:false},
-  {name:'雨樋塗装',qty:34,unit:'m',price:1150,note:'',pageBreak:false},
-  {name:'廃材運搬処分費',qty:1,unit:'式',price:48000,note:'',pageBreak:false},
-  {name:'運搬費',qty:1,unit:'式',price:48000,note:'',pageBreak:false},
+  {name:'足場架け払い',qty:204,unit:'㎡',price:900,note:'',pageBreak:false},
+  {name:'飛散防止メッシュシート',qty:204,unit:'㎡',price:200,note:'',pageBreak:false},
+  {name:'高圧洗浄',qty:170,unit:'㎡',price:250,note:'',pageBreak:false},
+  {name:'養生費',qty:1,unit:'式',price:30000,note:'',pageBreak:false},
+  {name:'シーリング打替え',qty:119,unit:'m',price:900,note:'',pageBreak:false},
+  {name:'外壁下塗り（シーラー）',qty:144,unit:'㎡',price:600,note:'',pageBreak:false},
+  {name:'外壁中塗り（シリコン塗料）',qty:144,unit:'㎡',price:900,note:'',pageBreak:false},
+  {name:'外壁上塗り（シリコン塗料）',qty:144,unit:'㎡',price:900,note:'',pageBreak:false},
+  {name:'軒天塗装',qty:20,unit:'㎡',price:1200,note:'',pageBreak:false},
+  {name:'破風板・鼻隠し塗装',qty:34,unit:'m',price:800,note:'',pageBreak:false},
+  {name:'雨樋塗装',qty:34,unit:'m',price:600,note:'',pageBreak:false},
+  {name:'廃材運搬処分費',qty:1,unit:'式',price:25000,note:'',pageBreak:false},
+  {name:'運搬費',qty:1,unit:'式',price:25000,note:'',pageBreak:false},
 ];
 
 // ── グループ用データ ──
@@ -295,19 +295,19 @@ let groupSummaryItems = [];
 
 const groupItems = [
   {name:'塗装工事一式',pageBreak:false,items:[
-    {name:'足場架け払い',qty:204,unit:'㎡',price:1700,note:''},
-    {name:'飛散防止メッシュシート',qty:204,unit:'㎡',price:380,note:''},
-    {name:'高圧洗浄',qty:170,unit:'㎡',price:480,note:''},
-    {name:'養生費',qty:1,unit:'式',price:57000,note:''},
-    {name:'シーリング打替え',qty:119,unit:'m',price:1700,note:''},
-    {name:'外壁下塗り（シーラー）',qty:144,unit:'㎡',price:1150,note:''},
-    {name:'外壁中塗り（シリコン塗料）',qty:144,unit:'㎡',price:1700,note:''},
-    {name:'外壁上塗り（シリコン塗料）',qty:144,unit:'㎡',price:1700,note:''},
-    {name:'軒天塗装',qty:20,unit:'㎡',price:2300,note:''},
-    {name:'破風板・鼻隠し塗装',qty:34,unit:'m',price:1550,note:''},
-    {name:'雨樋塗装',qty:34,unit:'m',price:1150,note:''},
-    {name:'廃材運搬処分費',qty:1,unit:'式',price:48000,note:''},
-    {name:'運搬費',qty:1,unit:'式',price:48000,note:''},
+    {name:'足場架け払い',qty:204,unit:'㎡',price:900,note:''},
+    {name:'飛散防止メッシュシート',qty:204,unit:'㎡',price:200,note:''},
+    {name:'高圧洗浄',qty:170,unit:'㎡',price:250,note:''},
+    {name:'養生費',qty:1,unit:'式',price:30000,note:''},
+    {name:'シーリング打替え',qty:119,unit:'m',price:900,note:''},
+    {name:'外壁下塗り（シーラー）',qty:144,unit:'㎡',price:600,note:''},
+    {name:'外壁中塗り（シリコン塗料）',qty:144,unit:'㎡',price:900,note:''},
+    {name:'外壁上塗り（シリコン塗料）',qty:144,unit:'㎡',price:900,note:''},
+    {name:'軒天塗装',qty:20,unit:'㎡',price:1200,note:''},
+    {name:'破風板・鼻隠し塗装',qty:34,unit:'m',price:800,note:''},
+    {name:'雨樋塗装',qty:34,unit:'m',price:600,note:''},
+    {name:'廃材運搬処分費',qty:1,unit:'式',price:25000,note:''},
+    {name:'運搬費',qty:1,unit:'式',price:25000,note:''},
   ]},
 ];
 
@@ -554,7 +554,7 @@ function renderGroupBlocks(){
         </table>
       </div>
       <button class="add-item-btn" onclick="groupAddItem(${gi})">＋ 小項目追加</button>
-      <div class="group-subtotal">小計：${fmt(gSub)}</div>`;
+      <div class="group-subtotal">小計：${fmtN(gSub)}</div>`;
     wrap.appendChild(div);
     // 小項目ドラッグ登録
     const gtbody=div.querySelector('tbody');
@@ -594,10 +594,10 @@ function calcTotals(){
 }
 
 function renderTotalBox(t){
-  const nebikiRow=nebiki>0?`<div class="total-row"><span>値引き</span><span>-${fmt(nebiki)}</span></div>`:'';
+  const nebikiRow=nebiki>0?`<div class="total-row"><span>値引き</span><span>-${fmtN(nebiki)}</span></div>`:'';
   document.getElementById('total-box').innerHTML=`
-    <div class="total-row"><span>小計</span><span>${fmt(t.subtotal)}</span></div>
-    <div class="total-row"><span>諸経費（${shokeihiRate}%）</span><span>${fmt(t.shokeihi)}</span></div>
+    <div class="total-row"><span>小計</span><span>${fmtN(t.subtotal)}</span></div>
+    <div class="total-row"><span>諸経費（${shokeihiRate}%）</span><span>${fmtN(t.shokeihi)}</span></div>
     ${nebikiRow}
     <div class="total-row"><span>税抜合計</span><span>${fmt(t.zeinuki)}</span></div>
     <div class="total-row"><span>消費税（10%）</span><span>${fmt(t.tax)}</span></div>
@@ -638,7 +638,7 @@ function render(){
       return `<tr${pbClass}>
         <td>${it.name}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
         <td>${it.qty}</td><td>${it.unit}</td>
-        <td>${fmt(it.price)}</td><td>${fmt(it.qty*it.price)}</td>
+        <td>${fmtN(it.price)}</td><td>${fmtN(it.qty*it.price)}</td>
       </tr>`;
     }).join('');
     tableHtml=`<table class="estimate-table" id="est-tbl">
@@ -649,9 +649,9 @@ function render(){
       </tr></thead>
       <tbody>
         ${rows}
-        <tr class="subtotal-row"><td colspan="4" style="text-align:right">小　計</td><td>${fmt(t.subtotal)}</td></tr>
-        <tr class="shokeihi-row"><td colspan="4" style="text-align:right">諸経費（${shokeihiRate}%）</td><td>${fmt(t.shokeihi)}</td></tr>
-        ${nebiki>0?`<tr class="shokeihi-row"><td colspan="4" style="text-align:right">値　引　き</td><td>-${fmt(nebiki)}</td></tr>`:''}
+        <tr class="subtotal-row"><td colspan="4" style="text-align:right">小　計</td><td>${fmtN(t.subtotal)}</td></tr>
+        <tr class="shokeihi-row"><td colspan="4" style="text-align:right">諸経費（${shokeihiRate}%）</td><td>${fmtN(t.shokeihi)}</td></tr>
+        ${nebiki>0?`<tr class="shokeihi-row"><td colspan="4" style="text-align:right">値　引　き</td><td>-${fmtN(nebiki)}</td></tr>`:''}
       </tbody>
     </table>`;
   } else {
@@ -662,13 +662,13 @@ function render(){
         <td>${g.name}</td>
         <td>1</td><td>式</td>
         <td></td>
-        <td>${fmt(gSub)}</td>
+        <td>${fmtN(gSub)}</td>
       </tr>`;
     }).join('');
     const summaryRows=groupSummaryItems.map(it=>{
       const q=it.qty!==''?it.qty:'';
-      const p=it.price!==''&&parseFloat(it.price)?fmt(it.price):'';
-      const a=(it.qty!==''&&it.price!==''&&parseFloat(it.qty)&&parseFloat(it.price))?fmt(parseFloat(it.qty)*parseFloat(it.price)):'';
+      const p=it.price!==''&&parseFloat(it.price)?fmtN(it.price):'';
+      const a=(it.qty!==''&&it.price!==''&&parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
       return `<tr>
         <td>${it.name}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
         <td>${q}</td><td>${it.unit||''}</td>
@@ -686,9 +686,9 @@ function render(){
         ${groupRows}
         ${sepRow}
         ${summaryRows}
-        <tr class="subtotal-row"><td colspan="4" style="text-align:right">小　計</td><td>${fmt(t.subtotal)}</td></tr>
-        <tr class="shokeihi-row"><td colspan="4" style="text-align:right">諸経費（${shokeihiRate}%）</td><td>${fmt(t.shokeihi)}</td></tr>
-        ${nebiki>0?`<tr class="shokeihi-row"><td colspan="4" style="text-align:right">値　引　き</td><td>-${fmt(nebiki)}</td></tr>`:''}
+        <tr class="subtotal-row"><td colspan="4" style="text-align:right">小　計</td><td>${fmtN(t.subtotal)}</td></tr>
+        <tr class="shokeihi-row"><td colspan="4" style="text-align:right">諸経費（${shokeihiRate}%）</td><td>${fmtN(t.shokeihi)}</td></tr>
+        ${nebiki>0?`<tr class="shokeihi-row"><td colspan="4" style="text-align:right">値　引　き</td><td>-${fmtN(nebiki)}</td></tr>`:''}
       </tbody>
     </table>`;
   }
@@ -750,16 +750,16 @@ function render(){
       allRows+=`<tr${pbClass}><td colspan="5" style="background:#444;color:#fff;font-weight:700;font-size:11.5px;padding:5px 8px;text-align:left;">■ ${g.name}　工事明細</td></tr>`;
       // 小項目行
       g.items.forEach(it=>{
-        const amt=(it.qty&&it.price)?fmt(it.qty*it.price):'';
+        const amt=(it.qty&&it.price)?fmtN(it.qty*it.price):'';
         allRows+=`<tr class="group-item-row" data-gi="${gi}">
           <td>${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
           <td>${it.qty||''}</td><td>${it.unit||''}</td>
-          <td>${(it.price&&it.price!='0'&&it.price!==0)?fmt(it.price):''}</td>
+          <td>${(it.price&&it.price!='0'&&it.price!==0)?fmtN(it.price):''}</td>
           <td>${amt}</td>
         </tr>`;
       });
       // 小計行
-      allRows+=`<tr class="group-subtotal-row"><td colspan="4" style="text-align:right;background:#e8e8e8;font-weight:700;padding:5px 8px;">小　計</td><td style="background:#e8e8e8;font-weight:700;text-align:right;padding:5px 8px;">${fmt(gSub)}</td></tr>`;
+      allRows+=`<tr class="group-subtotal-row"><td colspan="4" style="text-align:right;background:#e8e8e8;font-weight:700;padding:5px 8px;">小　計</td><td style="background:#e8e8e8;font-weight:700;text-align:right;padding:5px 8px;">${fmtN(gSub)}</td></tr>`;
     });
     const detailPageHtml=`<div class="doc-page" id="group-detail-page" style="margin-top:20px;">
       <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:12px;">
@@ -800,11 +800,14 @@ function render(){
 // ── 行高さ設定（最低高さ固定・A4超えは改ページに任せる）──
 const ROW_MIN_H = 52; // px：最低行高さ（備考あり行と同等）
 function adjustRowHeight(){
-  const tbl=document.getElementById('est-tbl');
-  if(!tbl)return;
-  tbl.querySelectorAll('tbody tr').forEach(el=>el.style.height=ROW_MIN_H+'px');
-  tbl.querySelectorAll('tbody td,thead th').forEach(el=>el.style.padding='9px 10px');
-  tbl.style.fontSize='12.5px';
+  // est-tbl（フラット・グループ1ページ目）+ group-detail-tbl（グループ明細ページ）両方対象
+  ['est-tbl','group-detail-tbl'].forEach(id=>{
+    const tbl=document.getElementById(id);
+    if(!tbl)return;
+    tbl.querySelectorAll('tbody tr.group-item-row, tbody tr:not(.group-section-header):not(.group-subtotal-row):not(.subtotal-row):not(.shokeihi-row)').forEach(el=>el.style.height=ROW_MIN_H+'px');
+    tbl.querySelectorAll('tbody td,thead th').forEach(el=>el.style.padding='9px 10px');
+    tbl.style.fontSize='12.5px';
+  });
 }
 
 // ── 手動改ページ処理 ──
@@ -1173,8 +1176,8 @@ function buildDocHTML(){
       return `<tr>
         <td ${tdStyleL}>${it.name}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
         <td ${tdStyle}>${isEmpty?'':it.qty}</td><td ${tdStyle}>${it.unit||''}</td>
-        <td ${tdStyle}>${isEmpty||!it.price||it.price==0?'':fmt(it.price)}</td>
-        <td ${tdStyle}>${isEmpty||!it.qty||!it.price||it.price==0?'':fmt(it.qty*it.price)}</td>
+        <td ${tdStyle}>${isEmpty||!it.price||it.price==0?'':fmtN(it.price)}</td>
+        <td ${tdStyle}>${isEmpty||!it.qty||!it.price||it.price==0?'':fmtN(it.qty*it.price)}</td>
       </tr>`;
     }).join('');
     tableHtml=`<table class="estimate-table" ${tblStyle}>
@@ -1187,9 +1190,9 @@ function buildDocHTML(){
       </tr></thead>
       <tbody>
         ${rows}
-        <tr class="subtotal-row"><td colspan="4" style="text-align:right">小　計</td><td style="text-align:right">${fmt(t.subtotal)}</td></tr>
-        <tr class="shokeihi-row"><td colspan="4" style="text-align:right">諸経費（${shokeihiRate}%）</td><td style="text-align:right">${fmt(t.shokeihi)}</td></tr>
-        ${nebiki>0?`<tr class="shokeihi-row"><td colspan="4" style="text-align:right">値　引　き</td><td style="text-align:right">-${fmt(nebiki)}</td></tr>`:''}
+        <tr class="subtotal-row"><td colspan="4" style="text-align:right">小　計</td><td style="text-align:right">${fmtN(t.subtotal)}</td></tr>
+        <tr class="shokeihi-row"><td colspan="4" style="text-align:right">諸経費（${shokeihiRate}%）</td><td style="text-align:right">${fmtN(t.shokeihi)}</td></tr>
+        ${nebiki>0?`<tr class="shokeihi-row"><td colspan="4" style="text-align:right">値　引　き</td><td style="text-align:right">-${fmtN(nebiki)}</td></tr>`:''}
       </tbody>
     </table>`;
   } else {
@@ -1200,7 +1203,7 @@ function buildDocHTML(){
         <td ${tdStyleL}>${g.name}</td>
         <td ${tdStyle}>1</td><td ${tdStyle}>式</td>
         <td ${tdStyle}></td>
-        <td ${tdStyle}>${fmt(gSub)}</td>
+        <td ${tdStyle}>${fmtN(gSub)}</td>
       </tr>`;
     }).join('');
     tableHtml=`<table class="estimate-table" ${tblStyle}>
@@ -1213,9 +1216,9 @@ function buildDocHTML(){
       </tr></thead>
       <tbody>
         ${groupRows}
-        <tr class="subtotal-row"><td colspan="4" style="text-align:right">小　計</td><td style="text-align:right">${fmt(t.subtotal)}</td></tr>
-        <tr class="shokeihi-row"><td colspan="4" style="text-align:right">諸経費（${shokeihiRate}%）</td><td style="text-align:right">${fmt(t.shokeihi)}</td></tr>
-        ${nebiki>0?`<tr class="shokeihi-row"><td colspan="4" style="text-align:right">値　引　き</td><td style="text-align:right">-${fmt(nebiki)}</td></tr>`:''}
+        <tr class="subtotal-row"><td colspan="4" style="text-align:right">小　計</td><td style="text-align:right">${fmtN(t.subtotal)}</td></tr>
+        <tr class="shokeihi-row"><td colspan="4" style="text-align:right">諸経費（${shokeihiRate}%）</td><td style="text-align:right">${fmtN(t.shokeihi)}</td></tr>
+        ${nebiki>0?`<tr class="shokeihi-row"><td colspan="4" style="text-align:right">値　引　き</td><td style="text-align:right">-${fmtN(nebiki)}</td></tr>`:''}
       </tbody>
     </table>`;
   }
@@ -1282,18 +1285,18 @@ ${(()=>{
       <td colspan="5" style="padding:5px 8px;text-align:left;">■ ${g.name}　工事明細</td>
     </tr>`;
     g.items.forEach(it=>{
-      const amt=(it.qty&&it.price&&it.price!='0'&&it.price!==0)?fmt(parseFloat(it.qty)*parseFloat(it.price)):'';
+      const amt=(it.qty&&it.price&&it.price!='0'&&it.price!==0)?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
       allRows+=`<tr>
         <td style="text-align:left;padding:9px 10px;">${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
         <td style="text-align:right;padding:9px 10px;">${it.qty||''}</td>
         <td style="text-align:right;padding:9px 10px;">${it.unit||''}</td>
-        <td style="text-align:right;padding:9px 10px;">${(it.price&&it.price!='0'&&it.price!==0)?fmt(it.price):''}</td>
+        <td style="text-align:right;padding:9px 10px;">${(it.price&&it.price!='0'&&it.price!==0)?fmtN(it.price):''}</td>
         <td style="text-align:right;padding:9px 10px;">${amt}</td>
       </tr>`;
     });
     allRows+=`<tr class="subtotal-row">
       <td colspan="4" style="text-align:right;padding:9px 10px;background:#e8e8e8;font-weight:700;">小　計</td>
-      <td style="text-align:right;padding:9px 10px;background:#e8e8e8;font-weight:700;">${fmt(gSub)}</td>
+      <td style="text-align:right;padding:9px 10px;background:#e8e8e8;font-weight:700;">${fmtN(gSub)}</td>
     </tr>`;
   });
   return `<div class="page page-break">
@@ -1362,3 +1365,4 @@ render();
 window.addEventListener('resize',scalePreview);
 </script>
 </body>
+</html>
