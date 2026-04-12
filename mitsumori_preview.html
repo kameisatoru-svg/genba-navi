@@ -127,7 +127,7 @@ tr.dragging{opacity:0.4;}
 .doc-page .estimate-table thead th:not(:first-child){text-align:right;}
 .doc-page .estimate-table tbody tr{border-bottom:1px solid #bbb;}
 .doc-page .estimate-table tbody tr:nth-child(even){background:#f4f4f4!important;}
-.doc-page .estimate-table tbody td{padding:9px 10px;height:52px;vertical-align:middle;color:#111;border-right:1px solid #bbb;}
+.doc-page .estimate-table tbody td{padding:9px 10px;vertical-align:middle;color:#111;border-right:1px solid #bbb;}
 .doc-page .estimate-table tbody td:first-child{text-align:left;}
 .doc-page .estimate-table tbody td:not(:first-child){text-align:right;}
 .doc-page .estimate-table .subtotal-row td{background:#e8e8e8!important;font-weight:700;font-size:13px;}
@@ -238,7 +238,7 @@ const TMPL_CSS = `
   .estimate-table thead th:not(:first-child){text-align:right;}
   .estimate-table tbody tr{border-bottom:1px solid var(--border);}
   .estimate-table tbody tr:nth-child(even){background:var(--even)!important;}
-  .estimate-table tbody td{padding:9px 10px;height:52px;vertical-align:middle;color:var(--text);border-right:1px solid var(--border);}
+  .estimate-table tbody td{padding:9px 10px;vertical-align:middle;color:var(--text);border-right:1px solid var(--border);}
   .estimate-table tbody td:first-child{text-align:left;}
   .estimate-table tbody td:not(:first-child){text-align:right;}
   .estimate-table .subtotal-row td{background:var(--subtotal-bg)!important;font-weight:700;font-size:13px;}
@@ -261,7 +261,7 @@ const TMPL_CSS = `
   .detail-table thead th:not(:first-child){text-align:right;}
   .detail-table tbody tr{border-bottom:1px solid var(--border);}
   .detail-table tbody tr:nth-child(even){background:var(--even)!important;}
-  .detail-table tbody td{padding:9px 10px;height:52px;vertical-align:middle;border-right:1px solid var(--border);}
+  .detail-table tbody td{padding:9px 10px;vertical-align:middle;border-right:1px solid var(--border);}
   .detail-table tbody td:first-child{text-align:left;}
   .detail-table tbody td:not(:first-child){text-align:right;}
   .detail-table .section-header td{background:var(--band-dark)!important;color:var(--white)!important;font-weight:700;font-size:11.5px;padding:4px 8px;}
@@ -797,33 +797,14 @@ function render(){
   });
 }
 
-// ── A4自動高さ調整 ──
+// ── 行高さ設定（最低高さ固定・A4超えは改ページに任せる）──
+const ROW_MIN_H = 52; // px：最低行高さ（備考あり行と同等）
 function adjustRowHeight(){
-  const page=document.getElementById('doc-page');
   const tbl=document.getElementById('est-tbl');
-  if(!tbl||!page)return;
-  tbl.querySelectorAll('td,th').forEach(el=>el.style.padding='');
-  tbl.style.fontSize='';
-  const tblTop=tbl.getBoundingClientRect().top - page.getBoundingClientRect().top;
-  const bottomSection=page.querySelector('.bottom-section');
-  const footer=page.querySelector('.footer');
-  const fixedH=(bottomSection?bottomSection.offsetHeight:0)
-              +(footer?footer.offsetHeight:0)
-              +40;
-  // A4縦横比から算出した内容高さを使用
-  const availH=getA4ContentH() - tblTop - fixedH;
-  const rows=tbl.querySelectorAll('tbody tr');
-  const headH=tbl.querySelector('thead')?tbl.querySelector('thead').offsetHeight:30;
-  if(rows.length===0)return;
-  const perRow=Math.floor((availH-headH)/rows.length);
-  // 行高さの上限を36pxに制限（行数が少なくても間延びしない）
-  const rowH=Math.min(54, Math.max(36, perRow));
-  const tdPad=Math.min(8, Math.max(2, Math.floor((rowH-18)/2)));
-  tbl.querySelectorAll('tbody tr').forEach(el=>el.style.height=rowH+'px');
-  tbl.querySelectorAll('tbody td').forEach(el=>el.style.padding=tdPad+'px 8px');
-  tbl.querySelectorAll('thead th').forEach(el=>el.style.padding=tdPad+'px 8px');
-  const fs=rows.length<=6?12.5:rows.length<=10?11.5:10.5;
-  tbl.style.fontSize=fs+'px';
+  if(!tbl)return;
+  tbl.querySelectorAll('tbody tr').forEach(el=>el.style.height=ROW_MIN_H+'px');
+  tbl.querySelectorAll('tbody td,thead th').forEach(el=>el.style.padding='9px 10px');
+  tbl.style.fontSize='12.5px';
 }
 
 // ── 手動改ページ処理 ──
@@ -1303,11 +1284,11 @@ ${(()=>{
     g.items.forEach(it=>{
       const amt=(it.qty&&it.price&&it.price!='0'&&it.price!==0)?fmt(parseFloat(it.qty)*parseFloat(it.price)):'';
       allRows+=`<tr>
-        <td style="text-align:left;padding:9px 10px;height:52px;">${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
-        <td style="text-align:right;padding:9px 10px;height:52px;">${it.qty||''}</td>
-        <td style="text-align:right;padding:9px 10px;height:52px;">${it.unit||''}</td>
-        <td style="text-align:right;padding:9px 10px;height:52px;">${(it.price&&it.price!='0'&&it.price!==0)?fmt(it.price):''}</td>
-        <td style="text-align:right;padding:9px 10px;height:52px;">${amt}</td>
+        <td style="text-align:left;padding:9px 10px;">${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+        <td style="text-align:right;padding:9px 10px;">${it.qty||''}</td>
+        <td style="text-align:right;padding:9px 10px;">${it.unit||''}</td>
+        <td style="text-align:right;padding:9px 10px;">${(it.price&&it.price!='0'&&it.price!==0)?fmt(it.price):''}</td>
+        <td style="text-align:right;padding:9px 10px;">${amt}</td>
       </tr>`;
     });
     allRows+=`<tr class="subtotal-row">
@@ -1335,11 +1316,26 @@ ${(()=>{
     </div>
   </div>`;
 })()}
+ADJSCRIPT_START
+window.addEventListener('load',function(){
+  var ROW_MIN_H=52;
+  document.querySelectorAll('.page').forEach(function(page){
+    var tbl=page.querySelector('table.estimate-table,table.detail-table');
+    if(!tbl)return;
+    tbl.querySelectorAll('tbody tr').forEach(function(tr){tr.style.height=ROW_MIN_H+'px';});
+    tbl.querySelectorAll('tbody td,thead th').forEach(function(el){el.style.padding='9px 10px';});
+    tbl.style.fontSize='12.5px';
+  });
+});
+ADJSCRIPT_END
 </body></html>`;
 }
 
 function printHTML(){
-  const html=buildDocHTML();
+  let html=buildDocHTML();
+  // プレースホルダーを実際のscriptタグに置換（テンプレートリテラル内でのscriptタグ問題を回避）
+  const adjScript='<script>'+html.split('ADJSCRIPT_START')[1].split('ADJSCRIPT_END')[0]+'<\/script>';
+  html=html.replace(/ADJSCRIPT_START[\s\S]*?ADJSCRIPT_END/,adjScript);
   // Blob URLをaタグでダウンロード→Chromeで開く→Ctrl+P
   const blob=new Blob([html],{type:'text/html;charset=utf-8'});
   const url=URL.createObjectURL(blob);
