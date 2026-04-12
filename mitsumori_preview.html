@@ -168,7 +168,7 @@ tr.dragging{opacity:0.4;}
         <div class="fgroup"><label>発行日</label><input id="hakkoDate" type="date" oninput="render()"></div>
       </div>
       <div class="fgroup"><label>工事件名</label><input id="kojimei" type="text" value="愛の治療院 松村 外壁塗装工事" oninput="render()"></div>
-      <div class="fgroup"><label>施工場所</label><input id="seshubasho" type="text" value="大分県大分市（大分リハビリテーション病院）" oninput="render()"></div>
+      <div class="fgroup"><label>施工場所</label><input id="seshubasho" type="text" value="大分県別府市" oninput="render()"></div>
       <hr class="section-sep">
       <div id="items-editor"></div>
       <div class="total-box" id="total-box"></div>
@@ -1349,7 +1349,7 @@ document.addEventListener('mousemove',e=>{if(!isResizing)return;const w=Math.max
 document.addEventListener('mouseup',()=>{if(!isResizing)return;isResizing=false;resizer.classList.remove('dragging');document.body.style.cursor='';document.body.style.userSelect='';});
 
 // ── 初期化 ──
-document.getElementById('hakkoDate').value='2026-04-12';
+document.getElementById('hakkoDate').value=new Date().toISOString().split('T')[0];
 renderEditor();
 render();
 window.addEventListener('resize',scalePreview);
