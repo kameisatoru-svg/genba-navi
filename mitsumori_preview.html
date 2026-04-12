@@ -162,13 +162,13 @@ tr.dragging{opacity:0.4;}
   <div class="editor">
     <div class="editor-head"><h2>積算編集</h2></div>
     <div class="editor-body">
-      <div class="fgroup"><label>宛名（会社名）</label><input id="atena" type="text" value="" oninput="render()"></div>
+      <div class="fgroup"><label>宛名（会社名）</label><input id="atena" type="text" value="株式会社島津製作所" oninput="render()"></div>
       <div class="fgroup-row">
-        <div class="fgroup"><label>見積番号</label><input id="mitsumoriNo" type="text" value="AR26-T000-M01" oninput="render()"></div>
+        <div class="fgroup"><label>見積番号</label><input id="mitsumoriNo" type="text" value="AR26-T013-M01" oninput="render()"></div>
         <div class="fgroup"><label>発行日</label><input id="hakkoDate" type="date" oninput="render()"></div>
       </div>
-      <div class="fgroup"><label>工事件名</label><input id="kojimei" type="text" value="" oninput="render()"></div>
-      <div class="fgroup"><label>施工場所</label><input id="seshubasho" type="text" value="" oninput="render()"></div>
+      <div class="fgroup"><label>工事件名</label><input id="kojimei" type="text" value="大分リハビリテーション病院 一般撮影室内装工事" oninput="render()"></div>
+      <div class="fgroup"><label>施工場所</label><input id="seshubasho" type="text" value="大分県大分市（大分リハビリテーション病院）" oninput="render()"></div>
       <hr class="section-sep">
       <div id="items-editor"></div>
       <div class="total-box" id="total-box"></div>
@@ -274,7 +274,16 @@ let nebiki = 0;        // 値引き額
 
 // ── フラット用データ ──
 const flatItems = [
-  {name:'',qty:'',unit:'',price:'',note:'',pageBreak:false},
+  {name:'壁クロス撤去',qty:49,unit:'㎡',price:400,note:'',pageBreak:false},
+  {name:'壁クロス貼',qty:49,unit:'㎡',price:1600,note:'',pageBreak:false},
+  {name:'床長尺シート撤去',qty:18,unit:'㎡',price:2000,note:'',pageBreak:false},
+  {name:'床下地調整費',qty:18,unit:'㎡',price:1250,note:'',pageBreak:false},
+  {name:'床長尺シート貼',qty:18,unit:'㎡',price:5800,note:'',pageBreak:false},
+  {name:'巾木撤去',qty:17,unit:'m',price:300,note:'',pageBreak:false},
+  {name:'ソフト巾木貼',qty:16,unit:'m',price:750,note:'',pageBreak:false},
+  {name:'資材運搬搬入費',qty:1,unit:'式',price:25000,note:'',pageBreak:false},
+  {name:'廃材運搬処分費',qty:1,unit:'式',price:35000,note:'',pageBreak:false},
+  {name:'養生・片付け清掃費',qty:1,unit:'式',price:40000,note:'',pageBreak:false},
 ];
 
 // ── グループ用データ ──
@@ -1340,7 +1349,7 @@ document.addEventListener('mousemove',e=>{if(!isResizing)return;const w=Math.max
 document.addEventListener('mouseup',()=>{if(!isResizing)return;isResizing=false;resizer.classList.remove('dragging');document.body.style.cursor='';document.body.style.userSelect='';});
 
 // ── 初期化 ──
-document.getElementById('hakkoDate').value=new Date().toISOString().split('T')[0];
+document.getElementById('hakkoDate').value='2026-04-12';
 renderEditor();
 render();
 window.addEventListener('resize',scalePreview);
