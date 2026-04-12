@@ -274,19 +274,19 @@ let nebiki = 0;        // 値引き額
 
 // ── フラット用データ ──
 const flatItems = [
-  {name:'足場架け払い',qty:204,unit:'㎡',price:900,note:'',pageBreak:false},
-  {name:'飛散防止メッシュシート',qty:204,unit:'㎡',price:200,note:'',pageBreak:false},
-  {name:'高圧洗浄',qty:170,unit:'㎡',price:250,note:'',pageBreak:false},
-  {name:'養生費',qty:1,unit:'式',price:30000,note:'',pageBreak:false},
-  {name:'シーリング打替え',qty:119,unit:'m',price:900,note:'',pageBreak:false},
-  {name:'外壁下塗り（シーラー）',qty:144,unit:'㎡',price:600,note:'',pageBreak:false},
-  {name:'外壁中塗り（シリコン塗料）',qty:144,unit:'㎡',price:900,note:'',pageBreak:false},
-  {name:'外壁上塗り（シリコン塗料）',qty:144,unit:'㎡',price:900,note:'',pageBreak:false},
-  {name:'軒天塗装',qty:20,unit:'㎡',price:1200,note:'',pageBreak:false},
-  {name:'破風板・鼻隠し塗装',qty:34,unit:'m',price:800,note:'',pageBreak:false},
-  {name:'雨樋塗装',qty:34,unit:'m',price:600,note:'',pageBreak:false},
-  {name:'廃材運搬処分費',qty:1,unit:'式',price:25000,note:'',pageBreak:false},
-  {name:'運搬費',qty:1,unit:'式',price:25000,note:'',pageBreak:false},
+  {name:'足場架け払い',qty:204,unit:'㎡',price:1700,note:'',pageBreak:false},
+  {name:'飛散防止メッシュシート',qty:204,unit:'㎡',price:380,note:'',pageBreak:false},
+  {name:'高圧洗浄',qty:170,unit:'㎡',price:480,note:'',pageBreak:false},
+  {name:'養生費',qty:1,unit:'式',price:57000,note:'',pageBreak:false},
+  {name:'シーリング打替え',qty:119,unit:'m',price:1700,note:'',pageBreak:false},
+  {name:'外壁下塗り（シーラー）',qty:144,unit:'㎡',price:1150,note:'',pageBreak:false},
+  {name:'外壁中塗り（シリコン塗料）',qty:144,unit:'㎡',price:1700,note:'',pageBreak:false},
+  {name:'外壁上塗り（シリコン塗料）',qty:144,unit:'㎡',price:1700,note:'',pageBreak:false},
+  {name:'軒天塗装',qty:20,unit:'㎡',price:2300,note:'',pageBreak:false},
+  {name:'破風板・鼻隠し塗装',qty:34,unit:'m',price:1550,note:'',pageBreak:false},
+  {name:'雨樋塗装',qty:34,unit:'m',price:1150,note:'',pageBreak:false},
+  {name:'廃材運搬処分費',qty:1,unit:'式',price:48000,note:'',pageBreak:false},
+  {name:'運搬費',qty:1,unit:'式',price:48000,note:'',pageBreak:false},
 ];
 
 // ── グループ用データ ──
@@ -1356,13 +1356,4 @@ const editor=document.querySelector('.editor');
 let isResizing=false,startX=0,startW=0;
 resizer.addEventListener('mousedown',e=>{isResizing=true;startX=e.clientX;startW=editor.offsetWidth;resizer.classList.add('dragging');document.body.style.cursor='col-resize';document.body.style.userSelect='none';});
 document.addEventListener('mousemove',e=>{if(!isResizing)return;const w=Math.max(320,Math.min(window.innerWidth*0.7,startW+(e.clientX-startX)));editor.style.width=w+'px';scalePreview();});
-document.addEventListener('mouseup',()=>{if(!isResizing)return;isResizing=false;resizer.classList.remove('dragging');document.body.style.cursor='';document.body.style.userSelect='';});
-
-// ── 初期化 ──
-document.getElementById('hakkoDate').value=new Date().toISOString().split('T')[0];
-renderEditor();
-render();
-window.addEventListener('resize',scalePreview);
-</script>
-</body>
-</html>
+document.addEventListener('mouseup',()=>{if(!isResizing)return;isRe
