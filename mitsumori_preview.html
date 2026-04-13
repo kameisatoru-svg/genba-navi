@@ -144,6 +144,85 @@ tr.dragging{opacity:0.4;}
 .doc-page .totals-table .t-final td{padding:8px 12px;font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:14px;font-weight:700;color:#fff!important;border-bottom:none;}
 .doc-page .footer{margin-top:10px;border-top:1px solid #888;padding-top:6px;display:flex;justify-content:space-between;font-size:11px;color:#444;}
 .doc-page .validity{font-size:11px;color:#444;text-align:left;margin-bottom:8px;margin-top:4px;}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   スマートフォン対応（768px以下）
+   JS一切変更なし・CSSのみ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width:768px){
+  /* タブバー（スマホのみ表示） */
+  .sp-tabbar{
+    display:flex!important;
+    background:var(--white);
+    border-bottom:2px solid var(--border);
+    flex-shrink:0;
+  }
+  .sp-tab{
+    flex:1;height:48px;display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:600;color:var(--sub);
+    border-bottom:3px solid transparent;cursor:pointer;gap:4px;
+  }
+  .sp-tab.active{color:var(--navy);border-bottom-color:var(--gold);}
+  .sp-tab-num{
+    width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+    background:#e0e0e0;color:#888;
+  }
+  .sp-tab.active .sp-tab-num{background:var(--gold);color:var(--navy);}
+
+  /* レイアウト変更 */
+  .main{flex-direction:column;}
+  .resizer{display:none;}
+
+  /* エディター */
+  .editor{
+    width:100%!important;min-width:0!important;max-width:100%!important;
+    flex-shrink:1;
+  }
+  .editor-body{padding-bottom:72px;}
+
+  /* フォーム入力を大きく */
+  .fgroup input,.fgroup select,.fgroup textarea{
+    font-size:16px!important;padding:8px 10px!important;min-height:44px;
+  }
+  .fgroup textarea{min-height:72px;}
+
+  /* プレビュー：スマホ時は編集パネルの下に配置 */
+  .preview{
+    flex:none!important;
+    padding:12px;
+  }
+
+  /* sp-hidden：スマホで非表示 */
+  .sp-hidden{display:none!important;}
+
+  /* 底部ナビ */
+  .sp-bottom-nav{
+    display:flex!important;
+    position:fixed;bottom:0;left:0;right:0;
+    background:var(--white);border-top:1px solid var(--border);
+    padding:8px 10px;gap:8px;z-index:200;
+  }
+  .sp-nav-btn{
+    flex:1;height:52px;border-radius:6px;font-size:14px;font-weight:700;
+    cursor:pointer;border:none;font-family:inherit;
+  }
+  .sp-nav-back{background:#f0f2f4;color:var(--navy);}
+  .sp-nav-next{background:var(--gold);color:var(--navy);}
+  .sp-nav-print{background:var(--navy);color:#fff;}
+
+  /* スマホ時：エディター/プレビューの表示切替 */
+  .main.sp-show-preview .editor{display:none;}
+  .main.sp-show-preview .preview{display:block!important;}
+  .main:not(.sp-show-preview) .preview{display:none!important;}
+  .main:not(.sp-show-preview) .editor{display:flex;}
+}
+
+/* PC時はタブバー・底部ナビを非表示 */
+@media (min-width:769px){
+  .sp-tabbar{display:none;}
+  .sp-bottom-nav{display:none;}
+}
 </style>
 </head>
 <body>
@@ -155,27 +234,42 @@ tr.dragging{opacity:0.4;}
       <option value="flat">フラット（単一明細）</option>
       <option value="group">大項目・小項目</option>
     </select>
-    <button class="btn btn-gold" onclick="printHTML()">印刷・PDF保存</button>
+    <button class="btn btn-gold sp-hidden-sm" onclick="printHTML()">印刷・PDF保存</button>
   </div>
 </div>
-<div class="main">
+<!-- スマホ用タブバー -->
+<div class="sp-tabbar" style="display:none">
+  <div class="sp-tab active" id="sp-tab-edit" onclick="spGoTab('edit')">
+    <span class="sp-tab-num">1</span>入力
+  </div>
+  <div class="sp-tab" id="sp-tab-preview" onclick="spGoTab('preview')">
+    <span class="sp-tab-num">2</span>確認
+  </div>
+</div>
+<!-- スマホ用底部ナビ -->
+<div class="sp-bottom-nav" style="display:none" id="sp-bottom-nav">
+  <button class="sp-nav-btn sp-nav-back" id="sp-nav-back" style="display:none" onclick="spGoTab('edit')">◀ 入力</button>
+  <button class="sp-nav-btn sp-nav-next" id="sp-nav-next" onclick="spGoTab('preview')">確認へ ▶</button>
+  <button class="sp-nav-btn sp-nav-print" id="sp-nav-print" style="display:none" onclick="printHTML()">印刷・PDF保存</button>
+</div>
+<div class="main" id="main-area">
   <div class="editor">
     <div class="editor-head"><h2>積算編集</h2></div>
     <div class="editor-body">
-      <div class="fgroup"><label>宛名（会社名）</label><input id="atena" type="text" value="サンプル株式会社 御中" oninput="render()"></div>
+      <div class="fgroup"><label>宛名（会社名）</label><input id="atena" type="text" value="愛の治療院 松村" oninput="render()"></div>
       <div class="fgroup-row">
-        <div class="fgroup"><label>見積番号</label><input id="mitsumoriNo" type="text" value="SAMPLE-001" oninput="render()"></div>
+        <div class="fgroup"><label>見積番号</label><input id="mitsumoriNo" type="text" value="AR-2026-0005" oninput="render()"></div>
         <div class="fgroup"><label>発行日</label><input id="hakkoDate" type="date" oninput="render()"></div>
       </div>
-      <div class="fgroup"><label>工事件名</label><input id="kojimei" type="text" value="床シート張替え工事" oninput="render()"></div>
-      <div class="fgroup"><label>施工場所</label><input id="seshubasho" type="text" value="（サンプル）" oninput="render()"></div>
+      <div class="fgroup"><label>工事件名</label><input id="kojimei" type="text" value="外壁コーキング補修・看板シート張替工事他" oninput="render()"></div>
+      <div class="fgroup"><label>施工場所</label><input id="seshubasho" type="text" value="大分県別府市" oninput="render()"></div>
       <hr class="section-sep">
       <div id="items-editor"></div>
       <div class="total-box" id="total-box"></div>
       <div style="display:flex;gap:8px;margin-top:8px;align-items:center;">
         <div class="fgroup" style="flex:1;margin:0;">
           <label style="font-size:10px;color:var(--sub);">諸経費率（%）</label>
-          <input id="shokeihiRateInput" type="number" value="10" min="0" max="100" step="0.1"
+          <input id="shokeihiRateInput" type="number" value="15" min="0" max="100" step="0.1"
             style="width:100%;border:1px solid var(--border);border-radius:3px;padding:4px 8px;font-size:12px;font-family:inherit;"
             oninput="shokeihiRate=parseFloat(this.value)||0;render()">
         </div>
@@ -269,18 +363,15 @@ const TMPL_CSS = `
 `;
 
 let mode = 'flat';
-let shokeihiRate = 10; // 諸経費率（%）
+let shokeihiRate = 15; // 諸経費率（%）
 let nebiki = 0;        // 値引き額
 
 // ── フラット用データ ──
 const flatItems = [
-  {name:'長尺塩ビシート（材料費）',qty:45,unit:'㎡',price:3500,note:'厚2.0mm 防滑仕様',pageBreak:false},
-  {name:'長尺シート張り施工費',qty:45,unit:'㎡',price:3000,note:'溶接仕上げ含む',pageBreak:false},
-  {name:'下地処理（パテ処理）',qty:45,unit:'㎡',price:1200,note:'不陸調整',pageBreak:false},
-  {name:'既存床材撤去・処分',qty:45,unit:'㎡',price:1500,note:'長尺シート撤去',pageBreak:false},
-  {name:'ソフト巾木張替え',qty:25,unit:'m',price:800,note:'H=75mm',pageBreak:false},
-  {name:'材料搬入・荷揚げ費',qty:1,unit:'式',price:25000,note:'',pageBreak:false},
-  {name:'養生費',qty:1,unit:'式',price:15000,note:'共用部養生',pageBreak:false},
+  {name:'外壁コーキング打ち（胴差天端）',qty:1,unit:'式',price:42000,note:'部分補修',pageBreak:false},
+  {name:'壁面突出看板インクジェットシート貼',qty:1,unit:'箇所',price:68000,note:'600×1,800mm　材工共',pageBreak:false},
+  {name:'壁面看板インクジェットシート貼',qty:1,unit:'箇所',price:15000,note:'600×600mm　材工共',pageBreak:false},
+  {name:'既存ボックス板金補修の上　再取付',qty:1,unit:'箇所',price:38000,note:'サッシシャッターボックス　W1,800mm',pageBreak:false},
 ];
 
 // ── グループ用データ ──
@@ -288,14 +379,11 @@ const flatItems = [
 let groupSummaryItems = [];
 
 const groupItems = [
-  {name:'床シート張替え工事',pageBreak:false,items:[
-    {name:'長尺塩ビシート（材料費）',qty:45,unit:'㎡',price:3500,note:'厚2.0mm 防滑仕様'},
-    {name:'長尺シート張り施工費',qty:45,unit:'㎡',price:3000,note:'溶接仕上げ含む'},
-    {name:'下地処理（パテ処理）',qty:45,unit:'㎡',price:1200,note:'不陸調整'},
-    {name:'既存床材撤去・処分',qty:45,unit:'㎡',price:1500,note:'長尺シート撤去'},
-    {name:'ソフト巾木張替え',qty:25,unit:'m',price:800,note:'H=75mm'},
-    {name:'材料搬入・荷揚げ費',qty:1,unit:'式',price:25000,note:''},
-    {name:'養生費',qty:1,unit:'式',price:15000,note:'共用部養生'},
+  {name:'外壁コーキング補修・看板シート張替工事他',pageBreak:false,items:[
+    {name:'外壁コーキング打ち（胴差天端）',qty:1,unit:'式',price:42000,note:'部分補修'},
+    {name:'壁面突出看板インクジェットシート貼',qty:1,unit:'箇所',price:68000,note:'600×1,800mm　材工共'},
+    {name:'壁面看板インクジェットシート貼',qty:1,unit:'箇所',price:15000,note:'600×600mm　材工共'},
+    {name:'既存ボックス板金補修の上　再取付',qty:1,unit:'箇所',price:38000,note:'サッシシャッターボックス　W1,800mm'},
   ]},
 ];
 
@@ -1213,7 +1301,86 @@ function buildDocHTML(){
 
   return `<!DOCTYPE html>
 <html lang="ja"><head><meta charset="UTF-8"><title>見積書_${mno}</title>
-<style>${TMPL_CSS}</style>
+<style>${TMPL_CSS}
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   スマートフォン対応（768px以下）
+   JS一切変更なし・CSSのみ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width:768px){
+  /* タブバー（スマホのみ表示） */
+  .sp-tabbar{
+    display:flex!important;
+    background:var(--white);
+    border-bottom:2px solid var(--border);
+    flex-shrink:0;
+  }
+  .sp-tab{
+    flex:1;height:48px;display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:600;color:var(--sub);
+    border-bottom:3px solid transparent;cursor:pointer;gap:4px;
+  }
+  .sp-tab.active{color:var(--navy);border-bottom-color:var(--gold);}
+  .sp-tab-num{
+    width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+    background:#e0e0e0;color:#888;
+  }
+  .sp-tab.active .sp-tab-num{background:var(--gold);color:var(--navy);}
+
+  /* レイアウト変更 */
+  .main{flex-direction:column;}
+  .resizer{display:none;}
+
+  /* エディター */
+  .editor{
+    width:100%!important;min-width:0!important;max-width:100%!important;
+    flex-shrink:1;
+  }
+  .editor-body{padding-bottom:72px;}
+
+  /* フォーム入力を大きく */
+  .fgroup input,.fgroup select,.fgroup textarea{
+    font-size:16px!important;padding:8px 10px!important;min-height:44px;
+  }
+  .fgroup textarea{min-height:72px;}
+
+  /* プレビュー：スマホ時は編集パネルの下に配置 */
+  .preview{
+    flex:none!important;
+    padding:12px;
+  }
+
+  /* sp-hidden：スマホで非表示 */
+  .sp-hidden{display:none!important;}
+
+  /* 底部ナビ */
+  .sp-bottom-nav{
+    display:flex!important;
+    position:fixed;bottom:0;left:0;right:0;
+    background:var(--white);border-top:1px solid var(--border);
+    padding:8px 10px;gap:8px;z-index:200;
+  }
+  .sp-nav-btn{
+    flex:1;height:52px;border-radius:6px;font-size:14px;font-weight:700;
+    cursor:pointer;border:none;font-family:inherit;
+  }
+  .sp-nav-back{background:#f0f2f4;color:var(--navy);}
+  .sp-nav-next{background:var(--gold);color:var(--navy);}
+  .sp-nav-print{background:var(--navy);color:#fff;}
+
+  /* スマホ時：エディター/プレビューの表示切替 */
+  .main.sp-show-preview .editor{display:none;}
+  .main.sp-show-preview .preview{display:block!important;}
+  .main:not(.sp-show-preview) .preview{display:none!important;}
+  .main:not(.sp-show-preview) .editor{display:flex;}
+}
+
+/* PC時はタブバー・底部ナビを非表示 */
+@media (min-width:769px){
+  .sp-tabbar{display:none;}
+  .sp-bottom-nav{display:none;}
+}
+</style>
 </head><body>
 <div class="page">
   <div class="header">
@@ -1351,6 +1518,36 @@ document.getElementById('hakkoDate').value='2026-03-17';
 renderEditor();
 render();
 window.addEventListener('resize',scalePreview);
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// スマホ用タブ切替（JSロジック一切変更なし）
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function spGoTab(tab){
+  const main=document.getElementById('main-area');
+  const tabEdit=document.getElementById('sp-tab-edit');
+  const tabPv=document.getElementById('sp-tab-preview');
+  const navBack=document.getElementById('sp-nav-back');
+  const navNext=document.getElementById('sp-nav-next');
+  const navPrint=document.getElementById('sp-nav-print');
+  if(tab==='preview'){
+    // 確認タブ：render()してからプレビュー表示
+    render();
+    main.classList.add('sp-show-preview');
+    tabEdit.classList.remove('active');
+    tabPv.classList.add('active');
+    navBack.style.display='';
+    navNext.style.display='none';
+    navPrint.style.display='';
+  } else {
+    main.classList.remove('sp-show-preview');
+    tabEdit.classList.add('active');
+    tabPv.classList.remove('active');
+    navBack.style.display='none';
+    navNext.style.display='';
+    navPrint.style.display='none';
+  }
+}
+
 </script>
 </body>
-</html>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+</html>
