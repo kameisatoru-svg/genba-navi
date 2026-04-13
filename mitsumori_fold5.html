@@ -365,10 +365,7 @@ let nebiki = 0;        // 値引き額
 
 // ── フラット用データ ──
 const flatItems = [
-  {name:'外壁コーキング打ち（胴差天端）',qty:1,unit:'式',price:42000,note:'部分補修',pageBreak:false},
-  {name:'壁面突出看板インクジェットシート貼',qty:1,unit:'箇所',price:68000,note:'600×1,800mm　材工共',pageBreak:false},
-  {name:'壁面看板インクジェットシート貼',qty:1,unit:'箇所',price:15000,note:'600×600mm　材工共',pageBreak:false},
-  {name:'既存ボックス板金補修の上　再取付',qty:1,unit:'箇所',price:38000,note:'サッシシャッターボックス　W1,800mm',pageBreak:false},
+  {name:'',qty:'',unit:'',price:'',note:'',pageBreak:false},
 ];
 
 // ── グループ用データ ──
@@ -376,11 +373,8 @@ const flatItems = [
 let groupSummaryItems = [];
 
 const groupItems = [
-  {name:'外壁コーキング補修・看板シート張替工事他',pageBreak:false,items:[
-    {name:'外壁コーキング打ち（胴差天端）',qty:1,unit:'式',price:42000,note:'部分補修'},
-    {name:'壁面突出看板インクジェットシート貼',qty:1,unit:'箇所',price:68000,note:'600×1,800mm　材工共'},
-    {name:'壁面看板インクジェットシート貼',qty:1,unit:'箇所',price:15000,note:'600×600mm　材工共'},
-    {name:'既存ボックス板金補修の上　再取付',qty:1,unit:'箇所',price:38000,note:'サッシシャッターボックス　W1,800mm'},
+  {name:'',pageBreak:false,items:[
+    {name:'',qty:'',unit:'',price:'',note:''}
   ]},
 ];
 
@@ -390,7 +384,41 @@ function today(){const d=new Date();return d.toLocaleDateString('ja-JP',{year:'n
 function addDays(n){const d=new Date();d.setDate(d.getDate()+n);return d.toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'});}
 
 function switchMode(v){
+  const prev=mode;
   mode=v;
+
+  if(prev==='flat' && v==='group'){
+    // フラット→大項目：flatItemsを工事件名1式の小項目に移行
+    const kojimei=document.getElementById('kojimei').value||'工事名';
+    // 有効行のみ（品名or数量or単価のどれかが入っている行）
+    const validItems=flatItems.filter(it=>it.name||parseFloat(it.qty)||parseFloat(it.price));
+    const newItems=validItems.length>0
+      ? validItems.map(it=>({name:it.name,qty:it.qty,unit:it.unit,price:it.price,note:it.note}))
+      : [{name:'',qty:'',unit:'',price:'',note:''}];
+    // groupItemsを上書き（既存データがあれば追記せず置き換え）
+    groupItems.splice(0,groupItems.length,{name:kojimei,pageBreak:false,items:newItems});
+    groupSummaryItems.splice(0,groupSummaryItems.length);
+    // flatItemsをリセット
+    flatItems.splice(0,flatItems.length,{name:'',qty:'',unit:'',price:'',note:'',pageBreak:false});
+
+  } else if(prev==='group' && v==='flat'){
+    // 大項目→フラット：全小項目をflatItemsに展開
+    const allItems=[];
+    groupItems.forEach(g=>{
+      g.items.forEach(it=>{
+        allItems.push({name:it.name,qty:it.qty,unit:it.unit,price:it.price,note:it.note,pageBreak:false});
+      });
+    });
+    groupSummaryItems.forEach(it=>{
+      allItems.push({name:it.name,qty:it.qty,unit:it.unit,price:it.price,note:it.note,pageBreak:false});
+    });
+    flatItems.splice(0,flatItems.length,...(allItems.length>0?allItems:[{name:'',qty:'',unit:'',price:'',note:'',pageBreak:false}]));
+    // groupItemsをリセット
+    const kojimei=document.getElementById('kojimei').value||'工事名';
+    groupItems.splice(0,groupItems.length,{name:kojimei,pageBreak:false,items:[{name:'',qty:'',unit:'',price:'',note:''}]});
+    groupSummaryItems.splice(0,groupSummaryItems.length);
+  }
+
   renderEditor();
   render();
 }
@@ -645,7 +673,7 @@ function groupTogglePageBreak(gi){
   groupItems[gi].pageBreak=!groupItems[gi].pageBreak;
   renderGroupBlocks();render();
 }
-function groupAddGroup(){groupItems.push({name:'新規大項目',pageBreak:false,items:[{name:'',qty:1,unit:'㎡',price:0,note:''}]});renderGroupBlocks();render();}
+function groupAddGroup(){groupItems.push({name:'新規大項目',pageBreak:false,items:[{name:'',qty:'',unit:'',price:'',note:''}]});renderGroupBlocks();render();}
 function groupDelGroup(gi){groupItems.splice(gi,1);renderGroupBlocks();render();}
 function groupAddItem(gi){groupItems[gi].items.push({name:'',qty:'',unit:'',price:'',note:''});renderGroupBlocks();render();}
 function groupDelItem(gi,ii){groupItems[gi].items.splice(ii,1);renderGroupBlocks();render();}
@@ -708,10 +736,11 @@ function render(){
   if(mode==='flat'){
     const rows=flatItems.map((it,i)=>{
       const pbClass=i>0&&it.pageBreak?' class="pb-row-mark"':'';
+      if(!it.name&&!it.qty&&!it.price&&!it.unit&&!it.note) return '';
       return `<tr${pbClass}>
         <td>${it.name}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
-        <td>${it.qty}</td><td>${it.unit}</td>
-        <td>${fmtN(it.price)}</td><td>${fmtN(it.qty*it.price)}</td>
+        <td>${it.qty||''}</td><td>${it.unit}</td>
+        <td>${(parseFloat(it.price)||0)?fmtN(it.price):''}</td><td>${(parseFloat(it.qty)&&parseFloat(it.price))?fmtN(it.qty*it.price):''}</td>
       </tr>`;
     }).join('');
     tableHtml=`<table class="estimate-table" id="est-tbl">
@@ -824,12 +853,13 @@ function render(){
       // 小項目行
       g.items.forEach(it=>{
         const amt=(it.qty&&it.price)?fmtN(it.qty*it.price):'';
+        if(!it.name&&!it.qty&&!it.price&&!it.unit&&!it.note){ /* 空行スキップ */ } else {
         allRows+=`<tr class="group-item-row" data-gi="${gi}">
           <td>${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
           <td>${it.qty||''}</td><td>${it.unit||''}</td>
           <td>${(it.price&&it.price!='0'&&it.price!==0)?fmtN(it.price):''}</td>
           <td>${amt}</td>
-        </tr>`;
+        </tr>`; }
       });
       // 小計行
       allRows+=`<tr class="group-subtotal-row"><td colspan="4" style="text-align:right;background:#e8e8e8;font-weight:700;padding:5px 8px;">小　計</td><td style="background:#e8e8e8;font-weight:700;text-align:right;padding:5px 8px;">${fmtN(gSub)}</td></tr>`;
@@ -1433,6 +1463,8 @@ function printHTML(){
 let currentScreen = 'input';
 
 function goScreen(s){
+  // 先にrender()（入力画面が表示中の状態でDOMを読む）
+  if(s==='preview') render();
   currentScreen = s;
   ['input','preview','save'].forEach(id=>{
     document.getElementById('screen-'+id).classList.toggle('active', id===s);
@@ -1446,7 +1478,6 @@ function goScreen(s){
   } else if(s==='preview'){
     back.style.display=''; back.textContent='◀ 入力';
     next.textContent='保存へ ▶'; next.className='nav-btn nav-next'; next.onclick=navNext;
-    render(); // プレビューを描画
   } else {
     back.style.display=''; back.textContent='◀ 確認';
     next.textContent='ダウンロード'; next.className='nav-btn nav-save'; next.onclick=downloadHTML;
