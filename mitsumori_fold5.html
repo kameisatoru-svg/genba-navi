@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>見積書作成 - Fold5</title>
+<style>
+:root{
+  --navy:#1e2d40;--gold:#c8a96e;--beige:#eeebe5;--border:#ddd;
+  --bg:#f5f4f0;--white:#fff;--text:#111;--sub:#666;--red:#c0392b;
+  --tap:52px; /* タップターゲット最小高さ */
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:"Meiryo","Yu Gothic",sans-serif;background:var(--bg);display:flex;flex-direction:column;max-width:904px;margin:0 auto;}
+
+/* ── トップバー ── */
+.topbar{
+  background:var(--navy);color:#fff;
+  height:52px;padding:0 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+.topbar-title{font-size:15px;font-weight:600;letter-spacing:0.05em;}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.mode-sel{
+  background:#2a3f58;color:#fff;border:1px solid rgba(255,255,255,0.3);
+  border-radius:4px;padding:6px 8px;font-size:12px;
+  font-family:inherit;height:36px;
+}
+
+/* ── 画面タブバー ── */
+.tabbar{
+  display:flex;background:var(--white);border-bottom:2px solid var(--border);
+  flex-shrink:0;
+}
+.tab{
+  flex:1;height:var(--tap);display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:600;color:var(--sub);
+  border-bottom:3px solid transparent;cursor:pointer;gap:6px;
+  transition:color 0.15s,border-color 0.15s;
+}
+.tab.active{color:var(--navy);border-bottom-color:var(--gold);}
+.tab-num{
+  width:20px;height:20px;border-radius:50%;font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  background:#e0e0e0;color:#888;
+}
+.tab.active .tab-num{background:var(--gold);color:var(--navy);}
+
+/* ── コンテンツエリア ── */
+.screens{flex:1;overflow:hidden;position:relative;}
+.screen{
+  position:absolute;inset:0;overflow-y:auto;
+  display:none;padding:0 0 80px 0;
+}
+.screen.active{display:block;}
+
+/* ── セクション ── */
+.sec{padding:12px 14px 0;}
+.sec-label{
+  font-size:11px;font-weight:700;color:var(--navy);letter-spacing:0.08em;
+  margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border);
+}
+.fgroup{margin-bottom:10px;}
+.fgroup label{display:block;font-size:11px;color:var(--sub);margin-bottom:3px;font-weight:500;}
+.fgroup input,.fgroup select,.fgroup textarea{
+  width:100%;border:1px solid var(--border);border-radius:4px;
+  padding:0 10px;font-size:15px;font-family:inherit;color:var(--text);background:#fff;
+  height:var(--tap);
+}
+.fgroup input:focus,.fgroup select:focus,.fgroup textarea:focus{
+  outline:none;border-color:var(--navy);box-shadow:0 0 0 2px rgba(30,45,64,0.1);
+}
+.fgroup textarea{height:auto;min-height:80px;padding:10px;resize:none;}
+.fgroup-row{display:flex;gap:8px;}
+.fgroup-row .fgroup{flex:1;}
+.sep{border:none;border-top:1px solid var(--border);margin:14px 14px 0;}
+
+/* ── data.jsonバナー ── */
+.data-banner{
+  margin:12px 14px 0;padding:10px 14px;
+  background:#e8f0f8;border:1px solid #b0c8e0;border-radius:6px;
+  font-size:12px;color:var(--navy);display:flex;align-items:center;gap:10px;
+}
+.data-banner.ok{background:#e8f5e9;border-color:#a5d6a7;}
+.data-banner.err{background:#fce4ec;border-color:#f48fb1;}
+.banner-spin{
+  width:16px;height:16px;border:2px solid #b0c8e0;border-top-color:var(--navy);
+  border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.banner-text{flex:1;line-height:1.4;}
+.btn-sm{
+  height:36px;padding:0 12px;border-radius:4px;font-size:12px;
+  cursor:pointer;border:none;font-family:inherit;font-weight:600;
+  white-space:nowrap;flex-shrink:0;
+}
+.btn-navy{background:var(--navy);color:#fff;}
+.btn-gold{background:var(--gold);color:var(--navy);}
+.btn-outline{background:#fff;border:1px solid var(--border);color:var(--navy);}
+
+/* ── 明細テーブル ── */
+.items-wrap{overflow-x:auto;margin:0 14px;}
+.items-table{
+  width:100%;min-width:560px;border-collapse:collapse;font-size:12px;table-layout:fixed;
+}
+.items-table th{
+  background:var(--navy);color:#fff;padding:8px 5px;font-weight:500;
+  white-space:nowrap;font-size:11px;
+}
+.items-table td{border-bottom:1px solid #eee;padding:4px 2px;vertical-align:middle;}
+.items-table td input{
+  width:100%;border:1px solid transparent;border-radius:3px;
+  padding:4px 5px;font-size:13px;font-family:inherit;background:transparent;
+  min-width:0;color:#111;height:44px;
+}
+.items-table td input[type=number]{-moz-appearance:textfield;text-align:right;}
+.items-table td input[type=number]::-webkit-inner-spin-button,
+.items-table td input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
+.items-table td input:focus{border-color:var(--navy);background:#fff;outline:none;}
+.col-drag{width:22px;}
+.col-name{width:30%;}
+.col-qty{width:11%;}
+.col-unit{width:10%;}
+.col-price{width:15%;}
+.col-amt{width:15%;}
+.col-note{width:14%;}
+.col-del{width:8%;}
+.drag-handle{
+  cursor:grab;color:#bbb;font-size:16px;padding:6px 4px;
+  user-select:none;line-height:1;display:block;text-align:center;
+}
+.drag-handle:active{cursor:grabbing;color:var(--navy);}
+.del-btn{
+  background:none;border:none;cursor:pointer;color:#ccc;
+  font-size:16px;padding:4px 6px;border-radius:3px;width:100%;height:44px;
+}
+.del-btn:active{color:var(--red);background:#fff0f0;}
+tr.dragging{opacity:0.4;}
+tr.drag-over td{border-top:2px solid var(--navy)!important;}
+
+/* ── 行追加ボタン ── */
+.add-row-btn{
+  width:calc(100% - 28px);margin:6px 14px 0;
+  height:44px;border:1px dashed var(--border);border-radius:4px;
+  background:transparent;font-size:13px;color:var(--sub);cursor:pointer;
+  font-family:inherit;
+}
+.add-row-btn:active{border-color:var(--navy);color:var(--navy);background:#f0f2f4;}
+
+/* ── 大項目ブロック ── */
+.group-block{
+  margin:0 14px 8px;border:1px solid var(--border);border-radius:6px;overflow:hidden;
+}
+.group-header{
+  display:flex;align-items:center;background:#e8ecf0;padding:0 10px;gap:8px;
+  min-height:var(--tap);
+}
+.group-header input{
+  flex:1;border:none;background:transparent;font-size:14px;font-weight:700;
+  color:var(--navy);font-family:inherit;outline:none;height:var(--tap);
+}
+.group-header input:focus{background:#fff;border-radius:3px;padding:0 6px;}
+.group-del-btn{
+  background:none;border:none;cursor:pointer;color:#ccc;font-size:18px;
+  padding:4px 6px;height:var(--tap);display:flex;align-items:center;
+}
+.group-items-wrap{overflow-x:auto;}
+.group-items-table{
+  width:100%;min-width:460px;border-collapse:collapse;font-size:12px;table-layout:fixed;
+}
+.group-items-table th{
+  background:#f0f2f4;color:var(--navy);padding:6px 5px;font-weight:500;
+  font-size:10px;border-bottom:1px solid var(--border);
+}
+.group-items-table td{border-bottom:1px solid #eee;padding:4px 2px;vertical-align:middle;}
+.group-items-table td input{
+  width:100%;border:1px solid transparent;border-radius:3px;
+  padding:4px 5px;font-size:13px;font-family:inherit;background:transparent;
+  min-width:0;color:#111;height:44px;
+}
+.group-items-table td input[type=number]{-moz-appearance:textfield;text-align:right;}
+.group-items-table td input[type=number]::-webkit-inner-spin-button,
+.group-items-table td input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
+.group-items-table td input:focus{border-color:var(--navy);background:#fff;outline:none;}
+.gcol-drag{width:22px;}
+.gcol-name{width:32%;}
+.gcol-qty{width:12%;}
+.gcol-unit{width:10%;}
+.gcol-price{width:15%;}
+.gcol-amt{width:15%;}
+.gcol-note{width:10%;}
+.gcol-del{width:6%;}
+.group-subtotal{
+  text-align:right;padding:6px 10px;font-size:12px;color:var(--sub);
+  background:#f8f8f6;border-top:1px solid var(--border);
+}
+.group-add-item{
+  width:100%;padding:8px;border:none;background:#f0f2f4;
+  font-size:12px;color:var(--sub);cursor:pointer;font-family:inherit;
+  height:40px;text-align:left;padding-left:14px;
+}
+.group-add-item:active{color:var(--navy);background:#e8ecf0;}
+.group-section-label{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:0 14px;margin:14px 0 8px;
+}
+.group-section-label span{font-size:11px;font-weight:700;color:var(--navy);}
+.add-group-btn{
+  height:36px;padding:0 12px;border-radius:4px;font-size:12px;font-weight:600;
+  background:var(--white);border:1px solid var(--border);color:var(--navy);cursor:pointer;
+}
+.add-group-btn:active{background:#e8ecf0;}
+
+/* ── 合計ボックス ── */
+.total-box{
+  background:var(--beige);border-radius:6px;padding:10px 14px;
+  margin:10px 14px 0;font-size:13px;
+}
+.total-row{display:flex;justify-content:space-between;padding:3px 0;color:var(--sub);}
+.total-row.final{
+  font-weight:700;font-size:16px;color:var(--navy);
+  border-top:1px solid var(--border);padding-top:6px;margin-top:4px;
+}
+
+/* ── 諸経費・値引き ── */
+.extra-row{display:flex;gap:8px;margin:8px 14px 0;}
+.extra-row .fgroup{flex:1;margin:0;}
+.extra-row .fgroup input{font-size:14px;}
+
+/* ── 確認画面 ── */
+#screen-preview{background:#ccc;}
+.preview-header{
+  background:var(--navy);color:#fff;padding:10px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:10;
+}
+.preview-header span{font-size:13px;font-weight:600;}
+.preview-scale-wrap{padding:12px;transform-origin:top center;}
+.doc-page{
+  width:210mm;background:#fff;padding:13mm 15mm;
+  font-family:"Meiryo","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-size:14px;line-height:1.65;color:#111;
+  box-shadow:0 2px 16px rgba(0,0,0,.2);margin:0 auto;
+}
+
+/* ── 保存画面 ── */
+.save-section{padding:16px 14px 0;}
+.save-card{
+  background:#fff;border:1px solid var(--border);border-radius:8px;
+  padding:14px 16px;margin-bottom:12px;
+}
+.save-card-title{
+  font-size:12px;font-weight:700;color:var(--navy);
+  margin-bottom:8px;letter-spacing:0.06em;
+}
+.save-summary{font-size:13px;line-height:2;color:var(--text);}
+.save-summary b{color:var(--navy);}
+.save-summary .amount{
+  font-size:22px;font-weight:700;color:var(--navy);
+  font-family:"Yu Mincho",serif;display:block;margin-top:4px;
+}
+.action-btn{
+  width:100%;height:56px;border-radius:8px;font-size:16px;font-weight:700;
+  cursor:pointer;border:none;font-family:inherit;margin-bottom:10px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-share{background:var(--gold);color:var(--navy);}
+.btn-share:active{background:#d4b97e;}
+.btn-download{background:var(--navy);color:#fff;}
+.btn-download:active{background:#152030;}
+.btn-copy{background:#f0f2f4;color:var(--navy);border:1px solid var(--border);}
+.btn-copy:active{background:#e0e4e8;}
+.save-note{
+  font-size:11px;color:var(--sub);padding:8px 12px;
+  background:#f5f4f0;border-radius:4px;line-height:1.7;margin-bottom:10px;
+}
+
+/* ── 底部ナビゲーション ── */
+.bottom-nav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:904px;
+  background:var(--white);border-top:1px solid var(--border);
+  display:flex;padding:6px 10px;gap:8px;z-index:100;
+}
+.nav-btn{
+  flex:1;height:52px;border-radius:6px;font-size:14px;font-weight:700;
+  cursor:pointer;border:none;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.nav-back{background:#f0f2f4;color:var(--navy);}
+.nav-back:active{background:#e0e4e8;}
+.nav-next{background:var(--gold);color:var(--navy);}
+.nav-next:active{background:#d4b97e;}
+.nav-save{background:var(--navy);color:#fff;}
+.nav-save:active{background:#152030;}
+
+/* ── プレビュー内CSS（ひな形と同じ） ── */
+.doc-page .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #111;padding-bottom:8px;margin-bottom:10px;}
+.doc-page .header-left{position:relative;display:inline-block;}
+.doc-page .company-name{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:22px;font-weight:700;color:#111;letter-spacing:0.06em;line-height:1.3;}
+.doc-page .company-name .co-prefix{font-size:15px;font-weight:400;letter-spacing:0.1em;}
+.doc-page .company-info{font-size:11.5px;color:#444;margin-top:5px;line-height:1.9;}
+.doc-page .kakuin{width:64px;height:64px;position:absolute;top:6px;right:-28px;}
+.doc-page .doc-title{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:28px;font-weight:700;color:#111;letter-spacing:0.18em;text-align:right;}
+.doc-page .doc-meta{font-size:11.5px;color:#444;text-align:right;margin-top:6px;line-height:2;}
+.doc-page .info-section{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:16px;}
+.doc-page .info-left{flex:1;display:flex;flex-direction:column;gap:8px;}
+.doc-page .client-name{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:21px;font-weight:600;color:#111;border-bottom:2px solid #111;padding-bottom:4px;}
+.doc-page .summary-box{background:#444!important;color:#fff!important;padding:12px 22px;border-radius:3px;text-align:right;flex-shrink:0;}
+.doc-page .summary-box .s-label{font-size:11px;color:#e0e0e0!important;letter-spacing:0.08em;}
+.doc-page .summary-box .total-amount{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:26px;font-weight:700;color:#fff!important;margin-top:2px;letter-spacing:0.04em;}
+.doc-page .summary-box .tax-note{font-size:11px;color:#e0e0e0!important;margin-top:3px;}
+.doc-page .project-band{background:#555!important;border-left:5px solid #111;padding:6px 14px;margin-bottom:6px;font-size:11.5px;color:#fff!important;display:inline-flex;flex-direction:column;gap:3px;align-self:flex-start;}
+.doc-page .band-label{color:#ddd!important;margin-right:4px;}
+.doc-page .section-title{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:13px;font-weight:600;color:#111;border-bottom:2px solid #111;padding-bottom:3px;margin-bottom:6px;letter-spacing:0.08em;}
+.doc-page .estimate-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:4px;border:1px solid #888;}
+.doc-page .estimate-table thead th{background:#555!important;color:#fff!important;padding:6px 8px;font-weight:700;font-size:11.5px;border-right:1px solid #666;}
+.doc-page .estimate-table thead th:first-child{text-align:left;}
+.doc-page .estimate-table thead th:not(:first-child){text-align:right;}
+.doc-page .estimate-table tbody tr{border-bottom:1px solid #bbb;}
+.doc-page .estimate-table tbody tr:nth-child(even){background:#f4f4f4!important;}
+.doc-page .estimate-table tbody td{padding:9px 10px;vertical-align:middle;color:#111;border-right:1px solid #bbb;}
+.doc-page .estimate-table tbody td:first-child{text-align:left;}
+.doc-page .estimate-table tbody td:not(:first-child){text-align:right;}
+.doc-page .estimate-table .subtotal-row td{background:#e8e8e8!important;font-weight:700;font-size:13px;}
+.doc-page .estimate-table .shokeihi-row td{background:#f4f4f4!important;color:#555;}
+.doc-page .bottom-section{display:flex;gap:14px;align-items:flex-start;margin-top:10px;margin-bottom:10px;}
+.doc-page .note-box{flex:1;border:1px solid #888;border-radius:3px;padding:8px 12px;background:#f8f8f8;font-size:11px;color:#444;line-height:1.8;min-height:80px;}
+.doc-page .note-title{font-size:11.5px;font-weight:700;color:#111;margin-bottom:4px;letter-spacing:0.06em;border-bottom:1px solid #bbb;padding-bottom:4px;}
+.doc-page .totals-wrap{flex-shrink:0;}
+.doc-page .totals-table{width:260px;border-collapse:collapse;font-size:12px;border:1px solid #888;}
+.doc-page .totals-table td{padding:5px 12px;border-bottom:1px solid #bbb;color:#111;}
+.doc-page .totals-table td:last-child{text-align:right;}
+.doc-page .totals-table .t-subtotal td{background:#e8e8e8!important;font-weight:600;}
+.doc-page .totals-table .t-final{background:#444!important;}
+.doc-page .totals-table .t-final td{padding:8px 12px;font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:14px;font-weight:700;color:#fff!important;border-bottom:none;}
+.doc-page .footer{margin-top:10px;border-top:1px solid #888;padding-top:6px;display:flex;justify-content:space-between;font-size:11px;color:#444;}
+.doc-page .validity{font-size:11px;color:#444;text-align:left;margin-bottom:8px;margin-top:4px;}
+</style>
+</head>
+<body>
+
+<!-- トップバー -->
+<div class="topbar">
+  <span class="topbar-title">📋 見積書作成</span>
+  <div class="topbar-right">
+    <select class="mode-sel" id="mode-select" onchange="switchMode(this.value)">
+      <option value="flat">フラット</option>
+      <option value="group">大項目</option>
+    </select>
+  </div>
+</div>
+
+<!-- タブバー -->
+<div class="tabbar">
+  <div class="tab active" id="tab-input" onclick="goScreen('input')">
+    <span class="tab-num">1</span>入力
+  </div>
+  <div class="tab" id="tab-preview" onclick="goScreen('preview')">
+    <span class="tab-num">2</span>確認
+  </div>
+  <div class="tab" id="tab-save" onclick="goScreen('save')">
+    <span class="tab-num">3</span>保存
+  </div>
+</div>
+
+<!-- ── 画面コンテナ ── -->
+<div class="screens">
+
+  <!-- ===== 画面1：入力 ===== -->
+  <div class="screen active" id="screen-input">
+
+    <!-- data.jsonバナー -->
+    <div class="data-banner" id="data-banner">
+      <div class="banner-spin" id="banner-spin"></div>
+      <div class="banner-text" id="banner-text">data.jsonを取得中…</div>
+      <button class="btn-sm btn-navy" id="banner-btn" style="display:none" onclick="loadDataJson()">再取得</button>
+    </div>
+
+    <!-- 基本情報 -->
+    <div class="sec" style="padding-top:14px;">
+      <div class="sec-label">基本情報</div>
+      <div class="fgroup">
+        <label>宛名（会社名）</label>
+        <input id="atena" type="text" placeholder="例：〇〇株式会社" oninput="onAnyInput()">
+      </div>
+      <div class="fgroup-row">
+        <div class="fgroup">
+          <label>見積番号</label>
+          <input id="mitsumoriNo" type="text" placeholder="AR26-T000-M01" oninput="onAnyInput()">
+        </div>
+        <div class="fgroup">
+          <label>発行日</label>
+          <input id="hakkoDate" type="date" oninput="onAnyInput()">
+        </div>
+      </div>
+      <div class="fgroup">
+        <label>工事件名</label>
+        <input id="kojimei" type="text" placeholder="工事件名を入力" oninput="onAnyInput()">
+      </div>
+      <div class="fgroup">
+        <label>施工場所</label>
+        <input id="seshubasho" type="text" placeholder="大分県別府市" oninput="onAnyInput()">
+      </div>
+    </div>
+
+    <hr class="sep">
+
+    <!-- 明細 -->
+    <div class="sec" style="padding-top:12px;">
+      <div class="sec-label">明細</div>
+    </div>
+    <div id="items-editor"></div>
+
+    <hr class="sep" style="margin-top:14px;">
+
+    <!-- 諸経費・値引き -->
+    <div class="extra-row">
+      <div class="fgroup">
+        <label>諸経費率（%）</label>
+        <input id="shokeihiRateInput" type="number" value="10" min="0" max="100"
+          oninput="shokeihiRate=parseFloat(this.value)||0;renderTotalBox()">
+      </div>
+      <div class="fgroup">
+        <label>値引き（円）</label>
+        <input id="nebikiInput" type="number" value="0" min="0"
+          oninput="nebiki=parseFloat(this.value)||0;renderTotalBox()">
+      </div>
+    </div>
+
+    <!-- 合計ボックス -->
+    <div class="total-box" id="total-box"></div>
+
+    <hr class="sep">
+
+    <!-- 備考 -->
+    <div class="sec" style="padding-top:12px;">
+      <div class="sec-label">備考</div>
+      <div class="fgroup">
+        <textarea id="bikou" rows="3">・本見積書の有効期限は発行日より30日間とさせていただきます。
+・上記金額は概算であり、現地確認後に変更となる場合があります。</textarea>
+      </div>
+    </div>
+
+  </div>
+  <!-- /screen-input -->
+
+  <!-- ===== 画面2：確認（プレビュー） ===== -->
+  <div class="screen" id="screen-preview">
+    <div class="preview-header">
+      <span>A4プレビュー</span>
+      <button class="btn-sm btn-outline" onclick="renderPreview()">🔄 更新</button>
+    </div>
+    <div class="preview-scale-wrap" id="preview-scale-wrap">
+      <div class="doc-page" id="doc-page"></div>
+    </div>
+  </div>
+
+  <!-- ===== 画面3：保存 ===== -->
+  <div class="screen" id="screen-save">
+    <div class="save-section">
+
+      <div class="save-card" id="save-summary-card">
+        <div class="save-card-title">📄 見積書サマリー</div>
+        <div class="save-summary" id="save-summary-content">
+          入力画面でデータを確認してください。
+        </div>
+      </div>
+
+      <div class="save-card">
+        <div class="save-card-title">📤 共有・保存</div>
+        <div class="save-note">
+          ① 「HTMLをダウンロード」→ genba-naviフォルダに保存<br>
+          ② 「見積書を開いて印刷」→ ChromeでPDF保存<br>
+          ③ Coworkで「保存して」と声をかけてdata.json更新
+        </div>
+        <button class="action-btn btn-download" onclick="downloadHTML()">
+          ⬇ HTMLをダウンロード
+        </button>
+        <button class="action-btn btn-share" onclick="openPrint()">
+          🖨 見積書を開いて印刷
+        </button>
+        <button class="action-btn btn-copy" onclick="copyAsText()">
+          📋 テキスト内容をコピー
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+<!-- /screens -->
+
+<!-- 底部ナビ -->
+<div class="bottom-nav" id="bottom-nav">
+  <button class="nav-btn nav-back" id="nav-back" onclick="navBack()" style="display:none">◀ 戻る</button>
+  <button class="nav-btn nav-next" id="nav-next" onclick="navNext()">確認画面へ ▶</button>
+</div>
+
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 角印BASE64
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const KAKUIN = 'data:image/png;base64,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';
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 状態
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let mode = 'flat';
+let shokeihiRate = 10;
+let nebiki = 0;
+let currentScreen = 'input';
+let dataJson = null;
+
+const flatItems = [
+  {name:'',qty:'',unit:'式',price:'',note:'',pageBreak:false}
+];
+let groupSummaryItems = [];
+const groupItems = [
+  {name:'工事名',pageBreak:false,items:[
+    {name:'',qty:'',unit:'式',price:'',note:''}
+  ]}
+];
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 初期化
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+window.addEventListener('load', ()=>{
+  const d = new Date();
+  document.getElementById('hakkoDate').value = d.toISOString().slice(0,10);
+  renderEditor();
+  renderTotalBox();
+  loadDataJson();
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// data.json 取得
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function loadDataJson(){
+  const banner = document.getElementById('data-banner');
+  const bannerText = document.getElementById('banner-text');
+  const spin = document.getElementById('banner-spin');
+  const btn = document.getElementById('banner-btn');
+  banner.className = 'data-banner';
+  spin.style.display = '';
+  btn.style.display = 'none';
+  bannerText.textContent = 'data.jsonを取得中…';
+  try {
+    const res = await fetch('https://kameisatoru-svg.github.io/genba-navi/data.json?t='+Date.now());
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    dataJson = await res.json();
+    // 次番号を採番
+    const ankenNums = (dataJson.案件||[]).map(a=>parseInt((a.案件番号||'').replace('AR-26-',''))||0);
+    const tNums = (dataJson.取引先||[]).map(t=>parseInt((t.取引先番号||'').replace('T-',''))||0);
+    const nextAnken = 'AR-26-'+ String(Math.max(0,...ankenNums)+1).padStart(3,'0');
+    const nextT = 'T-'+ String(Math.max(0,...tNums)+1).padStart(3,'0');
+    const nextMno = 'AR26-T'+String(Math.max(0,...ankenNums)+1).padStart(3,'0')+'-M01';
+    // フィールド自動入力（空欄のみ）
+    if(!document.getElementById('mitsumoriNo').value)
+      document.getElementById('mitsumoriNo').value = nextMno;
+    banner.className = 'data-banner ok';
+    spin.style.display = 'none';
+    bannerText.innerHTML = `<b>取得完了</b>　次の案件番号：<b>${nextAnken}</b>　見積番号：<b>${nextMno}</b>　（取引先${nextT}）`;
+  } catch(e) {
+    banner.className = 'data-banner err';
+    spin.style.display = 'none';
+    btn.style.display = '';
+    bannerText.textContent = '取得失敗。オフラインの可能性があります。手動で番号を入力してください。';
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 画面切替
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function goScreen(s){
+  currentScreen = s;
+  ['input','preview','save'].forEach(id=>{
+    document.getElementById('screen-'+id).classList.toggle('active', id===s);
+    document.getElementById('tab-'+id).classList.toggle('active', id===s);
+  });
+  const back = document.getElementById('nav-back');
+  const next = document.getElementById('nav-next');
+  if(s==='input'){
+    back.style.display='none';
+    next.textContent='確認画面へ ▶';
+    next.className='nav-btn nav-next';
+    next.style.display='';
+    next.onclick=navNext;
+  } else if(s==='preview'){
+    back.style.display='';
+    back.textContent='◀ 入力';
+    next.style.display='';
+    next.textContent='保存へ ▶';
+    next.className='nav-btn nav-next';
+    next.onclick=navNext;
+    renderPreview();
+  } else {
+    back.style.display='';
+    back.textContent='◀ 確認';
+    next.style.display='';
+    next.textContent='⬇ HTML保存';
+    next.className='nav-btn nav-save';
+    next.onclick=downloadHTML;
+    updateSaveSummary();
+  }
+}
+function navNext(){
+  if(currentScreen==='input') goScreen('preview');
+  else if(currentScreen==='preview') goScreen('save');
+}
+function navBack(){
+  if(currentScreen==='preview') goScreen('input');
+  else if(currentScreen==='save') goScreen('preview');
+}
+function switchMode(v){
+  mode=v;
+  renderEditor();
+  renderTotalBox();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ユーティリティ
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function fmt(n){return '¥'+Math.round(n).toLocaleString();}
+function fmtN(n){return Math.round(n).toLocaleString();}
+function today(){const d=new Date();return d.toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'});}
+function addDays(n){const d=new Date();d.setDate(d.getDate()+n);return d.toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'});}
+function onAnyInput(){renderTotalBox();}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 集計
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function calcTotals(){
+  let sub=0;
+  if(mode==='flat'){
+    flatItems.forEach(it=>{sub+=(parseFloat(it.qty)||0)*(parseFloat(it.price)||0);});
+  } else {
+    groupSummaryItems.forEach(it=>{sub+=(parseFloat(it.qty)||0)*(parseFloat(it.price)||0);});
+    groupItems.forEach(g=>{g.items.forEach(it=>{sub+=(parseFloat(it.qty)||0)*(parseFloat(it.price)||0);});});
+  }
+  const shokeihi=Math.round(sub*shokeihiRate/100);
+  const zeinuki=sub+shokeihi-nebiki;
+  const tax=Math.round(zeinuki*0.1);
+  return {subtotal:sub,shokeihi,nebiki,zeinuki,tax,total:zeinuki+tax};
+}
+
+function renderTotalBox(){
+  const t=calcTotals();
+  document.getElementById('total-box').innerHTML=`
+    <div class="total-row"><span>小計（税抜）</span><span>${fmt(t.subtotal)}</span></div>
+    <div class="total-row"><span>諸経費（${shokeihiRate}%）</span><span>${fmt(t.shokeihi)}</span></div>
+    ${nebiki>0?`<div class="total-row"><span>値引き</span><span>-${fmt(nebiki)}</span></div>`:''}
+    <div class="total-row"><span>税抜合計</span><span>${fmt(t.zeinuki)}</span></div>
+    <div class="total-row"><span>消費税（10%）</span><span>${fmt(t.tax)}</span></div>
+    <div class="total-row final"><span>税込合計</span><span>${fmt(t.total)}</span></div>`;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 明細エディター（フラット）
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderEditor(){
+  const el=document.getElementById('items-editor');
+  if(mode==='flat'){
+    el.innerHTML=`
+      <div class="items-wrap">
+        <table class="items-table">
+          <thead><tr>
+            <th class="col-drag"></th>
+            <th class="col-name">品名</th>
+            <th class="col-qty">数量</th>
+            <th class="col-unit">単位</th>
+            <th class="col-price">単価</th>
+            <th class="col-amt">金額</th>
+            <th class="col-note">備考</th>
+            <th class="col-del"></th>
+          </tr></thead>
+          <tbody id="flat-body"></tbody>
+        </table>
+      </div>
+      <button class="add-row-btn" onclick="flatAddRow()">＋ 行を追加</button>`;
+    renderFlatRows();
+  } else {
+    el.innerHTML=`
+      <div class="group-section-label">
+        <span>1枚目・単一明細</span>
+      </div>
+      <div class="items-wrap">
+        <table class="items-table">
+          <thead><tr>
+            <th class="col-drag"></th>
+            <th class="col-name">品名</th>
+            <th class="col-qty">数量</th>
+            <th class="col-unit">単位</th>
+            <th class="col-price">単価</th>
+            <th class="col-amt">金額</th>
+            <th class="col-note">備考</th>
+            <th class="col-del"></th>
+          </tr></thead>
+          <tbody id="gsummary-body"></tbody>
+        </table>
+      </div>
+      <button class="add-row-btn" onclick="groupSummaryAddRow()">＋ 行を追加</button>
+      <div class="group-section-label" style="margin-top:16px;">
+        <span>大項目・小項目</span>
+        <button class="add-group-btn" onclick="groupAddGroup()">＋ 大項目追加</button>
+      </div>
+      <div id="groups-wrap"></div>`;
+    renderGroupSummaryRows();
+    renderGroupBlocks();
+  }
+}
+
+function renderFlatRows(){
+  const body=document.getElementById('flat-body');
+  if(!body)return;
+  body.innerHTML='';
+  flatItems.forEach((it,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="col-drag"><span class="drag-handle" draggable="true">⠿</span></td>
+      <td class="col-name"><input value="${escH(it.name)}" placeholder="工事内容" oninput="flatItems[${i}].name=this.value;renderTotalBox()" onkeydown="enterNav(event)"></td>
+      <td class="col-qty"><input type="number" value="${it.qty}" inputmode="decimal" oninput="flatItems[${i}].qty=this.value;updateAmt(this);renderTotalBox()" onkeydown="enterNav(event)"></td>
+      <td class="col-unit"><input value="${escH(it.unit)}" oninput="flatItems[${i}].unit=this.value" style="text-align:center;" onkeydown="enterNav(event)"></td>
+      <td class="col-price"><input type="number" value="${it.price}" inputmode="decimal" oninput="flatItems[${i}].price=this.value;updateAmt(this);renderTotalBox()" onkeydown="enterNav(event)"></td>
+      <td class="col-amt"><input type="number" readonly class="r" value="${(parseFloat(it.qty)||0)*(parseFloat(it.price)||0)|0}" style="color:var(--sub);"></td>
+      <td class="col-note"><input value="${escH(it.note)}" placeholder="備考" oninput="flatItems[${i}].note=this.value" onkeydown="enterNav(event)"></td>
+      <td class="col-del"><button class="del-btn" onclick="flatDelRow(${i})">✕</button></td>`;
+    body.appendChild(tr);
+  });
+  initDragRows(body, ()=>flatItems, arr=>{flatItems.splice(0,flatItems.length,...arr);}, ()=>{renderFlatRows();renderTotalBox();});
+}
+
+function flatAddRow(){flatItems.push({name:'',qty:'',unit:'式',price:'',note:'',pageBreak:false});renderFlatRows();}
+function flatDelRow(i){if(flatItems.length>1)flatItems.splice(i,1);renderFlatRows();renderTotalBox();}
+
+// ── グループモード ──
+function renderGroupSummaryRows(){
+  const body=document.getElementById('gsummary-body');
+  if(!body)return;
+  body.innerHTML='';
+  groupSummaryItems.forEach((it,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="col-drag"><span class="drag-handle">⠿</span></td>
+      <td class="col-name"><input value="${escH(it.name)}" placeholder="品名" oninput="groupSummaryItems[${i}].name=this.value;renderTotalBox()" onkeydown="enterNav(event)"></td>
+      <td class="col-qty"><input type="number" value="${it.qty}" inputmode="decimal" oninput="groupSummaryItems[${i}].qty=this.value;updateAmt(this);renderTotalBox()" onkeydown="enterNav(event)"></td>
+      <td class="col-unit"><input value="${escH(it.unit)}" oninput="groupSummaryItems[${i}].unit=this.value" style="text-align:center;" onkeydown="enterNav(event)"></td>
+      <td class="col-price"><input type="number" value="${it.price}" inputmode="decimal" oninput="groupSummaryItems[${i}].price=this.value;updateAmt(this);renderTotalBox()" onkeydown="enterNav(event)"></td>
+      <td class="col-amt"><input readonly type="number" value="${(parseFloat(it.qty)||0)*(parseFloat(it.price)||0)|0}" style="color:var(--sub);text-align:right;"></td>
+      <td class="col-note"><input value="${escH(it.note)}" oninput="groupSummaryItems[${i}].note=this.value" onkeydown="enterNav(event)"></td>
+      <td class="col-del"><button class="del-btn" onclick="groupSummaryDelRow(${i})">✕</button></td>`;
+    body.appendChild(tr);
+  });
+}
+function groupSummaryAddRow(){groupSummaryItems.push({name:'',qty:'',unit:'式',price:'',note:''});renderGroupSummaryRows();}
+function groupSummaryDelRow(i){groupSummaryItems.splice(i,1);renderGroupSummaryRows();renderTotalBox();}
+
+function renderGroupBlocks(){
+  const wrap=document.getElementById('groups-wrap');
+  if(!wrap)return;
+  wrap.innerHTML='';
+  groupItems.forEach((g,gi)=>{
+    const gSub=g.items.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0),0);
+    const div=document.createElement('div');
+    div.className='group-block';
+    let itemRows='';
+    g.items.forEach((it,ii)=>{
+      itemRows+=`<tr>
+        <td class="gcol-drag"><span class="drag-handle">⠿</span></td>
+        <td class="gcol-name"><input value="${escH(it.name)}" placeholder="品名" oninput="groupItems[${gi}].items[${ii}].name=this.value;renderGroupBlocks();renderTotalBox()" onkeydown="enterNav(event)"></td>
+        <td class="gcol-qty"><input type="number" value="${it.qty}" inputmode="decimal" oninput="groupItems[${gi}].items[${ii}].qty=this.value;updateAmt(this);renderTotalBox()" onkeydown="enterNav(event)"></td>
+        <td class="gcol-unit"><input value="${escH(it.unit)}" oninput="groupItems[${gi}].items[${ii}].unit=this.value" style="text-align:center;" onkeydown="enterNav(event)"></td>
+        <td class="gcol-price"><input type="number" value="${it.price}" inputmode="decimal" oninput="groupItems[${gi}].items[${ii}].price=this.value;updateAmt(this);renderTotalBox()" onkeydown="enterNav(event)"></td>
+        <td class="gcol-amt"><input readonly type="number" value="${(parseFloat(it.qty)||0)*(parseFloat(it.price)||0)|0}" style="color:var(--sub);text-align:right;"></td>
+        <td class="gcol-note"><input value="${escH(it.note)}" oninput="groupItems[${gi}].items[${ii}].note=this.value" onkeydown="enterNav(event)"></td>
+        <td class="gcol-del"><button class="del-btn" onclick="groupDelItem(${gi},${ii})">✕</button></td>
+      </tr>`;
+    });
+    div.innerHTML=`
+      <div class="group-header">
+        <input value="${escH(g.name)}" placeholder="大項目名" oninput="groupItems[${gi}].name=this.value">
+        <button class="group-del-btn" onclick="groupDelGroup(${gi})">✕</button>
+      </div>
+      <div class="group-items-wrap">
+        <table class="group-items-table">
+          <thead><tr>
+            <th class="gcol-drag"></th>
+            <th class="gcol-name">品名</th>
+            <th class="gcol-qty">数量</th>
+            <th class="gcol-unit">単位</th>
+            <th class="gcol-price">単価</th>
+            <th class="gcol-amt">金額</th>
+            <th class="gcol-note">備考</th>
+            <th class="gcol-del"></th>
+          </tr></thead>
+          <tbody id="gbody-${gi}">${itemRows}</tbody>
+        </table>
+      </div>
+      <div class="group-subtotal">小計：${fmtN(gSub)} 円</div>
+      <button class="group-add-item" onclick="groupAddItem(${gi})">＋ 行を追加</button>`;
+    wrap.appendChild(div);
+  });
+}
+function groupAddGroup(){groupItems.push({name:'新規工事',pageBreak:false,items:[{name:'',qty:'',unit:'式',price:'',note:''}]});renderGroupBlocks();}
+function groupDelGroup(gi){if(groupItems.length>1)groupItems.splice(gi,1);renderGroupBlocks();renderTotalBox();}
+function groupAddItem(gi){groupItems[gi].items.push({name:'',qty:'',unit:'式',price:'',note:''});renderGroupBlocks();}
+function groupDelItem(gi,ii){if(groupItems[gi].items.length>1)groupItems[gi].items.splice(ii,1);renderGroupBlocks();renderTotalBox();}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ドラッグ（タッチ対応）
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function initDragRows(tbody, getArr, setArr, onDone){
+  let dragIdx=null;
+  Array.from(tbody.querySelectorAll('tr')).forEach((tr,i)=>{
+    const handle=tr.querySelector('.drag-handle');
+    if(!handle)return;
+    // タッチドラッグ
+    let touchStartY=0;
+    handle.addEventListener('touchstart',e=>{
+      dragIdx=i;
+      touchStartY=e.touches[0].clientY;
+      tr.classList.add('dragging');
+    },{passive:true});
+    handle.addEventListener('touchmove',e=>{
+      e.preventDefault();
+      const y=e.touches[0].clientY;
+      const rows=Array.from(tbody.querySelectorAll('tr'));
+      rows.forEach(r=>r.classList.remove('drag-over'));
+      const target=document.elementFromPoint(e.touches[0].clientX,y);
+      if(target){
+        const targetRow=target.closest('tr');
+        if(targetRow&&targetRow!==tr){
+          const ti=rows.indexOf(targetRow);
+          if(ti>=0) rows[ti].classList.add('drag-over');
+        }
+      }
+    },{passive:false});
+    handle.addEventListener('touchend',e=>{
+      tr.classList.remove('dragging');
+      const y=e.changedTouches[0].clientY;
+      const target=document.elementFromPoint(e.changedTouches[0].clientX,y);
+      tbody.querySelectorAll('tr').forEach(r=>r.classList.remove('drag-over'));
+      if(target&&dragIdx!==null){
+        const targetRow=target.closest('tr');
+        if(targetRow&&targetRow!==tr){
+          const rows=Array.from(tbody.querySelectorAll('tr'));
+          const ti=rows.indexOf(targetRow);
+          if(ti>=0&&ti!==dragIdx){
+            const arr=[...getArr()];
+            const moved=arr.splice(dragIdx,1)[0];
+            arr.splice(ti,0,moved);
+            setArr(arr);
+            onDone();
+          }
+        }
+      }
+      dragIdx=null;
+    });
+    // マウスドラッグ
+    tr.draggable=true;
+    tr.addEventListener('dragstart',e=>{dragIdx=i;tr.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
+    tr.addEventListener('dragend',()=>{tr.classList.remove('dragging');tbody.querySelectorAll('tr').forEach(r=>r.classList.remove('drag-over'));});
+    tr.addEventListener('dragover',e=>{e.preventDefault();tbody.querySelectorAll('tr').forEach(r=>r.classList.remove('drag-over'));if(i!==dragIdx)tr.classList.add('drag-over');});
+    tr.addEventListener('drop',e=>{
+      e.preventDefault();tr.classList.remove('drag-over');
+      if(dragIdx===null||dragIdx===i)return;
+      const arr=[...getArr()];const moved=arr.splice(dragIdx,1)[0];arr.splice(i,0,moved);
+      setArr(arr);dragIdx=null;onDone();
+    });
+  });
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Enterナビ・金額更新
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function enterNav(e){
+  if(e.key!=='Enter')return;
+  e.preventDefault();
+  const tr=e.target.closest('tr');
+  if(!tr)return;
+  const inputs=Array.from(tr.querySelectorAll('input:not([readonly])')).filter(el=>el.offsetParent!==null);
+  const idx=inputs.indexOf(e.target);
+  if(idx>=0&&idx<inputs.length-1){inputs[idx+1].focus();inputs[idx+1].select();}
+  else{
+    const tbody=tr.closest('tbody');if(!tbody)return;
+    const rows=Array.from(tbody.querySelectorAll('tr'));
+    const trIdx=rows.indexOf(tr);
+    for(let ni=trIdx+1;ni<rows.length;ni++){
+      const ni2=Array.from(rows[ni].querySelectorAll('input:not([readonly])')).filter(el=>el.offsetParent!==null);
+      if(ni2.length>0){ni2[0].focus();ni2[0].select();return;}
+    }
+  }
+}
+function updateAmt(inputEl){
+  const tr=inputEl.closest('tr');if(!tr)return;
+  const nums=tr.querySelectorAll('input[type="number"]:not([readonly])');
+  if(nums.length<2)return;
+  const q=parseFloat(nums[0].value)||0,p=parseFloat(nums[1].value)||0;
+  const amtEl=tr.querySelector('input[readonly]');
+  if(amtEl) amtEl.value=(q*p)|0;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// プレビュー生成
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderPreview(){
+  const t=calcTotals();
+  const atena=document.getElementById('atena').value||'（宛名未入力）';
+  const mno=document.getElementById('mitsumoriNo').value;
+  const hdateRaw=document.getElementById('hakkoDate').value;
+  const hdate=hdateRaw?new Date(hdateRaw).toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'}):today();
+  const expDate=hdateRaw?(()=>{const d=new Date(hdateRaw);d.setDate(d.getDate()+30);return d.toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'});})():addDays(30);
+  const kojimei=document.getElementById('kojimei').value;
+  const seshu=document.getElementById('seshubasho').value;
+  const bikou=document.getElementById('bikou').value;
+  const bikouLines=bikou.split('\n').map(l=>`<p style="margin:0">${escH(l)}</p>`).join('');
+
+  let tableHtml='';
+  if(mode==='flat'){
+    const rows=flatItems.map(it=>`<tr>
+      <td>${escH(it.name)}${it.note?'<br><span style="font-size:10px;color:#111">'+escH(it.note)+'</span>':''}</td>
+      <td>${it.qty}</td><td>${escH(it.unit)}</td>
+      <td>${fmtN(it.price)}</td><td>${fmtN((parseFloat(it.qty)||0)*(parseFloat(it.price)||0))}</td>
+    </tr>`).join('');
+    tableHtml=`<table class="estimate-table">
+      <thead><tr>
+        <th style="width:42%;text-align:left">工事内容</th>
+        <th style="width:8%">数量</th><th style="width:7%">単位</th>
+        <th style="width:13%">単価</th><th style="width:20%">金額（税抜）</th>
+      </tr></thead>
+      <tbody>
+        ${rows}
+        <tr class="subtotal-row"><td colspan="4" style="text-align:right">小　計</td><td>${fmtN(t.subtotal)}</td></tr>
+        <tr class="shokeihi-row"><td colspan="4" style="text-align:right">諸経費（${shokeihiRate}%）</td><td>${fmtN(t.shokeihi)}</td></tr>
+        ${nebiki>0?`<tr class="shokeihi-row"><td colspan="4" style="text-align:right">値　引　き</td><td>-${fmtN(nebiki)}</td></tr>`:''}
+      </tbody>
+    </table>`;
+  } else {
+    const groupRows=groupItems.map(g=>{
+      const gSub=g.items.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0),0);
+      return `<tr><td>${escH(g.name)}</td><td>1</td><td>式</td><td></td><td>${fmtN(gSub)}</td></tr>`;
+    }).join('');
+    const summaryRows=groupSummaryItems.map(it=>`<tr>
+      <td>${escH(it.name)}${it.note?'<br><span style="font-size:10px;color:#111">'+escH(it.note)+'</span>':''}</td>
+      <td>${it.qty||''}</td><td>${escH(it.unit||'')}</td>
+      <td>${(it.price&&parseFloat(it.price))?fmtN(it.price):''}</td>
+      <td>${(it.qty&&it.price&&parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):''}</td>
+    </tr>`).join('');
+    tableHtml=`<table class="estimate-table">
+      <thead><tr>
+        <th style="width:42%;text-align:left">工事内容</th>
+        <th style="width:8%">数量</th><th style="width:7%">単位</th>
+        <th style="width:13%">単価</th><th style="width:20%">金額（税抜）</th>
+      </tr></thead>
+      <tbody>
+        ${groupRows}${summaryRows}
+        <tr class="subtotal-row"><td colspan="4" style="text-align:right">小　計</td><td>${fmtN(t.subtotal)}</td></tr>
+        <tr class="shokeihi-row"><td colspan="4" style="text-align:right">諸経費（${shokeihiRate}%）</td><td>${fmtN(t.shokeihi)}</td></tr>
+        ${nebiki>0?`<tr class="shokeihi-row"><td colspan="4" style="text-align:right">値　引　き</td><td>-${fmtN(nebiki)}</td></tr>`:''}
+      </tbody>
+    </table>`;
+  }
+
+  document.getElementById('doc-page').innerHTML=`
+    <div class="header">
+      <div class="header-left">
+        <div>
+          <div class="company-name"><span class="co-prefix">株式会社</span>アート・レイズ</div>
+          <div class="company-info">〒874-0829　大分県別府市上原町13番25号<br>TEL　0977-21-0603　担当：亀井 悟</div>
+        </div>
+        <img class="kakuin" src="${KAKUIN}" alt="角印">
+      </div>
+      <div>
+        <div class="doc-title">御 見 積 書</div>
+        <div class="doc-meta">見積番号：${escH(mno)}<br>発行日：${hdate}<br>有効期限：${expDate}</div>
+      </div>
+    </div>
+    <div class="info-section">
+      <div class="info-left">
+        <div class="client-name">${escH(atena)}　御中</div>
+        <div class="project-band">
+          <span><span class="band-label">工事件名：</span>${escH(kojimei)}</span>
+          <span><span class="band-label">施工場所：</span>${escH(seshu)}</span>
+        </div>
+      </div>
+      <div class="summary-box">
+        <div class="s-label">御 見 積 金 額（税込）</div>
+        <div class="total-amount">${fmt(t.total)}</div>
+        <div class="tax-note">消費税（10%）${fmt(t.tax)} 含む</div>
+      </div>
+    </div>
+    <div class="validity">下記の通りお見積り申し上げます。何卒よろしくお願いいたします。</div>
+    <div class="section-title">■ 見積内訳</div>
+    ${tableHtml}
+    <div class="bottom-section">
+      <div class="note-box">
+        <div class="note-title">備　考</div>
+        ${bikouLines}
+      </div>
+      <div class="totals-wrap">
+        <table class="totals-table">
+          <tr class="t-subtotal"><td>税抜合計</td><td>${fmt(t.zeinuki)}</td></tr>
+          <tr><td>消費税（10%）</td><td>${fmt(t.tax)}</td></tr>
+          <tr class="t-final"><td>税込合計</td><td>${fmt(t.total)}</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="footer"><div>株式会社アート・レイズ　© 2026</div></div>`;
+
+  // A4スケール
+  requestAnimationFrame(()=>{
+    const wrap=document.getElementById('preview-scale-wrap');
+    const page=document.getElementById('doc-page');
+    if(!wrap||!page)return;
+    const a4w=page.offsetWidth;
+    const avail=wrap.parentElement.clientWidth-24;
+    const scale=Math.min(1,avail/a4w);
+    page.style.transform=`scale(${scale})`;
+    page.style.transformOrigin='top center';
+    page.style.marginBottom=(page.offsetHeight*scale-page.offsetHeight)+'px';
+  });
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 保存・共有
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function updateSaveSummary(){
+  const t=calcTotals();
+  const atena=document.getElementById('atena').value||'（未入力）';
+  const mno=document.getElementById('mitsumoriNo').value||'（未入力）';
+  const kojimei=document.getElementById('kojimei').value||'（未入力）';
+  document.getElementById('save-summary-content').innerHTML=`
+    <b>宛名</b>：${escH(atena)}<br>
+    <b>見積番号</b>：${escH(mno)}<br>
+    <b>工事件名</b>：${escH(kojimei)}<br>
+    <span class="amount">${fmt(t.total)}</span>
+    <span style="font-size:11px;color:var(--sub);">（税込）</span>`;
+}
+
+function buildDocHTML(){
+  // PC版mitsumori_preview.htmlのbuildDocHTML()相当
+  // スタンドアロンHTMLを生成（印刷用）
+  renderPreview();
+  const pageEl=document.getElementById('doc-page');
+  if(!pageEl)return '';
+  const clone=pageEl.cloneNode(true);
+  clone.style.transform='';
+  clone.style.marginBottom='';
+  const tmplCSS=`
+:root{--text:#111;--text-sub:#444;--white:#fff;--band:#555;--band-dark:#444;--even:#f4f4f4;--subtotal-bg:#e8e8e8;--border:#bbb;--border-dark:#888;--light:#f8f8f8;}
+@page{margin:0;size:A4;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+body{font-family:"Meiryo","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;background:#e0e0e0;color:var(--text);font-size:14px;line-height:1.65;}
+.page{width:210mm;min-height:297mm;margin:0 auto;background:#fff;padding:13mm 15mm;}
+@media screen{.page{margin-bottom:24px;box-shadow:0 2px 16px rgba(0,0,0,.18);}}
+@media print{body{background:#fff;}.page{margin:0;padding:11mm 13mm;box-shadow:none;}}
+.header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #111;padding-bottom:10px;margin-bottom:14px;}
+.header-left{position:relative;display:inline-block;}
+.company-name{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:22px;font-weight:700;color:#111;letter-spacing:0.06em;line-height:1.3;}
+.company-name .co-prefix{font-size:15px;font-weight:400;}
+.company-info{font-size:11.5px;color:#444;margin-top:5px;line-height:1.9;}
+.kakuin{width:64px;height:64px;position:absolute;top:6px;right:-28px;}
+.doc-title{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:28px;font-weight:700;color:#111;letter-spacing:0.18em;text-align:right;}
+.doc-meta{font-size:11.5px;color:#444;text-align:right;margin-top:6px;line-height:2;}
+.info-section{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:16px;}
+.info-left{flex:1;display:flex;flex-direction:column;gap:8px;}
+.client-name{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:21px;font-weight:600;color:#111;border-bottom:2px solid #111;padding-bottom:4px;}
+.summary-box{background:#444!important;color:#fff!important;padding:12px 22px;border-radius:3px;text-align:right;flex-shrink:0;}
+.summary-box .s-label{font-size:11px;color:#e0e0e0!important;}
+.summary-box .total-amount{font-family:"Yu Mincho",serif;font-size:26px;font-weight:700;color:#fff!important;margin-top:2px;}
+.summary-box .tax-note{font-size:11px;color:#e0e0e0!important;margin-top:3px;}
+.project-band{background:#555!important;border-left:5px solid #111;padding:6px 14px;margin-bottom:6px;font-size:11.5px;color:#fff!important;display:inline-flex;flex-direction:column;gap:3px;align-self:flex-start;}
+.band-label{color:#ddd!important;margin-right:4px;}
+.section-title{font-family:"Yu Mincho",serif;font-size:13px;font-weight:600;color:#111;border-bottom:2px solid #111;padding-bottom:3px;margin-bottom:6px;}
+.estimate-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:4px;border:1px solid #888;}
+.estimate-table thead th{background:#555!important;color:#fff!important;padding:8px 10px;font-weight:700;font-size:12px;}
+.estimate-table thead th:first-child{text-align:left;}
+.estimate-table thead th:not(:first-child){text-align:right;}
+.estimate-table tbody tr{border-bottom:1px solid #bbb;}
+.estimate-table tbody tr:nth-child(even){background:#f4f4f4!important;}
+.estimate-table tbody td{padding:9px 10px;vertical-align:middle;color:#111;border-right:1px solid #bbb;}
+.estimate-table tbody td:first-child{text-align:left;}
+.estimate-table tbody td:not(:first-child){text-align:right;}
+.estimate-table .subtotal-row td{background:#e8e8e8!important;font-weight:700;font-size:13px;}
+.estimate-table .shokeihi-row td{background:#f4f4f4!important;color:#555;}
+.bottom-section{display:flex;gap:14px;align-items:flex-start;margin-top:10px;margin-bottom:10px;}
+.note-box{flex:1;border:1px solid #888;border-radius:3px;padding:8px 12px;background:#f8f8f8;font-size:11px;color:#444;line-height:1.8;min-height:80px;}
+.note-title{font-size:11.5px;font-weight:700;color:#111;margin-bottom:4px;border-bottom:1px solid #bbb;padding-bottom:4px;}
+.totals-wrap{flex-shrink:0;}
+.totals-table{width:260px;border-collapse:collapse;font-size:12px;border:1px solid #888;}
+.totals-table td{padding:5px 12px;border-bottom:1px solid #bbb;color:#111;}
+.totals-table td:last-child{text-align:right;}
+.totals-table .t-subtotal td{background:#e8e8e8!important;font-weight:600;}
+.totals-table .t-final{background:#444!important;}
+.totals-table .t-final td{padding:8px 12px;font-family:"Yu Mincho",serif;font-size:14px;font-weight:700;color:#fff!important;border-bottom:none;}
+.footer{margin-top:10px;border-top:1px solid #888;padding-top:6px;display:flex;justify-content:space-between;font-size:11px;color:#444;}
+.validity{font-size:11px;color:#444;margin-bottom:8px;margin-top:4px;}
+`;
+  return `<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>御見積書</title>
+<style>${tmplCSS}</style></head>
+<body><div class="page">${clone.innerHTML}</div>
+<script>window.addEventListener('load',function(){
+  document.querySelectorAll('.page table tbody tr').forEach(function(tr){tr.style.height='52px';});
+  document.querySelectorAll('.page table tbody td,.page table thead th').forEach(function(el){el.style.padding='9px 10px';});
+  document.querySelectorAll('.page table').forEach(function(t){t.style.fontSize='12.5px';});
+});<\/script>
+</body></html>`;
+}
+
+function downloadHTML(){
+  const html=buildDocHTML();
+  const mno=document.getElementById('mitsumoriNo').value||'mitsumori';
+  const fname=`見積書_${mno}.html`;
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=fname;a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+}
+
+function openPrint(){
+  const html=buildDocHTML();
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.target='_blank';a.rel='noopener';a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+}
+
+async function copyAsText(){
+  const t=calcTotals();
+  const atena=document.getElementById('atena').value;
+  const mno=document.getElementById('mitsumoriNo').value;
+  const kojimei=document.getElementById('kojimei').value;
+  let lines=[`【御見積書】`,`宛名：${atena}　御中`,`見積番号：${mno}`,`工事件名：${kojimei}`,``,`--- 明細 ---`];
+  if(mode==='flat'){
+    flatItems.forEach(it=>{
+      if(it.name) lines.push(`${it.name}　${it.qty}${it.unit}　¥${fmtN(it.price)}　= ¥${fmtN((parseFloat(it.qty)||0)*(parseFloat(it.price)||0))}`);
+    });
+  }
+  lines.push(``,`税抜合計：${fmt(t.zeinuki)}`,`消費税：${fmt(t.tax)}`,`税込合計：${fmt(t.total)}`);
+  try{
+    await navigator.clipboard.writeText(lines.join('\n'));
+    alert('テキストをコピーしました');
+  }catch(e){
+    alert('コピーに失敗しました');
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// エスケープ
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function escH(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
