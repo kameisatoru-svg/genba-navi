@@ -467,7 +467,7 @@ function flatTogglePageBreak(i){
   render();
 }
 
-function flatAddRow(){flatItems.push({name:'',qty:1,unit:'㎡',price:0,note:''});renderFlatRows();render();}
+function flatAddRow(){flatItems.push({name:'',qty:'',unit:'',price:'',note:'',pageBreak:false});renderFlatRows();render();}
 
 // ── グループモード：1枚目単一明細 ──
 function renderGroupSummaryRows(){
