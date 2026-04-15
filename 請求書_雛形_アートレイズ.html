@@ -54,8 +54,8 @@
   }
 
   /* ===== ヘッダー ===== */
-  .header-left{display:flex;align-items:flex-start;gap:8px;justify-content:flex-end;}
-  .kakuin{width:20mm;height:20mm;flex-shrink:0;}
+  .header-left{position:relative;display:inline-block;}
+  .kakuin{width:20mm;height:20mm;position:absolute;top:6px;right:-10mm;}
   .header {
     display: flex;
     justify-content: space-between;
@@ -294,7 +294,7 @@
         お支払期限：
       </div>
     </div>
-    <div class="header-left" style="text-align:right;">
+    <div class="header-left" style="text-align:right;flex:1;padding-right:22mm;">
       <div>
         <div class="company-info">
           〒874-0829　大分県別府市上原町13番25号
