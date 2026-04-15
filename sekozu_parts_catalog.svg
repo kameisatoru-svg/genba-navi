@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 1074" width="760" height="1074"
+     style="background:#fff; font-family:Meiryo,'Yu Gothic',sans-serif;">
+
+<defs>
+  <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5"
+    markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+    <path d="M2 2L8 5L2 8" fill="none" stroke="context-stroke" stroke-width="1.2"/>
+  </marker>
+  <marker id="dot" viewBox="0 0 6 6" refX="3" refY="3"
+    markerWidth="4" markerHeight="4">
+    <circle cx="3" cy="3" r="1.6" fill="context-stroke"/>
+  </marker>
+  <pattern id="hatchPB" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <line x1="0" y1="0" x2="0" y2="6" stroke="#bbb" stroke-width="0.6"/>
+  </pattern>
+  <pattern id="hatchWood" width="4" height="4" patternUnits="userSpaceOnUse">
+    <path d="M0 4 Q1 2 2 4 T4 4" stroke="#8a6a3a" stroke-width="0.4" fill="none" opacity="0.5"/>
+  </pattern>
+  <pattern id="hatchPly" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(30)">
+    <line x1="0" y1="0" x2="0" y2="8" stroke="#a88658" stroke-width="0.5"/>
+  </pattern>
+</defs>
+<text x="20" y="28" font-size="18" font-family="Meiryo" fill="#1e2d40" font-weight="bold">施工図部品ライブラリ v1.0</text>
+<text x="20" y="46" font-size="11" font-family="Meiryo" fill="#555">株式会社アート・レイズ / sekozu_parts.py</text>
+<text x="20" y="90" font-size="12" font-family="Meiryo" fill="#333" font-weight="bold">■ H鋼（実寸 scale=1.0）</text>
+
+<!-- H鋼 H-100x100 -->
+<g class="part-hko">
+  <rect x="40.00" y="110.00"  width="100.00" height="8.00" fill="#999" fill-opacity="0.65" stroke="#1a1a1a" stroke-width="0.8"/>
+  <rect x="87.00"  y="118.00"  width="6.00" height="84.00" fill="#999" fill-opacity="0.65" stroke="#1a1a1a" stroke-width="0.8"/>
+  <rect x="40.00" y="202.00"  width="100.00" height="8.00" fill="#999" fill-opacity="0.65" stroke="#1a1a1a" stroke-width="0.8"/>
+</g><g class="label-right">
+  <line x1="140.00" y1="160.00" x2="154.00" y2="160.00" stroke="#aaa" stroke-width="0.6"/>
+  <text x="156.00" y="164.00" font-size="10" fill="#555" font-family="Meiryo, 'Yu Gothic', sans-serif">H-100×100</text>
+</g>
+
+<!-- H鋼 H-150x150 -->
+<g class="part-hko">
+  <rect x="185.00" y="110.00"  width="150.00" height="10.00" fill="#999" fill-opacity="0.65" stroke="#1a1a1a" stroke-width="0.8"/>
+  <rect x="256.50"  y="120.00"  width="7.00" height="130.00" fill="#999" fill-opacity="0.65" stroke="#1a1a1a" stroke-width="0.8"/>
+  <rect x="185.00" y="250.00"  width="150.00" height="10.00" fill="#999" fill-opacity="0.65" stroke="#1a1a1a" stroke-width="0.8"/>
+</g><g class="label-right">
+  <line x1="335.00" y1="185.00" x2="349.00" y2="185.00" stroke="#aaa" stroke-width="0.6"/>
+  <text x="351.00" y="189.00" font-size="10" fill="#555" font-family="Meiryo, 'Yu Gothic', sans-serif">H-150×150</text>
+</g>
+
+<!-- H鋼 H-200x200 -->
+<g class="part-hko">
+  <rect x="360.00" y="110.00"  width="200.00" height="12.00" fill="#999" fill-opacity="0.65" stroke="#1a1a1a" stroke-width="0.8"/>
+  <rect x="456.00"  y="122.00"  width="8.00" height="176.00" fill="#999" fill-opacity="0.65" stroke="#1a1a1a" stroke-width="0.8"/>
+  <rect x="360.00" y="298.00"  width="200.00" height="12.00" fill="#999" fill-opacity="0.65" stroke="#1a1a1a" stroke-width="0.8"/>
+</g><g class="label-right">
+  <line x1="560.00" y1="210.00" x2="574.00" y2="210.00" stroke="#aaa" stroke-width="0.6"/>
+  <text x="576.00" y="214.00" font-size="10" fill="#555" font-family="Meiryo, 'Yu Gothic', sans-serif">H-200×200</text>
+</g>
+<text x="20" y="360" font-size="12" font-family="Meiryo" fill="#333" font-weight="bold">■ LGSランナー（口↓＝天井付）／スタッド（縦2本線）</text>
+
+<!-- LGSランナー LGS65（口↓） -->
+<g class="part-lgs-runner">
+  <rect x="67.50" y="380.00" width="65.00" height="1.50" fill="#333" fill-opacity="0.75" stroke="#1a1a1a" stroke-width="0.6"/>
+  <rect x="67.50" y="381.50" width="1.50" height="38.50" fill="#333" fill-opacity="0.75" stroke="#1a1a1a" stroke-width="0.6"/>
+  <rect x="131.00" y="381.50" width="1.50" height="38.50" fill="#333" fill-opacity="0.75" stroke="#1a1a1a" stroke-width="0.6"/>
+</g>
+<g class="label-right">
+  <line x1="140.00" y1="400.00" x2="154.00" y2="400.00" stroke="#aaa" stroke-width="0.6"/>
+  <text x="156.00" y="404.00" font-size="10" fill="#555" font-family="Meiryo, 'Yu Gothic', sans-serif">LGS65ランナー（口↓）</text>
+</g>
+
+<!-- LGSランナー LGS65（口↑） -->
+<g class="part-lgs-runner">
+  <rect x="67.50" y="518.50" width="65.00" height="1.50" fill="#333" fill-opacity="0.75" stroke="#1a1a1a" stroke-width="0.6"/>
+  <rect x="67.50" y="480.00" width="1.50" height="38.50" fill="#333" fill-opacity="0.75" stroke="#1a1a1a" stroke-width="0.6"/>
+  <rect x="131.00" y="480.00" width="1.50" height="38.50" fill="#333" fill-opacity="0.75" stroke="#1a1a1a" stroke-width="0.6"/>
+</g>
+<g class="label-right">
+  <line x1="140.00" y1="500.00" x2="154.00" y2="500.00" stroke="#aaa" stroke-width="0.6"/>
+  <text x="156.00" y="504.00" font-size="10" fill="#555" font-family="Meiryo, 'Yu Gothic', sans-serif">LGS65ランナー（口↑）</text>
+</g>
+
+<!-- LGSスタッド LGS65 -->
+<g class="part-lgs-stud" stroke="#333" stroke-width="2.2" opacity="0.85">
+  <line x1="330.00" y1="380.00" x2="330.00" y2="520.00"/>
+  <line x1="395.00" y1="380.00" x2="395.00" y2="520.00"/>
+</g>
+<g class="label-right">
+  <line x1="395.00" y1="450.00" x2="409.00" y2="450.00" stroke="#aaa" stroke-width="0.6"/>
+  <text x="411.00" y="454.00" font-size="10" fill="#555" font-family="Meiryo, 'Yu Gothic', sans-serif">LGS65スタッド（正面）</text>
+</g>
+<text x="20" y="580" font-size="12" font-family="Meiryo" fill="#333" font-weight="bold">■ C形鋼</text>
+<!-- C形鋼 C-75x45 --><g class="part-c"><rect x="78.85" y="600.00" width="2.30" height="75.00" fill="#444" fill-opacity="0.85" stroke="#1a1a1a" stroke-width="0.6"/><rect x="78.85" y="600.00" width="45.00" height="2.30" fill="#444" fill-opacity="0.85" stroke="#1a1a1a" stroke-width="0.6"/><rect x="78.85" y="672.70" width="45.00" height="2.30" fill="#444" fill-opacity="0.85" stroke="#1a1a1a" stroke-width="0.6"/><rect x="121.55" y="600.00" width="2.30" height="15.00" fill="#444" fill-opacity="0.85" stroke="#1a1a1a" stroke-width="0.6"/><rect x="121.55" y="660.00" width="2.30" height="15.00" fill="#444" fill-opacity="0.85" stroke="#1a1a1a" stroke-width="0.6"/></g>
+<g class="label-right">
+  <line x1="130.00" y1="640.00" x2="144.00" y2="640.00" stroke="#aaa" stroke-width="0.6"/>
+  <text x="146.00" y="644.00" font-size="10" fill="#555" font-family="Meiryo, 'Yu Gothic', sans-serif">C-75×45</text>
+</g>
+<!-- C形鋼 C-100x50 --><g class="part-c"><rect x="298.85" y="600.00" width="2.30" height="100.00" fill="#444" fill-opacity="0.85" stroke="#1a1a1a" stroke-width="0.6"/><rect x="298.85" y="600.00" width="50.00" height="2.30" fill="#444" fill-opacity="0.85" stroke="#1a1a1a" stroke-width="0.6"/><rect x="298.85" y="697.70" width="50.00" height="2.30" fill="#444" fill-opacity="0.85" stroke="#1a1a1a" stroke-width="0.6"/><rect x="346.55" y="600.00" width="2.30" height="20.00" fill="#444" fill-opacity="0.85" stroke="#1a1a1a" stroke-width="0.6"/><rect x="346.55" y="680.00" width="2.30" height="20.00" fill="#444" fill-opacity="0.85" stroke="#1a1a1a" stroke-width="0.6"/></g>
+<g class="label-right">
+  <line x1="360.00" y1="650.00" x2="374.00" y2="650.00" stroke="#aaa" stroke-width="0.6"/>
+  <text x="376.00" y="654.00" font-size="10" fill="#555" font-family="Meiryo, 'Yu Gothic', sans-serif">C-100×50</text>
+</g>
+<text x="20" y="770" font-size="12" font-family="Meiryo" fill="#333" font-weight="bold">■ 木材</text>
+
+<!-- 木材 45x45 -->
+<g class="part-wood">
+  <rect x="37.50" y="790.00" width="45.00" height="45.00"
+        fill="#efe3c8" stroke="#8a6a3a" stroke-width="1.0"/>
+  <rect x="37.50" y="790.00" width="45.00" height="45.00"
+        fill="url(#hatchWood)" stroke="none"/>
+  <line x1="51.00" y1="796.75"
+        x2="51.00" y2="828.25"
+        stroke="#8a6a3a" stroke-width="0.3" opacity="0.6"/>
+  <line x1="69.00" y1="796.75"
+        x2="69.00" y2="828.25"
+        stroke="#8a6a3a" stroke-width="0.3" opacity="0.6"/>
+</g><g class="label-right">
+  <line x1="82.50" y1="812.50" x2="96.50" y2="812.50" stroke="#aaa" stroke-width="0.6"/>
+  <text x="98.50" y="816.50" font-size="10" fill="#555" font-family="Meiryo, 'Yu Gothic', sans-serif">45×45</text>
+</g>
+
+<!-- 木材 45x105 -->
+<g class="part-wood">
+  <rect x="137.50" y="790.00" width="45.00" height="105.00"
+        fill="#efe3c8" stroke="#8a6a3a" stroke-width="1.0"/>
+  <rect x="137.50" y="790.00" width="45.00" height="105.00"
+        fill="url(#hatchWood)" stroke="none"/>
+  <line x1="151.00" y1="805.75"
+        x2="151.00" y2="879.25"
+        stroke="#8a6a3a" stroke-width="0.3" opacity="0.6"/>
+  <line x1="169.00" y1="805.75"
+        x2="169.00" y2="879.25"
+        stroke="#8a6a3a" stroke-width="0.3" opacity="0.6"/>
+</g><g class="label-right">
+  <line x1="182.50" y1="842.50" x2="196.50" y2="842.50" stroke="#aaa" stroke-width="0.6"/>
+  <text x="198.50" y="846.50" font-size="10" fill="#555" font-family="Meiryo, 'Yu Gothic', sans-serif">45×105</text>
+</g>
+
+<!-- 木材 105x105 -->
+<g class="part-wood">
+  <rect x="227.50" y="790.00" width="105.00" height="105.00"
+        fill="#efe3c8" stroke="#8a6a3a" stroke-width="1.0"/>
+  <rect x="227.50" y="790.00" width="105.00" height="105.00"
+        fill="url(#hatchWood)" stroke="none"/>
+  <line x1="259.00" y1="805.75"
+        x2="259.00" y2="879.25"
+        stroke="#8a6a3a" stroke-width="0.3" opacity="0.6"/>
+  <line x1="301.00" y1="805.75"
+        x2="301.00" y2="879.25"
+        stroke="#8a6a3a" stroke-width="0.3" opacity="0.6"/>
+</g><g class="label-right">
+  <line x1="332.50" y1="842.50" x2="346.50" y2="842.50" stroke="#aaa" stroke-width="0.6"/>
+  <text x="348.50" y="846.50" font-size="10" fill="#555" font-family="Meiryo, 'Yu Gothic', sans-serif">105×105 柱</text>
+</g>
+
+<!-- 木材 45x90 -->
+<g class="part-wood">
+  <rect x="407.50" y="790.00" width="45.00" height="90.00"
+        fill="#efe3c8" stroke="#8a6a3a" stroke-width="1.0"/>
+  <rect x="407.50" y="790.00" width="45.00" height="90.00"
+        fill="url(#hatchWood)" stroke="none"/>
+  <line x1="421.00" y1="803.50"
+        x2="421.00" y2="866.50"
+        stroke="#8a6a3a" stroke-width="0.3" opacity="0.6"/>
+  <line x1="439.00" y1="803.50"
+        x2="439.00" y2="866.50"
+        stroke="#8a6a3a" stroke-width="0.3" opacity="0.6"/>
+</g><g class="label-right">
+  <line x1="452.50" y1="835.00" x2="466.50" y2="835.00" stroke="#aaa" stroke-width="0.6"/>
+  <text x="468.50" y="839.00" font-size="10" fill="#555" font-family="Meiryo, 'Yu Gothic', sans-serif">45×90 垂木</text>
+</g>
+<text x="20" y="920" font-size="12" font-family="Meiryo" fill="#333" font-weight="bold">■ ボード類（t=実寸mm×10で拡大表示）</text>
+
+<!-- PB t12.5 -->
+<g class="part-pb">
+  <rect x="60.00" y="940.00" width="50.00" height="100.00"
+        fill="#f8f8f8" stroke="#1a1a1a" stroke-width="1.2"/>
+  <rect x="60.00" y="940.00" width="50.00" height="100.00" fill="url(#hatchPB)" stroke="none"/>
+</g>
+<g class="label-right">
+  <line x1="110.00" y1="990.00" x2="124.00" y2="990.00" stroke="#aaa" stroke-width="0.6"/>
+  <text x="126.00" y="994.00" font-size="10" fill="#555" font-family="Meiryo, 'Yu Gothic', sans-serif">PB t12.5</text>
+</g>
+
+<!-- 合板 t12 -->
+<g class="part-ply">
+  <rect x="200.00" y="940.00" width="48.00" height="100.00"
+        fill="#f3e6cc" stroke="#6a4a20" stroke-width="1.0"/>
+  <rect x="200.00" y="940.00" width="48.00" height="100.00"
+        fill="url(#hatchPly)" stroke="none"/>
+</g>
+<g class="label-right">
+  <line x1="248.00" y1="990.00" x2="262.00" y2="990.00" stroke="#aaa" stroke-width="0.6"/>
+  <text x="264.00" y="994.00" font-size="10" fill="#555" font-family="Meiryo, 'Yu Gothic', sans-serif">合板 t12</text>
+</g>
+
+<!-- ケイカル板 t8 -->
+<g class="part-keical">
+  <rect x="340.00" y="940.00" width="32.00" height="100.00"
+        fill="#e8e8e6" stroke="#555" stroke-width="1.0"/>
+  <rect x="351.20" y="942.00"
+        width="9.60" height="96.00"
+        fill="#d0d0ce" stroke="none" opacity="0.6"/>
+</g>
+<g class="label-right">
+  <line x1="372.00" y1="990.00" x2="386.00" y2="990.00" stroke="#aaa" stroke-width="0.6"/>
+  <text x="388.00" y="994.00" font-size="10" fill="#555" font-family="Meiryo, 'Yu Gothic', sans-serif">ケイカル板 t8</text>
+</g>
+<text x="520" y="580" font-size="12" font-family="Meiryo" fill="#333" font-weight="bold">■ 留め付け</text>
+
+<!-- ビス L32 -->
+<g class="part-screw" stroke="#222" stroke-width="0.6">
+  <circle cx="540.00" cy="610.00" r="2.0" fill="#666"/>
+  <line x1="540.00" y1="608.00" x2="540.00" y2="612.00"/>
+  <rect x="540.00" y="609.40" width="32.00" height="1.20" fill="#888"/>
+  <polygon points="572.00,609.40 574.00,610.00 572.00,610.60" fill="#888"/>
+</g>
+<g class="label-right">
+  <line x1="576.00" y1="610.00" x2="590.00" y2="610.00" stroke="#aaa" stroke-width="0.6"/>
+  <text x="592.00" y="614.00" font-size="10" fill="#555" font-family="Meiryo, 'Yu Gothic', sans-serif">コーススレッド L32</text>
+</g>
+
+<!-- ビス L25 -->
+<g class="part-screw" stroke="#222" stroke-width="0.6">
+  <circle cx="540.00" cy="640.00" r="2.0" fill="#666"/>
+  <line x1="540.00" y1="638.00" x2="540.00" y2="642.00"/>
+  <rect x="540.00" y="639.40" width="25.00" height="1.20" fill="#888"/>
+  <polygon points="565.00,639.40 567.00,640.00 565.00,640.60" fill="#888"/>
+</g>
+<g class="label-right">
+  <line x1="569.00" y1="640.00" x2="583.00" y2="640.00" stroke="#aaa" stroke-width="0.6"/>
+  <text x="585.00" y="644.00" font-size="10" fill="#555" font-family="Meiryo, 'Yu Gothic', sans-serif">ドリルビス L25</text>
+</g>
+
+<!-- アンカーボルト -->
+<g class="part-anchor">
+  <circle cx="600.00" cy="720.00" r="5" fill="none" stroke="#1a1a1a" stroke-width="1.2"/>
+  <circle cx="600.00" cy="720.00" r="2" fill="#1a1a1a"/>
+  <line x1="600.00" y1="714.00" x2="600.00" y2="698.00" stroke="#aaa" stroke-width="0.6"/>
+  <line x1="600.00" y1="698.00" x2="572.00" y2="698.00" stroke="#aaa" stroke-width="0.6"/>
+  <text x="570.00" y="695.00" text-anchor="end" font-size="10" fill="#555" font-family="Meiryo, 'Yu Gothic', sans-serif">アンカーボルト</text>
+</g>
+
+<!-- 六角ボルト M12 -->
+<polygon points="685.98,723.45 680.00,726.90 674.02,723.45 674.02,716.55 680.00,713.10 685.98,716.55" fill="#888" stroke="#1a1a1a" stroke-width="0.6"/>
+<circle cx="680.00" cy="720.00" r="2.41" fill="none" stroke="#1a1a1a" stroke-width="0.5"/>
+<g class="label-right">
+  <line x1="695.00" y1="720.00" x2="709.00" y2="720.00" stroke="#aaa" stroke-width="0.6"/>
+  <text x="711.00" y="724.00" font-size="10" fill="#555" font-family="Meiryo, 'Yu Gothic', sans-serif">六角ボルト M12</text>
+</g>
+</svg>
