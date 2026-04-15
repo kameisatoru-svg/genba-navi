@@ -1490,7 +1490,7 @@ window.addEventListener('load',function(){
   document.querySelectorAll('.page').forEach(function(page){
     var tbl=page.querySelector('table.estimate-table,table.detail-table');
     if(!tbl)return;
-    tbl.querySelectorAll('tbody tr').forEach(function(tr){tr.style.height=ROW_MIN_H+'px';});
+    tbl.querySelectorAll('tbody tr:not(.subtotal-row):not(.shokeihi-row):not(.group-section-header):not(.group-subtotal-row)').forEach(function(tr){tr.style.height=ROW_MIN_H+'px';});
     tbl.querySelectorAll('tbody td,thead th').forEach(function(el){el.style.padding='9px 10px';});
     tbl.style.fontSize='12.5px';
   });
