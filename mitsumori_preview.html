@@ -1282,6 +1282,17 @@ function buildDocHTML(){
         <td ${tdStyle}>${fmtN(gSub)}</td>
       </tr>`;
     }).join('');
+    // 空白欄（1ページ目の余白埋め）
+    const summaryRows=groupSummaryItems.map(it=>{
+      const q=it.qty!==''&&it.qty!=null?it.qty:'';
+      const p=it.price!==''&&parseFloat(it.price)?fmtN(it.price):'';
+      const a=(it.qty!==''&&it.price!==''&&parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
+      return `<tr>
+        <td ${tdStyleL}>${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+        <td ${tdStyle}>${q}</td><td ${tdStyle}>${it.unit||''}</td>
+        <td ${tdStyle}>${p}</td><td ${tdStyle}>${a}</td>
+      </tr>`;
+    }).join('');
     tableHtml=`<table class="estimate-table" ${tblStyle}>
       <thead><tr>
         <th ${thStyle} style="width:42%;text-align:left;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">工事内容</th>
@@ -1292,6 +1303,7 @@ function buildDocHTML(){
       </tr></thead>
       <tbody>
         ${groupRows}
+        ${summaryRows}
         <tr class="subtotal-row"><td colspan="4" style="text-align:right">小　計</td><td style="text-align:right">${fmtN(t.subtotal)}</td></tr>
         <tr class="shokeihi-row"><td colspan="4" style="text-align:right">諸経費（${shokeihiRate}%）</td><td style="text-align:right">${fmtN(t.shokeihi)}</td></tr>
         ${nebiki>0?`<tr class="shokeihi-row"><td colspan="4" style="text-align:right">値　引　き</td><td style="text-align:right">-${fmtN(nebiki)}</td></tr>`:''}
