@@ -1442,18 +1442,16 @@ function buildDocHTML(){
 </div>
 ${(()=>{
   if(mode!=='group')return '';
-  // 連続テーブル方式（プレビューと同じ）
-  let allRows='';
-  groupItems.forEach((g,gi)=>{
+  // 工種ごとに1ページ発行（改頁を確実にするため.page page-breakを個別に生成）
+  return groupItems.map((g,gi)=>{
     const gSub=g.items.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0),0);
-    // 改頁フラグ：2番目以降でpageBreak=trueなら page-break-before
-    const pbStyle=gi>0&&g.pageBreak?'page-break-before:always;':'';
-    allRows+=`<tr style="${pbStyle}background:#444;color:#fff;font-weight:700;font-size:11.5px;">
+    let rows='';
+    rows+=`<tr style="background:#444;color:#fff;font-weight:700;font-size:11.5px;">
       <td colspan="5" style="padding:5px 8px;text-align:left;">■ ${g.name}　工事明細</td>
     </tr>`;
     g.items.forEach(it=>{
       const amt=(it.qty&&it.price&&it.price!='0'&&it.price!==0)?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
-      allRows+=`<tr>
+      rows+=`<tr>
         <td style="text-align:left;">${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
         <td style="text-align:right;">${it.qty||''}</td>
         <td style="text-align:right;">${it.unit||''}</td>
@@ -1461,30 +1459,30 @@ ${(()=>{
         <td style="text-align:right;">${amt}</td>
       </tr>`;
     });
-    allRows+=`<tr class="subtotal-row">
+    rows+=`<tr class="subtotal-row">
       <td colspan="4" style="text-align:right;background:#e8e8e8;font-weight:700;">小　計</td>
       <td style="text-align:right;background:#e8e8e8;font-weight:700;">${fmtN(gSub)}</td>
     </tr>`;
-  });
-  return `<div class="page page-break">
-    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:12px;">
-      <div style="font-family:'Yu Mincho',serif;font-size:15px;font-weight:700;color:#111;">工 事 明 細</div>
-      <div style="font-size:11px;color:#666;">${kojimei}</div>
-    </div>
-    <table class="detail-table" style="width:100%;border-collapse:collapse;border:1px solid #888;">
-      <thead><tr>
-        <th style="width:42%;text-align:left;background:#555;color:#fff;padding:6px 8px;">工事内容</th>
-        <th style="width:8%;background:#555;color:#fff;padding:6px 8px;text-align:right;">数量</th>
-        <th style="width:7%;background:#555;color:#fff;padding:6px 8px;text-align:right;">単位</th>
-        <th style="width:13%;background:#555;color:#fff;padding:6px 8px;text-align:right;">単価</th>
-        <th style="width:20%;background:#555;color:#fff;padding:6px 8px;text-align:right;">金額（税抜）</th>
-      </tr></thead>
-      <tbody>${allRows}</tbody>
-    </table>
-    <div class="footer" style="margin-top:10px;border-top:1px solid #888;padding-top:6px;display:flex;justify-content:space-between;font-size:11px;color:#666;">
-      <div>株式会社アート・レイズ　© 2026</div>
-    </div>
-  </div>`;
+    return `<div class="page page-break" style="page-break-before:always;break-before:page;">
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:12px;">
+        <div style="font-family:'Yu Mincho',serif;font-size:15px;font-weight:700;color:#111;">工 事 明 細</div>
+        <div style="font-size:11px;color:#666;">${kojimei}</div>
+      </div>
+      <table class="detail-table" style="width:100%;border-collapse:collapse;border:1px solid #888;">
+        <thead><tr>
+          <th style="width:42%;text-align:left;background:#555;color:#fff;padding:6px 8px;">工事内容</th>
+          <th style="width:8%;background:#555;color:#fff;padding:6px 8px;text-align:right;">数量</th>
+          <th style="width:7%;background:#555;color:#fff;padding:6px 8px;text-align:right;">単位</th>
+          <th style="width:13%;background:#555;color:#fff;padding:6px 8px;text-align:right;">単価</th>
+          <th style="width:20%;background:#555;color:#fff;padding:6px 8px;text-align:right;">金額（税抜）</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="footer" style="margin-top:10px;border-top:1px solid #888;padding-top:6px;display:flex;justify-content:space-between;font-size:11px;color:#666;">
+        <div>株式会社アート・レイズ　© 2026</div>
+      </div>
+    </div>`;
+  }).join('');
 })()}
 ADJSCRIPT_START
 window.addEventListener('load',function(){
