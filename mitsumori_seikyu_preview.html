@@ -266,14 +266,14 @@ tr.dragging{opacity:0.4;}
   <div class="editor">
     <div class="editor-head"><h2>積算編集</h2></div>
     <div class="editor-body">
-      <div class="fgroup"><label>宛名（会社名）</label><input id="atena" type="text" value="愛の治療院 松村" oninput="render()"></div>
+      <div class="fgroup"><label>宛名（会社名）</label><input id="atena" type="text" value="" placeholder="例：株式会社〇〇" oninput="render()"></div>
       <div class="fgroup-row">
         <div class="fgroup"><label id="label-docNo">見積番号</label><input id="mitsumoriNo" type="text" value="AR-26-XXX-M1" oninput="render()"></div>
         <div class="fgroup"><label>発行日</label><input id="hakkoDate" type="date" oninput="render()"></div>
       </div>
       <div class="fgroup" id="shiharai-wrap" style="display:none;"><label>お支払期限</label><input id="shiharaiDate" type="date" oninput="render()"></div>
-      <div class="fgroup"><label>工事件名</label><input id="kojimei" type="text" value="外壁コーキング補修・看板シート張替工事他" oninput="render()"></div>
-      <div class="fgroup"><label>施工場所</label><input id="seshubasho" type="text" value="大分県別府市" oninput="render()"></div>
+      <div class="fgroup"><label>工事件名</label><input id="kojimei" type="text" value="" placeholder="例：〇〇邸 外壁塗装工事" oninput="render()"></div>
+      <div class="fgroup"><label>施工場所</label><input id="seshubasho" type="text" value="" placeholder="例：大分県別府市〇〇" oninput="render()"></div>
       <div class="fgroup" id="koki-wrap" style="display:none;"><label>工事期間</label><input id="koki" type="text" value="" oninput="render()" placeholder="例：2026/4/22 または 2026/4/1〜2026/4/30"></div>
       <hr class="section-sep">
       <div id="items-editor"></div>
@@ -295,8 +295,7 @@ tr.dragging{opacity:0.4;}
       <hr class="section-sep">
       <div id="bikou-wrap">
         <div class="section-label">備考欄</div>
-        <div class="fgroup"><textarea id="bikou" rows="3" oninput="render()">・本見積書の有効期限は発行日より30日間とさせていただきます。
-・上記金額は概算であり、現地確認後に変更となる場合があります。</textarea></div>
+        <div class="fgroup"><textarea id="bikou" rows="3" oninput="render()"></textarea></div>
       </div>
     </div>
   </div>
@@ -419,10 +418,9 @@ const FURIKOMI_HTML = `<div class="bank-box" style="border:1px solid var(--borde
 
 // ── フラット用データ ──
 const flatItems = [
-  {name:'外壁コーキング打ち（胴差天端）',qty:1,unit:'式',price:42000,note:'部分補修',pageBreak:false},
-  {name:'壁面突出看板インクジェットシート貼',qty:1,unit:'箇所',price:68000,note:'600×1,800mm　材工共',pageBreak:false},
-  {name:'壁面看板インクジェットシート貼',qty:1,unit:'箇所',price:15000,note:'600×600mm　材工共',pageBreak:false},
-  {name:'既存ボックス板金補修の上　再取付',qty:1,unit:'箇所',price:38000,note:'サッシシャッターボックス　W1,800mm',pageBreak:false},
+  {name:'',qty:'',unit:'',price:'',note:'',pageBreak:false},
+  {name:'',qty:'',unit:'',price:'',note:'',pageBreak:false},
+  {name:'',qty:'',unit:'',price:'',note:'',pageBreak:false},
 ];
 
 // ── グループ用データ ──
@@ -430,11 +428,8 @@ const flatItems = [
 let groupSummaryItems = [];
 
 const groupItems = [
-  {name:'外壁コーキング補修・看板シート張替工事他',pageBreak:false,items:[
-    {name:'外壁コーキング打ち（胴差天端）',qty:1,unit:'式',price:42000,note:'部分補修'},
-    {name:'壁面突出看板インクジェットシート貼',qty:1,unit:'箇所',price:68000,note:'600×1,800mm　材工共'},
-    {name:'壁面看板インクジェットシート貼',qty:1,unit:'箇所',price:15000,note:'600×600mm　材工共'},
-    {name:'既存ボックス板金補修の上　再取付',qty:1,unit:'箇所',price:38000,note:'サッシシャッターボックス　W1,800mm'},
+  {name:'',pageBreak:false,items:[
+    {name:'',qty:'',unit:'',price:'',note:''},
   ]},
 ];
 
@@ -1806,7 +1801,7 @@ document.addEventListener('mousemove',e=>{if(!isResizing)return;const w=Math.max
 document.addEventListener('mouseup',()=>{if(!isResizing)return;isResizing=false;resizer.classList.remove('dragging');document.body.style.cursor='';document.body.style.userSelect='';});
 
 // ── 初期化 ──
-document.getElementById('hakkoDate').value='2026-03-17';
+document.getElementById('hakkoDate').value=new Date().toISOString().slice(0,10);
 // 初期書類種別の状態を同期（見積書モードで起動）
 switchDocType('mitsumori');
 renderEditor();
