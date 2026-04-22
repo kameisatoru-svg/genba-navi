@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>見積書・請求書プレビュー</title>
+<style>
+:root{--navy:#1e2d40;--gold:#c8a96e;--beige:#eeebe5;--border:#ddd;--bg:#f5f4f0;--white:#fff;--text:#111;--sub:#666;--red:#c0392b;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"Meiryo","Yu Gothic",sans-serif;background:var(--bg);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{background:var(--navy);color:#fff;padding:0 16px;height:48px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-title{font-size:14px;font-weight:500;letter-spacing:0.05em;}
+.topbar-actions{display:flex;gap:8px;align-items:center;}
+.btn{padding:6px 16px;border-radius:4px;font-size:12px;cursor:pointer;border:none;font-family:inherit;}
+.btn-outline{background:transparent;border:1px solid rgba(255,255,255,0.4);color:#fff;font-size:11px;}
+.btn-outline:hover{background:rgba(255,255,255,0.1);}
+.btn-gold{background:var(--gold);color:var(--navy);font-weight:700;}
+.btn-gold:hover{background:#d4b97e;}
+.mode-label{font-size:11px;color:rgba(255,255,255,0.6);margin-right:4px;}
+.doctype-toggle{display:inline-flex;background:#2a3f58;border:1px solid rgba(255,255,255,0.25);border-radius:4px;overflow:hidden;}
+.dt-btn{padding:4px 12px;font-size:11px;background:transparent;color:#fff;border:none;cursor:pointer;font-family:inherit;letter-spacing:0.04em;}
+.dt-btn:hover{background:rgba(255,255,255,0.08);}
+.dt-btn.active{background:var(--gold);color:var(--navy);font-weight:700;}
+.mode-select{background:#2a3f58;color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:4px;padding:4px 8px;font-size:11px;cursor:pointer;font-family:inherit;}
+.main{display:flex;flex:1;overflow:hidden;}
+.resizer{width:5px;background:var(--border);cursor:col-resize;flex-shrink:0;transition:background 0.15s;}
+.resizer:hover,.resizer.dragging{background:var(--navy);}
+.editor{width:520px;min-width:320px;max-width:70vw;background:var(--white);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;}
+.editor-head{padding:10px 14px;border-bottom:1px solid var(--border);background:var(--beige);display:flex;align-items:center;justify-content:space-between;}
+.editor-head h2{font-size:12px;color:var(--navy);font-weight:700;letter-spacing:0.06em;}
+.editor-body{flex:1;overflow-y:auto;padding:12px 14px;}
+.fgroup{margin-bottom:10px;}
+.fgroup label{display:block;font-size:11px;color:var(--sub);margin-bottom:3px;font-weight:500;}
+.fgroup input,.fgroup select,.fgroup textarea{width:100%;border:1px solid var(--border);border-radius:3px;padding:5px 8px;font-size:12px;font-family:inherit;color:var(--text);background:#fff;}
+.fgroup input:focus,.fgroup select:focus,.fgroup textarea:focus{outline:none;border-color:var(--navy);}
+.fgroup textarea{resize:vertical;min-height:48px;}
+.fgroup-row{display:flex;gap:8px;}
+.fgroup-row .fgroup{flex:1;}
+.section-sep{border:none;border-top:1px solid var(--border);margin:12px 0 8px;}
+.section-label{font-size:11px;font-weight:700;color:var(--navy);letter-spacing:0.06em;margin-bottom:6px;}
+/* フラット明細テーブル */
+.items-wrap{overflow-x:auto;}
+.items-table{width:100%;min-width:500px;border-collapse:collapse;font-size:11px;table-layout:fixed;}
+.items-table th{background:var(--navy);color:#fff;padding:5px 5px;font-weight:500;white-space:nowrap;}
+.items-table td{border-bottom:1px solid #eee;padding:6px 2px;vertical-align:middle;}
+.items-table td input{width:100%;border:1px solid transparent;border-radius:2px;padding:3px 4px;font-size:11px;font-family:inherit;background:transparent;min-width:0;color:#111;}
+.items-table td input[type=number]{-moz-appearance:textfield;}
+.items-table td input[type=number]::-webkit-inner-spin-button,
+.items-table td input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+.items-table td input:focus{border-color:var(--navy);background:#fff;outline:none;}
+.items-table td input.r{text-align:right;}
+.col-drag{width:18px;padding:0!important;}
+.col-name{width:28%;}
+.col-qty{width:9%;}
+.col-unit{width:8%;}
+.col-price{width:13%;}
+.col-amt{width:13%;}
+.col-note{width:21%;}
+.col-del{width:6%;}
+/* 大項目明細テーブル */
+.groups-wrap{display:flex;flex-direction:column;gap:8px;}
+.group-block{border:1px solid var(--border);border-radius:4px;overflow:hidden;}
+.group-header{display:flex;align-items:center;background:#e8ecf0;padding:5px 8px;gap:6px;}
+.group-header input{flex:1;border:none;background:transparent;font-size:12px;font-weight:700;color:var(--navy);font-family:inherit;outline:none;}
+.group-header input:focus{background:#fff;border-radius:2px;padding:1px 4px;}
+.group-del-btn{background:none;border:none;cursor:pointer;color:#ccc;font-size:12px;padding:2px 4px;}
+.group-del-btn:hover{color:var(--red);}
+.group-items-table{width:100%;min-width:400px;border-collapse:collapse;font-size:11px;table-layout:fixed;}
+.group-items-table th{background:#f0f2f4;color:var(--navy);padding:4px 5px;font-weight:500;font-size:10px;border-bottom:1px solid var(--border);}
+.group-items-table td{border-bottom:1px solid #eee;padding:9px 2px;height:52px;vertical-align:middle;}
+.group-items-table td input{width:100%;border:1px solid transparent;border-radius:2px;padding:3px 4px;font-size:11px;font-family:inherit;background:transparent;min-width:0;color:#111;}
+.group-items-table td input[type=number]{-moz-appearance:textfield;}
+.group-items-table td input[type=number]::-webkit-inner-spin-button,
+.group-items-table td input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+.group-items-table td input:focus{border-color:var(--navy);background:#fff;outline:none;}
+.group-items-table td input.r{text-align:right;}
+.gcol-drag{width:18px;padding:0!important;}
+.gcol-name{width:30%;}
+.gcol-qty{width:10%;}
+.gcol-unit{width:9%;}
+.gcol-price{width:14%;}
+.gcol-amt{width:14%;}
+.gcol-note{width:15%;}
+.gcol-del{width:6%;}
+.group-subtotal{text-align:right;padding:4px 8px;font-size:11px;color:var(--sub);background:#f8f8f6;border-top:1px solid var(--border);}
+.add-item-btn{width:100%;padding:4px;border:none;background:#f0f2f4;font-size:11px;color:var(--sub);cursor:pointer;font-family:inherit;text-align:left;padding-left:10px;}
+.add-item-btn:hover{color:var(--navy);background:#e8ecf0;}
+.add-row-btn{margin-top:6px;width:100%;padding:5px;border:1px dashed var(--border);border-radius:3px;background:transparent;font-size:11px;color:var(--sub);cursor:pointer;font-family:inherit;}
+.add-row-btn:hover{border-color:var(--navy);color:var(--navy);}
+.del-btn{background:none;border:none;cursor:pointer;color:#ccc;font-size:12px;padding:2px 3px;border-radius:2px;}
+.del-btn:hover{color:var(--red);background:#fff0f0;}
+.drag-handle{cursor:grab;color:#ccc;font-size:13px;padding:2px 3px;user-select:none;line-height:1;}
+.drag-handle:hover{color:var(--navy);}
+.drag-handle:active{cursor:grabbing;}
+tr.drag-over td{border-top:2px solid var(--navy)!important;}
+tr.dragging{opacity:0.4;}
+.pb-btn{background:none;border:1px solid #ddd;cursor:pointer;color:#bbb;font-size:9px;padding:2px 4px;border-radius:2px;white-space:nowrap;font-family:inherit;}
+.pb-btn:hover{border-color:var(--navy);color:var(--navy);}
+.pb-btn.on{background:var(--navy);border-color:var(--navy);color:#fff;}
+.pb-row-mark td{border-top:2px dashed var(--navy)!important;position:relative;}
+.pb-row-mark td:first-child::before{content:"── 改ページ ──";position:absolute;top:-10px;left:0;font-size:9px;color:var(--navy);background:#fff;padding:0 4px;letter-spacing:0.05em;}
+.total-box{background:var(--beige);border-radius:4px;padding:8px 12px;margin-top:10px;font-size:12px;}
+.total-row{display:flex;justify-content:space-between;padding:2px 0;color:var(--sub);}
+.total-row.final{font-weight:700;font-size:14px;color:var(--navy);border-top:1px solid var(--border);padding-top:5px;margin-top:3px;}
+.preview{flex:1;overflow:auto;padding:20px;background:#ccc;}
+.preview-inner{transform-origin:top left;}
+.doc-page{width:210mm;min-height:297mm;margin:0 auto;background:#fff;padding:13mm 15mm;font-family:"Meiryo","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;font-size:14px;line-height:1.65;color:#111;box-shadow:0 2px 16px rgba(0,0,0,.18);}
+/* ── ひな形CSS プレビュー内に適用 ── */
+.doc-page :root{--text:#111111;--text-sub:#444444;--white:#ffffff;--band:#555555;--band-dark:#444444;--band-mid:#666666;--even:#f4f4f4;--subtotal-bg:#e8e8e8;--border:#bbbbbb;--border-dark:#888888;--light:#f8f8f8;}
+.doc-page .header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #111;padding-bottom:8px;margin-bottom:10px;}
+.doc-page .header-left{position:relative;display:block;}
+.doc-page .company-name{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:22px;font-weight:700;color:#111;letter-spacing:0.06em;line-height:1.3;}
+.doc-page .company-name .co-prefix{font-size:15px;font-weight:400;letter-spacing:0.1em;}
+.doc-page .company-info{font-size:11.5px;color:#444;margin-top:5px;line-height:1.9;}
+.doc-page .kakuin{width:64px;height:64px;position:absolute;top:6px;right:-11px;}
+.doc-page .doc-title{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:28px;font-weight:700;color:#111;letter-spacing:0.18em;text-align:right;}
+.doc-page .doc-meta{font-size:11.5px;color:#444;text-align:right;margin-top:6px;line-height:2;}
+.doc-page .info-section{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:16px;}
+.doc-page .info-left{flex:1;display:flex;flex-direction:column;gap:8px;}
+.doc-page .client-name{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:21px;font-weight:600;color:#111;border-bottom:2px solid #111;padding-bottom:4px;}
+.doc-page .summary-box{background:#444!important;color:#fff!important;padding:12px 22px;border-radius:3px;text-align:right;flex-shrink:0;}
+.doc-page .summary-box .s-label{font-size:11px;color:#e0e0e0!important;letter-spacing:0.08em;}
+.doc-page .summary-box .total-amount{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:26px;font-weight:700;color:#fff!important;margin-top:2px;letter-spacing:0.04em;}
+.doc-page .summary-box .tax-note{font-size:11px;color:#e0e0e0!important;margin-top:3px;}
+.doc-page .project-band{background:#555!important;border-left:5px solid #111;padding:6px 14px;margin-bottom:6px;font-size:11.5px;color:#fff!important;display:inline-flex;flex-direction:column;gap:3px;align-self:flex-start;}
+.doc-page .band-label{color:#ddd!important;margin-right:4px;}
+.doc-page .section-title{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:13px;font-weight:600;color:#111;border-bottom:2px solid #111;padding-bottom:3px;margin-bottom:6px;letter-spacing:0.08em;}
+.doc-page .estimate-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:4px;border:1px solid #888;}
+.doc-page .estimate-table thead th{background:#555!important;color:#fff!important;padding:6px 8px;font-weight:700;font-size:11.5px;letter-spacing:0.05em;border-right:1px solid #666;}
+.doc-page .estimate-table thead th:first-child{text-align:left;}
+.doc-page .estimate-table thead th:not(:first-child){text-align:right;}
+.doc-page .estimate-table tbody tr{border-bottom:1px solid #bbb;}
+.doc-page .estimate-table tbody tr:nth-child(even){background:#f4f4f4!important;}
+.doc-page .estimate-table tbody td{padding:9px 10px;vertical-align:middle;color:#111;border-right:1px solid #bbb;}
+.doc-page .estimate-table tbody td:first-child{text-align:left;}
+.doc-page .estimate-table tbody td:not(:first-child){text-align:right;}
+.doc-page .estimate-table .subtotal-row td{background:#e8e8e8!important;font-weight:700;font-size:13px;}
+.doc-page .estimate-table .section-header td{background:#444!important;color:#fff!important;font-weight:700;font-size:11.5px;padding:4px 8px;}
+.doc-page .bottom-section{display:flex;gap:14px;align-items:flex-start;margin-top:10px;margin-bottom:10px;}
+.doc-page .note-box{flex:1;border:1px solid #888;border-radius:3px;padding:8px 12px;background:#f8f8f8;font-size:11px;color:#444;line-height:1.8;min-height:80px;}
+.doc-page .note-title{font-size:11.5px;font-weight:700;color:#111;margin-bottom:4px;letter-spacing:0.06em;border-bottom:1px solid #bbb;padding-bottom:4px;}
+.doc-page .totals-wrap{flex-shrink:0;}
+.doc-page .totals-table{width:300px;border-collapse:collapse;font-size:12px;border:1px solid #888;}
+.doc-page .totals-table td{padding:5px 12px;border-bottom:1px solid #bbb;color:#111;}
+.doc-page .totals-table td:last-child{text-align:right;}
+.doc-page .totals-table .t-subtotal td{background:#e8e8e8!important;font-weight:600;}
+.doc-page .totals-table .t-final{background:#444!important;}
+.doc-page .totals-table .t-final td{padding:8px 12px;font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:14px;font-weight:700;color:#fff!important;border-bottom:none;}
+.doc-page .footer{margin-top:10px;border-top:1px solid #888;padding-top:6px;display:flex;justify-content:space-between;font-size:11px;color:#444;}
+.doc-page .validity{font-size:11px;color:#444;text-align:left;margin-bottom:8px;margin-top:4px;}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   スマートフォン対応（768px以下）
+   JS一切変更なし・CSSのみ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width:768px){
+  /* タブバー（スマホのみ表示） */
+  .sp-tabbar{
+    display:flex!important;
+    background:var(--white);
+    border-bottom:2px solid var(--border);
+    flex-shrink:0;
+  }
+  .sp-tab{
+    flex:1;height:48px;display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:600;color:var(--sub);
+    border-bottom:3px solid transparent;cursor:pointer;gap:4px;
+  }
+  .sp-tab.active{color:var(--navy);border-bottom-color:var(--gold);}
+  .sp-tab-num{
+    width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+    background:#e0e0e0;color:#888;
+  }
+  .sp-tab.active .sp-tab-num{background:var(--gold);color:var(--navy);}
+
+  /* レイアウト変更 */
+  .main{flex-direction:column;}
+  .resizer{display:none;}
+
+  /* エディター */
+  .editor{
+    width:100%!important;min-width:0!important;max-width:100%!important;
+    flex-shrink:1;
+  }
+  .editor-body{padding-bottom:72px;}
+
+  /* フォーム入力を大きく */
+  .fgroup input,.fgroup select,.fgroup textarea{
+    font-size:16px!important;padding:8px 10px!important;min-height:44px;
+  }
+  .fgroup textarea{min-height:72px;}
+
+  /* プレビュー：スマホ時は編集パネルの下に配置 */
+  .preview{
+    flex:none!important;
+    padding:12px;
+  }
+
+  /* sp-hidden：スマホで非表示 */
+  .sp-hidden{display:none!important;}
+
+  /* 底部ナビ */
+  .sp-bottom-nav{
+    display:flex!important;
+    position:fixed;bottom:0;left:0;right:0;
+    background:var(--white);border-top:1px solid var(--border);
+    padding:8px 10px;gap:8px;z-index:200;
+  }
+  .sp-nav-btn{
+    flex:1;height:52px;border-radius:6px;font-size:14px;font-weight:700;
+    cursor:pointer;border:none;font-family:inherit;
+  }
+  .sp-nav-back{background:#f0f2f4;color:var(--navy);}
+  .sp-nav-next{background:var(--gold);color:var(--navy);}
+  .sp-nav-print{background:var(--navy);color:#fff;}
+
+  /* スマホ時：エディター/プレビューの表示切替 */
+  .main.sp-show-preview .editor{display:none;}
+  .main.sp-show-preview .preview{display:block!important;}
+  .main:not(.sp-show-preview) .preview{display:none!important;}
+  .main:not(.sp-show-preview) .editor{display:flex;}
+}
+
+/* PC時はタブバー・底部ナビを非表示 */
+@media (min-width:769px){
+  .sp-tabbar{display:none;}
+  .sp-bottom-nav{display:none;}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <span class="topbar-title" id="topbar-title">見積書プレビュー</span>
+  <div class="topbar-actions">
+    <span class="mode-label">書類：</span>
+    <div class="doctype-toggle">
+      <button class="dt-btn active" id="dt-mitsumori" onclick="switchDocType('mitsumori')">見積書</button>
+      <button class="dt-btn" id="dt-seikyu" onclick="switchDocType('seikyu')">請求書</button>
+    </div>
+    <span class="mode-label" style="margin-left:10px;">モード：</span>
+    <select class="mode-select" id="mode-select" onchange="switchMode(this.value)">
+      <option value="flat">フラット（単一明細）</option>
+      <option value="group">大項目・小項目</option>
+      <option value="lump" id="mode-lump" style="display:none;">1式表記</option>
+    </select>
+    <button class="btn btn-gold sp-hidden-sm" onclick="printHTML()">印刷・PDF保存</button>
+  </div>
+</div>
+<!-- スマホ用タブバー -->
+<div class="sp-tabbar" style="display:none">
+  <div class="sp-tab active" id="sp-tab-edit" onclick="spGoTab('edit')">
+    <span class="sp-tab-num">1</span>入力
+  </div>
+  <div class="sp-tab" id="sp-tab-preview" onclick="spGoTab('preview')">
+    <span class="sp-tab-num">2</span>確認
+  </div>
+</div>
+<!-- スマホ用底部ナビ -->
+<div class="sp-bottom-nav" style="display:none" id="sp-bottom-nav">
+  <button class="sp-nav-btn sp-nav-back" id="sp-nav-back" style="display:none" onclick="spGoTab('edit')">◀ 入力</button>
+  <button class="sp-nav-btn sp-nav-next" id="sp-nav-next" onclick="spGoTab('preview')">確認へ ▶</button>
+  <button class="sp-nav-btn sp-nav-print" id="sp-nav-print" style="display:none" onclick="printHTML()">印刷・PDF保存</button>
+</div>
+<div class="main" id="main-area">
+  <div class="editor">
+    <div class="editor-head"><h2>積算編集</h2></div>
+    <div class="editor-body">
+      <div class="fgroup"><label>宛名（会社名）</label><input id="atena" type="text" value="愛の治療院 松村" oninput="render()"></div>
+      <div class="fgroup-row">
+        <div class="fgroup"><label id="label-docNo">見積番号</label><input id="mitsumoriNo" type="text" value="AR-26-XXX-M1" oninput="render()"></div>
+        <div class="fgroup"><label>発行日</label><input id="hakkoDate" type="date" oninput="render()"></div>
+      </div>
+      <div class="fgroup" id="shiharai-wrap" style="display:none;"><label>お支払期限</label><input id="shiharaiDate" type="date" oninput="render()"></div>
+      <div class="fgroup"><label>工事件名</label><input id="kojimei" type="text" value="外壁コーキング補修・看板シート張替工事他" oninput="render()"></div>
+      <div class="fgroup"><label>施工場所</label><input id="seshubasho" type="text" value="大分県別府市" oninput="render()"></div>
+      <div class="fgroup" id="koki-wrap" style="display:none;"><label>工事期間</label><input id="koki" type="text" value="" oninput="render()" placeholder="例：2026/4/22 または 2026/4/1〜2026/4/30"></div>
+      <hr class="section-sep">
+      <div id="items-editor"></div>
+      <div class="total-box" id="total-box"></div>
+      <div id="shokeihi-wrap" style="display:flex;gap:8px;margin-top:8px;align-items:center;">
+        <div class="fgroup" style="flex:1;margin:0;">
+          <label style="font-size:10px;color:var(--sub);">諸経費率（%）</label>
+          <input id="shokeihiRateInput" type="number" value="15" min="0" max="100" step="0.1"
+            style="width:100%;border:1px solid var(--border);border-radius:3px;padding:4px 8px;font-size:12px;font-family:inherit;"
+            oninput="shokeihiRate=parseFloat(this.value)||0;render()">
+        </div>
+        <div class="fgroup" style="flex:2;margin:0;">
+          <label style="font-size:10px;color:var(--sub);">値引き（円）</label>
+          <input id="nebikiInput" type="number" value="0" min="0"
+            style="width:100%;border:1px solid var(--border);border-radius:3px;padding:4px 8px;font-size:12px;font-family:inherit;"
+            oninput="nebiki=parseFloat(this.value)||0;render()">
+        </div>
+      </div>
+      <hr class="section-sep">
+      <div id="bikou-wrap">
+        <div class="section-label">備考欄</div>
+        <div class="fgroup"><textarea id="bikou" rows="3" oninput="render()">・本見積書の有効期限は発行日より30日間とさせていただきます。
+・上記金額は概算であり、現地確認後に変更となる場合があります。</textarea></div>
+      </div>
+    </div>
+  </div>
+  <div class="resizer" id="resizer"></div>
+  <div class="preview" id="preview-area">
+    <div class="preview-inner" id="preview-inner">
+      <div class="doc-page" id="doc-page"></div>
+    </div>
+  </div>
+</div>
+<script>
+const KAKUIN = 'data:image/png;base64,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';
+const TMPL_CSS = `
+  :root {
+    --text:#111111;--text-sub:#444444;--white:#ffffff;
+    --band:#555555;--band-dark:#444444;--band-mid:#666666;
+    --even:#f4f4f4;--subtotal-bg:#e8e8e8;--border:#bbbbbb;
+    --border-dark:#888888;--light:#f8f8f8;
+  }
+  @page{margin:0;size:A4;}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important;}
+  body{font-family:"Meiryo","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;background:#e0e0e0;color:var(--text);font-size:14px;line-height:1.65;}
+  .page{width:210mm;min-height:297mm;margin:0 auto;background:var(--white);padding:13mm 15mm;}
+  @media screen{.page{margin-bottom:24px;box-shadow:0 2px 16px rgba(0,0,0,.18);}}
+  @media print{body{background:#fff;}.page{margin:0;padding:11mm 13mm;box-shadow:none;}}
+  .header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid var(--text);padding-bottom:10px;margin-bottom:14px;}
+  .header-left{position:relative;display:block;}
+  .company-name{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:22px;font-weight:700;color:var(--text);letter-spacing:0.06em;line-height:1.3;}
+  .company-name .co-prefix{font-size:15px;font-weight:400;letter-spacing:0.1em;}
+  .company-info{font-size:11.5px;color:var(--text-sub);margin-top:5px;line-height:1.9;}
+  .kakuin{width:64px;height:64px;position:absolute;top:6px;right:-11px;}
+  .doc-title{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:28px;font-weight:700;color:var(--text);letter-spacing:0.18em;text-align:right;}
+  .doc-meta{font-size:11.5px;color:var(--text-sub);text-align:right;margin-top:6px;line-height:2;}
+  .info-section{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:16px;}
+  .info-left{flex:1;display:flex;flex-direction:column;gap:8px;}
+  .client-name{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:21px;font-weight:600;color:var(--text);border-bottom:2px solid var(--text);padding-bottom:4px;}
+  .summary-box{background:var(--band-dark)!important;color:var(--white)!important;padding:12px 22px;border-radius:3px;text-align:right;flex-shrink:0;}
+  .summary-box .s-label{font-size:11px;color:#e0e0e0!important;letter-spacing:0.08em;}
+  .summary-box .total-amount{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:26px;font-weight:700;color:var(--white)!important;margin-top:2px;letter-spacing:0.04em;}
+  .summary-box .tax-note{font-size:11px;color:#e0e0e0!important;margin-top:3px;}
+  .project-band{background:var(--band)!important;border-left:5px solid var(--text);padding:6px 14px;margin-bottom:6px;font-size:11.5px;color:var(--white)!important;display:inline-flex;flex-direction:column;gap:3px;align-self:flex-start;}
+  .band-label{color:#dddddd!important;margin-right:4px;}
+  .section-title{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:14px;font-weight:600;color:var(--text);border-bottom:2px solid var(--text);padding-bottom:4px;margin-bottom:10px;letter-spacing:0.08em;}
+  .estimate-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:8px;border:1px solid var(--border-dark);}
+  .estimate-table thead th{background:var(--band)!important;color:var(--white)!important;padding:8px 10px;font-weight:700;font-size:12px;letter-spacing:0.05em;border-right:1px solid var(--band-mid);}
+  .estimate-table thead th:first-child{text-align:left;}
+  .estimate-table thead th:not(:first-child){text-align:right;}
+  .estimate-table tbody tr{border-bottom:1px solid var(--border);}
+  .estimate-table tbody tr:nth-child(even){background:var(--even)!important;}
+  .estimate-table tbody td{padding:9px 10px;vertical-align:middle;color:var(--text);border-right:1px solid var(--border);}
+  .estimate-table tbody td:first-child{text-align:left;}
+  .estimate-table tbody td:not(:first-child){text-align:right;}
+  .estimate-table .subtotal-row td{background:var(--subtotal-bg)!important;font-weight:700;font-size:13px;}
+  .bottom-section{display:flex;gap:14px;align-items:flex-start;margin-top:10px;margin-bottom:10px;}
+  .note-box{flex:1;border:1px solid var(--border-dark);border-radius:3px;padding:8px 12px;background:var(--light);font-size:11px;color:var(--text-sub);line-height:1.8;min-height:80px;}
+  .note-title{font-size:11.5px;font-weight:700;color:var(--text);margin-bottom:4px;letter-spacing:0.06em;border-bottom:1px solid var(--border);padding-bottom:4px;}
+  .totals-wrap{flex-shrink:0;}
+  .totals-table{width:300px;border-collapse:collapse;font-size:12px;border:1px solid var(--border-dark);}
+  .totals-table td{padding:5px 12px;border-bottom:1px solid var(--border);color:var(--text);}
+  .totals-table td:last-child{text-align:right;}
+  .totals-table .t-subtotal td{background:var(--subtotal-bg)!important;font-weight:600;}
+  .totals-table .t-final{background:var(--band-dark)!important;}
+  .totals-table .t-final td{padding:8px 12px;font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:14px;font-weight:700;color:var(--white)!important;border-bottom:none;}
+  .footer{margin-top:16px;border-top:1px solid var(--border-dark);padding-top:8px;display:flex;justify-content:space-between;font-size:11px;color:var(--text-sub);}
+  .validity{font-size:11px;color:var(--text-sub);text-align:left;margin-bottom:8px;margin-top:4px;}
+  .page-break{page-break-before:always;}
+  .detail-table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:8px;border:1px solid var(--border-dark);}
+  .detail-table thead th{background:var(--band)!important;color:var(--white)!important;padding:5px 8px;font-weight:700;border-right:1px solid var(--band-mid);}
+  .detail-table thead th:first-child{text-align:left;}
+  .detail-table thead th:not(:first-child){text-align:right;}
+  .detail-table tbody tr{border-bottom:1px solid var(--border);}
+  .detail-table tbody tr:nth-child(even){background:var(--even)!important;}
+  .detail-table tbody td{padding:9px 10px;vertical-align:middle;border-right:1px solid var(--border);}
+  .detail-table tbody td:first-child{text-align:left;}
+  .detail-table tbody td:not(:first-child){text-align:right;}
+  .detail-table .section-header td{background:var(--band-dark)!important;color:var(--white)!important;font-weight:700;font-size:11.5px;padding:4px 8px;}
+  .detail-table .subtotal-row td{background:var(--subtotal-bg)!important;font-weight:700;}
+`;
+
+let mode = 'flat';
+let docType = 'mitsumori'; // 'mitsumori' or 'seikyu'
+let shokeihiRate = 15; // 諸経費率（%）
+let nebiki = 0;        // 値引き額
+
+// ── 書類種別ごとのラベル定義 ──
+const LABELS = {
+  mitsumori: {
+    topbarTitle: '見積書プレビュー',
+    docNoLabel:  '見積番号',
+    docTitle:    '御 見 積 書',
+    docTitleContinue: '御 見 積 書　（続き）',
+    sLabel:      '御 見 積 金 額（税込）',
+    validity:    '下記の通りお見積り申し上げます。何卒よろしくお願いいたします。',
+    sectionTitle:'■ 見積内訳',
+    bikouDefault:'・本見積書の有効期限は発行日より30日間とさせていただきます。\n・上記金額は概算であり、現地確認後に変更となる場合があります。',
+    dateLabel2:  '有効期限',
+  },
+  seikyu: {
+    topbarTitle: '請求書プレビュー',
+    docNoLabel:  '請求番号',
+    docTitle:    '御 請 求 書',
+    docTitleContinue: '御 請 求 書　（続き）',
+    sLabel:      'ご 請 求 金 額（税込）',
+    validity:    '下記の通りご請求申し上げます。何卒よろしくお願いいたします。',
+    sectionTitle:'■ 請求内容',
+    bikouDefault:'',
+    dateLabel2:  'お支払期限',
+  }
+};
+
+// 振込先情報
+const FURIKOMI_HTML = `<div class="bank-box" style="border:1px solid var(--border-dark);border-radius:3px;padding:10px 14px;margin-top:10px;background:var(--light);">
+  <div style="font-size:12.5px;font-weight:700;margin-bottom:6px;letter-spacing:0.06em;border-bottom:1px solid var(--border);padding-bottom:5px;">振 込 先</div>
+  <div style="font-size:12.5px;line-height:2;">
+    大分みらい信用金庫　石垣支店　普通　9151080<br>
+    株式会社アート・レイズ
+    <div style="font-size:11px;margin-top:4px;color:var(--text-sub);">※振込手数料はご負担くださいますようお願いいたします。</div>
+  </div>
+</div>`;
+
+// ── フラット用データ ──
+const flatItems = [
+  {name:'外壁コーキング打ち（胴差天端）',qty:1,unit:'式',price:42000,note:'部分補修',pageBreak:false},
+  {name:'壁面突出看板インクジェットシート貼',qty:1,unit:'箇所',price:68000,note:'600×1,800mm　材工共',pageBreak:false},
+  {name:'壁面看板インクジェットシート貼',qty:1,unit:'箇所',price:15000,note:'600×600mm　材工共',pageBreak:false},
+  {name:'既存ボックス板金補修の上　再取付',qty:1,unit:'箇所',price:38000,note:'サッシシャッターボックス　W1,800mm',pageBreak:false},
+];
+
+// ── グループ用データ ──
+// 1ページ目に追加表示する単一明細（グループモード専用）
+let groupSummaryItems = [];
+
+const groupItems = [
+  {name:'外壁コーキング補修・看板シート張替工事他',pageBreak:false,items:[
+    {name:'外壁コーキング打ち（胴差天端）',qty:1,unit:'式',price:42000,note:'部分補修'},
+    {name:'壁面突出看板インクジェットシート貼',qty:1,unit:'箇所',price:68000,note:'600×1,800mm　材工共'},
+    {name:'壁面看板インクジェットシート貼',qty:1,unit:'箇所',price:15000,note:'600×600mm　材工共'},
+    {name:'既存ボックス板金補修の上　再取付',qty:1,unit:'箇所',price:38000,note:'サッシシャッターボックス　W1,800mm'},
+  ]},
+];
+
+function fmt(n){return '¥'+Math.round(n).toLocaleString();}
+function fmtN(n){return Math.round(n).toLocaleString();}
+function today(){const d=new Date();return d.toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'});}
+function addDays(n){const d=new Date();d.setDate(d.getDate()+n);return d.toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'});}
+
+function switchMode(v){
+  const prev = mode;
+  mode=v;
+  // lumpモードから他モードに切替：自動投入したlumpサンプル行を削除
+  if(prev==='lump' && v!=='lump'){
+    for(let i=groupSummaryItems.length-1; i>=0; i--){
+      if(groupSummaryItems[i]._lumpAuto){
+        groupSummaryItems.splice(i,1);
+      }
+    }
+  }
+  // lumpモード切替時：groupSummaryItemsが空なら工事件名で1行サンプル投入
+  if(v==='lump' && groupSummaryItems.length===0){
+    const kojimei = document.getElementById('kojimei').value || '工事一式';
+    groupSummaryItems.push({name:kojimei, qty:1, unit:'式', price:0, note:'', _lumpAuto:true});
+  }
+  renderEditor();
+  render();
+}
+
+// ── 書類種別切替 ──
+function switchDocType(type){
+  docType = type;
+  const L = LABELS[docType];
+
+  // topbar
+  document.getElementById('topbar-title').textContent = L.topbarTitle;
+  document.getElementById('dt-mitsumori').classList.toggle('active', type==='mitsumori');
+  document.getElementById('dt-seikyu').classList.toggle('active', type==='seikyu');
+
+  // タイトルタグ
+  document.title = L.topbarTitle;
+
+  // 入力ラベル
+  document.getElementById('label-docNo').textContent = L.docNoLabel;
+
+  // 1式表記オプション：請求書時のみ選択可
+  const lumpOpt = document.getElementById('mode-lump');
+  if(lumpOpt){
+    lumpOpt.style.display = (type==='seikyu') ? '' : 'none';
+    // 見積書に戻した時、現在が1式表記ならflatに戻す
+    if(type==='mitsumori' && mode==='lump'){
+      mode = 'flat';
+      document.getElementById('mode-select').value = 'flat';
+    }
+  }
+
+  // 支払期限入力欄：請求書時のみ表示
+  document.getElementById('shiharai-wrap').style.display = (type==='seikyu') ? '' : 'none';
+  // 工事期間入力欄：請求書時のみ表示
+  document.getElementById('koki-wrap').style.display = (type==='seikyu') ? '' : 'none';
+
+  // 諸経費・値引き：見積書時のみ（請求書時は隠す）
+  document.getElementById('shokeihi-wrap').style.display = (type==='mitsumori') ? '' : 'none';
+
+  // 備考欄：見積書時のみ表示（請求書時は振込先が代わりに入る）
+  document.getElementById('bikou-wrap').style.display = (type==='mitsumori') ? '' : 'none';
+
+  // 書類番号のデフォルト切替（ユーザーが編集していない場合のみ）
+  const docNo = document.getElementById('mitsumoriNo');
+  if(docNo.value.match(/^AR-26-XXX-[MS]\d+$/)){
+    docNo.value = docNo.value.replace(/-[MS](\d+)$/, type==='mitsumori' ? '-M$1' : '-S$1');
+  }
+
+  // 備考欄：空なら種別デフォルトを流し込み
+  const bikou = document.getElementById('bikou');
+  if(!bikou.value.trim() || bikou.dataset.auto==='1'){
+    bikou.value = L.bikouDefault;
+    bikou.dataset.auto = '1';
+  }
+
+  // 支払期限のデフォルト（請求書時・未設定なら発行日から月末）
+  const shiharai = document.getElementById('shiharaiDate');
+  if(type==='seikyu' && !shiharai.value){
+    const h = document.getElementById('hakkoDate').value;
+    if(h){
+      const d = new Date(h);
+      // 翌月末
+      const end = new Date(d.getFullYear(), d.getMonth()+2, 0);
+      shiharai.value = end.toISOString().slice(0,10);
+    }
+  }
+
+  render();
+}
+
+// ── 編集パネル描画 ──
+function renderEditor(){
+  const el=document.getElementById('items-editor');
+  if(mode==='flat'){
+    el.innerHTML=`
+      <div class="section-label">明細</div>
+      <div class="items-wrap">
+        <table class="items-table">
+          <thead><tr>
+            <th class="col-drag"></th>
+            <th class="col-name">品名</th>
+            <th class="col-qty">数量</th>
+            <th class="col-unit">単位</th>
+            <th class="col-price">単価</th>
+            <th class="col-amt">金額</th>
+            <th class="col-note">備考</th>
+            <th class="col-del"></th>
+          </tr></thead>
+          <tbody id="flat-body"></tbody>
+        </table>
+      </div>
+      <button class="add-row-btn" onclick="flatAddRow()">＋ 行を追加</button>`;
+    renderFlatRows();
+  } else if(mode==='lump'){
+    // 1式表記モード（請求書専用）：groupモードの「1枚目・単一明細」だけ使う
+    // groupSummaryItemsを流用・groupItemsは使わない
+    el.innerHTML=`
+      <div class="section-label">明細（1式表記）</div>
+      <div class="items-wrap">
+        <table class="items-table">
+          <thead><tr>
+            <th class="col-drag"></th>
+            <th class="col-name">品名</th>
+            <th class="col-qty">数量</th>
+            <th class="col-unit">単位</th>
+            <th class="col-price">単価</th>
+            <th class="col-amt">金額</th>
+            <th class="col-note">備考</th>
+            <th class="col-del"></th>
+          </tr></thead>
+          <tbody id="gsummary-body"></tbody>
+        </table>
+      </div>
+      <button class="add-row-btn" onclick="groupSummaryAddRow()">＋ 行を追加</button>`;
+    renderGroupSummaryRows();
+  } else {
+    el.innerHTML=`
+      <div class="section-label" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>1枚目・単一明細</span>
+      </div>
+      <div class="items-wrap">
+        <table class="items-table">
+          <thead><tr>
+            <th class="col-drag"></th>
+            <th class="col-name">品名</th>
+            <th class="col-qty">数量</th>
+            <th class="col-unit">単位</th>
+            <th class="col-price">単価</th>
+            <th class="col-amt">金額</th>
+            <th class="col-note">備考</th>
+            <th class="col-del"></th>
+          </tr></thead>
+          <tbody id="gsummary-body"></tbody>
+        </table>
+      </div>
+      <button class="add-row-btn" onclick="groupSummaryAddRow()">＋ 行を追加</button>
+      <hr class="section-sep" style="margin:10px 0 8px;">
+      <div class="section-label" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>大項目・小項目</span>
+        <button class="btn btn-outline" style="color:var(--navy);border-color:var(--border);font-size:10px;padding:3px 10px;" onclick="groupAddGroup()">＋ 大項目追加</button>
+      </div>
+      <div class="groups-wrap" id="groups-wrap"></div>`;
+    renderGroupSummaryRows();
+    renderGroupBlocks();
+  }
+}
+
+function renderFlatRows(){
+  const body=document.getElementById('flat-body');
+  if(!body)return;
+  body.innerHTML='';
+  flatItems.forEach((it,i)=>{
+    const tr=document.createElement('tr');
+    if(it.pageBreak) tr.style.cssText='border-top:2px dashed var(--navy);';
+    tr.innerHTML=`
+      <td style="width:18px;padding:2px 0;cursor:grab" class="drag-handle" title="ドラッグで並び替え">⠿</td>
+      <td><input value="${it.name}" oninput="flatItems[${i}].name=this.value;render()" onkeydown="enterNav(event)"></td>
+      <td><input class="r" type="number" value="${it.qty}" oninput="flatItems[${i}].qty=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
+      <td><input value="${it.unit}" oninput="flatItems[${i}].unit=this.value;render()" style="max-width:34px" onkeydown="enterNav(event)"></td>
+      <td><input class="r" type="number" value="${it.price}" oninput="flatItems[${i}].price=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
+      <td><input class="r amt-cell" readonly value="${fmtN((parseFloat(it.qty)||0)*(parseFloat(it.price)||0))}" style="color:var(--sub)"></td>
+      <td><input value="${it.note}" oninput="flatItems[${i}].note=this.value;render()" onkeydown="enterNav(event)"></td>
+      <td style="white-space:nowrap;padding:2px 2px;">
+        <button class="pb-btn${it.pageBreak?' on':''}" title="この行の前で改ページ" onclick="flatTogglePageBreak(${i})">改頁</button>
+        <button class="del-btn" onclick="flatDelRow(${i})">✕</button>
+      </td>`;
+    body.appendChild(tr);
+  });
+  initDragRows(body, ()=>flatItems, arr=>{flatItems.splice(0,flatItems.length,...arr);}, ()=>{renderFlatRows();render();});
+}
+
+// ── 行ドラッグ&ドロップ（共通） ──
+// tbody内のtrにdraggable設定・イベント登録
+function initDragRows(tbody, getArr, setArr, onDone){
+  let dragIdx=null;
+  Array.from(tbody.querySelectorAll('tr')).forEach((tr,i)=>{
+    tr.draggable=true;
+    tr.addEventListener('dragstart',e=>{
+      dragIdx=i;
+      tr.classList.add('dragging');
+      e.dataTransfer.effectAllowed='move';
+    });
+    tr.addEventListener('dragend',()=>{
+      tr.classList.remove('dragging');
+      tbody.querySelectorAll('tr').forEach(r=>r.classList.remove('drag-over'));
+    });
+    tr.addEventListener('dragover',e=>{
+      e.preventDefault();
+      e.dataTransfer.dropEffect='move';
+      tbody.querySelectorAll('tr').forEach(r=>r.classList.remove('drag-over'));
+      if(i!==dragIdx) tr.classList.add('drag-over');
+    });
+    tr.addEventListener('dragleave',()=>tr.classList.remove('drag-over'));
+    tr.addEventListener('drop',e=>{
+      e.preventDefault();
+      tr.classList.remove('drag-over');
+      if(dragIdx===null||dragIdx===i)return;
+      // コピーして操作（元配列への副作用を防ぐ）
+      const arr=[...getArr()];
+      const moved=arr.splice(dragIdx,1)[0];
+      arr.splice(i,0,moved);
+      setArr(arr);
+      dragIdx=null;
+      onDone();
+    });
+  });
+}
+
+// 数量・単価入力時に同行の金額欄を即時更新
+function updateAmt(inputEl){
+  const tr=inputEl.closest('tr');
+  if(!tr)return;
+  const inputs=tr.querySelectorAll('input[type="number"]:not([readonly])');
+  if(inputs.length<2)return;
+  const qty=parseFloat(inputs[0].value)||0;
+  const price=parseFloat(inputs[1].value)||0;
+  const amtCell=tr.querySelector('.amt-cell');
+  if(amtCell) amtCell.value=Math.round(qty*price).toLocaleString();
+}
+
+// Enterキーで同行の次input→行末なら次行の品名にフォーカス移動
+function enterNav(e){
+  if(e.key!=='Enter')return;
+  e.preventDefault();
+  const tr=e.target.closest('tr');
+  if(!tr)return;
+  const inputs=Array.from(tr.querySelectorAll('input:not([readonly])')).filter(el=>el.offsetParent!==null);
+  const idx=inputs.indexOf(e.target);
+  if(idx>=0&&idx<inputs.length-1){
+    // 同行の次へ
+    inputs[idx+1].focus();
+    inputs[idx+1].select();
+  } else {
+    // 行末→次のtrの最初のinputへ
+    const tbody=tr.closest('tbody');
+    if(!tbody)return;
+    const rows=Array.from(tbody.querySelectorAll('tr'));
+    const trIdx=rows.indexOf(tr);
+    for(let ni=trIdx+1;ni<rows.length;ni++){
+      const nextInputs=Array.from(rows[ni].querySelectorAll('input:not([readonly])')).filter(el=>el.offsetParent!==null);
+      if(nextInputs.length>0){
+        nextInputs[0].focus();
+        nextInputs[0].select();
+        return;
+      }
+    }
+  }
+}
+
+function flatTogglePageBreak(i){
+  flatItems[i].pageBreak=!flatItems[i].pageBreak;
+  renderFlatRows();
+  render();
+}
+
+function flatAddRow(){flatItems.push({name:'',qty:'',unit:'',price:'',note:'',pageBreak:false});renderFlatRows();render();}
+
+// ── グループモード：1枚目単一明細 ──
+function renderGroupSummaryRows(){
+  const body=document.getElementById('gsummary-body');
+  if(!body)return;
+  body.innerHTML='';
+  groupSummaryItems.forEach((it,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td style="width:18px;padding:2px 0;cursor:grab" class="drag-handle" title="ドラッグで並び替え">⠿</td>
+      <td><input value="${it.name}" oninput="groupSummaryItems[${i}].name=this.value;render()" onkeydown="enterNav(event)"></td>
+      <td><input class="r" type="number" value="${it.qty}" oninput="groupSummaryItems[${i}].qty=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
+      <td><input value="${it.unit}" oninput="groupSummaryItems[${i}].unit=this.value;render()" style="max-width:34px" onkeydown="enterNav(event)"></td>
+      <td><input class="r" type="number" value="${it.price}" oninput="groupSummaryItems[${i}].price=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
+      <td><input class="r amt-cell" readonly value="${fmtN((parseFloat(it.qty)||0)*(parseFloat(it.price)||0))}" style="color:var(--sub)"></td>
+      <td><input value="${it.note}" oninput="groupSummaryItems[${i}].note=this.value;render()" onkeydown="enterNav(event)"></td>
+      <td><button class="del-btn" onclick="groupSummaryDelRow(${i})">✕</button></td>`;
+    body.appendChild(tr);
+  });
+  initDragRows(body, ()=>groupSummaryItems, arr=>{groupSummaryItems.splice(0,groupSummaryItems.length,...arr);}, ()=>{renderGroupSummaryRows();render();});
+}
+function groupSummaryAddRow(){groupSummaryItems.push({name:'',qty:'',unit:'',price:'',note:''});renderGroupSummaryRows();render();}
+function groupSummaryDelRow(i){groupSummaryItems.splice(i,1);renderGroupSummaryRows();render();}
+function flatDelRow(i){flatItems.splice(i,1);renderFlatRows();render();}
+
+function renderGroupBlocks(){
+  const wrap=document.getElementById('groups-wrap');
+  if(!wrap)return;
+  wrap.innerHTML='';
+  groupItems.forEach((g,gi)=>{
+    const div=document.createElement('div');
+    div.className='group-block';
+    const gSub=g.items.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0),0);
+    let rowsHtml='';
+    g.items.forEach((it,ii)=>{
+      rowsHtml+=`<tr>
+        <td style="width:18px;padding:2px 0;cursor:grab" class="drag-handle" title="ドラッグで並び替え">⠿</td>
+        <td><input value="${it.name}" oninput="groupItems[${gi}].items[${ii}].name=this.value;render()" onkeydown="enterNav(event)"></td>
+        <td><input class="r" type="number" value="${it.qty||''}" oninput="groupItems[${gi}].items[${ii}].qty=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
+        <td><input value="${it.unit||''}" oninput="groupItems[${gi}].items[${ii}].unit=this.value;render()" style="max-width:32px" onkeydown="enterNav(event)"></td>
+        <td><input class="r" type="number" value="${it.price||''}" oninput="groupItems[${gi}].items[${ii}].price=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
+        <td><input class="r amt-cell" readonly value="${fmtN((parseFloat(it.qty)||0)*(parseFloat(it.price)||0))}" style="color:var(--sub)"></td>
+        <td><input value="${it.note}" oninput="groupItems[${gi}].items[${ii}].note=this.value;render()" onkeydown="enterNav(event)"></td>
+        <td><button class="del-btn" onclick="groupDelItem(${gi},${ii})">✕</button></td>
+      </tr>`;
+    });
+    div.innerHTML=`
+      <div class="group-header">
+        <input value="${g.name}" oninput="groupItems[${gi}].name=this.value;render()" placeholder="大項目名">
+        <button class="pb-btn${g.pageBreak?' on':''}" title="この工事の前で改ページ" onclick="groupTogglePageBreak(${gi})">改頁</button>
+        <button class="group-del-btn" onclick="groupDelGroup(${gi})">✕ 削除</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="group-items-table">
+          <thead><tr>
+            <th class="gcol-drag"></th>
+            <th class="gcol-name">品名</th>
+            <th class="gcol-qty">数量</th>
+            <th class="gcol-unit">単位</th>
+            <th class="gcol-price">単価</th>
+            <th class="gcol-amt">金額</th>
+            <th class="gcol-note">備考</th>
+            <th class="gcol-del"></th>
+          </tr></thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+      </div>
+      <button class="add-item-btn" onclick="groupAddItem(${gi})">＋ 小項目追加</button>
+      <div class="group-subtotal">小計：${fmtN(gSub)}</div>`;
+    wrap.appendChild(div);
+    // 小項目ドラッグ登録
+    const gtbody=div.querySelector('tbody');
+    if(gtbody){
+      initDragRows(gtbody,
+        ()=>groupItems[gi].items,
+        arr=>{groupItems[gi].items.splice(0,groupItems[gi].items.length,...arr);},
+        ()=>{renderGroupBlocks();render();}
+      );
+    }
+  });
+}
+
+function groupTogglePageBreak(gi){
+  groupItems[gi].pageBreak=!groupItems[gi].pageBreak;
+  renderGroupBlocks();render();
+}
+function groupAddGroup(){groupItems.push({name:'新規大項目',pageBreak:false,items:[{name:'',qty:1,unit:'㎡',price:0,note:''}]});renderGroupBlocks();render();}
+function groupDelGroup(gi){groupItems.splice(gi,1);renderGroupBlocks();render();}
+function groupAddItem(gi){groupItems[gi].items.push({name:'',qty:'',unit:'',price:'',note:''});renderGroupBlocks();render();}
+function groupDelItem(gi,ii){groupItems[gi].items.splice(ii,1);renderGroupBlocks();render();}
+
+// ── 合計計算 ──
+function calcTotals(){
+  let subtotal=0;
+  if(mode==='flat'){
+    subtotal=flatItems.reduce((s,it)=>s+it.qty*it.price,0);
+  } else if(mode==='lump'){
+    // 1式表記モード：groupSummaryItemsのみ合計（大項目は使わない）
+    groupSummaryItems.forEach(it=>subtotal+=(parseFloat(it.qty)||0)*(parseFloat(it.price)||0));
+  } else {
+    groupItems.forEach(g=>g.items.forEach(it=>subtotal+=(parseFloat(it.qty)||0)*(parseFloat(it.price)||0)));
+    groupSummaryItems.forEach(it=>subtotal+=(parseFloat(it.qty)||0)*(parseFloat(it.price)||0));
+  }
+  // 1式表記（請求書）・請求書の他モード時は諸経費・値引きを適用しない
+  const applyShokeihi = docType==='mitsumori';
+  const shokeihi = applyShokeihi ? Math.round(subtotal*(shokeihiRate/100)) : 0;
+  const nb = applyShokeihi ? nebiki : 0;
+  const zeinuki=subtotal+shokeihi-nb;
+  const tax=Math.round(zeinuki*0.1);
+  const total=zeinuki+tax;
+  return{subtotal,shokeihi,zeinuki,tax,total};
+}
+
+function renderTotalBox(t){
+  const isMits = docType==='mitsumori';
+  const shokeihiRow = isMits ? `<div class="total-row"><span>諸経費（${shokeihiRate}%）</span><span>${fmtN(t.shokeihi)}</span></div>` : '';
+  const nebikiRow = (isMits && nebiki>0) ? `<div class="total-row"><span>値引き</span><span>-${fmtN(nebiki)}</span></div>` : '';
+  document.getElementById('total-box').innerHTML=`
+    <div class="total-row"><span>小計</span><span>${fmtN(t.subtotal)}</span></div>
+    ${shokeihiRow}
+    ${nebikiRow}
+    <div class="total-row"><span>税抜合計</span><span>${fmt(t.zeinuki)}</span></div>
+    <div class="total-row"><span>消費税（10%）</span><span>${fmt(t.tax)}</span></div>
+    <div class="total-row final"><span>税込合計</span><span>${fmt(t.total)}</span></div>`;
+}
+
+// ── プレビュー描画 ──
+function render(){
+  // 前回の追加ページ・改ページ注記をすべて削除
+  document.querySelectorAll('#preview-inner .doc-page:not(#doc-page)').forEach(el=>el.remove());
+  document.querySelectorAll('.next-page-notice').forEach(el=>el.remove());
+  document.querySelectorAll('.group-overflow-page').forEach(el=>el.remove());
+  // 1ページ目のbottom-section表示・to-nextを復元
+  const _bs=document.querySelector('#doc-page .bottom-section');
+  if(_bs) _bs.style.display='';
+  document.querySelectorAll('#doc-page .footer .to-next').forEach(el=>el.remove());
+
+  const t=calcTotals();
+  renderTotalBox(t);
+  const L = LABELS[docType];
+  const atena=document.getElementById('atena').value;
+  const mno=document.getElementById('mitsumoriNo').value;
+  const hdate=document.getElementById('hakkoDate').value
+    ?new Date(document.getElementById('hakkoDate').value).toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'})
+    :today();
+  // 見積：有効期限（発行日＋30日）／ 請求：支払期限（ユーザー入力 or 未入力なら翌月末）
+  let date2 = '';
+  if(docType==='mitsumori'){
+    date2 = document.getElementById('hakkoDate').value
+      ?(()=>{const d=new Date(document.getElementById('hakkoDate').value);d.setDate(d.getDate()+30);return d.toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'});})()
+      :addDays(30);
+  } else {
+    const sv = document.getElementById('shiharaiDate').value;
+    date2 = sv ? new Date(sv).toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'}) : '';
+  }
+  const expDate = date2;
+  const kojimei=document.getElementById('kojimei').value;
+  const seshu=document.getElementById('seshubasho').value;
+  const koki=document.getElementById('koki')?document.getElementById('koki').value:'';
+  const bikou=document.getElementById('bikou').value;
+  const bikouLines=bikou.split('\n').map(l=>`<p style="margin:0">${l}</p>`).join('');
+  // 請求書時は自動で振込先表示（備考の代わり）
+  const isSeikyu = docType==='seikyu';
+
+  let tableHtml='';
+  const hasManualBreak=mode==='flat'&&flatItems.some((it,i)=>i>0&&it.pageBreak);
+  // 請求書時は諸経費・値引き行を出さない
+  const isMitsRender = docType==='mitsumori';
+  const shokeihiTr = isMitsRender ? `<tr class="shokeihi-row"><td colspan="4" style="text-align:right">諸経費（${shokeihiRate}%）</td><td>${fmtN(t.shokeihi)}</td></tr>` : '';
+  const nebikiTr = (isMitsRender && nebiki>0) ? `<tr class="shokeihi-row"><td colspan="4" style="text-align:right">値　引　き</td><td>-${fmtN(nebiki)}</td></tr>` : '';
+
+  if(mode==='lump'){
+    // 1式表記モード：groupSummaryItemsのみ表示（大項目なし）
+    const summaryRows=groupSummaryItems.map(it=>{
+      const q=it.qty!==''?it.qty:'';
+      const p=it.price!==''&&parseFloat(it.price)?fmtN(it.price):'';
+      const a=(it.qty!==''&&it.price!==''&&parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
+      return `<tr>
+        <td>${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+        <td>${q}</td><td>${it.unit||''}</td>
+        <td>${p}</td><td>${a}</td>
+      </tr>`;
+    }).join('');
+    tableHtml=`<table class="estimate-table" id="est-tbl">
+      <thead><tr>
+        <th style="width:42%;text-align:left">工事内容</th>
+        <th style="width:8%">数量</th><th style="width:7%">単位</th>
+        <th style="width:13%">単価</th><th style="width:20%">金額（税抜）</th>
+      </tr></thead>
+      <tbody>
+        ${summaryRows}
+        <tr class="subtotal-row"><td colspan="4" style="text-align:right">小　計</td><td>${fmtN(t.subtotal)}</td></tr>
+      </tbody>
+    </table>`;
+  } else if(mode==='flat'){
+    const rows=flatItems.map((it,i)=>{
+      const pbClass=i>0&&it.pageBreak?' class="pb-row-mark"':'';
+      return `<tr${pbClass}>
+        <td>${it.name}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+        <td>${it.qty}</td><td>${it.unit}</td>
+        <td>${fmtN(it.price)}</td><td>${fmtN(it.qty*it.price)}</td>
+      </tr>`;
+    }).join('');
+    tableHtml=`<table class="estimate-table" id="est-tbl">
+      <thead><tr>
+        <th style="width:42%;text-align:left">工事内容</th>
+        <th style="width:8%">数量</th><th style="width:7%">単位</th>
+        <th style="width:13%">単価</th><th style="width:20%">金額（税抜）</th>
+      </tr></thead>
+      <tbody>
+        ${rows}
+        <tr class="subtotal-row"><td colspan="4" style="text-align:right">小　計</td><td>${fmtN(t.subtotal)}</td></tr>
+        ${shokeihiTr}
+        ${nebikiTr}
+      </tbody>
+    </table>`;
+  } else {
+    // 1ページ目：大項目一覧（1式）＋単一明細
+    const groupRows=groupItems.map(g=>{
+      const gSub=g.items.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0),0);
+      return `<tr>
+        <td>${g.name}</td>
+        <td>1</td><td>式</td>
+        <td></td>
+        <td>${fmtN(gSub)}</td>
+      </tr>`;
+    }).join('');
+    const summaryRows=groupSummaryItems.map(it=>{
+      const q=it.qty!==''?it.qty:'';
+      const p=it.price!==''&&parseFloat(it.price)?fmtN(it.price):'';
+      const a=(it.qty!==''&&it.price!==''&&parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
+      return `<tr>
+        <td>${it.name}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+        <td>${q}</td><td>${it.unit||''}</td>
+        <td>${p}</td><td>${a}</td>
+      </tr>`;
+    }).join('');
+    const sepRow=''; // 区切り行なし・続けて表示
+    tableHtml=`<table class="estimate-table" id="est-tbl">
+      <thead><tr>
+        <th style="width:42%;text-align:left">工事内容</th>
+        <th style="width:8%">数量</th><th style="width:7%">単位</th>
+        <th style="width:13%">単価</th><th style="width:20%">金額（税抜）</th>
+      </tr></thead>
+      <tbody>
+        ${groupRows}
+        ${sepRow}
+        ${summaryRows}
+        <tr class="subtotal-row"><td colspan="4" style="text-align:right">小　計</td><td>${fmtN(t.subtotal)}</td></tr>
+        ${shokeihiTr}
+        ${nebikiTr}
+      </tbody>
+    </table>`;
+  }
+
+  const docMetaHtml = docType==='mitsumori'
+    ? `見積番号：${mno}<br>発行日：${hdate}<br>有効期限：${expDate}`
+    : `請求番号：${mno}<br>発行日：${hdate}${expDate?'<br>お支払期限：'+expDate:''}`;
+
+  const bandHtml = docType==='mitsumori'
+    ? `<div class="project-band">
+          <span><span class="band-label">工事件名：</span>${kojimei}</span>
+          <span><span class="band-label">施工場所：</span>${seshu}</span>
+        </div>`
+    : `<div class="project-band">
+          <span><span class="band-label">工事件名：</span>${kojimei}</span>
+          <span><span class="band-label">施工場所：</span>${seshu}</span>
+          ${koki?'<span><span class="band-label">工事期間：</span>'+koki+'</span>':''}
+        </div>`;
+
+  document.getElementById('doc-page').innerHTML=`
+    <div class="header">
+      <div>
+        <div class="doc-title" style="text-align:left;">${L.docTitle}</div>
+        <div class="doc-meta" style="text-align:left;">${docMetaHtml}</div>
+      </div>
+      <div class="header-left" style="text-align:right;">
+        <div>
+          <div class="company-name"><span class="co-prefix">株式会社</span>アート・レイズ</div>
+          <div class="company-info">〒874-0829　大分県別府市上原町13番25号<br>TEL　0977-21-0603　担当：亀井 悟</div>
+        </div>
+        <img class="kakuin" src="${KAKUIN}" alt="角印">
+      </div>
+    </div>
+    <div class="info-section">
+      <div class="info-left">
+        <div class="client-name">${atena}　御中</div>
+        ${bandHtml}
+      </div>
+      <div class="summary-box">
+        <div class="s-label">${L.sLabel}</div>
+        <div class="total-amount">${fmt(t.total)}</div>
+        <div class="tax-note">消費税（10%）${fmt(t.tax)} 含む</div>
+      </div>
+    </div>
+    <div class="validity">${L.validity}</div>
+    <div class="section-title">${L.sectionTitle}</div>
+    ${tableHtml}
+    <div class="bottom-section">
+      ${isSeikyu
+        ? `<div class="note-box">
+            <div class="note-title">振 込 先</div>
+            <div style="font-size:11.5px;line-height:1.9;color:#111;">
+              大分みらい信用金庫　石垣支店　普通　9151080<br>
+              株式会社アート・レイズ
+              <div style="font-size:10.5px;margin-top:4px;color:#444;">※振込手数料はご負担くださいますようお願いいたします。</div>
+            </div>
+          </div>`
+        : `<div class="note-box">
+            <div class="note-title">備　考</div>
+            ${bikouLines}
+          </div>`}
+      <div class="totals-wrap">
+        <table class="totals-table">
+          <tr class="t-subtotal"><td>税抜合計</td><td>${fmt(t.zeinuki)}</td></tr>
+          <tr><td>消費税（10%）</td><td>${fmt(t.tax)}</td></tr>
+          <tr class="t-final"><td>税込合計</td><td>${fmt(t.total)}</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="footer"><div>株式会社アート・レイズ　© 2026</div></div>`;
+
+  // グループモード：全グループを1つの明細ページに連続表示
+  if(mode==='group'){
+    const kojimei2=document.getElementById('kojimei').value;
+    let allRows='';
+    groupItems.forEach((g,gi)=>{
+      const gSub=g.items.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0),0);
+      // セクションヘッダー行（工事名・黒帯）。改頁フラグはクラスで付与
+      const pbClass=gi>0&&g.pageBreak?' class="group-section-header pb-row-mark"':' class="group-section-header"';
+      allRows+=`<tr${pbClass}><td colspan="5" style="background:#444;color:#fff;font-weight:700;font-size:11.5px;padding:5px 8px;text-align:left;">■ ${g.name}　工事明細</td></tr>`;
+      // 小項目行
+      g.items.forEach(it=>{
+        const amt=(it.qty&&it.price)?fmtN(it.qty*it.price):'';
+        allRows+=`<tr class="group-item-row" data-gi="${gi}">
+          <td>${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+          <td>${it.qty||''}</td><td>${it.unit||''}</td>
+          <td>${(it.price&&it.price!='0'&&it.price!==0)?fmtN(it.price):''}</td>
+          <td>${amt}</td>
+        </tr>`;
+      });
+      // 小計行
+      allRows+=`<tr class="group-subtotal-row"><td colspan="4" style="text-align:right;background:#e8e8e8;font-weight:700;padding:5px 8px;">小　計</td><td style="background:#e8e8e8;font-weight:700;text-align:right;padding:5px 8px;">${fmtN(gSub)}</td></tr>`;
+    });
+    const detailPageHtml=`<div class="doc-page" id="group-detail-page" style="margin-top:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:12px;">
+        <div style="font-family:Yu Mincho,serif;font-size:15px;font-weight:700;color:#111;">工 事 明 細</div>
+        <div style="font-size:11px;color:#666;">${kojimei2}</div>
+      </div>
+      <table class="estimate-table" id="group-detail-tbl" style="width:100%;border-collapse:collapse;border:1px solid #888;">
+        <thead><tr>
+          <th style="width:42%;text-align:left;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;">工事内容</th>
+          <th style="width:8%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">数量</th>
+          <th style="width:7%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">単位</th>
+          <th style="width:13%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">単価</th>
+          <th style="width:20%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">金額（税抜）</th>
+        </tr></thead>
+        <tbody>${allRows}</tbody>
+      </table>
+      <div class="footer" style="margin-top:10px;"><div>株式会社アート・レイズ　© 2026</div></div>
+    </div>`;
+    document.getElementById('preview-inner').insertAdjacentHTML('beforeend', detailPageHtml);
+  }
+
+  adjustRowHeight();
+  // DOM確定後に改ページ処理（2フレーム待ってレイアウト完全確定後に計測）
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      if(mode==='group'){
+        checkAndPaginateGroup();
+      } else if(hasManualBreak){
+        applyManualPageBreaks();
+      } else {
+        checkAndPaginate();
+      }
+      scalePreview();
+    });
+  });
+}
+
+// ── 行高さ設定（最低高さ固定・A4超えは改ページに任せる）──
+const ROW_MIN_H = 52; // px：最低行高さ（備考あり行と同等）
+function adjustRowHeight(){
+  // est-tbl（フラット・グループ1ページ目）+ group-detail-tbl（グループ明細ページ）両方対象
+  ['est-tbl','group-detail-tbl'].forEach(id=>{
+    const tbl=document.getElementById(id);
+    if(!tbl)return;
+    tbl.querySelectorAll('tbody tr.group-item-row, tbody tr:not(.group-section-header):not(.group-subtotal-row):not(.subtotal-row):not(.shokeihi-row)').forEach(el=>el.style.height=ROW_MIN_H+'px');
+    tbl.querySelectorAll('tbody td,thead th').forEach(el=>el.style.padding='9px 10px');
+    tbl.style.fontSize='12.5px';
+  });
+}
+
+// ── 手動改ページ処理 ──
+function applyManualPageBreaks(){
+  // 既存の追加ページ・自動ラベルをリセット
+  document.querySelectorAll('.overflow-page').forEach(el=>el.remove());
+  document.querySelectorAll('.next-page-notice').forEach(el=>el.remove());
+
+  const page=document.getElementById('doc-page');
+  const tbl=document.getElementById('est-tbl');
+  if(!tbl||!page)return;
+
+  const tbody=tbl.querySelector('tbody');
+  if(!tbody)return;
+
+  // pageBreakフラグが立っているインデックスを収集（i>0のもののみ）
+  const breakIndices=flatItems.reduce((acc,it,i)=>{if(i>0&&it.pageBreak)acc.push(i);return acc;},[]);
+  if(breakIndices.length===0)return;
+
+  // 全データ行とfixed行を取得
+  const allRows=Array.from(tbody.querySelectorAll('tr'));
+  const dataRows=allRows.filter(tr=>!tr.classList.contains('subtotal-row')&&!tr.classList.contains('shokeihi-row')&&!tr.classList.contains('next-page-notice'));
+  const fixedRows=allRows.filter(tr=>tr.classList.contains('subtotal-row')||tr.classList.contains('shokeihi-row'));
+
+  const kojimei=document.getElementById('kojimei').value;
+  const mno=document.getElementById('mitsumoriNo').value;
+
+  // 改ページ位置ごとに2ページ目以降を生成
+  // 最初の改ページインデックスで分割
+  const splitIdx=breakIndices[0];
+  const overflowRows=dataRows.slice(splitIdx);
+  if(overflowRows.length===0)return;
+
+  buildPage2(overflowRows, fixedRows, true);
+}
+
+// ── グループモード改ページ処理 ──
+// 手動改頁フラグ＋A4縦横比自動改ページ（明細ページ分割）
+function checkAndPaginateGroup(){
+  // 既存の分割ページを削除してリセット
+  document.querySelectorAll('.group-overflow-page').forEach(el=>el.remove());
+  document.querySelectorAll('.next-page-notice').forEach(el=>el.remove());
+
+  const detailPage=document.getElementById('group-detail-page');
+  const tbl=document.getElementById('group-detail-tbl');
+  if(!detailPage||!tbl)return;
+
+  const mno=document.getElementById('mitsumoriNo').value;
+  const kojimei=document.getElementById('kojimei').value;
+
+  // ページヘッダー高さを取得
+  const pageRect=detailPage.getBoundingClientRect();
+  const tblTop=tbl.getBoundingClientRect().top - pageRect.top;
+  const thead=tbl.querySelector('thead');
+  const theadH=thead?thead.offsetHeight:30;
+  const footer=detailPage.querySelector('.footer');
+  const footerH=footer?footer.offsetHeight+20:40;
+
+  const availH=getA4ContentH() - tblTop - theadH - footerH;
+  if(availH<=0)return;
+
+  const tbody=tbl.querySelector('tbody');
+  if(!tbody)return;
+  const allRows=Array.from(tbody.querySelectorAll('tr'));
+
+  // まず手動改頁フラグ（pb-row-mark）の位置を適用してから
+  // 各ページ内でA4高さを超えたら自動分割
+  // ページ境界インデックスを収集
+  const breakPoints=[];
+
+  // 手動改頁行のインデックス
+  allRows.forEach((tr,i)=>{
+    if(i>0 && tr.classList.contains('pb-row-mark')) breakPoints.push(i);
+  });
+
+  // A4高さで自動分割（手動改頁で区切ったセグメントごとに計測）
+  const autoBreakPoints=[];
+  let segStart=0;
+  const allSegEnds=[...breakPoints, allRows.length];
+
+  allSegEnds.forEach(segEnd=>{
+    let cumH=0;
+    for(let i=segStart;i<segEnd;i++){
+      cumH+=allRows[i].offsetHeight;
+      if(cumH>availH){
+        const bp=Math.max(segStart+1, i);
+        autoBreakPoints.push(bp);
+        cumH=allRows[i].offsetHeight; // 新セグメント開始
+        segStart=bp;
+      }
+    }
+    segStart=segEnd;
+  });
+
+  // 全ての改ページ位置をマージ（重複除去・ソート）
+  const allBreaks=[...new Set([...breakPoints,...autoBreakPoints])].sort((a,b)=>a-b);
+  if(allBreaks.length===0)return;
+
+  // ページに分割してDOMを再構築
+  // まず元のdetailPageのtbodyを1ページ目分だけ残す
+  const firstBreak=allBreaks[0];
+
+  // 1ページ目の末尾に「次ページへ続く」
+  const noticeRow=document.createElement('tr');
+  noticeRow.className='next-page-notice';
+  noticeRow.innerHTML='<td colspan="5" style="text-align:center;padding:5px 8px;font-size:11px;color:#666;background:#f0f2f4;border-top:1px dashed #aaa;font-style:italic;">―　次ページへ続く　―</td>';
+  allRows[firstBreak-1].after(noticeRow);
+
+  // 分割ページを生成
+  const segments=[];
+  let prev=firstBreak;
+  for(let i=1;i<allBreaks.length;i++){
+    segments.push({start:prev, end:allBreaks[i]});
+    prev=allBreaks[i];
+  }
+  segments.push({start:prev, end:allRows.length});
+
+  segments.forEach((seg,si)=>{
+    const overRows=allRows.slice(seg.start, seg.end);
+    if(overRows.length===0)return;
+
+    const pg=document.createElement('div');
+    pg.className='doc-page group-overflow-page';
+    pg.style.marginTop='20px';
+
+    // ヘッダー
+    const hd=document.createElement('div');
+    hd.style.cssText='display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:12px;';
+    hd.innerHTML='<div style="font-family:Yu Mincho,serif;font-size:15px;font-weight:700;color:#111;">工 事 明 細　（続き）</div>'
+      +'<div style="font-size:11px;color:#666;">'+kojimei+'</div>';
+
+    // テーブル
+    const t2=document.createElement('table');
+    t2.className='estimate-table';
+    t2.style.cssText='width:100%;border-collapse:collapse;border:1px solid #888;';
+    t2.innerHTML='<thead><tr>'
+      +'<th style="width:42%;text-align:left;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;">工事内容</th>'
+      +'<th style="width:8%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">数量</th>'
+      +'<th style="width:7%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">単位</th>'
+      +'<th style="width:13%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">単価</th>'
+      +'<th style="width:20%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">金額（税抜）</th>'
+      +'</tr></thead>';
+    const tb2=document.createElement('tbody');
+    overRows.forEach(tr=>{
+      tr.classList.remove('pb-row-mark'); // 2ページ目先頭は破線不要
+      tb2.appendChild(tr);
+    });
+
+    // 最終ページ以外は「次ページへ続く」
+    if(si<segments.length-1){
+      const nr=document.createElement('tr');
+      nr.className='next-page-notice';
+      nr.innerHTML='<td colspan="5" style="text-align:center;padding:5px 8px;font-size:11px;color:#666;background:#f0f2f4;border-top:1px dashed #aaa;font-style:italic;">―　次ページへ続く　―</td>';
+      tb2.appendChild(nr);
+    }
+
+    t2.appendChild(tb2);
+
+    const ft2=document.createElement('div');
+    ft2.className='footer';
+    ft2.style.marginTop='10px';
+    ft2.innerHTML='<div>株式会社アート・レイズ　© 2026</div><div>'+mno+'</div>';
+
+    pg.appendChild(hd);
+    pg.appendChild(t2);
+    pg.appendChild(ft2);
+
+    // group-detail-pageの直後に挿入
+    const ref=document.querySelector('.group-overflow-page:last-of-type')||detailPage;
+    ref.after(pg);
+  });
+}
+
+// ── 自動改ページ処理 ──
+// A4縦横比（297/210）からdoc-pageの実幅を使って動的に高さを算出
+// 横を5%大きく見なすことで印刷時のはみ出しを防ぐ
+function getA4ContentH(){
+  const page=document.getElementById('doc-page');
+  if(!page)return 1031;
+  const pageW=page.offsetWidth;
+  const a4H=Math.round(pageW*(297/(210*1.05)));
+  // padding上下(13mm+13mm=26mm) → 26/210 の比率分を引く
+  const padV=Math.round(pageW*(26/210));
+  return a4H - padV;
+}
+
+function checkAndPaginate(){
+  document.querySelectorAll('.overflow-page').forEach(el=>el.remove());
+  // 「次ページへ続く」行も削除してリセット
+  document.querySelectorAll('.next-page-notice').forEach(el=>el.remove());
+
+  const page=document.getElementById('doc-page');
+  const tbl=document.getElementById('est-tbl');
+  if(!tbl||!page)return;
+
+  const pageRect=page.getBoundingClientRect();
+  const tblTop=tbl.getBoundingClientRect().top - pageRect.top;
+  const thead=tbl.querySelector('thead');
+  const theadH=thead?thead.offsetHeight:30;
+
+  const bottomSection=page.querySelector('.bottom-section');
+  const footer=page.querySelector('.footer');
+  const fixedH=(bottomSection?bottomSection.offsetHeight:0)
+              +(footer?footer.offsetHeight:0)
+              +50;
+
+  const availH=getA4ContentH() - tblTop - theadH - fixedH;
+
+  // レイアウト未確定（tblTopが0）の場合はスキップ
+  if(tblTop<=0||availH<=0)return;
+
+  const tbody=tbl.querySelector('tbody');
+  if(!tbody)return;
+  const allRows=Array.from(tbody.querySelectorAll('tr'));
+  const dataRows=allRows.filter(tr=>!tr.classList.contains('subtotal-row')&&!tr.classList.contains('shokeihi-row'));
+  const fixedRows=allRows.filter(tr=>tr.classList.contains('subtotal-row')||tr.classList.contains('shokeihi-row'));
+
+  let cumH=0;
+  let splitIdx=-1;
+  for(let i=0;i<dataRows.length;i++){
+    cumH+=dataRows[i].offsetHeight;
+    if(cumH>availH){
+      splitIdx=Math.max(0,i-1);
+      break;
+    }
+  }
+  if(splitIdx<0)return;
+
+  // 「次ページへ続く」行を挿入
+  const noticeRow=document.createElement('tr');
+  noticeRow.className='next-page-notice';
+  noticeRow.innerHTML='<td colspan="5" style="text-align:center;padding:6px 10px;font-size:11px;color:#666;background:#f0f2f4;border-top:1px dashed #aaa;font-style:italic;letter-spacing:0.05em;">―　次ページへ続く　―</td>';
+  dataRows[splitIdx].after(noticeRow);
+
+  const overflowRows=dataRows.slice(splitIdx+1);
+  if(overflowRows.length===0)return;
+
+  buildPage2(overflowRows, fixedRows, false);
+}
+
+// ── 2ページ目生成（共通） ──
+// 備考・税込合計は1ページ目に常時表示。
+// 2ページ目には続き明細＋税込合計のみをページ下部に表示。
+function buildPage2(overflowRows, fixedRows, removeNotice){
+  const mno=document.getElementById('mitsumoriNo').value;
+  const kojimei=document.getElementById('kojimei').value;
+  const t=calcTotals();
+
+  // ── 1ページ目はそのまま（bottom-section非表示にしない）──
+  // フッターに「次ページへ続く」を追加（まだなければ）
+  const p1footer=document.querySelector('#doc-page .footer');
+  if(p1footer && !p1footer.querySelector('.to-next')){
+    const tn=document.createElement('span');
+    tn.className='to-next';
+    tn.style.cssText='font-style:italic;color:#888;';
+    tn.textContent='→ 次ページへ続く';
+    p1footer.appendChild(tn);
+  }
+
+  // ── 2ページ目を生成（flex縦積み：明細上・合計下固定）──
+  const page2=document.createElement('div');
+  page2.className='doc-page overflow-page';
+  page2.style.cssText='margin-top:20px;display:flex;flex-direction:column;';
+
+  // 続きヘッダー
+  const header2=document.createElement('div');
+  header2.style.cssText='display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:14px;flex-shrink:0;';
+  header2.innerHTML='<div style="font-family:Yu Mincho,serif;font-size:16px;font-weight:700;color:#111;">'+LABELS[docType].docTitleContinue+'</div>'
+    +'<div style="font-size:11px;color:#666;">'+mno+'　／　工事件名：'+kojimei+'</div>';
+
+  // 続き明細テーブル
+  const p2tbl=document.createElement('table');
+  p2tbl.className='estimate-table';
+  p2tbl.style.cssText='width:100%;border-collapse:collapse;border:1px solid #888;flex-shrink:0;';
+  p2tbl.innerHTML='<thead><tr>'
+    +'<th style="width:42%;text-align:left;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;">工事内容</th>'
+    +'<th style="width:8%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">数量</th>'
+    +'<th style="width:7%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">単位</th>'
+    +'<th style="width:13%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">単価</th>'
+    +'<th style="width:20%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">金額（税抜）</th>'
+    +'</tr></thead>';
+  const p2tbody=document.createElement('tbody');
+  if(removeNotice && overflowRows[0]) overflowRows[0].classList.remove('pb-row-mark');
+  overflowRows.forEach(tr=>p2tbody.appendChild(tr));
+  fixedRows.forEach(tr=>p2tbody.appendChild(tr));
+  p2tbl.appendChild(p2tbody);
+
+  // スペーサー（合計を下に押し下げる）
+  const spacer=document.createElement('div');
+  spacer.style.cssText='flex:1;min-height:20px;';
+
+  // 税込合計のみ（備考なし）をページ下部に表示
+  const totals2=document.createElement('div');
+  totals2.style.cssText='flex-shrink:0;display:flex;justify-content:flex-end;margin-bottom:10px;';
+  totals2.innerHTML=`
+    <table class="totals-table">
+      <tr class="t-subtotal"><td>税抜合計</td><td>${fmt(t.zeinuki)}</td></tr>
+      <tr><td>消費税（10%）</td><td>${fmt(t.tax)}</td></tr>
+      <tr class="t-final"><td>税込合計</td><td>${fmt(t.total)}</td></tr>
+    </table>`;
+
+  // フッター
+  const footer2=document.createElement('div');
+  footer2.className='footer';
+  footer2.style.cssText='flex-shrink:0;';
+  footer2.innerHTML='<div>株式会社アート・レイズ　© 2026</div><div>'+mno+'</div>';
+
+  page2.appendChild(header2);
+  page2.appendChild(p2tbl);
+  page2.appendChild(spacer);
+  page2.appendChild(totals2);
+  page2.appendChild(footer2);
+
+  const firstGroupPage=document.querySelector('#preview-inner .doc-page:not(#doc-page):not(.overflow-page)');
+  if(firstGroupPage){
+    document.getElementById('preview-inner').insertBefore(page2,firstGroupPage);
+  } else {
+    document.getElementById('preview-inner').appendChild(page2);
+  }
+}
+
+function scalePreview(){
+  const area=document.getElementById('preview-area');
+  const inner=document.getElementById('preview-inner');
+  const page=document.getElementById('doc-page');
+  if(!page)return;
+  const PAD=20;
+  const available=area.clientWidth-PAD*2;
+  const scale=Math.min(1,available/794);
+  inner.style.transform=`scale(${scale})`;
+  inner.style.width=(794*scale)+'px';
+  inner.style.marginBottom=`-${(1-scale)*page.offsetHeight}px`;
+}
+
+// ── 生成HTML構築 ──
+function buildDocHTML(){
+  const t=calcTotals();
+  const L = LABELS[docType];
+  const mno=document.getElementById('mitsumoriNo').value;
+  const atena=document.getElementById('atena').value;
+  const kojimei=document.getElementById('kojimei').value;
+  const seshu=document.getElementById('seshubasho').value;
+  const koki=document.getElementById('koki')?document.getElementById('koki').value:'';
+  const bikou=document.getElementById('bikou').value;
+  const hdate=document.getElementById('hakkoDate').value
+    ?new Date(document.getElementById('hakkoDate').value).toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'})
+    :today();
+  let expDate = '';
+  if(docType==='mitsumori'){
+    expDate = document.getElementById('hakkoDate').value
+      ?(()=>{const d=new Date(document.getElementById('hakkoDate').value);d.setDate(d.getDate()+30);return d.toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'});})()
+      :addDays(30);
+  } else {
+    const sv = document.getElementById('shiharaiDate').value;
+    expDate = sv ? new Date(sv).toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'}) : '';
+  }
+  const bikouLines=bikou.split('\n').map(l=>`<p style="margin:0">${l}</p>`).join('');
+  // 請求書時は自動で振込先表示（備考の代わり）
+  const isSeikyuP = docType==='seikyu';
+
+  // 現在のテーブルから調整済みスタイルを取得
+  const tbl=document.getElementById('est-tbl');
+  const tdPadStyle=tbl?tbl.querySelector('tbody td')&&tbl.querySelector('tbody td').style.padding:'';
+  const tblFsStyle=tbl?tbl.style.fontSize:'';
+  const itemCount=mode==='flat'?flatItems.length:groupItems.reduce((s,g)=>s+g.items.length+2,0);
+
+  let tableHtml='';
+  const tdStyle=tdPadStyle?`style="padding:${tdPadStyle};text-align:right"`:`style="text-align:right"`;
+  const tdStyleL=tdPadStyle?`style="padding:${tdPadStyle};text-align:left"`:`style="text-align:left"`;
+  const thStyle=tdPadStyle?`style="padding:${tdPadStyle}"`:'';
+  const tblStyle=tblFsStyle?`style="width:100%;border-collapse:collapse;font-size:${tblFsStyle};margin-bottom:8px;border:1px solid var(--border-dark)"`:'style="width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:8px;border:1px solid var(--border-dark)"';
+  // 請求書時は諸経費・値引き行を出さない
+  const isMitsPrint = docType==='mitsumori';
+  const shokeihiTrP = isMitsPrint ? `<tr class="shokeihi-row"><td colspan="4" style="text-align:right">諸経費（${shokeihiRate}%）</td><td style="text-align:right">${fmtN(t.shokeihi)}</td></tr>` : '';
+  const nebikiTrP = (isMitsPrint && nebiki>0) ? `<tr class="shokeihi-row"><td colspan="4" style="text-align:right">値　引　き</td><td style="text-align:right">-${fmtN(nebiki)}</td></tr>` : '';
+
+  if(mode==='lump'){
+    // 1式表記モード（請求書専用）：groupSummaryItemsのみ表示（大項目なし）
+    const summaryRows=groupSummaryItems.map(it=>{
+      const q=it.qty!==''&&it.qty!=null?it.qty:'';
+      const p=it.price!==''&&parseFloat(it.price)?fmtN(it.price):'';
+      const a=(it.qty!==''&&it.price!==''&&parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
+      return `<tr>
+        <td ${tdStyleL}>${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+        <td ${tdStyle}>${q}</td><td ${tdStyle}>${it.unit||''}</td>
+        <td ${tdStyle}>${p}</td><td ${tdStyle}>${a}</td>
+      </tr>`;
+    }).join('');
+    tableHtml=`<table class="estimate-table" ${tblStyle}>
+      <thead><tr>
+        <th ${thStyle} style="width:42%;text-align:left;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">工事内容</th>
+        <th ${thStyle} style="width:8%;text-align:right;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">数量</th>
+        <th ${thStyle} style="width:7%;text-align:right;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">単位</th>
+        <th ${thStyle} style="width:13%;text-align:right;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">単価</th>
+        <th ${thStyle} style="width:20%;text-align:right;background:var(--band);color:#fff;font-weight:700">金額（税抜）</th>
+      </tr></thead>
+      <tbody>
+        ${summaryRows}
+        <tr class="subtotal-row"><td colspan="4" style="text-align:right">小　計</td><td style="text-align:right">${fmtN(t.subtotal)}</td></tr>
+      </tbody>
+    </table>`;
+  } else if(mode==='flat'){
+    const rows=flatItems.map(it=>{
+      const isEmpty=!it.name&&!it.unit&&(!it.qty||it.qty==0)&&(!it.price||it.price==0);
+      return `<tr>
+        <td ${tdStyleL}>${it.name}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+        <td ${tdStyle}>${isEmpty?'':it.qty}</td><td ${tdStyle}>${it.unit||''}</td>
+        <td ${tdStyle}>${isEmpty||!it.price||it.price==0?'':fmtN(it.price)}</td>
+        <td ${tdStyle}>${isEmpty||!it.qty||!it.price||it.price==0?'':fmtN(it.qty*it.price)}</td>
+      </tr>`;
+    }).join('');
+    tableHtml=`<table class="estimate-table" ${tblStyle}>
+      <thead><tr>
+        <th ${thStyle} style="width:42%;text-align:left;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">工事内容</th>
+        <th ${thStyle} style="width:8%;text-align:right;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">数量</th>
+        <th ${thStyle} style="width:7%;text-align:right;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">単位</th>
+        <th ${thStyle} style="width:13%;text-align:right;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">単価</th>
+        <th ${thStyle} style="width:20%;text-align:right;background:var(--band);color:#fff;font-weight:700">金額（税抜）</th>
+      </tr></thead>
+      <tbody>
+        ${rows}
+        <tr class="subtotal-row"><td colspan="4" style="text-align:right">小　計</td><td style="text-align:right">${fmtN(t.subtotal)}</td></tr>
+        ${shokeihiTrP}
+        ${nebikiTrP}
+      </tbody>
+    </table>`;
+  } else {
+    // 1ページ目：大項目一覧
+    const groupRows=groupItems.map(g=>{
+      const gSub=g.items.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0),0);
+      return `<tr>
+        <td ${tdStyleL}>${g.name}</td>
+        <td ${tdStyle}>1</td><td ${tdStyle}>式</td>
+        <td ${tdStyle}></td>
+        <td ${tdStyle}>${fmtN(gSub)}</td>
+      </tr>`;
+    }).join('');
+    // 空白欄（1ページ目の余白埋め）
+    const summaryRows=groupSummaryItems.map(it=>{
+      const q=it.qty!==''&&it.qty!=null?it.qty:'';
+      const p=it.price!==''&&parseFloat(it.price)?fmtN(it.price):'';
+      const a=(it.qty!==''&&it.price!==''&&parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
+      return `<tr>
+        <td ${tdStyleL}>${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+        <td ${tdStyle}>${q}</td><td ${tdStyle}>${it.unit||''}</td>
+        <td ${tdStyle}>${p}</td><td ${tdStyle}>${a}</td>
+      </tr>`;
+    }).join('');
+    tableHtml=`<table class="estimate-table" ${tblStyle}>
+      <thead><tr>
+        <th ${thStyle} style="width:42%;text-align:left;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">工事内容</th>
+        <th ${thStyle} style="width:8%;text-align:right;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">数量</th>
+        <th ${thStyle} style="width:7%;text-align:right;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">単位</th>
+        <th ${thStyle} style="width:13%;text-align:right;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">単価</th>
+        <th ${thStyle} style="width:20%;text-align:right;background:var(--band);color:#fff;font-weight:700">金額（税抜）</th>
+      </tr></thead>
+      <tbody>
+        ${groupRows}
+        ${summaryRows}
+        <tr class="subtotal-row"><td colspan="4" style="text-align:right">小　計</td><td style="text-align:right">${fmtN(t.subtotal)}</td></tr>
+        ${shokeihiTrP}
+        ${nebikiTrP}
+      </tbody>
+    </table>`;
+  }
+
+  const docMetaHtmlP = docType==='mitsumori'
+    ? `見積番号：${mno}<br>発行日：${hdate}<br>有効期限：${expDate}`
+    : `請求番号：${mno}<br>発行日：${hdate}${expDate?'<br>お支払期限：'+expDate:''}`;
+
+  const bandHtmlP = docType==='mitsumori'
+    ? `<div class="project-band">
+        <span><span class="band-label">工事件名：</span>${kojimei}</span>
+        <span><span class="band-label">施工場所：</span>${seshu}</span>
+      </div>`
+    : `<div class="project-band">
+        <span><span class="band-label">工事件名：</span>${kojimei}</span>
+        <span><span class="band-label">施工場所：</span>${seshu}</span>
+        ${koki?'<span><span class="band-label">工事期間：</span>'+koki+'</span>':''}
+      </div>`;
+
+  return `<!DOCTYPE html>
+<html lang="ja"><head><meta charset="UTF-8"><title>${L.topbarTitle}_${mno}</title>
+<style>${TMPL_CSS}
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   スマートフォン対応（768px以下）
+   JS一切変更なし・CSSのみ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width:768px){
+  /* タブバー（スマホのみ表示） */
+  .sp-tabbar{
+    display:flex!important;
+    background:var(--white);
+    border-bottom:2px solid var(--border);
+    flex-shrink:0;
+  }
+  .sp-tab{
+    flex:1;height:48px;display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:600;color:var(--sub);
+    border-bottom:3px solid transparent;cursor:pointer;gap:4px;
+  }
+  .sp-tab.active{color:var(--navy);border-bottom-color:var(--gold);}
+  .sp-tab-num{
+    width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+    background:#e0e0e0;color:#888;
+  }
+  .sp-tab.active .sp-tab-num{background:var(--gold);color:var(--navy);}
+
+  /* レイアウト変更 */
+  .main{flex-direction:column;}
+  .resizer{display:none;}
+
+  /* エディター */
+  .editor{
+    width:100%!important;min-width:0!important;max-width:100%!important;
+    flex-shrink:1;
+  }
+  .editor-body{padding-bottom:72px;}
+
+  /* フォーム入力を大きく */
+  .fgroup input,.fgroup select,.fgroup textarea{
+    font-size:16px!important;padding:8px 10px!important;min-height:44px;
+  }
+  .fgroup textarea{min-height:72px;}
+
+  /* プレビュー：スマホ時は編集パネルの下に配置 */
+  .preview{
+    flex:none!important;
+    padding:12px;
+  }
+
+  /* sp-hidden：スマホで非表示 */
+  .sp-hidden{display:none!important;}
+
+  /* 底部ナビ */
+  .sp-bottom-nav{
+    display:flex!important;
+    position:fixed;bottom:0;left:0;right:0;
+    background:var(--white);border-top:1px solid var(--border);
+    padding:8px 10px;gap:8px;z-index:200;
+  }
+  .sp-nav-btn{
+    flex:1;height:52px;border-radius:6px;font-size:14px;font-weight:700;
+    cursor:pointer;border:none;font-family:inherit;
+  }
+  .sp-nav-back{background:#f0f2f4;color:var(--navy);}
+  .sp-nav-next{background:var(--gold);color:var(--navy);}
+  .sp-nav-print{background:var(--navy);color:#fff;}
+
+  /* スマホ時：エディター/プレビューの表示切替 */
+  .main.sp-show-preview .editor{display:none;}
+  .main.sp-show-preview .preview{display:block!important;}
+  .main:not(.sp-show-preview) .preview{display:none!important;}
+  .main:not(.sp-show-preview) .editor{display:flex;}
+}
+
+/* PC時はタブバー・底部ナビを非表示 */
+@media (min-width:769px){
+  .sp-tabbar{display:none;}
+  .sp-bottom-nav{display:none;}
+}
+</style>
+</head><body>
+<div class="page">
+  <div class="header">
+    <div>
+      <div class="doc-title" style="text-align:left;">${L.docTitle}</div>
+      <div class="doc-meta" style="text-align:left;">${docMetaHtmlP}</div>
+    </div>
+    <div class="header-left" style="text-align:right;">
+      <div>
+        <div class="company-name"><span class="co-prefix">株式会社</span>アート・レイズ</div>
+        <div class="company-info">〒874-0829　大分県別府市上原町13番25号<br>TEL　0977-21-0603　担当：亀井 悟</div>
+      </div>
+      <img class="kakuin" src="${KAKUIN}" alt="角印">
+    </div>
+  </div>
+  <div class="info-section">
+    <div class="info-left">
+      <div class="client-name">${atena}　御中</div>
+      ${bandHtmlP}
+    </div>
+    <div class="summary-box">
+      <div class="s-label">${L.sLabel}</div>
+      <div class="total-amount">${fmt(t.total)}</div>
+      <div class="tax-note">消費税（10%）${fmt(t.tax)} 含む</div>
+    </div>
+  </div>
+  <div class="validity">${L.validity}</div>
+  <div class="section-title">${L.sectionTitle}</div>
+  ${tableHtml}
+  <div class="bottom-section">
+    ${isSeikyuP
+      ? `<div class="note-box">
+          <div class="note-title">振 込 先</div>
+          <div style="font-size:11.5px;line-height:1.9;color:#111;">
+            大分みらい信用金庫　石垣支店　普通　9151080<br>
+            株式会社アート・レイズ
+            <div style="font-size:10.5px;margin-top:4px;color:#444;">※振込手数料はご負担くださいますようお願いいたします。</div>
+          </div>
+        </div>`
+      : `<div class="note-box">
+          <div class="note-title">備　考</div>
+          ${bikouLines}
+        </div>`}
+    <div class="totals-wrap">
+      <table class="totals-table">
+        <tr class="t-subtotal"><td>税抜合計</td><td>${fmt(t.zeinuki)}</td></tr>
+        <tr><td>消費税（10%）</td><td>${fmt(t.tax)}</td></tr>
+        <tr class="t-final"><td>税込合計</td><td>${fmt(t.total)}</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="footer"><div>株式会社アート・レイズ　© 2026</div></div>
+</div>
+${(()=>{
+  if(mode!=='group')return '';
+  // 工種ごとに1ページ発行（改頁を確実にするため.page page-breakを個別に生成）
+  return groupItems.map((g,gi)=>{
+    const gSub=g.items.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0),0);
+    let rows='';
+    rows+=`<tr style="background:#444;color:#fff;font-weight:700;font-size:11.5px;">
+      <td colspan="5" style="padding:5px 8px;text-align:left;">■ ${g.name}　工事明細</td>
+    </tr>`;
+    g.items.forEach(it=>{
+      const amt=(it.qty&&it.price&&it.price!='0'&&it.price!==0)?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
+      rows+=`<tr>
+        <td style="text-align:left;">${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+        <td style="text-align:right;">${it.qty||''}</td>
+        <td style="text-align:right;">${it.unit||''}</td>
+        <td style="text-align:right;">${(it.price&&it.price!='0'&&it.price!==0)?fmtN(it.price):''}</td>
+        <td style="text-align:right;">${amt}</td>
+      </tr>`;
+    });
+    rows+=`<tr class="subtotal-row">
+      <td colspan="4" style="text-align:right;background:#e8e8e8;font-weight:700;">小　計</td>
+      <td style="text-align:right;background:#e8e8e8;font-weight:700;">${fmtN(gSub)}</td>
+    </tr>`;
+    return `<div class="page page-break" style="page-break-before:always;break-before:page;">
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:12px;">
+        <div style="font-family:'Yu Mincho',serif;font-size:15px;font-weight:700;color:#111;">工 事 明 細</div>
+        <div style="font-size:11px;color:#666;">${kojimei}</div>
+      </div>
+      <table class="detail-table" style="width:100%;border-collapse:collapse;border:1px solid #888;">
+        <thead><tr>
+          <th style="width:42%;text-align:left;background:#555;color:#fff;padding:6px 8px;">工事内容</th>
+          <th style="width:8%;background:#555;color:#fff;padding:6px 8px;text-align:right;">数量</th>
+          <th style="width:7%;background:#555;color:#fff;padding:6px 8px;text-align:right;">単位</th>
+          <th style="width:13%;background:#555;color:#fff;padding:6px 8px;text-align:right;">単価</th>
+          <th style="width:20%;background:#555;color:#fff;padding:6px 8px;text-align:right;">金額（税抜）</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="footer" style="margin-top:10px;border-top:1px solid #888;padding-top:6px;display:flex;justify-content:space-between;font-size:11px;color:#666;">
+        <div>株式会社アート・レイズ　© 2026</div>
+      </div>
+    </div>`;
+  }).join('');
+})()}
+ADJSCRIPT_START
+window.addEventListener('load',function(){
+  var ROW_MIN_H=52;
+  document.querySelectorAll('.page').forEach(function(page){
+    var tbl=page.querySelector('table.estimate-table,table.detail-table');
+    if(!tbl)return;
+    tbl.querySelectorAll('tbody tr:not(.subtotal-row):not(.shokeihi-row):not(.group-section-header):not(.group-subtotal-row)').forEach(function(tr){tr.style.height=ROW_MIN_H+'px';});
+    tbl.querySelectorAll('tbody td,thead th').forEach(function(el){el.style.padding='9px 10px';});
+    tbl.style.fontSize='12.5px';
+  });
+});
+ADJSCRIPT_END
+</body></html>`;
+}
+
+function printHTML(){
+  let html=buildDocHTML();
+  // プレースホルダーを実際のscriptタグに置換（テンプレートリテラル内でのscriptタグ問題を回避）
+  const adjScript='<script>'+html.split('ADJSCRIPT_START')[1].split('ADJSCRIPT_END')[0]+'<\/script>';
+  html=html.replace(/ADJSCRIPT_START[\s\S]*?ADJSCRIPT_END/,adjScript);
+  // Blob URLをaタグでダウンロード→Chromeで開く→Ctrl+P
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.target='_blank';
+  a.rel='noopener';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+}
+
+// ── リサイザー ──
+const resizer=document.getElementById('resizer');
+const editor=document.querySelector('.editor');
+let isResizing=false,startX=0,startW=0;
+resizer.addEventListener('mousedown',e=>{isResizing=true;startX=e.clientX;startW=editor.offsetWidth;resizer.classList.add('dragging');document.body.style.cursor='col-resize';document.body.style.userSelect='none';});
+document.addEventListener('mousemove',e=>{if(!isResizing)return;const w=Math.max(320,Math.min(window.innerWidth*0.7,startW+(e.clientX-startX)));editor.style.width=w+'px';scalePreview();});
+document.addEventListener('mouseup',()=>{if(!isResizing)return;isResizing=false;resizer.classList.remove('dragging');document.body.style.cursor='';document.body.style.userSelect='';});
+
+// ── 初期化 ──
+document.getElementById('hakkoDate').value='2026-03-17';
+// 初期書類種別の状態を同期（見積書モードで起動）
+switchDocType('mitsumori');
+renderEditor();
+render();
+window.addEventListener('resize',scalePreview);
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// スマホ用タブ切替（JSロジック一切変更なし）
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function spGoTab(tab){
+  const main=document.getElementById('main-area');
+  const tabEdit=document.getElementById('sp-tab-edit');
+  const tabPv=document.getElementById('sp-tab-preview');
+  const navBack=document.getElementById('sp-nav-back');
+  const navNext=document.getElementById('sp-nav-next');
+  const navPrint=document.getElementById('sp-nav-print');
+  if(tab==='preview'){
+    // 確認タブ：render()してからプレビュー表示
+    render();
+    main.classList.add('sp-show-preview');
+    tabEdit.classList.remove('active');
+    tabPv.classList.add('active');
+    navBack.style.display='';
+    navNext.style.display='none';
+    navPrint.style.display='';
+  } else {
+    main.classList.remove('sp-show-preview');
+    tabEdit.classList.add('active');
+    tabPv.classList.remove('active');
+    navBack.style.display='none';
+    navNext.style.display='';
+    navPrint.style.display='none';
+  }
+}
+
+</script>
+</body>
+</html>
