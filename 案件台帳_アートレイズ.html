@@ -109,8 +109,31 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 .card-toggle{font-size:14px;opacity:0.4;color:var(--text-sub);transition:transform 0.2s;flex-shrink:0;}
 .card.open .card-toggle{transform:rotate(180deg);opacity:0.7;}
 .card.open{box-shadow:0 4px 16px rgba(30,45,64,0.12);}
-.card-body{display:none;padding:16px 20px;background:#fbfaf8;}
+.card-body{display:none;padding:12px;background:#fbfaf8;}
 .card.open .card-body{display:block;}
+/* ★ C-4 改修（2026/4/23）：案件カード展開部分を nav-list 化 + 2階層折りたたみ */
+/* カード内の nav-list は背景透過・影なし（カードに埋め込まれるため） */
+.card .nav-list{box-shadow:none;border-radius:10px;border:1px solid rgba(30,45,64,0.08);margin-bottom:0;}
+.card .nav-list-item{min-height:58px;padding:12px 14px;cursor:pointer;}
+.card .nav-list-item__title{font-size:14px;}
+.card .nav-list-item__desc{font-size:11px;}
+.card .nav-list-item__value{font-size:13px;font-weight:700;color:var(--navy);margin-right:4px;}
+.card .nav-list-item__arrow{font-size:14px;transition:transform 0.2s;}
+.card .nav-list-item.nav-expand.open .nav-list-item__arrow{transform:rotate(90deg);opacity:0.9;}
+.card .nav-list-item.nav-expand.open{background:#f5f2ec;border-bottom:1px solid rgba(200,169,110,0.3);}
+.card .nav-list-item.nav-expand.open .nav-list-item__title{color:var(--navy);}
+/* 2階層目（展開エリア） */
+.nav-expand-body{
+  display:none;
+  padding:14px 16px 16px;
+  background:#fff;
+  border-bottom:1px solid rgba(30,45,64,0.06);
+  animation:navExpandFade 0.2s ease-out;
+}
+.nav-list-item.nav-expand.open + .nav-expand-body{display:block;}
+@keyframes navExpandFade{from{opacity:0;}to{opacity:1;}}
+/* 展開が空な時の案内 */
+.empty-hint{font-size:12px;color:#999;padding:6px 0;}
 .badge{
   padding:5px 0;border-radius:12px;font-size:11px;font-weight:700;
   white-space:nowrap;flex-shrink:0;letter-spacing:0.02em;
@@ -423,17 +446,57 @@ function renderAnken(){
 }
 function setAnkenStatus(s){ankenStatusFilter=s;renderAnken();closeFilterSheet();}
 function toggleCard(h){h.closest('.card').classList.toggle('open');}
+// ★ C-4: nav-list-item の個別展開
+function toggleNavItem(el){
+  el.classList.toggle('open');
+}
 
 function buildAnkenCard(p){
   const mAmt=fmtYen(p.見積?.見積金額);
   const rAmt=p.請求?.length?fmtYen(p.請求.reduce((s,r)=>s+Number(r.請求金額||0),0)):'-';
+  const cAmtTotal=(p.注文書||[]).filter(c=>c.業者名||c.注文番号).reduce((s,c)=>s+Number(c.注文金額||0),0);
+  const cAmtStr=cAmtTotal?fmtYen(cAmtTotal):'-';
+  const chumonCount=(p.注文書||[]).filter(c=>c.業者名||c.注文番号).length;
+  const seikyuCount=(p.請求||[]).length;
+  const minyukinCount=(p.請求||[]).filter(r=>r.入金状況!=='nyukin').length;
   const g=p.原価||{};
   const genkaTotal=(g.労務費||0)+(g.材料費||0)+(g.外注費||0)+(g.経費||0);
   const uriage=(p.請求||[]).reduce((s,r)=>s+Number(r.請求金額||0),0)||Number(p.見積?.見積金額||0);
   const arariRate=uriage&&genkaTotal?Math.round((1-genkaTotal/uriage)*100):null;
   const rateColor=arariRate===null?'#999':arariRate>=80?'#1a7a30':arariRate>=60?'#d97706':'#dc2626';
+  const keiyakuStatus=p.契約書?.ステータス||'未締結';
+  const keiyakuColor=keiyakuStatus==='締結済み'?'#1a7a30':'#d97706';
+  const safeId=p.案件番号.replace(/[^a-zA-Z0-9]/g,'-');
 
-  const seikyuHtml=(p.請求||[]).map(r=>{
+  // ── 詳細セクションHTML生成 ──
+  const detailBasic=`
+    <div class="info-grid">
+      <div class="info-item"><span class="info-label">法人名</span><span class="info-value">${p.法人名||'-'}</span></div>
+      <div class="info-item"><span class="info-label">代表者</span><span class="info-value">${p.代表者||'-'}</span></div>
+      <div class="info-item"><span class="info-label">施工場所</span><span class="info-value">${p.施工場所||'-'}</span></div>
+      ${p.元請フラグ?`<div class="info-item"><span class="info-label">元請</span><span class="info-value" style="color:#b45309;">${p.元請名||'-'}</span></div>`:''}
+    </div>
+    ${p.備考?`<div class="note-box"><div class="note-label">📝 備考</div>${p.備考}</div>`:''}
+    <div style="margin-top:10px;">${driveTag(p.driveUrl)}</div>`;
+
+  const detailMitsumori=`
+    <div class="info-grid">
+      <div class="info-item"><span class="info-label">見積番号</span><span class="info-value">${p.見積?.見積番号||'-'}</span></div>
+      <div class="info-item"><span class="info-label">見積日</span><span class="info-value">${fmtDate(p.見積?.見積日)}</span></div>
+      <div class="info-item"><span class="info-label">見積金額（税込）</span><span class="info-value amount">${mAmt}</span></div>
+    </div>
+    ${p.見積?.備考?`<div class="note-box"><div class="note-label">備考</div>${p.見積.備考}</div>`:''}
+    <div style="margin-top:10px;">${pdfTag(p.見積?.PDF,'見積書PDF')}</div>
+    ${(p.見積?.明細||[]).length ? `
+      <button class="meisai-toggle" onclick="toggleMeisai('m-meisai-${safeId}', this)">▶ 明細を表示</button>
+      <div class="meisai-wrap" id="m-meisai-${safeId}">
+        <table class="meisai-table">
+          <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">単価</th><th class="right">金額（税抜）</th></tr></thead>
+          <tbody>${(p.見積.明細||[]).map(m=>`<tr><td>${m.工事内容||'-'}</td><td class="right">${m.数量||'-'}</td><td>${m.単位||''}</td><td class="right">${m.単価?'¥'+Number(m.単価).toLocaleString():'-'}</td><td class="right">¥${Number(m.金額税抜||0).toLocaleString()}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>` : ''}`;
+
+  const detailSeikyu=(p.請求||[]).map(r=>{
     const isNyukin=r.入金状況==='nyukin';
     return`<div class="sub-card">
       <div class="sub-card-header"><span class="sub-id">${r.請求番号||'-'}</span><span class="badge ${isNyukin?'b-入金済み':'b-未入金'}">${isNyukin?'入金済み':'未入金'}</span></div>
@@ -445,8 +508,8 @@ function buildAnkenCard(p){
       </div>
       <div>${pdfTag(r.PDF,'請求書PDF')}</div>
       ${(r.明細||[]).length ? `
-        <button class="meisai-toggle" onclick="toggleMeisai('r-meisai-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}-${r.請求番号?.replace(/[^a-zA-Z0-9]/g,'-')||'x'}', this)">▶ 明細を表示</button>
-        <div class="meisai-wrap" id="r-meisai-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}-${r.請求番号?.replace(/[^a-zA-Z0-9]/g,'-')||'x'}">
+        <button class="meisai-toggle" onclick="toggleMeisai('r-meisai-${safeId}-${r.請求番号?.replace(/[^a-zA-Z0-9]/g,'-')||'x'}', this)">▶ 明細を表示</button>
+        <div class="meisai-wrap" id="r-meisai-${safeId}-${r.請求番号?.replace(/[^a-zA-Z0-9]/g,'-')||'x'}">
           <table class="meisai-table">
             <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">金額（税抜）</th></tr></thead>
             <tbody>${(r.明細||[]).map(m=>`<tr><td>${m.工事内容||'-'}</td><td class="right">${m.数量||'-'}</td><td>${m.単位||''}</td><td class="right">¥${Number(m.金額税抜||0).toLocaleString()}</td></tr>`).join('')}</tbody>
@@ -454,9 +517,9 @@ function buildAnkenCard(p){
           ${r.税込合計?`<table class="totals-table"><tr><td>税抜合計</td><td>¥${Number(r.税抜合計||0).toLocaleString()}</td></tr><tr><td>消費税（10%）</td><td>¥${Number(r.消費税||0).toLocaleString()}</td></tr><tr><td>税込合計</td><td>¥${Number(r.税込合計||0).toLocaleString()}</td></tr></table>`:''}
         </div>` : ''}
     </div>`;
-  }).join('')||'<div style="font-size:12px;color:#999;padding:4px 0;">請求書なし</div>';
+  }).join('')||'<div class="empty-hint">請求書なし</div>';
 
-  const chumonHtml=(p.注文書||[]).filter(c=>c.業者名||c.注文番号).map(c=>`
+  const detailChumon=(p.注文書||[]).filter(c=>c.業者名||c.注文番号).map(c=>`
     <div class="sub-card">
       <div class="sub-card-header"><span class="sub-id">${c.注文番号||'-'}</span><span style="font-size:12px;color:#555;">${c.業者名||'-'}</span></div>
       <div class="info-grid">
@@ -464,7 +527,15 @@ function buildAnkenCard(p){
         <div class="info-item"><span class="info-label">注文日</span><span class="info-value">${fmtDate(c.注文日)}</span></div>
       </div>
       <div>${pdfTag(c.PDF,'注文書PDF')}</div>
-    </div>`).join('')||'<div style="font-size:12px;color:#999;padding:4px 0;">注文書なし</div>';
+    </div>`).join('')||'<div class="empty-hint">注文書なし</div>';
+
+  const detailKeiyaku=`
+    <div class="info-grid">
+      <div class="info-item"><span class="info-label">契約番号</span><span class="info-value">${p.契約書?.契約番号||'-'}</span></div>
+      <div class="info-item"><span class="info-label">契約日</span><span class="info-value">${fmtDate(p.契約書?.契約日)}</span></div>
+      <div class="info-item"><span class="info-label">契約金額</span><span class="info-value amount">${fmtYen(p.契約書?.契約金額)}</span></div>
+    </div>
+    <div style="margin-top:10px;">${pdfTag(p.契約書?.PDF,'契約書PDF')}</div>`;
 
   const genkaBarHtml=genkaTotal>0?(()=>{
     const colors=['#3b82f6','#10b981','#f59e0b','#ef4444'];
@@ -472,8 +543,20 @@ function buildAnkenCard(p){
     const bars=items.map(([k,v,c])=>v?`<div class="genka-bar-fill" style="width:${Math.round(v/genkaTotal*100)}%;background:${c};"></div>`:'').join('');
     const legend=items.map(([k,v,c])=>v?`<span><span class="genka-dot" style="background:${c};"></span>${k} ${fmtYen(v)}</span>`:'').join('');
     return`<div class="genka-bar">${bars}</div><div class="genka-legend">${legend}</div>`;
-  })():'<div style="font-size:12px;color:#999;">原価未入力</div>';
+  })():'<div class="empty-hint">原価未入力</div>';
 
+  const detailGenka=`
+    <div class="info-grid">
+      <div class="info-item"><span class="info-label">労務費</span><span class="info-value">${fmtYen(g.労務費||null)}</span></div>
+      <div class="info-item"><span class="info-label">材料費</span><span class="info-value">${fmtYen(g.材料費||null)}</span></div>
+      <div class="info-item"><span class="info-label">外注費</span><span class="info-value">${fmtYen(g.外注費||null)}</span></div>
+      <div class="info-item"><span class="info-label">経費</span><span class="info-value">${fmtYen(g.経費||null)}</span></div>
+      <div class="info-item"><span class="info-label">原価合計</span><span class="info-value minyukin">${fmtYen(genkaTotal||null)}</span></div>
+      <div class="info-item"><span class="info-label">粗利</span><span class="info-value nyukin">${uriage&&genkaTotal?fmtYen(uriage-genkaTotal):'-'}</span></div>
+    </div>
+    ${genkaBarHtml}`;
+
+  // ── カード全体 ──
   return`
   <div class="card status-${p.ステータス||'default'}">
     <div class="card-header" onclick="toggleCard(this)">
@@ -485,74 +568,82 @@ function buildAnkenCard(p){
       <span class="card-toggle">▼</span>
     </div>
     <div class="card-body">
-      <div class="detail-section">
-        <div class="detail-section-header"><span style="display:flex;align-items:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="10" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>基本情報</span>${p.元請フラグ?`<span style="color:#b45309;font-size:11px;">元請：${p.元請名}</span>`:''}</div>
-        <div class="detail-section-body">
-          <div class="info-grid">
-            <div class="info-item"><span class="info-label">法人名</span><span class="info-value">${p.法人名||'-'}</span></div>
-            <div class="info-item"><span class="info-label">代表者</span><span class="info-value">${p.代表者||'-'}</span></div>
-            <div class="info-item"><span class="info-label">施工場所</span><span class="info-value">${p.施工場所||'-'}</span></div>
+      <div class="nav-list">
+        <!-- 基本情報 -->
+        <button class="nav-list-item nav-expand" onclick="toggleNavItem(this)">
+          <svg class="nav-list-item__icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="5" width="20" height="22" rx="2"/><line x1="11" y1="11" x2="21" y2="11"/><line x1="11" y1="16" x2="21" y2="16"/><line x1="11" y1="21" x2="17" y2="21"/></svg>
+          <div class="nav-list-item__body">
+            <div class="nav-list-item__title">基本情報</div>
+            <div class="nav-list-item__desc">${p.法人名||'-'}${p.施工場所?' ・ '+p.施工場所:''}</div>
           </div>
-          ${p.備考?`<div class="note-box"><div class="note-label">📝 備考</div>${p.備考}</div>`:''}
-          <div style="margin-top:8px;">${driveTag(p.driveUrl)}</div>
-        </div>
-      </div>
-      <div class="detail-section">
-        <div class="detail-section-header"><span style="display:flex;align-items:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>見積</span><span class="amount">${mAmt}</span></div>
-        <div class="detail-section-body">
-          <div class="info-grid">
-            <div class="info-item"><span class="info-label">見積番号</span><span class="info-value">${p.見積?.見積番号||'-'}</span></div>
-            <div class="info-item"><span class="info-label">見積日</span><span class="info-value">${fmtDate(p.見積?.見積日)}</span></div>
-            <div class="info-item"><span class="info-label">見積金額（税込）</span><span class="info-value amount">${mAmt}</span></div>
+          <div class="nav-list-item__arrow">›</div>
+        </button>
+        <div class="nav-expand-body">${detailBasic}</div>
+
+        <!-- 見積 -->
+        <button class="nav-list-item nav-expand" onclick="toggleNavItem(this)">
+          <svg class="nav-list-item__icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="5" width="20" height="22" rx="2"/><line x1="11" y1="11" x2="21" y2="11"/><line x1="11" y1="16" x2="21" y2="16"/><path d="M13 23 L16 20 L19 23" fill="none"/></svg>
+          <div class="nav-list-item__body">
+            <div class="nav-list-item__title">見積</div>
+            <div class="nav-list-item__desc">${p.見積?.見積番号||'未発行'}</div>
           </div>
-          ${p.見積?.備考?`<div class="note-box"><div class="note-label">備考</div>${p.見積.備考}</div>`:''}
-          <div style="margin-top:8px;">${pdfTag(p.見積?.PDF,'見積書PDF')}</div>
-          ${(p.見積?.明細||[]).length ? `
-            <button class="meisai-toggle" onclick="toggleMeisai('m-meisai-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}', this)">▶ 明細を表示</button>
-            <div class="meisai-wrap" id="m-meisai-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}">
-              <table class="meisai-table">
-                <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">単価</th><th class="right">金額（税抜）</th></tr></thead>
-                <tbody>${(p.見積.明細||[]).map(m=>`<tr><td>${m.工事内容||'-'}</td><td class="right">${m.数量||'-'}</td><td>${m.単位||''}</td><td class="right">${m.単価?'¥'+Number(m.単価).toLocaleString():'-'}</td><td class="right">¥${Number(m.金額税抜||0).toLocaleString()}</td></tr>`).join('')}</tbody>
-              </table>
-            </div>` : ''}
-        </div>
-      </div>
-      <div class="detail-section">
-        <div class="detail-section-header"><span style="display:flex;align-items:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="10" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="13" cy="13" r="2" fill="currentColor" opacity="0.5"/></svg>請求</span><span class="amount">${rAmt}</span></div>
-        <div class="detail-section-body">${seikyuHtml}</div>
-      </div>
-      <div class="detail-section">
-        <div class="detail-section-header"><span style="display:flex;align-items:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="11" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M13 15 L14 14 L16 16 L13 17 Z" fill="currentColor" opacity="0.6"/></svg>注文書</span></div>
-        <div class="detail-section-body">${chumonHtml}</div>
-      </div>
-      <div class="detail-section">
-        <div class="detail-section-header"><span style="display:flex;align-items:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="9" y1="15.5" x2="11" y2="15.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>契約書</span><span style="font-size:11px;color:${p.契約書?.ステータス==='締結済み'?'#1a7a30':'#d97706'};">${p.契約書?.ステータス||'未締結'}</span></div>
-        <div class="detail-section-body">
-          <div class="info-grid">
-            <div class="info-item"><span class="info-label">契約番号</span><span class="info-value">${p.契約書?.契約番号||'-'}</span></div>
-            <div class="info-item"><span class="info-label">契約日</span><span class="info-value">${fmtDate(p.契約書?.契約日)}</span></div>
-            <div class="info-item"><span class="info-label">契約金額</span><span class="info-value amount">${fmtYen(p.契約書?.契約金額)}</span></div>
+          <div class="nav-list-item__value">${mAmt}</div>
+          <div class="nav-list-item__arrow">›</div>
+        </button>
+        <div class="nav-expand-body">${detailMitsumori}</div>
+
+        <!-- 請求 -->
+        <button class="nav-list-item nav-expand" onclick="toggleNavItem(this)">
+          <svg class="nav-list-item__icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="5" width="20" height="22" rx="2"/><line x1="11" y1="11" x2="21" y2="11"/><line x1="11" y1="16" x2="21" y2="16"/><line x1="11" y1="21" x2="17" y2="21"/><circle cx="21" cy="21" r="2" fill="currentColor" opacity="0.5" stroke="none"/></svg>
+          <div class="nav-list-item__body">
+            <div class="nav-list-item__title">請求</div>
+            <div class="nav-list-item__desc">${seikyuCount?`${seikyuCount}件${minyukinCount?`（未入金${minyukinCount}件）`:''}`:'未発行'}</div>
           </div>
-          <div style="margin-top:8px;">${pdfTag(p.契約書?.PDF,'契約書PDF')}</div>
-        </div>
-      </div>
-      <div class="detail-section">
-        <div class="detail-section-header"><span style="display:flex;align-items:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="2" y="3" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="2" y1="8" x2="18" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3"/><line x1="7" y1="3" x2="7" y2="17" stroke="currentColor" stroke-width="1" opacity="0.3"/><line x1="13" y1="3" x2="13" y2="17" stroke="currentColor" stroke-width="1" opacity="0.3"/><rect x="8" y="10" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.5"/></svg>原価管理</span>${arariRate!==null?`<span style="color:${rateColor};font-weight:700;">粗利率 ${arariRate}%</span>`:''}</div>
-        <div class="detail-section-body">
-          <div class="info-grid">
-            <div class="info-item"><span class="info-label">労務費</span><span class="info-value">${fmtYen(g.労務費||null)}</span></div>
-            <div class="info-item"><span class="info-label">材料費</span><span class="info-value">${fmtYen(g.材料費||null)}</span></div>
-            <div class="info-item"><span class="info-label">外注費</span><span class="info-value">${fmtYen(g.外注費||null)}</span></div>
-            <div class="info-item"><span class="info-label">経費</span><span class="info-value">${fmtYen(g.経費||null)}</span></div>
-            <div class="info-item"><span class="info-label">原価合計</span><span class="info-value minyukin">${fmtYen(genkaTotal||null)}</span></div>
-            <div class="info-item"><span class="info-label">粗利</span><span class="info-value nyukin">${uriage&&genkaTotal?fmtYen(uriage-genkaTotal):'-'}</span></div>
+          <div class="nav-list-item__value">${rAmt}</div>
+          <div class="nav-list-item__arrow">›</div>
+        </button>
+        <div class="nav-expand-body">${detailSeikyu}</div>
+
+        <!-- 注文書 -->
+        <button class="nav-list-item nav-expand" onclick="toggleNavItem(this)">
+          <svg class="nav-list-item__icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="5" width="20" height="22" rx="2"/><line x1="11" y1="11" x2="21" y2="11"/><line x1="11" y1="16" x2="21" y2="16"/><line x1="11" y1="21" x2="17" y2="21"/><path d="M20 22 L22 20 L25 23 L20 25 Z" fill="currentColor" opacity="0.6" stroke="none"/></svg>
+          <div class="nav-list-item__body">
+            <div class="nav-list-item__title">注文書</div>
+            <div class="nav-list-item__desc">${chumonCount?`${chumonCount}件`:'未発行'}</div>
           </div>
-          ${genkaBarHtml}
-        </div>
+          <div class="nav-list-item__value">${cAmtStr}</div>
+          <div class="nav-list-item__arrow">›</div>
+        </button>
+        <div class="nav-expand-body">${detailChumon}</div>
+
+        <!-- 契約書 -->
+        <button class="nav-list-item nav-expand" onclick="toggleNavItem(this)">
+          <svg class="nav-list-item__icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="5" width="20" height="22" rx="2"/><line x1="11" y1="11" x2="21" y2="11"/><line x1="11" y1="16" x2="21" y2="16"/><line x1="11" y1="21" x2="21" y2="21"/><line x1="14" y1="25" x2="18" y2="25" stroke-width="2"/></svg>
+          <div class="nav-list-item__body">
+            <div class="nav-list-item__title">契約書</div>
+            <div class="nav-list-item__desc" style="color:${keiyakuColor};">${keiyakuStatus}</div>
+          </div>
+          <div class="nav-list-item__value">${fmtYen(p.契約書?.契約金額)}</div>
+          <div class="nav-list-item__arrow">›</div>
+        </button>
+        <div class="nav-expand-body">${detailKeiyaku}</div>
+
+        <!-- 原価管理 -->
+        <button class="nav-list-item nav-expand" onclick="toggleNavItem(this)">
+          <svg class="nav-list-item__icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="24" height="20" rx="2"/><line x1="4" y1="13" x2="28" y2="13" stroke-width="1" opacity="0.4"/><line x1="12" y1="6" x2="12" y2="26" stroke-width="1" opacity="0.4"/><line x1="20" y1="6" x2="20" y2="26" stroke-width="1" opacity="0.4"/><rect x="14" y="16" width="4" height="4" fill="currentColor" opacity="0.5" stroke="none"/></svg>
+          <div class="nav-list-item__body">
+            <div class="nav-list-item__title">原価管理</div>
+            <div class="nav-list-item__desc">${genkaTotal?`原価 ${fmtYen(genkaTotal)}`:'未入力'}</div>
+          </div>
+          <div class="nav-list-item__value" style="color:${rateColor};">${arariRate!==null?`粗利 ${arariRate}%`:'-'}</div>
+          <div class="nav-list-item__arrow">›</div>
+        </button>
+        <div class="nav-expand-body">${detailGenka}</div>
       </div>
     </div>
   </div>`;
 }
+
 
 // ─ 見積ビュー ─
 function renderMitsumori(){
