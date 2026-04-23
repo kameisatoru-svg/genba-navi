@@ -79,6 +79,37 @@ body{
 .dot-入金済み{background:#27ae60;}
 .dot-完了{background:#95a5a6;}
 
+/* ★ 今の動き：トピック3分割グリッド（2026/4/23 ダッシュボード統合） */
+.topic-grid{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;
+}
+.topic-cell{
+  background:var(--white);border-radius:14px;padding:12px 10px;
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 2px 8px rgba(30,45,64,0.07);
+}
+.topic-icon{
+  font-size:22px;flex-shrink:0;line-height:1;
+}
+.topic-body{flex:1;min-width:0;}
+.topic-label{
+  font-size:10px;color:var(--text2);letter-spacing:0.04em;margin-bottom:2px;
+  white-space:nowrap;
+}
+.topic-count{
+  font-size:22px;font-weight:900;color:var(--navy);line-height:1;letter-spacing:-0.02em;
+}
+.topic-count small{
+  font-size:11px;font-weight:400;color:var(--text2);margin-left:2px;
+}
+
+/* ダッシュボード内のサブタイトル（進行中案件）*/
+.sub-title{
+  font-size:11px;font-weight:700;color:var(--text2);letter-spacing:0.08em;
+  margin:14px 0 8px 2px;
+}
+.sub-title span{font-weight:400;margin-left:4px;}
+
 /* セクションタイトル */
 /* ★ 現場ツール：ミニマル白カード（2026/4/23 Phase 1導入）
    - 3列自動切替（Fold5横向き=3列 / 縦向き=2列）
@@ -182,9 +213,9 @@ body{
     </div>
   </div>
 
-  <!-- KPI ダッシュボード -->
+  <!-- ダッシュボード（経営サマリー＋今の動き＋進行中案件） -->
   <div class="kpi-section">
-    <div class="sec-title">2026年 経営サマリー</div>
+    <div class="sec-title">ダッシュボード</div>
 
     <div id="kpiArea">
       <div class="kpi-loading">📊 データ読み込み中...</div>
@@ -421,6 +452,11 @@ function renderKPI(rows){
   const nyukinRate     = totalSeikyu > 0 ? Math.round(totalNyukin / totalSeikyu * 100) : 0;
   const activeCount    = active.filter(r => !['入金済み','完了'].includes(r['ステータス'])).length;
 
+  // ★ 今の動き：ステータス別件数
+  const mitsumoriCount = active.filter(r => ['見積作成中','見積提出済み'].includes(r['ステータス'])).length;
+  const sekoCount      = active.filter(r => r['ステータス']==='施工中').length;
+  const nyukinMachi    = active.filter(r => r['ステータス']==='請求済み').length;
+
   // ステータス別に並べ替え
   const sorted = [...active].sort((a,b) =>
     STATUS_ORDER.indexOf(a['ステータス']) - STATUS_ORDER.indexOf(b['ステータス'])
@@ -453,7 +489,30 @@ function renderKPI(rows){
         <div class="kpi-bar-fill" style="width:${nyukinRate}%"></div>
       </div>
     </div>
-    <div class="sec-title" style="margin-top:4px;">進行中案件 <span style="font-weight:400;color:var(--text2);">(${activeCount}件)</span></div>
+    <div class="topic-grid">
+      <div class="topic-cell">
+        <div class="topic-icon">🔥</div>
+        <div class="topic-body">
+          <div class="topic-label">見積対応中</div>
+          <div class="topic-count">${mitsumoriCount}<small>件</small></div>
+        </div>
+      </div>
+      <div class="topic-cell">
+        <div class="topic-icon">⚡</div>
+        <div class="topic-body">
+          <div class="topic-label">施工中</div>
+          <div class="topic-count">${sekoCount}<small>件</small></div>
+        </div>
+      </div>
+      <div class="topic-cell">
+        <div class="topic-icon">💰</div>
+        <div class="topic-body">
+          <div class="topic-label">入金待ち</div>
+          <div class="topic-count">${nyukinMachi}<small>件</small></div>
+        </div>
+      </div>
+    </div>
+    <div class="sub-title">進行中案件 <span>(${activeCount}件)</span></div>
     <div class="anken-list">`;
 
   sorted.forEach(r => {
