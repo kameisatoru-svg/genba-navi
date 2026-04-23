@@ -4,714 +4,679 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>案件台帳｜株式会社アート・レイズ</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="common.css">
 <style>
-  :root {
-    --band: #555;
-    --band-mid: #777;
-    --light: #f8f8f8;
-    --border: #ddd;
-    --border-dark: #aaa;
-    --text: #333;
-    --text-sub: #666;
-    --white: #fff;
-    --accent: #2563eb;
-    --even: #f5f5f5;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Noto Sans JP', sans-serif;
-    background: #eee;
-    color: var(--text);
-    font-size: 14px;
-  }
-  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
-
-  .page-header {
-    background: var(--band);
-    color: var(--white);
-    padding: 18px 24px;
-    border-radius: 6px 6px 0 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .page-header h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.05em; }
-  .page-header .meta { font-size: 12px; opacity: 0.8; text-align: right; }
-
-  .stats-bar {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-top: none;
-    padding: 14px 24px;
-    display: flex;
-    gap: 32px;
-    flex-wrap: wrap;
-  }
-  .stat-item { text-align: center; }
-  .stat-num { font-size: 24px; font-weight: 700; color: var(--band); }
-  .stat-label { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
-
-  .search-bar {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-top: none;
-    padding: 12px 24px;
-    border-radius: 0 0 6px 6px;
-    margin-bottom: 20px;
-  }
-  .search-bar input {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid var(--border-dark);
-    border-radius: 4px;
-    font-size: 14px;
-    font-family: inherit;
-  }
-  .search-bar input:focus { outline: none; border-color: var(--accent); }
-
-  /* 案件カード */
-  .project-card {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    margin-bottom: 14px;
-    overflow: hidden;
-  }
-  .card-header {
-    background: var(--light);
-    border-bottom: 2px solid var(--band);
-    padding: 12px 18px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .card-header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .project-id {
-    font-size: 12px;
-    font-weight: 700;
-    background: var(--band);
-    color: var(--white);
-    padding: 3px 10px;
-    border-radius: 3px;
-  }
-  .project-name { font-size: 16px; font-weight: 700; }
-
-  /* ステータスバッジ */
-  .badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 700;
-  }
-  .badge-juchu { background: #dcfce7; color: #15803d; }
-  .badge-mitumori { background: #dbeafe; color: #1d4ed8; }
-  .badge-kanryo { background: #f3f4f6; color: #6b7280; }
-  .badge-mihai { background: #fef9c3; color: #854d0e; }
-
-  .card-body { padding: 16px 18px; }
-  .info-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px 24px;
-    margin-bottom: 14px;
-  }
-  .info-item { display: flex; flex-direction: column; gap: 3px; }
-  .info-label { font-size: 11px; color: var(--text-sub); font-weight: 700; letter-spacing: 0.04em; }
-  .info-value { font-size: 14px; color: var(--text); }
-
-  /* 金額ハイライト */
-  .amount-value {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--band);
-  }
-
-  /* 工程バー */
-  .process-bar {
-    display: flex;
-    gap: 6px;
-    margin-top: 14px;
-    flex-wrap: wrap;
-  }
-  .process-step {
-    flex: 1;
-    min-width: 80px;
-    text-align: center;
-    padding: 7px 4px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 700;
-    border: 1px solid var(--border);
-    background: var(--light);
-    color: var(--text-sub);
-  }
-  .process-step.done { background: var(--band); color: var(--white); border-color: var(--band); }
-  .process-step.current { background: #2563eb; color: var(--white); border-color: #2563eb; }
-  .process-step.pending { background: #fef9c3; color: #854d0e; border-color: #fde68a; }
-
-  .note-box {
-    margin-top: 12px;
-    padding: 10px 14px;
-    background: #fffbeb;
-    border-left: 3px solid #f59e0b;
-    border-radius: 0 4px 4px 0;
-    font-size: 13px;
-    color: var(--text);
-  }
-  .note-label { font-size: 11px; color: #92400e; font-weight: 700; margin-bottom: 4px; }
-
-  .add-row {
-    background: var(--light);
-    border: 1px dashed var(--border-dark);
-    border-radius: 6px;
-    padding: 18px;
-    text-align: center;
-    color: var(--text-sub);
-    font-size: 13px;
-    margin-bottom: 14px;
-  }
-
-  /* 書類ボタンエリア */
-  .doc-buttons {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px solid var(--border);
-  }
-  .doc-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 6px 14px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 700;
-    font-family: inherit;
-    cursor: pointer;
-    border: none;
-    text-decoration: none;
-    transition: opacity 0.15s;
-  }
-  .doc-btn:hover { opacity: 0.85; }
-  .doc-btn.active { background: #2563eb; color: #fff; }
-  .doc-btn.inactive { background: #e5e7eb; color: #9ca3af; cursor: default; pointer-events: none; }
-
-  .page-footer {
-    text-align: center;
-    font-size: 11px;
-    color: var(--text-sub);
-    margin-top: 24px;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
-  }
-
-  @media (max-width: 700px) {
-    .info-grid { grid-template-columns: 1fr 1fr; }
-    .page-header { flex-direction: column; gap: 8px; }
-  }
-  @media (max-width: 480px) {
-    .info-grid { grid-template-columns: 1fr; }
-  }
+/* ★ 現場ナビ系との配色統一（2026/4/23）：bg・card-header をnavy系に揃える
+   その他の変数（text/text-sub/green/red/orange/blue）は書類固有のまま維持 */
+:root {
+  --navy:#1e2d40; --accent:#c8a96e; --white:#fff;
+  --bg:#eeebe5; --border:#ddd; --border-dark:#aaa;
+  --text:#333; --text-sub:#666; --light:#f8f8f8;
+  --green:#16a34a; --red:#dc2626; --orange:#d97706; --blue:#2563eb;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--text);font-size:14px;padding-bottom:20px;}
+.container{max-width:1100px;margin:0 auto;padding:0 16px 24px;}
+.page-header{background:var(--navy);color:var(--white);padding:16px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;}
+.page-header h1{font-size:18px;font-weight:700;letter-spacing:0.05em;}
+.page-header .meta{font-size:11px;opacity:0.7;text-align:right;}
+#sourceBadge{font-size:11px;font-weight:600;margin-top:2px;}
+.tab-nav{background:var(--navy);display:flex;border-bottom:2px solid var(--accent);overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.tab-nav::-webkit-scrollbar{display:none;}
+.tab-btn{padding:10px 18px;border:none;background:transparent;color:rgba(255,255,255,0.6);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.15s;}
+.tab-btn:hover{color:rgba(255,255,255,0.9);}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+.filter-bar{background:var(--white);border:1px solid var(--border);padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px;border-radius:0 0 6px 6px;}
+.filter-bar input[type="text"]{flex:1;min-width:180px;padding:7px 10px;border:1px solid var(--border-dark);border-radius:4px;font-size:13px;font-family:inherit;}
+.filter-bar input[type="text"]:focus{outline:none;border-color:var(--blue);}
+.filter-bar input[type="date"]{padding:6px 8px;border:1px solid var(--border-dark);border-radius:4px;font-size:12px;font-family:inherit;cursor:pointer;}
+.filter-label{font-size:11px;color:var(--text-sub);white-space:nowrap;}
+.filter-sep{color:var(--border-dark);}
+.chip{padding:4px 12px;border-radius:20px;border:1px solid var(--border-dark);background:var(--white);font-size:12px;cursor:pointer;font-family:inherit;transition:all 0.1s;white-space:nowrap;}
+.chip.active{background:var(--navy);color:var(--white);border-color:var(--navy);}
+.stats-bar{display:flex;background:var(--white);border:1px solid var(--border);border-top:none;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.stats-bar::-webkit-scrollbar{display:none;}
+.stat-item{text-align:center;padding:12px 20px;border-right:1px solid var(--border);flex-shrink:0;}
+.stat-item:last-child{border-right:none;}
+.stat-num{font-size:20px;font-weight:700;color:var(--navy);}
+.stat-label{font-size:10px;color:var(--text-sub);margin-top:2px;}
+.card{background:var(--white);border:1px solid var(--border);border-radius:6px;margin-bottom:12px;overflow:hidden;transition:box-shadow 0.15s;}
+.card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+.card-header{background:var(--navy);color:var(--white);padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;user-select:none;}
+.card-header:hover{background:#2a3f5a;}
+.card-header-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1;}
+.card-id{background:rgba(255,255,255,0.2);padding:2px 10px;border-radius:12px;font-size:12px;font-weight:700;flex-shrink:0;}
+.card-name{font-size:15px;font-weight:700;}
+.card-toggle{font-size:12px;opacity:0.6;transition:transform 0.2s;flex-shrink:0;}
+.card.open .card-toggle{transform:rotate(180deg);}
+.card-body{display:none;padding:16px 20px;}
+.card.open .card-body{display:block;}
+.badge{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;}
+.b-施工中{background:#0e6b9a;color:#fff;}
+.b-受注済{background:#1a7a30;color:#fff;}
+.b-完了{background:#6b7280;color:#fff;}
+.b-見積提出済み{background:#2563eb;color:#fff;}
+.b-見積提出予定{background:#d97706;color:#fff;}
+.b-請求済み{background:#6b7280;color:#fff;}
+.b-入金済み{background:#4b5563;color:#fff;}
+.b-未入金{background:#dc2626;color:#fff;}
+.b-締結済み{background:#1a7a30;color:#fff;}
+.b-未締結{background:#d97706;color:#fff;}
+.b-default{background:#9ca3af;color:#fff;}
+.detail-section{border:1px solid var(--border);border-radius:4px;margin-bottom:12px;overflow:hidden;}
+.detail-section-header{background:var(--light);padding:8px 14px;display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700;color:var(--text-sub);border-bottom:1px solid var(--border);}
+.detail-section-body{padding:12px 14px;}
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px 20px;margin-bottom:10px;}
+.info-item{display:flex;flex-direction:column;gap:2px;}
+.info-label{font-size:10px;color:var(--text-sub);}
+.info-value{font-size:13px;font-weight:600;}
+.amount{color:var(--navy);font-size:14px;}
+.minyukin{color:var(--red);}
+.nyukin{color:var(--green);}
+.sub-card{border:1px solid var(--border);border-radius:4px;padding:10px 14px;margin-bottom:8px;background:#fafafa;}
+.sub-card:last-child{margin-bottom:0;}
+.sub-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.sub-id{font-size:12px;font-weight:700;color:var(--blue);}
+.note-box{background:#fffbf0;border-left:3px solid #e8d9a0;padding:8px 12px;font-size:12px;color:var(--text-sub);border-radius:0 4px 4px 0;margin-top:8px;line-height:1.7;}
+.note-label{font-weight:700;color:#9a7a20;margin-bottom:2px;font-size:11px;}
+.pdf-tag{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:4px;font-size:12px;text-decoration:none;margin:4px 4px 0 0;}
+.pdf-tag.on{background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd;}
+.pdf-tag.on:hover{background:#0369a1;color:#fff;}
+.pdf-tag.off{background:#f3f4f6;color:#9ca3af;border:1px solid #e5e7eb;pointer-events:none;}
+.drive-tag{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:4px;font-size:12px;text-decoration:none;margin:4px 4px 0 0;background:#e6f4ea;color:#1a7a30;border:1px solid #a8d5b0;}
+.drive-tag:hover{background:#1a7a30;color:#fff;}
+.drive-tag.off{background:#f3f4f6;color:#9ca3af;border:1px solid #e5e7eb;pointer-events:none;}
+.genka-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;margin:8px 0;}
+.genka-bar-fill{transition:width 0.3s;}
+.genka-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;}
+.genka-dot{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:3px;}
+.view-card{background:var(--white);border:1px solid var(--border);border-radius:6px;margin-bottom:10px;overflow:hidden;}
+.view-card-header{padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--border);}
+.view-card-body{padding:14px 16px;}
+.view-card-id{font-size:12px;font-weight:700;color:var(--blue);}
+.view-card-name{font-size:14px;font-weight:700;color:var(--text);}
+.view-anken-ref{font-size:11px;color:var(--text-sub);background:var(--light);padding:2px 8px;border-radius:10px;}
+.meisai-toggle{
+  background:var(--light);border:1px solid var(--border);border-radius:4px;
+  padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit;
+  color:var(--text-sub);margin-top:8px;width:100%;text-align:left;
+}
+.meisai-toggle:hover{background:#e8e8e8;}
+.meisai-wrap{display:none;margin-top:8px;}
+.meisai-wrap.open{display:block;}
+.meisai-table{width:100%;border-collapse:collapse;font-size:12px;border:1px solid var(--border);}
+.meisai-table th{background:var(--navy);color:#fff;padding:6px 10px;text-align:left;font-weight:600;}
+.meisai-table th.right,.meisai-table td.right{text-align:right;}
+.meisai-table td{padding:6px 10px;border-bottom:1px solid var(--border);}
+.meisai-table tr:nth-child(even) td{background:#f5f5f5;}
+.meisai-table tr:last-child td{border-bottom:none;}
+.totals-table{width:280px;margin-left:auto;border-collapse:collapse;font-size:12px;border:1px solid var(--border);margin-top:4px;}
+.totals-table td{padding:5px 12px;border-bottom:1px solid var(--border);}
+.totals-table td:last-child{text-align:right;}
+.totals-table tr:last-child td{background:var(--navy);color:#fff;font-weight:700;border-bottom:none;}
+.empty{background:var(--white);border:2px dashed var(--border-dark);border-radius:6px;padding:20px;text-align:center;color:var(--text-sub);font-size:13px;margin-bottom:12px;}
+.loading{text-align:center;padding:40px;color:var(--text-sub);font-size:13px;}
+@media(max-width:600px){.info-grid{grid-template-columns:1fr 1fr;}.tab-btn{padding:10px 12px;font-size:12px;}}
 </style>
 </head>
 <body>
+<div class="page-header">
+  <h1 style="display:flex;align-items:center;gap:8px;"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="10" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>案件台帳｜アート・レイズ</h1>
+  <div class="meta"><div id="lastUpdated">-</div><div id="sourceBadge">読込中...</div></div>
+</div>
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('anken')">
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="vertical-align:-3px;margin-right:4px;"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="10" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>案件
+  </button>
+  <button class="tab-btn" onclick="switchTab('mitsumori')">
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="vertical-align:-3px;margin-right:4px;"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="7" x2="6" y2="16" stroke="currentColor" stroke-width="0.8" opacity="0.4"/></svg>見積
+  </button>
+  <button class="tab-btn" onclick="switchTab('seikyu')">
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="vertical-align:-3px;margin-right:4px;"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="10" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="13" cy="13" r="2" fill="currentColor" opacity="0.5"/></svg>請求
+  </button>
+  <button class="tab-btn" onclick="switchTab('chumon')">
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="vertical-align:-3px;margin-right:4px;"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="11" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M13 15 L14 14 L16 16 L13 17 Z" fill="currentColor" opacity="0.6"/></svg>注文書
+  </button>
+  <button class="tab-btn" onclick="switchTab('keiyaku')">
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="vertical-align:-3px;margin-right:4px;"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="9" y1="15.5" x2="11" y2="15.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>契約書
+  </button>
+  <button class="tab-btn" onclick="switchTab('genka')">
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="vertical-align:-3px;margin-right:4px;"><rect x="2" y="3" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="2" y1="8" x2="18" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3"/><line x1="7" y1="3" x2="7" y2="17" stroke="currentColor" stroke-width="1" opacity="0.3"/><line x1="13" y1="3" x2="13" y2="17" stroke="currentColor" stroke-width="1" opacity="0.3"/><rect x="8" y="10" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.5"/></svg>原価
+  </button>
+</div>
 <div class="container">
 
-  <div class="page-header">
-    <h1>📋 案件台帳</h1>
-    <div class="meta">株式会社アート・レイズ<br>最終更新：2026-03-19</div>
-  </div>
-
+<!-- 案件ビュー -->
+<div id="view-anken">
   <div class="stats-bar">
-    <div class="stat-item">
-      <div class="stat-num" id="totalCount">5</div>
-      <div class="stat-label">総案件数</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">1</div>
-      <div class="stat-label">受注済</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">3</div>
-      <div class="stat-label">見積提出済／予定</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">1</div>
-      <div class="stat-label">請求済</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">¥9,990,200</div>
-      <div class="stat-label">受注総額（税込）</div>
-    </div>
+    <div class="stat-item"><div class="stat-num" id="s-total">-</div><div class="stat-label">総案件数</div></div>
+    <div class="stat-item"><div class="stat-num" id="s-active" style="color:#0e6b9a;">-</div><div class="stat-label">施工中</div></div>
+    <div class="stat-item"><div class="stat-num" id="s-mitsumori" style="color:#2563eb;">-</div><div class="stat-label">見積中</div></div>
+    <div class="stat-item"><div class="stat-num" id="s-seikyu" style="color:#d97706;">-</div><div class="stat-label">請求済</div></div>
+    <div class="stat-item"><div class="stat-num" id="s-amount" style="color:#1a7a30;">-</div><div class="stat-label">受注総額</div></div>
   </div>
-
-  <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="🔍 案件番号・顧客名・工事内容で絞り込み..." oninput="filterCards()">
+  <div class="filter-bar">
+    <input type="text" id="anken-search" placeholder="🔍 案件番号・顧客・工事内容・施工場所..." oninput="renderAnken()">
+    <div id="anken-chips"></div>
   </div>
+  <div id="anken-area"><div class="loading">📡 データを読み込んでいます...</div></div>
+</div>
 
-  <!-- AR-2026-0004 -->
-  <div class="project-card" data-search="ar-2026-0004 さくら苑 玉寿会 床工事 ウッドタイル 熊本 玉名 施工中 請求済み">
-    <div class="card-header">
-      <div class="card-header-left">
-        <span class="project-id">AR-2026-0004</span>
-        <span class="project-name">第一期工事　さくら苑床工事</span>
-      </div>
-      <span class="badge" style="background:#6b7280;color:#fff;">第1期完了・請求済み</span>
-    </div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">顧客</span>
-          <span class="info-value">社会福祉法人 玉寿会　御中（C-001）</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">施工場所</span>
-          <span class="info-value">熊本県玉名市伊倉北方1533</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">見積金額（税込）</span>
-          <span class="info-value amount-value">¥9,990,200</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">契約日</span>
-          <span class="info-value">2026-03-16（令和8年）</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">請求金額（第1期）</span>
-          <span class="info-value amount-value">¥9,990,200</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">完了日（第1期）</span>
-          <span class="info-value">2026-03-23（令和8年）</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">入金日</span>
-          <span class="info-value">未入金</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">法人・代表者</span>
-          <span class="info-value">社会福祉法人 玉寿会　山田勝徳 理事長</span>
-        </div>
-      </div>
-
-      <!-- 工程バー -->
-      <div style="font-size:11px; color:var(--text-sub); font-weight:700; margin-bottom:6px;">📅 施工工程</div>
-      <div class="process-bar">
-        <div class="process-step done">第1期<br>3/21〜23</div>
-        <div class="process-step pending">第2期<br>4/18〜20</div>
-        <div class="process-step pending">第3期<br>日程未定</div>
-      </div>
-
-      <div class="note-box">
-        <div class="note-label">📝 備考</div>
-        第1期：3月21〜23日完了・請求済み（請求番号：AR-2026-0004-1）。原価管理台帳は業者請求書受領後に作成予定。<br>
-        第2期：4月18〜20日（Googleカレンダー登録済み）。第3期は日程調整中。
-      </div>
-
-      <!-- 残材メモ -->
-      <div class="note-box" style="border-left-color:#16a34a; background:#f0fdf4; margin-top:8px;">
-        <div class="note-label" style="color:#15803d;">📦 現場残材メモ（第2期発注時に確認）</div>
-        ウッドタイル：10ケース　／　接着剤：5ケース　／　見切り金物：8本<br>
-        <span style="font-size:11px; color:#166534;">※ すべてさくら苑現場保管。第2期発注前に残数を確認して不足分のみ追加発注すること。</span>
-      </div>
-
-      <!-- 書類ボタン -->
-      <div class="doc-buttons">
-        <a class="doc-btn active" href="見積台帳_アートレイズ.html" target="_blank">📄 見積書</a>
-        <a class="doc-btn active" href="請求台帳_アートレイズ.html" target="_blank">📄 請求書</a>
-        <button class="doc-btn inactive">📄 注文書</button>
-        <a class="doc-btn active" href="工事請負契約書_雛形_アートレイズ.html" target="_blank">📄 工事請負契約書</a>
-      </div>
-    </div>
+<!-- 見積ビュー -->
+<div id="view-mitsumori" style="display:none;">
+  <div class="stats-bar">
+    <div class="stat-item"><div class="stat-num" id="m-total">-</div><div class="stat-label">総見積件数</div></div>
+    <div class="stat-item"><div class="stat-num" id="m-total-amt" style="color:#1a7a30;">-</div><div class="stat-label">見積総額</div></div>
   </div>
-
-  <!-- AR-2026-0005 -->
-  <div class="project-card" data-search="ar-2026-0005 松村整骨院 愛の治療院 松村 外装補修 看板 コーキング 見積提出済み 別府">
-    <div class="card-header">
-      <div class="card-header-left">
-        <span class="project-id">AR-2026-0005</span>
-        <span class="project-name">外壁コーキング補修・看板シート張替工事他</span>
-      </div>
-      <span class="badge" style="background:#2563eb;color:#fff;">見積提出済み</span>
-    </div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">顧客</span>
-          <span class="info-value">松村整骨院（愛の治療院）　松村 様</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">施工場所</span>
-          <span class="info-value">大分県別府市（詳細現地確認済み）</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">見積金額（税込）</span>
-          <span class="info-value amount-value">¥206,195</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">見積日</span>
-          <span class="info-value">2026-03-17</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">契約日</span>
-          <span class="info-value">未定</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">請求金額</span>
-          <span class="info-value">未設定</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">完了日</span>
-          <span class="info-value">未定</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">入金日</span>
-          <span class="info-value">未入金</span>
-        </div>
-      </div>
-      <div class="note-box">
-        <div class="note-label">📝 備考</div>
-        外壁コーキング打ち（胴差天端）部分補修・壁面突出看板インクジェットシート貼（600×1,800mm）・
-        壁面看板インクジェットシート貼（600×600mm）・既存ボックス板金補修の上再取付（W1,800mm）。
-        ふすま張り替え・耐熱配管交換は別途対応予定（設備屋確認待ち）。紹介経由（元同級生の妻が勤務）。
-        見積書ファイル：見積書_AR-2026-0005_松村整骨院_20260317.html
-      </div>
-
-      <!-- 書類ボタン -->
-      <div class="doc-buttons">
-        <a class="doc-btn active" href="見積台帳_アートレイズ.html" target="_blank">📄 見積書</a>
-        <button class="doc-btn inactive">📄 請求書</button>
-        <button class="doc-btn inactive">📄 注文書</button>
-        <button class="doc-btn inactive">📄 工事請負契約書</button>
-      </div>
-    </div>
+  <div class="filter-bar">
+    <input type="text" id="m-search" placeholder="🔍 案件番号・顧客名・工事内容..." oninput="renderMitsumori()">
+    <span class="filter-label">期間：</span>
+    <input type="date" id="m-from" onchange="renderMitsumori()">
+    <span class="filter-sep">〜</span>
+    <input type="date" id="m-to" onchange="renderMitsumori()">
   </div>
+  <div id="mitsumori-area"></div>
+</div>
 
-  <!-- AR-2026-0006 -->
-  <div class="project-card" data-search="ar-2026-0006 信和 加藤博和 ビーコンプラザ 別府コンベンションセンター アルミアングル トイレ建具 見積提出予定">
-    <div class="card-header">
-      <div class="card-header-left">
-        <span class="project-id">AR-2026-0006</span>
-        <span class="project-name">トイレ建具アルミアングル取付工事</span>
-      </div>
-      <span class="badge" style="background:#d97706;color:#fff;">見積提出予定</span>
-    </div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">顧客</span>
-          <span class="info-value">株式会社 信和　加藤 博和 様</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">施工場所</span>
-          <span class="info-value">別府コンベンションセンター（ビーコンプラザ）</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">見積金額（税込）</span>
-          <span class="info-value amount-value">¥126,324</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">見積日</span>
-          <span class="info-value">2026-03-18</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">契約日</span>
-          <span class="info-value">未定</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">請求金額</span>
-          <span class="info-value">未設定</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">完了日</span>
-          <span class="info-value">未定</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">入金日</span>
-          <span class="info-value">未入金</span>
-        </div>
-      </div>
-      <div class="note-box">
-        <div class="note-label">📝 備考</div>
-        下請：塩出木工（y-siodew@ctb.ne.jp）。材料費は塩出木工請求書に基づき計上。
-        見積書ファイル：見積書_AR-2026-0006_ビーコンプラザ追加工事_20260318.html
-      </div>
-
-      <!-- 書類ボタン -->
-      <div class="doc-buttons">
-        <a class="doc-btn active" href="見積台帳_アートレイズ.html" target="_blank">📄 見積書</a>
-        <button class="doc-btn inactive">📄 請求書</button>
-        <button class="doc-btn inactive">📄 注文書</button>
-        <button class="doc-btn inactive">📄 工事請負契約書</button>
-      </div>
-    </div>
+<!-- 請求ビュー -->
+<div id="view-seikyu" style="display:none;">
+  <div class="stats-bar">
+    <div class="stat-item"><div class="stat-num" id="r-total">-</div><div class="stat-label">総請求件数</div></div>
+    <div class="stat-item"><div class="stat-num" id="r-minyukin" style="color:#dc2626;">-</div><div class="stat-label">未入金</div></div>
+    <div class="stat-item"><div class="stat-num" id="r-nyukin" style="color:#16a34a;">-</div><div class="stat-label">入金済み</div></div>
+    <div class="stat-item"><div class="stat-num" id="r-minyukin-amt" style="color:#dc2626;">-</div><div class="stat-label">未入金合計</div></div>
   </div>
-
-  <!-- AR-2026-0007 -->
-  <div class="project-card" data-search="ar-2026-0007 信和 加藤博和 朝見浄水場 ルーツブロア 基礎補修 見積提出予定">
-    <div class="card-header">
-      <div class="card-header-left">
-        <span class="project-id">AR-2026-0007</span>
-        <span class="project-name">ルーツブロア基礎補修工事</span>
-      </div>
-      <span class="badge" style="background:#d97706;color:#fff;">見積提出予定</span>
-    </div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">顧客（元請）</span>
-          <span class="info-value">株式会社 信和　加藤 博和 様</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">施工場所</span>
-          <span class="info-value">朝見浄水場</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">見積金額（税込）</span>
-          <span class="info-value amount-value">¥82,280</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">見積日</span>
-          <span class="info-value">2026-03-18</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">契約日</span>
-          <span class="info-value">未定</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">請求金額</span>
-          <span class="info-value">未設定</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">完了日</span>
-          <span class="info-value">未定</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">入金日</span>
-          <span class="info-value">未入金</span>
-        </div>
-      </div>
-      <div class="note-box">
-        <div class="note-label">📝 備考</div>
-        外注：小田工業（¥31,900税込）。元請：株式会社 信和。
-      </div>
-      <!-- 書類ボタン -->
-      <div class="doc-buttons">
-        <a class="doc-btn active" href="見積台帳_アートレイズ.html" target="_blank">📄 見積書</a>
-        <button class="doc-btn inactive">📄 請求書</button>
-        <button class="doc-btn inactive">📄 注文書</button>
-        <button class="doc-btn inactive">📄 工事請負契約書</button>
-      </div>
-    </div>
+  <div class="filter-bar">
+    <input type="text" id="r-search" placeholder="🔍 案件番号・顧客名・請求番号..." oninput="renderSeikyu()">
+    <span class="filter-label">請求日：</span>
+    <input type="date" id="r-from" onchange="renderSeikyu()">
+    <span class="filter-sep">〜</span>
+    <input type="date" id="r-to" onchange="renderSeikyu()">
+    <button class="chip active" id="r-chip-all" onclick="setSeikyuFilter('all')">すべて</button>
+    <button class="chip" id="r-chip-minyukin" onclick="setSeikyuFilter('minyukin')">未入金</button>
+    <button class="chip" id="r-chip-nyukin" onclick="setSeikyuFilter('nyukin')">入金済み</button>
   </div>
+  <div id="seikyu-area"></div>
+</div>
 
-  <!-- AR-2026-0008 -->
-  <div class="project-card" data-search="ar-2026-0008 ウインズコーポレーション 民泊客家 ロールスクリーン 補修 請求済み">
-    <div class="card-header">
-      <div class="card-header-left">
-        <span class="project-id">AR-2026-0008</span>
-        <span class="project-name">ロールスクリーン補修工事</span>
-      </div>
-      <span class="badge" style="background:#6b7280;color:#fff;">請求済み</span>
-    </div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">顧客</span>
-          <span class="info-value">有限会社ウインズコーポレーション</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">施工場所</span>
-          <span class="info-value">民泊客家</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">請求金額（税込）</span>
-          <span class="info-value amount-value">¥14,520</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">請求番号</span>
-          <span class="info-value">AR-2026-C004-001</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">請求日</span>
-          <span class="info-value">2026-03-18</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">入金日</span>
-          <span class="info-value">入金済み</span>
-        </div>
-      </div>
-      <!-- 書類ボタン -->
-      <div class="doc-buttons">
-        <button class="doc-btn inactive">📄 見積書</button>
-        <a class="doc-btn active" href="請求台帳_アートレイズ.html" target="_blank">📄 請求書</a>
-        <button class="doc-btn inactive">📄 注文書</button>
-        <button class="doc-btn inactive">📄 工事請負契約書</button>
-      </div>
-    </div>
+<!-- 注文書ビュー -->
+<div id="view-chumon" style="display:none;">
+  <div class="stats-bar">
+    <div class="stat-item"><div class="stat-num" id="c-total">-</div><div class="stat-label">総注文件数</div></div>
+    <div class="stat-item"><div class="stat-num" id="c-total-amt" style="color:#1a7a30;">-</div><div class="stat-label">注文総額</div></div>
   </div>
+  <div class="filter-bar">
+    <input type="text" id="c-search" placeholder="🔍 案件番号・業者名・工事内容..." oninput="renderChumon()">
+    <span class="filter-label">注文日：</span>
+    <input type="date" id="c-from" onchange="renderChumon()">
+    <span class="filter-sep">〜</span>
+    <input type="date" id="c-to" onchange="renderChumon()">
+  </div>
+  <div id="chumon-area"></div>
+</div>
 
-  <div class="add-row" id="addRow">
-    ＋ 次の案件データをここに追加（AR-2026-0007〜）
+<!-- 契約書ビュー -->
+<div id="view-keiyaku" style="display:none;">
+  <div class="stats-bar">
+    <div class="stat-item"><div class="stat-num" id="k-total">-</div><div class="stat-label">総契約件数</div></div>
+    <div class="stat-item"><div class="stat-num" id="k-signed" style="color:#1a7a30;">-</div><div class="stat-label">締結済み</div></div>
+    <div class="stat-item"><div class="stat-num" id="k-pending" style="color:#d97706;">-</div><div class="stat-label">未締結</div></div>
   </div>
+  <div class="filter-bar">
+    <input type="text" id="k-search" placeholder="🔍 案件番号・顧客名・工事名..." oninput="renderKeiyaku()">
+    <span class="filter-label">契約日：</span>
+    <input type="date" id="k-from" onchange="renderKeiyaku()">
+    <span class="filter-sep">〜</span>
+    <input type="date" id="k-to" onchange="renderKeiyaku()">
+    <button class="chip active" id="k-chip-all" onclick="setKeiyakuFilter('all')">すべて</button>
+    <button class="chip" id="k-chip-signed" onclick="setKeiyakuFilter('signed')">締結済み</button>
+    <button class="chip" id="k-chip-pending" onclick="setKeiyakuFilter('pending')">未締結</button>
+  </div>
+  <div id="keiyaku-area"></div>
+</div>
 
-  <div class="page-footer">
-    株式会社アート・レイズ｜大分県別府市上原町13番25号｜TEL 0977-21-0603
+<!-- 原価ビュー -->
+<div id="view-genka" style="display:none;">
+  <div class="stats-bar">
+    <div class="stat-item"><div class="stat-num" id="g-total">-</div><div class="stat-label">集計案件数</div></div>
+    <div class="stat-item"><div class="stat-num" id="g-total-genka" style="color:#dc2626;">-</div><div class="stat-label">原価合計</div></div>
+    <div class="stat-item"><div class="stat-num" id="g-total-uri" style="color:#1a7a30;">-</div><div class="stat-label">売上合計</div></div>
+    <div class="stat-item"><div class="stat-num" id="g-avg-rate" style="color:#0e6b9a;">-</div><div class="stat-label">平均粗利率</div></div>
   </div>
+  <div class="filter-bar">
+    <input type="text" id="g-search" placeholder="🔍 案件番号・顧客名・工事内容..." oninput="renderGenka()">
+  </div>
+  <div id="genka-area"></div>
+</div>
 
 </div>
 <script>
-function filterCards() {
-  const q = document.getElementById('searchInput').value.toLowerCase();
-  const cards = document.querySelectorAll('.project-card');
-  let count = 0;
-  cards.forEach(card => {
-    const text = card.getAttribute('data-search') || '';
-    const show = !q || text.toLowerCase().includes(q);
-    card.style.display = show ? '' : 'none';
-    if (show) count++;
+const BASE_URL='https://kameisatoru-svg.github.io/genba-navi/';
+const DATA_URL=BASE_URL+'data.json';
+const LS_KEY='artrise_allinone_v1';
+let ALL_DATA=[];
+let currentTab='anken';
+let seikyuFilter='all';
+let keiyakuFilter='all';
+let ankenStatusFilter='all';
+
+async function loadData(){
+  try{
+    const res=await fetch(DATA_URL+'?v='+Date.now());
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const json=await res.json();
+    ALL_DATA=json.案件||[];
+    localStorage.setItem(LS_KEY,JSON.stringify(ALL_DATA));
+    setSourceBadge('fetch',json.最終更新||'');
+    document.getElementById('lastUpdated').textContent='最終更新：'+(json.最終更新||'-');
+  }catch(e){
+    try{ALL_DATA=JSON.parse(localStorage.getItem(LS_KEY)||'[]');}catch(e2){ALL_DATA=[];}
+    setSourceBadge('local','');
+  }
+  renderAll();
+}
+function setSourceBadge(type,date){
+  const el=document.getElementById('sourceBadge');
+  el.innerHTML=type==='fetch'
+    ?`<span style="color:#6ee7b7;">● GitHub同期</span>${date?' <span style="opacity:0.6;">('+date+')</span>':''}`
+    :`<span style="color:#fbbf24;">● オフライン</span>`;
+}
+function switchTab(tab){
+  currentTab=tab;
+  ['anken','mitsumori','seikyu','chumon','keiyaku','genka'].forEach(t=>{
+    document.getElementById('view-'+t).style.display=t===tab?'':'none';
   });
-  document.getElementById('totalCount').textContent = count;
-  document.getElementById('addRow').style.display = q ? 'none' : '';
-}
-
-// ─── URLパラメータ：1件専用ビュー ──────────────────
-(function() {
-  const params = new URLSearchParams(window.location.search);
-  const anken = params.get('anken');
-  if (!anken) return;
-
-  const statsBar = document.querySelector('.stats-bar');
-  const searchBar = document.querySelector('.search-bar');
-  if (statsBar) statsBar.style.display = 'none';
-  if (searchBar) searchBar.style.display = 'none';
-
-  const header = document.querySelector('.page-header');
-  if (header) {
-    const backBtn = document.createElement('a');
-    backBtn.href = 'https://kameisatoru-svg.github.io/genba-navi/案件台帳_アートレイズ.html';
-    backBtn.textContent = '← 案件台帳に戻る';
-    backBtn.style.cssText = 'display:inline-block;margin-bottom:10px;color:#2563eb;font-size:13px;font-weight:700;text-decoration:none;';
-    header.parentNode.insertBefore(backBtn, header);
-  }
-
-  const input = document.getElementById('searchInput');
-  if (input) {
-    input.value = anken;
-    filterCards();
-  }
-})();
-</script>
-
-<!-- ★ 共通ナビバー（編集する場合はこのブロックをすべてのアプリで同時に差し替える） -->
-<style>
-.app-navbar {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  height: 60px;
-  background: #1e2d40;
-  display: flex;
-  align-items: stretch;
-  z-index: 9999;
-  box-shadow: 0 -2px 12px rgba(0,0,0,0.18);
-  padding-bottom: env(safe-area-inset-bottom, 0);
-}
-.app-navbar a {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  text-decoration: none;
-  color: rgba(255,255,255,0.45);
-  font-family: Meiryo,'Yu Gothic',sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  transition: color 0.15s, background 0.15s;
-  -webkit-tap-highlight-color: transparent;
-}
-.app-navbar a:active {
-  background: rgba(255,255,255,0.06);
-}
-.app-navbar a.nav-active {
-  color: #c8a96e;
-}
-.app-navbar a svg {
-  opacity: 0.45;
-  transition: opacity 0.15s;
-}
-.app-navbar a.nav-active svg {
-  opacity: 1;
-}
-/* ナビバー分の余白 */
-body { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)); }
-</style>
-<nav class="app-navbar" id="appNavbar">
-  <a href="案件台帳_アートレイズ.html" data-page="anken">
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <rect x="3" y="2" width="16" height="18" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
-      <line x1="7" y1="7" x2="15" y2="7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-      <line x1="7" y1="11" x2="15" y2="11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-      <line x1="7" y1="15" x2="11" y2="15" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-    </svg>
-    案件台帳
-  </a>
-  <a href="見積台帳_アートレイズ.html" data-page="mitsumori">
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <rect x="3" y="2" width="16" height="18" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
-      <line x1="7" y1="7" x2="15" y2="7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-      <line x1="7" y1="11" x2="13" y2="11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-      <path d="M10 17 L13 14 L16 17" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    </svg>
-    見積台帳
-  </a>
-  <a href="請求台帳_アートレイズ.html" data-page="seikyu">
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <rect x="3" y="2" width="16" height="18" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
-      <path d="M11 7 v8 M8.5 9 Q8.5 7 11 7 Q13.5 7 13.5 9 Q13.5 11 11 11 Q13.5 11 13.5 13 Q13.5 15 11 15 Q8.5 15 8.5 13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" fill="none"/>
-    </svg>
-    請求台帳
-  </a>
-  <a href="原価管理台帳_アートレイズ.html" data-page="genka">
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <rect x="2" y="14" width="4" height="6" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/>
-      <rect x="9" y="9" width="4" height="11" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/>
-      <rect x="16" y="4" width="4" height="16" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/>
-      <path d="M4 12 L9 8 L13 10 L18 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    </svg>
-    工事台帳
-  </a>
-</nav>
-<script>
-(function(){
-  var path = location.pathname;
-  var map = {
-    '案件台帳_アートレイズ.html': 'anken',
-    '見積台帳_アートレイズ.html': 'mitsumori',
-    '請求台帳_アートレイズ.html': 'seikyu',
-    '原価管理台帳_アートレイズ.html': 'genka'
-  };
-  var current = null;
-  Object.keys(map).forEach(function(k){
-    if(path.indexOf(k) !== -1) current = map[k];
+  document.querySelectorAll('.tab-btn').forEach((btn,i)=>{
+    const tabs=['anken','mitsumori','seikyu','chumon','keiyaku','genka'];
+    btn.classList.toggle('active',tabs[i]===tab);
   });
-  if(current){
-    var links = document.querySelectorAll('#appNavbar a');
-    links.forEach(function(a){
-      if(a.getAttribute('data-page') === current) a.classList.add('nav-active');
-    });
-  }
-})();
-</script>
-<!-- ★ 共通ナビバー ここまで -->
+  const fns={anken:renderAnken,mitsumori:renderMitsumori,seikyu:renderSeikyu,chumon:renderChumon,keiyaku:renderKeiyaku,genka:renderGenka};
+  fns[tab]?.();
+}
+function renderAll(){renderAnken();renderMitsumori();renderSeikyu();renderChumon();renderKeiyaku();renderGenka();}
 
+const fmtYen=v=>v?'¥'+Number(v).toLocaleString():'-';
+const fmtDate=d=>d||'-';
+const inRange=(d,from,to)=>{if(!d)return true;if(from&&d<from)return false;if(to&&d>to)return false;return true;};
+const badgeClass=s=>({'施工中':'b-施工中','受注済':'b-受注済','完了':'b-完了','見積提出済み':'b-見積提出済み','見積提出予定':'b-見積提出予定','請求済み':'b-請求済み','入金済み':'b-入金済み'}[s]||'b-default');
+const pdfTag=(url,label)=>url?`<a class="pdf-tag on" href="${url}" target="_blank">📄 ${label}</a>`:`<span class="pdf-tag off">📄 ${label}</span>`;
+const driveTag=url=>url?`<a class="drive-tag" href="${url}" target="_blank">📁 Drive</a>`:`<span class="drive-tag off">📁 Drive</span>`;
+
+// ─ 案件ビュー ─
+function renderAnken(){
+  const q=document.getElementById('anken-search').value.toLowerCase();
+  const data=ALL_DATA.filter(p=>{
+    const txt=[p.案件番号,p.工事名,p.法人名,p.代表者,p.施工場所,p.ステータス,p.備考].filter(Boolean).join(' ').toLowerCase();
+    return(!q||txt.includes(q))&&(ankenStatusFilter==='all'||p.ステータス===ankenStatusFilter);
+  });
+  document.getElementById('s-total').textContent=data.length;
+  document.getElementById('s-active').textContent=data.filter(p=>p.ステータス==='施工中').length;
+  document.getElementById('s-mitsumori').textContent=data.filter(p=>p.ステータス?.includes('見積')).length;
+  document.getElementById('s-seikyu').textContent=data.filter(p=>p.ステータス==='請求済み'||p.ステータス==='入金済み').length;
+  const amt=data.reduce((s,p)=>{const r=(p.請求||[]).reduce((a,r)=>a+Number(r.請求金額||0),0);return s+(r||Number(p.見積?.見積金額||0));},0);
+  document.getElementById('s-amount').textContent=amt?'¥'+Math.round(amt/10000)+'万':'-';
+  const statuses=['all',...new Set(ALL_DATA.map(p=>p.ステータス).filter(Boolean))];
+  document.getElementById('anken-chips').innerHTML=statuses.map(s=>`<button class="chip ${s===ankenStatusFilter?'active':''}" onclick="setAnkenStatus('${s}')">${s==='all'?'すべて':s}</button>`).join('');
+  const area=document.getElementById('anken-area');
+  if(!data.length){area.innerHTML='<div class="empty">該当する案件がありません</div>';return;}
+  area.innerHTML=data.map(p=>buildAnkenCard(p)).join('');
+}
+function setAnkenStatus(s){ankenStatusFilter=s;renderAnken();}
+function toggleCard(h){h.closest('.card').classList.toggle('open');}
+
+function buildAnkenCard(p){
+  const mAmt=fmtYen(p.見積?.見積金額);
+  const rAmt=p.請求?.length?fmtYen(p.請求.reduce((s,r)=>s+Number(r.請求金額||0),0)):'-';
+  const g=p.原価||{};
+  const genkaTotal=(g.労務費||0)+(g.材料費||0)+(g.外注費||0)+(g.経費||0);
+  const uriage=(p.請求||[]).reduce((s,r)=>s+Number(r.請求金額||0),0)||Number(p.見積?.見積金額||0);
+  const arariRate=uriage&&genkaTotal?Math.round((1-genkaTotal/uriage)*100):null;
+  const rateColor=arariRate===null?'#999':arariRate>=80?'#1a7a30':arariRate>=60?'#d97706':'#dc2626';
+
+  const seikyuHtml=(p.請求||[]).map(r=>{
+    const isNyukin=r.入金状況==='nyukin';
+    return`<div class="sub-card">
+      <div class="sub-card-header"><span class="sub-id">${r.請求番号||'-'}</span><span class="badge ${isNyukin?'b-入金済み':'b-未入金'}">${isNyukin?'入金済み':'未入金'}</span></div>
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">請求金額</span><span class="info-value amount ${isNyukin?'nyukin':'minyukin'}">${fmtYen(r.請求金額)}</span></div>
+        <div class="info-item"><span class="info-label">請求日</span><span class="info-value">${fmtDate(r.請求日)}</span></div>
+        <div class="info-item"><span class="info-label">支払期限</span><span class="info-value">${fmtDate(r.支払期限)}</span></div>
+        <div class="info-item"><span class="info-label">入金日</span><span class="info-value">${fmtDate(r.入金日)}</span></div>
+      </div>
+      <div>${pdfTag(r.PDF,'請求書PDF')}</div>
+      ${(r.明細||[]).length ? `
+        <button class="meisai-toggle" onclick="toggleMeisai('r-meisai-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}-${r.請求番号?.replace(/[^a-zA-Z0-9]/g,'-')||'x'}', this)">▶ 明細を表示</button>
+        <div class="meisai-wrap" id="r-meisai-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}-${r.請求番号?.replace(/[^a-zA-Z0-9]/g,'-')||'x'}">
+          <table class="meisai-table">
+            <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">金額（税抜）</th></tr></thead>
+            <tbody>${(r.明細||[]).map(m=>`<tr><td>${m.工事内容||'-'}</td><td class="right">${m.数量||'-'}</td><td>${m.単位||''}</td><td class="right">¥${Number(m.金額税抜||0).toLocaleString()}</td></tr>`).join('')}</tbody>
+          </table>
+          ${r.税込合計?`<table class="totals-table"><tr><td>税抜合計</td><td>¥${Number(r.税抜合計||0).toLocaleString()}</td></tr><tr><td>消費税（10%）</td><td>¥${Number(r.消費税||0).toLocaleString()}</td></tr><tr><td>税込合計</td><td>¥${Number(r.税込合計||0).toLocaleString()}</td></tr></table>`:''}
+        </div>` : ''}
+    </div>`;
+  }).join('')||'<div style="font-size:12px;color:#999;padding:4px 0;">請求書なし</div>';
+
+  const chumonHtml=(p.注文書||[]).filter(c=>c.業者名||c.注文番号).map(c=>`
+    <div class="sub-card">
+      <div class="sub-card-header"><span class="sub-id">${c.注文番号||'-'}</span><span style="font-size:12px;color:#555;">${c.業者名||'-'}</span></div>
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">注文金額</span><span class="info-value amount">${fmtYen(c.注文金額)}</span></div>
+        <div class="info-item"><span class="info-label">注文日</span><span class="info-value">${fmtDate(c.注文日)}</span></div>
+      </div>
+      <div>${pdfTag(c.PDF,'注文書PDF')}</div>
+    </div>`).join('')||'<div style="font-size:12px;color:#999;padding:4px 0;">注文書なし</div>';
+
+  const genkaBarHtml=genkaTotal>0?(()=>{
+    const colors=['#3b82f6','#10b981','#f59e0b','#ef4444'];
+    const items=[['労務費',g.労務費||0,colors[0]],['材料費',g.材料費||0,colors[1]],['外注費',g.外注費||0,colors[2]],['経費',g.経費||0,colors[3]]];
+    const bars=items.map(([k,v,c])=>v?`<div class="genka-bar-fill" style="width:${Math.round(v/genkaTotal*100)}%;background:${c};"></div>`:'').join('');
+    const legend=items.map(([k,v,c])=>v?`<span><span class="genka-dot" style="background:${c};"></span>${k} ${fmtYen(v)}</span>`:'').join('');
+    return`<div class="genka-bar">${bars}</div><div class="genka-legend">${legend}</div>`;
+  })():'<div style="font-size:12px;color:#999;">原価未入力</div>';
+
+  return`
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-header-left">
+        <span class="card-id">${p.案件番号}</span>
+        <span class="card-name">${p.工事名}</span>
+      </div>
+      <span class="badge ${badgeClass(p.ステータス)}">${p.ステータス||'未設定'}</span>
+      <span class="card-toggle">▼</span>
+    </div>
+    <div class="card-body">
+      <div class="detail-section">
+        <div class="detail-section-header"><span style="display:flex;align-items:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="10" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>基本情報</span>${p.元請フラグ?`<span style="color:#b45309;font-size:11px;">元請：${p.元請名}</span>`:''}</div>
+        <div class="detail-section-body">
+          <div class="info-grid">
+            <div class="info-item"><span class="info-label">法人名</span><span class="info-value">${p.法人名||'-'}</span></div>
+            <div class="info-item"><span class="info-label">代表者</span><span class="info-value">${p.代表者||'-'}</span></div>
+            <div class="info-item"><span class="info-label">施工場所</span><span class="info-value">${p.施工場所||'-'}</span></div>
+          </div>
+          ${p.備考?`<div class="note-box"><div class="note-label">📝 備考</div>${p.備考}</div>`:''}
+          <div style="margin-top:8px;">${driveTag(p.driveUrl)}</div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-header"><span style="display:flex;align-items:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>見積</span><span class="amount">${mAmt}</span></div>
+        <div class="detail-section-body">
+          <div class="info-grid">
+            <div class="info-item"><span class="info-label">見積番号</span><span class="info-value">${p.見積?.見積番号||'-'}</span></div>
+            <div class="info-item"><span class="info-label">見積日</span><span class="info-value">${fmtDate(p.見積?.見積日)}</span></div>
+            <div class="info-item"><span class="info-label">見積金額（税込）</span><span class="info-value amount">${mAmt}</span></div>
+          </div>
+          ${p.見積?.備考?`<div class="note-box"><div class="note-label">備考</div>${p.見積.備考}</div>`:''}
+          <div style="margin-top:8px;">${pdfTag(p.見積?.PDF,'見積書PDF')}</div>
+          ${(p.見積?.明細||[]).length ? `
+            <button class="meisai-toggle" onclick="toggleMeisai('m-meisai-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}', this)">▶ 明細を表示</button>
+            <div class="meisai-wrap" id="m-meisai-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}">
+              <table class="meisai-table">
+                <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">単価</th><th class="right">金額（税抜）</th></tr></thead>
+                <tbody>${(p.見積.明細||[]).map(m=>`<tr><td>${m.工事内容||'-'}</td><td class="right">${m.数量||'-'}</td><td>${m.単位||''}</td><td class="right">${m.単価?'¥'+Number(m.単価).toLocaleString():'-'}</td><td class="right">¥${Number(m.金額税抜||0).toLocaleString()}</td></tr>`).join('')}</tbody>
+              </table>
+            </div>` : ''}
+        </div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-header"><span style="display:flex;align-items:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="10" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="13" cy="13" r="2" fill="currentColor" opacity="0.5"/></svg>請求</span><span class="amount">${rAmt}</span></div>
+        <div class="detail-section-body">${seikyuHtml}</div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-header"><span style="display:flex;align-items:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="11" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M13 15 L14 14 L16 16 L13 17 Z" fill="currentColor" opacity="0.6"/></svg>注文書</span></div>
+        <div class="detail-section-body">${chumonHtml}</div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-header"><span style="display:flex;align-items:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="9" y1="15.5" x2="11" y2="15.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>契約書</span><span style="font-size:11px;color:${p.契約書?.ステータス==='締結済み'?'#1a7a30':'#d97706'};">${p.契約書?.ステータス||'未締結'}</span></div>
+        <div class="detail-section-body">
+          <div class="info-grid">
+            <div class="info-item"><span class="info-label">契約番号</span><span class="info-value">${p.契約書?.契約番号||'-'}</span></div>
+            <div class="info-item"><span class="info-label">契約日</span><span class="info-value">${fmtDate(p.契約書?.契約日)}</span></div>
+            <div class="info-item"><span class="info-label">契約金額</span><span class="info-value amount">${fmtYen(p.契約書?.契約金額)}</span></div>
+          </div>
+          <div style="margin-top:8px;">${pdfTag(p.契約書?.PDF,'契約書PDF')}</div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-header"><span style="display:flex;align-items:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="2" y="3" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="2" y1="8" x2="18" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3"/><line x1="7" y1="3" x2="7" y2="17" stroke="currentColor" stroke-width="1" opacity="0.3"/><line x1="13" y1="3" x2="13" y2="17" stroke="currentColor" stroke-width="1" opacity="0.3"/><rect x="8" y="10" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.5"/></svg>原価管理</span>${arariRate!==null?`<span style="color:${rateColor};font-weight:700;">粗利率 ${arariRate}%</span>`:''}</div>
+        <div class="detail-section-body">
+          <div class="info-grid">
+            <div class="info-item"><span class="info-label">労務費</span><span class="info-value">${fmtYen(g.労務費||null)}</span></div>
+            <div class="info-item"><span class="info-label">材料費</span><span class="info-value">${fmtYen(g.材料費||null)}</span></div>
+            <div class="info-item"><span class="info-label">外注費</span><span class="info-value">${fmtYen(g.外注費||null)}</span></div>
+            <div class="info-item"><span class="info-label">経費</span><span class="info-value">${fmtYen(g.経費||null)}</span></div>
+            <div class="info-item"><span class="info-label">原価合計</span><span class="info-value minyukin">${fmtYen(genkaTotal||null)}</span></div>
+            <div class="info-item"><span class="info-label">粗利</span><span class="info-value nyukin">${uriage&&genkaTotal?fmtYen(uriage-genkaTotal):'-'}</span></div>
+          </div>
+          ${genkaBarHtml}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ─ 見積ビュー ─
+function renderMitsumori(){
+  const q=document.getElementById('m-search').value.toLowerCase();
+  const from=document.getElementById('m-from').value;
+  const to=document.getElementById('m-to').value;
+  const items=ALL_DATA.filter(p=>{
+    if(!p.見積?.見積金額&&!p.見積?.見積番号)return false;
+    const txt=[p.案件番号,p.工事名,p.法人名,p.代表者,p.見積?.見積番号].filter(Boolean).join(' ').toLowerCase();
+    return(!q||txt.includes(q))&&inRange(p.見積?.見積日,from,to);
+  });
+  document.getElementById('m-total').textContent=items.length;
+  document.getElementById('m-total-amt').textContent=fmtYen(items.reduce((s,p)=>s+Number(p.見積?.見積金額||0),0));
+  const area=document.getElementById('mitsumori-area');
+  if(!items.length){area.innerHTML='<div class="empty">該当する見積がありません</div>';return;}
+  area.innerHTML=items.map(p=>`
+  <div class="view-card">
+    <div class="view-card-header">
+      <div><div class="view-card-name">${p.工事名}</div><div style="margin-top:3px;">${p.見積?.見積番号?`<span class="view-card-id">${p.見積.見積番号}</span> `:''}<span class="view-anken-ref">${p.案件番号}</span></div></div>
+      <span class="amount" style="font-size:16px;">${fmtYen(p.見積?.見積金額)}</span>
+    </div>
+    <div class="view-card-body">
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">顧客</span><span class="info-value">${p.法人名||p.代表者||'-'}</span></div>
+        <div class="info-item"><span class="info-label">施工場所</span><span class="info-value">${p.施工場所||'-'}</span></div>
+        <div class="info-item"><span class="info-label">見積日</span><span class="info-value">${fmtDate(p.見積?.見積日)}</span></div>
+        <div class="info-item"><span class="info-label">ステータス</span><span class="badge ${badgeClass(p.ステータス)}">${p.ステータス||'-'}</span></div>
+      </div>
+      ${p.見積?.備考?`<div class="note-box"><div class="note-label">備考</div>${p.見積.備考}</div>`:''}
+      <div style="margin-top:8px;">${pdfTag(p.見積?.PDF,'見積書PDF')}</div>
+      ${(p.見積?.明細||[]).length ? `
+        <button class="meisai-toggle" onclick="toggleMeisai('mv-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}',this)">▶ 明細を表示</button>
+        <div class="meisai-wrap" id="mv-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}">
+          <table class="meisai-table">
+            <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">単価</th><th class="right">金額（税抜）</th></tr></thead>
+            <tbody>${(p.見積.明細||[]).map(m=>`<tr><td>${m.工事内容||'-'}</td><td class="right">${m.数量||'-'}</td><td>${m.単位||''}</td><td class="right">${m.単価?'¥'+Number(m.単価).toLocaleString():'-'}</td><td class="right">¥${Number(m.金額税抜||0).toLocaleString()}</td></tr>`).join('')}</tbody>
+          </table>
+        </div>` : ''}
+    </div>
+  </div>`).join('');
+}
+
+// ─ 請求ビュー ─
+function setSeikyuFilter(f){
+  seikyuFilter=f;
+  ['all','minyukin','nyukin'].forEach(k=>document.getElementById('r-chip-'+k)?.classList.toggle('active',k===f));
+  renderSeikyu();
+}
+function renderSeikyu(){
+  const q=document.getElementById('r-search').value.toLowerCase();
+  const from=document.getElementById('r-from').value;
+  const to=document.getElementById('r-to').value;
+  const items=[];
+  ALL_DATA.forEach(p=>(p.請求||[]).forEach(r=>{
+    const txt=[p.案件番号,p.工事名,p.法人名,p.代表者,r.請求番号].filter(Boolean).join(' ').toLowerCase();
+    if((!q||txt.includes(q))&&inRange(r.請求日,from,to)&&(seikyuFilter==='all'||r.入金状況===seikyuFilter))items.push({p,r});
+  }));
+  const minyukin=items.filter(x=>x.r.入金状況!=='nyukin');
+  document.getElementById('r-total').textContent=items.length;
+  document.getElementById('r-minyukin').textContent=minyukin.length;
+  document.getElementById('r-nyukin').textContent=items.length-minyukin.length;
+  document.getElementById('r-minyukin-amt').textContent=fmtYen(minyukin.reduce((s,x)=>s+Number(x.r.請求金額||0),0));
+  const area=document.getElementById('seikyu-area');
+  if(!items.length){area.innerHTML='<div class="empty">該当する請求がありません</div>';return;}
+  area.innerHTML=items.map(({p,r})=>{
+    const isNyukin=r.入金状況==='nyukin';
+    return`<div class="view-card">
+      <div class="view-card-header">
+        <div><div class="view-card-name">${p.工事名}</div><div style="margin-top:3px;">${r.請求番号?`<span class="view-card-id">${r.請求番号}</span> `:''}<span class="view-anken-ref">${p.案件番号}</span></div></div>
+        <div style="text-align:right;"><div class="amount ${isNyukin?'nyukin':'minyukin'}" style="font-size:16px;">${fmtYen(r.請求金額)}</div><span class="badge ${isNyukin?'b-入金済み':'b-未入金'}" style="display:inline-block;margin-top:3px;">${isNyukin?'入金済み':'未入金'}</span></div>
+      </div>
+      <div class="view-card-body">
+        <div class="info-grid">
+          <div class="info-item"><span class="info-label">顧客</span><span class="info-value">${p.法人名||p.代表者||'-'}</span></div>
+          <div class="info-item"><span class="info-label">施工場所</span><span class="info-value">${p.施工場所||'-'}</span></div>
+          <div class="info-item"><span class="info-label">請求日</span><span class="info-value">${fmtDate(r.請求日)}</span></div>
+          <div class="info-item"><span class="info-label">支払期限</span><span class="info-value">${fmtDate(r.支払期限)}</span></div>
+          <div class="info-item"><span class="info-label">入金日</span><span class="info-value">${fmtDate(r.入金日)}</span></div>
+        </div>
+        ${r.備考?`<div class="note-box"><div class="note-label">備考</div>${r.備考}</div>`:''}
+        <div style="margin-top:8px;">${pdfTag(r.PDF,'請求書PDF')}</div>
+        ${(r.明細||[]).length ? `
+          <button class="meisai-toggle" onclick="toggleMeisai('rv-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}-${r.請求番号?.replace(/[^a-zA-Z0-9]/g,'-')||'x'}',this)">▶ 明細を表示</button>
+          <div class="meisai-wrap" id="rv-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}-${r.請求番号?.replace(/[^a-zA-Z0-9]/g,'-')||'x'}">
+            <table class="meisai-table">
+              <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">金額（税抜）</th></tr></thead>
+              <tbody>${(r.明細||[]).map(m=>`<tr><td>${m.工事内容||'-'}</td><td class="right">${m.数量||'-'}</td><td>${m.単位||''}</td><td class="right">¥${Number(m.金額税抜||0).toLocaleString()}</td></tr>`).join('')}</tbody>
+            </table>
+            ${r.税込合計?`<table class="totals-table"><tr><td>税抜合計</td><td>¥${Number(r.税抜合計||0).toLocaleString()}</td></tr><tr><td>消費税（10%）</td><td>¥${Number(r.消費税||0).toLocaleString()}</td></tr><tr><td>税込合計</td><td>¥${Number(r.税込合計||0).toLocaleString()}</td></tr></table>`:''}
+          </div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─ 注文書ビュー ─
+function renderChumon(){
+  const q=document.getElementById('c-search').value.toLowerCase();
+  const from=document.getElementById('c-from').value;
+  const to=document.getElementById('c-to').value;
+  const items=[];
+  ALL_DATA.forEach(p=>(p.注文書||[]).filter(c=>c.業者名||c.注文番号).forEach(c=>{
+    const txt=[p.案件番号,p.工事名,p.法人名,c.業者名,c.注文番号].filter(Boolean).join(' ').toLowerCase();
+    if((!q||txt.includes(q))&&inRange(c.注文日,from,to))items.push({p,c});
+  }));
+  document.getElementById('c-total').textContent=items.length;
+  document.getElementById('c-total-amt').textContent=fmtYen(items.reduce((s,x)=>s+Number(x.c.注文金額||0),0)||null);
+  const area=document.getElementById('chumon-area');
+  if(!items.length){area.innerHTML='<div class="empty">注文書がありません</div>';return;}
+  area.innerHTML=items.map(({p,c})=>`
+  <div class="view-card">
+    <div class="view-card-header">
+      <div><div class="view-card-name">${p.工事名}　<span style="font-size:13px;color:#555;">／ ${c.業者名||'-'}</span></div><div style="margin-top:3px;">${c.注文番号?`<span class="view-card-id">${c.注文番号}</span> `:''}<span class="view-anken-ref">${p.案件番号}</span></div></div>
+      <span class="amount" style="font-size:16px;">${fmtYen(c.注文金額)}</span>
+    </div>
+    <div class="view-card-body">
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">業者名</span><span class="info-value">${c.業者名||'-'}</span></div>
+        <div class="info-item"><span class="info-label">注文日</span><span class="info-value">${fmtDate(c.注文日)}</span></div>
+        <div class="info-item"><span class="info-label">納期</span><span class="info-value">${fmtDate(c.納期)}</span></div>
+      </div>
+      <div style="margin-top:8px;">${pdfTag(c.PDF,'注文書PDF')}</div>
+    </div>
+  </div>`).join('');
+}
+
+// ─ 契約書ビュー ─
+function setKeiyakuFilter(f){
+  keiyakuFilter=f;
+  ['all','signed','pending'].forEach(k=>document.getElementById('k-chip-'+k)?.classList.toggle('active',k===f));
+  renderKeiyaku();
+}
+function renderKeiyaku(){
+  const q=document.getElementById('k-search').value.toLowerCase();
+  const from=document.getElementById('k-from').value;
+  const to=document.getElementById('k-to').value;
+  const items=ALL_DATA.filter(p=>{
+    const k=p.契約書||{};
+    const txt=[p.案件番号,p.工事名,p.法人名,p.代表者,k.契約番号].filter(Boolean).join(' ').toLowerCase();
+    const isSigned=k.ステータス==='締結済み';
+    return(!q||txt.includes(q))&&inRange(k.契約日,from,to)&&(keiyakuFilter==='all'||(keiyakuFilter==='signed'&&isSigned)||(keiyakuFilter==='pending'&&!isSigned));
+  });
+  const signed=items.filter(p=>p.契約書?.ステータス==='締結済み');
+  document.getElementById('k-total').textContent=items.length;
+  document.getElementById('k-signed').textContent=signed.length;
+  document.getElementById('k-pending').textContent=items.length-signed.length;
+  const area=document.getElementById('keiyaku-area');
+  if(!items.length){area.innerHTML='<div class="empty">該当する契約書がありません</div>';return;}
+  area.innerHTML=items.map(p=>{
+    const k=p.契約書||{};
+    const isSigned=k.ステータス==='締結済み';
+    return`<div class="view-card">
+      <div class="view-card-header">
+        <div><div class="view-card-name">${p.工事名}</div><div style="margin-top:3px;">${k.契約番号?`<span class="view-card-id">${k.契約番号}</span> `:''}<span class="view-anken-ref">${p.案件番号}</span></div></div>
+        <span class="badge ${isSigned?'b-締結済み':'b-未締結'}">${k.ステータス||'未締結'}</span>
+      </div>
+      <div class="view-card-body">
+        <div class="info-grid">
+          <div class="info-item"><span class="info-label">顧客</span><span class="info-value">${p.法人名||p.代表者||'-'}</span></div>
+          <div class="info-item"><span class="info-label">施工場所</span><span class="info-value">${p.施工場所||'-'}</span></div>
+          <div class="info-item"><span class="info-label">契約日</span><span class="info-value">${fmtDate(k.契約日)}</span></div>
+          <div class="info-item"><span class="info-label">契約金額</span><span class="info-value amount">${fmtYen(k.契約金額)}</span></div>
+        </div>
+        <div style="margin-top:8px;">${pdfTag(k.PDF,'契約書PDF')}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─ 原価ビュー ─
+function renderGenka(){
+  const q=document.getElementById('g-search').value.toLowerCase();
+  const items=ALL_DATA.filter(p=>{
+    const txt=[p.案件番号,p.工事名,p.法人名,p.代表者].filter(Boolean).join(' ').toLowerCase();
+    return!q||txt.includes(q);
+  });
+  let tg=0,tu=0;
+  items.forEach(p=>{
+    const g=p.原価||{};
+    const gt=(g.労務費||0)+(g.材料費||0)+(g.外注費||0)+(g.経費||0);
+    const u=(p.請求||[]).reduce((s,r)=>s+Number(r.請求金額||0),0)||Number(p.見積?.見積金額||0);
+    tg+=gt;tu+=u;
+  });
+  const avgRate=tu&&tg?Math.round((1-tg/tu)*100):null;
+  document.getElementById('g-total').textContent=items.length;
+  document.getElementById('g-total-genka').textContent=fmtYen(tg||null);
+  document.getElementById('g-total-uri').textContent=fmtYen(tu||null);
+  document.getElementById('g-avg-rate').textContent=avgRate!==null?avgRate+'%':'-';
+  const area=document.getElementById('genka-area');
+  if(!items.length){area.innerHTML='<div class="empty">該当する案件がありません</div>';return;}
+  area.innerHTML=items.map(p=>{
+    const g=p.原価||{};
+    const gt=(g.労務費||0)+(g.材料費||0)+(g.外注費||0)+(g.経費||0);
+    const u=(p.請求||[]).reduce((s,r)=>s+Number(r.請求金額||0),0)||Number(p.見積?.見積金額||0);
+    const rate=u&&gt?Math.round((1-gt/u)*100):null;
+    const rc=rate===null?'#999':rate>=80?'#1a7a30':rate>=60?'#d97706':'#dc2626';
+    return`<div class="view-card">
+      <div class="view-card-header">
+        <div><div class="view-card-name">${p.工事名}</div><div style="margin-top:3px;"><span class="view-anken-ref">${p.案件番号}</span></div></div>
+        <div style="text-align:right;">${rate!==null?`<div style="font-size:18px;font-weight:700;color:${rc};">粗利率 ${rate}%</div>`:'<div style="color:#999;font-size:12px;">原価未入力</div>'}</div>
+      </div>
+      <div class="view-card-body">
+        <div class="info-grid">
+          <div class="info-item"><span class="info-label">売上</span><span class="info-value amount nyukin">${fmtYen(u||null)}</span></div>
+          <div class="info-item"><span class="info-label">原価合計</span><span class="info-value amount minyukin">${fmtYen(gt||null)}</span></div>
+          <div class="info-item"><span class="info-label">粗利</span><span class="info-value amount" style="color:${rc};">${u&&gt?fmtYen(u-gt):'-'}</span></div>
+          <div class="info-item"><span class="info-label">労務費</span><span class="info-value">${fmtYen(g.労務費||null)}</span></div>
+          <div class="info-item"><span class="info-label">材料費</span><span class="info-value">${fmtYen(g.材料費||null)}</span></div>
+          <div class="info-item"><span class="info-label">外注費</span><span class="info-value">${fmtYen(g.外注費||null)}</span></div>
+          <div class="info-item"><span class="info-label">経費</span><span class="info-value">${fmtYen(g.経費||null)}</span></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleMeisai(id,btn){
+  const wrap=document.getElementById(id);
+  if(!wrap)return;
+  const isOpen=wrap.classList.toggle('open');
+  btn.textContent=isOpen?'▼ 明細を隠す':'▶ 明細を表示';
+}
+
+loadData();
+</script>
 </body>
 </html>
