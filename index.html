@@ -79,17 +79,18 @@ body{
 .dot-入金済み{background:#27ae60;}
 .dot-完了{background:#95a5a6;}
 
-/* ★ 今の動き：トピック3分割グリッド（2026/4/23 ダッシュボード統合） */
+/* ★ 今の動き：トピック3分割グリッド（2026/4/23 ダッシュボード統合）
+   進行中案件ドットと色を統一：紫=見積対応中 / 橙=施工中 / 緑=入金待ち */
 .topic-grid{
   display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;
 }
 .topic-cell{
-  background:var(--white);border-radius:14px;padding:12px 10px;
-  display:flex;align-items:center;gap:10px;
+  background:var(--white);border-radius:14px;padding:12px 12px;
+  display:flex;align-items:center;gap:12px;
   box-shadow:0 2px 8px rgba(30,45,64,0.07);
 }
-.topic-icon{
-  font-size:22px;flex-shrink:0;line-height:1;
+.topic-dot{
+  width:12px;height:12px;border-radius:50%;flex-shrink:0;
 }
 .topic-body{flex:1;min-width:0;}
 .topic-label{
@@ -491,21 +492,21 @@ function renderKPI(rows){
     </div>
     <div class="topic-grid">
       <div class="topic-cell">
-        <div class="topic-icon">🔥</div>
+        <div class="topic-dot" style="background:#9b59b6;"></div>
         <div class="topic-body">
           <div class="topic-label">見積対応中</div>
           <div class="topic-count">${mitsumoriCount}<small>件</small></div>
         </div>
       </div>
       <div class="topic-cell">
-        <div class="topic-icon">⚡</div>
+        <div class="topic-dot" style="background:#f39c12;"></div>
         <div class="topic-body">
           <div class="topic-label">施工中</div>
           <div class="topic-count">${sekoCount}<small>件</small></div>
         </div>
       </div>
       <div class="topic-cell">
-        <div class="topic-icon">💰</div>
+        <div class="topic-dot" style="background:#1a7a30;"></div>
         <div class="topic-body">
           <div class="topic-label">入金待ち</div>
           <div class="topic-count">${nyukinMachi}<small>件</small></div>
