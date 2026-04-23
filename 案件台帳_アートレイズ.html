@@ -15,7 +15,9 @@
   --green:#16a34a; --red:#dc2626; --orange:#d97706; --blue:#2563eb;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--text);font-size:14px;padding-bottom:20px;}
+body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--text);font-size:14px;padding-bottom:20px;
+  /* ★ common.cssの overflow:hidden と height:100dvh を解除してページ全体スクロールを有効化 */
+  height:auto;min-height:100dvh;overflow:auto;overflow-x:hidden;}
 .container{max-width:1100px;margin:0 auto;padding:0 16px 24px;}
 .page-header{background:var(--navy);color:var(--white);padding:14px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;}
 .page-header h1{font-size:17px;font-weight:700;letter-spacing:0.04em;display:flex;align-items:center;gap:8px;}
