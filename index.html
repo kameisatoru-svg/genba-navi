@@ -10,13 +10,14 @@
 <meta name="theme-color" content="#1e2d40">
 <link rel="stylesheet" href="common.css">
 <style>
-/* ★ :root変数はcommon.cssで一元管理（2026/4/23 Phase 0導入） */
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{
-  background:var(--bg);color:var(--text);
-  font-family:'Meiryo','Yu Gothic',sans-serif;
-  height:100dvh;display:flex;flex-direction:column;overflow:hidden;
-}
+/* ★ Phase 0 仕上げ（2026/4/23）：common.cssとの重複CSSを削除
+   - :root変数 → common.cssで一元管理
+   - *{リセット} → common.cssで定義済み（完全削除）
+   - body基本 → common.cssで定義済み（ページ固有のflex設定のみ残す）
+   - .scroll-area → common.cssで定義済み（ページ固有のpaddingのみ追記） */
+
+/* body：flex縦並びレイアウトだけページ固有（それ以外はcommon.cssで定義済み） */
+body{display:flex;flex-direction:column;}
 
 /* ヘッダー */
 .header{background:var(--navy);padding:env(safe-area-inset-top,0) 0 0;flex-shrink:0;}
@@ -27,8 +28,8 @@ body{
 .header-btn{width:40px;height:40px;border:none;background:transparent;color:rgba(255,255,255,0.7);cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:8px;flex-shrink:0;margin-left:4px;}
 .header-btn:active{background:rgba(255,255,255,0.12);}
 
-/* スクロールエリア */
-.scroll-area{flex:1;overflow-y:auto;padding:20px 16px max(24px,env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch;}
+/* スクロールエリア（flex:1とoverflow-y:autoはcommon.cssで定義済み・paddingのみ追記） */
+.scroll-area{padding:20px 16px max(24px,env(safe-area-inset-bottom));}
 
 /* 今日の日付カード */
 .today-card{background:var(--navy2);border-radius:16px;padding:16px 18px;margin-bottom:16px;display:flex;align-items:center;gap:14px;}
