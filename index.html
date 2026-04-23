@@ -80,12 +80,41 @@ body{
 .dot-完了{background:#95a5a6;}
 
 /* セクションタイトル */
-.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;}
-.main-card{background:var(--white);border-radius:16px;padding:18px 14px 16px;display:flex;flex-direction:column;align-items:flex-start;gap:10px;cursor:pointer;box-shadow:0 2px 8px rgba(30,45,64,0.08);border:1.5px solid transparent;transition:border-color 0.15s;text-decoration:none;}
-.main-card:active{border-color:var(--accent);background:#faf8f4;}
-.card-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+/* ★ 現場ツール：ミニマル白カード（2026/4/23 Phase 1導入）
+   - 3列自動切替（Fold5横向き=3列 / 縦向き=2列）
+   - アスペクト比 4:3
+   - アイコン48px（紺の線）
+   - カード全体がピクト領域 */
+.main-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:12px;margin-bottom:24px;
+}
+.main-card{
+  background:var(--white);
+  border-radius:20px;
+  padding:18px 16px;
+  aspect-ratio:4/3;
+  display:flex;flex-direction:column;justify-content:space-between;
+  cursor:pointer;
+  box-shadow:0 2px 10px rgba(30,45,64,0.06);
+  border:1px solid rgba(30,45,64,0.06);
+  transition:transform 0.15s,border-color 0.15s;
+  text-decoration:none;
+  color:var(--text);
+}
+.main-card:active{
+  transform:scale(0.97);
+  border-color:var(--accent);
+  background:#faf8f4;
+}
+.card-icon{
+  width:48px;height:48px;
+  color:var(--navy);
+  flex-shrink:0;
+}
 .card-body{width:100%;}
-.card-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.card-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:2px;line-height:1.3;}
 .card-desc{font-size:11px;color:var(--text2);line-height:1.4;}
 
 /* 外部連携リスト */
@@ -163,109 +192,103 @@ body{
   <div class="sec-title">現場ツール</div>
   <div class="main-grid">
 
+    <!-- 1. 図面スケッチ -->
     <a class="main-card" href="https://kameisatoru-svg.github.io/genba-navi/zumen_sketch_v4.html">
-      <div class="card-icon" style="background:rgba(30,45,64,0.08);">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <rect x="4" y="4" width="20" height="20" rx="3" stroke="#1e2d40" stroke-width="1.5" fill="none"></rect>
-          <line x1="4" y1="10" x2="24" y2="10" stroke="#1e2d40" stroke-width="1" opacity="0.3"></line>
-          <line x1="4" y1="16" x2="24" y2="16" stroke="#1e2d40" stroke-width="1" opacity="0.3"></line>
-          <line x1="10" y1="4" x2="10" y2="24" stroke="#1e2d40" stroke-width="1" opacity="0.3"></line>
-          <line x1="16" y1="4" x2="16" y2="24" stroke="#1e2d40" stroke-width="1" opacity="0.3"></line>
-          <path d="M8 20 L12 12 L16 17 L18 14 L21 20" stroke="#1e2d40" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
-        </svg>
+      <svg class="card-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="6" y="6" width="36" height="36" rx="3"/>
+        <path d="M12 36 L20 23 L27 29 L34 18 L38 24"/>
+        <circle cx="34" cy="16" r="2" fill="currentColor" stroke="none"/>
+      </svg>
+      <div class="card-body">
+        <div class="card-title">図面スケッチ</div>
+        <div class="card-desc">実測・図面・拾い出し</div>
       </div>
-      <div class="card-body"><div class="card-title">図面スケッチ</div><div class="card-desc">実測・図面・拾い出し</div></div>
     </a>
 
-    <a class="main-card" href="https://kameisatoru-svg.github.io/genba-navi/genba_photo.html">
-      <div class="card-icon" style="background:rgba(26,111,196,0.1);">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <rect x="3" y="7" width="22" height="17" rx="3" stroke="#1a6fc4" stroke-width="1.5" fill="none"></rect>
-          <circle cx="14" cy="15" r="5" stroke="#1a6fc4" stroke-width="1.5" fill="none"></circle>
-          <circle cx="14" cy="15" r="2" fill="#1a6fc4" opacity="0.4"></circle>
-          <path d="M10 7 L12 4 L16 4 L18 7" stroke="#1a6fc4" stroke-width="1.5" fill="none" stroke-linejoin="round"></path>
-        </svg>
-      </div>
-      <div class="card-body"><div class="card-title">現場写真</div><div class="card-desc">施工前後・案件別管理</div></div>
-    </a>
-
+    <!-- 2. 工程表 -->
     <a class="main-card" href="https://kameisatoru-svg.github.io/genba-navi/gantt.html">
-      <div class="card-icon" style="background:rgba(26,122,48,0.1);">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <rect x="4" y="4" width="20" height="20" rx="2" stroke="#1a7a30" stroke-width="1.4" fill="none"></rect>
-          <line x1="10" y1="4" x2="10" y2="24" stroke="#1a7a30" stroke-width="0.8" opacity="0.3"></line>
-          <line x1="4" y1="10" x2="24" y2="10" stroke="#1a7a30" stroke-width="0.8" opacity="0.3"></line>
-          <line x1="4" y1="16" x2="24" y2="16" stroke="#1a7a30" stroke-width="0.8" opacity="0.3"></line>
-          <rect x="11" y="6.5" width="9" height="3" rx="1.5" fill="#1a7a30" opacity="0.8"></rect>
-          <rect x="11" y="12.5" width="6" height="3" rx="1.5" fill="#1a7a30" opacity="0.6"></rect>
-          <rect x="14" y="18.5" width="7" height="3" rx="1.5" fill="#1a7a30" opacity="0.5"></rect>
-        </svg>
+      <svg class="card-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="5" y="8" width="38" height="32" rx="3"/>
+        <line x1="5" y1="18" x2="43" y2="18" stroke-width="1" opacity="0.4"/>
+        <line x1="5" y1="28" x2="43" y2="28" stroke-width="1" opacity="0.4"/>
+        <rect x="12" y="12" width="16" height="4" rx="0.8" fill="currentColor" stroke="none"/>
+        <rect x="17" y="22" width="13" height="4" rx="0.8" fill="currentColor" opacity="0.7" stroke="none"/>
+        <rect x="22" y="32" width="15" height="4" rx="0.8" fill="currentColor" opacity="0.5" stroke="none"/>
+      </svg>
+      <div class="card-body">
+        <div class="card-title">工程表</div>
+        <div class="card-desc">バーチャート作成</div>
       </div>
-      <div class="card-body"><div class="card-title">工程表</div><div class="card-desc">バーチャート作成</div></div>
     </a>
 
+    <!-- 3. 図面アプリ -->
     <a class="main-card" href="https://kameisatoru-svg.github.io/genba-navi/zumen_app.html">
-      <div class="card-icon" style="background:rgba(176,106,0,0.1);">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <rect x="3" y="3" width="22" height="22" rx="3" stroke="#b06a00" stroke-width="1.5" fill="none"></rect>
-          <rect x="7" y="7" width="14" height="14" rx="1.5" stroke="#b06a00" stroke-width="1.2" fill="rgba(176,106,0,0.08)"></rect>
-          <line x1="3" y1="14" x2="7" y2="14" stroke="#b06a00" stroke-width="1.2" stroke-linecap="round"></line>
-          <line x1="21" y1="14" x2="25" y2="14" stroke="#b06a00" stroke-width="1.2" stroke-linecap="round"></line>
-          <line x1="14" y1="3" x2="14" y2="7" stroke="#b06a00" stroke-width="1.2" stroke-linecap="round"></line>
-          <line x1="14" y1="21" x2="14" y2="25" stroke="#b06a00" stroke-width="1.2" stroke-linecap="round"></line>
-          <circle cx="14" cy="14" r="2" fill="#b06a00" opacity="0.5"></circle>
-        </svg>
+      <svg class="card-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="4" width="40" height="40" rx="3"/>
+        <line x1="16" y1="4" x2="16" y2="44"/>
+        <line x1="4" y1="18" x2="44" y2="18"/>
+        <rect x="24" y="24" width="14" height="14" fill="rgba(30,45,64,0.08)" stroke="currentColor"/>
+      </svg>
+      <div class="card-body">
+        <div class="card-title">図面アプリ</div>
+        <div class="card-desc">平面図・展開図・天井図</div>
       </div>
-      <div class="card-body"><div class="card-title">図面アプリ</div><div class="card-desc">平面図・展開図・天井図</div></div>
     </a>
 
+    <!-- 4. 材料割付 -->
     <a class="main-card" href="https://kameisatoru-svg.github.io/genba-navi/%E6%9D%90%E6%96%99%E5%89%B2%E4%BB%98_app_.html">
-      <div class="card-icon" style="background:rgba(42,106,74,0.1);">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <rect x="3" y="3" width="10" height="10" rx="2" stroke="#2a6a4a" stroke-width="1.4" fill="rgba(42,106,74,0.08)"></rect>
-          <rect x="15" y="3" width="10" height="10" rx="2" stroke="#2a6a4a" stroke-width="1.4" fill="rgba(42,106,74,0.08)"></rect>
-          <rect x="3" y="15" width="10" height="10" rx="2" stroke="#2a6a4a" stroke-width="1.4" fill="rgba(42,106,74,0.08)"></rect>
-          <rect x="15" y="15" width="10" height="10" rx="2" stroke="#2a6a4a" stroke-width="1.4" fill="rgba(42,106,74,0.05)"></rect>
-        </svg>
+      <svg class="card-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+        <rect x="6" y="6" width="16" height="16" rx="1.5"/>
+        <rect x="26" y="6" width="16" height="16" rx="1.5"/>
+        <rect x="6" y="26" width="16" height="16" rx="1.5"/>
+        <rect x="26" y="26" width="16" height="16" rx="1.5" fill="rgba(30,45,64,0.15)" stroke="currentColor"/>
+      </svg>
+      <div class="card-body">
+        <div class="card-title">材料割付</div>
+        <div class="card-desc">タイル・床材・数量拾い</div>
       </div>
-      <div class="card-body"><div class="card-title">材料割付</div><div class="card-desc">タイル・床材・数量拾い</div></div>
     </a>
 
+    <!-- 5. Claude -->
     <a class="main-card" href="https://claude.ai/project/019ce0c4-f60b-74b7-88ad-873a22c28553" target="_blank">
-      <div class="card-icon" style="background:rgba(200,169,110,0.15);">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <circle cx="14" cy="14" r="10" stroke="#c8a96e" stroke-width="1.5" fill="none"></circle>
-          <path d="M9 14 Q14 8 19 14 Q14 20 9 14Z" stroke="#c8a96e" stroke-width="1.3" fill="none"></path>
-          <circle cx="14" cy="14" r="2.5" fill="#c8a96e" opacity="0.5"></circle>
-        </svg>
+      <svg class="card-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 12 Q8 8 12 8 L36 8 Q40 8 40 12 L40 28 Q40 32 36 32 L20 32 L12 38 L12 32 Q8 32 8 28 Z"/>
+        <path d="M24 14 L25.5 18 L29.5 19.5 L25.5 21 L24 25 L22.5 21 L18.5 19.5 L22.5 18 Z" fill="currentColor" stroke="none"/>
+      </svg>
+      <div class="card-body">
+        <div class="card-title">Claude</div>
+        <div class="card-desc">AI見積・書類生成</div>
       </div>
-      <div class="card-body"><div class="card-title">Claude</div><div class="card-desc">AI見積・書類生成</div></div>
     </a>
 
+    <!-- 6. 案件 -->
     <a class="main-card" href="https://kameisatoru-svg.github.io/genba-navi/案件台帳_アートレイズ.html">
-      <div class="card-icon" style="background:rgba(26,111,196,0.1);">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <rect x="4" y="3" width="20" height="22" rx="3" stroke="#1a6fc4" stroke-width="1.5" fill="none"></rect>
-          <line x1="8" y1="9" x2="20" y2="9" stroke="#1a6fc4" stroke-width="1.3" stroke-linecap="round"></line>
-          <line x1="8" y1="13" x2="20" y2="13" stroke="#1a6fc4" stroke-width="1.3" stroke-linecap="round"></line>
-          <line x1="8" y1="17" x2="14" y2="17" stroke="#1a6fc4" stroke-width="1.3" stroke-linecap="round"></line>
-        </svg>
+      <svg class="card-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="8" y="6" width="32" height="36" rx="3"/>
+        <line x1="14" y1="16" x2="34" y2="16"/>
+        <line x1="14" y1="23" x2="34" y2="23"/>
+        <line x1="14" y1="30" x2="26" y2="30"/>
+      </svg>
+      <div class="card-body">
+        <div class="card-title">案件</div>
+        <div class="card-desc">案件台帳・Drive連携</div>
       </div>
-      <div class="card-body"><div class="card-title">案件</div><div class="card-desc">案件台帳・Drive連携</div></div>
     </a>
 
+    <!-- 7. 工程カレンダー -->
     <a class="main-card" href="https://calendar.google.com/calendar/r?src=hf02c6e51i9chil96o9hmsccmk@group.calendar.google.com" target="_blank">
-      <div class="card-icon" style="background:rgba(32,128,64,0.1);">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <rect x="3" y="4" width="22" height="21" rx="3" stroke="#208040" stroke-width="1.5" fill="none"></rect>
-          <line x1="3" y1="11" x2="25" y2="11" stroke="#208040" stroke-width="1.3"></line>
-          <line x1="9" y1="2" x2="9" y2="7" stroke="#208040" stroke-width="1.8" stroke-linecap="round"></line>
-          <line x1="19" y1="2" x2="19" y2="7" stroke="#208040" stroke-width="1.8" stroke-linecap="round"></line>
-          <rect x="7" y="15" width="4" height="4" rx="1" fill="#208040" opacity="0.5"></rect>
-          <rect x="13" y="15" width="4" height="4" rx="1" fill="#208040" opacity="0.3"></rect>
-        </svg>
+      <svg class="card-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="6" y="8" width="36" height="34" rx="3"/>
+        <line x1="6" y1="18" x2="42" y2="18"/>
+        <line x1="15" y1="4" x2="15" y2="12"/>
+        <line x1="33" y1="4" x2="33" y2="12"/>
+        <rect x="13" y="24" width="6" height="6" rx="1" fill="currentColor" opacity="0.5" stroke="none"/>
+        <rect x="23" y="24" width="6" height="6" rx="1" fill="currentColor" opacity="0.3" stroke="none"/>
+      </svg>
+      <div class="card-body">
+        <div class="card-title">工程カレンダー</div>
+        <div class="card-desc">Googleカレンダー</div>
       </div>
-      <div class="card-body"><div class="card-title">工程カレンダー</div><div class="card-desc">Googleカレンダー</div></div>
     </a>
 
   </div>
