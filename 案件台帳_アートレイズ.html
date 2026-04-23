@@ -4,58 +4,118 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>案件台帳｜株式会社アート・レイズ</title>
+<link rel="stylesheet" href="common.css">
 <style>
+/* ★ 現場ナビ系との配色統一（2026/4/23）：bg・card-header をnavy系に揃える
+   その他の変数（text/text-sub/green/red/orange/blue）は書類固有のまま維持 */
 :root {
   --navy:#1e2d40; --accent:#c8a96e; --white:#fff;
-  --bg:#f0f0ee; --border:#ddd; --border-dark:#aaa;
+  --bg:#eeebe5; --border:#ddd; --border-dark:#aaa;
   --text:#333; --text-sub:#666; --light:#f8f8f8;
   --green:#16a34a; --red:#dc2626; --orange:#d97706; --blue:#2563eb;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--text);font-size:14px;padding-bottom:20px;}
 .container{max-width:1100px;margin:0 auto;padding:0 16px 24px;}
-.page-header{background:var(--navy);color:var(--white);padding:16px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;}
-.page-header h1{font-size:18px;font-weight:700;letter-spacing:0.05em;}
-.page-header .meta{font-size:11px;opacity:0.7;text-align:right;}
-#sourceBadge{font-size:11px;font-weight:600;margin-top:2px;}
+.page-header{background:var(--navy);color:var(--white);padding:14px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;}
+.page-header h1{font-size:17px;font-weight:700;letter-spacing:0.04em;display:flex;align-items:center;gap:8px;}
+.page-header .summary{font-size:12px;opacity:0.85;text-align:right;line-height:1.4;}
+.page-header .summary .count{font-size:14px;font-weight:700;}
 .tab-nav{background:var(--navy);display:flex;border-bottom:2px solid var(--accent);overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .tab-nav::-webkit-scrollbar{display:none;}
-.tab-btn{padding:10px 18px;border:none;background:transparent;color:rgba(255,255,255,0.6);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.15s;}
-.tab-btn:hover{color:rgba(255,255,255,0.9);}
+.tab-btn{padding:14px 22px;border:none;background:transparent;color:rgba(255,255,255,0.7);font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all 0.15s;min-height:52px;display:flex;align-items:center;gap:6px;}
+.tab-btn:hover{color:rgba(255,255,255,0.95);}
 .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
-.filter-bar{background:var(--white);border:1px solid var(--border);padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px;border-radius:0 0 6px 6px;}
-.filter-bar input[type="text"]{flex:1;min-width:180px;padding:7px 10px;border:1px solid var(--border-dark);border-radius:4px;font-size:13px;font-family:inherit;}
-.filter-bar input[type="text"]:focus{outline:none;border-color:var(--blue);}
-.filter-bar input[type="date"]{padding:6px 8px;border:1px solid var(--border-dark);border-radius:4px;font-size:12px;font-family:inherit;cursor:pointer;}
+.tab-btn svg{width:18px;height:18px;}
+/* ★ 検索＋フィルタボタン：シンプル化 */
+.filter-bar{background:var(--white);border:1px solid var(--border);padding:10px 12px;display:flex;gap:8px;align-items:center;margin-bottom:14px;border-radius:6px;margin-top:14px;}
+.filter-bar input[type="text"]{flex:1;min-width:0;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-size:15px;font-family:inherit;background:var(--light);}
+.filter-bar input[type="text"]:focus{outline:none;border-color:var(--accent);background:var(--white);}
+.filter-bar input[type="date"]{padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;cursor:pointer;background:var(--light);}
 .filter-label{font-size:11px;color:var(--text-sub);white-space:nowrap;}
 .filter-sep{color:var(--border-dark);}
+/* フィルタボタン（右端のアイコン・タップでシート展開） */
+.filter-toggle-btn{
+  width:44px;height:44px;border:1px solid var(--border);border-radius:6px;
+  background:var(--white);color:var(--navy);cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;
+}
+.filter-toggle-btn:hover{background:var(--light);}
+.filter-toggle-btn.has-filter{background:var(--navy);color:var(--white);border-color:var(--navy);}
+.filter-toggle-btn .filter-dot{
+  position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;
+  background:var(--accent);display:none;
+}
+.filter-toggle-btn.has-filter .filter-dot{display:block;}
+/* フィルタシート（下から出るモーダル） */
+.filter-sheet{
+  position:fixed;bottom:0;left:0;right:0;background:var(--white);
+  border-radius:16px 16px 0 0;box-shadow:0 -4px 16px rgba(0,0,0,0.15);
+  z-index:200;padding:20px 20px 24px;transform:translateY(100%);
+  transition:transform 0.25s ease-out;
+}
+.filter-sheet.open{transform:translateY(0);}
+.filter-sheet-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:199;
+  opacity:0;pointer-events:none;transition:opacity 0.25s;
+}
+.filter-sheet-backdrop.open{opacity:1;pointer-events:auto;}
+.filter-sheet-title{font-size:13px;font-weight:700;color:var(--text-sub);margin-bottom:12px;letter-spacing:0.06em;}
+.filter-sheet-chips{display:flex;flex-wrap:wrap;gap:8px;}
+.filter-sheet-chip{
+  padding:10px 18px;border:1px solid var(--border);border-radius:24px;
+  background:var(--white);font-size:14px;font-weight:600;color:var(--text);
+  cursor:pointer;font-family:inherit;min-height:44px;
+}
+.filter-sheet-chip.active{background:var(--navy);color:var(--white);border-color:var(--navy);}
+.filter-sheet-close{
+  margin-top:16px;width:100%;padding:12px;background:var(--accent);color:var(--navy);
+  border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;
+  font-family:inherit;min-height:48px;
+}
+/* 旧ステータスチップ（filter-bar内）は非表示・シートに移行 */
+#anken-chips{display:none;}
 .chip{padding:4px 12px;border-radius:20px;border:1px solid var(--border-dark);background:var(--white);font-size:12px;cursor:pointer;font-family:inherit;transition:all 0.1s;white-space:nowrap;}
 .chip.active{background:var(--navy);color:var(--white);border-color:var(--navy);}
-.stats-bar{display:flex;background:var(--white);border:1px solid var(--border);border-top:none;overflow-x:auto;-webkit-overflow-scrolling:touch;}
-.stats-bar::-webkit-scrollbar{display:none;}
+/* ★ 統計バー非表示（サマリーはヘッダーに集約） */
+.stats-bar{display:none;}
 .stat-item{text-align:center;padding:12px 20px;border-right:1px solid var(--border);flex-shrink:0;}
 .stat-item:last-child{border-right:none;}
 .stat-num{font-size:20px;font-weight:700;color:var(--navy);}
 .stat-label{font-size:10px;color:var(--text-sub);margin-top:2px;}
-.card{background:var(--white);border:1px solid var(--border);border-radius:6px;margin-bottom:12px;overflow:hidden;transition:box-shadow 0.15s;}
-.card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.1);}
-.card-header{background:#444;color:var(--white);padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;user-select:none;}
-.card-header:hover{background:#3a3a3a;}
-.card-header-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1;}
-.card-id{background:rgba(255,255,255,0.2);padding:2px 10px;border-radius:12px;font-size:12px;font-weight:700;flex-shrink:0;}
-.card-name{font-size:15px;font-weight:700;}
-.card-toggle{font-size:12px;opacity:0.6;transition:transform 0.2s;flex-shrink:0;}
-.card.open .card-toggle{transform:rotate(180deg);}
-.card-body{display:none;padding:16px 20px;}
+/* ★ C-1 改修（2026/4/23）：カード反転＋左端の緊急度バーで視認性UP */
+.card{background:var(--white);border:1px solid var(--border);border-radius:6px;margin-bottom:10px;overflow:hidden;transition:box-shadow 0.15s;position:relative;border-left:4px solid var(--border-dark);}
+.card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+/* 緊急度バー：ステータス別の左端色 */
+.card.status-施工中{border-left-color:#f39c12;}
+.card.status-見積作成中{border-left-color:#9b59b6;}
+.card.status-見積提出済み{border-left-color:#2563eb;}
+.card.status-見積提出予定{border-left-color:#d97706;}
+.card.status-請求済み{border-left-color:#1a7a30;}
+.card.status-受注済{border-left-color:#1a7a30;}
+.card.status-入金済み{border-left-color:#9ca3af;}
+.card.status-完了{border-left-color:#9ca3af;opacity:0.75;}
+/* ヘッダー：白基調に反転 */
+.card-header{background:var(--white);color:var(--text);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;user-select:none;min-height:56px;}
+.card-header:hover{background:#faf9f6;}
+.card-header-left{display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex:1;min-width:0;}
+.card-id{background:var(--light);color:var(--text-sub);padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;flex-shrink:0;letter-spacing:0.02em;}
+.card-name{font-size:16px;font-weight:700;color:var(--navy);line-height:1.35;}
+.card-toggle{font-size:14px;opacity:0.4;color:var(--text-sub);transition:transform 0.2s;flex-shrink:0;}
+.card.open .card-toggle{transform:rotate(180deg);opacity:0.7;}
+.card.open{box-shadow:0 2px 12px rgba(30,45,64,0.1);}
+.card-body{display:none;padding:16px 20px;background:#fbfaf8;}
 .card.open .card-body{display:block;}
-.badge{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;}
-.b-施工中{background:#0e6b9a;color:#fff;}
-.b-受注済{background:#1a7a30;color:#fff;}
-.b-完了{background:#6b7280;color:#fff;}
+.badge{padding:4px 11px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;letter-spacing:0.02em;}
+/* 優先度順：橙（今動いてる）→ 紫（作成中）→ 青（提出済み・相手待ち）→ 緑（請求・入金）→ グレー（完了） */
+.b-施工中{background:#f39c12;color:#fff;}
+.b-見積作成中{background:#9b59b6;color:#fff;}
 .b-見積提出済み{background:#2563eb;color:#fff;}
 .b-見積提出予定{background:#d97706;color:#fff;}
-.b-請求済み{background:#6b7280;color:#fff;}
-.b-入金済み{background:#4b5563;color:#fff;}
+.b-受注済{background:#1a7a30;color:#fff;}
+.b-請求済み{background:#1a7a30;color:#fff;}
+.b-入金済み{background:#e8ebef;color:#6b7280;}
+.b-完了{background:#e8ebef;color:#6b7280;}
 .b-未入金{background:#dc2626;color:#fff;}
 .b-締結済み{background:#1a7a30;color:#fff;}
 .b-未締結{background:#d97706;color:#fff;}
@@ -102,7 +162,7 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 .meisai-wrap{display:none;margin-top:8px;}
 .meisai-wrap.open{display:block;}
 .meisai-table{width:100%;border-collapse:collapse;font-size:12px;border:1px solid var(--border);}
-.meisai-table th{background:#444;color:#fff;padding:6px 10px;text-align:left;font-weight:600;}
+.meisai-table th{background:var(--navy);color:#fff;padding:6px 10px;text-align:left;font-weight:600;}
 .meisai-table th.right,.meisai-table td.right{text-align:right;}
 .meisai-table td{padding:6px 10px;border-bottom:1px solid var(--border);}
 .meisai-table tr:nth-child(even) td{background:#f5f5f5;}
@@ -110,16 +170,27 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 .totals-table{width:280px;margin-left:auto;border-collapse:collapse;font-size:12px;border:1px solid var(--border);margin-top:4px;}
 .totals-table td{padding:5px 12px;border-bottom:1px solid var(--border);}
 .totals-table td:last-child{text-align:right;}
-.totals-table tr:last-child td{background:#444;color:#fff;font-weight:700;border-bottom:none;}
+.totals-table tr:last-child td{background:var(--navy);color:#fff;font-weight:700;border-bottom:none;}
 .empty{background:var(--white);border:2px dashed var(--border-dark);border-radius:6px;padding:20px;text-align:center;color:var(--text-sub);font-size:13px;margin-bottom:12px;}
 .loading{text-align:center;padding:40px;color:var(--text-sub);font-size:13px;}
-@media(max-width:600px){.info-grid{grid-template-columns:1fr 1fr;}.tab-btn{padding:10px 12px;font-size:12px;}}
+@media(max-width:600px){
+  .info-grid{grid-template-columns:1fr 1fr;}
+  .tab-btn{padding:13px 16px;font-size:14px;}
+  .tab-btn svg{width:16px;height:16px;}
+  .page-header{padding:12px 14px;}
+  .page-header h1{font-size:16px;}
+  .page-header .summary{font-size:11px;}
+  .page-header .summary .count{font-size:13px;}
+  .card-name{font-size:15px;}
+  .filter-bar{padding:8px 10px;gap:6px;}
+  .filter-bar input[type="text"]{font-size:15px;padding:10px;}
+}
 </style>
 </head>
 <body>
 <div class="page-header">
-  <h1 style="display:flex;align-items:center;gap:8px;"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="10" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>案件台帳｜アート・レイズ</h1>
-  <div class="meta"><div id="lastUpdated">-</div><div id="sourceBadge">読込中...</div></div>
+  <h1><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="10" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>案件台帳</h1>
+  <div class="summary" id="headerSummary">-</div>
 </div>
 <div class="tab-nav">
   <button class="tab-btn active" onclick="switchTab('anken')">
@@ -145,18 +216,27 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 
 <!-- 案件ビュー -->
 <div id="view-anken">
-  <div class="stats-bar">
-    <div class="stat-item"><div class="stat-num" id="s-total">-</div><div class="stat-label">総案件数</div></div>
-    <div class="stat-item"><div class="stat-num" id="s-active" style="color:#0e6b9a;">-</div><div class="stat-label">施工中</div></div>
-    <div class="stat-item"><div class="stat-num" id="s-mitsumori" style="color:#2563eb;">-</div><div class="stat-label">見積中</div></div>
-    <div class="stat-item"><div class="stat-num" id="s-seikyu" style="color:#d97706;">-</div><div class="stat-label">請求済</div></div>
-    <div class="stat-item"><div class="stat-num" id="s-amount" style="color:#1a7a30;">-</div><div class="stat-label">受注総額</div></div>
-  </div>
   <div class="filter-bar">
-    <input type="text" id="anken-search" placeholder="🔍 案件番号・顧客・工事内容・施工場所..." oninput="renderAnken()">
+    <input type="text" id="anken-search" placeholder="🔍 案件・顧客・工事内容を検索" oninput="renderAnken()">
+    <button class="filter-toggle-btn" id="anken-filter-btn" onclick="openFilterSheet()" aria-label="絞り込み">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <line x1="4" y1="7" x2="18" y2="7"/>
+        <line x1="7" y1="11" x2="15" y2="11"/>
+        <line x1="9" y1="15" x2="13" y2="15"/>
+      </svg>
+      <span class="filter-dot"></span>
+    </button>
     <div id="anken-chips"></div>
   </div>
   <div id="anken-area"><div class="loading">📡 データを読み込んでいます...</div></div>
+</div>
+
+<!-- フィルタシート（下からスライドアップ） -->
+<div class="filter-sheet-backdrop" id="filterBackdrop" onclick="closeFilterSheet()"></div>
+<div class="filter-sheet" id="filterSheet">
+  <div class="filter-sheet-title">ステータスで絞り込み</div>
+  <div class="filter-sheet-chips" id="filter-sheet-chips"></div>
+  <button class="filter-sheet-close" onclick="closeFilterSheet()">閉じる</button>
 </div>
 
 <!-- 見積ビュー -->
@@ -264,19 +344,32 @@ async function loadData(){
     const json=await res.json();
     ALL_DATA=json.案件||[];
     localStorage.setItem(LS_KEY,JSON.stringify(ALL_DATA));
-    setSourceBadge('fetch',json.最終更新||'');
-    document.getElementById('lastUpdated').textContent='最終更新：'+(json.最終更新||'-');
   }catch(e){
     try{ALL_DATA=JSON.parse(localStorage.getItem(LS_KEY)||'[]');}catch(e2){ALL_DATA=[];}
-    setSourceBadge('local','');
   }
   renderAll();
 }
-function setSourceBadge(type,date){
-  const el=document.getElementById('sourceBadge');
-  el.innerHTML=type==='fetch'
-    ?`<span style="color:#6ee7b7;">● GitHub同期</span>${date?' <span style="opacity:0.6;">('+date+')</span>':''}`
-    :`<span style="color:#fbbf24;">● オフライン</span>`;
+// ヘッダーサマリー更新（案件ビュー表示中のみ）
+function updateHeaderSummary(count,amount){
+  const el=document.getElementById('headerSummary');
+  if(!el)return;
+  el.innerHTML=`<span class="count">${count}件</span> · ${amount?'¥'+Math.round(amount/10000)+'万':'-'}`;
+}
+// フィルタシート制御
+function openFilterSheet(){
+  renderFilterSheetChips();
+  document.getElementById('filterSheet').classList.add('open');
+  document.getElementById('filterBackdrop').classList.add('open');
+}
+function closeFilterSheet(){
+  document.getElementById('filterSheet').classList.remove('open');
+  document.getElementById('filterBackdrop').classList.remove('open');
+}
+function renderFilterSheetChips(){
+  const statuses=['all',...new Set(ALL_DATA.map(p=>p.ステータス).filter(Boolean))];
+  document.getElementById('filter-sheet-chips').innerHTML=statuses.map(s=>
+    `<button class="filter-sheet-chip ${s===ankenStatusFilter?'active':''}" onclick="setAnkenStatus('${s}')">${s==='all'?'すべて':s}</button>`
+  ).join('');
 }
 function switchTab(tab){
   currentTab=tab;
@@ -287,6 +380,9 @@ function switchTab(tab){
     const tabs=['anken','mitsumori','seikyu','chumon','keiyaku','genka'];
     btn.classList.toggle('active',tabs[i]===tab);
   });
+  // 案件以外のタブではヘッダーサマリー非表示
+  const sum=document.getElementById('headerSummary');
+  if(sum)sum.style.display=tab==='anken'?'':'none';
   const fns={anken:renderAnken,mitsumori:renderMitsumori,seikyu:renderSeikyu,chumon:renderChumon,keiyaku:renderKeiyaku,genka:renderGenka};
   fns[tab]?.();
 }
@@ -306,19 +402,17 @@ function renderAnken(){
     const txt=[p.案件番号,p.工事名,p.法人名,p.代表者,p.施工場所,p.ステータス,p.備考].filter(Boolean).join(' ').toLowerCase();
     return(!q||txt.includes(q))&&(ankenStatusFilter==='all'||p.ステータス===ankenStatusFilter);
   });
-  document.getElementById('s-total').textContent=data.length;
-  document.getElementById('s-active').textContent=data.filter(p=>p.ステータス==='施工中').length;
-  document.getElementById('s-mitsumori').textContent=data.filter(p=>p.ステータス?.includes('見積')).length;
-  document.getElementById('s-seikyu').textContent=data.filter(p=>p.ステータス==='請求済み'||p.ステータス==='入金済み').length;
+  // ヘッダーサマリーに件数＋受注総額を集約表示
   const amt=data.reduce((s,p)=>{const r=(p.請求||[]).reduce((a,r)=>a+Number(r.請求金額||0),0);return s+(r||Number(p.見積?.見積金額||0));},0);
-  document.getElementById('s-amount').textContent=amt?'¥'+Math.round(amt/10000)+'万':'-';
-  const statuses=['all',...new Set(ALL_DATA.map(p=>p.ステータス).filter(Boolean))];
-  document.getElementById('anken-chips').innerHTML=statuses.map(s=>`<button class="chip ${s===ankenStatusFilter?'active':''}" onclick="setAnkenStatus('${s}')">${s==='all'?'すべて':s}</button>`).join('');
+  updateHeaderSummary(data.length,amt);
+  // フィルタボタンの状態表示（フィルタ適用中ならハイライト）
+  const btn=document.getElementById('anken-filter-btn');
+  if(btn)btn.classList.toggle('has-filter',ankenStatusFilter!=='all');
   const area=document.getElementById('anken-area');
   if(!data.length){area.innerHTML='<div class="empty">該当する案件がありません</div>';return;}
   area.innerHTML=data.map(p=>buildAnkenCard(p)).join('');
 }
-function setAnkenStatus(s){ankenStatusFilter=s;renderAnken();}
+function setAnkenStatus(s){ankenStatusFilter=s;renderAnken();closeFilterSheet();}
 function toggleCard(h){h.closest('.card').classList.toggle('open');}
 
 function buildAnkenCard(p){
@@ -372,7 +466,7 @@ function buildAnkenCard(p){
   })():'<div style="font-size:12px;color:#999;">原価未入力</div>';
 
   return`
-  <div class="card">
+  <div class="card status-${p.ステータス||'default'}">
     <div class="card-header" onclick="toggleCard(this)">
       <div class="card-header-left">
         <span class="card-id">${p.案件番号}</span>
