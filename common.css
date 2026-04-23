@@ -210,3 +210,114 @@ input, select, textarea, button{
 /* ── 9. セーフエリア対応 ───────────── */
 .safe-top{ padding-top: env(safe-area-inset-top, 0); }
 .safe-bottom{ padding-bottom: env(safe-area-inset-bottom, 0); }
+
+/* ── 10. ページスクロール（案件台帳など通常のWebページ型UI用） ───────────── */
+/* body{overflow:hidden;height:100dvh}を打ち消して、普通に縦スクロールさせる */
+.page-scroll{
+  height:auto;
+  min-height:100dvh;
+  overflow:auto;
+  overflow-x:hidden;
+}
+
+/* ── 11. ナビリスト（現場ナビ標準の「1行リスト」パターン） ─────────────
+   書類BOXの展開・案件詳細の各セクションなど、
+   「ピクト + タイトル/説明 + 矢印」の並びを共通化。
+   
+   基本構造:
+     <div class="nav-list">
+       <div class="nav-list-section">セクション見出し（任意）</div>
+       <a class="nav-list-item" href="...">
+         <svg class="nav-list-item__icon">...</svg>
+         <div class="nav-list-item__body">
+           <div class="nav-list-item__title">タイトル</div>
+           <div class="nav-list-item__desc">補足説明</div>
+         </div>
+         <div class="nav-list-item__arrow">›</div>
+       </a>
+     </div>
+   ───────────────────────────────────────── */
+.nav-list{
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-card);
+}
+.nav-list-section{
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text2);
+  letter-spacing: 0.08em;
+  padding: 10px 16px 4px;
+  border-top: 1px solid rgba(30,45,64,0.06);
+}
+.nav-list-section:first-child{
+  border-top: none;
+  padding-top: 8px;
+}
+.nav-list-item{
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(30,45,64,0.06);
+  min-height: 60px;
+  box-sizing: border-box;
+}
+.nav-list-item:last-child{
+  border-bottom: none;
+}
+.nav-list-item:active{
+  background: rgba(30,45,64,0.03);
+}
+.nav-list-item__icon{
+  width: 32px;
+  height: 32px;
+  color: var(--navy);
+  flex-shrink: 0;
+}
+/* 書類BOX等、48pxアイコンを使うとき */
+.nav-list-item__icon--large{
+  width: 48px;
+  height: 48px;
+}
+.nav-list-item__body{
+  flex: 1;
+  min-width: 0;
+}
+.nav-list-item__title{
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.35;
+}
+.nav-list-item__desc{
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 1px;
+  line-height: 1.4;
+}
+.nav-list-item__arrow{
+  color: var(--text2);
+  font-size: 16px;
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+/* 右端に値を出したい時（「受注総額 ¥1,180,000」みたいな）*/
+.nav-list-item__value{
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
