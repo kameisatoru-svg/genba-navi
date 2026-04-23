@@ -1,0 +1,212 @@
+/* =========================================
+   現場ナビPRO 共通スタイル
+   common.css v1.0
+   作成日：2026/4/23
+   
+   Phase 0：基盤作り
+   - CSS変数の共通化
+   - 基本ボタン・カード・ヘッダーの共通化
+   - タイポグラフィの共通化
+   
+   Phase 1以降：
+   - Phase 1：配色見直し（変数値の調整のみで対応）
+   - Phase 2：ボタン52→60px化（--btn-default の値変更のみ）
+   - Phase 3：全アプリ展開（既に完了済み状態）
+   - Phase 4：案件ID連携（このCSSには影響なし）
+   
+   ★ 各HTMLは <link rel="stylesheet" href="common.css"> を <head> に追加
+   ★ アプリ固有の変数・スタイルは各HTMLに残す（開口部色・図面スタイル等）
+   ========================================= */
+
+/* ── 1. CSS変数（共通カラーパレット） ───────────── */
+:root{
+  /* 基本色 */
+  --bg: #eeebe5;
+  --navy: #1e2d40;
+  --navy2: #2a3f5a;
+  --accent: #c8a96e;
+  --white: #ffffff;
+  
+  /* テキスト */
+  --text: #1e2d40;
+  --text2: #5a6a7a;
+  
+  /* ステータス色 */
+  --green: #1a7a30;
+  --blue: #1a6fc4;
+  --red: #c0392b;
+  --orange: #b06a00;
+  
+  /* ボタンサイズ
+     現状：最小44 / 標準52
+     Phase 2で 52 / 60 に引き上げ予定（値を変えるだけで全アプリ反映） */
+  --btn-min: 44px;
+  --btn-default: 52px;
+  --btn-large: 60px;
+  
+  /* 角丸 */
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 16px;
+  
+  /* 影 */
+  --shadow-card: 0 2px 8px rgba(30,45,64,0.07);
+  --shadow-modal: 0 8px 32px rgba(30,45,64,0.25);
+  
+  /* ヘッダー */
+  --header-height: 54px;
+}
+
+/* ── 2. リセット ───────────── */
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── 3. body基本 ───────────── */
+body{
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Meiryo', 'Yu Gothic', sans-serif;
+  height: 100dvh;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── 4. ボタン共通 ───────────── */
+
+/* 基本ボタン */
+.btn{
+  min-height: var(--btn-default);
+  min-width: var(--btn-default);
+  padding: 0 16px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.15s;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.btn-primary{
+  background: var(--navy);
+  color: var(--white);
+}
+.btn-primary:active{ background: var(--navy2); }
+
+.btn-accent{
+  background: var(--accent);
+  color: var(--navy);
+}
+.btn-accent:active{ background: #b8996a; }
+
+.btn-ghost{
+  background: transparent;
+  color: var(--navy);
+  border: 1px solid rgba(30,45,64,0.2);
+}
+.btn-ghost:active{ background: rgba(30,45,64,0.08); }
+
+.btn-danger{
+  background: var(--red);
+  color: var(--white);
+}
+.btn-danger:active{ background: #a13225; }
+
+/* 戻るボタン（アイコン単独・ヘッダー用） */
+.btn-back{
+  width: var(--btn-min);
+  height: var(--btn-min);
+  border: none;
+  background: transparent;
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.btn-back:active{ background: rgba(255,255,255,0.15); }
+
+/* ── 5. ヘッダー共通 ───────────── */
+.app-header{
+  background: var(--navy);
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.app-header-title{
+  color: var(--white);
+  font-size: 16px;
+  font-weight: 700;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── 6. カード共通 ───────────── */
+.card{
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 14px;
+}
+
+/* ── 7. ユーティリティ ───────────── */
+.hidden{ display: none !important; }
+
+.flex{ display: flex; }
+.flex-col{ display: flex; flex-direction: column; }
+.flex-1{ flex: 1; }
+.items-center{ align-items: center; }
+.justify-between{ justify-content: space-between; }
+.gap-1{ gap: 4px; }
+.gap-2{ gap: 8px; }
+.gap-3{ gap: 12px; }
+
+/* スクロール可能エリア */
+.scroll-area{
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── 8. フォーム共通 ───────────── */
+input, select, textarea, button{
+  font-family: inherit;
+}
+
+.input{
+  height: var(--btn-default);
+  padding: 0 12px;
+  border: 1px solid rgba(30,45,64,0.2);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.input:focus{
+  border-color: var(--accent);
+}
+
+/* ── 9. セーフエリア対応 ───────────── */
+.safe-top{ padding-top: env(safe-area-inset-top, 0); }
+.safe-bottom{ padding-bottom: env(safe-area-inset-bottom, 0); }
