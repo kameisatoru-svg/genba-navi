@@ -150,17 +150,8 @@ body{display:flex;flex-direction:column;}
 .card-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:2px;line-height:1.3;}
 .card-desc{font-size:11px;color:var(--text2);line-height:1.4;}
 
-/* 外部連携リスト */
-.link-list{background:var(--white);border-radius:16px;overflow:hidden;margin-bottom:20px;box-shadow:0 1px 4px rgba(30,45,64,0.07);}
-.link-row{display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;border:none;background:transparent;width:100%;text-align:left;font-family:'Meiryo','Yu Gothic',sans-serif;border-bottom:1px solid rgba(30,45,64,0.06);text-decoration:none;color:var(--text);}
-.link-row:last-child{border-bottom:none;}
-.link-row:active{background:rgba(30,45,64,0.03);}
-/* ★ ミニマル化：ラインアイコン（塗り枠なし）・2026/4/23 */
-.link-icon{width:32px;height:32px;color:var(--navy);flex-shrink:0;}
-.link-body{flex:1;}
-.link-title{font-size:14px;font-weight:700;color:var(--text);}
-.link-desc{font-size:11px;color:var(--text2);margin-top:1px;}
-.link-arrow{color:var(--text2);font-size:16px;opacity:0.5;}
+/* ★ 2026/4/23 共通化：.link-list / .link-row 系は common.css の .nav-list に移行済み
+   書類BOXのアコーディオン部分（doc-box-*）のみ、このページ固有のため残す */
 
 /* 書類BOX */
 .doc-box-card{background:var(--white);border-radius:20px;box-shadow:0 2px 10px rgba(30,45,64,0.06);border:1px solid rgba(30,45,64,0.06);overflow:hidden;margin-bottom:12px;transition:border-color 0.15s;}
@@ -168,14 +159,11 @@ body{display:flex;flex-direction:column;}
 .doc-box-trigger{display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:18px 14px 16px;cursor:pointer;background:transparent;border:none;width:100%;text-align:left;font-family:'Meiryo','Yu Gothic',sans-serif;}
 .doc-box-trigger:active{background:#faf8f4;}
 .doc-box-header{display:flex;align-items:center;gap:14px;width:100%;}
-/* ★ ミニマル化：ラインアイコン（塗り枠なし） */
 .doc-box-icon{width:48px;height:48px;color:var(--navy);flex-shrink:0;}
 .doc-box-chevron{margin-left:auto;font-size:14px;color:var(--text2);opacity:0.5;transition:transform 0.2s;display:inline-block;}
 .doc-box-card.open .doc-box-chevron{transform:rotate(90deg);}
 .doc-box-body{max-height:0;overflow:hidden;transition:max-height 0.3s ease;}
 .doc-box-card.open .doc-box-body{max-height:800px;}
-.doc-sec-label{font-size:10px;font-weight:700;color:var(--text2);letter-spacing:0.08em;padding:10px 16px 4px;border-top:1px solid rgba(30,45,64,0.06);}
-.doc-sec-label:first-child{border-top:none;padding-top:8px;}
 
 .footer-info{text-align:center;font-size:10px;color:var(--text2);opacity:0.6;padding:4px 0 8px;}
 </style>
@@ -347,47 +335,48 @@ body{display:flex;flex-direction:column;}
       </div>
     </button>
     <div class="doc-box-body">
-      <div class="doc-sec-label">台帳</div>
-      <a class="link-row" href="https://kameisatoru-svg.github.io/genba-navi/案件台帳_アートレイズ.html" target="_blank">
-        <svg class="link-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <!-- ★ 2026/4/23 共通クラス .nav-list に移行（common.cssで定義） -->
+      <div class="nav-list-section">台帳</div>
+      <a class="nav-list-item" href="https://kameisatoru-svg.github.io/genba-navi/案件台帳_アートレイズ.html" target="_blank">
+        <svg class="nav-list-item__icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <rect x="6" y="5" width="20" height="22" rx="2"/>
           <line x1="11" y1="12" x2="21" y2="12"/>
           <line x1="11" y1="17" x2="21" y2="17"/>
           <line x1="11" y1="22" x2="17" y2="22"/>
         </svg>
-        <div class="link-body"><div class="link-title">案件台帳</div><div class="link-desc">見積・請求・原価・契約書 一元管理</div></div>
-        <div class="link-arrow">›</div>
+        <div class="nav-list-item__body"><div class="nav-list-item__title">案件台帳</div><div class="nav-list-item__desc">見積・請求・原価・契約書 一元管理</div></div>
+        <div class="nav-list-item__arrow">›</div>
       </a>
-      <a class="link-row" href="https://kameisatoru-svg.github.io/genba-navi/取引先台帳_アートレイズ.html" target="_blank">
-        <svg class="link-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <a class="nav-list-item" href="https://kameisatoru-svg.github.io/genba-navi/取引先台帳_アートレイズ.html" target="_blank">
+        <svg class="nav-list-item__icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="11" r="4"/>
           <circle cx="22" cy="11" r="4"/>
           <path d="M5 26 Q5 19 12 19 Q19 19 19 26"/>
           <path d="M19 22 Q22 20 25 20 Q29 20 29 26" opacity="0.6"/>
         </svg>
-        <div class="link-body"><div class="link-title">取引先台帳</div><div class="link-desc">顧客・業者・取引先一覧</div></div>
-        <div class="link-arrow">›</div>
+        <div class="nav-list-item__body"><div class="nav-list-item__title">取引先台帳</div><div class="nav-list-item__desc">顧客・業者・取引先一覧</div></div>
+        <div class="nav-list-item__arrow">›</div>
       </a>
-      <div class="doc-sec-label">マスター</div>
-      <a class="link-row" href="https://kameisatoru-svg.github.io/genba-navi/単価マスター_アートレイズ.html" target="_blank">
-        <svg class="link-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <div class="nav-list-section">マスター</div>
+      <a class="nav-list-item" href="https://kameisatoru-svg.github.io/genba-navi/単価マスター_アートレイズ.html" target="_blank">
+        <svg class="nav-list-item__icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <rect x="4" y="6" width="24" height="20" rx="2"/>
           <line x1="4" y1="13" x2="28" y2="13" stroke-width="1" opacity="0.4"/>
           <line x1="12" y1="6" x2="12" y2="26" stroke-width="1" opacity="0.4"/>
           <line x1="20" y1="6" x2="20" y2="26" stroke-width="1" opacity="0.4"/>
         </svg>
-        <div class="link-body"><div class="link-title">単価マスター</div><div class="link-desc">工種別単価一覧</div></div>
-        <div class="link-arrow">›</div>
+        <div class="nav-list-item__body"><div class="nav-list-item__title">単価マスター</div><div class="nav-list-item__desc">工種別単価一覧</div></div>
+        <div class="nav-list-item__arrow">›</div>
       </a>
-      <a class="link-row" href="https://kameisatoru-svg.github.io/genba-navi/名刺帳_アートレイズ.html" target="_blank" style="border-bottom:none;">
-        <svg class="link-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <a class="nav-list-item" href="https://kameisatoru-svg.github.io/genba-navi/名刺帳_アートレイズ.html" target="_blank">
+        <svg class="nav-list-item__icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="8" width="26" height="17" rx="2"/>
           <line x1="7" y1="14" x2="15" y2="14"/>
           <line x1="7" y1="18" x2="12" y2="18" opacity="0.6"/>
           <circle cx="22" cy="16" r="3" opacity="0.7"/>
         </svg>
-        <div class="link-body"><div class="link-title">名刺帳</div><div class="link-desc">CSV読み込み・全件検索</div></div>
-        <div class="link-arrow">›</div>
+        <div class="nav-list-item__body"><div class="nav-list-item__title">名刺帳</div><div class="nav-list-item__desc">CSV読み込み・全件検索</div></div>
+        <div class="nav-list-item__arrow">›</div>
       </a>
     </div>
   </div>
