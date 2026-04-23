@@ -40,25 +40,39 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 .stat-item:last-child{border-right:none;}
 .stat-num{font-size:20px;font-weight:700;color:var(--navy);}
 .stat-label{font-size:10px;color:var(--text-sub);margin-top:2px;}
-.card{background:var(--white);border:1px solid var(--border);border-radius:6px;margin-bottom:12px;overflow:hidden;transition:box-shadow 0.15s;}
-.card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.1);}
-.card-header{background:var(--navy);color:var(--white);padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;user-select:none;}
-.card-header:hover{background:#2a3f5a;}
-.card-header-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1;}
-.card-id{background:rgba(255,255,255,0.2);padding:2px 10px;border-radius:12px;font-size:12px;font-weight:700;flex-shrink:0;}
-.card-name{font-size:15px;font-weight:700;}
-.card-toggle{font-size:12px;opacity:0.6;transition:transform 0.2s;flex-shrink:0;}
-.card.open .card-toggle{transform:rotate(180deg);}
-.card-body{display:none;padding:16px 20px;}
+/* ★ C-1 改修（2026/4/23）：カード反転＋左端の緊急度バーで視認性UP */
+.card{background:var(--white);border:1px solid var(--border);border-radius:6px;margin-bottom:10px;overflow:hidden;transition:box-shadow 0.15s;position:relative;border-left:4px solid var(--border-dark);}
+.card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+/* 緊急度バー：ステータス別の左端色 */
+.card.status-施工中{border-left-color:#f39c12;}
+.card.status-見積作成中{border-left-color:#9b59b6;}
+.card.status-見積提出済み{border-left-color:#2563eb;}
+.card.status-見積提出予定{border-left-color:#d97706;}
+.card.status-請求済み{border-left-color:#1a7a30;}
+.card.status-受注済{border-left-color:#1a7a30;}
+.card.status-入金済み{border-left-color:#9ca3af;}
+.card.status-完了{border-left-color:#9ca3af;opacity:0.75;}
+/* ヘッダー：白基調に反転 */
+.card-header{background:var(--white);color:var(--text);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;user-select:none;min-height:56px;}
+.card-header:hover{background:#faf9f6;}
+.card-header-left{display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex:1;min-width:0;}
+.card-id{background:var(--light);color:var(--text-sub);padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;flex-shrink:0;letter-spacing:0.02em;}
+.card-name{font-size:16px;font-weight:700;color:var(--navy);line-height:1.35;}
+.card-toggle{font-size:14px;opacity:0.4;color:var(--text-sub);transition:transform 0.2s;flex-shrink:0;}
+.card.open .card-toggle{transform:rotate(180deg);opacity:0.7;}
+.card.open{box-shadow:0 2px 12px rgba(30,45,64,0.1);}
+.card-body{display:none;padding:16px 20px;background:#fbfaf8;}
 .card.open .card-body{display:block;}
-.badge{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;}
-.b-施工中{background:#0e6b9a;color:#fff;}
-.b-受注済{background:#1a7a30;color:#fff;}
-.b-完了{background:#6b7280;color:#fff;}
+.badge{padding:4px 11px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;letter-spacing:0.02em;}
+/* 優先度順：橙（今動いてる）→ 紫（作成中）→ 青（提出済み・相手待ち）→ 緑（請求・入金）→ グレー（完了） */
+.b-施工中{background:#f39c12;color:#fff;}
+.b-見積作成中{background:#9b59b6;color:#fff;}
 .b-見積提出済み{background:#2563eb;color:#fff;}
 .b-見積提出予定{background:#d97706;color:#fff;}
-.b-請求済み{background:#6b7280;color:#fff;}
-.b-入金済み{background:#4b5563;color:#fff;}
+.b-受注済{background:#1a7a30;color:#fff;}
+.b-請求済み{background:#1a7a30;color:#fff;}
+.b-入金済み{background:#e8ebef;color:#6b7280;}
+.b-完了{background:#e8ebef;color:#6b7280;}
 .b-未入金{background:#dc2626;color:#fff;}
 .b-締結済み{background:#1a7a30;color:#fff;}
 .b-未締結{background:#d97706;color:#fff;}
@@ -375,7 +389,7 @@ function buildAnkenCard(p){
   })():'<div style="font-size:12px;color:#999;">原価未入力</div>';
 
   return`
-  <div class="card">
+  <div class="card status-${p.ステータス||'default'}">
     <div class="card-header" onclick="toggleCard(this)">
       <div class="card-header-left">
         <span class="card-id">${p.案件番号}</span>
