@@ -19,24 +19,24 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 .container{max-width:1100px;margin:0 auto;padding:0 16px 24px;}
 .page-header{background:var(--navy);color:var(--white);padding:14px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;}
 .page-header h1{font-size:17px;font-weight:700;letter-spacing:0.04em;display:flex;align-items:center;gap:8px;}
-.page-header .summary{font-size:12px;opacity:0.85;text-align:right;line-height:1.4;}
-.page-header .summary .count{font-size:14px;font-weight:700;}
+.page-header .summary{font-size:14px;opacity:0.9;text-align:right;line-height:1.4;white-space:nowrap;}
+.page-header .summary .count{font-size:17px;font-weight:700;}
 .tab-nav{background:var(--navy);display:flex;border-bottom:2px solid var(--accent);overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .tab-nav::-webkit-scrollbar{display:none;}
 .tab-btn{padding:14px 22px;border:none;background:transparent;color:rgba(255,255,255,0.7);font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all 0.15s;min-height:52px;display:flex;align-items:center;gap:6px;}
 .tab-btn:hover{color:rgba(255,255,255,0.95);}
 .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
 .tab-btn svg{width:18px;height:18px;}
-/* ★ 検索＋フィルタボタン：シンプル化 */
-.filter-bar{background:var(--white);border:1px solid var(--border);padding:10px 12px;display:flex;gap:8px;align-items:center;margin-bottom:14px;border-radius:6px;margin-top:14px;}
-.filter-bar input[type="text"]{flex:1;min-width:0;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-size:15px;font-family:inherit;background:var(--light);}
+/* ★ 検索＋フィルタボタン：index.htmlの丸みと統一 */
+.filter-bar{background:var(--white);border:none;padding:10px 12px;display:flex;gap:8px;align-items:center;margin-bottom:14px;border-radius:14px;margin-top:14px;box-shadow:0 2px 8px rgba(30,45,64,0.07);}
+.filter-bar input[type="text"]{flex:1;min-width:0;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit;background:var(--light);}
 .filter-bar input[type="text"]:focus{outline:none;border-color:var(--accent);background:var(--white);}
-.filter-bar input[type="date"]{padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;cursor:pointer;background:var(--light);}
+.filter-bar input[type="date"]{padding:8px 10px;border:1px solid var(--border);border-radius:10px;font-size:13px;font-family:inherit;cursor:pointer;background:var(--light);}
 .filter-label{font-size:11px;color:var(--text-sub);white-space:nowrap;}
 .filter-sep{color:var(--border-dark);}
 /* フィルタボタン（右端のアイコン・タップでシート展開） */
 .filter-toggle-btn{
-  width:44px;height:44px;border:1px solid var(--border);border-radius:6px;
+  width:44px;height:44px;border:1px solid var(--border);border-radius:10px;
   background:var(--white);color:var(--navy);cursor:pointer;font-family:inherit;
   display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;
 }
@@ -83,9 +83,12 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 .stat-item:last-child{border-right:none;}
 .stat-num{font-size:20px;font-weight:700;color:var(--navy);}
 .stat-label{font-size:10px;color:var(--text-sub);margin-top:2px;}
-/* ★ C-1 改修（2026/4/23）：カード反転＋左端の緊急度バーで視認性UP */
-.card{background:var(--white);border:1px solid var(--border);border-radius:6px;margin-bottom:10px;overflow:hidden;transition:box-shadow 0.15s;position:relative;border-left:4px solid var(--border-dark);}
-.card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+/* ★ C-3 改修（2026/4/23）：index.htmlの案件リストに見た目を寄せる
+   - 角丸14px（index.htmlのanken-list/kpi-cardと同じ）
+   - 枠線なし・影のみ（浮き感を出す）
+   - 左端バーは中の線でなくborder-leftで維持 */
+.card{background:var(--white);border:none;border-radius:14px;margin-bottom:10px;overflow:hidden;transition:box-shadow 0.15s;position:relative;box-shadow:0 2px 8px rgba(30,45,64,0.07);border-left:4px solid #d0d0cc;}
+.card:hover{box-shadow:0 4px 12px rgba(30,45,64,0.1);}
 /* 緊急度バー：ステータス別の左端色 */
 .card.status-施工中{border-left-color:#f39c12;}
 .card.status-見積作成中{border-left-color:#9b59b6;}
@@ -95,18 +98,22 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 .card.status-受注済{border-left-color:#1a7a30;}
 .card.status-入金済み{border-left-color:#9ca3af;}
 .card.status-完了{border-left-color:#9ca3af;opacity:0.75;}
-/* ヘッダー：白基調に反転 */
-.card-header{background:var(--white);color:var(--text);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;user-select:none;min-height:56px;}
+/* ヘッダー：白基調 */
+.card-header{background:var(--white);color:var(--text);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:nowrap;cursor:pointer;user-select:none;min-height:56px;}
 .card-header:hover{background:#faf9f6;}
 .card-header-left{display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex:1;min-width:0;}
 .card-id{background:var(--light);color:var(--text-sub);padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;flex-shrink:0;letter-spacing:0.02em;}
 .card-name{font-size:16px;font-weight:700;color:var(--navy);line-height:1.35;}
 .card-toggle{font-size:14px;opacity:0.4;color:var(--text-sub);transition:transform 0.2s;flex-shrink:0;}
 .card.open .card-toggle{transform:rotate(180deg);opacity:0.7;}
-.card.open{box-shadow:0 2px 12px rgba(30,45,64,0.1);}
+.card.open{box-shadow:0 4px 16px rgba(30,45,64,0.12);}
 .card-body{display:none;padding:16px 20px;background:#fbfaf8;}
 .card.open .card-body{display:block;}
-.badge{padding:4px 11px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;letter-spacing:0.02em;}
+.badge{
+  padding:5px 0;border-radius:12px;font-size:11px;font-weight:700;
+  white-space:nowrap;flex-shrink:0;letter-spacing:0.02em;
+  width:82px;text-align:center;display:inline-block;
+}
 /* 優先度順：橙（今動いてる）→ 紫（作成中）→ 青（提出済み・相手待ち）→ 緑（請求・入金）→ グレー（完了） */
 .b-施工中{background:#f39c12;color:#fff;}
 .b-見積作成中{background:#9b59b6;color:#fff;}
