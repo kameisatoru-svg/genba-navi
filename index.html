@@ -119,21 +119,24 @@ body{
 
 /* 外部連携リスト */
 .link-list{background:var(--white);border-radius:16px;overflow:hidden;margin-bottom:20px;box-shadow:0 1px 4px rgba(30,45,64,0.07);}
-.link-row{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;border:none;background:transparent;width:100%;text-align:left;font-family:'Meiryo','Yu Gothic',sans-serif;border-bottom:1px solid rgba(30,45,64,0.06);}
+.link-row{display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;border:none;background:transparent;width:100%;text-align:left;font-family:'Meiryo','Yu Gothic',sans-serif;border-bottom:1px solid rgba(30,45,64,0.06);text-decoration:none;color:var(--text);}
 .link-row:last-child{border-bottom:none;}
 .link-row:active{background:rgba(30,45,64,0.03);}
-.link-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+/* ★ ミニマル化：ラインアイコン（塗り枠なし）・2026/4/23 */
+.link-icon{width:32px;height:32px;color:var(--navy);flex-shrink:0;}
 .link-body{flex:1;}
-.link-title{font-size:13px;font-weight:700;color:var(--text);}
+.link-title{font-size:14px;font-weight:700;color:var(--text);}
 .link-desc{font-size:11px;color:var(--text2);margin-top:1px;}
 .link-arrow{color:var(--text2);font-size:16px;opacity:0.5;}
 
 /* 書類BOX */
-.doc-box-card{background:var(--white);border-radius:16px;box-shadow:0 2px 8px rgba(30,45,64,0.08);border:1.5px solid transparent;overflow:hidden;margin-bottom:12px;transition:border-color 0.15s;}
+.doc-box-card{background:var(--white);border-radius:20px;box-shadow:0 2px 10px rgba(30,45,64,0.06);border:1px solid rgba(30,45,64,0.06);overflow:hidden;margin-bottom:12px;transition:border-color 0.15s;}
 .doc-box-card.open{border-color:var(--accent);}
 .doc-box-trigger{display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:18px 14px 16px;cursor:pointer;background:transparent;border:none;width:100%;text-align:left;font-family:'Meiryo','Yu Gothic',sans-serif;}
 .doc-box-trigger:active{background:#faf8f4;}
-.doc-box-header{display:flex;align-items:center;gap:10px;width:100%;}
+.doc-box-header{display:flex;align-items:center;gap:14px;width:100%;}
+/* ★ ミニマル化：ラインアイコン（塗り枠なし） */
+.doc-box-icon{width:48px;height:48px;color:var(--navy);flex-shrink:0;}
 .doc-box-chevron{margin-left:auto;font-size:14px;color:var(--text2);opacity:0.5;transition:transform 0.2s;display:inline-block;}
 .doc-box-card.open .doc-box-chevron{transform:rotate(90deg);}
 .doc-box-body{max-height:0;overflow:hidden;transition:max-height 0.3s ease;}
@@ -297,17 +300,15 @@ body{
   <div class="doc-box-card" id="docBoxCard">
     <button class="doc-box-trigger" onclick="toggleDocBox()">
       <div class="doc-box-header">
-        <div class="card-icon" style="background:rgba(200,169,110,0.15);width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <svg width="28" height="28" viewBox="0 0 30 30" fill="none">
-            <path d="M3 10C3 8.9 3.9 8 5 8H12L14 6H25C26.1 6 27 6.9 27 8V23C27 24.1 26.1 25 25 25H5C3.9 25 3 24.1 3 23V10Z" fill="rgba(200,169,110,0.2)" stroke="#c8a96e" stroke-width="1.5"></path>
-            <rect x="8" y="12" width="6" height="8" rx="1" fill="white" stroke="#c8a96e" stroke-width="1.2"></rect>
-            <line x1="9.5" y1="14" x2="12.5" y2="14" stroke="#c8a96e" stroke-width="0.9" stroke-linecap="round"></line>
-            <line x1="9.5" y1="16" x2="12.5" y2="16" stroke="#c8a96e" stroke-width="0.9" stroke-linecap="round"></line>
-            <rect x="16" y="11" width="6" height="8" rx="1" fill="white" stroke="#c8a96e" stroke-width="1.2"></rect>
-            <line x1="17.5" y1="13" x2="20.5" y2="13" stroke="#c8a96e" stroke-width="0.9" stroke-linecap="round"></line>
-            <line x1="17.5" y1="15" x2="20.5" y2="15" stroke="#c8a96e" stroke-width="0.9" stroke-linecap="round"></line>
-          </svg>
-        </div>
+        <svg class="doc-box-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 14 Q6 11 9 11 L19 11 L22 8 L39 8 Q42 8 42 11 L42 36 Q42 39 39 39 L9 39 Q6 39 6 36 Z"/>
+          <rect x="14" y="19" width="8" height="12" rx="1"/>
+          <line x1="16" y1="22" x2="20" y2="22" stroke-width="1"/>
+          <line x1="16" y1="25" x2="20" y2="25" stroke-width="1"/>
+          <rect x="26" y="17" width="8" height="12" rx="1"/>
+          <line x1="28" y1="20" x2="32" y2="20" stroke-width="1"/>
+          <line x1="28" y1="23" x2="32" y2="23" stroke-width="1"/>
+        </svg>
         <div class="card-body"><div class="card-title">書類BOX</div><div class="card-desc">台帳・マスター一覧</div></div>
         <span class="doc-box-chevron">›</span>
       </div>
@@ -315,35 +316,47 @@ body{
     <div class="doc-box-body">
       <div class="doc-sec-label">台帳</div>
       <a class="link-row" href="https://kameisatoru-svg.github.io/genba-navi/案件台帳_アートレイズ.html" target="_blank">
-        <div class="link-icon" style="background:rgba(26,111,196,0.1);"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="17" rx="2" stroke="#1a6fc4" stroke-width="1.5" fill="none"></rect><line x1="6" y1="7" x2="14" y2="7" stroke="#1a6fc4" stroke-width="1.2" stroke-linecap="round"></line><line x1="6" y1="10" x2="14" y2="10" stroke="#1a6fc4" stroke-width="1.2" stroke-linecap="round"></line><line x1="6" y1="13" x2="10" y2="13" stroke="#1a6fc4" stroke-width="1.2" stroke-linecap="round"></line></svg></div>
+        <svg class="link-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="6" y="5" width="20" height="22" rx="2"/>
+          <line x1="11" y1="12" x2="21" y2="12"/>
+          <line x1="11" y1="17" x2="21" y2="17"/>
+          <line x1="11" y1="22" x2="17" y2="22"/>
+        </svg>
         <div class="link-body"><div class="link-title">案件台帳</div><div class="link-desc">見積・請求・原価・契約書 一元管理</div></div>
         <div class="link-arrow">›</div>
       </a>
       <a class="link-row" href="https://kameisatoru-svg.github.io/genba-navi/取引先台帳_アートレイズ.html" target="_blank">
-        <div class="link-icon" style="background:rgba(26,111,196,0.1);"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="7" cy="7" r="2.8" stroke="#1a6fc4" stroke-width="1.4" fill="none"></circle><circle cx="14" cy="7" r="2.8" stroke="#1a6fc4" stroke-width="1.4" fill="none"></circle><path d="M2 17c0-2.8 2.2-5 5-5s5 2.2 5 5" stroke="#1a6fc4" stroke-width="1.4" stroke-linecap="round" fill="none"></path><path d="M12 14.5c.6-.3 1.3-.5 2-.5 2.8 0 5 2.2 5 5" stroke="#1a6fc4" stroke-width="1.4" stroke-linecap="round" fill="none" opacity="0.6"></path></svg></div>
+        <svg class="link-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="11" r="4"/>
+          <circle cx="22" cy="11" r="4"/>
+          <path d="M5 26 Q5 19 12 19 Q19 19 19 26"/>
+          <path d="M19 22 Q22 20 25 20 Q29 20 29 26" opacity="0.6"/>
+        </svg>
         <div class="link-body"><div class="link-title">取引先台帳</div><div class="link-desc">顧客・業者・取引先一覧</div></div>
         <div class="link-arrow">›</div>
       </a>
       <div class="doc-sec-label">マスター</div>
       <a class="link-row" href="https://kameisatoru-svg.github.io/genba-navi/単価マスター_アートレイズ.html" target="_blank">
-        <div class="link-icon" style="background:rgba(30,45,64,0.08);"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="3" width="16" height="14" rx="2" stroke="#1e2d40" stroke-width="1.5" fill="none"></rect><line x1="2" y1="8" x2="18" y2="8" stroke="#1e2d40" stroke-width="1" opacity="0.3"></line><line x1="7" y1="3" x2="7" y2="17" stroke="#1e2d40" stroke-width="1" opacity="0.3"></line><line x1="13" y1="3" x2="13" y2="17" stroke="#1e2d40" stroke-width="1" opacity="0.3"></line></svg></div>
+        <svg class="link-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="6" width="24" height="20" rx="2"/>
+          <line x1="4" y1="13" x2="28" y2="13" stroke-width="1" opacity="0.4"/>
+          <line x1="12" y1="6" x2="12" y2="26" stroke-width="1" opacity="0.4"/>
+          <line x1="20" y1="6" x2="20" y2="26" stroke-width="1" opacity="0.4"/>
+        </svg>
         <div class="link-body"><div class="link-title">単価マスター</div><div class="link-desc">工種別単価一覧</div></div>
         <div class="link-arrow">›</div>
       </a>
       <a class="link-row" href="https://kameisatoru-svg.github.io/genba-navi/名刺帳_アートレイズ.html" target="_blank" style="border-bottom:none;">
-        <div class="link-icon" style="background:rgba(30,45,64,0.08);"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="5" width="16" height="11" rx="2" stroke="#1e2d40" stroke-width="1.4" fill="none"></rect><line x1="5" y1="9" x2="10" y2="9" stroke="#1e2d40" stroke-width="1.2" stroke-linecap="round"></line><line x1="5" y1="12" x2="8" y2="12" stroke="#1e2d40" stroke-width="1.2" stroke-linecap="round" opacity="0.5"></line><circle cx="14" cy="10" r="2" stroke="#1e2d40" stroke-width="1.2" fill="none" opacity="0.6"></circle></svg></div>
+        <svg class="link-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="8" width="26" height="17" rx="2"/>
+          <line x1="7" y1="14" x2="15" y2="14"/>
+          <line x1="7" y1="18" x2="12" y2="18" opacity="0.6"/>
+          <circle cx="22" cy="16" r="3" opacity="0.7"/>
+        </svg>
         <div class="link-body"><div class="link-title">名刺帳</div><div class="link-desc">CSV読み込み・全件検索</div></div>
         <div class="link-arrow">›</div>
       </a>
     </div>
-  </div>
-
-  <div class="link-list" style="margin-bottom:20px;">
-    <a class="link-row" href="https://github.com/kameisatoru-svg/genba-navi" target="_blank">
-      <div class="link-icon" style="background:rgba(30,45,64,0.08);"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 1.5C5.3 1.5 1.5 5.3 1.5 10c0 3.8 2.4 7 5.8 8.1.4.1.6-.2.6-.4v-1.4c-2.4.5-2.9-1.1-2.9-1.1-.4-1-.9-1.3-.9-1.3-.7-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.2 1.9.9 2.3.7.1-.5.3-.9.5-1.1-1.8-.2-3.7-.9-3.7-4 0-.9.3-1.6.8-2.1-.1-.2-.4-1 .1-2.1 0 0 .7-.2 2.2.8.6-.2 1.3-.3 2-.3s1.4.1 2 .3c1.5-1 2.2-.8 2.2-.8.5 1.1.2 1.9.1 2.1.5.6.8 1.3.8 2.1 0 3.1-1.9 3.8-3.7 4 .3.3.6.6.6 1.6v2.3c0 .2.1.5.6.4C16.1 17 18.5 13.8 18.5 10c0-4.7-3.8-8.5-8.5-8.5z" fill="#1e2d40"></path></svg></div>
-      <div class="link-body"><div class="link-title">GitHub</div><div class="link-desc">現場ナビ リポジトリ</div></div>
-      <div class="link-arrow">›</div>
-    </a>
   </div>
 
   <div class="footer-info">株式会社アート・レイズ　現場ナビ v2.0</div>
