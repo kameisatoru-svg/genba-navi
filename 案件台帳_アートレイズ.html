@@ -113,6 +113,7 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 .card.status-見積作成中{border-left-color:#9b59b6;}
 .card.status-見積提出済み{border-left-color:#2563eb;}
 .card.status-見積提出予定{border-left-color:#d97706;}
+.card.status-完了・請求書作成待ち{border-left-color:#1a7a30;}
 .card.status-請求済み{border-left-color:#1a7a30;}
 .card.status-受注済{border-left-color:#1a7a30;}
 .card.status-入金済み{border-left-color:#9ca3af;}
@@ -189,6 +190,7 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 .b-請求済み{background:#1a7a30;color:#fff;}
 .b-入金済み{background:#e8ebef;color:#6b7280;}
 .b-完了{background:#e8ebef;color:#6b7280;}
+.b-完了請求待ち{background:#1a7a30;color:#fff;}
 .b-未入金{background:#dc2626;color:#fff;}
 .b-締結済み{background:#1a7a30;color:#fff;}
 .b-未締結{background:#d97706;color:#fff;}
@@ -261,6 +263,7 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 .view-card.status-受注済{border-left-color:#1a7a30;}
 .view-card.status-入金済み{border-left-color:#9ca3af;}
 .view-card.status-完了{border-left-color:#9ca3af;opacity:0.85;}
+.view-card.status-完了・請求書作成待ち{border-left-color:#1a7a30;}
 .view-card.status-未入金{border-left-color:#dc2626;}
 .view-card.status-締結済み{border-left-color:#1a7a30;}
 .view-card.status-未締結{border-left-color:#d97706;}
@@ -306,6 +309,7 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 .tab-nav-card.status-見積提出予定{border-left-color:#d97706;}
 .tab-nav-card.status-請求済み,.tab-nav-card.status-受注済{border-left-color:#1a7a30;}
 .tab-nav-card.status-入金済み,.tab-nav-card.status-完了{border-left-color:#9ca3af;opacity:0.85;}
+.tab-nav-card.status-完了・請求書作成待ち{border-left-color:#1a7a30;}
 .tab-nav-card.status-未入金{border-left-color:#dc2626;}
 .tab-nav-card.status-締結済み{border-left-color:#1a7a30;}
 .tab-nav-card.status-未締結{border-left-color:#d97706;}
@@ -616,7 +620,8 @@ let keiyakuFilter='all';
 let ankenStatusFilter='all';
 // 完了除外フラグ（デフォルトON = 完了を隠す）
 const ANKEN_DONE_STATUS=['入金済み','完了'];
-const MITSUMORI_HIDE_STATUS=['施工中','受注済','請求済み','入金済み','完了'];
+const MITSUMORI_HIDE_STATUS=['施工中','受注済','請求済み','入金済み','完了','完了・請求書作成待ち'];
+const STATUS_ORDER=['見積作成中','見積提出済み','受注済','施工中','完了・請求書作成待ち','請求済み','入金済み','完了'];
 let ankenHideDone=true;
 let mitsumoriHideActive=true;
 
@@ -674,7 +679,7 @@ function renderAll(){renderAnken();renderMitsumori();renderSeikyu();renderChumon
 const fmtYen=v=>v?'¥'+Number(v).toLocaleString():'-';
 const fmtDate=d=>d||'-';
 const inRange=(d,from,to)=>{if(!d)return true;if(from&&d<from)return false;if(to&&d>to)return false;return true;};
-const badgeClass=s=>({'施工中':'b-施工中','受注済':'b-受注済','完了':'b-完了','見積提出済み':'b-見積提出済み','見積提出予定':'b-見積提出予定','請求済み':'b-請求済み','入金済み':'b-入金済み'}[s]||'b-default');
+const badgeClass=s=>({'施工中':'b-施工中','受注済':'b-受注済','完了':'b-完了','見積提出済み':'b-見積提出済み','見積作成中':'b-見積作成中','完了・請求書作成待ち':'b-完了請求待ち','請求済み':'b-請求済み','入金済み':'b-入金済み'}[s]||'b-default');
 // ★ PDFタグ：SVGアイコン化 + Google Drive検索URL自動生成
 // data.jsonのPDFフィールドはファイル名のみ→Drive検索にリンクしてDrive上で探す
 const ICON_PDF=`<svg class="tag-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3 L12 3 L15 6 L15 17 L5 17 Z"/><path d="M12 3 L12 6 L15 6"/><line x1="7" y1="10" x2="13" y2="10"/><line x1="7" y1="13" x2="13" y2="13"/></svg>`;
@@ -694,6 +699,11 @@ function renderAnken(){
     const statusOk=ankenStatusFilter==='all'||p.ステータス===ankenStatusFilter;
     const doneOk=!ankenHideDone||!ANKEN_DONE_STATUS.includes(p.ステータス);
     return(!q||txt.includes(q))&&statusOk&&doneOk;
+  });
+  data.sort((a,b)=>{
+    const ai=STATUS_ORDER.indexOf(a.ステータス);const bi=STATUS_ORDER.indexOf(b.ステータス);
+    const an=ai===-1?STATUS_ORDER.length:ai;const bn=bi===-1?STATUS_ORDER.length:bi;
+    return an-bn;
   });
   // ヘッダーサマリーに件数＋受注総額を集約表示
   const amt=data.reduce((s,p)=>{const r=(p.請求||[]).reduce((a,r)=>a+Number(r.請求金額||0),0);return s+(r||Number(p.見積?.見積金額||0));},0);
@@ -914,7 +924,7 @@ function buildAnkenCard(p){
         <div class="edit-row">
           <span class="edit-label">案件ステータス</span>
           <select class="edit-select" id="sel-status-${safeId}">
-            ${['施工中','見積作成中','見積提出済み','見積提出予定','受注済','請求済み','入金済み','完了'].map(s=>`<option value="${s}"${p.ステータス===s?' selected':''}>${s}</option>`).join('')}
+            ${['見積作成中','見積提出済み','受注済','施工中','完了・請求書作成待ち','請求済み','入金済み','完了'].map(s=>`<option value="${s}"${p.ステータス===s?' selected':''}>${s}</option>`).join('')}
           </select>
         </div>
         <div class="edit-row">
