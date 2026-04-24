@@ -4,23 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>案件台帳｜株式会社アート・レイズ</title>
-<style>
-/* ===== common.css v1.1 インライン ===== */
-:root{--navy:#1e2d40;--beige:#eeebe5;--gold:#c8a96e;--white:#fff;--bg:#eeebe5;--text:#333;--text2:#666;--border:#ddd;}
-.page-scroll{overflow:auto!important;height:auto!important;min-height:100dvh!important;}
-.nav-list{background:#fff;border-radius:16px;box-shadow:0 2px 8px rgba(30,45,64,0.07);overflow:hidden;margin-bottom:12px;}
-.nav-list-section{font-size:10px;color:#666;letter-spacing:0.08em;padding:10px 16px 4px;font-weight:700;}
-.nav-list-item{display:flex;align-items:center;gap:14px;min-height:60px;padding:13px 14px;width:100%;box-sizing:border-box;text-align:left;border:none;background:transparent;font-family:inherit;cursor:pointer;border-bottom:1px solid rgba(30,45,64,0.05);}
-.nav-list-item:last-child{border-bottom:none;}
-.nav-list-item:hover{background:#faf9f6;}
-.nav-list-item__icon{width:32px!important;height:32px!important;flex-shrink:0!important;flex-grow:0!important;color:#1e2d40;}
-.nav-list-item__icon--large{width:48px!important;height:48px!important;flex-shrink:0!important;}
-.nav-list-item__body{flex:1;min-width:0;text-align:left;}
-.nav-list-item__title{font-size:14px;font-weight:700;color:#333;text-align:left;}
-.nav-list-item__desc{font-size:11px;color:#666;margin-top:1px;text-align:left;}
-.nav-list-item__arrow{font-size:14px;color:#666;opacity:0.5;flex-shrink:0;}
-.nav-list-item__value{font-size:13px;font-weight:700;color:#1e2d40;white-space:nowrap;flex-shrink:0;}
-</style>
+<link rel="stylesheet" href="common.css">
 <style>
 /* ★ 現場ナビ系との配色統一（2026/4/23）：bg・card-header をnavy系に揃える
    その他の変数（text/text-sub/green/red/orange/blue）は書類固有のまま維持 */
@@ -346,6 +330,26 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 .tab-detail-value{font-size:14px;font-weight:600;color:var(--text);}
 
 .empty{background:var(--white);border:2px dashed var(--border-dark);border-radius:6px;padding:20px;text-align:center;color:var(--text-sub);font-size:13px;margin-bottom:12px;}
+/* Sheetsで編集ボタン */
+.sheets-edit-btn{
+  display:flex;align-items:center;gap:8px;
+  width:calc(100% - 24px);margin:0 12px 12px;
+  padding:12px 16px;border:1px solid rgba(30,45,64,0.15);border-radius:10px;
+  background:#f0f4f8;color:var(--navy);font-size:13px;font-weight:600;
+  cursor:pointer;font-family:inherit;min-height:48px;
+  transition:background 0.15s;
+}
+.sheets-edit-btn:hover{background:#dce6f0;}
+.sheets-edit-btn svg{flex-shrink:0;color:var(--navy);}
+/* トースト */
+#sheets-toast{
+  position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(16px);
+  background:var(--navy);color:#fff;padding:12px 20px;border-radius:10px;
+  font-size:13px;line-height:1.6;white-space:pre;text-align:center;
+  opacity:0;pointer-events:none;transition:all 0.25s;z-index:500;
+  box-shadow:0 4px 16px rgba(0,0,0,0.2);
+}
+#sheets-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .loading{text-align:center;padding:40px;color:var(--text-sub);font-size:13px;}
 @media(max-width:600px){
   .info-grid{grid-template-columns:1fr 1fr;}
@@ -821,6 +825,11 @@ function buildAnkenCard(p){
         </button>
         <div class="nav-expand-body">${detailGenka}</div>
       </div>
+      <!-- Sheetsで編集ボタン -->
+      <button class="sheets-edit-btn" onclick="openSheets('${p.案件番号}',event)">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="14" height="14" rx="2"/><line x1="3" y1="8" x2="17" y2="8"/><line x1="8" y1="8" x2="8" y2="17"/></svg>
+        Sheetsで編集
+      </button>
     </div>
   </div>`;
 }
@@ -1094,6 +1103,25 @@ function renderGenka(){
       <div class="tab-nav-card-body">${bodyHtml}</div>
     </div>`;
   }).join('');
+}
+
+// ─ Sheets編集 ─
+const SHEETS_URL='https://docs.google.com/spreadsheets/d/1M7CPRijH446h63LlDYIZGzwSSfUZnvqYT0VSRoEy2PU/edit';
+function openSheets(ankenNo, e){
+  e.stopPropagation();
+  // 案件番号をクリップボードにコピー
+  navigator.clipboard.writeText(ankenNo).catch(()=>{});
+  // トースト表示
+  showToast(`「${ankenNo}」をコピーしました\nSheets内でCtrl+Fで検索してください`);
+  // Sheetsを新タブで開く
+  window.open(SHEETS_URL, '_blank');
+}
+function showToast(msg){
+  let t=document.getElementById('sheets-toast');
+  if(!t){t=document.createElement('div');t.id='sheets-toast';document.body.appendChild(t);}
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('show'),2800);
 }
 
 // ─ 他タブのカード展開 ─
