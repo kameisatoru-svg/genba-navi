@@ -4,7 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>案件台帳｜株式会社アート・レイズ</title>
-<link rel="stylesheet" href="common.css">
+<style>
+/* ===== common.css v1.1 インライン ===== */
+:root{--navy:#1e2d40;--beige:#eeebe5;--gold:#c8a96e;--white:#fff;--bg:#eeebe5;--text:#333;--text2:#666;--border:#ddd;}
+.page-scroll{overflow:auto!important;height:auto!important;min-height:100dvh!important;}
+.nav-list{background:#fff;border-radius:16px;box-shadow:0 2px 8px rgba(30,45,64,0.07);overflow:hidden;margin-bottom:12px;}
+.nav-list-section{font-size:10px;color:#666;letter-spacing:0.08em;padding:10px 16px 4px;font-weight:700;}
+.nav-list-item{display:flex;align-items:center;gap:14px;min-height:60px;padding:13px 14px;width:100%;box-sizing:border-box;text-align:left;border:none;background:transparent;font-family:inherit;cursor:pointer;border-bottom:1px solid rgba(30,45,64,0.05);}
+.nav-list-item:last-child{border-bottom:none;}
+.nav-list-item:hover{background:#faf9f6;}
+.nav-list-item__icon{width:32px!important;height:32px!important;flex-shrink:0!important;flex-grow:0!important;color:#1e2d40;}
+.nav-list-item__icon--large{width:48px!important;height:48px!important;flex-shrink:0!important;}
+.nav-list-item__body{flex:1;min-width:0;text-align:left;}
+.nav-list-item__title{font-size:14px;font-weight:700;color:#333;text-align:left;}
+.nav-list-item__desc{font-size:11px;color:#666;margin-top:1px;text-align:left;}
+.nav-list-item__arrow{font-size:14px;color:#666;opacity:0.5;flex-shrink:0;}
+.nav-list-item__value{font-size:13px;font-weight:700;color:#1e2d40;white-space:nowrap;flex-shrink:0;}
+</style>
 <style>
 /* ★ 現場ナビ系との配色統一（2026/4/23）：bg・card-header をnavy系に揃える
    その他の変数（text/text-sub/green/red/orange/blue）は書類固有のまま維持 */
@@ -387,6 +403,7 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
       </svg>
       <span class="filter-dot"></span>
     </button>
+    <button class="chip" id="anken-done-toggle" onclick="toggleAnkenDone()">完了済みも表示</button>
     <div id="anken-chips"></div>
   </div>
   <div id="anken-area"><div class="loading">データを読み込んでいます...</div></div>
@@ -415,6 +432,7 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
     <input type="date" id="m-from" onchange="renderMitsumori()">
     <span class="filter-sep">〜</span>
     <input type="date" id="m-to" onchange="renderMitsumori()">
+    <button class="chip" id="m-all-toggle" onclick="mitsumoriHideActive=!mitsumoriHideActive;renderMitsumori()">すべて表示</button>
   </div>
   <div id="mitsumori-area"></div>
 </div>
@@ -436,8 +454,8 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
     <input type="date" id="r-from" onchange="renderSeikyu()">
     <span class="filter-sep">〜</span>
     <input type="date" id="r-to" onchange="renderSeikyu()">
-    <button class="chip active" id="r-chip-all" onclick="setSeikyuFilter('all')">すべて</button>
-    <button class="chip" id="r-chip-minyukin" onclick="setSeikyuFilter('minyukin')">未入金</button>
+    <button class="chip" id="r-chip-all" onclick="setSeikyuFilter('all')">すべて</button>
+    <button class="chip active" id="r-chip-minyukin" onclick="setSeikyuFilter('minyukin')">未入金</button>
     <button class="chip" id="r-chip-nyukin" onclick="setSeikyuFilter('nyukin')">入金済み</button>
   </div>
   <div id="seikyu-area"></div>
@@ -509,9 +527,14 @@ const DATA_URL=BASE_URL+'data.json';
 const LS_KEY='artrise_allinone_v1';
 let ALL_DATA=[];
 let currentTab='anken';
-let seikyuFilter='all';
+let seikyuFilter='minyukin'; // デフォルト：未入金のみ
 let keiyakuFilter='all';
 let ankenStatusFilter='all';
+// 完了除外フラグ（デフォルトON = 完了を隠す）
+const ANKEN_DONE_STATUS=['入金済み','完了'];
+const MITSUMORI_HIDE_STATUS=['施工中','受注済','請求済み','入金済み','完了'];
+let ankenHideDone=true;
+let mitsumoriHideActive=true;
 
 async function loadData(){
   try{
@@ -584,19 +607,25 @@ function renderAnken(){
   const q=document.getElementById('anken-search').value.toLowerCase();
   const data=ALL_DATA.filter(p=>{
     const txt=[p.案件番号,p.工事名,p.法人名,p.代表者,p.施工場所,p.ステータス,p.備考].filter(Boolean).join(' ').toLowerCase();
-    return(!q||txt.includes(q))&&(ankenStatusFilter==='all'||p.ステータス===ankenStatusFilter);
+    const statusOk=ankenStatusFilter==='all'||p.ステータス===ankenStatusFilter;
+    const doneOk=!ankenHideDone||!ANKEN_DONE_STATUS.includes(p.ステータス);
+    return(!q||txt.includes(q))&&statusOk&&doneOk;
   });
   // ヘッダーサマリーに件数＋受注総額を集約表示
   const amt=data.reduce((s,p)=>{const r=(p.請求||[]).reduce((a,r)=>a+Number(r.請求金額||0),0);return s+(r||Number(p.見積?.見積金額||0));},0);
   updateHeaderSummary(data.length,amt);
-  // フィルタボタンの状態表示（フィルタ適用中ならハイライト）
+  // フィルタボタンの状態表示
   const btn=document.getElementById('anken-filter-btn');
-  if(btn)btn.classList.toggle('has-filter',ankenStatusFilter!=='all');
+  if(btn)btn.classList.toggle('has-filter',ankenStatusFilter!=='all'||!ankenHideDone);
+  // 完了除外トグルボタンの表示更新
+  const doneBtn=document.getElementById('anken-done-toggle');
+  if(doneBtn){doneBtn.textContent=ankenHideDone?'完了済みも表示':'完了済みを隠す';doneBtn.classList.toggle('active',!ankenHideDone);}
   const area=document.getElementById('anken-area');
   if(!data.length){area.innerHTML='<div class="empty">該当する案件がありません</div>';return;}
   area.innerHTML=data.map(p=>buildAnkenCard(p)).join('');
 }
 function setAnkenStatus(s){ankenStatusFilter=s;renderAnken();closeFilterSheet();}
+function toggleAnkenDone(){ankenHideDone=!ankenHideDone;renderAnken();}
 function toggleCard(h){h.closest('.card').classList.toggle('open');}
 // ★ C-4: nav-list-item の個別展開
 function toggleNavItem(el){
@@ -805,10 +834,14 @@ function renderMitsumori(){
   const items=ALL_DATA.filter(p=>{
     if(!p.見積?.見積金額&&!p.見積?.見積番号)return false;
     const txt=[p.案件番号,p.工事名,p.法人名,p.代表者,p.見積?.見積番号].filter(Boolean).join(' ').toLowerCase();
-    return(!q||txt.includes(q))&&inRange(p.見積?.見積日,from,to);
+    const hideOk=!mitsumoriHideActive||!MITSUMORI_HIDE_STATUS.includes(p.ステータス);
+    return(!q||txt.includes(q))&&inRange(p.見積?.見積日,from,to)&&hideOk;
   });
   document.getElementById('m-total').textContent=items.length;
   document.getElementById('m-total-amt').textContent=fmtYen(items.reduce((s,p)=>s+Number(p.見積?.見積金額||0),0));
+  // 「すべて表示」トグルボタン状態更新
+  const mBtn=document.getElementById('m-all-toggle');
+  if(mBtn){mBtn.textContent=mitsumoriHideActive?'すべて表示':'対応中のみ';mBtn.classList.toggle('active',!mitsumoriHideActive);}
   const area=document.getElementById('mitsumori-area');
   if(!items.length){area.innerHTML='<div class="empty">該当する見積がありません</div>';return;}
   area.innerHTML=items.map(p=>{
