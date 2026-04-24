@@ -4,235 +4,236 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>取引先台帳｜株式会社アート・レイズ</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="common.css">
 <style>
-  :root {
-    --band: #555;
-    --light: #f8f8f8;
-    --border: #ddd;
-    --border-dark: #aaa;
-    --text: #333;
-    --text-sub: #666;
-    --white: #fff;
-    --accent: #2563eb;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Noto Sans JP', sans-serif; background: #eee; color: var(--text); font-size: 14px; }
-  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+/* ★ 案件台帳_アートレイズ.htmlと同じ設計思想で改修（2026/4/24）
+   - Google Fonts撤去
+   - page-headerをnavy系に統一
+   - カードはC-3準拠（白基調・角丸14px・影のみ・左端バーは関係性色）
+   - カード展開はC-4準拠（nav-list化・2階層折りたたみ）
+   - 検索＋フィルタはC-1準拠（フィルタシート下スライド） */
+:root {
+  --navy:#1e2d40; --accent:#c8a96e; --white:#fff;
+  --bg:#eeebe5; --border:#ddd; --border-dark:#aaa;
+  --text:#333; --text-sub:#666; --light:#f8f8f8;
+  --green:#16a34a; --red:#dc2626; --orange:#d97706; --blue:#2563eb;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--text);font-size:14px;padding-bottom:20px;
+  /* ★ common.cssの overflow:hidden と height:100dvh を解除してページ全体スクロールを有効化 */
+  height:auto;min-height:100dvh;overflow:auto;overflow-x:hidden;}
+.container{max-width:1100px;margin:0 auto;padding:0 16px 24px;}
+.page-header{background:var(--navy);color:var(--white);padding:14px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;}
+.page-header h1{font-size:17px;font-weight:700;letter-spacing:0.04em;display:flex;align-items:center;gap:8px;}
+.page-header .summary{font-size:14px;opacity:0.9;text-align:right;line-height:1.4;white-space:nowrap;}
+.page-header .summary .count{font-size:17px;font-weight:700;}
 
-  /* ヘッダー */
-  .page-header {
-    background: var(--band); color: var(--white);
-    padding: 18px 24px; border-radius: 6px 6px 0 0;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .page-header h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.05em; }
-  .page-header .meta { font-size: 12px; opacity: 0.8; text-align: right; }
+/* ★ 検索＋フィルタボタン：案件台帳と統一 */
+.filter-bar{background:var(--white);border:none;padding:10px 12px;display:flex;gap:8px;align-items:center;margin-bottom:14px;border-radius:14px;margin-top:14px;box-shadow:0 2px 8px rgba(30,45,64,0.07);}
+.filter-bar input[type="text"]{flex:1;min-width:0;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit;background:var(--light);}
+.filter-bar input[type="text"]:focus{outline:none;border-color:var(--accent);background:var(--white);}
+/* フィルタボタン（右端のアイコン・タップでシート展開） */
+.filter-toggle-btn{
+  width:44px;height:44px;border:1px solid var(--border);border-radius:10px;
+  background:var(--white);color:var(--navy);cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;
+}
+.filter-toggle-btn:hover{background:var(--light);}
+.filter-toggle-btn.has-filter{background:var(--navy);color:var(--white);border-color:var(--navy);}
+.filter-toggle-btn .filter-dot{
+  position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;
+  background:var(--accent);display:none;
+}
+.filter-toggle-btn.has-filter .filter-dot{display:block;}
 
-  /* 統計バー */
-  .stats-bar {
-    background: var(--white); border: 1px solid var(--border); border-top: none;
-    padding: 14px 24px; display: flex; gap: 32px; flex-wrap: wrap;
-  }
-  .stat-item { text-align: center; }
-  .stat-num { font-size: 22px; font-weight: 700; color: var(--band); }
-  .stat-label { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+/* フィルタシート（下から出るモーダル） */
+.filter-sheet{
+  position:fixed;bottom:0;left:0;right:0;background:var(--white);
+  border-radius:16px 16px 0 0;box-shadow:0 -4px 16px rgba(0,0,0,0.15);
+  z-index:200;padding:20px 20px 24px;transform:translateY(100%);
+  transition:transform 0.25s ease-out;max-height:80vh;overflow-y:auto;
+}
+.filter-sheet.open{transform:translateY(0);}
+.filter-sheet-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:199;
+  opacity:0;pointer-events:none;transition:opacity 0.25s;
+}
+.filter-sheet-backdrop.open{opacity:1;pointer-events:auto;}
+.filter-sheet-title{font-size:13px;font-weight:700;color:var(--text-sub);margin-bottom:12px;letter-spacing:0.06em;margin-top:14px;}
+.filter-sheet-title:first-child{margin-top:0;}
+.filter-sheet-chips{display:flex;flex-wrap:wrap;gap:8px;}
+.filter-sheet-chip{
+  padding:10px 18px;border:1px solid var(--border);border-radius:24px;
+  background:var(--white);font-size:14px;font-weight:600;color:var(--text);
+  cursor:pointer;font-family:inherit;min-height:44px;
+}
+.filter-sheet-chip.active{background:var(--navy);color:var(--white);border-color:var(--navy);}
+.filter-sheet-close{
+  margin-top:20px;width:100%;padding:12px;background:var(--accent);color:var(--navy);
+  border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;
+  font-family:inherit;min-height:48px;
+}
 
-  /* フィルターバー */
-  .filter-bar {
-    background: var(--white); border: 1px solid var(--border); border-top: none;
-    padding: 12px 24px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
-  }
-  .filter-label { font-size: 11px; font-weight: 700; color: var(--text-sub); margin-right: 4px; white-space: nowrap; }
-  .filter-btn {
-    font-size: 12px; padding: 4px 12px; border-radius: 20px;
-    border: 1px solid var(--border-dark); background: var(--white);
-    cursor: pointer; font-family: inherit; color: var(--text-sub); transition: all 0.15s;
-  }
-  .filter-btn:hover { background: #f0f0f0; }
-  .filter-btn.active { background: #444; color: #fff; border-color: #444; }
-  .filter-divider { width: 1px; height: 20px; background: var(--border-dark); margin: 0 4px; }
+/* コピーバー（業者選択→一括コピー機能） */
+.copy-bar{
+  display:none;background:var(--navy);color:#fff;
+  padding:10px 16px;border-radius:10px;margin-bottom:12px;
+  align-items:center;gap:12px;flex-wrap:wrap;
+}
+.copy-bar.visible{display:flex;}
+.copy-bar-text{font-size:13px;flex:1;font-weight:600;}
+.copy-btn{
+  background:var(--accent);color:var(--navy);border:none;border-radius:8px;
+  padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;min-height:40px;
+}
+.copy-btn:hover{background:#b8996a;}
+.clear-btn{
+  background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.4);
+  border-radius:8px;padding:8px 12px;font-size:12px;cursor:pointer;font-family:inherit;min-height:40px;
+}
 
-  /* 検索バー */
-  .search-bar {
-    background: var(--white); border: 1px solid var(--border); border-top: none;
-    padding: 12px 24px; border-radius: 0 0 6px 6px; margin-bottom: 16px;
-    display: flex; gap: 10px; align-items: center;
-  }
-  .search-bar input {
-    flex: 1; padding: 8px 12px; border: 1px solid var(--border-dark);
-    border-radius: 4px; font-size: 14px; font-family: inherit;
-  }
-  .search-bar input:focus { outline: none; border-color: var(--accent); }
+/* ★ カード：案件台帳C-3準拠（白基調・角丸14px・影のみ・左端関係性バー） */
+.vendor-card{background:var(--white);border:none;border-radius:14px;margin-bottom:10px;overflow:hidden;transition:box-shadow 0.15s;position:relative;box-shadow:0 2px 8px rgba(30,45,64,0.07);border-left:4px solid #d0d0cc;}
+.vendor-card:hover{box-shadow:0 4px 12px rgba(30,45,64,0.1);}
+/* 関係性バー：優先度順（元請け > 顧客 > 業者 > 仕入先 > 休眠） */
+.vendor-card.rel-元請け{border-left-color:#9b59b6;}
+.vendor-card.rel-顧客{border-left-color:#1a7a30;}
+.vendor-card.rel-業者{border-left-color:#f39c12;}
+.vendor-card.rel-仕入先{border-left-color:#2563eb;}
+.vendor-card.rel-休眠{border-left-color:#9ca3af;opacity:0.75;}
 
-  /* コピーバー */
-  .copy-bar {
-    display: none; background: #1e40af; color: #fff;
-    padding: 10px 20px; border-radius: 6px; margin-bottom: 12px;
-    display: none; align-items: center; gap: 12px; flex-wrap: wrap;
-  }
-  .copy-bar.visible { display: flex; }
-  .copy-bar-text { font-size: 13px; flex: 1; }
-  .copy-btn {
-    background: #fff; color: #1e40af; border: none; border-radius: 4px;
-    padding: 6px 16px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
-  }
-  .copy-btn:hover { background: #dbeafe; }
-  .clear-btn {
-    background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.5);
-    border-radius: 4px; padding: 6px 12px; font-size: 12px; cursor: pointer; font-family: inherit;
-  }
+/* ヘッダー：白基調 */
+.card-header{background:var(--white);color:var(--text);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:nowrap;cursor:pointer;user-select:none;min-height:56px;}
+.card-header:hover{background:#faf9f6;}
+.card-header-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1;min-width:0;}
+.vendor-id{background:var(--light);color:var(--text-sub);padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;flex-shrink:0;letter-spacing:0.02em;}
+.vendor-name{font-size:16px;font-weight:700;color:var(--navy);line-height:1.35;}
+.card-toggle{font-size:14px;opacity:0.4;color:var(--text-sub);transition:transform 0.2s;flex-shrink:0;}
+.vendor-card.open .card-toggle{transform:rotate(180deg);opacity:0.7;}
+.vendor-card.open{box-shadow:0 4px 16px rgba(30,45,64,0.12);}
 
-  /* カード */
-  .vendor-card {
-    background: var(--white); border: 1px solid var(--border);
-    border-radius: 6px; margin-bottom: 12px; overflow: hidden;
-    transition: box-shadow 0.15s;
-  }
-  .vendor-card.selected { border: 2px solid #2563eb; box-shadow: 0 0 0 3px #dbeafe; }
-  .card-header {
-    background: #444; color: var(--white); padding: 10px 16px;
-    display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
-  }
-  .card-header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .vendor-id {
-    font-size: 12px; font-weight: 700; background: rgba(255,255,255,0.2);
-    padding: 2px 8px; border-radius: 4px; letter-spacing: 0.05em; white-space: nowrap;
-  }
-  .vendor-name { font-size: 15px; font-weight: 700; }
+/* カードチェックボックス（コピー選択用） */
+.card-checkbox{
+  width:20px;height:20px;cursor:pointer;accent-color:var(--navy);flex-shrink:0;
+}
+.vendor-card.selected{box-shadow:0 0 0 2px var(--navy),0 2px 8px rgba(30,45,64,0.15);}
 
-  /* チェックボックス */
-  .card-checkbox {
-    width: 18px; height: 18px; cursor: pointer; accent-color: #2563eb; flex-shrink: 0;
-  }
+/* バッジ：82px固定・中央寄せ（案件台帳と統一） */
+.badge{
+  padding:5px 0;border-radius:12px;font-size:11px;font-weight:700;
+  white-space:nowrap;flex-shrink:0;letter-spacing:0.02em;
+  min-width:56px;text-align:center;display:inline-block;padding:5px 10px;
+}
+.b-顧客{background:#1a7a30;color:#fff;}
+.b-業者{background:#f39c12;color:#fff;}
+.b-元請け{background:#9b59b6;color:#fff;}
+.b-仕入先{background:#2563eb;color:#fff;}
+.b-休眠{background:#e8ebef;color:#6b7280;}
+.b-業種{background:#f1f5f9;color:#475569;font-weight:600;}
 
-  /* タグ */
-  .tags { display: flex; flex-wrap: wrap; gap: 4px; }
-  .tag {
-    font-size: 11px; font-weight: 700; padding: 2px 8px;
-    border-radius: 10px; white-space: nowrap;
-  }
-  /* 関係性タグ */
-  .tag-顧客     { background: #dcfce7; color: #15803d; }
-  .tag-業者     { background: #fef9c3; color: #854d0e; }
-  .tag-両方     { background: #dbeafe; color: #1e40af; }
-  .tag-元請け   { background: #e0e7ff; color: #3730a3; }
-  .tag-紹介元   { background: #fce7f3; color: #9d174d; }
-  .tag-仕入先   { background: #ffedd5; color: #9a3412; }
-  .tag-休眠     { background: #f3f4f6; color: #6b7280; }
-  /* 業種タグ */
-  .tag-業種 { background: #f1f5f9; color: #475569; }
+/* カードボディ：展開時 */
+.card-body{display:none;padding:12px;background:#fbfaf8;}
+.vendor-card.open .card-body{display:block;}
 
-  /* 情報グリッド */
-  .card-body { padding: 14px 16px; }
-  .info-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 8px 20px; margin-bottom: 10px;
-  }
-  .info-item { display: flex; flex-direction: column; gap: 2px; }
-  .info-label { font-size: 11px; color: var(--text-sub); font-weight: 700; }
-  .info-value { font-size: 13px; color: var(--text); }
-  .info-value a { color: var(--accent); text-decoration: none; }
-  .info-value.warn { color: #b45309; }
+/* ★ C-4 改修：カード展開部分を nav-list 化 + 2階層折りたたみ */
+.vendor-card .nav-list{box-shadow:none;border-radius:10px;border:1px solid rgba(30,45,64,0.08);margin-bottom:0;}
+.vendor-card .nav-list-item{min-height:60px;padding:13px 14px;cursor:pointer;}
+.vendor-card .nav-list-item__title{font-size:15px;}
+.vendor-card .nav-list-item__desc{font-size:12px;}
+.vendor-card .nav-list-item__value{font-size:13px;font-weight:600;color:var(--text-sub);margin-right:4px;}
+.vendor-card .nav-list-item__arrow{font-size:14px;transition:transform 0.2s;}
+.vendor-card .nav-list-item.nav-expand.open .nav-list-item__arrow{transform:rotate(90deg);opacity:0.9;}
+.vendor-card .nav-list-item.nav-expand.open{background:#f5f2ec;border-bottom:1px solid rgba(200,169,110,0.3);}
+.vendor-card .nav-list-item.nav-expand.open .nav-list-item__title{color:var(--navy);}
+/* 2階層目（展開エリア） */
+.nav-expand-body{
+  display:none;
+  padding:14px 16px 16px;
+  background:#fff;
+  border-bottom:1px solid rgba(30,45,64,0.06);
+  animation:navExpandFade 0.2s ease-out;
+}
+.nav-list-item.nav-expand.open + .nav-expand-body{display:block;}
+@keyframes navExpandFade{from{opacity:0;}to{opacity:1;}}
 
-  /* 案件履歴 */
-  .case-links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-  .case-link {
-    font-size: 11px; background: #f1f5f9; border: 1px solid #cbd5e1;
-    border-radius: 4px; padding: 3px 10px; color: #334155; text-decoration: none;
-    font-weight: 700;
-  }
-  .case-link:hover { background: #e2e8f0; }
+/* 情報グリッド（展開エリア内） */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px 20px;}
+.info-item{display:flex;flex-direction:column;gap:3px;}
+.info-label{font-size:11px;color:var(--text-sub);font-weight:700;}
+.info-value{font-size:14px;color:var(--text);}
+.info-value a{color:var(--blue);text-decoration:none;}
+.info-value a:hover{text-decoration:underline;}
+.info-value.warn{color:#b45309;}
+.info-value.fullwidth{grid-column:1/-1;}
 
-  /* メモ */
-  .note-box {
-    background: #fafafa; border-left: 3px solid #d1d5db;
-    padding: 8px 12px; font-size: 12px; color: var(--text-sub);
-    border-radius: 0 4px 4px 0; margin-top: 8px; line-height: 1.7;
-  }
-  .note-label { font-weight: 700; color: var(--text); margin-bottom: 3px; font-size: 11px; }
+/* 案件履歴 */
+.case-links{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.case-link{
+  font-size:12px;background:#f1f5f9;border:1px solid #cbd5e1;
+  border-radius:6px;padding:6px 12px;color:#334155;text-decoration:none;
+  font-weight:600;
+}
+.case-link:hover{background:#e2e8f0;}
 
-  .add-row {
-    background: var(--white); border: 2px dashed var(--border-dark);
-    border-radius: 6px; padding: 16px; text-align: center;
-    color: var(--text-sub); font-size: 13px; margin-bottom: 20px;
-  }
-  .page-footer {
-    text-align: center; font-size: 11px; color: var(--text-sub);
-    padding: 12px 0; border-top: 1px solid var(--border); margin-top: 8px;
-  }
+/* メモ */
+.note-box{
+  background:#fffbf0;border-left:3px solid #e8d9a0;
+  padding:10px 14px;font-size:13px;color:var(--text-sub);
+  border-radius:0 4px 4px 0;line-height:1.7;
+}
 
-  /* コピー完了トースト */
-  .toast {
-    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-    background: #1e293b; color: #fff; padding: 10px 24px; border-radius: 24px;
-    font-size: 13px; font-weight: 700; opacity: 0; transition: opacity 0.3s;
-    pointer-events: none; z-index: 999;
-  }
-  .toast.show { opacity: 1; }
+.empty{background:var(--white);border:2px dashed var(--border-dark);border-radius:10px;padding:20px;text-align:center;color:var(--text-sub);font-size:13px;margin-bottom:12px;}
+.loading{text-align:center;padding:40px;color:var(--text-sub);font-size:13px;}
 
-  @media (max-width: 600px) {
-    .info-grid { grid-template-columns: 1fr 1fr; }
-  }
+/* ページフッター */
+.page-footer{text-align:center;font-size:11px;color:var(--text-sub);padding:12px 0;border-top:1px solid var(--border);margin-top:8px;}
+
+/* トースト */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--navy);color:#fff;padding:10px 24px;border-radius:24px;
+  font-size:13px;font-weight:700;opacity:0;transition:opacity 0.3s;
+  pointer-events:none;z-index:999;
+}
+.toast.show{opacity:1;}
+
+@media(max-width:600px){
+  .info-grid{grid-template-columns:1fr 1fr;}
+  .page-header{padding:12px 14px;}
+  .page-header h1{font-size:16px;}
+  .page-header .summary{font-size:11px;}
+  .page-header .summary .count{font-size:13px;}
+  .vendor-name{font-size:15px;}
+  .filter-bar{padding:8px 10px;gap:6px;}
+  .filter-bar input[type="text"]{font-size:15px;padding:10px;}
+}
 </style>
 </head>
 <body>
+<div class="page-header">
+  <h1>
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <circle cx="7" cy="7" r="2.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <circle cx="13" cy="7" r="2.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <path d="M2 16 Q2 12 7 12 Q9 12 10 13 Q11 12 13 12 Q18 12 18 16" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    </svg>
+    取引先台帳
+  </h1>
+  <div class="summary" id="headerSummary">-</div>
+</div>
 <div class="container">
 
-  <div class="page-header">
-    <h1>🤝 取引先台帳</h1>
-    <div class="meta">株式会社アート・レイズ<br>最終更新：2026-03-18</div>
-  </div>
-
-  <div class="stats-bar">
-    <div class="stat-item">
-      <div class="stat-num" id="totalCount">7</div>
-      <div class="stat-label">総取引先数</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">3</div>
-      <div class="stat-label">顧客</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">5</div>
-      <div class="stat-label">業者</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num" id="selectedCount">0</div>
-      <div class="stat-label">選択中</div>
-    </div>
-  </div>
-
-  <!-- フィルターバー -->
+  <!-- 検索＋フィルタ -->
   <div class="filter-bar">
-    <span class="filter-label">関係性：</span>
-    <button class="filter-btn active" onclick="setFilter('rel','全て')">全て</button>
-    <button class="filter-btn" onclick="setFilter('rel','顧客')">顧客</button>
-    <button class="filter-btn" onclick="setFilter('rel','業者')">業者</button>
-    <button class="filter-btn" onclick="setFilter('rel','元請け')">元請け</button>
-    <button class="filter-btn" onclick="setFilter('rel','仕入先')">仕入先</button>
-    <button class="filter-btn" onclick="setFilter('rel','休眠')">休眠</button>
-    <div class="filter-divider"></div>
-    <span class="filter-label">業種：</span>
-    <button class="filter-btn active" onclick="setFilter('type','全て')">全て</button>
-    <button class="filter-btn" onclick="setFilter('type','左官')">左官</button>
-    <button class="filter-btn" onclick="setFilter('type','内装')">内装</button>
-    <button class="filter-btn" onclick="setFilter('type','床工事')">床工事</button>
-    <button class="filter-btn" onclick="setFilter('type','塗装')">塗装</button>
-    <button class="filter-btn" onclick="setFilter('type','建具・サッシ')">建具・サッシ</button>
-    <button class="filter-btn" onclick="setFilter('type','設備')">設備</button>
-    <button class="filter-btn" onclick="setFilter('type','木工事')">木工事</button>
-    <button class="filter-btn" onclick="setFilter('type','屋根・防水')">屋根・防水</button>
-    <button class="filter-btn" onclick="setFilter('type','外構')">外構</button>
-    <button class="filter-btn" onclick="setFilter('type','ゼネコン・元請け')">ゼネコン・元請け</button>
-    <button class="filter-btn" onclick="setFilter('type','公共施設')">公共施設</button>
-    <button class="filter-btn" onclick="setFilter('type','店舗・法人')">店舗・法人</button>
-    <button class="filter-btn" onclick="setFilter('type','住宅・個人')">住宅・個人</button>
-    <button class="filter-btn" onclick="setFilter('type','バックオフィス')">バックオフィス</button>
-  </div>
-
-  <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="🔍 会社名・担当者名・住所・案件番号で絞り込み..." oninput="applyFilters()">
+    <input type="text" id="vendor-search" placeholder="🔍 会社名・担当者・住所・案件番号で検索" oninput="renderVendors()">
+    <button class="filter-toggle-btn" id="vendor-filter-btn" onclick="openFilterSheet()" aria-label="絞り込み">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <line x1="4" y1="7" x2="18" y2="7"/>
+        <line x1="7" y1="11" x2="15" y2="11"/>
+        <line x1="9" y1="15" x2="13" y2="15"/>
+      </svg>
+      <span class="filter-dot"></span>
+    </button>
   </div>
 
   <!-- コピーバー -->
@@ -242,588 +243,457 @@
     <button class="clear-btn" onclick="clearSelection()">✕ 選択解除</button>
   </div>
 
-  <!-- ===================== 取引先カード ===================== -->
-
-  <!-- T-001 社会福祉法人 玉寿会（さくら苑） -->
-  <div class="vendor-card" data-rel="顧客" data-type="公共施設" data-search="t-001 さくら苑 玉寿会 西俊至 山田勝徳 熊本 玉名">
-    <div class="card-header">
-      <input type="checkbox" class="card-checkbox" onchange="updateSelection(this)">
-      <div class="card-header-left">
-        <span class="vendor-id">T-001</span>
-        <span class="vendor-name">社会福祉法人 玉寿会（さくら苑）</span>
-      </div>
-      <div class="tags">
-        <span class="tag tag-顧客">顧客</span>
-        <span class="tag tag-業種">公共施設</span>
-      </div>
-    </div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">担当者</span>
-          <span class="info-value">西 俊至 様（事務課長）</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">代表者</span>
-          <span class="info-value">山田 勝徳 理事長</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">TEL</span>
-          <span class="info-value"><a href="tel:096-875-1139">096-875-1139</a></span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">メール</span>
-          <span class="info-value"><a href="mailto:nishi@sakura-en.com">nishi@sakura-en.com</a></span>
-        </div>
-        <div class="info-item" style="grid-column:1/-1;">
-          <span class="info-label">住所</span>
-          <span class="info-value">熊本県玉名市伊倉北方1533</span>
-        </div>
-      </div>
-      <div class="case-links">
-        <span style="font-size:11px;color:var(--text-sub);font-weight:700;align-self:center;">案件：</span>
-        <a class="case-link" href="案件台帳_アートレイズ.html">AR-2026-0004 床工事</a>
-      </div>
-      <div class="note-box">
-        <div class="note-label">📝 メモ</div>
-        契約日：令和8年3月16日。第1期3/21〜22施工。第2期4/18〜20予定。税込¥9,990,200。
-      </div>
-    </div>
-  </div>
-
-  <!-- T-002 松村整骨院 -->
-  <div class="vendor-card" data-rel="顧客" data-type="住宅・個人" data-search="t-002 松村整骨院 愛の治療院 松村 別府 外装 看板">
-    <div class="card-header">
-      <input type="checkbox" class="card-checkbox" onchange="updateSelection(this)">
-      <div class="card-header-left">
-        <span class="vendor-id">T-002</span>
-        <span class="vendor-name">松村整骨院（愛の治療院）</span>
-      </div>
-      <div class="tags">
-        <span class="tag tag-顧客">顧客</span>
-        <span class="tag tag-業種">住宅・個人</span>
-      </div>
-    </div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">担当者</span>
-          <span class="info-value">松村 様</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">TEL</span>
-          <span class="info-value warn">未登録</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">メール</span>
-          <span class="info-value warn">未登録</span>
-        </div>
-        <div class="info-item" style="grid-column:1/-1;">
-          <span class="info-label">住所</span>
-          <span class="info-value">大分県別府市（詳細未登録）</span>
-        </div>
-      </div>
-      <div class="case-links">
-        <span style="font-size:11px;color:var(--text-sub);font-weight:700;align-self:center;">案件：</span>
-        <a class="case-link" href="案件台帳_アートレイズ.html">AR-2026-0005 外装補修</a>
-      </div>
-      <div class="note-box">
-        <div class="note-label">📝 メモ</div>
-        外壁コーキング・看板シート張替他（¥206,195税込）。紹介経由（元同級生の妻が勤務）。
-      </div>
-    </div>
-  </div>
-
-  <!-- T-003 株式会社 信和 -->
-  <div class="vendor-card" data-rel="顧客 元請け" data-type="ゼネコン・元請け" data-search="t-003 信和 加藤博和 別府 ゼネコン 元請け ビーコンプラザ">
-    <div class="card-header">
-      <input type="checkbox" class="card-checkbox" onchange="updateSelection(this)">
-      <div class="card-header-left">
-        <span class="vendor-id">T-003</span>
-        <span class="vendor-name">株式会社 信和</span>
-      </div>
-      <div class="tags">
-        <span class="tag tag-顧客">顧客</span>
-        <span class="tag tag-元請け">元請け</span>
-        <span class="tag tag-業種">ゼネコン・元請け</span>
-      </div>
-    </div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">担当者</span>
-          <span class="info-value">加藤 博和 様</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">TEL</span>
-          <span class="info-value"><a href="tel:0977-21-9640">0977-21-9640</a></span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">携帯</span>
-          <span class="info-value"><a href="tel:090-3607-5427">090-3607-5427</a></span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">FAX</span>
-          <span class="info-value">0977-21-9669</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">メール</span>
-          <span class="info-value"><a href="mailto:h-katou@ctb.ne.jp">h-katou@ctb.ne.jp</a></span>
-        </div>
-        <div class="info-item" style="grid-column:1/-1;">
-          <span class="info-label">住所</span>
-          <span class="info-value">〒874-0942　大分県別府市千代町6-3</span>
-        </div>
-      </div>
-      <div class="case-links">
-        <span style="font-size:11px;color:var(--text-sub);font-weight:700;align-self:center;">案件：</span>
-        <a class="case-link" href="案件台帳_アートレイズ.html">AR-2026-0006 アルミアングル</a>
-        <a class="case-link" href="案件台帳_アートレイズ.html">AR-2026-0007 ルーツブロア</a>
-      </div>
-      <div class="note-box">
-        <div class="note-label">📝 メモ</div>
-        元請として発注いただくケースと、協力業者として連携するケースあり。過去：ビーコンプラザ トイレ・シャワー室改修工事 等。
-      </div>
-    </div>
-  </div>
-
-  <!-- T-004 小田工業 -->
-  <div class="vendor-card" data-rel="業者" data-type="左官" data-search="t-004 小田工業 小田勝美 別府 左官 モルタル">
-    <div class="card-header">
-      <input type="checkbox" class="card-checkbox" onchange="updateSelection(this)">
-      <div class="card-header-left">
-        <span class="vendor-id">T-004</span>
-        <span class="vendor-name">小田工業</span>
-      </div>
-      <div class="tags">
-        <span class="tag tag-業者">業者</span>
-        <span class="tag tag-業種">左官・モルタル</span>
-      </div>
-    </div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">代表者</span>
-          <span class="info-value">小田 勝美</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">TEL</span>
-          <span class="info-value"><a href="tel:0977-66-4198">0977-66-4198</a></span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">携帯</span>
-          <span class="info-value"><a href="tel:090-3320-5931">090-3320-5931</a></span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">住所</span>
-          <span class="info-value">別府市中須賀東町5-3組</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">振込先</span>
-          <span class="info-value">大分県信用組合 上人支店（普通）4034903</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">登録番号</span>
-          <span class="info-value">T3-8103-2472-2011</span>
-        </div>
-      </div>
-      <div class="case-links">
-        <span style="font-size:11px;color:var(--text-sub);font-weight:700;align-self:center;">案件：</span>
-        <a class="case-link" href="案件台帳_アートレイズ.html">AR-2026-0007 ルーツブロア</a>
-      </div>
-      <div class="note-box">
-        <div class="note-label">📝 メモ</div>
-        無収縮モルタル塗り工事。請求書より情報取得（令和8年3月14日付）。
-      </div>
-    </div>
-  </div>
-
-  <!-- T-005 塩出木工 -->
-  <div class="vendor-card" data-rel="業者" data-type="木工事 建具・サッシ" data-search="t-005 塩出木工 木工 建具 アルミ 別府">
-    <div class="card-header">
-      <input type="checkbox" class="card-checkbox" onchange="updateSelection(this)">
-      <div class="card-header-left">
-        <span class="vendor-id">T-005</span>
-        <span class="vendor-name">塩出木工</span>
-      </div>
-      <div class="tags">
-        <span class="tag tag-業者">業者</span>
-        <span class="tag tag-業種">木工事</span>
-        <span class="tag tag-業種">建具・サッシ</span>
-      </div>
-    </div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">メール</span>
-          <span class="info-value"><a href="mailto:y-siodew@ctb.ne.jp">y-siodew@ctb.ne.jp</a></span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">TEL</span>
-          <span class="info-value warn">⚠ 未登録</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">住所</span>
-          <span class="info-value warn">⚠ 未登録</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">登録番号</span>
-          <span class="info-value warn">⚠ 未登録</span>
-        </div>
-      </div>
-      <div class="case-links">
-        <span style="font-size:11px;color:var(--text-sub);font-weight:700;align-self:center;">案件：</span>
-        <a class="case-link" href="案件台帳_アートレイズ.html">AR-2026-0006 アルミアングル</a>
-      </div>
-      <div class="note-box">
-        <div class="note-label">📝 メモ</div>
-        AR-2026-0006の下請。住所・TEL・登録番号は追加情報待ち。
-      </div>
-    </div>
-  </div>
-
-  <!-- T-006 インテリア中津屋 -->
-  <div class="vendor-card" data-rel="業者" data-type="床工事 内装" data-search="t-006 インテリア中津屋 杵築 床 内装 フローリング タイル">
-    <div class="card-header">
-      <input type="checkbox" class="card-checkbox" onchange="updateSelection(this)">
-      <div class="card-header-left">
-        <span class="vendor-id">T-006</span>
-        <span class="vendor-name">有限会社 インテリア中津屋</span>
-      </div>
-      <div class="tags">
-        <span class="tag tag-業者">業者</span>
-        <span class="tag tag-業種">床工事</span>
-        <span class="tag tag-業種">内装</span>
-      </div>
-    </div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">担当者</span>
-          <span class="info-value warn">⚠ 未登録</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">TEL</span>
-          <span class="info-value"><a href="tel:0978-63-0081">0978-63-0081</a></span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">FAX</span>
-          <span class="info-value">0978-63-1833</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">携帯</span>
-          <span class="info-value warn">⚠ 未登録</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">住所</span>
-          <span class="info-value">〒873-0001　杵築市煙硝倉1306-1</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">登録番号</span>
-          <span class="info-value">T2320002015061</span>
-        </div>
-      </div>
-      <div class="case-links">
-        <span style="font-size:11px;color:var(--text-sub);font-weight:700;align-self:center;">案件：</span>
-        <a class="case-link" href="案件台帳_アートレイズ.html">AR-2026-0004 床工事（第2期）</a>
-      </div>
-      <div class="note-box">
-        <div class="note-label">📝 メモ</div>
-        さくら苑 第2期（4/18〜20）で使用予定。担当者・携帯は追加情報待ち。
-      </div>
-    </div>
-  </div>
-
-  <!-- T-007 いわい装飾 -->
-  <div class="vendor-card" data-rel="業者" data-type="内装" data-search="t-007 いわい装飾 岩井健一 別府 内装 壁紙 クロス 装飾">
-    <div class="card-header">
-      <input type="checkbox" class="card-checkbox" onchange="updateSelection(this)">
-      <div class="card-header-left">
-        <span class="vendor-id">T-007</span>
-        <span class="vendor-name">いわい装飾</span>
-      </div>
-      <div class="tags">
-        <span class="tag tag-業者">業者</span>
-        <span class="tag tag-業種">内装</span>
-      </div>
-    </div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">担当者</span>
-          <span class="info-value">岩井 健一</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">TEL</span>
-          <span class="info-value warn">⚠ 未登録</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">メール</span>
-          <span class="info-value warn">⚠ 未登録</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">住所</span>
-          <span class="info-value">〒874-0912　別府市南須賀1組</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">登録番号</span>
-          <span class="info-value">T2810104242784</span>
-        </div>
-      </div>
-      <div class="case-links">
-        <span style="font-size:11px;color:var(--text-sub);font-weight:700;align-self:center;">案件：</span>
-        <a class="case-link" href="案件台帳_アートレイズ.html">AR-2026-0004 床工事（第2期）</a>
-      </div>
-      <div class="note-box">
-        <div class="note-label">📝 メモ</div>
-        さくら苑 第2期（4/18〜20）で使用予定。TEL・メールは追加情報待ち。
-      </div>
-    </div>
-  </div>
-
-  <!-- T-009 株式会社信用産業 -->
-  <div class="vendor-card" data-rel="顧客" data-type="店舗・法人" data-search="t-009 信用産業 江田至 別府 うた乃 厨房 飲食店">
-    <div class="card-header">
-      <input type="checkbox" class="card-checkbox" onchange="updateSelection(this)">
-      <div class="card-header-left">
-        <span class="vendor-id">T-009</span>
-        <span class="vendor-name">株式会社信用産業</span>
-      </div>
-      <div class="tags">
-        <span class="tag tag-顧客">顧客</span>
-        <span class="tag tag-業種">店舗・法人</span>
-      </div>
-    </div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">代表者</span>
-          <span class="info-value">江田 至 様</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">メール</span>
-          <span class="info-value"><a href="mailto:i.kohda@ssg.co.jp">i.kohda@ssg.co.jp</a></span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">TEL</span>
-          <span class="info-value warn">⚠ 未登録</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">住所</span>
-          <span class="info-value warn">⚠ 未登録</span>
-        </div>
-      </div>
-      <div class="case-links">
-        <span style="font-size:11px;color:var(--text-sub);font-weight:700;align-self:center;">案件：</span>
-        <a class="case-link" href="案件台帳_アートレイズ.html">AR-26-010 うた乃別府本店 厨房改装工事</a>
-      </div>
-      <div class="note-box">
-        <div class="note-label">📝 メモ</div>
-        うた乃別府本店・うた乃総本店のオーナー企業。過去：製麺室塗装・スチコン設置付帯・エアコン取替等（¥671,000税込・2026/02/21）。厨房工事はタニコー大分営業所と連携。
-      </div>
-    </div>
-  </div>
-
-  <!-- T-010 株式会社バイオメディカル -->
-  <div class="vendor-card" data-rel="顧客" data-type="店舗・法人" data-search="t-010 バイオメディカル アクリル加工 坂本">
-    <div class="card-header">
-      <input type="checkbox" class="card-checkbox" onchange="updateSelection(this)">
-      <div class="card-header-left">
-        <span class="vendor-id">T-010</span>
-        <span class="vendor-name">株式会社バイオメディカル</span>
-      </div>
-      <div class="tags">
-        <span class="tag tag-顧客">顧客</span>
-        <span class="tag tag-業種">店舗・法人</span>
-      </div>
-    </div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">担当者</span>
-          <span class="info-value">坂本 様</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">メール</span>
-          <span class="info-value"><a href="mailto:biomedical.sakamoto@gmail.com">biomedical.sakamoto@gmail.com</a></span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">TEL</span>
-          <span class="info-value warn">⚠ 未登録</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">住所</span>
-          <span class="info-value warn">⚠ 未登録</span>
-        </div>
-      </div>
-      <div class="case-links">
-        <span style="font-size:11px;color:var(--text-sub);font-weight:700;align-self:center;">案件：</span>
-        <a class="case-link" href="案件台帳_アートレイズ.html">アクリル加工（¥38,500税込）</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- T-011 株式会社ネクサスプラザ -->
-  <div class="vendor-card" data-rel="顧客" data-type="店舗・法人" data-search="t-011 ネクサスプラザ 力武太郎 府内町 大分 飲食 不動産 たつみ">
-    <div class="card-header">
-      <input type="checkbox" class="card-checkbox" onchange="updateSelection(this)">
-      <div class="card-header-left">
-        <span class="vendor-id">T-011</span>
-        <span class="vendor-name">株式会社ネクサスプラザ</span>
-      </div>
-      <div class="tags">
-        <span class="tag tag-顧客">顧客</span>
-        <span class="tag tag-業種">店舗・法人</span>
-      </div>
-    </div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">代表取締役</span>
-          <span class="info-value">力武 太郎 様</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">メール</span>
-          <span class="info-value"><a href="mailto:t-rikitake@nexusplaza.com">t-rikitake@nexusplaza.com</a></span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">TEL</span>
-          <span class="info-value warn">⚠ 未登録</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">住所</span>
-          <span class="info-value">大分市府内町3丁目7番7号</span>
-        </div>
-      </div>
-      <div class="case-links">
-        <span style="font-size:11px;color:var(--text-sub);font-weight:700;align-self:center;">案件：</span>
-        <a class="case-link" href="案件台帳_アートレイズ.html">AR-26-011 自火報制御盤修理・排煙窓金物固定費（¥114,180税込）</a>
-      </div>
-      <div class="note-box">
-        <div class="note-label">📝 メモ</div>
-        飲食事業（串焼きのたつみ・焼肉のたつみ等）・不動産事業。府内町ネクサスプラザビル（旧セントラルプラザビル）オーナー。設立：平成25年10月20日。
-      </div>
-    </div>
-  </div>
-
-  <!-- ★ 次の取引先データをここに追加（T-012〜） -->
-  <div class="add-row" id="addRow">
-    ＋ 次の取引先データをここに追加（T-012〜）
-  </div>
+  <!-- カード一覧（動的描画） -->
+  <div id="vendor-area"><div class="loading">📡 データを読み込んでいます...</div></div>
 
   <div class="page-footer">
     株式会社アート・レイズ｜大分県別府市上原町13番25号｜TEL 0977-21-0603
   </div>
 </div>
 
+<!-- フィルタシート（下からスライドアップ） -->
+<div class="filter-sheet-backdrop" id="filterBackdrop" onclick="closeFilterSheet()"></div>
+<div class="filter-sheet" id="filterSheet">
+  <div class="filter-sheet-title">関係性で絞り込み</div>
+  <div class="filter-sheet-chips" id="filter-sheet-rel-chips"></div>
+  <div class="filter-sheet-title">業種で絞り込み</div>
+  <div class="filter-sheet-chips" id="filter-sheet-type-chips"></div>
+  <button class="filter-sheet-close" onclick="closeFilterSheet()">閉じる</button>
+</div>
+
 <!-- トースト -->
 <div class="toast" id="toast">📋 コピーしました！</div>
 
 <script>
-  let activeRelFilter = '全て';
-  let activeTypeFilter = '全て';
-
-  function setFilter(kind, val) {
-    if (kind === 'rel') {
-      activeRelFilter = val;
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        if (['全て','顧客','業者','元請け','仕入先','休眠'].includes(btn.textContent)) {
-          btn.classList.toggle('active', btn.textContent === val);
-        }
-      });
-    } else {
-      activeTypeFilter = val;
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        if (!['全て','顧客','業者','元請け','仕入先','休眠'].includes(btn.textContent)) {
-          btn.classList.toggle('active', btn.textContent === val);
-        }
-      });
-    }
-    applyFilters();
+/* ═══════════════════════════════════════════════════════════
+   取引先データ（案C採用：静的JS配列で保持）
+   案件台帳は data.json から動的読込みするが、
+   取引先台帳は詳細フィールド（関係性/業種/メモ等）が豊富で
+   data.json に無いため、このHTML内で一元管理する。
+   新規追加・修正はこの配列を直接編集する。
+   ═══════════════════════════════════════════════════════════ */
+const VENDORS = [
+  {
+    id:"T-001", name:"社会福祉法人 玉寿会（さくら苑）",
+    rel:["顧客"], type:["公共施設"],
+    basic:{ contact:"西 俊至 様（事務課長）", rep:"山田 勝徳 理事長" },
+    contact:{ tel:"096-875-1139", mobile:"", fax:"", mail:"nishi@sakura-en.com", address:"熊本県玉名市伊倉北方1533", touroku:"" },
+    cases:[ {num:"AR-2026-0004", title:"床工事"} ],
+    memo:"契約日：令和8年3月16日。第1期3/21〜22施工。第2期4/18〜20予定。税込¥9,990,200。",
+    search:"t-001 さくら苑 玉寿会 西俊至 山田勝徳 熊本 玉名"
+  },
+  {
+    id:"T-002", name:"松村整骨院（愛の治療院）",
+    rel:["顧客"], type:["住宅・個人"],
+    basic:{ contact:"松村 様", rep:"" },
+    contact:{ tel:"", mobile:"", fax:"", mail:"", address:"大分県別府市（詳細未登録）", touroku:"" },
+    cases:[ {num:"AR-2026-0005", title:"外装補修"} ],
+    memo:"外壁コーキング・看板シート張替他（¥206,195税込）。紹介経由（元同級生の妻が勤務）。",
+    search:"t-002 松村整骨院 愛の治療院 松村 別府 外装 看板"
+  },
+  {
+    id:"T-003", name:"株式会社 信和",
+    rel:["顧客","元請け"], type:["ゼネコン・元請け"],
+    basic:{ contact:"加藤 博和 様", rep:"清家 和子" },
+    contact:{ tel:"0977-21-9640", mobile:"090-3607-5427", fax:"0977-21-9669", mail:"h-katou@ctb.ne.jp", address:"〒874-0942　大分県別府市千代町6-3", touroku:"" },
+    cases:[ {num:"AR-2026-0006", title:"アルミアングル"}, {num:"AR-2026-0007", title:"ルーツブロア"} ],
+    memo:"元請として発注いただくケースと、協力業者として連携するケースあり。過去：ビーコンプラザ トイレ・シャワー室改修工事 等。",
+    search:"t-003 信和 加藤博和 清家和子 別府 ゼネコン 元請け ビーコンプラザ"
+  },
+  {
+    id:"T-004", name:"小田工業",
+    rel:["業者"], type:["左官"],
+    basic:{ contact:"", rep:"小田 勝美" },
+    contact:{ tel:"0977-66-4198", mobile:"090-3320-5931", fax:"", mail:"", address:"別府市中須賀東町5-3組", touroku:"T3-8103-2472-2011", furikomi:"大分県信用組合 上人支店（普通）4034903" },
+    cases:[ {num:"AR-2026-0007", title:"ルーツブロア"} ],
+    memo:"無収縮モルタル塗り工事。請求書より情報取得（令和8年3月14日付）。",
+    search:"t-004 小田工業 小田勝美 別府 左官 モルタル"
+  },
+  {
+    id:"T-005", name:"塩出木工",
+    rel:["業者"], type:["木工事","建具・サッシ"],
+    basic:{ contact:"", rep:"" },
+    contact:{ tel:"", mobile:"", fax:"", mail:"y-siodew@ctb.ne.jp", address:"", touroku:"" },
+    cases:[ {num:"AR-2026-0006", title:"アルミアングル"} ],
+    memo:"AR-2026-0006の下請。住所・TEL・登録番号は追加情報待ち。",
+    search:"t-005 塩出木工 木工 建具 アルミ 別府"
+  },
+  {
+    id:"T-006", name:"有限会社 インテリア中津屋",
+    rel:["業者"], type:["床工事","内装"],
+    basic:{ contact:"佐藤", rep:"" },
+    contact:{ tel:"0978-63-0081", mobile:"", fax:"0978-63-1833", mail:"", address:"〒873-0001　杵築市煙硝倉1306-1", touroku:"T2320002015061" },
+    cases:[ {num:"AR-2026-0004", title:"床工事（第2期）"} ],
+    memo:"さくら苑 第2期（4/18〜20）で使用。担当者・携帯は追加情報待ち。",
+    search:"t-006 インテリア中津屋 杵築 床 内装 フローリング タイル 佐藤"
+  },
+  {
+    id:"T-007", name:"いわい装飾",
+    rel:["業者"], type:["内装"],
+    basic:{ contact:"岩井 健一", rep:"" },
+    contact:{ tel:"", mobile:"", fax:"", mail:"", address:"〒874-0912　別府市南須賀1組", touroku:"T2810104242784" },
+    cases:[ {num:"AR-2026-0004", title:"床工事（第2期）"} ],
+    memo:"さくら苑 第2期（4/18〜20）で使用。TEL・メールは追加情報待ち。",
+    search:"t-007 いわい装飾 岩井健一 別府 内装 壁紙 クロス 装飾"
+  },
+  {
+    id:"T-008", name:"有限会社ウインズコーポレーション",
+    rel:["顧客"], type:["店舗・法人"],
+    basic:{ contact:"", rep:"" },
+    contact:{ tel:"", mobile:"", fax:"", mail:"", address:"", touroku:"（補完待ち）" },
+    cases:[ {num:"AR-26-008", title:"民泊客家 ロールスクリーン補修"} ],
+    memo:"民泊客家（大村さん）オーナー企業。登録番号補完待ち。",
+    search:"t-008 ウインズコーポレーション 民泊 客家 大村"
+  },
+  {
+    id:"T-009", name:"株式会社信用産業",
+    rel:["顧客"], type:["店舗・法人"],
+    basic:{ contact:"", rep:"江田 至 様" },
+    contact:{ tel:"", mobile:"", fax:"", mail:"i.kohda@ssg.co.jp", address:"", touroku:"" },
+    cases:[ {num:"AR-26-010", title:"うた乃別府本店 厨房改装工事"}, {num:"AR-26-012", title:"うた乃別府本店 階段閉鎖工事"} ],
+    memo:"うた乃別府本店・うた乃総本店のオーナー企業。過去：製麺室塗装・スチコン設置付帯・エアコン取替等（¥671,000税込・2026/02/21）。厨房工事はタニコー大分営業所と連携。",
+    search:"t-009 信用産業 江田至 別府 うた乃 厨房 飲食店"
+  },
+  {
+    id:"T-010", name:"株式会社バイオメディカル",
+    rel:["顧客"], type:["店舗・法人"],
+    basic:{ contact:"坂本 様", rep:"衛藤 和三" },
+    contact:{ tel:"", mobile:"", fax:"", mail:"biomedical.sakamoto@gmail.com", address:"", touroku:"" },
+    cases:[ {num:"", title:"アクリル加工（¥38,500税込）"} ],
+    memo:"アクリル加工（¥38,500税込）。",
+    search:"t-010 バイオメディカル アクリル加工 坂本 衛藤"
+  },
+  {
+    id:"T-011", name:"株式会社ネクサスプラザ",
+    rel:["顧客"], type:["店舗・法人"],
+    basic:{ contact:"力武 太郎 様（代表取締役）", rep:"力武 太郎" },
+    contact:{ tel:"", mobile:"", fax:"", mail:"t-rikitake@nexusplaza.com", address:"大分県大分市府内町3丁目7番7号", touroku:"" },
+    cases:[ {num:"AR-26-011", title:"自火報制御盤修理・排煙窓金物固定（¥114,180税込）"} ],
+    memo:"飲食事業（串焼きのたつみ・焼肉のたつみ等）・不動産事業。府内町ネクサスプラザビル（旧セントラルプラザビル）オーナー。設立：平成25年10月20日。",
+    search:"t-011 ネクサスプラザ 力武太郎 府内町 大分 飲食 不動産 たつみ"
+  },
+  {
+    id:"T-012", name:"未来システム熊本",
+    rel:["顧客"], type:["店舗・法人"],
+    basic:{ contact:"綾部 圭祐", rep:"" },
+    contact:{ tel:"090-4358-0576", mobile:"", fax:"", mail:"mirai_system@oregano.ocn.ne.jp", address:"〒861-8035 熊本県熊本市東区御領5丁目3-13", touroku:"" },
+    cases:[],
+    memo:"営業所住所（2026/4/3登録）。",
+    search:"t-012 未来システム 熊本 綾部圭祐"
+  },
+  {
+    id:"T-013", name:"株式会社島津製作所",
+    rel:["顧客","元請け"], type:["ゼネコン・元請け"],
+    basic:{ contact:"竹村 勝利", rep:"" },
+    contact:{ tel:"", mobile:"", fax:"", mail:"ktake@shimadzu.co.jp", address:"", touroku:"" },
+    cases:[ {num:"AR-26-013", title:"大分リハビリテーション病院 一般撮影室内装工事"} ],
+    memo:"大分リハビリテーション病院関連。施工日程：7/18（土）〜19（日）。5月連休明けに確定予定。",
+    search:"t-013 島津製作所 竹村勝利 大分 リハビリ 撮影室"
   }
+];
 
-  function applyFilters() {
-    const q = document.getElementById('searchInput').value.toLowerCase();
-    const cards = document.querySelectorAll('.vendor-card');
-    let count = 0;
+/* ═══════════════════════════════════════════════════════════
+   状態
+   ═══════════════════════════════════════════════════════════ */
+let relFilter = 'all';
+let typeFilter = 'all';
+let selectedIds = new Set();
 
-    cards.forEach(card => {
-      const rel  = card.getAttribute('data-rel')  || '';
-      const type = card.getAttribute('data-type') || '';
-      const search = card.getAttribute('data-search') || '';
+/* ═══════════════════════════════════════════════════════════
+   関係性の表示優先度
+   （左端バー色・バッジ並び順）
+   元請け > 顧客 > 業者 > 仕入先 > 休眠
+   ═══════════════════════════════════════════════════════════ */
+const REL_PRIORITY = ['元請け','顧客','業者','仕入先','休眠'];
+function primaryRel(rels){
+  for(const r of REL_PRIORITY){ if(rels.includes(r)) return r; }
+  return '顧客';
+}
 
-      const relOK  = activeRelFilter  === '全て' || rel.includes(activeRelFilter);
-      const typeOK = activeTypeFilter === '全て' || type.includes(activeTypeFilter);
-      const textOK = !q || search.toLowerCase().includes(q);
+/* ═══════════════════════════════════════════════════════════
+   フィルタシート
+   ═══════════════════════════════════════════════════════════ */
+function openFilterSheet(){
+  renderFilterChips();
+  document.getElementById('filterSheet').classList.add('open');
+  document.getElementById('filterBackdrop').classList.add('open');
+}
+function closeFilterSheet(){
+  document.getElementById('filterSheet').classList.remove('open');
+  document.getElementById('filterBackdrop').classList.remove('open');
+}
+function renderFilterChips(){
+  // 関係性チップ
+  const rels = ['all',...REL_PRIORITY];
+  document.getElementById('filter-sheet-rel-chips').innerHTML = rels.map(r =>
+    `<button class="filter-sheet-chip ${r===relFilter?'active':''}" onclick="setRelFilter('${r}')">${r==='all'?'すべて':r}</button>`
+  ).join('');
+  // 業種チップ（使用中のものだけ表示）
+  const typesSet = new Set();
+  VENDORS.forEach(v => (v.type||[]).forEach(t => typesSet.add(t)));
+  const types = ['all',...Array.from(typesSet).sort()];
+  document.getElementById('filter-sheet-type-chips').innerHTML = types.map(t =>
+    `<button class="filter-sheet-chip ${t===typeFilter?'active':''}" onclick="setTypeFilter('${t}')">${t==='all'?'すべて':t}</button>`
+  ).join('');
+}
+function setRelFilter(r){ relFilter = r; renderFilterChips(); renderVendors(); }
+function setTypeFilter(t){ typeFilter = t; renderFilterChips(); renderVendors(); }
 
-      const show = relOK && typeOK && textOK;
-      card.style.display = show ? '' : 'none';
-      if (show) count++;
-    });
+/* ═══════════════════════════════════════════════════════════
+   カード展開
+   ═══════════════════════════════════════════════════════════ */
+function toggleCard(el){
+  // チェックボックスのクリックでは展開しない
+  if(event && event.target.classList.contains('card-checkbox')) return;
+  el.closest('.vendor-card').classList.toggle('open');
+}
+function toggleNavItem(el){
+  el.classList.toggle('open');
+}
 
-    document.getElementById('totalCount').textContent = count;
-    document.getElementById('addRow').style.display = q ? 'none' : '';
-  }
-
-  function updateSelection(cb) {
-    const card = cb.closest('.vendor-card');
-    card.classList.toggle('selected', cb.checked);
-    const selected = document.querySelectorAll('.card-checkbox:checked').length;
-    document.getElementById('selectedCount').textContent = selected;
-
-    const copyBar = document.getElementById('copyBar');
-    if (selected > 0) {
-      copyBar.classList.add('visible');
-      const names = getSelectedNames();
-      document.getElementById('copyBarText').textContent = `${selected}社選択中：${names}`;
-    } else {
-      copyBar.classList.remove('visible');
-    }
-  }
-
-  function getSelectedNames() {
-    const checked = document.querySelectorAll('.card-checkbox:checked');
-    return Array.from(checked).map(cb => {
-      return cb.closest('.vendor-card').querySelector('.vendor-name').textContent.trim();
-    }).join('、');
-  }
-
-  function copySelected() {
-    const text = getSelectedNames();
-    navigator.clipboard.writeText(text).then(() => {
-      showToast('📋 コピーしました！');
-    }).catch(() => {
-      // フォールバック
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      showToast('📋 コピーしました！');
-    });
-  }
-
-  function clearSelection() {
-    document.querySelectorAll('.card-checkbox:checked').forEach(cb => {
-      cb.checked = false;
-      cb.closest('.vendor-card').classList.remove('selected');
-    });
-    document.getElementById('selectedCount').textContent = '0';
-    document.getElementById('copyBar').classList.remove('visible');
-  }
-
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2000);
-  }
-
-  // 初期フィルターボタン状態設定
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    if (btn.textContent === '全て') btn.classList.add('active');
+/* ═══════════════════════════════════════════════════════════
+   メイン描画
+   ═══════════════════════════════════════════════════════════ */
+function renderVendors(){
+  const q = (document.getElementById('vendor-search').value || '').toLowerCase().trim();
+  const data = VENDORS.filter(v => {
+    const relOK = relFilter==='all' || (v.rel||[]).includes(relFilter);
+    const typeOK = typeFilter==='all' || (v.type||[]).includes(typeFilter);
+    const textOK = !q || (v.search||'').toLowerCase().includes(q)
+                      || (v.name||'').toLowerCase().includes(q)
+                      || (v.id||'').toLowerCase().includes(q)
+                      || (v.cases||[]).some(c => (c.num||'').toLowerCase().includes(q));
+    return relOK && typeOK && textOK;
   });
+
+  // ヘッダーサマリー更新
+  const total = VENDORS.length;
+  const kokyakuCount = VENDORS.filter(v => (v.rel||[]).includes('顧客')).length;
+  const gyoushaCount = VENDORS.filter(v => (v.rel||[]).includes('業者')).length;
+  document.getElementById('headerSummary').innerHTML =
+    `<span class="count">${data.length}/${total}社</span> · 顧客${kokyakuCount} · 業者${gyoushaCount}`;
+
+  // フィルタボタン状態
+  const btn = document.getElementById('vendor-filter-btn');
+  if(btn) btn.classList.toggle('has-filter', relFilter!=='all' || typeFilter!=='all');
+
+  const area = document.getElementById('vendor-area');
+  if(!data.length){
+    area.innerHTML = '<div class="empty">該当する取引先がありません</div>';
+    return;
+  }
+  area.innerHTML = data.map(v => buildVendorCard(v)).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   カードHTML生成
+   ═══════════════════════════════════════════════════════════ */
+function buildVendorCard(v){
+  const mainRel = primaryRel(v.rel||[]);
+  const isSelected = selectedIds.has(v.id);
+
+  // バッジ（関係性 + 業種）
+  const relBadges = (v.rel||[]).map(r => `<span class="badge b-${r}">${r}</span>`).join('');
+  const typeBadges = (v.type||[]).map(t => `<span class="badge b-業種">${t}</span>`).join('');
+
+  // 基本情報（担当・代表）
+  const basicHtml = `
+    <div class="info-grid">
+      ${v.basic?.contact ? `<div class="info-item"><span class="info-label">担当者</span><span class="info-value">${v.basic.contact}</span></div>` : ''}
+      ${v.basic?.rep     ? `<div class="info-item"><span class="info-label">代表者</span><span class="info-value">${v.basic.rep}</span></div>` : ''}
+      ${!v.basic?.contact && !v.basic?.rep ? '<div style="color:#999;font-size:13px;">担当者・代表者情報なし</div>' : ''}
+    </div>`;
+
+  // 連絡先（TEL/携帯/FAX/メール/住所/登録番号）
+  const c = v.contact || {};
+  const contactHtml = `
+    <div class="info-grid">
+      ${fieldHtml('TEL', c.tel, c.tel ? `<a href="tel:${c.tel}">${c.tel}</a>` : null)}
+      ${fieldHtml('携帯', c.mobile, c.mobile ? `<a href="tel:${c.mobile}">${c.mobile}</a>` : null)}
+      ${fieldHtml('FAX', c.fax)}
+      ${fieldHtml('メール', c.mail, c.mail ? `<a href="mailto:${c.mail}">${c.mail}</a>` : null)}
+      ${fieldHtml('住所', c.address, null, true)}
+      ${c.touroku ? `<div class="info-item fullwidth"><span class="info-label">登録番号</span><span class="info-value">${c.touroku}</span></div>` : ''}
+      ${c.furikomi ? `<div class="info-item fullwidth"><span class="info-label">振込先</span><span class="info-value">${c.furikomi}</span></div>` : ''}
+    </div>`;
+
+  // 関連案件
+  const casesHtml = (v.cases||[]).length ?
+    `<div class="case-links">
+       ${(v.cases||[]).map(c => `<a class="case-link" href="案件台帳_アートレイズ.html">${c.num?c.num+' ':''}${c.title||''}</a>`).join('')}
+     </div>` :
+    '<div style="color:#999;font-size:13px;">関連案件なし</div>';
+
+  // メモ
+  const memoHtml = v.memo ?
+    `<div class="note-box"><div class="note-label" style="font-weight:700;color:#9a7a20;margin-bottom:3px;font-size:12px;">📝 メモ</div>${v.memo}</div>` :
+    '<div style="color:#999;font-size:13px;">メモなし</div>';
+
+  // 連絡先サマリー（リストの右側に出す値）
+  const contactSummary = c.tel || c.mobile || c.mail || '-';
+  const caseSummary = (v.cases||[]).length ? `${v.cases.length}件` : 'なし';
+
+  return `
+  <div class="vendor-card rel-${mainRel} ${isSelected?'selected':''}">
+    <div class="card-header" onclick="toggleCard(this)">
+      <input type="checkbox" class="card-checkbox" ${isSelected?'checked':''} onchange="toggleSelect('${v.id}', this)" onclick="event.stopPropagation()">
+      <div class="card-header-left">
+        <span class="vendor-id">${v.id}</span>
+        <span class="vendor-name">${v.name}</span>
+      </div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;flex-shrink:0;">
+        ${relBadges}
+      </div>
+      <span class="card-toggle">▼</span>
+    </div>
+    <div class="card-body">
+      <div class="nav-list">
+
+        <!-- 基本情報 -->
+        <button class="nav-list-item nav-expand" onclick="toggleNavItem(this)">
+          <svg class="nav-list-item__icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="16" cy="11" r="4"/><path d="M6 26 Q6 19 16 19 Q26 19 26 26"/>
+          </svg>
+          <div class="nav-list-item__body">
+            <div class="nav-list-item__title">基本情報</div>
+            <div class="nav-list-item__desc">${v.basic?.contact || v.basic?.rep || '未登録'}</div>
+          </div>
+          <div class="nav-list-item__arrow">›</div>
+        </button>
+        <div class="nav-expand-body">${basicHtml}</div>
+
+        <!-- 連絡先 -->
+        <button class="nav-list-item nav-expand" onclick="toggleNavItem(this)">
+          <svg class="nav-list-item__icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 10 Q6 7 9 7 L11 7 Q13 7 13 9 L13 12 Q13 14 11 14 Q11 19 16 23 Q21 25 21 21 L24 21 Q26 21 26 23 L26 25 Q26 28 23 28 Q12 28 6 17 Q6 13 6 10"/>
+          </svg>
+          <div class="nav-list-item__body">
+            <div class="nav-list-item__title">連絡先</div>
+            <div class="nav-list-item__desc">${c.address || '住所未登録'}</div>
+          </div>
+          <div class="nav-list-item__value">${contactSummary}</div>
+          <div class="nav-list-item__arrow">›</div>
+        </button>
+        <div class="nav-expand-body">${contactHtml}</div>
+
+        <!-- 業種 -->
+        ${(v.type||[]).length ? `
+        <button class="nav-list-item nav-expand" onclick="toggleNavItem(this)">
+          <svg class="nav-list-item__icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="8" width="22" height="18" rx="2"/><path d="M11 8 L11 4 L21 4 L21 8"/>
+          </svg>
+          <div class="nav-list-item__body">
+            <div class="nav-list-item__title">業種・関係性</div>
+            <div class="nav-list-item__desc">${(v.type||[]).join('・')}</div>
+          </div>
+          <div class="nav-list-item__arrow">›</div>
+        </button>
+        <div class="nav-expand-body">
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            ${relBadges}${typeBadges}
+          </div>
+        </div>` : ''}
+
+        <!-- 関連案件 -->
+        <button class="nav-list-item nav-expand" onclick="toggleNavItem(this)">
+          <svg class="nav-list-item__icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="6" y="5" width="20" height="22" rx="2"/><line x1="11" y1="11" x2="21" y2="11"/><line x1="11" y1="16" x2="21" y2="16"/><line x1="11" y1="21" x2="17" y2="21"/>
+          </svg>
+          <div class="nav-list-item__body">
+            <div class="nav-list-item__title">関連案件</div>
+            <div class="nav-list-item__desc">${(v.cases||[]).length?`${v.cases.length}件の案件`:'案件なし'}</div>
+          </div>
+          <div class="nav-list-item__value">${caseSummary}</div>
+          <div class="nav-list-item__arrow">›</div>
+        </button>
+        <div class="nav-expand-body">${casesHtml}</div>
+
+        <!-- メモ -->
+        <button class="nav-list-item nav-expand" onclick="toggleNavItem(this)">
+          <svg class="nav-list-item__icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 5 L22 5 L26 9 L26 27 L8 27 Z"/><line x1="12" y1="13" x2="22" y2="13"/><line x1="12" y1="17" x2="22" y2="17"/><line x1="12" y1="21" x2="18" y2="21"/>
+          </svg>
+          <div class="nav-list-item__body">
+            <div class="nav-list-item__title">メモ</div>
+            <div class="nav-list-item__desc">${v.memo ? (v.memo.length>36?v.memo.slice(0,36)+'…':v.memo) : 'なし'}</div>
+          </div>
+          <div class="nav-list-item__arrow">›</div>
+        </button>
+        <div class="nav-expand-body">${memoHtml}</div>
+
+      </div>
+    </div>
+  </div>`;
+}
+
+/* info-grid フィールドHTMLヘルパー */
+function fieldHtml(label, value, linkHtml, fullwidth){
+  if(!value){
+    return `<div class="info-item${fullwidth?' fullwidth':''}"><span class="info-label">${label}</span><span class="info-value warn">⚠ 未登録</span></div>`;
+  }
+  const cls = 'info-item' + (fullwidth?' fullwidth':'');
+  return `<div class="${cls}"><span class="info-label">${label}</span><span class="info-value">${linkHtml || value}</span></div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   選択・コピー機能
+   ═══════════════════════════════════════════════════════════ */
+function toggleSelect(id, cb){
+  if(cb.checked){ selectedIds.add(id); }
+  else{ selectedIds.delete(id); }
+  const card = cb.closest('.vendor-card');
+  card.classList.toggle('selected', cb.checked);
+  updateCopyBar();
+}
+function updateCopyBar(){
+  const bar = document.getElementById('copyBar');
+  const n = selectedIds.size;
+  if(n === 0){
+    bar.classList.remove('visible');
+  }else{
+    bar.classList.add('visible');
+    document.getElementById('copyBarText').textContent = `${n}社選択中`;
+  }
+}
+function getSelectedNames(){
+  return Array.from(selectedIds).map(id => {
+    const v = VENDORS.find(v => v.id === id);
+    return v ? v.name : '';
+  }).filter(Boolean).join('\n');
+}
+function copySelected(){
+  const text = getSelectedNames();
+  if(!text) return;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(showCopiedToast).catch(() => fallbackCopy(text));
+  }else{
+    fallbackCopy(text);
+  }
+}
+function fallbackCopy(text){
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  document.body.appendChild(ta);
+  ta.select();
+  try{ document.execCommand('copy'); showCopiedToast(); }catch(e){}
+  document.body.removeChild(ta);
+}
+function showCopiedToast(){
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1500);
+}
+function clearSelection(){
+  selectedIds.clear();
+  document.querySelectorAll('.card-checkbox').forEach(cb => cb.checked = false);
+  document.querySelectorAll('.vendor-card').forEach(c => c.classList.remove('selected'));
+  updateCopyBar();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   初期化
+   ═══════════════════════════════════════════════════════════ */
+renderVendors();
 </script>
 </body>
 </html>
