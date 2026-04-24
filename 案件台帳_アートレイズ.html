@@ -1302,7 +1302,10 @@ async function saveEdit(safeId, ankenNo, e){
     if(!res.ok)throw new Error('取得失敗 '+res.status);
     const fileData=await res.json();
     const sha=fileData.sha;
-    const currentJson=JSON.parse(atob(fileData.content.replace(/\n/g,'')));
+    // Base64→UTF-8を正しくデコード（日本語キー対応）
+    const raw=atob(fileData.content.replace(/\n/g,''));
+    const bytes=new Uint8Array(raw.length).map((_,i)=>raw.charCodeAt(i));
+    const currentJson=JSON.parse(new TextDecoder('utf-8').decode(bytes));
 
     // 2. 該当案件を更新
     const ankenList=currentJson.案件||currentJson.anken||Object.values(currentJson).find(v=>Array.isArray(v)&&v[0]?.案件番号);
@@ -1325,8 +1328,11 @@ async function saveEdit(safeId, ankenNo, e){
       }
     }
 
-    // 3. GitHubにPUT
-    const newContent=btoa(unescape(encodeURIComponent(JSON.stringify(currentJson,null,2))));
+    // 3. GitHubにPUT（UTF-8→Base64を正しくエンコード）
+    const jsonStr=JSON.stringify(currentJson,null,2);
+    const encBytes=new TextEncoder().encode(jsonStr);
+    const encChars=Array.from(encBytes).map(b=>String.fromCharCode(b)).join('');
+    const newContent=btoa(encChars);
     const putRes=await fetch(GH_API,{
       method:'PUT',
       headers:{Authorization:`token ${pat}`,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
