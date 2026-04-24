@@ -189,9 +189,26 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 .amount{color:var(--navy);font-size:16px;}
 .minyukin{color:var(--red);}
 .nyukin{color:var(--green);}
-.sub-card{border:1px solid var(--border);border-radius:6px;padding:12px 14px;margin-bottom:10px;background:#fafafa;}
+/* ★ タスク2 (2026/4/24): sub-card を案件タブ.cardのデザインに寄せる
+   白基調・角丸10px（ネストなので控えめ）・影のみ・枠線なし */
+.sub-card{
+  background:var(--white);
+  border:none;
+  border-radius:10px;
+  padding:12px 14px;
+  margin-bottom:10px;
+  box-shadow:0 2px 8px rgba(30,45,64,0.07);
+  border-left:4px solid #d0d0cc;
+  transition:box-shadow 0.15s;
+}
 .sub-card:last-child{margin-bottom:0;}
-.sub-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.sub-card:hover{box-shadow:0 4px 12px rgba(30,45,64,0.1);}
+/* 請求の入金状況で左端バー色を変える */
+.sub-card.status-入金済み{border-left-color:#9ca3af;opacity:0.85;}
+.sub-card.status-未入金{border-left-color:#dc2626;}
+.sub-card.status-請求済み{border-left-color:#1a7a30;}
+.sub-card.status-注文{border-left-color:#1a6fc4;}
+.sub-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;flex-wrap:wrap;}
 .sub-id{font-size:13px;font-weight:700;color:var(--blue);}
 .note-box{background:#fffbf0;border-left:3px solid #e8d9a0;padding:10px 14px;font-size:13px;color:var(--text-sub);border-radius:0 4px 4px 0;margin-top:10px;line-height:1.7;}
 .note-label{font-weight:700;color:#9a7a20;margin-bottom:3px;font-size:12px;}
@@ -207,18 +224,47 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 .genka-bar-fill{transition:width 0.3s;}
 .genka-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;}
 .genka-dot{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:4px;}
-.view-card{background:var(--white);border:1px solid var(--border);border-radius:6px;margin-bottom:10px;overflow:hidden;}
-.view-card-header{padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--border);}
-.view-card-body{padding:14px 16px;}
+/* ★ タスク2 (2026/4/24): view-card を案件タブ.cardのデザインに寄せる
+   白基調・角丸14px・影のみ・枠線なし・左端状態色バー */
+.view-card{
+  background:var(--white);
+  border:none;
+  border-radius:14px;
+  margin-bottom:10px;
+  overflow:hidden;
+  transition:box-shadow 0.15s;
+  position:relative;
+  box-shadow:0 2px 8px rgba(30,45,64,0.07);
+  border-left:4px solid #d0d0cc;
+}
+.view-card:hover{box-shadow:0 4px 12px rgba(30,45,64,0.1);}
+/* ステータス別左端バー（案件タブと同じルール） */
+.view-card.status-施工中{border-left-color:#f39c12;}
+.view-card.status-見積作成中{border-left-color:#9b59b6;}
+.view-card.status-見積提出済み{border-left-color:#2563eb;}
+.view-card.status-見積提出予定{border-left-color:#d97706;}
+.view-card.status-請求済み{border-left-color:#1a7a30;}
+.view-card.status-受注済{border-left-color:#1a7a30;}
+.view-card.status-入金済み{border-left-color:#9ca3af;}
+.view-card.status-完了{border-left-color:#9ca3af;opacity:0.85;}
+.view-card.status-未入金{border-left-color:#dc2626;}
+.view-card.status-締結済み{border-left-color:#1a7a30;}
+.view-card.status-未締結{border-left-color:#d97706;}
+.view-card.status-注文{border-left-color:#1a6fc4;}
+.view-card-header{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:var(--white);}
+.view-card-body{padding:12px 16px 14px;background:#fbfaf8;border-top:1px solid rgba(30,45,64,0.05);}
 .view-card-id{font-size:12px;font-weight:700;color:var(--blue);}
-.view-card-name{font-size:14px;font-weight:700;color:var(--text);}
+.view-card-name{font-size:15px;font-weight:700;color:var(--navy);line-height:1.35;}
 .view-anken-ref{font-size:11px;color:var(--text-sub);background:var(--light);padding:2px 8px;border-radius:10px;}
 .meisai-toggle{
   background:var(--light);border:1px solid var(--border);border-radius:6px;
   padding:8px 14px;font-size:13px;cursor:pointer;font-family:inherit;
   color:var(--text-sub);margin-top:10px;width:100%;text-align:left;
+  display:flex;align-items:center;gap:6px;
 }
 .meisai-toggle:hover{background:#e8e8e8;}
+.meisai-toggle__chevron{transition:transform 0.2s;flex-shrink:0;}
+.meisai-toggle.open .meisai-toggle__chevron{transform:rotate(90deg);}
 .meisai-wrap{display:none;margin-top:10px;}
 .meisai-wrap.open{display:block;}
 .meisai-table{width:100%;border-collapse:collapse;font-size:13px;border:1px solid var(--border);}
@@ -542,7 +588,7 @@ function buildAnkenCard(p){
     ${p.見積?.備考?`<div class="note-box"><div class="note-label">備考</div>${p.見積.備考}</div>`:''}
     <div style="margin-top:10px;">${pdfTag(p.見積?.PDF,'見積書PDF')}</div>
     ${(p.見積?.明細||[]).length ? `
-      <button class="meisai-toggle" onclick="toggleMeisai('m-meisai-${safeId}', this)">▶ 明細を表示</button>
+      <button class="meisai-toggle" onclick="toggleMeisai('m-meisai-${safeId}', this)"><svg class="meisai-toggle__chevron" width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><polygon points="2,1 8,5 2,9"/></svg>明細を表示</button>
       <div class="meisai-wrap" id="m-meisai-${safeId}">
         <table class="meisai-table">
           <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">単価</th><th class="right">金額（税抜）</th></tr></thead>
@@ -562,7 +608,7 @@ function buildAnkenCard(p){
       </div>
       <div>${pdfTag(r.PDF,'請求書PDF')}</div>
       ${(r.明細||[]).length ? `
-        <button class="meisai-toggle" onclick="toggleMeisai('r-meisai-${safeId}-${r.請求番号?.replace(/[^a-zA-Z0-9]/g,'-')||'x'}', this)">▶ 明細を表示</button>
+        <button class="meisai-toggle" onclick="toggleMeisai('r-meisai-${safeId}-${r.請求番号?.replace(/[^a-zA-Z0-9]/g,'-')||'x'}', this)"><svg class="meisai-toggle__chevron" width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><polygon points="2,1 8,5 2,9"/></svg>明細を表示</button>
         <div class="meisai-wrap" id="r-meisai-${safeId}-${r.請求番号?.replace(/[^a-zA-Z0-9]/g,'-')||'x'}">
           <table class="meisai-table">
             <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">金額（税抜）</th></tr></thead>
@@ -619,7 +665,7 @@ function buildAnkenCard(p){
         <span class="card-name">${p.工事名}</span>
       </div>
       <span class="badge ${badgeClass(p.ステータス)}">${p.ステータス||'未設定'}</span>
-      <span class="card-toggle">▼</span>
+      <svg class="card-toggle" width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,4 12,4 7,11"/></svg>
     </div>
     <div class="card-body">
       <div class="nav-list">
@@ -714,7 +760,7 @@ function renderMitsumori(){
   const area=document.getElementById('mitsumori-area');
   if(!items.length){area.innerHTML='<div class="empty">該当する見積がありません</div>';return;}
   area.innerHTML=items.map(p=>`
-  <div class="view-card">
+  <div class="view-card status-${p.ステータス||'default'}">
     <div class="view-card-header">
       <div><div class="view-card-name">${p.工事名}</div><div style="margin-top:3px;">${p.見積?.見積番号?`<span class="view-card-id">${p.見積.見積番号}</span> `:''}<span class="view-anken-ref">${p.案件番号}</span></div></div>
       <span class="amount" style="font-size:16px;">${fmtYen(p.見積?.見積金額)}</span>
@@ -729,7 +775,7 @@ function renderMitsumori(){
       ${p.見積?.備考?`<div class="note-box"><div class="note-label">備考</div>${p.見積.備考}</div>`:''}
       <div style="margin-top:8px;">${pdfTag(p.見積?.PDF,'見積書PDF')}</div>
       ${(p.見積?.明細||[]).length ? `
-        <button class="meisai-toggle" onclick="toggleMeisai('mv-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}',this)">▶ 明細を表示</button>
+        <button class="meisai-toggle" onclick="toggleMeisai('mv-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}',this)"><svg class="meisai-toggle__chevron" width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><polygon points="2,1 8,5 2,9"/></svg>明細を表示</button>
         <div class="meisai-wrap" id="mv-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}">
           <table class="meisai-table">
             <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">単価</th><th class="right">金額（税抜）</th></tr></thead>
@@ -764,7 +810,7 @@ function renderSeikyu(){
   if(!items.length){area.innerHTML='<div class="empty">該当する請求がありません</div>';return;}
   area.innerHTML=items.map(({p,r})=>{
     const isNyukin=r.入金状況==='nyukin';
-    return`<div class="view-card">
+    return`<div class="view-card status-${isNyukin?'入金済み':'未入金'}">
       <div class="view-card-header">
         <div><div class="view-card-name">${p.工事名}</div><div style="margin-top:3px;">${r.請求番号?`<span class="view-card-id">${r.請求番号}</span> `:''}<span class="view-anken-ref">${p.案件番号}</span></div></div>
         <div style="text-align:right;"><div class="amount ${isNyukin?'nyukin':'minyukin'}" style="font-size:16px;">${fmtYen(r.請求金額)}</div><span class="badge ${isNyukin?'b-入金済み':'b-未入金'}" style="display:inline-block;margin-top:3px;">${isNyukin?'入金済み':'未入金'}</span></div>
@@ -780,7 +826,7 @@ function renderSeikyu(){
         ${r.備考?`<div class="note-box"><div class="note-label">備考</div>${r.備考}</div>`:''}
         <div style="margin-top:8px;">${pdfTag(r.PDF,'請求書PDF')}</div>
         ${(r.明細||[]).length ? `
-          <button class="meisai-toggle" onclick="toggleMeisai('rv-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}-${r.請求番号?.replace(/[^a-zA-Z0-9]/g,'-')||'x'}',this)">▶ 明細を表示</button>
+          <button class="meisai-toggle" onclick="toggleMeisai('rv-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}-${r.請求番号?.replace(/[^a-zA-Z0-9]/g,'-')||'x'}',this)"><svg class="meisai-toggle__chevron" width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><polygon points="2,1 8,5 2,9"/></svg>明細を表示</button>
           <div class="meisai-wrap" id="rv-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}-${r.請求番号?.replace(/[^a-zA-Z0-9]/g,'-')||'x'}">
             <table class="meisai-table">
               <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">金額（税抜）</th></tr></thead>
@@ -808,7 +854,7 @@ function renderChumon(){
   const area=document.getElementById('chumon-area');
   if(!items.length){area.innerHTML='<div class="empty">注文書がありません</div>';return;}
   area.innerHTML=items.map(({p,c})=>`
-  <div class="view-card">
+  <div class="view-card status-注文">
     <div class="view-card-header">
       <div><div class="view-card-name">${p.工事名}　<span style="font-size:13px;color:#555;">／ ${c.業者名||'-'}</span></div><div style="margin-top:3px;">${c.注文番号?`<span class="view-card-id">${c.注文番号}</span> `:''}<span class="view-anken-ref">${p.案件番号}</span></div></div>
       <span class="amount" style="font-size:16px;">${fmtYen(c.注文金額)}</span>
@@ -849,7 +895,7 @@ function renderKeiyaku(){
   area.innerHTML=items.map(p=>{
     const k=p.契約書||{};
     const isSigned=k.ステータス==='締結済み';
-    return`<div class="view-card">
+    return`<div class="view-card status-${isSigned?'締結済み':'未締結'}">
       <div class="view-card-header">
         <div><div class="view-card-name">${p.工事名}</div><div style="margin-top:3px;">${k.契約番号?`<span class="view-card-id">${k.契約番号}</span> `:''}<span class="view-anken-ref">${p.案件番号}</span></div></div>
         <span class="badge ${isSigned?'b-締結済み':'b-未締結'}">${k.ステータス||'未締結'}</span>
@@ -894,7 +940,8 @@ function renderGenka(){
     const u=(p.請求||[]).reduce((s,r)=>s+Number(r.請求金額||0),0)||Number(p.見積?.見積金額||0);
     const rate=u&&gt?Math.round((1-gt/u)*100):null;
     const rc=rate===null?'#999':rate>=80?'#1a7a30':rate>=60?'#d97706':'#dc2626';
-    return`<div class="view-card">
+    const rateClass=rate===null?'default':rate>=80?'受注済':rate>=60?'見積提出予定':'未入金';
+    return`<div class="view-card status-${rateClass}">
       <div class="view-card-header">
         <div><div class="view-card-name">${p.工事名}</div><div style="margin-top:3px;"><span class="view-anken-ref">${p.案件番号}</span></div></div>
         <div style="text-align:right;">${rate!==null?`<div style="font-size:18px;font-weight:700;color:${rc};">粗利率 ${rate}%</div>`:'<div style="color:#999;font-size:12px;">原価未入力</div>'}</div>
@@ -918,7 +965,8 @@ function toggleMeisai(id,btn){
   const wrap=document.getElementById(id);
   if(!wrap)return;
   const isOpen=wrap.classList.toggle('open');
-  btn.textContent=isOpen?'▼ 明細を隠す':'▶ 明細を表示';
+  btn.classList.toggle('open',isOpen);
+  btn.innerHTML='<svg class="meisai-toggle__chevron" width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><polygon points="2,1 8,5 2,9"/></svg>'+(isOpen?'明細を隠す':'明細を表示');
 }
 
 loadData();
