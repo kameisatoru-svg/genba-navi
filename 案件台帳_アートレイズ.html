@@ -4,7 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>案件台帳｜株式会社アート・レイズ</title>
-<link rel="stylesheet" href="common.css">
+<style>
+/* ===== common.css v1.1 インライン ===== */
+:root{--navy:#1e2d40;--beige:#eeebe5;--gold:#c8a96e;--white:#fff;--bg:#eeebe5;--text:#333;--text2:#666;--border:#ddd;}
+.page-scroll{overflow:auto!important;height:auto!important;min-height:100dvh!important;}
+.nav-list{background:#fff;border-radius:16px;box-shadow:0 2px 8px rgba(30,45,64,0.07);overflow:hidden;margin-bottom:12px;}
+.nav-list-section{font-size:10px;color:#666;letter-spacing:0.08em;padding:10px 16px 4px;font-weight:700;}
+.nav-list-item{display:flex;align-items:center;gap:14px;min-height:60px;padding:13px 14px;width:100%;box-sizing:border-box;text-align:left;border:none;background:transparent;font-family:inherit;cursor:pointer;border-bottom:1px solid rgba(30,45,64,0.05);}
+.nav-list-item:last-child{border-bottom:none;}
+.nav-list-item:hover{background:#faf9f6;}
+.nav-list-item__icon{width:32px!important;height:32px!important;flex-shrink:0!important;flex-grow:0!important;color:#1e2d40;}
+.nav-list-item__body{flex:1;min-width:0;text-align:left;}
+.nav-list-item__title{font-size:14px;font-weight:700;color:#333;text-align:left;}
+.nav-list-item__desc{font-size:11px;color:#666;margin-top:1px;text-align:left;}
+.nav-list-item__arrow{font-size:14px;color:#666;opacity:0.5;flex-shrink:0;}
+.nav-list-item__value{font-size:13px;font-weight:700;color:#1e2d40;white-space:nowrap;flex-shrink:0;}
+</style>
 <style>
 /* ★ 現場ナビ系との配色統一（2026/4/23）：bg・card-header をnavy系に揃える
    その他の変数（text/text-sub/green/red/orange/blue）は書類固有のまま維持 */
@@ -330,6 +345,72 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 .tab-detail-value{font-size:14px;font-weight:600;color:var(--text);}
 
 .empty{background:var(--white);border:2px dashed var(--border-dark);border-radius:6px;padding:20px;text-align:center;color:var(--text-sub);font-size:13px;margin-bottom:12px;}
+/* ── アプリ内編集パネル ── */
+.card-actions{
+  display:flex;gap:8px;padding:0 12px 12px;
+}
+.edit-toggle-btn{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:11px;border:1.5px solid var(--accent);border-radius:10px;
+  background:#fffbf3;color:var(--navy);font-size:13px;font-weight:700;
+  cursor:pointer;font-family:inherit;min-height:48px;transition:background 0.15s;
+}
+.edit-toggle-btn:hover{background:#f5ecd0;}
+.sheets-edit-btn-small{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:11px;border:1px solid rgba(30,45,64,0.15);border-radius:10px;
+  background:#f0f4f8;color:var(--navy);font-size:13px;font-weight:600;
+  cursor:pointer;font-family:inherit;min-height:48px;transition:background 0.15s;
+}
+.sheets-edit-btn-small:hover{background:#dce6f0;}
+.edit-panel{
+  display:none;margin:0 12px 12px;padding:16px;
+  background:#fffbf3;border:1.5px solid var(--accent);border-radius:12px;
+}
+.edit-panel.open{display:block;}
+.edit-panel-title{font-size:12px;font-weight:700;color:var(--navy);letter-spacing:0.06em;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.edit-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.edit-label{font-size:12px;color:var(--text-sub);flex-shrink:0;min-width:80px;}
+.edit-select{
+  flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:8px;
+  font-size:14px;font-family:inherit;background:var(--white);color:var(--text);
+  min-height:44px;
+}
+.edit-actions{display:flex;gap:8px;margin-top:14px;}
+.edit-save-btn{
+  flex:1;padding:12px;background:var(--navy);color:var(--white);
+  border:none;border-radius:8px;font-size:14px;font-weight:700;
+  cursor:pointer;font-family:inherit;min-height:48px;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.edit-save-btn:hover{background:#2a3f5a;}
+.edit-cancel-btn{
+  padding:12px 16px;background:var(--light);color:var(--text-sub);
+  border:1px solid var(--border);border-radius:8px;font-size:14px;
+  cursor:pointer;font-family:inherit;min-height:48px;
+}
+.edit-status{font-size:13px;margin-top:10px;text-align:center;min-height:20px;}
+.edit-status.saving{color:var(--text-sub);}
+.edit-status.success{color:#1a7a30;font-weight:700;}
+.edit-status.error{color:var(--red);}
+/* PAT モーダル */
+#pat-modal{
+  display:none;position:fixed;inset:0;z-index:300;
+  align-items:center;justify-content:center;
+}
+.pat-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.4);}
+.pat-modal-box{
+  position:relative;background:var(--white);border-radius:16px;
+  padding:24px;margin:20px;max-width:400px;width:100%;
+  box-shadow:0 8px 32px rgba(0,0,0,0.2);
+}
+.pat-modal-title{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:8px;}
+.pat-modal-desc{font-size:12px;color:var(--text-sub);margin-bottom:16px;line-height:1.6;}
+.pat-input{
+  width:100%;padding:12px;border:1px solid var(--border);border-radius:8px;
+  font-size:14px;font-family:inherit;margin-bottom:14px;
+}
+.pat-modal-actions{display:flex;gap:8px;}
 /* Sheetsで編集ボタン */
 .sheets-edit-btn{
   display:flex;align-items:center;gap:8px;
@@ -825,11 +906,53 @@ function buildAnkenCard(p){
         </button>
         <div class="nav-expand-body">${detailGenka}</div>
       </div>
-      <!-- Sheetsで編集ボタン -->
-      <button class="sheets-edit-btn" onclick="openSheets('${p.案件番号}',event)">
-        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="14" height="14" rx="2"/><line x1="3" y1="8" x2="17" y2="8"/><line x1="8" y1="8" x2="8" y2="17"/></svg>
-        Sheetsで編集
-      </button>
+      <!-- アプリ内編集パネル -->
+      <div class="edit-panel" id="edit-${safeId}">
+        <div class="edit-panel-title">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3 L17 6 L8 15 L4 16 L5 12 Z"/></svg>
+          クイック編集
+        </div>
+        <div class="edit-row">
+          <span class="edit-label">案件ステータス</span>
+          <select class="edit-select" id="sel-status-${safeId}">
+            ${['施工中','見積作成中','見積提出済み','見積提出予定','受注済','請求済み','入金済み','完了'].map(s=>`<option value="${s}"${p.ステータス===s?' selected':''}>${s}</option>`).join('')}
+          </select>
+        </div>
+        <div class="edit-row">
+          <span class="edit-label">契約書</span>
+          <select class="edit-select" id="sel-keiyaku-${safeId}">
+            <option value="未締結"${(p.契約書?.ステータス||'未締結')==='未締結'?' selected':''}>未締結</option>
+            <option value="締結済み"${p.契約書?.ステータス==='締結済み'?' selected':''}>締結済み</option>
+          </select>
+        </div>
+        <div class="edit-row">
+          <span class="edit-label">入金状況</span>
+          <select class="edit-select" id="sel-nyukin-${safeId}">
+            ${(p.請求||[]).length
+              ? (p.請求||[]).map((r,i)=>`<option value="r${i}-minyukin"${r.入金状況!=='nyukin'?' selected':''}>請求${i+1}：未入金</option><option value="r${i}-nyukin"${r.入金状況==='nyukin'?' selected':''}>請求${i+1}：入金済み</option>`).join('')
+              : '<option value="none">請求書なし</option>'}
+          </select>
+        </div>
+        <div class="edit-actions">
+          <button class="edit-save-btn" onclick="saveEdit('${safeId}','${p.案件番号}',event)">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="4,10 8,14 16,6"/></svg>
+            保存
+          </button>
+          <button class="edit-cancel-btn" onclick="toggleEditPanel('${safeId}',event)">キャンセル</button>
+        </div>
+        <div class="edit-status" id="edit-status-${safeId}"></div>
+      </div>
+      <!-- 編集ボタン行 -->
+      <div class="card-actions">
+        <button class="edit-toggle-btn" onclick="toggleEditPanel('${safeId}',event)">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3 L17 6 L8 15 L4 16 L5 12 Z"/></svg>
+          編集
+        </button>
+        <button class="sheets-edit-btn-small" onclick="openSheets('${p.案件番号}',event)">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="14" height="14" rx="2"/><line x1="3" y1="8" x2="17" y2="8"/><line x1="8" y1="8" x2="8" y2="17"/></svg>
+          Sheetsで編集
+        </button>
+      </div>
     </div>
   </div>`;
 }
@@ -1103,6 +1226,127 @@ function renderGenka(){
       <div class="tab-nav-card-body">${bodyHtml}</div>
     </div>`;
   }).join('');
+}
+
+// ─ GitHub API 編集機能 ─
+const GH_REPO='kameisatoru-svg/genba-navi';
+const GH_FILE='data.json';
+const GH_API=`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`;
+const PAT_KEY='artrise_gh_pat';
+
+function getPAT(){return localStorage.getItem(PAT_KEY)||'';}
+function savePAT(t){localStorage.setItem(PAT_KEY,t);}
+
+// PAT設定モーダル
+function showPATModal(callback){
+  let m=document.getElementById('pat-modal');
+  if(!m){
+    m=document.createElement('div');
+    m.id='pat-modal';
+    m.innerHTML=`
+      <div class="pat-modal-backdrop" onclick="closePATModal()"></div>
+      <div class="pat-modal-box">
+        <div class="pat-modal-title">GitHub Token を設定</div>
+        <div class="pat-modal-desc">初回のみ必要です。localStorageに保存されます（GitHubには送信されません）。</div>
+        <input type="password" id="pat-input" class="pat-input" placeholder="ghp_xxxxxxxxxxxx">
+        <div class="pat-modal-actions">
+          <button class="edit-save-btn" onclick="confirmPAT()">保存して続ける</button>
+          <button class="edit-cancel-btn" onclick="closePATModal()">キャンセル</button>
+        </div>
+      </div>`;
+    document.body.appendChild(m);
+  }
+  m._callback=callback;
+  m.style.display='flex';
+  setTimeout(()=>document.getElementById('pat-input')?.focus(),100);
+}
+function closePATModal(){
+  const m=document.getElementById('pat-modal');
+  if(m)m.style.display='none';
+}
+function confirmPAT(){
+  const val=document.getElementById('pat-input')?.value.trim();
+  if(!val){showToast('トークンを入力してください');return;}
+  savePAT(val);
+  closePATModal();
+  const m=document.getElementById('pat-modal');
+  if(m?._callback)m._callback();
+}
+
+// 編集パネル開閉
+function toggleEditPanel(safeId, e){
+  e.stopPropagation();
+  const panel=document.getElementById('edit-'+safeId);
+  if(!panel)return;
+  const isOpen=panel.classList.toggle('open');
+  // カードを開いた状態にする
+  if(isOpen)panel.closest('.card').classList.add('open');
+}
+
+// 保存処理
+async function saveEdit(safeId, ankenNo, e){
+  e.stopPropagation();
+  const pat=getPAT();
+  if(!pat){showPATModal(()=>saveEdit(safeId,ankenNo,e));return;}
+
+  const statusEl=document.getElementById('edit-status-'+safeId);
+  const newStatus=document.getElementById('sel-status-'+safeId)?.value;
+  const newKeiyaku=document.getElementById('sel-keiyaku-'+safeId)?.value;
+  const nyukinSel=document.getElementById('sel-nyukin-'+safeId)?.value;
+
+  statusEl.textContent='保存中...';statusEl.className='edit-status saving';
+
+  try{
+    // 1. 現在のdata.jsonとSHAを取得
+    const res=await fetch(GH_API,{headers:{Authorization:`token ${pat}`,'Accept':'application/vnd.github.v3+json'}});
+    if(res.status===401){localStorage.removeItem(PAT_KEY);showToast('トークンが無効です。再設定してください');showPATModal(()=>saveEdit(safeId,ankenNo,e));statusEl.textContent='';return;}
+    if(!res.ok)throw new Error('取得失敗 '+res.status);
+    const fileData=await res.json();
+    const sha=fileData.sha;
+    const currentJson=JSON.parse(atob(fileData.content.replace(/\n/g,'')));
+
+    // 2. 該当案件を更新
+    const idx=currentJson.案件.findIndex(p=>p.案件番号===ankenNo);
+    if(idx===-1)throw new Error('案件が見つかりません');
+
+    currentJson.案件[idx].ステータス=newStatus;
+    if(!currentJson.案件[idx].契約書)currentJson.案件[idx].契約書={};
+    currentJson.案件[idx].契約書.ステータス=newKeiyaku;
+
+    // 入金状況の更新
+    if(nyukinSel&&nyukinSel!=='none'){
+      const match=nyukinSel.match(/^r(\d+)-(nyukin|minyukin)$/);
+      if(match){
+        const ri=parseInt(match[1]);
+        if(currentJson.案件[idx].請求?.[ri]){
+          currentJson.案件[idx].請求[ri].入金状況=match[2];
+        }
+      }
+    }
+
+    // 3. GitHubにPUT
+    const newContent=btoa(unescape(encodeURIComponent(JSON.stringify(currentJson,null,2))));
+    const putRes=await fetch(GH_API,{
+      method:'PUT',
+      headers:{Authorization:`token ${pat}`,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
+      body:JSON.stringify({message:`アプリ更新: ${ankenNo} ステータス→${newStatus}`,content:newContent,sha})
+    });
+    if(!putRes.ok)throw new Error('保存失敗 '+putRes.status);
+
+    // 4. ローカルのALL_DATAも即時更新
+    ALL_DATA=currentJson.案件;
+    localStorage.setItem(LS_KEY,JSON.stringify(ALL_DATA));
+
+    statusEl.textContent='✓ 保存しました';statusEl.className='edit-status success';
+    setTimeout(()=>{
+      document.getElementById('edit-'+safeId)?.classList.remove('open');
+      statusEl.textContent='';
+      renderAll();
+    },1200);
+
+  }catch(err){
+    statusEl.textContent='エラー: '+err.message;statusEl.className='edit-status error';
+  }
 }
 
 // ─ Sheets編集 ─
