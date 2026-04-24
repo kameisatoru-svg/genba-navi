@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>案件台帳｜株式会社アート・レイズ</title>
 <style>
-/* ===== common.css v1.1 インライン ===== */
 :root{--navy:#1e2d40;--beige:#eeebe5;--gold:#c8a96e;--white:#fff;--bg:#eeebe5;--text:#333;--text2:#666;--border:#ddd;}
 .page-scroll{overflow:auto!important;height:auto!important;min-height:100dvh!important;}
 .nav-list{background:#fff;border-radius:16px;box-shadow:0 2px 8px rgba(30,45,64,0.07);overflow:hidden;margin-bottom:12px;}
@@ -1306,20 +1305,22 @@ async function saveEdit(safeId, ankenNo, e){
     const currentJson=JSON.parse(atob(fileData.content.replace(/\n/g,'')));
 
     // 2. 該当案件を更新
-    const idx=currentJson.案件.findIndex(p=>p.案件番号===ankenNo);
-    if(idx===-1)throw new Error('案件が見つかりません');
+    const ankenList=currentJson.案件||currentJson.anken||Object.values(currentJson).find(v=>Array.isArray(v)&&v[0]?.案件番号);
+    if(!ankenList)throw new Error('data.jsonの案件リストが見つかりません: keys='+Object.keys(currentJson).join(','));
+    const idx=ankenList.findIndex(p=>p.案件番号===ankenNo);
+    if(idx===-1)throw new Error('案件が見つかりません: '+ankenNo);
 
-    currentJson.案件[idx].ステータス=newStatus;
-    if(!currentJson.案件[idx].契約書)currentJson.案件[idx].契約書={};
-    currentJson.案件[idx].契約書.ステータス=newKeiyaku;
+    ankenList[idx].ステータス=newStatus;
+    if(!ankenList[idx].契約書)ankenList[idx].契約書={};
+    ankenList[idx].契約書.ステータス=newKeiyaku;
 
     // 入金状況の更新
     if(nyukinSel&&nyukinSel!=='none'){
       const match=nyukinSel.match(/^r(\d+)-(nyukin|minyukin)$/);
       if(match){
         const ri=parseInt(match[1]);
-        if(currentJson.案件[idx].請求?.[ri]){
-          currentJson.案件[idx].請求[ri].入金状況=match[2];
+        if(ankenList[idx].請求?.[ri]){
+          ankenList[idx].請求[ri].入金状況=match[2];
         }
       }
     }
@@ -1334,7 +1335,7 @@ async function saveEdit(safeId, ankenNo, e){
     if(!putRes.ok)throw new Error('保存失敗 '+putRes.status);
 
     // 4. ローカルのALL_DATAも即時更新
-    ALL_DATA=currentJson.案件;
+    ALL_DATA=ankenList;
     localStorage.setItem(LS_KEY,JSON.stringify(ALL_DATA));
 
     statusEl.textContent='✓ 保存しました';statusEl.className='edit-status success';
