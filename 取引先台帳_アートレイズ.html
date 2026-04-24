@@ -136,22 +136,46 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 .vendor-card.open .card-body{display:block;}
 
 /* ★ C-4 改修：カード展開部分を nav-list 化 + 2階層折りたたみ */
-.vendor-card .nav-list{box-shadow:none;border-radius:10px;border:1px solid rgba(30,45,64,0.08);margin-bottom:0;}
-.vendor-card .nav-list-item{min-height:60px;padding:13px 14px;cursor:pointer;}
-.vendor-card .nav-list-item__title{font-size:15px;}
-.vendor-card .nav-list-item__desc{font-size:12px;}
-.vendor-card .nav-list-item__value{font-size:13px;font-weight:600;color:var(--text-sub);margin-right:4px;}
-.vendor-card .nav-list-item__arrow{font-size:14px;transition:transform 0.2s;}
+/* ★ PCでbuttonが横並びになるのを確実に防ぐため、明示的にdisplay:block + width:100% */
+.vendor-card .nav-list{box-shadow:none;border-radius:10px;border:1px solid rgba(30,45,64,0.08);margin-bottom:0;display:block;}
+.vendor-card .nav-list-item{
+  min-height:60px;padding:13px 14px;cursor:pointer;
+  display:flex;
+  align-items:center;
+  width:100%;
+  box-sizing:border-box;
+  gap:14px;
+  text-align:left;
+}
+/* ★ SVGアイコンは必ず32x32固定・flex-shrink:0で絶対拡大させない */
+.vendor-card .nav-list-item__icon{
+  width:32px !important;
+  height:32px !important;
+  flex-shrink:0 !important;
+  flex-grow:0 !important;
+  color:var(--navy);
+}
+.vendor-card .nav-list-item__body{
+  flex:1;
+  min-width:0;
+  text-align:left;
+}
+.vendor-card .nav-list-item__title{font-size:15px;font-weight:700;color:var(--text);line-height:1.35;text-align:left;}
+.vendor-card .nav-list-item__desc{font-size:12px;color:var(--text-sub);margin-top:1px;line-height:1.4;text-align:left;}
+.vendor-card .nav-list-item__value{font-size:13px;font-weight:600;color:var(--text-sub);margin-right:4px;white-space:nowrap;flex-shrink:0;}
+.vendor-card .nav-list-item__arrow{font-size:14px;transition:transform 0.2s;color:var(--text-sub);opacity:0.5;flex-shrink:0;}
 .vendor-card .nav-list-item.nav-expand.open .nav-list-item__arrow{transform:rotate(90deg);opacity:0.9;}
 .vendor-card .nav-list-item.nav-expand.open{background:#f5f2ec;border-bottom:1px solid rgba(200,169,110,0.3);}
 .vendor-card .nav-list-item.nav-expand.open .nav-list-item__title{color:var(--navy);}
-/* 2階層目（展開エリア） */
+/* 2階層目（展開エリア）：display:blockで横幅いっぱい */
 .nav-expand-body{
   display:none;
   padding:14px 16px 16px;
   background:#fff;
   border-bottom:1px solid rgba(30,45,64,0.06);
   animation:navExpandFade 0.2s ease-out;
+  width:100%;
+  box-sizing:border-box;
 }
 .nav-list-item.nav-expand.open + .nav-expand-body{display:block;}
 @keyframes navExpandFade{from{opacity:0;}to{opacity:1;}}
