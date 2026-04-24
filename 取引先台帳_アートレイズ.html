@@ -30,7 +30,9 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 
 /* ★ 検索＋フィルタボタン：案件台帳と統一 */
 .filter-bar{background:var(--white);border:none;padding:10px 12px;display:flex;gap:8px;align-items:center;margin-bottom:14px;border-radius:14px;margin-top:14px;box-shadow:0 2px 8px rgba(30,45,64,0.07);}
-.filter-bar input[type="text"]{flex:1;min-width:0;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit;background:var(--light);}
+.search-input-wrap{flex:1;min-width:0;position:relative;display:flex;align-items:center;}
+.search-icon{position:absolute;left:12px;color:var(--text-sub);pointer-events:none;flex-shrink:0;}
+.filter-bar input[type="text"]{flex:1;min-width:0;padding:10px 12px 10px 38px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit;background:var(--light);width:100%;}
 .filter-bar input[type="text"]:focus{outline:none;border-color:var(--accent);background:var(--white);}
 /* フィルタボタン（右端のアイコン・タップでシート展開） */
 .filter-toggle-btn{
@@ -95,8 +97,8 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 /* ★ カード：案件台帳C-3準拠（白基調・角丸14px・影のみ・左端関係性バー） */
 .vendor-card{background:var(--white);border:none;border-radius:14px;margin-bottom:10px;overflow:hidden;transition:box-shadow 0.15s;position:relative;box-shadow:0 2px 8px rgba(30,45,64,0.07);border-left:4px solid #d0d0cc;}
 .vendor-card:hover{box-shadow:0 4px 12px rgba(30,45,64,0.1);}
-/* 関係性バー：優先度順（元請け > 顧客 > 業者 > 仕入先 > 休眠） */
-.vendor-card.rel-元請け{border-left-color:#9b59b6;}
+/* 関係性バー：優先度順（元請 > 顧客 > 業者 > 仕入先 > 休眠） */
+.vendor-card.rel-元請{border-left-color:#9b59b6;}
 .vendor-card.rel-顧客{border-left-color:#1a7a30;}
 .vendor-card.rel-業者{border-left-color:#f39c12;}
 .vendor-card.rel-仕入先{border-left-color:#2563eb;}
@@ -126,7 +128,7 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 }
 .b-顧客{background:#1a7a30;color:#fff;}
 .b-業者{background:#f39c12;color:#fff;}
-.b-元請け{background:#9b59b6;color:#fff;}
+.b-元請{background:#9b59b6;color:#fff;}
 .b-仕入先{background:#2563eb;color:#fff;}
 .b-休眠{background:#e8ebef;color:#6b7280;}
 .b-業種{background:#f1f5f9;color:#475569;font-weight:600;}
@@ -249,7 +251,13 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 
   <!-- 検索＋フィルタ -->
   <div class="filter-bar">
-    <input type="text" id="vendor-search" placeholder="🔍 会社名・担当者・住所・案件番号で検索" oninput="renderVendors()">
+    <div class="search-input-wrap">
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <circle cx="9" cy="9" r="6"/>
+        <line x1="13.5" y1="13.5" x2="17" y2="17"/>
+      </svg>
+      <input type="text" id="vendor-search" placeholder="会社名・担当者・住所・案件番号で検索" oninput="renderVendors()">
+    </div>
     <button class="filter-toggle-btn" id="vendor-filter-btn" onclick="openFilterSheet()" aria-label="絞り込み">
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
         <line x1="4" y1="7" x2="18" y2="7"/>
@@ -317,12 +325,12 @@ const VENDORS = [
   },
   {
     id:"T-003", name:"株式会社 信和",
-    rel:["顧客","元請け"], type:["ゼネコン・元請け"],
+    rel:["顧客","元請"], type:["ゼネコン・元請"],
     basic:{ contact:"加藤 博和 様", rep:"清家 和子" },
     contact:{ tel:"0977-21-9640", mobile:"090-3607-5427", fax:"0977-21-9669", mail:"h-katou@ctb.ne.jp", address:"〒874-0942　大分県別府市千代町6-3", touroku:"" },
     cases:[ {num:"AR-2026-0006", title:"アルミアングル"}, {num:"AR-2026-0007", title:"ルーツブロア"} ],
     memo:"元請として発注いただくケースと、協力業者として連携するケースあり。過去：ビーコンプラザ トイレ・シャワー室改修工事 等。",
-    search:"t-003 信和 加藤博和 清家和子 別府 ゼネコン 元請け ビーコンプラザ"
+    search:"t-003 信和 加藤博和 清家和子 別府 ゼネコン 元請 ビーコンプラザ"
   },
   {
     id:"T-004", name:"小田工業",
@@ -407,7 +415,7 @@ const VENDORS = [
   },
   {
     id:"T-013", name:"株式会社島津製作所",
-    rel:["顧客","元請け"], type:["ゼネコン・元請け"],
+    rel:["顧客","元請"], type:["ゼネコン・元請"],
     basic:{ contact:"竹村 勝利", rep:"" },
     contact:{ tel:"", mobile:"", fax:"", mail:"ktake@shimadzu.co.jp", address:"", touroku:"" },
     cases:[ {num:"AR-26-013", title:"大分リハビリテーション病院 一般撮影室内装工事"} ],
@@ -426,9 +434,9 @@ let selectedIds = new Set();
 /* ═══════════════════════════════════════════════════════════
    関係性の表示優先度
    （左端バー色・バッジ並び順）
-   元請け > 顧客 > 業者 > 仕入先 > 休眠
+   元請 > 顧客 > 業者 > 仕入先 > 休眠
    ═══════════════════════════════════════════════════════════ */
-const REL_PRIORITY = ['元請け','顧客','業者','仕入先','休眠'];
+const REL_PRIORITY = ['元請','顧客','業者','仕入先','休眠'];
 function primaryRel(rels){
   for(const r of REL_PRIORITY){ if(rels.includes(r)) return r; }
   return '顧客';
