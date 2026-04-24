@@ -277,6 +277,58 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 .totals-table td{padding:7px 12px;border-bottom:1px solid var(--border);}
 .totals-table td:last-child{text-align:right;}
 .totals-table tr:last-child td{background:var(--navy);color:#fff;font-weight:700;border-bottom:none;}
+/* ── 他タブ共通 nav-card デザイン（2026/4/24） ──
+   案件タブの .card と同じ構造・見た目を共有 */
+.tab-nav-card{
+  background:var(--white);border:none;border-radius:14px;margin-bottom:10px;
+  overflow:hidden;transition:box-shadow 0.15s;position:relative;
+  box-shadow:0 2px 8px rgba(30,45,64,0.07);border-left:4px solid #d0d0cc;
+}
+.tab-nav-card:hover{box-shadow:0 4px 12px rgba(30,45,64,0.1);}
+/* ステータス別左端バー */
+.tab-nav-card.status-施工中{border-left-color:#f39c12;}
+.tab-nav-card.status-見積作成中{border-left-color:#9b59b6;}
+.tab-nav-card.status-見積提出済み{border-left-color:#2563eb;}
+.tab-nav-card.status-見積提出予定{border-left-color:#d97706;}
+.tab-nav-card.status-請求済み,.tab-nav-card.status-受注済{border-left-color:#1a7a30;}
+.tab-nav-card.status-入金済み,.tab-nav-card.status-完了{border-left-color:#9ca3af;opacity:0.85;}
+.tab-nav-card.status-未入金{border-left-color:#dc2626;}
+.tab-nav-card.status-締結済み{border-left-color:#1a7a30;}
+.tab-nav-card.status-未締結{border-left-color:#d97706;}
+.tab-nav-card.status-注文{border-left-color:#1a6fc4;}
+/* 粗利率連動（原価タブ用） */
+.tab-nav-card.status-受注済{border-left-color:#1a7a30;}
+.tab-nav-card.status-default{border-left-color:#d0d0cc;}
+/* ヘッダーボタン */
+.tab-nav-card-header{
+  width:100%;background:var(--white);border:none;padding:14px 16px;
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  cursor:pointer;font-family:inherit;text-align:left;min-height:60px;
+}
+.tab-nav-card-header:hover{background:#faf9f6;}
+.tab-nav-card-left{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+.tab-nav-card-id{font-size:11px;font-weight:700;color:var(--text-sub);background:var(--light);padding:2px 8px;border-radius:10px;align-self:flex-start;}
+.tab-nav-card-name{font-size:15px;font-weight:700;color:var(--navy);line-height:1.35;}
+.tab-nav-card-sub{font-size:12px;color:var(--text-sub);}
+.tab-nav-card-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+.tab-nav-card-amount{font-size:16px;font-weight:700;color:var(--navy);white-space:nowrap;}
+.tab-nav-card-chevron{color:var(--text-sub);opacity:0.4;transition:transform 0.2s;flex-shrink:0;}
+.tab-nav-card.open .tab-nav-card-chevron{transform:rotate(180deg);opacity:0.7;}
+/* 展開ボディ */
+.tab-nav-card-body{
+  display:none;padding:14px 16px 16px;
+  background:#fbfaf8;border-top:1px solid rgba(30,45,64,0.05);
+}
+.tab-nav-card.open .tab-nav-card-body{display:block;}
+/* 1行1情報レイアウト */
+.tab-detail-row{
+  display:flex;align-items:baseline;gap:10px;
+  padding:6px 0;border-bottom:1px solid rgba(30,45,64,0.05);
+}
+.tab-detail-row:last-of-type{border-bottom:none;}
+.tab-detail-label{font-size:12px;color:var(--text-sub);flex-shrink:0;min-width:72px;}
+.tab-detail-value{font-size:14px;font-weight:600;color:var(--text);}
+
 .empty{background:var(--white);border:2px dashed var(--border-dark);border-radius:6px;padding:20px;text-align:center;color:var(--text-sub);font-size:13px;margin-bottom:12px;}
 .loading{text-align:center;padding:40px;color:var(--text-sub);font-size:13px;}
 @media(max-width:600px){
@@ -759,31 +811,41 @@ function renderMitsumori(){
   document.getElementById('m-total-amt').textContent=fmtYen(items.reduce((s,p)=>s+Number(p.見積?.見積金額||0),0));
   const area=document.getElementById('mitsumori-area');
   if(!items.length){area.innerHTML='<div class="empty">該当する見積がありません</div>';return;}
-  area.innerHTML=items.map(p=>`
-  <div class="view-card status-${p.ステータス||'default'}">
-    <div class="view-card-header">
-      <div><div class="view-card-name">${p.工事名}</div><div style="margin-top:3px;">${p.見積?.見積番号?`<span class="view-card-id">${p.見積.見積番号}</span> `:''}<span class="view-anken-ref">${p.案件番号}</span></div></div>
-      <span class="amount" style="font-size:16px;">${fmtYen(p.見積?.見積金額)}</span>
-    </div>
-    <div class="view-card-body">
-      <div class="info-grid">
-        <div class="info-item"><span class="info-label">顧客</span><span class="info-value">${p.法人名||p.代表者||'-'}</span></div>
-        <div class="info-item"><span class="info-label">施工場所</span><span class="info-value">${p.施工場所||'-'}</span></div>
-        <div class="info-item"><span class="info-label">見積日</span><span class="info-value">${fmtDate(p.見積?.見積日)}</span></div>
-        <div class="info-item"><span class="info-label">ステータス</span><span class="badge ${badgeClass(p.ステータス)}">${p.ステータス||'-'}</span></div>
-      </div>
-      ${p.見積?.備考?`<div class="note-box"><div class="note-label">備考</div>${p.見積.備考}</div>`:''}
-      <div style="margin-top:8px;">${pdfTag(p.見積?.PDF,'見積書PDF')}</div>
-      ${(p.見積?.明細||[]).length ? `
-        <button class="meisai-toggle" onclick="toggleMeisai('mv-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}',this)"><svg class="meisai-toggle__chevron" width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><polygon points="2,1 8,5 2,9"/></svg>明細を表示</button>
-        <div class="meisai-wrap" id="mv-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}">
-          <table class="meisai-table">
-            <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">単価</th><th class="right">金額（税抜）</th></tr></thead>
-            <tbody>${(p.見積.明細||[]).map(m=>`<tr><td>${m.工事内容||'-'}</td><td class="right">${m.数量||'-'}</td><td>${m.単位||''}</td><td class="right">${m.単価?'¥'+Number(m.単価).toLocaleString():'-'}</td><td class="right">¥${Number(m.金額税抜||0).toLocaleString()}</td></tr>`).join('')}</tbody>
-          </table>
-        </div>` : ''}
-    </div>
-  </div>`).join('');
+  area.innerHTML=items.map(p=>{
+    const sid=p.案件番号.replace(/[^a-zA-Z0-9]/g,'-');
+    const meisaiHtml=(p.見積?.明細||[]).length?`
+      <button class="meisai-toggle" onclick="toggleMeisai('mv-${sid}',this)"><svg class="meisai-toggle__chevron" width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><polygon points="2,1 8,5 2,9"/></svg>明細を表示</button>
+      <div class="meisai-wrap" id="mv-${sid}">
+        <table class="meisai-table">
+          <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">単価</th><th class="right">金額（税抜）</th></tr></thead>
+          <tbody>${(p.見積.明細||[]).map(m=>`<tr><td>${m.工事内容||'-'}</td><td class="right">${m.数量||'-'}</td><td>${m.単位||''}</td><td class="right">${m.単価?'¥'+Number(m.単価).toLocaleString():'-'}</td><td class="right">¥${Number(m.金額税抜||0).toLocaleString()}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>`:'';
+    const bodyHtml=`
+      <div class="tab-detail-row"><span class="tab-detail-label">顧客</span><span class="tab-detail-value">${p.法人名||p.代表者||'-'}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">施工場所</span><span class="tab-detail-value">${p.施工場所||'-'}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">見積番号</span><span class="tab-detail-value">${p.見積?.見積番号||'-'}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">見積日</span><span class="tab-detail-value">${fmtDate(p.見積?.見積日)}</span></div>
+      ${p.見積?.備考?`<div class="note-box" style="margin-top:8px;"><div class="note-label">備考</div>${p.見積.備考}</div>`:''}
+      <div style="margin-top:10px;">${pdfTag(p.見積?.PDF,'見積書PDF')}</div>
+      ${meisaiHtml}`;
+    return`
+    <div class="tab-nav-card status-${p.ステータス||'default'}">
+      <button class="tab-nav-card-header" onclick="toggleTabCard(this)">
+        <div class="tab-nav-card-left">
+          <span class="tab-nav-card-id">${p.案件番号}</span>
+          <div class="tab-nav-card-name">${p.工事名}</div>
+          <div class="tab-nav-card-sub">${p.法人名||p.代表者||'-'}</div>
+        </div>
+        <div class="tab-nav-card-right">
+          <div class="tab-nav-card-amount">${fmtYen(p.見積?.見積金額)}</div>
+          <span class="badge ${badgeClass(p.ステータス)}">${p.ステータス||'-'}</span>
+          <svg class="tab-nav-card-chevron" width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,4 12,4 7,11"/></svg>
+        </div>
+      </button>
+      <div class="tab-nav-card-body">${bodyHtml}</div>
+    </div>`;
+  }).join('');
 }
 
 // ─ 請求ビュー ─
@@ -810,31 +872,41 @@ function renderSeikyu(){
   if(!items.length){area.innerHTML='<div class="empty">該当する請求がありません</div>';return;}
   area.innerHTML=items.map(({p,r})=>{
     const isNyukin=r.入金状況==='nyukin';
-    return`<div class="view-card status-${isNyukin?'入金済み':'未入金'}">
-      <div class="view-card-header">
-        <div><div class="view-card-name">${p.工事名}</div><div style="margin-top:3px;">${r.請求番号?`<span class="view-card-id">${r.請求番号}</span> `:''}<span class="view-anken-ref">${p.案件番号}</span></div></div>
-        <div style="text-align:right;"><div class="amount ${isNyukin?'nyukin':'minyukin'}" style="font-size:16px;">${fmtYen(r.請求金額)}</div><span class="badge ${isNyukin?'b-入金済み':'b-未入金'}" style="display:inline-block;margin-top:3px;">${isNyukin?'入金済み':'未入金'}</span></div>
-      </div>
-      <div class="view-card-body">
-        <div class="info-grid">
-          <div class="info-item"><span class="info-label">顧客</span><span class="info-value">${p.法人名||p.代表者||'-'}</span></div>
-          <div class="info-item"><span class="info-label">施工場所</span><span class="info-value">${p.施工場所||'-'}</span></div>
-          <div class="info-item"><span class="info-label">請求日</span><span class="info-value">${fmtDate(r.請求日)}</span></div>
-          <div class="info-item"><span class="info-label">支払期限</span><span class="info-value">${fmtDate(r.支払期限)}</span></div>
-          <div class="info-item"><span class="info-label">入金日</span><span class="info-value">${fmtDate(r.入金日)}</span></div>
+    const sid=p.案件番号.replace(/[^a-zA-Z0-9]/g,'-');
+    const rid=r.請求番号?.replace(/[^a-zA-Z0-9]/g,'-')||'x';
+    const meisaiHtml=(r.明細||[]).length?`
+      <button class="meisai-toggle" onclick="toggleMeisai('rv-${sid}-${rid}',this)"><svg class="meisai-toggle__chevron" width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><polygon points="2,1 8,5 2,9"/></svg>明細を表示</button>
+      <div class="meisai-wrap" id="rv-${sid}-${rid}">
+        <table class="meisai-table">
+          <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">金額（税抜）</th></tr></thead>
+          <tbody>${(r.明細||[]).map(m=>`<tr><td>${m.工事内容||'-'}</td><td class="right">${m.数量||'-'}</td><td>${m.単位||''}</td><td class="right">¥${Number(m.金額税抜||0).toLocaleString()}</td></tr>`).join('')}</tbody>
+        </table>
+        ${r.税込合計?`<table class="totals-table"><tr><td>税抜合計</td><td>¥${Number(r.税抜合計||0).toLocaleString()}</td></tr><tr><td>消費税（10%）</td><td>¥${Number(r.消費税||0).toLocaleString()}</td></tr><tr><td>税込合計</td><td>¥${Number(r.税込合計||0).toLocaleString()}</td></tr></table>`:''}
+      </div>`:'';
+    const bodyHtml=`
+      <div class="tab-detail-row"><span class="tab-detail-label">顧客</span><span class="tab-detail-value">${p.法人名||p.代表者||'-'}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">施工場所</span><span class="tab-detail-value">${p.施工場所||'-'}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">請求日</span><span class="tab-detail-value">${fmtDate(r.請求日)}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">支払期限</span><span class="tab-detail-value">${fmtDate(r.支払期限)}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">入金日</span><span class="tab-detail-value">${fmtDate(r.入金日)}</span></div>
+      ${r.備考?`<div class="note-box" style="margin-top:8px;"><div class="note-label">備考</div>${r.備考}</div>`:''}
+      <div style="margin-top:10px;">${pdfTag(r.PDF,'請求書PDF')}</div>
+      ${meisaiHtml}`;
+    return`
+    <div class="tab-nav-card status-${isNyukin?'入金済み':'未入金'}">
+      <button class="tab-nav-card-header" onclick="toggleTabCard(this)">
+        <div class="tab-nav-card-left">
+          <span class="tab-nav-card-id">${r.請求番号||'-'}</span>
+          <div class="tab-nav-card-name">${p.工事名}</div>
+          <div class="tab-nav-card-sub">${p.法人名||p.代表者||'-'} <span class="view-anken-ref">${p.案件番号}</span></div>
         </div>
-        ${r.備考?`<div class="note-box"><div class="note-label">備考</div>${r.備考}</div>`:''}
-        <div style="margin-top:8px;">${pdfTag(r.PDF,'請求書PDF')}</div>
-        ${(r.明細||[]).length ? `
-          <button class="meisai-toggle" onclick="toggleMeisai('rv-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}-${r.請求番号?.replace(/[^a-zA-Z0-9]/g,'-')||'x'}',this)"><svg class="meisai-toggle__chevron" width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><polygon points="2,1 8,5 2,9"/></svg>明細を表示</button>
-          <div class="meisai-wrap" id="rv-${p.案件番号.replace(/[^a-zA-Z0-9]/g,'-')}-${r.請求番号?.replace(/[^a-zA-Z0-9]/g,'-')||'x'}">
-            <table class="meisai-table">
-              <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">金額（税抜）</th></tr></thead>
-              <tbody>${(r.明細||[]).map(m=>`<tr><td>${m.工事内容||'-'}</td><td class="right">${m.数量||'-'}</td><td>${m.単位||''}</td><td class="right">¥${Number(m.金額税抜||0).toLocaleString()}</td></tr>`).join('')}</tbody>
-            </table>
-            ${r.税込合計?`<table class="totals-table"><tr><td>税抜合計</td><td>¥${Number(r.税抜合計||0).toLocaleString()}</td></tr><tr><td>消費税（10%）</td><td>¥${Number(r.消費税||0).toLocaleString()}</td></tr><tr><td>税込合計</td><td>¥${Number(r.税込合計||0).toLocaleString()}</td></tr></table>`:''}
-          </div>` : ''}
-      </div>
+        <div class="tab-nav-card-right">
+          <div class="tab-nav-card-amount ${isNyukin?'nyukin':'minyukin'}">${fmtYen(r.請求金額)}</div>
+          <span class="badge ${isNyukin?'b-入金済み':'b-未入金'}">${isNyukin?'入金済み':'未入金'}</span>
+          <svg class="tab-nav-card-chevron" width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,4 12,4 7,11"/></svg>
+        </div>
+      </button>
+      <div class="tab-nav-card-body">${bodyHtml}</div>
     </div>`;
   }).join('');
 }
@@ -853,21 +925,29 @@ function renderChumon(){
   document.getElementById('c-total-amt').textContent=fmtYen(items.reduce((s,x)=>s+Number(x.c.注文金額||0),0)||null);
   const area=document.getElementById('chumon-area');
   if(!items.length){area.innerHTML='<div class="empty">注文書がありません</div>';return;}
-  area.innerHTML=items.map(({p,c})=>`
-  <div class="view-card status-注文">
-    <div class="view-card-header">
-      <div><div class="view-card-name">${p.工事名}　<span style="font-size:13px;color:#555;">／ ${c.業者名||'-'}</span></div><div style="margin-top:3px;">${c.注文番号?`<span class="view-card-id">${c.注文番号}</span> `:''}<span class="view-anken-ref">${p.案件番号}</span></div></div>
-      <span class="amount" style="font-size:16px;">${fmtYen(c.注文金額)}</span>
-    </div>
-    <div class="view-card-body">
-      <div class="info-grid">
-        <div class="info-item"><span class="info-label">業者名</span><span class="info-value">${c.業者名||'-'}</span></div>
-        <div class="info-item"><span class="info-label">注文日</span><span class="info-value">${fmtDate(c.注文日)}</span></div>
-        <div class="info-item"><span class="info-label">納期</span><span class="info-value">${fmtDate(c.納期)}</span></div>
-      </div>
-      <div style="margin-top:8px;">${pdfTag(c.PDF,'注文書PDF')}</div>
-    </div>
-  </div>`).join('');
+  area.innerHTML=items.map(({p,c})=>{
+    const bodyHtml=`
+      <div class="tab-detail-row"><span class="tab-detail-label">案件</span><span class="tab-detail-value">${p.工事名}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">業者名</span><span class="tab-detail-value">${c.業者名||'-'}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">注文日</span><span class="tab-detail-value">${fmtDate(c.注文日)}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">納期</span><span class="tab-detail-value">${fmtDate(c.納期)}</span></div>
+      <div style="margin-top:10px;">${pdfTag(c.PDF,'注文書PDF')}</div>`;
+    return`
+    <div class="tab-nav-card status-注文">
+      <button class="tab-nav-card-header" onclick="toggleTabCard(this)">
+        <div class="tab-nav-card-left">
+          <span class="tab-nav-card-id">${c.注文番号||'-'}</span>
+          <div class="tab-nav-card-name">${c.業者名||'-'}</div>
+          <div class="tab-nav-card-sub">${p.工事名} <span class="view-anken-ref">${p.案件番号}</span></div>
+        </div>
+        <div class="tab-nav-card-right">
+          <div class="tab-nav-card-amount">${fmtYen(c.注文金額)}</div>
+          <svg class="tab-nav-card-chevron" width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,4 12,4 7,11"/></svg>
+        </div>
+      </button>
+      <div class="tab-nav-card-body">${bodyHtml}</div>
+    </div>`;
+  }).join('');
 }
 
 // ─ 契約書ビュー ─
@@ -895,20 +975,28 @@ function renderKeiyaku(){
   area.innerHTML=items.map(p=>{
     const k=p.契約書||{};
     const isSigned=k.ステータス==='締結済み';
-    return`<div class="view-card status-${isSigned?'締結済み':'未締結'}">
-      <div class="view-card-header">
-        <div><div class="view-card-name">${p.工事名}</div><div style="margin-top:3px;">${k.契約番号?`<span class="view-card-id">${k.契約番号}</span> `:''}<span class="view-anken-ref">${p.案件番号}</span></div></div>
-        <span class="badge ${isSigned?'b-締結済み':'b-未締結'}">${k.ステータス||'未締結'}</span>
-      </div>
-      <div class="view-card-body">
-        <div class="info-grid">
-          <div class="info-item"><span class="info-label">顧客</span><span class="info-value">${p.法人名||p.代表者||'-'}</span></div>
-          <div class="info-item"><span class="info-label">施工場所</span><span class="info-value">${p.施工場所||'-'}</span></div>
-          <div class="info-item"><span class="info-label">契約日</span><span class="info-value">${fmtDate(k.契約日)}</span></div>
-          <div class="info-item"><span class="info-label">契約金額</span><span class="info-value amount">${fmtYen(k.契約金額)}</span></div>
+    const bodyHtml=`
+      <div class="tab-detail-row"><span class="tab-detail-label">顧客</span><span class="tab-detail-value">${p.法人名||p.代表者||'-'}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">施工場所</span><span class="tab-detail-value">${p.施工場所||'-'}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">契約番号</span><span class="tab-detail-value">${k.契約番号||'-'}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">契約日</span><span class="tab-detail-value">${fmtDate(k.契約日)}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">契約金額</span><span class="tab-detail-value amount">${fmtYen(k.契約金額)}</span></div>
+      <div style="margin-top:10px;">${pdfTag(k.PDF,'契約書PDF')}</div>`;
+    return`
+    <div class="tab-nav-card status-${isSigned?'締結済み':'未締結'}">
+      <button class="tab-nav-card-header" onclick="toggleTabCard(this)">
+        <div class="tab-nav-card-left">
+          <span class="tab-nav-card-id">${k.契約番号||p.案件番号}</span>
+          <div class="tab-nav-card-name">${p.工事名}</div>
+          <div class="tab-nav-card-sub">${p.法人名||p.代表者||'-'}</div>
         </div>
-        <div style="margin-top:8px;">${pdfTag(k.PDF,'契約書PDF')}</div>
-      </div>
+        <div class="tab-nav-card-right">
+          <div class="tab-nav-card-amount">${fmtYen(k.契約金額)}</div>
+          <span class="badge ${isSigned?'b-締結済み':'b-未締結'}">${k.ステータス||'未締結'}</span>
+          <svg class="tab-nav-card-chevron" width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,4 12,4 7,11"/></svg>
+        </div>
+      </button>
+      <div class="tab-nav-card-body">${bodyHtml}</div>
     </div>`;
   }).join('');
 }
@@ -941,24 +1029,44 @@ function renderGenka(){
     const rate=u&&gt?Math.round((1-gt/u)*100):null;
     const rc=rate===null?'#999':rate>=80?'#1a7a30':rate>=60?'#d97706':'#dc2626';
     const rateClass=rate===null?'default':rate>=80?'受注済':rate>=60?'見積提出予定':'未入金';
-    return`<div class="view-card status-${rateClass}">
-      <div class="view-card-header">
-        <div><div class="view-card-name">${p.工事名}</div><div style="margin-top:3px;"><span class="view-anken-ref">${p.案件番号}</span></div></div>
-        <div style="text-align:right;">${rate!==null?`<div style="font-size:18px;font-weight:700;color:${rc};">粗利率 ${rate}%</div>`:'<div style="color:#999;font-size:12px;">原価未入力</div>'}</div>
-      </div>
-      <div class="view-card-body">
-        <div class="info-grid">
-          <div class="info-item"><span class="info-label">売上</span><span class="info-value amount nyukin">${fmtYen(u||null)}</span></div>
-          <div class="info-item"><span class="info-label">原価合計</span><span class="info-value amount minyukin">${fmtYen(gt||null)}</span></div>
-          <div class="info-item"><span class="info-label">粗利</span><span class="info-value amount" style="color:${rc};">${u&&gt?fmtYen(u-gt):'-'}</span></div>
-          <div class="info-item"><span class="info-label">労務費</span><span class="info-value">${fmtYen(g.労務費||null)}</span></div>
-          <div class="info-item"><span class="info-label">材料費</span><span class="info-value">${fmtYen(g.材料費||null)}</span></div>
-          <div class="info-item"><span class="info-label">外注費</span><span class="info-value">${fmtYen(g.外注費||null)}</span></div>
-          <div class="info-item"><span class="info-label">経費</span><span class="info-value">${fmtYen(g.経費||null)}</span></div>
+    const genkaBarHtml=gt>0?(()=>{
+      const colors=['#3b82f6','#10b981','#f59e0b','#ef4444'];
+      const gi=[['労務費',g.労務費||0,colors[0]],['材料費',g.材料費||0,colors[1]],['外注費',g.外注費||0,colors[2]],['経費',g.経費||0,colors[3]]];
+      const bars=gi.map(([k,v,c])=>v?`<div class="genka-bar-fill" style="width:${Math.round(v/gt*100)}%;background:${c};"></div>`:'').join('');
+      const legend=gi.map(([k,v,c])=>v?`<span><span class="genka-dot" style="background:${c};"></span>${k} ${fmtYen(v)}</span>`:'').join('');
+      return`<div class="genka-bar">${bars}</div><div class="genka-legend">${legend}</div>`;
+    })():'';
+    const bodyHtml=`
+      <div class="tab-detail-row"><span class="tab-detail-label">売上</span><span class="tab-detail-value amount nyukin">${fmtYen(u||null)}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">原価合計</span><span class="tab-detail-value amount minyukin">${fmtYen(gt||null)}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">粗利</span><span class="tab-detail-value amount" style="color:${rc};">${u&&gt?fmtYen(u-gt):'-'}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">労務費</span><span class="tab-detail-value">${fmtYen(g.労務費||null)}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">材料費</span><span class="tab-detail-value">${fmtYen(g.材料費||null)}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">外注費</span><span class="tab-detail-value">${fmtYen(g.外注費||null)}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">経費</span><span class="tab-detail-value">${fmtYen(g.経費||null)}</span></div>
+      ${gt>0?`<div style="margin-top:12px;">${genkaBarHtml}</div>`:'<div class="empty-hint" style="margin-top:8px;">原価未入力</div>'}`;
+    return`
+    <div class="tab-nav-card status-${rateClass}">
+      <button class="tab-nav-card-header" onclick="toggleTabCard(this)">
+        <div class="tab-nav-card-left">
+          <span class="tab-nav-card-id">${p.案件番号}</span>
+          <div class="tab-nav-card-name">${p.工事名}</div>
+          <div class="tab-nav-card-sub">${p.法人名||p.代表者||'-'}</div>
         </div>
-      </div>
+        <div class="tab-nav-card-right">
+          ${rate!==null?`<div class="tab-nav-card-amount" style="color:${rc};">粗利率 ${rate}%</div>`:'<div class="tab-nav-card-amount" style="color:#999;font-size:13px;">未入力</div>'}
+          <svg class="tab-nav-card-chevron" width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,4 12,4 7,11"/></svg>
+        </div>
+      </button>
+      <div class="tab-nav-card-body">${bodyHtml}</div>
     </div>`;
   }).join('');
+}
+
+// ─ 他タブのカード展開 ─
+function toggleTabCard(btn){
+  const card=btn.closest('.tab-nav-card');
+  card.classList.toggle('open');
 }
 
 function toggleMeisai(id,btn){
