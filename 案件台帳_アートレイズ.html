@@ -31,7 +31,10 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 .tab-btn svg{width:18px;height:18px;}
 /* ★ 検索＋フィルタボタン：index.htmlの丸みと統一 */
 .filter-bar{background:var(--white);border:none;padding:10px 12px;display:flex;gap:8px;align-items:center;margin-bottom:14px;border-radius:14px;margin-top:14px;box-shadow:0 2px 8px rgba(30,45,64,0.07);}
-.filter-bar input[type="text"]{flex:1;min-width:0;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit;background:var(--light);}
+.search-input-wrap{flex:1;min-width:0;position:relative;display:flex;align-items:center;}
+.search-icon{position:absolute;left:12px;color:var(--text-sub);pointer-events:none;flex-shrink:0;}
+.filter-bar .search-input-wrap input[type="text"]{padding-left:38px;}
+.filter-bar input[type="text"]{flex:1;min-width:0;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit;background:var(--light);width:100%;}
 .filter-bar input[type="text"]:focus{outline:none;border-color:var(--accent);background:var(--white);}
 .filter-bar input[type="date"]{padding:8px 10px;border:1px solid var(--border);border-radius:10px;font-size:13px;font-family:inherit;cursor:pointer;background:var(--light);}
 .filter-label{font-size:11px;color:var(--text-sub);white-space:nowrap;}
@@ -249,7 +252,10 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 <!-- 案件ビュー -->
 <div id="view-anken">
   <div class="filter-bar">
-    <input type="text" id="anken-search" placeholder="🔍 案件・顧客・工事内容を検索" oninput="renderAnken()">
+    <div class="search-input-wrap">
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><line x1="13.5" y1="13.5" x2="17" y2="17"/></svg>
+      <input type="text" id="anken-search" placeholder="案件・顧客・工事内容を検索" oninput="renderAnken()">
+    </div>
     <button class="filter-toggle-btn" id="anken-filter-btn" onclick="openFilterSheet()" aria-label="絞り込み">
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
         <line x1="4" y1="7" x2="18" y2="7"/>
@@ -278,7 +284,10 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
     <div class="stat-item"><div class="stat-num" id="m-total-amt" style="color:#1a7a30;">-</div><div class="stat-label">見積総額</div></div>
   </div>
   <div class="filter-bar">
-    <input type="text" id="m-search" placeholder="🔍 案件番号・顧客名・工事内容..." oninput="renderMitsumori()">
+    <div class="search-input-wrap">
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><line x1="13.5" y1="13.5" x2="17" y2="17"/></svg>
+      <input type="text" id="m-search" placeholder="案件番号・顧客名・工事内容..." oninput="renderMitsumori()">
+    </div>
     <span class="filter-label">期間：</span>
     <input type="date" id="m-from" onchange="renderMitsumori()">
     <span class="filter-sep">〜</span>
@@ -296,7 +305,10 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
     <div class="stat-item"><div class="stat-num" id="r-minyukin-amt" style="color:#dc2626;">-</div><div class="stat-label">未入金合計</div></div>
   </div>
   <div class="filter-bar">
-    <input type="text" id="r-search" placeholder="🔍 案件番号・顧客名・請求番号..." oninput="renderSeikyu()">
+    <div class="search-input-wrap">
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><line x1="13.5" y1="13.5" x2="17" y2="17"/></svg>
+      <input type="text" id="r-search" placeholder="案件番号・顧客名・請求番号..." oninput="renderSeikyu()">
+    </div>
     <span class="filter-label">請求日：</span>
     <input type="date" id="r-from" onchange="renderSeikyu()">
     <span class="filter-sep">〜</span>
@@ -315,7 +327,10 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
     <div class="stat-item"><div class="stat-num" id="c-total-amt" style="color:#1a7a30;">-</div><div class="stat-label">注文総額</div></div>
   </div>
   <div class="filter-bar">
-    <input type="text" id="c-search" placeholder="🔍 案件番号・業者名・工事内容..." oninput="renderChumon()">
+    <div class="search-input-wrap">
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><line x1="13.5" y1="13.5" x2="17" y2="17"/></svg>
+      <input type="text" id="c-search" placeholder="案件番号・業者名・工事内容..." oninput="renderChumon()">
+    </div>
     <span class="filter-label">注文日：</span>
     <input type="date" id="c-from" onchange="renderChumon()">
     <span class="filter-sep">〜</span>
@@ -332,7 +347,10 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
     <div class="stat-item"><div class="stat-num" id="k-pending" style="color:#d97706;">-</div><div class="stat-label">未締結</div></div>
   </div>
   <div class="filter-bar">
-    <input type="text" id="k-search" placeholder="🔍 案件番号・顧客名・工事名..." oninput="renderKeiyaku()">
+    <div class="search-input-wrap">
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><line x1="13.5" y1="13.5" x2="17" y2="17"/></svg>
+      <input type="text" id="k-search" placeholder="案件番号・顧客名・工事名..." oninput="renderKeiyaku()">
+    </div>
     <span class="filter-label">契約日：</span>
     <input type="date" id="k-from" onchange="renderKeiyaku()">
     <span class="filter-sep">〜</span>
@@ -353,7 +371,10 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
     <div class="stat-item"><div class="stat-num" id="g-avg-rate" style="color:#0e6b9a;">-</div><div class="stat-label">平均粗利率</div></div>
   </div>
   <div class="filter-bar">
-    <input type="text" id="g-search" placeholder="🔍 案件番号・顧客名・工事内容..." oninput="renderGenka()">
+    <div class="search-input-wrap">
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><line x1="13.5" y1="13.5" x2="17" y2="17"/></svg>
+      <input type="text" id="g-search" placeholder="案件番号・顧客名・工事内容..." oninput="renderGenka()">
+    </div>
   </div>
   <div id="genka-area"></div>
 </div>
