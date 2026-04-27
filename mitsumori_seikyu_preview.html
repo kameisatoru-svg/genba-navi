@@ -509,17 +509,7 @@ function switchDocType(type){
     bikou.dataset.auto = '1';
   }
 
-  // 支払期限のデフォルト（請求書時・未設定なら発行日から月末）
-  const shiharai = document.getElementById('shiharaiDate');
-  if(type==='seikyu' && !shiharai.value){
-    const h = document.getElementById('hakkoDate').value;
-    if(h){
-      const d = new Date(h);
-      // 翌月末
-      const end = new Date(d.getFullYear(), d.getMonth()+2, 0);
-      shiharai.value = end.toISOString().slice(0,10);
-    }
-  }
+  // 支払期限：自動デフォルトはセットしない（空欄ならお支払期限行は非表示）
 
   render();
 }
@@ -614,7 +604,7 @@ function renderFlatRows(){
       <td><input class="r" type="number" value="${it.qty}" oninput="flatItems[${i}].qty=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
       <td><input value="${it.unit}" oninput="flatItems[${i}].unit=this.value;render()" style="max-width:34px" onkeydown="enterNav(event)"></td>
       <td><input class="r" type="number" value="${it.price}" oninput="flatItems[${i}].price=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
-      <td><input class="r amt-cell" readonly value="${fmtN((parseFloat(it.qty)||0)*(parseFloat(it.price)||0))}" style="color:var(--sub)"></td>
+      <td><input class="r amt-cell" readonly value="${(parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):''}" style="color:var(--sub)"></td>
       <td><input value="${it.note}" oninput="flatItems[${i}].note=this.value;render()" onkeydown="enterNav(event)"></td>
       <td style="white-space:nowrap;padding:2px 2px;">
         <button class="pb-btn${it.pageBreak?' on':''}" title="この行の前で改ページ" onclick="flatTogglePageBreak(${i})">改頁</button>
@@ -671,7 +661,7 @@ function updateAmt(inputEl){
   const qty=parseFloat(inputs[0].value)||0;
   const price=parseFloat(inputs[1].value)||0;
   const amtCell=tr.querySelector('.amt-cell');
-  if(amtCell) amtCell.value=Math.round(qty*price).toLocaleString();
+  if(amtCell) amtCell.value=(qty&&price)?Math.round(qty*price).toLocaleString():'';
 }
 
 // Enterキーで同行の次input→行末なら次行の品名にフォーカス移動
@@ -724,7 +714,7 @@ function renderGroupSummaryRows(){
       <td><input class="r" type="number" value="${it.qty}" oninput="groupSummaryItems[${i}].qty=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
       <td><input value="${it.unit}" oninput="groupSummaryItems[${i}].unit=this.value;render()" style="max-width:34px" onkeydown="enterNav(event)"></td>
       <td><input class="r" type="number" value="${it.price}" oninput="groupSummaryItems[${i}].price=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
-      <td><input class="r amt-cell" readonly value="${fmtN((parseFloat(it.qty)||0)*(parseFloat(it.price)||0))}" style="color:var(--sub)"></td>
+      <td><input class="r amt-cell" readonly value="${(parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):''}" style="color:var(--sub)"></td>
       <td><input value="${it.note}" oninput="groupSummaryItems[${i}].note=this.value;render()" onkeydown="enterNav(event)"></td>
       <td><button class="del-btn" onclick="groupSummaryDelRow(${i})">✕</button></td>`;
     body.appendChild(tr);
@@ -751,7 +741,7 @@ function renderGroupBlocks(){
         <td><input class="r" type="number" value="${it.qty||''}" oninput="groupItems[${gi}].items[${ii}].qty=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
         <td><input value="${it.unit||''}" oninput="groupItems[${gi}].items[${ii}].unit=this.value;render()" style="max-width:32px" onkeydown="enterNav(event)"></td>
         <td><input class="r" type="number" value="${it.price||''}" oninput="groupItems[${gi}].items[${ii}].price=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
-        <td><input class="r amt-cell" readonly value="${fmtN((parseFloat(it.qty)||0)*(parseFloat(it.price)||0))}" style="color:var(--sub)"></td>
+        <td><input class="r amt-cell" readonly value="${(parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):''}" style="color:var(--sub)"></td>
         <td><input value="${it.note}" oninput="groupItems[${gi}].items[${ii}].note=this.value;render()" onkeydown="enterNav(event)"></td>
         <td><button class="del-btn" onclick="groupDelItem(${gi},${ii})">✕</button></td>
       </tr>`;
@@ -907,10 +897,14 @@ function render(){
   } else if(mode==='flat'){
     const rows=flatItems.map((it,i)=>{
       const pbClass=i>0&&it.pageBreak?' class="pb-row-mark"':'';
+      const q=parseFloat(it.qty)||0;
+      const p=parseFloat(it.price)||0;
+      const priceCell=p?fmtN(p):'';
+      const amtCell=(q&&p)?fmtN(q*p):'';
       return `<tr${pbClass}>
         <td>${it.name}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
-        <td>${it.qty}</td><td>${it.unit}</td>
-        <td>${fmtN(it.price)}</td><td>${fmtN(it.qty*it.price)}</td>
+        <td>${it.qty===''||it.qty==null?'':it.qty}</td><td>${it.unit||''}</td>
+        <td>${priceCell}</td><td>${amtCell}</td>
       </tr>`;
     }).join('');
     tableHtml=`<table class="estimate-table" id="est-tbl">
