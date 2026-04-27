@@ -5,279 +5,1532 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>工事請負契約書台帳｜株式会社アート・レイズ</title>
 <style>
+:root{--navy:#1e2d40;--beige:#eeebe5;--gold:#c8a96e;--white:#fff;--bg:#eeebe5;--text:#333;--text2:#666;--border:#ddd;}
+.page-scroll{overflow:auto!important;height:auto!important;min-height:100dvh!important;}
+.nav-list{background:#fff;border-radius:16px;box-shadow:0 2px 8px rgba(30,45,64,0.07);overflow:hidden;margin-bottom:12px;}
+.nav-list-section{font-size:10px;color:#666;letter-spacing:0.08em;padding:10px 16px 4px;font-weight:700;}
+.nav-list-item{display:flex;align-items:center;gap:14px;min-height:60px;padding:13px 14px;width:100%;box-sizing:border-box;text-align:left;border:none;background:transparent;font-family:inherit;cursor:pointer;border-bottom:1px solid rgba(30,45,64,0.05);}
+.nav-list-item:last-child{border-bottom:none;}
+.nav-list-item:hover{background:#faf9f6;}
+.nav-list-item__icon{width:32px!important;height:32px!important;flex-shrink:0!important;flex-grow:0!important;color:#1e2d40;}
+.nav-list-item__body{flex:1;min-width:0;text-align:left;}
+.nav-list-item__title{font-size:14px;font-weight:700;color:#333;text-align:left;}
+.nav-list-item__desc{font-size:11px;color:#666;margin-top:1px;text-align:left;}
+.nav-list-item__arrow{font-size:14px;color:#666;opacity:0.5;flex-shrink:0;}
+.nav-list-item__value{font-size:13px;font-weight:700;color:#1e2d40;white-space:nowrap;flex-shrink:0;}
+</style>
+<style>
+/* ★ 現場ナビ系との配色統一（2026/4/23）：bg・card-header をnavy系に揃える
+   その他の変数（text/text-sub/green/red/orange/blue）は書類固有のまま維持 */
 :root {
-  --band: #1e2d40; --light: #f8f8f8; --border: #ddd; --border-dark: #aaa;
-  --text: #333; --text-sub: #666; --white: #fff; --accent: #2563eb;
-  --green: #16a34a; --orange: #d97706; --red: #dc2626;
+  --navy:#1e2d40; --accent:#c8a96e; --white:#fff;
+  --bg:#eeebe5; --border:#ddd; --border-dark:#aaa;
+  --text:#333; --text-sub:#666; --light:#f8f8f8;
+  --green:#16a34a; --red:#dc2626; --orange:#d97706; --blue:#2563eb;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: Meiryo,'Yu Gothic',sans-serif; background: #eee; color: var(--text); font-size: 14px; padding-bottom: 70px; }
-.container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--text);font-size:14px;padding-bottom:20px;
+  /* ★ common.cssの overflow:hidden と height:100dvh を解除してページ全体スクロールを有効化 */
+  height:auto;min-height:100dvh;overflow:auto;overflow-x:hidden;}
+.container{max-width:1100px;margin:0 auto;padding:0 16px 24px;}
+.page-header{background:var(--navy);color:var(--white);padding:14px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;}
+.page-header h1{font-size:17px;font-weight:700;letter-spacing:0.04em;display:flex;align-items:center;gap:8px;}
+.page-header .summary{font-size:14px;opacity:0.9;text-align:right;line-height:1.4;white-space:nowrap;}
+.page-header .summary .count{font-size:17px;font-weight:700;}
+.tab-nav{background:var(--navy);display:flex;border-bottom:2px solid var(--accent);overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.tab-nav::-webkit-scrollbar{display:none;}
+.tab-btn{padding:14px 22px;border:none;background:transparent;color:rgba(255,255,255,0.7);font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all 0.15s;min-height:52px;display:flex;align-items:center;gap:6px;}
+.tab-btn:hover{color:rgba(255,255,255,0.95);}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tab-btn svg{width:18px;height:18px;}
+/* ★ 検索＋フィルタボタン：index.htmlの丸みと統一 */
+.filter-bar{background:var(--white);border:none;padding:10px 12px;display:flex;gap:8px;align-items:center;margin-bottom:14px;border-radius:14px;margin-top:14px;box-shadow:0 2px 8px rgba(30,45,64,0.07);}
+.search-input-wrap{flex:1;min-width:0;position:relative;display:flex;align-items:center;}
+.search-icon{position:absolute;left:12px;color:var(--text-sub);pointer-events:none;flex-shrink:0;}
+.filter-bar .search-input-wrap input[type="text"]{padding-left:38px;}
+.filter-bar input[type="text"]{flex:1;min-width:0;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit;background:var(--light);width:100%;}
+.filter-bar input[type="text"]:focus{outline:none;border-color:var(--accent);background:var(--white);}
+.filter-bar input[type="date"]{padding:8px 10px;border:1px solid var(--border);border-radius:10px;font-size:13px;font-family:inherit;cursor:pointer;background:var(--light);}
+.filter-label{font-size:11px;color:var(--text-sub);white-space:nowrap;}
+.filter-sep{color:var(--border-dark);}
+/* フィルタボタン（右端のアイコン・タップでシート展開） */
+.filter-toggle-btn{
+  width:44px;height:44px;border:1px solid var(--border);border-radius:10px;
+  background:var(--white);color:var(--navy);cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;
+}
+.filter-toggle-btn:hover{background:var(--light);}
+.filter-toggle-btn.has-filter{background:var(--navy);color:var(--white);border-color:var(--navy);}
+.filter-toggle-btn .filter-dot{
+  position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;
+  background:var(--accent);display:none;
+}
+.filter-toggle-btn.has-filter .filter-dot{display:block;}
+/* フィルタシート（下から出るモーダル） */
+.filter-sheet{
+  position:fixed;bottom:0;left:0;right:0;background:var(--white);
+  border-radius:16px 16px 0 0;box-shadow:0 -4px 16px rgba(0,0,0,0.15);
+  z-index:200;padding:20px 20px 24px;transform:translateY(100%);
+  transition:transform 0.25s ease-out;
+}
+.filter-sheet.open{transform:translateY(0);}
+.filter-sheet-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:199;
+  opacity:0;pointer-events:none;transition:opacity 0.25s;
+}
+.filter-sheet-backdrop.open{opacity:1;pointer-events:auto;}
+.filter-sheet-title{font-size:13px;font-weight:700;color:var(--text-sub);margin-bottom:12px;letter-spacing:0.06em;}
+.filter-sheet-chips{display:flex;flex-wrap:wrap;gap:8px;}
+.filter-sheet-chip{
+  padding:10px 18px;border:1px solid var(--border);border-radius:24px;
+  background:var(--white);font-size:14px;font-weight:600;color:var(--text);
+  cursor:pointer;font-family:inherit;min-height:44px;
+}
+.filter-sheet-chip.active{background:var(--navy);color:var(--white);border-color:var(--navy);}
+.filter-sheet-close{
+  margin-top:16px;width:100%;padding:12px;background:var(--accent);color:var(--navy);
+  border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;
+  font-family:inherit;min-height:48px;
+}
+/* 旧ステータスチップ（filter-bar内）は非表示・シートに移行 */
+#anken-chips{display:none;}
+.chip{padding:4px 12px;border-radius:20px;border:1px solid var(--border-dark);background:var(--white);font-size:12px;cursor:pointer;font-family:inherit;transition:all 0.1s;white-space:nowrap;}
+.chip.active{background:var(--navy);color:var(--white);border-color:var(--navy);}
+/* ★ 統計バー非表示（サマリーはヘッダーに集約） */
+.stats-bar{display:none;}
+.stat-item{text-align:center;padding:12px 20px;border-right:1px solid var(--border);flex-shrink:0;}
+.stat-item:last-child{border-right:none;}
+.stat-num{font-size:20px;font-weight:700;color:var(--navy);}
+.stat-label{font-size:10px;color:var(--text-sub);margin-top:2px;}
+/* ★ C-3 改修（2026/4/23）：index.htmlの案件リストに見た目を寄せる
+   - 角丸14px（index.htmlのanken-list/kpi-cardと同じ）
+   - 枠線なし・影のみ（浮き感を出す）
+   - 左端バーは中の線でなくborder-leftで維持 */
+.card{background:var(--white);border:none;border-radius:14px;margin-bottom:10px;overflow:hidden;transition:box-shadow 0.15s;position:relative;box-shadow:0 2px 8px rgba(30,45,64,0.07);border-left:4px solid #d0d0cc;}
+.card:hover{box-shadow:0 4px 12px rgba(30,45,64,0.1);}
+/* 緊急度バー：ステータス別の左端色 */
+.card.status-施工中{border-left-color:#f39c12;}
+.card.status-見積作成中{border-left-color:#9b59b6;}
+.card.status-見積提出済み{border-left-color:#2563eb;}
+.card.status-見積提出予定{border-left-color:#d97706;}
+.card.status-完了・請求書作成待ち{border-left-color:#1a7a30;}
+.card.status-請求済み{border-left-color:#1a7a30;}
+.card.status-受注済{border-left-color:#1a7a30;}
+.card.status-入金済み{border-left-color:#9ca3af;}
+.card.status-完了{border-left-color:#9ca3af;opacity:0.75;}
+/* ヘッダー：白基調 */
+.card-header{background:var(--white);color:var(--text);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:nowrap;cursor:pointer;user-select:none;min-height:56px;}
+.card-header:hover{background:#faf9f6;}
+.card-header-left{display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex:1;min-width:0;}
+.card-id{background:var(--light);color:var(--text-sub);padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;flex-shrink:0;letter-spacing:0.02em;}
+.card-name{font-size:16px;font-weight:700;color:var(--navy);line-height:1.35;}
+.card-toggle{font-size:14px;opacity:0.4;color:var(--text-sub);transition:transform 0.2s;flex-shrink:0;}
+.card.open .card-toggle{transform:rotate(180deg);opacity:0.7;}
+.card.open{box-shadow:0 4px 16px rgba(30,45,64,0.12);}
+.card-body{display:none;padding:12px;background:#fbfaf8;}
+.card.open .card-body{display:block;}
+/* ★ C-4 改修（2026/4/23）：案件カード展開部分を nav-list 化 + 2階層折りたたみ */
+/* カード内の nav-list は背景透過・影なし（カードに埋め込まれるため） */
+/* ★ 2026/4/24 修正：PCでbuttonが横並びになる／SVGが巨大化する問題を防ぐため明示指定 */
+.card .nav-list{box-shadow:none;border-radius:10px;border:1px solid rgba(30,45,64,0.08);margin-bottom:0;display:block;}
+.card .nav-list-item{
+  min-height:60px;padding:13px 14px;cursor:pointer;
+  display:flex;
+  align-items:center;
+  width:100%;
+  box-sizing:border-box;
+  gap:14px;
+  text-align:left;
+}
+/* SVGアイコンは32x32固定・拡大させない */
+.card .nav-list-item__icon{
+  width:32px !important;
+  height:32px !important;
+  flex-shrink:0 !important;
+  flex-grow:0 !important;
+  color:var(--navy);
+}
+.card .nav-list-item__body{
+  flex:1;
+  min-width:0;
+  text-align:left;
+}
+.card .nav-list-item__title{font-size:15px;font-weight:700;color:var(--text);line-height:1.35;text-align:left;}
+.card .nav-list-item__desc{font-size:12px;color:var(--text-sub);margin-top:1px;line-height:1.4;text-align:left;}
+.card .nav-list-item__value{font-size:14px;font-weight:700;color:var(--navy);margin-right:4px;white-space:nowrap;flex-shrink:0;}
+.card .nav-list-item__arrow{font-size:14px;transition:transform 0.2s;color:var(--text-sub);opacity:0.5;flex-shrink:0;}
+.card .nav-list-item.nav-expand.open .nav-list-item__arrow{transform:rotate(90deg);opacity:0.9;}
+.card .nav-list-item.nav-expand.open{background:#f5f2ec;border-bottom:1px solid rgba(200,169,110,0.3);}
+.card .nav-list-item.nav-expand.open .nav-list-item__title{color:var(--navy);}
+/* 2階層目（展開エリア） */
+.nav-expand-body{
+  display:none;
+  padding:14px 16px 16px;
+  background:#fff;
+  border-bottom:1px solid rgba(30,45,64,0.06);
+  animation:navExpandFade 0.2s ease-out;
+  width:100%;
+  box-sizing:border-box;
+}
+.nav-list-item.nav-expand.open + .nav-expand-body{display:block;}
+@keyframes navExpandFade{from{opacity:0;}to{opacity:1;}}
+/* 展開が空な時の案内 */
+.empty-hint{font-size:13px;color:#999;padding:8px 0;}
+.badge{
+  padding:5px 0;border-radius:12px;font-size:11px;font-weight:700;
+  white-space:nowrap;flex-shrink:0;letter-spacing:0.02em;
+  width:82px;text-align:center;display:inline-block;
+}
+/* 優先度順：橙（今動いてる）→ 紫（作成中）→ 青（提出済み・相手待ち）→ 緑（請求・入金）→ グレー（完了） */
+.b-施工中{background:#f39c12;color:#fff;}
+.b-見積作成中{background:#9b59b6;color:#fff;}
+.b-見積提出済み{background:#2563eb;color:#fff;}
+.b-見積提出予定{background:#d97706;color:#fff;}
+.b-受注済{background:#1a7a30;color:#fff;}
+.b-請求済み{background:#1a7a30;color:#fff;}
+.b-入金済み{background:#e8ebef;color:#6b7280;}
+.b-完了{background:#e8ebef;color:#6b7280;}
+.b-完了請求待ち{background:#1a7a30;color:#fff;}
+.b-未入金{background:#dc2626;color:#fff;}
+.b-締結済み{background:#1a7a30;color:#fff;}
+.b-未締結{background:#d97706;color:#fff;}
+.b-default{background:#9ca3af;color:#fff;}
+.detail-section{border:1px solid var(--border);border-radius:4px;margin-bottom:12px;overflow:hidden;}
+.detail-section-header{background:var(--light);padding:8px 14px;display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700;color:var(--text-sub);border-bottom:1px solid var(--border);}
+.detail-section-body{padding:12px 14px;}
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px 20px;margin-bottom:12px;}
+.info-item{display:flex;flex-direction:column;gap:3px;}
+.info-label{font-size:12px;color:var(--text-sub);}
+.info-value{font-size:15px;font-weight:600;}
+.amount{color:var(--navy);font-size:16px;}
+.minyukin{color:var(--red);}
+.nyukin{color:var(--green);}
+/* ★ タスク2 (2026/4/24): sub-card を案件タブ.cardのデザインに寄せる
+   白基調・角丸10px（ネストなので控えめ）・影のみ・枠線なし */
+.sub-card{
+  background:var(--white);
+  border:none;
+  border-radius:10px;
+  padding:12px 14px;
+  margin-bottom:10px;
+  box-shadow:0 2px 8px rgba(30,45,64,0.07);
+  border-left:4px solid #d0d0cc;
+  transition:box-shadow 0.15s;
+}
+.sub-card:last-child{margin-bottom:0;}
+.sub-card:hover{box-shadow:0 4px 12px rgba(30,45,64,0.1);}
+/* 請求の入金状況で左端バー色を変える */
+.sub-card.status-入金済み{border-left-color:#9ca3af;opacity:0.85;}
+.sub-card.status-未入金{border-left-color:#dc2626;}
+.sub-card.status-請求済み{border-left-color:#1a7a30;}
+.sub-card.status-注文{border-left-color:#1a6fc4;}
+.sub-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;flex-wrap:wrap;}
+.sub-id{font-size:13px;font-weight:700;color:var(--blue);}
+.note-box{background:#fffbf0;border-left:3px solid #e8d9a0;padding:10px 14px;font-size:13px;color:var(--text-sub);border-radius:0 4px 4px 0;margin-top:10px;line-height:1.7;}
+.note-label{font-weight:700;color:#9a7a20;margin-bottom:3px;font-size:12px;}
+.pdf-tag{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:6px;font-size:13px;text-decoration:none;margin:4px 4px 0 0;}
+.pdf-tag.on{background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd;}
+.pdf-tag.on:hover{background:#0369a1;color:#fff;}
+.pdf-tag.off{background:#f3f4f6;color:#9ca3af;border:1px solid #e5e7eb;pointer-events:none;}
+.drive-tag{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:6px;font-size:13px;text-decoration:none;margin:4px 4px 0 0;background:#e6f4ea;color:#1a7a30;border:1px solid #a8d5b0;}
+.drive-tag:hover{background:#1a7a30;color:#fff;}
+.drive-tag.off{background:#f3f4f6;color:#9ca3af;border:1px solid #e5e7eb;pointer-events:none;}
+.tag-icon{width:14px;height:14px;flex-shrink:0;}
+.genka-bar{display:flex;height:10px;border-radius:5px;overflow:hidden;margin:10px 0;}
+.genka-bar-fill{transition:width 0.3s;}
+.genka-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;}
+.genka-dot{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:4px;}
+/* ★ タスク2 (2026/4/24): view-card を案件タブ.cardのデザインに寄せる
+   白基調・角丸14px・影のみ・枠線なし・左端状態色バー */
+.view-card{
+  background:var(--white);
+  border:none;
+  border-radius:14px;
+  margin-bottom:10px;
+  overflow:hidden;
+  transition:box-shadow 0.15s;
+  position:relative;
+  box-shadow:0 2px 8px rgba(30,45,64,0.07);
+  border-left:4px solid #d0d0cc;
+}
+.view-card:hover{box-shadow:0 4px 12px rgba(30,45,64,0.1);}
+/* ステータス別左端バー（案件タブと同じルール） */
+.view-card.status-施工中{border-left-color:#f39c12;}
+.view-card.status-見積作成中{border-left-color:#9b59b6;}
+.view-card.status-見積提出済み{border-left-color:#2563eb;}
+.view-card.status-見積提出予定{border-left-color:#d97706;}
+.view-card.status-請求済み{border-left-color:#1a7a30;}
+.view-card.status-受注済{border-left-color:#1a7a30;}
+.view-card.status-入金済み{border-left-color:#9ca3af;}
+.view-card.status-完了{border-left-color:#9ca3af;opacity:0.85;}
+.view-card.status-完了・請求書作成待ち{border-left-color:#1a7a30;}
+.view-card.status-未入金{border-left-color:#dc2626;}
+.view-card.status-締結済み{border-left-color:#1a7a30;}
+.view-card.status-未締結{border-left-color:#d97706;}
+.view-card.status-注文{border-left-color:#1a6fc4;}
+.view-card-header{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:var(--white);}
+.view-card-body{padding:12px 16px 14px;background:#fbfaf8;border-top:1px solid rgba(30,45,64,0.05);}
+.view-card-id{font-size:12px;font-weight:700;color:var(--blue);}
+.view-card-name{font-size:15px;font-weight:700;color:var(--navy);line-height:1.35;}
+.view-anken-ref{font-size:11px;color:var(--text-sub);background:var(--light);padding:2px 8px;border-radius:10px;}
+.meisai-toggle{
+  background:var(--light);border:1px solid var(--border);border-radius:6px;
+  padding:8px 14px;font-size:13px;cursor:pointer;font-family:inherit;
+  color:var(--text-sub);margin-top:10px;width:100%;text-align:left;
+  display:flex;align-items:center;gap:6px;
+}
+.meisai-toggle:hover{background:#e8e8e8;}
+.meisai-toggle__chevron{transition:transform 0.2s;flex-shrink:0;}
+.meisai-toggle.open .meisai-toggle__chevron{transform:rotate(90deg);}
+.meisai-wrap{display:none;margin-top:10px;}
+.meisai-wrap.open{display:block;}
+.meisai-table{width:100%;border-collapse:collapse;font-size:13px;border:1px solid var(--border);}
+.meisai-table th{background:var(--navy);color:#fff;padding:8px 10px;text-align:left;font-weight:600;}
+.meisai-table th.right,.meisai-table td.right{text-align:right;}
+.meisai-table td{padding:8px 10px;border-bottom:1px solid var(--border);}
+.meisai-table tr:nth-child(even) td{background:#f5f5f5;}
+.meisai-table tr:last-child td{border-bottom:none;}
+.totals-table{width:280px;margin-left:auto;border-collapse:collapse;font-size:13px;border:1px solid var(--border);margin-top:6px;}
+.totals-table td{padding:7px 12px;border-bottom:1px solid var(--border);}
+.totals-table td:last-child{text-align:right;}
+.totals-table tr:last-child td{background:var(--navy);color:#fff;font-weight:700;border-bottom:none;}
+/* ── 他タブ共通 nav-card デザイン（2026/4/24） ──
+   案件タブの .card と同じ構造・見た目を共有 */
+.tab-nav-card{
+  background:var(--white);border:none;border-radius:14px;margin-bottom:10px;
+  overflow:hidden;transition:box-shadow 0.15s;position:relative;
+  box-shadow:0 2px 8px rgba(30,45,64,0.07);border-left:4px solid #d0d0cc;
+}
+.tab-nav-card:hover{box-shadow:0 4px 12px rgba(30,45,64,0.1);}
+/* ステータス別左端バー */
+.tab-nav-card.status-施工中{border-left-color:#f39c12;}
+.tab-nav-card.status-見積作成中{border-left-color:#9b59b6;}
+.tab-nav-card.status-見積提出済み{border-left-color:#2563eb;}
+.tab-nav-card.status-見積提出予定{border-left-color:#d97706;}
+.tab-nav-card.status-請求済み,.tab-nav-card.status-受注済{border-left-color:#1a7a30;}
+.tab-nav-card.status-入金済み,.tab-nav-card.status-完了{border-left-color:#9ca3af;opacity:0.85;}
+.tab-nav-card.status-完了・請求書作成待ち{border-left-color:#1a7a30;}
+.tab-nav-card.status-未入金{border-left-color:#dc2626;}
+.tab-nav-card.status-締結済み{border-left-color:#1a7a30;}
+.tab-nav-card.status-未締結{border-left-color:#d97706;}
+.tab-nav-card.status-注文{border-left-color:#1a6fc4;}
+/* 粗利率連動（原価タブ用） */
+.tab-nav-card.status-受注済{border-left-color:#1a7a30;}
+.tab-nav-card.status-default{border-left-color:#d0d0cc;}
+/* ヘッダーボタン */
+.tab-nav-card-header{
+  width:100%;background:var(--white);border:none;padding:14px 16px;
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  cursor:pointer;font-family:inherit;text-align:left;min-height:60px;
+}
+.tab-nav-card-header:hover{background:#faf9f6;}
+.tab-nav-card-left{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+.tab-nav-card-id{font-size:11px;font-weight:700;color:var(--text-sub);background:var(--light);padding:2px 8px;border-radius:10px;align-self:flex-start;}
+.tab-nav-card-name{font-size:15px;font-weight:700;color:var(--navy);line-height:1.35;}
+.tab-nav-card-sub{font-size:12px;color:var(--text-sub);}
+.tab-nav-card-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+.tab-nav-card-amount{font-size:16px;font-weight:700;color:var(--navy);white-space:nowrap;}
+.tab-nav-card-chevron{color:var(--text-sub);opacity:0.4;transition:transform 0.2s;flex-shrink:0;}
+.tab-nav-card.open .tab-nav-card-chevron{transform:rotate(180deg);opacity:0.7;}
+/* 展開ボディ */
+.tab-nav-card-body{
+  display:none;padding:14px 16px 16px;
+  background:#fbfaf8;border-top:1px solid rgba(30,45,64,0.05);
+}
+.tab-nav-card.open .tab-nav-card-body{display:block;}
+/* 1行1情報レイアウト */
+.tab-detail-row{
+  display:flex;align-items:baseline;gap:10px;
+  padding:6px 0;border-bottom:1px solid rgba(30,45,64,0.05);
+}
+.tab-detail-row:last-of-type{border-bottom:none;}
+.tab-detail-label{font-size:12px;color:var(--text-sub);flex-shrink:0;min-width:72px;}
+.tab-detail-value{font-size:14px;font-weight:600;color:var(--text);}
 
-.page-header {
-  background: var(--band); color: var(--white);
-  padding: 18px 24px; border-radius: 6px 6px 0 0;
-  display: flex; justify-content: space-between; align-items: center;
+.empty{background:var(--white);border:2px dashed var(--border-dark);border-radius:6px;padding:20px;text-align:center;color:var(--text-sub);font-size:13px;margin-bottom:12px;}
+/* ── アプリ内編集パネル ── */
+.card-actions{
+  display:flex;gap:8px;padding:0 12px 12px;
 }
-.page-header h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.05em; }
-.page-header .meta { font-size: 12px; opacity: 0.8; text-align: right; }
-
-.stats-bar {
-  background: var(--white); border: 1px solid var(--border); border-top: none;
-  padding: 14px 24px; display: flex; gap: 32px; flex-wrap: wrap;
+.edit-toggle-btn{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:11px;border:1.5px solid var(--accent);border-radius:10px;
+  background:#fffbf3;color:var(--navy);font-size:13px;font-weight:700;
+  cursor:pointer;font-family:inherit;min-height:48px;transition:background 0.15s;
 }
-.stat-item { text-align: center; }
-.stat-num { font-size: 22px; font-weight: 700; color: var(--band); }
-.stat-label { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
-
-.search-bar {
-  background: var(--white); border: 1px solid var(--border); border-top: none;
-  padding: 12px 24px; border-radius: 0 0 6px 6px; margin-bottom: 20px;
-  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+.edit-toggle-btn:hover{background:#f5ecd0;}
+.sheets-edit-btn-small{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:11px;border:1px solid rgba(30,45,64,0.15);border-radius:10px;
+  background:#f0f4f8;color:var(--navy);font-size:13px;font-weight:600;
+  cursor:pointer;font-family:inherit;min-height:48px;transition:background 0.15s;
 }
-.search-bar input {
-  flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid var(--border-dark);
-  border-radius: 4px; font-size: 14px; font-family: inherit;
+.sheets-edit-btn-small:hover{background:#dce6f0;}
+.edit-panel{
+  display:none;margin:0 12px 12px;padding:16px;
+  background:#fffbf3;border:1.5px solid var(--accent);border-radius:12px;
 }
-.search-bar input:focus { outline: none; border-color: var(--accent); }
-
-.contract-card {
-  background: var(--white); border: 1px solid var(--border);
-  border-radius: 6px; margin-bottom: 14px; overflow: hidden;
+.edit-panel.open{display:block;}
+.edit-panel-title{font-size:12px;font-weight:700;color:var(--navy);letter-spacing:0.06em;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.edit-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.edit-label{font-size:12px;color:var(--text-sub);flex-shrink:0;min-width:80px;}
+.edit-select{
+  flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:8px;
+  font-size:14px;font-family:inherit;background:var(--white);color:var(--text);
+  min-height:44px;
 }
-.card-header {
-  background: var(--band); color: var(--white);
-  padding: 10px 16px; display: flex; justify-content: space-between;
-  align-items: center; gap: 12px; flex-wrap: wrap;
+.edit-actions{display:flex;gap:8px;margin-top:14px;}
+.edit-save-btn{
+  flex:1;padding:12px;background:var(--navy);color:var(--white);
+  border:none;border-radius:8px;font-size:14px;font-weight:700;
+  cursor:pointer;font-family:inherit;min-height:48px;
+  display:flex;align-items:center;justify-content:center;gap:6px;
 }
-.card-header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.contract-id {
-  background: rgba(255,255,255,0.2); padding: 2px 10px;
-  border-radius: 12px; font-size: 12px; font-weight: 700;
+.edit-save-btn:hover{background:#2a3f5a;}
+.edit-cancel-btn{
+  padding:12px 16px;background:var(--light);color:var(--text-sub);
+  border:1px solid var(--border);border-radius:8px;font-size:14px;
+  cursor:pointer;font-family:inherit;min-height:48px;
 }
-.contract-name { font-size: 15px; font-weight: 700; }
-.badge {
-  padding: 3px 12px; border-radius: 12px; font-size: 12px; font-weight: 700;
+.edit-status{font-size:13px;margin-top:10px;text-align:center;min-height:20px;}
+.edit-status.saving{color:var(--text-sub);}
+.edit-status.success{color:#1a7a30;font-weight:700;}
+.edit-status.error{color:var(--red);}
+/* PAT モーダル */
+#pat-modal{
+  display:none;position:fixed;inset:0;z-index:300;
+  align-items:center;justify-content:center;
 }
-.badge-signed   { background: #1a7a30; color: #fff; }
-.badge-pending  { background: #d97706; color: #fff; }
-.badge-unsigned { background: #6b7280; color: #fff; }
-
-.card-body { padding: 16px 20px; }
-.info-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 12px 24px; margin-bottom: 14px;
+.pat-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.4);}
+.pat-modal-box{
+  position:relative;background:var(--white);border-radius:16px;
+  padding:24px;margin:20px;max-width:400px;width:100%;
+  box-shadow:0 8px 32px rgba(0,0,0,0.2);
 }
-.info-item { display: flex; flex-direction: column; gap: 2px; }
-.info-label { font-size: 11px; color: var(--text-sub); }
-.info-value { font-size: 13px; font-weight: 600; }
-.amount-value { color: var(--band); font-size: 15px; }
-
-.note-box {
-  background: #fafafa; border-left: 3px solid #d1d5db;
-  padding: 10px 14px; font-size: 12px; color: var(--text-sub);
-  border-radius: 0 4px 4px 0; margin-top: 12px; line-height: 1.7;
+.pat-modal-title{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:8px;}
+.pat-modal-desc{font-size:12px;color:var(--text-sub);margin-bottom:16px;line-height:1.6;}
+.pat-input{
+  width:100%;padding:12px;border:1px solid var(--border);border-radius:8px;
+  font-size:14px;font-family:inherit;margin-bottom:14px;
 }
-.note-label { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 11px; }
-
-.doc-tag {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 4px 10px; border-radius: 4px; font-size: 12px;
-  text-decoration: none; margin: 4px 4px 0 0;
+.pat-modal-actions{display:flex;gap:8px;}
+/* Sheetsで編集ボタン */
+.sheets-edit-btn{
+  display:flex;align-items:center;gap:8px;
+  width:calc(100% - 24px);margin:0 12px 12px;
+  padding:12px 16px;border:1px solid rgba(30,45,64,0.15);border-radius:10px;
+  background:#f0f4f8;color:var(--navy);font-size:13px;font-weight:600;
+  cursor:pointer;font-family:inherit;min-height:48px;
+  transition:background 0.15s;
 }
-.doc-tag.available { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
-.doc-tag.unavailable { background: #f3f4f6; color: #9ca3af; border: 1px solid #e5e7eb; }
-
-.add-row {
-  background: var(--white); border: 2px dashed var(--border-dark);
-  border-radius: 6px; padding: 16px; text-align: center;
-  color: var(--text-sub); font-size: 13px; margin-bottom: 20px;
+.sheets-edit-btn:hover{background:#dce6f0;}
+.sheets-edit-btn svg{flex-shrink:0;color:var(--navy);}
+/* トースト */
+#sheets-toast{
+  position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(16px);
+  background:var(--navy);color:#fff;padding:12px 20px;border-radius:10px;
+  font-size:13px;line-height:1.6;white-space:pre;text-align:center;
+  opacity:0;pointer-events:none;transition:all 0.25s;z-index:500;
+  box-shadow:0 4px 16px rgba(0,0,0,0.2);
 }
-.page-footer {
-  text-align: center; font-size: 11px; color: var(--text-sub);
-  padding: 12px 0; border-top: 1px solid var(--border); margin-top: 8px;
+#sheets-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.loading{text-align:center;padding:40px;color:var(--text-sub);font-size:13px;}
+@media(max-width:600px){
+  .info-grid{grid-template-columns:1fr 1fr;}
+  .tab-btn{padding:13px 16px;font-size:14px;}
+  .tab-btn svg{width:16px;height:16px;}
+  .page-header{padding:12px 14px;}
+  .page-header h1{font-size:16px;}
+  .page-header .summary{font-size:11px;}
+  .page-header .summary .count{font-size:13px;}
+  .card-name{font-size:15px;}
+  .filter-bar{padding:8px 10px;gap:6px;}
+  .filter-bar input[type="text"]{font-size:15px;padding:10px;}
 }
-
-/* ★ 共通ナビバー */
-.bottom-nav {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-  background: #333; display: flex; border-top: 2px solid #c8a96e;
-}
-.bottom-nav a {
-  flex: 1; display: flex; flex-direction: column; align-items: center;
-  justify-content: center; padding: 8px 4px; color: #ccc;
-  text-decoration: none; font-size: 11px; gap: 2px; transition: background 0.15s;
-}
-.bottom-nav a:hover { background: #444; }
-.bottom-nav a.active { color: #c8a96e; border-top: 2px solid #c8a96e; margin-top: -2px; }
-.bottom-nav a .nav-icon { font-size: 18px; }
 </style>
 </head>
 <body>
+<div class="page-header">
+  <h1><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="9" y1="15.5" x2="11" y2="15.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>工事請負契約書台帳</h1>
+  <div class="summary" id="headerSummary">-</div>
+</div>
+<div class="tab-nav">
+  <button class="tab-btn" onclick="switchTab('anken')">
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="vertical-align:-3px;margin-right:4px;"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="10" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>案件
+  </button>
+  <button class="tab-btn" onclick="switchTab('mitsumori')">
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="vertical-align:-3px;margin-right:4px;"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="7" x2="6" y2="16" stroke="currentColor" stroke-width="0.8" opacity="0.4"/></svg>見積
+  </button>
+  <button class="tab-btn" onclick="switchTab('seikyu')">
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="vertical-align:-3px;margin-right:4px;"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="10" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="13" cy="13" r="2" fill="currentColor" opacity="0.5"/></svg>請求
+  </button>
+  <button class="tab-btn" onclick="switchTab('chumon')">
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="vertical-align:-3px;margin-right:4px;"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="11" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M13 15 L14 14 L16 16 L13 17 Z" fill="currentColor" opacity="0.6"/></svg>注文書
+  </button>
+  <button class="tab-btn active" onclick="switchTab('keiyaku')">
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="vertical-align:-3px;margin-right:4px;"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="9" y1="15.5" x2="11" y2="15.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>契約書
+  </button>
+  <button class="tab-btn" onclick="switchTab('genka')">
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="vertical-align:-3px;margin-right:4px;"><rect x="2" y="3" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="2" y1="8" x2="18" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3"/><line x1="7" y1="3" x2="7" y2="17" stroke="currentColor" stroke-width="1" opacity="0.3"/><line x1="13" y1="3" x2="13" y2="17" stroke="currentColor" stroke-width="1" opacity="0.3"/><rect x="8" y="10" width="4" height="4" rx="0.5" fill="currentColor" opacity="0.5"/></svg>原価
+  </button>
+</div>
 <div class="container">
 
-  <div class="page-header">
-    <h1>📜 工事請負契約書台帳</h1>
-    <div class="meta">株式会社アート・レイズ<br><span id="lastUpdated">-</span></div>
-  </div>
-
-  <div class="stats-bar">
-    <div class="stat-item"><div class="stat-num" id="totalCount">-</div><div class="stat-label">総契約件数</div></div>
-    <div class="stat-item"><div class="stat-num" id="signedCount" style="color:#1a7a30;">-</div><div class="stat-label">締結済み</div></div>
-    <div class="stat-item"><div class="stat-num" id="pendingCount" style="color:#d97706;">-</div><div class="stat-label">未締結</div></div>
-    <div class="stat-item" style="margin-left:auto;text-align:right;">
-      <div style="font-size:12px;font-weight:600;" id="sourceBadge">読込中...</div>
-      <div class="stat-label">データソース</div>
+<!-- 案件ビュー -->
+<div id="view-anken" style="display:none;">
+  <div class="filter-bar">
+    <div class="search-input-wrap">
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><line x1="13.5" y1="13.5" x2="17" y2="17"/></svg>
+      <input type="text" id="anken-search" placeholder="案件・顧客・工事内容を検索" oninput="renderAnken()">
     </div>
+    <button class="filter-toggle-btn" id="anken-filter-btn" onclick="openFilterSheet()" aria-label="絞り込み">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <line x1="4" y1="7" x2="18" y2="7"/>
+        <line x1="7" y1="11" x2="15" y2="11"/>
+        <line x1="9" y1="15" x2="13" y2="15"/>
+      </svg>
+      <span class="filter-dot"></span>
+    </button>
+    <button class="chip" id="anken-done-toggle" onclick="toggleAnkenDone()">完了済みも表示</button>
+    <div id="anken-chips"></div>
   </div>
-
-  <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="🔍 契約番号・顧客名・工事名で絞り込み..." oninput="renderCards()">
-  </div>
-
-  <div id="cardsArea"></div>
-  <div class="add-row" id="addRow">＋ Claudeに依頼してJSONで契約書を追加</div>
-
-  <div class="page-footer">
-    株式会社アート・レイズ｜大分県別府市上原町13番25号｜TEL 0977-21-0603
-  </div>
+  <div id="anken-area"><div class="loading">データを読み込んでいます...</div></div>
 </div>
 
-<!-- ★ 共通ナビバー -->
-<nav class="bottom-nav">
-  <a href="案件台帳_アートレイズ.html"><span class="nav-icon">📋</span>案件台帳</a>
-  <a href="見積台帳_アートレイズ.html"><span class="nav-icon">📄</span>見積台帳</a>
-  <a href="請求台帳_アートレイズ.html"><span class="nav-icon">🧾</span>請求台帳</a>
-  <a href="原価管理台帳_アートレイズ.html"><span class="nav-icon">📊</span>工事台帳</a>
-</nav>
+<!-- フィルタシート（下からスライドアップ） -->
+<div class="filter-sheet-backdrop" id="filterBackdrop" onclick="closeFilterSheet()"></div>
+<div class="filter-sheet" id="filterSheet">
+  <div class="filter-sheet-title">ステータスで絞り込み</div>
+  <div class="filter-sheet-chips" id="filter-sheet-chips"></div>
+  <button class="filter-sheet-close" onclick="closeFilterSheet()">閉じる</button>
+</div>
 
+<!-- 見積ビュー -->
+<div id="view-mitsumori" style="display:none;">
+  <div class="stats-bar">
+    <div class="stat-item"><div class="stat-num" id="m-total">-</div><div class="stat-label">総見積件数</div></div>
+    <div class="stat-item"><div class="stat-num" id="m-total-amt" style="color:#1a7a30;">-</div><div class="stat-label">見積総額</div></div>
+  </div>
+  <div class="filter-bar">
+    <div class="search-input-wrap">
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><line x1="13.5" y1="13.5" x2="17" y2="17"/></svg>
+      <input type="text" id="m-search" placeholder="案件番号・顧客名・工事内容..." oninput="renderMitsumori()">
+    </div>
+    <span class="filter-label">期間：</span>
+    <input type="date" id="m-from" onchange="renderMitsumori()">
+    <span class="filter-sep">〜</span>
+    <input type="date" id="m-to" onchange="renderMitsumori()">
+    <button class="chip" id="m-all-toggle" onclick="mitsumoriHideActive=!mitsumoriHideActive;renderMitsumori()">すべて表示</button>
+  </div>
+  <div id="mitsumori-area"></div>
+</div>
+
+<!-- 請求ビュー -->
+<div id="view-seikyu" style="display:none;">
+  <div class="stats-bar">
+    <div class="stat-item"><div class="stat-num" id="r-total">-</div><div class="stat-label">総請求件数</div></div>
+    <div class="stat-item"><div class="stat-num" id="r-minyukin" style="color:#dc2626;">-</div><div class="stat-label">未入金</div></div>
+    <div class="stat-item"><div class="stat-num" id="r-nyukin" style="color:#16a34a;">-</div><div class="stat-label">入金済み</div></div>
+    <div class="stat-item"><div class="stat-num" id="r-minyukin-amt" style="color:#dc2626;">-</div><div class="stat-label">未入金合計</div></div>
+  </div>
+  <div class="filter-bar">
+    <div class="search-input-wrap">
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><line x1="13.5" y1="13.5" x2="17" y2="17"/></svg>
+      <input type="text" id="r-search" placeholder="案件番号・顧客名・請求番号..." oninput="renderSeikyu()">
+    </div>
+    <span class="filter-label">請求日：</span>
+    <input type="date" id="r-from" onchange="renderSeikyu()">
+    <span class="filter-sep">〜</span>
+    <input type="date" id="r-to" onchange="renderSeikyu()">
+    <button class="chip" id="r-chip-all" onclick="setSeikyuFilter('all')">すべて</button>
+    <button class="chip active" id="r-chip-minyukin" onclick="setSeikyuFilter('minyukin')">未入金</button>
+    <button class="chip" id="r-chip-nyukin" onclick="setSeikyuFilter('nyukin')">入金済み</button>
+  </div>
+  <div id="seikyu-area"></div>
+</div>
+
+<!-- 注文書ビュー -->
+<div id="view-chumon" style="display:none;">
+  <div class="stats-bar">
+    <div class="stat-item"><div class="stat-num" id="c-total">-</div><div class="stat-label">総注文件数</div></div>
+    <div class="stat-item"><div class="stat-num" id="c-total-amt" style="color:#1a7a30;">-</div><div class="stat-label">注文総額</div></div>
+  </div>
+  <div class="filter-bar">
+    <div class="search-input-wrap">
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><line x1="13.5" y1="13.5" x2="17" y2="17"/></svg>
+      <input type="text" id="c-search" placeholder="案件番号・業者名・工事内容..." oninput="renderChumon()">
+    </div>
+    <span class="filter-label">注文日：</span>
+    <input type="date" id="c-from" onchange="renderChumon()">
+    <span class="filter-sep">〜</span>
+    <input type="date" id="c-to" onchange="renderChumon()">
+  </div>
+  <div id="chumon-area"></div>
+</div>
+
+<!-- 契約書ビュー -->
+<div id="view-keiyaku">
+  <div class="stats-bar">
+    <div class="stat-item"><div class="stat-num" id="k-total">-</div><div class="stat-label">総契約件数</div></div>
+    <div class="stat-item"><div class="stat-num" id="k-signed" style="color:#1a7a30;">-</div><div class="stat-label">締結済み</div></div>
+    <div class="stat-item"><div class="stat-num" id="k-pending" style="color:#d97706;">-</div><div class="stat-label">未締結</div></div>
+  </div>
+  <div class="filter-bar">
+    <div class="search-input-wrap">
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><line x1="13.5" y1="13.5" x2="17" y2="17"/></svg>
+      <input type="text" id="k-search" placeholder="案件番号・顧客名・工事名..." oninput="renderKeiyaku()">
+    </div>
+    <span class="filter-label">契約日：</span>
+    <input type="date" id="k-from" onchange="renderKeiyaku()">
+    <span class="filter-sep">〜</span>
+    <input type="date" id="k-to" onchange="renderKeiyaku()">
+    <button class="chip active" id="k-chip-all" onclick="setKeiyakuFilter('all')">すべて</button>
+    <button class="chip" id="k-chip-signed" onclick="setKeiyakuFilter('signed')">締結済み</button>
+    <button class="chip" id="k-chip-pending" onclick="setKeiyakuFilter('pending')">未締結</button>
+  </div>
+  <div id="keiyaku-area"></div>
+</div>
+
+<!-- 原価ビュー -->
+<div id="view-genka" style="display:none;">
+  <div class="stats-bar">
+    <div class="stat-item"><div class="stat-num" id="g-total">-</div><div class="stat-label">集計案件数</div></div>
+    <div class="stat-item"><div class="stat-num" id="g-total-genka" style="color:#dc2626;">-</div><div class="stat-label">原価合計</div></div>
+    <div class="stat-item"><div class="stat-num" id="g-total-uri" style="color:#1a7a30;">-</div><div class="stat-label">売上合計</div></div>
+    <div class="stat-item"><div class="stat-num" id="g-avg-rate" style="color:#0e6b9a;">-</div><div class="stat-label">平均粗利率</div></div>
+  </div>
+  <div class="filter-bar">
+    <div class="search-input-wrap">
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><line x1="13.5" y1="13.5" x2="17" y2="17"/></svg>
+      <input type="text" id="g-search" placeholder="案件番号・顧客名・工事内容..." oninput="renderGenka()">
+    </div>
+  </div>
+  <div id="genka-area"></div>
+</div>
+
+</div>
 <script>
-const BASE_URL = 'https://kameisatoru-svg.github.io/genba-navi/';
-const DATA_JSON_URL = BASE_URL + 'data.json';
-const STORAGE_KEY = 'artrise_keiyaku_v1';
+const BASE_URL='https://kameisatoru-svg.github.io/genba-navi/';
+const DATA_URL=BASE_URL+'data.json';
+const LS_KEY='artrise_allinone_v2';
+const LS_KEY_MASTERS='artrise_masters_v1';
+let ALL_DATA=[];
+let CUSTOMERS={};  // 顧客マスター（顧客略 → 詳細）
+let VENDORS={};    // 業者マスター（業者略 → 詳細）
+let currentTab='keiyaku';
+let seikyuFilter='minyukin'; // デフォルト：未入金のみ
+let keiyakuFilter='all';
+let ankenStatusFilter='all';
+// 完了除外フラグ（デフォルトON = 完了を隠す）
+const ANKEN_DONE_STATUS=['入金済み','完了'];
+const MITSUMORI_HIDE_STATUS=['施工中','受注済','請求済み','入金済み','完了','完了・請求書作成待ち'];
+const STATUS_ORDER=['見積作成中','見積提出済み','受注済','施工中','完了・請求書作成待ち','請求済み','入金済み','完了'];
+let ankenHideDone=true;
+let mitsumoriHideActive=true;
 
-// ─── データ読み込み ──────────────────────────────────
-async function loadDataAsync() {
-  try {
-    const res = await fetch(DATA_JSON_URL + '?v=' + Date.now());
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const json = await res.json();
-    const data = json.契約書 || [];
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    setSourceBadge('fetch', json.最終更新 || '');
-    return data;
-  } catch(e) {
-    setSourceBadge('local', '');
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-    catch(e2) { return []; }
+// ═══════════════════════════════════════════════════════════
+// 新旧両対応ヘルパー群（2026-04-27 案件キー方式統合）
+// ═══════════════════════════════════════════════════════════
+// 案件キー優先で取得（新ルール → 旧ルールフォールバック）
+const ankenKey = p => p.案件キー || p.案件番号 || '-';
+const oldAnken = p => p.旧案件番号 || (p.案件番号 && p.案件キー ? p.案件番号 : '');
+const kojiName = p => p.正式工事名 || p.工事名 || '-';
+const customerName = p => (CUSTOMERS[p.顧客略]?.正式名称) || p.法人名 || p.代表者 || '-';
+const customerRep = p => (CUSTOMERS[p.顧客略]?.代表者) || p.代表者 || '-';
+const vendorName = c => (VENDORS[c.業者略]?.正式名称) || c.業者名 || '-';
+// 配列保証（旧構造の単一オブジェクトもラップ）
+const asArray = v => Array.isArray(v) ? v : (v && typeof v === 'object' && Object.keys(v).length ? [v] : []);
+const getMitsumoriList = p => asArray(p.見積);
+const getSeikyuList = p => asArray(p.請求);
+const getChumonList = p => asArray(p.注文書).filter(c => c.業者名 || c.業者略 || c.書類番号 || c.注文番号);
+const getKeiyakuList = p => asArray(p.契約書);
+
+// 各種フィールド名の新旧対応
+const docNo = m => m.書類番号 || m.見積番号 || m.請求番号 || m.注文番号 || m.契約番号 || '';
+const docDate = m => m.発行日 || m.見積日 || m.請求日 || m.注文日 || m.契約日 || '';
+const docAmt = m => Number(m.金額 || m.見積金額 || m.請求金額 || m.注文金額 || m.契約金額 || 0);
+const docPdf = m => m.ファイル || m.PDF || '';
+
+const seikyuPayDue = r => r.支払期限 || '';
+const seikyuPayDate = r => r.入金日 || '';
+const seikyuStatus = r => r.入金状況 || (r.入金日 ? 'nyukin' : 'minyukin');
+
+const keiyakuStatusOf = k => k.ステータス || (k.契約日 ? '締結済み' : '未締結');
+
+// 案件カードのDOM ID（配列インデックス＋subindex方式）
+function ankenIndex(p) { return ALL_DATA.indexOf(p); }
+const safeAnkenId = p => `a${ankenIndex(p)}`;
+
+// 売上集計
+const uriageOf = p => {
+  const total = getSeikyuList(p).reduce((s, r) => s + docAmt(r), 0);
+  if (total) return total;
+  const ms = getMitsumoriList(p);
+  return ms.reduce((mx, m) => Math.max(mx, docAmt(m)), 0);
+};
+
+// マスター情報のロード（顧客/業者マスターを連想配列に変換）
+function loadMasters(json){
+  CUSTOMERS = Object.fromEntries((json.顧客マスター || []).map(c => [c.顧客略, c]));
+  VENDORS = Object.fromEntries((json.業者マスター || []).map(v => [v.業者略, v]));
+  // 旧構造 取引先 配列のフォールバック
+  if(!Object.keys(CUSTOMERS).length && Array.isArray(json.取引先)){
+    json.取引先.forEach(t => {
+      const key = t.取引先番号 || t.取引先名;
+      CUSTOMERS[key] = {
+        顧客略: key,
+        正式名称: t.取引先名 || '',
+        代表者: t.担当者 || '',
+        備考: t.備考 || ''
+      };
+    });
   }
-}
-function loadDataSync() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-  catch(e) { return []; }
-}
-function setSourceBadge(type, updatedAt) {
-  const el = document.getElementById('sourceBadge');
-  if (!el) return;
-  el.innerHTML = type === 'fetch'
-    ? `<span style="color:#1a7a30;">● GitHub同期</span>${updatedAt ? ' <span style="color:#888;font-size:11px;">('+updatedAt+')</span>' : ''}`
-    : `<span style="color:#d97706;">● オフライン（ローカル）</span>`;
+  try { localStorage.setItem(LS_KEY_MASTERS, JSON.stringify({CUSTOMERS, VENDORS})); } catch(e){}
 }
 
-// ─── カード生成 ──────────────────────────────────────
-function buildCard(item) {
-  const isSigned = item.ステータス === '締結済み';
-  const badgeClass = isSigned ? 'badge-signed' : 'badge-pending';
-  const badgeLabel = item.ステータス || '未締結';
+async function loadData(){
+  try{
+    const res=await fetch(DATA_URL+'?v='+Date.now());
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const json=await res.json();
+    ALL_DATA=json.案件||[];
+    loadMasters(json);
+    localStorage.setItem(LS_KEY,JSON.stringify(ALL_DATA));
+  }catch(e){
+    try{
+      ALL_DATA=JSON.parse(localStorage.getItem(LS_KEY)||'[]');
+      const cachedM=JSON.parse(localStorage.getItem(LS_KEY_MASTERS)||'{}');
+      CUSTOMERS=cachedM.CUSTOMERS||{};
+      VENDORS=cachedM.VENDORS||{};
+    }catch(e2){ALL_DATA=[];CUSTOMERS={};VENDORS={};}
+  }
+  renderAll();
+  // 初期タブに応じてheaderSummary表示制御＋activeクラス整合
+  const sum=document.getElementById('headerSummary');
+  if(sum)sum.style.display=currentTab==='anken'?'':'none';
+}
+// ヘッダーサマリー更新（案件ビュー表示中のみ）
+function updateHeaderSummary(count,amount){
+  const el=document.getElementById('headerSummary');
+  if(!el)return;
+  el.innerHTML=`<span class="count">${count}件</span> · ${amount?'¥'+Math.round(amount/10000)+'万':'-'}`;
+}
+// フィルタシート制御
+function openFilterSheet(){
+  renderFilterSheetChips();
+  document.getElementById('filterSheet').classList.add('open');
+  document.getElementById('filterBackdrop').classList.add('open');
+}
+function closeFilterSheet(){
+  document.getElementById('filterSheet').classList.remove('open');
+  document.getElementById('filterBackdrop').classList.remove('open');
+}
+function renderFilterSheetChips(){
+  const statuses=['all',...new Set(ALL_DATA.map(p=>p.ステータス).filter(Boolean))];
+  document.getElementById('filter-sheet-chips').innerHTML=statuses.map(s=>
+    `<button class="filter-sheet-chip ${s===ankenStatusFilter?'active':''}" onclick="setAnkenStatus('${s}')">${s==='all'?'すべて':s}</button>`
+  ).join('');
+}
+function switchTab(tab){
+  currentTab=tab;
+  ['anken','mitsumori','seikyu','chumon','keiyaku','genka'].forEach(t=>{
+    document.getElementById('view-'+t).style.display=t===tab?'':'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach((btn,i)=>{
+    const tabs=['anken','mitsumori','seikyu','chumon','keiyaku','genka'];
+    btn.classList.toggle('active',tabs[i]===tab);
+  });
+  // 案件以外のタブではヘッダーサマリー非表示
+  const sum=document.getElementById('headerSummary');
+  if(sum)sum.style.display=tab==='anken'?'':'none';
+  const fns={anken:renderAnken,mitsumori:renderMitsumori,seikyu:renderSeikyu,chumon:renderChumon,keiyaku:renderKeiyaku,genka:renderGenka};
+  fns[tab]?.();
+}
+function renderAll(){renderAnken();renderMitsumori();renderSeikyu();renderChumon();renderKeiyaku();renderGenka();}
 
-  const docTag = item.契約書PDF
-    ? `<a class="doc-tag available" href="${item.契約書PDF}" target="_blank">📄 契約書PDF</a>`
-    : `<span class="doc-tag unavailable">📄 契約書PDF</span>`;
+const fmtYen=v=>v?'¥'+Number(v).toLocaleString():'-';
+const fmtDate=d=>d||'-';
+const inRange=(d,from,to)=>{if(!d)return true;if(from&&d<from)return false;if(to&&d>to)return false;return true;};
+const badgeClass=s=>({'施工中':'b-施工中','受注済':'b-受注済','完了':'b-完了','見積提出済み':'b-見積提出済み','見積作成中':'b-見積作成中','完了・請求書作成待ち':'b-完了請求待ち','請求済み':'b-請求済み','入金済み':'b-入金済み'}[s]||'b-default');
+// ★ PDFタグ：SVGアイコン化 + Google Drive検索URL自動生成
+// data.jsonのPDFフィールドはファイル名のみ→Drive検索にリンクしてDrive上で探す
+const ICON_PDF=`<svg class="tag-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3 L12 3 L15 6 L15 17 L5 17 Z"/><path d="M12 3 L12 6 L15 6"/><line x1="7" y1="10" x2="13" y2="10"/><line x1="7" y1="13" x2="13" y2="13"/></svg>`;
+const ICON_FOLDER=`<svg class="tag-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6 Q3 4 5 4 L8 4 L10 6 L15 6 Q17 6 17 8 L17 14 Q17 16 15 16 L5 16 Q3 16 3 14 Z"/></svg>`;
+const pdfTag=(pdf,label)=>{
+  if(!pdf) return `<span class="pdf-tag off">${ICON_PDF}<span>${label}</span></span>`;
+  const url=`https://drive.google.com/drive/search?q=${encodeURIComponent(pdf)}`;
+  return `<a class="pdf-tag on" href="${url}" target="_blank" rel="noopener">${ICON_PDF}<span>${label}</span></a>`;
+};
+const driveTag=url=>url?`<a class="drive-tag" href="${url}" target="_blank" rel="noopener">${ICON_FOLDER}<span>Drive</span></a>`:`<span class="drive-tag off">${ICON_FOLDER}<span>Drive</span></span>`;
 
-  const searchText = [item.契約番号, item.案件番号, item.顧客名, item.工事名, item.施工場所].filter(Boolean).join(' ').toLowerCase();
+// ─ 案件ビュー ─
+function renderAnken(){
+  const q=document.getElementById('anken-search').value.toLowerCase();
+  const data=ALL_DATA.filter(p=>{
+    const txt=[ankenKey(p),oldAnken(p),kojiName(p),customerName(p),customerRep(p),p.施工場所,p.ステータス,p.備考].filter(Boolean).join(' ').toLowerCase();
+    const statusOk=ankenStatusFilter==='all'||p.ステータス===ankenStatusFilter;
+    const doneOk=!ankenHideDone||!ANKEN_DONE_STATUS.includes(p.ステータス);
+    return(!q||txt.includes(q))&&statusOk&&doneOk;
+  });
+  data.sort((a,b)=>{
+    const ai=STATUS_ORDER.indexOf(a.ステータス);const bi=STATUS_ORDER.indexOf(b.ステータス);
+    const an=ai===-1?STATUS_ORDER.length:ai;const bn=bi===-1?STATUS_ORDER.length:bi;
+    return an-bn;
+  });
+  // ヘッダーサマリーに件数＋受注総額を集約表示
+  const amt=data.reduce((s,p)=>s+uriageOf(p),0);
+  updateHeaderSummary(data.length,amt);
+  // フィルタボタンの状態表示
+  const btn=document.getElementById('anken-filter-btn');
+  if(btn)btn.classList.toggle('has-filter',ankenStatusFilter!=='all'||!ankenHideDone);
+  // 完了除外トグルボタンの表示更新
+  const doneBtn=document.getElementById('anken-done-toggle');
+  if(doneBtn){doneBtn.textContent=ankenHideDone?'完了済みも表示':'完了済みを隠す';doneBtn.classList.toggle('active',!ankenHideDone);}
+  const area=document.getElementById('anken-area');
+  if(!data.length){area.innerHTML='<div class="empty">該当する案件がありません</div>';return;}
+  area.innerHTML=data.map(p=>buildAnkenCard(p)).join('');
+}
+function setAnkenStatus(s){ankenStatusFilter=s;renderAnken();closeFilterSheet();}
+function toggleAnkenDone(){ankenHideDone=!ankenHideDone;renderAnken();}
+function toggleCard(h){h.closest('.card').classList.toggle('open');}
+// ★ C-4: nav-list-item の個別展開
+function toggleNavItem(el){
+  el.classList.toggle('open');
+}
 
-  return `
-  <div class="contract-card" data-search="${searchText}">
-    <div class="card-header">
-      <div class="card-header-left">
-        <span class="contract-id">${item.契約番号 || '-'}</span>
-        <span class="contract-name">${item.工事名 || '-'}</span>
+function buildAnkenCard(p){
+  // ─ 集計ヘルパー（新ルール：配列対応） ─
+  const mList=getMitsumoriList(p);
+  const sList=getSeikyuList(p);
+  const cList=getChumonList(p);
+  const kList=getKeiyakuList(p);
+  // 見積金額：最大の見積金額を代表値として表示
+  const mTotal=mList.reduce((mx,m)=>Math.max(mx,docAmt(m)),0);
+  const mAmt=mTotal?fmtYen(mTotal):'-';
+  // 請求金額：合計
+  const sTotal=sList.reduce((s,r)=>s+docAmt(r),0);
+  const rAmt=sTotal?fmtYen(sTotal):'-';
+  // 注文書合計
+  const cAmtTotal=cList.reduce((s,c)=>s+docAmt(c),0);
+  const cAmtStr=cAmtTotal?fmtYen(cAmtTotal):'-';
+  // 契約書合計
+  const kAmtTotal=kList.reduce((s,k)=>s+docAmt(k),0);
+  const chumonCount=cList.length;
+  const seikyuCount=sList.length;
+  const minyukinCount=sList.filter(r=>seikyuStatus(r)!=='nyukin').length;
+  const g=p.原価||{};
+  const genkaTotal=(g.労務費||0)+(g.材料費||0)+(g.外注費||0)+(g.経費||0);
+  const uriage=uriageOf(p);
+  const arariRate=uriage&&genkaTotal?Math.round((1-genkaTotal/uriage)*100):null;
+  const rateColor=arariRate===null?'#999':arariRate>=80?'#1a7a30':arariRate>=60?'#d97706':'#dc2626';
+  // 契約書ステータス：複数ある場合 全締結＝締結済み、それ以外＝未締結
+  const allSigned=kList.length && kList.every(k=>keiyakuStatusOf(k)==='締結済み');
+  const keiyakuStatus=kList.length?(allSigned?'締結済み':'未締結'):'未締結';
+  const keiyakuColor=keiyakuStatus==='締結済み'?'#1a7a30':'#d97706';
+  // DOM ID（配列インデックス方式・日本語キー衝突回避）
+  const safeId=safeAnkenId(p);
+  // 顧客名・代表者（マスター優先）
+  const cName=customerName(p);
+  const cRep=customerRep(p);
+
+  // ── 詳細セクションHTML生成 ──
+  const detailBasic=`
+    <div class="info-grid">
+      <div class="info-item"><span class="info-label">法人名</span><span class="info-value">${cName}</span></div>
+      <div class="info-item"><span class="info-label">代表者</span><span class="info-value">${cRep}</span></div>
+      <div class="info-item"><span class="info-label">施工場所</span><span class="info-value">${p.施工場所||'-'}</span></div>
+      ${p.元請フラグ?`<div class="info-item"><span class="info-label">元請</span><span class="info-value" style="color:#b45309;">${p.元請名||'-'}</span></div>`:''}
+      ${oldAnken(p)?`<div class="info-item"><span class="info-label">旧案件番号</span><span class="info-value" style="color:#999;">${oldAnken(p)}</span></div>`:''}
+    </div>
+    ${p.備考?`<div class="note-box"><div class="note-label"><svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M4 3 L14 3 L16 5 L16 17 L4 17 Z"/><line x1="7" y1="8" x2="13" y2="8"/><line x1="7" y1="11" x2="13" y2="11"/><line x1="7" y1="14" x2="11" y2="14"/></svg>備考</div>${p.備考}</div>`:''}
+    <div style="margin-top:10px;">${driveTag(p.driveUrl)}</div>`;
+
+  // 見積：配列対応（全件表示）
+  const detailMitsumori=mList.length?mList.map((m,i)=>`
+    <div class="sub-card">
+      <div class="sub-card-header"><span class="sub-id">${docNo(m)||'-'}</span><span style="font-size:12px;color:#555;">${fmtDate(docDate(m))}</span></div>
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">見積金額（税込）</span><span class="info-value amount">${fmtYen(docAmt(m))}</span></div>
+        ${m.備考?`<div class="info-item"><span class="info-label">備考</span><span class="info-value" style="font-size:13px;">${m.備考}</span></div>`:''}
       </div>
-      <span class="badge ${badgeClass}">${badgeLabel}</span>
+      <div style="margin-top:8px;">${pdfTag(docPdf(m),'見積書PDF')}</div>
+      ${(m.明細||[]).length?`
+        <button class="meisai-toggle" onclick="toggleMeisai('m-meisai-${safeId}-${i}', this)"><svg class="meisai-toggle__chevron" width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><polygon points="2,1 8,5 2,9"/></svg>明細を表示</button>
+        <div class="meisai-wrap" id="m-meisai-${safeId}-${i}">
+          <table class="meisai-table">
+            <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">単価</th><th class="right">金額（税抜）</th></tr></thead>
+            <tbody>${(m.明細||[]).map(d=>`<tr><td>${d.工事内容||'-'}</td><td class="right">${d.数量||'-'}</td><td>${d.単位||''}</td><td class="right">${d.単価?'¥'+Number(d.単価).toLocaleString():'-'}</td><td class="right">¥${Number(d.金額税抜||0).toLocaleString()}</td></tr>`).join('')}</tbody>
+          </table>
+        </div>`:''}
+    </div>`).join(''):'<div class="empty-hint">見積書なし</div>';
+
+  // 請求：配列対応
+  const detailSeikyu=sList.length?sList.map((r,i)=>{
+    const isNyukin=seikyuStatus(r)==='nyukin';
+    const ridSafe=`${safeId}-r${i}`;
+    return`<div class="sub-card status-${isNyukin?'入金済み':'未入金'}">
+      <div class="sub-card-header"><span class="sub-id">${docNo(r)||'-'}</span><span class="badge ${isNyukin?'b-入金済み':'b-未入金'}">${isNyukin?'入金済み':'未入金'}</span></div>
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">請求金額</span><span class="info-value amount ${isNyukin?'nyukin':'minyukin'}">${fmtYen(docAmt(r))}</span></div>
+        <div class="info-item"><span class="info-label">請求日</span><span class="info-value">${fmtDate(docDate(r))}</span></div>
+        <div class="info-item"><span class="info-label">支払期限</span><span class="info-value">${fmtDate(seikyuPayDue(r))}</span></div>
+        <div class="info-item"><span class="info-label">入金日</span><span class="info-value">${fmtDate(seikyuPayDate(r))}</span></div>
+      </div>
+      ${r.備考?`<div class="note-box"><div class="note-label">備考</div>${r.備考}</div>`:''}
+      <div style="margin-top:8px;">${pdfTag(docPdf(r),'請求書PDF')}</div>
+      ${(r.明細||[]).length?`
+        <button class="meisai-toggle" onclick="toggleMeisai('r-meisai-${ridSafe}', this)"><svg class="meisai-toggle__chevron" width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><polygon points="2,1 8,5 2,9"/></svg>明細を表示</button>
+        <div class="meisai-wrap" id="r-meisai-${ridSafe}">
+          <table class="meisai-table">
+            <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">金額（税抜）</th></tr></thead>
+            <tbody>${(r.明細||[]).map(d=>`<tr><td>${d.工事内容||'-'}</td><td class="right">${d.数量||'-'}</td><td>${d.単位||''}</td><td class="right">¥${Number(d.金額税抜||0).toLocaleString()}</td></tr>`).join('')}</tbody>
+          </table>
+          ${r.税込合計?`<table class="totals-table"><tr><td>税抜合計</td><td>¥${Number(r.税抜合計||0).toLocaleString()}</td></tr><tr><td>消費税（10%）</td><td>¥${Number(r.消費税||0).toLocaleString()}</td></tr><tr><td>税込合計</td><td>¥${Number(r.税込合計||0).toLocaleString()}</td></tr></table>`:''}
+        </div>`:''}
+    </div>`;
+  }).join(''):'<div class="empty-hint">請求書なし</div>';
+
+  // 注文書：配列対応
+  const detailChumon=cList.length?cList.map(c=>`
+    <div class="sub-card">
+      <div class="sub-card-header"><span class="sub-id">${docNo(c)||'-'}</span><span style="font-size:12px;color:#555;">${vendorName(c)}</span></div>
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">注文金額</span><span class="info-value amount">${fmtYen(docAmt(c))}</span></div>
+        <div class="info-item"><span class="info-label">注文日</span><span class="info-value">${fmtDate(docDate(c))}</span></div>
+        ${c.納期?`<div class="info-item"><span class="info-label">納期</span><span class="info-value">${fmtDate(c.納期)}</span></div>`:''}
+      </div>
+      ${c.備考?`<div class="note-box"><div class="note-label">備考</div>${c.備考}</div>`:''}
+      <div style="margin-top:8px;">${pdfTag(docPdf(c),'注文書PDF')}</div>
+    </div>`).join(''):'<div class="empty-hint">注文書なし</div>';
+
+  // 契約書：配列対応
+  const detailKeiyaku=kList.length?kList.map(k=>{
+    const ks=keiyakuStatusOf(k);
+    return`<div class="sub-card">
+      <div class="sub-card-header"><span class="sub-id">${docNo(k)||'-'}</span><span class="badge ${ks==='締結済み'?'b-完了':'b-見積提出予定'}" style="font-size:10px;">${ks}</span></div>
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">契約日</span><span class="info-value">${fmtDate(docDate(k))}</span></div>
+        ${docAmt(k)?`<div class="info-item"><span class="info-label">契約金額</span><span class="info-value amount">${fmtYen(docAmt(k))}</span></div>`:''}
+      </div>
+      <div style="margin-top:8px;">${pdfTag(docPdf(k),'契約書PDF')}</div>
+    </div>`;
+  }).join(''):'<div class="empty-hint">契約書なし</div>';
+
+  const genkaBarHtml=genkaTotal>0?(()=>{
+    const colors=['#3b82f6','#10b981','#f59e0b','#ef4444'];
+    const items=[['労務費',g.労務費||0,colors[0]],['材料費',g.材料費||0,colors[1]],['外注費',g.外注費||0,colors[2]],['経費',g.経費||0,colors[3]]];
+    const bars=items.map(([k,v,c])=>v?`<div class="genka-bar-fill" style="width:${Math.round(v/genkaTotal*100)}%;background:${c};"></div>`:'').join('');
+    const legend=items.map(([k,v,c])=>v?`<span><span class="genka-dot" style="background:${c};"></span>${k} ${fmtYen(v)}</span>`:'').join('');
+    return`<div class="genka-bar">${bars}</div><div class="genka-legend">${legend}</div>`;
+  })():'<div class="empty-hint">原価未入力</div>';
+
+  const detailGenka=`
+    <div class="info-grid">
+      <div class="info-item"><span class="info-label">労務費</span><span class="info-value">${fmtYen(g.労務費||null)}</span></div>
+      <div class="info-item"><span class="info-label">材料費</span><span class="info-value">${fmtYen(g.材料費||null)}</span></div>
+      <div class="info-item"><span class="info-label">外注費</span><span class="info-value">${fmtYen(g.外注費||null)}</span></div>
+      <div class="info-item"><span class="info-label">経費</span><span class="info-value">${fmtYen(g.経費||null)}</span></div>
+      <div class="info-item"><span class="info-label">原価合計</span><span class="info-value minyukin">${fmtYen(genkaTotal||null)}</span></div>
+      <div class="info-item"><span class="info-label">粗利</span><span class="info-value nyukin">${uriage&&genkaTotal?fmtYen(uriage-genkaTotal):'-'}</span></div>
+    </div>
+    ${genkaBarHtml}`;
+
+  // ── カード全体 ──
+  return`
+  <div class="card status-${p.ステータス||'default'}">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-header-left">
+        <span class="card-id">${ankenKey(p)}</span>
+        ${oldAnken(p)?`<span style="font-size:10px;opacity:0.6;">(旧:${oldAnken(p)})</span>`:''}
+        <span class="card-name">${kojiName(p)}</span>
+      </div>
+      <span class="badge ${badgeClass(p.ステータス)}">${p.ステータス||'未設定'}</span>
+      <svg class="card-toggle" width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,4 12,4 7,11"/></svg>
     </div>
     <div class="card-body">
-      <div class="info-grid">
-        <div class="info-item"><span class="info-label">顧客名</span><span class="info-value">${item.顧客名 || '-'}</span></div>
-        <div class="info-item"><span class="info-label">案件番号</span><span class="info-value">${item.案件番号 || '-'}</span></div>
-        <div class="info-item"><span class="info-label">施工場所</span><span class="info-value">${item.施工場所 || '-'}</span></div>
-        <div class="info-item"><span class="info-label">契約日</span><span class="info-value">${item.契約日 || '-'}</span></div>
-        <div class="info-item"><span class="info-label">契約金額（税込）</span><span class="info-value amount-value">${item.契約金額 ? '¥' + Number(item.契約金額).toLocaleString() : '-'}</span></div>
-        <div class="info-item"><span class="info-label">工期</span><span class="info-value">${item.工期開始 || '-'} 〜 ${item.工期終了 || '-'}</span></div>
+      <div class="nav-list">
+        <!-- 基本情報 -->
+        <button class="nav-list-item nav-expand" onclick="toggleNavItem(this)">
+          <svg class="nav-list-item__icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="5" width="20" height="22" rx="2"/><line x1="11" y1="11" x2="21" y2="11"/><line x1="11" y1="16" x2="21" y2="16"/><line x1="11" y1="21" x2="17" y2="21"/></svg>
+          <div class="nav-list-item__body">
+            <div class="nav-list-item__title">基本情報</div>
+            <div class="nav-list-item__desc">${cName}${p.施工場所?' ・ '+p.施工場所:''}</div>
+          </div>
+          <div class="nav-list-item__arrow">›</div>
+        </button>
+        <div class="nav-expand-body">${detailBasic}</div>
+
+        <!-- 見積 -->
+        <button class="nav-list-item nav-expand" onclick="toggleNavItem(this)">
+          <svg class="nav-list-item__icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="5" width="20" height="22" rx="2"/><line x1="11" y1="11" x2="21" y2="11"/><line x1="11" y1="16" x2="21" y2="16"/><path d="M13 23 L16 20 L19 23" fill="none"/></svg>
+          <div class="nav-list-item__body">
+            <div class="nav-list-item__title">見積</div>
+            <div class="nav-list-item__desc">${mList.length?`${mList.length}件`:'未発行'}</div>
+          </div>
+          <div class="nav-list-item__value">${mAmt}</div>
+          <div class="nav-list-item__arrow">›</div>
+        </button>
+        <div class="nav-expand-body">${detailMitsumori}</div>
+
+        <!-- 請求 -->
+        <button class="nav-list-item nav-expand" onclick="toggleNavItem(this)">
+          <svg class="nav-list-item__icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="5" width="20" height="22" rx="2"/><line x1="11" y1="11" x2="21" y2="11"/><line x1="11" y1="16" x2="21" y2="16"/><line x1="11" y1="21" x2="17" y2="21"/><circle cx="21" cy="21" r="2" fill="currentColor" opacity="0.5" stroke="none"/></svg>
+          <div class="nav-list-item__body">
+            <div class="nav-list-item__title">請求</div>
+            <div class="nav-list-item__desc">${seikyuCount?`${seikyuCount}件${minyukinCount?`（未入金${minyukinCount}件）`:''}`:'未発行'}</div>
+          </div>
+          <div class="nav-list-item__value">${rAmt}</div>
+          <div class="nav-list-item__arrow">›</div>
+        </button>
+        <div class="nav-expand-body">${detailSeikyu}</div>
+
+        <!-- 注文書 -->
+        <button class="nav-list-item nav-expand" onclick="toggleNavItem(this)">
+          <svg class="nav-list-item__icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="5" width="20" height="22" rx="2"/><line x1="11" y1="11" x2="21" y2="11"/><line x1="11" y1="16" x2="21" y2="16"/><line x1="11" y1="21" x2="17" y2="21"/><path d="M20 22 L22 20 L25 23 L20 25 Z" fill="currentColor" opacity="0.6" stroke="none"/></svg>
+          <div class="nav-list-item__body">
+            <div class="nav-list-item__title">注文書</div>
+            <div class="nav-list-item__desc">${chumonCount?`${chumonCount}件`:'未発行'}</div>
+          </div>
+          <div class="nav-list-item__value">${cAmtStr}</div>
+          <div class="nav-list-item__arrow">›</div>
+        </button>
+        <div class="nav-expand-body">${detailChumon}</div>
+
+        <!-- 契約書 -->
+        <button class="nav-list-item nav-expand" onclick="toggleNavItem(this)">
+          <svg class="nav-list-item__icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="5" width="20" height="22" rx="2"/><line x1="11" y1="11" x2="21" y2="11"/><line x1="11" y1="16" x2="21" y2="16"/><line x1="11" y1="21" x2="21" y2="21"/><line x1="14" y1="25" x2="18" y2="25" stroke-width="2"/></svg>
+          <div class="nav-list-item__body">
+            <div class="nav-list-item__title">契約書</div>
+            <div class="nav-list-item__desc" style="color:${keiyakuColor};">${kList.length?`${kList.length}件・${keiyakuStatus}`:keiyakuStatus}</div>
+          </div>
+          <div class="nav-list-item__value">${kAmtTotal?fmtYen(kAmtTotal):'-'}</div>
+          <div class="nav-list-item__arrow">›</div>
+        </button>
+        <div class="nav-expand-body">${detailKeiyaku}</div>
+
+        <!-- 原価管理 -->
+        <button class="nav-list-item nav-expand" onclick="toggleNavItem(this)">
+          <svg class="nav-list-item__icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="24" height="20" rx="2"/><line x1="4" y1="13" x2="28" y2="13" stroke-width="1" opacity="0.4"/><line x1="12" y1="6" x2="12" y2="26" stroke-width="1" opacity="0.4"/><line x1="20" y1="6" x2="20" y2="26" stroke-width="1" opacity="0.4"/><rect x="14" y="16" width="4" height="4" fill="currentColor" opacity="0.5" stroke="none"/></svg>
+          <div class="nav-list-item__body">
+            <div class="nav-list-item__title">原価管理</div>
+            <div class="nav-list-item__desc">${genkaTotal?`原価 ${fmtYen(genkaTotal)}`:'未入力'}</div>
+          </div>
+          <div class="nav-list-item__value" style="color:${rateColor};">${arariRate!==null?`粗利 ${arariRate}%`:'-'}</div>
+          <div class="nav-list-item__arrow">›</div>
+        </button>
+        <div class="nav-expand-body">${detailGenka}</div>
       </div>
-      ${item.備考 ? `<div class="note-box"><div class="note-label">📝 備考</div>${item.備考}</div>` : ''}
-      <div style="margin-top:10px;">${docTag}</div>
+      <!-- アプリ内編集パネル -->
+      <div class="edit-panel" id="edit-${safeId}">
+        <div class="edit-panel-title">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3 L17 6 L8 15 L4 16 L5 12 Z"/></svg>
+          クイック編集
+        </div>
+        <div class="edit-row">
+          <span class="edit-label">案件ステータス</span>
+          <select class="edit-select" id="sel-status-${safeId}">
+            ${['見積作成中','見積提出済み','受注済','施工中','完了・請求書作成待ち','請求済み','入金済み','完了'].map(s=>`<option value="${s}"${p.ステータス===s?' selected':''}>${s}</option>`).join('')}
+          </select>
+        </div>
+        <div class="edit-row">
+          <span class="edit-label">契約書</span>
+          <select class="edit-select" id="sel-keiyaku-${safeId}">
+            <option value="未締結"${keiyakuStatus==='未締結'?' selected':''}>未締結</option>
+            <option value="締結済み"${keiyakuStatus==='締結済み'?' selected':''}>締結済み</option>
+          </select>
+        </div>
+        <div class="edit-row">
+          <span class="edit-label">入金状況</span>
+          <select class="edit-select" id="sel-nyukin-${safeId}">
+            ${sList.length
+              ? sList.map((r,i)=>`<option value="r${i}-minyukin"${seikyuStatus(r)!=='nyukin'?' selected':''}>請求${i+1}：未入金</option><option value="r${i}-nyukin"${seikyuStatus(r)==='nyukin'?' selected':''}>請求${i+1}：入金済み</option>`).join('')
+              : '<option value="none">請求書なし</option>'}
+          </select>
+        </div>
+        <div class="edit-actions">
+          <button class="edit-save-btn" onclick="saveEdit('${safeId}','${ankenKey(p)}',event)">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="4,10 8,14 16,6"/></svg>
+            保存
+          </button>
+          <button class="edit-cancel-btn" onclick="toggleEditPanel('${safeId}',event)">キャンセル</button>
+        </div>
+        <div class="edit-status" id="edit-status-${safeId}"></div>
+      </div>
+      <!-- 編集ボタン行 -->
+      <div class="card-actions">
+        <button class="edit-toggle-btn" onclick="toggleEditPanel('${safeId}',event)">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3 L17 6 L8 15 L4 16 L5 12 Z"/></svg>
+          編集
+        </button>
+        <button class="sheets-edit-btn-small" onclick="openSheets('${ankenKey(p)}',event)">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="14" height="14" rx="2"/><line x1="3" y1="8" x2="17" y2="8"/><line x1="8" y1="8" x2="8" y2="17"/></svg>
+          Sheetsで編集
+        </button>
+      </div>
     </div>
   </div>`;
 }
 
-// ─── 統計 ────────────────────────────────────────────
-function updateStats(data) {
-  document.getElementById('totalCount').textContent = data.length;
-  document.getElementById('signedCount').textContent = data.filter(p => p.ステータス === '締結済み').length;
-  document.getElementById('pendingCount').textContent = data.filter(p => p.ステータス !== '締結済み').length;
-  const now = new Date();
-  document.getElementById('lastUpdated').textContent = `最終更新：${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+// ─ 見積ビュー ─
+function renderMitsumori(){
+  const q=document.getElementById('m-search').value.toLowerCase();
+  const from=document.getElementById('m-from').value;
+  const to=document.getElementById('m-to').value;
+  // 見積を flatten（1案件で複数見積がある場合は複数カードになる）
+  const items=[];
+  ALL_DATA.forEach(p=>{
+    const mList=getMitsumoriList(p);
+    if(!mList.length)return;
+    mList.forEach((m,mi)=>{
+      const txt=[ankenKey(p),oldAnken(p),kojiName(p),customerName(p),customerRep(p),docNo(m)].filter(Boolean).join(' ').toLowerCase();
+      const hideOk=!mitsumoriHideActive||!MITSUMORI_HIDE_STATUS.includes(p.ステータス);
+      if((!q||txt.includes(q))&&inRange(docDate(m),from,to)&&hideOk){
+        items.push({p,m,mi});
+      }
+    });
+  });
+  document.getElementById('m-total').textContent=items.length;
+  document.getElementById('m-total-amt').textContent=fmtYen(items.reduce((s,x)=>s+docAmt(x.m),0));
+  const mBtn=document.getElementById('m-all-toggle');
+  if(mBtn){mBtn.textContent=mitsumoriHideActive?'すべて表示':'対応中のみ';mBtn.classList.toggle('active',!mitsumoriHideActive);}
+  const area=document.getElementById('mitsumori-area');
+  if(!items.length){area.innerHTML='<div class="empty">該当する見積がありません</div>';return;}
+  area.innerHTML=items.map(({p,m,mi})=>{
+    const sid=`${safeAnkenId(p)}-m${mi}`;
+    const meisaiHtml=(m.明細||[]).length?`
+      <button class="meisai-toggle" onclick="toggleMeisai('mv-${sid}',this)"><svg class="meisai-toggle__chevron" width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><polygon points="2,1 8,5 2,9"/></svg>明細を表示</button>
+      <div class="meisai-wrap" id="mv-${sid}">
+        <table class="meisai-table">
+          <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">単価</th><th class="right">金額（税抜）</th></tr></thead>
+          <tbody>${(m.明細||[]).map(d=>`<tr><td>${d.工事内容||'-'}</td><td class="right">${d.数量||'-'}</td><td>${d.単位||''}</td><td class="right">${d.単価?'¥'+Number(d.単価).toLocaleString():'-'}</td><td class="right">¥${Number(d.金額税抜||0).toLocaleString()}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>`:'';
+    const bodyHtml=`
+      <div class="tab-detail-row"><span class="tab-detail-label">顧客</span><span class="tab-detail-value">${customerName(p)}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">施工場所</span><span class="tab-detail-value">${p.施工場所||'-'}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">見積番号</span><span class="tab-detail-value">${docNo(m)||'-'}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">見積日</span><span class="tab-detail-value">${fmtDate(docDate(m))}</span></div>
+      ${m.備考?`<div class="note-box" style="margin-top:8px;"><div class="note-label">備考</div>${m.備考}</div>`:''}
+      <div style="margin-top:10px;">${pdfTag(docPdf(m),'見積書PDF')}</div>
+      ${meisaiHtml}`;
+    return`
+    <div class="tab-nav-card status-${p.ステータス||'default'}">
+      <button class="tab-nav-card-header" onclick="toggleTabCard(this)">
+        <div class="tab-nav-card-left">
+          <span class="tab-nav-card-id">${ankenKey(p)}</span>
+          <div class="tab-nav-card-name">${kojiName(p)}</div>
+          <div class="tab-nav-card-sub">${customerName(p)}</div>
+        </div>
+        <div class="tab-nav-card-right">
+          <div class="tab-nav-card-amount">${fmtYen(docAmt(m))}</div>
+          <span class="badge ${badgeClass(p.ステータス)}">${p.ステータス||'-'}</span>
+          <svg class="tab-nav-card-chevron" width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,4 12,4 7,11"/></svg>
+        </div>
+      </button>
+      <div class="tab-nav-card-body">${bodyHtml}</div>
+    </div>`;
+  }).join('');
 }
 
-// ─── レンダリング ────────────────────────────────────
-function renderCards(data) {
-  if (data === undefined) data = loadDataSync();
-  const q = document.getElementById('searchInput').value.toLowerCase();
-  updateStats(data);
-  const filtered = data.filter(p =>
-    !q || [p.契約番号, p.案件番号, p.顧客名, p.工事名, p.施工場所].filter(Boolean).join(' ').toLowerCase().includes(q)
-  );
-  const area = document.getElementById('cardsArea');
-  area.innerHTML = filtered.length === 0
-    ? '<div class="add-row" style="margin-bottom:14px;">該当する契約書がありません</div>'
-    : filtered.map(p => buildCard(p)).join('');
-  document.getElementById('addRow').style.display = q ? 'none' : '';
+// ─ 請求ビュー ─
+function setSeikyuFilter(f){
+  seikyuFilter=f;
+  ['all','minyukin','nyukin'].forEach(k=>document.getElementById('r-chip-'+k)?.classList.toggle('active',k===f));
+  renderSeikyu();
+}
+function renderSeikyu(){
+  const q=document.getElementById('r-search').value.toLowerCase();
+  const from=document.getElementById('r-from').value;
+  const to=document.getElementById('r-to').value;
+  const items=[];
+  ALL_DATA.forEach(p=>getSeikyuList(p).forEach((r,ri)=>{
+    const txt=[ankenKey(p),oldAnken(p),kojiName(p),customerName(p),customerRep(p),docNo(r)].filter(Boolean).join(' ').toLowerCase();
+    const sStat=seikyuStatus(r);
+    if((!q||txt.includes(q))&&inRange(docDate(r),from,to)&&(seikyuFilter==='all'||sStat===seikyuFilter))items.push({p,r,ri});
+  }));
+  const minyukin=items.filter(x=>seikyuStatus(x.r)!=='nyukin');
+  document.getElementById('r-total').textContent=items.length;
+  document.getElementById('r-minyukin').textContent=minyukin.length;
+  document.getElementById('r-nyukin').textContent=items.length-minyukin.length;
+  document.getElementById('r-minyukin-amt').textContent=fmtYen(minyukin.reduce((s,x)=>s+docAmt(x.r),0));
+  const area=document.getElementById('seikyu-area');
+  if(!items.length){area.innerHTML='<div class="empty">該当する請求がありません</div>';return;}
+  area.innerHTML=items.map(({p,r,ri})=>{
+    const isNyukin=seikyuStatus(r)==='nyukin';
+    const sid=`${safeAnkenId(p)}-r${ri}`;
+    const meisaiHtml=(r.明細||[]).length?`
+      <button class="meisai-toggle" onclick="toggleMeisai('rv-${sid}',this)"><svg class="meisai-toggle__chevron" width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><polygon points="2,1 8,5 2,9"/></svg>明細を表示</button>
+      <div class="meisai-wrap" id="rv-${sid}">
+        <table class="meisai-table">
+          <thead><tr><th>工事内容</th><th class="right">数量</th><th>単位</th><th class="right">金額（税抜）</th></tr></thead>
+          <tbody>${(r.明細||[]).map(d=>`<tr><td>${d.工事内容||'-'}</td><td class="right">${d.数量||'-'}</td><td>${d.単位||''}</td><td class="right">¥${Number(d.金額税抜||0).toLocaleString()}</td></tr>`).join('')}</tbody>
+        </table>
+        ${r.税込合計?`<table class="totals-table"><tr><td>税抜合計</td><td>¥${Number(r.税抜合計||0).toLocaleString()}</td></tr><tr><td>消費税（10%）</td><td>¥${Number(r.消費税||0).toLocaleString()}</td></tr><tr><td>税込合計</td><td>¥${Number(r.税込合計||0).toLocaleString()}</td></tr></table>`:''}
+      </div>`:'';
+    const bodyHtml=`
+      <div class="tab-detail-row"><span class="tab-detail-label">顧客</span><span class="tab-detail-value">${customerName(p)}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">施工場所</span><span class="tab-detail-value">${p.施工場所||'-'}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">請求日</span><span class="tab-detail-value">${fmtDate(docDate(r))}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">支払期限</span><span class="tab-detail-value">${fmtDate(seikyuPayDue(r))}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">入金日</span><span class="tab-detail-value">${fmtDate(seikyuPayDate(r))}</span></div>
+      ${r.備考?`<div class="note-box" style="margin-top:8px;"><div class="note-label">備考</div>${r.備考}</div>`:''}
+      <div style="margin-top:10px;">${pdfTag(docPdf(r),'請求書PDF')}</div>
+      ${meisaiHtml}`;
+    return`
+    <div class="tab-nav-card status-${isNyukin?'入金済み':'未入金'}">
+      <button class="tab-nav-card-header" onclick="toggleTabCard(this)">
+        <div class="tab-nav-card-left">
+          <span class="tab-nav-card-id">${docNo(r)||'-'}</span>
+          <div class="tab-nav-card-name">${kojiName(p)}</div>
+          <div class="tab-nav-card-sub">${customerName(p)} <span class="view-anken-ref">${ankenKey(p)}</span></div>
+        </div>
+        <div class="tab-nav-card-right">
+          <div class="tab-nav-card-amount ${isNyukin?'nyukin':'minyukin'}">${fmtYen(docAmt(r))}</div>
+          <span class="badge ${isNyukin?'b-入金済み':'b-未入金'}">${isNyukin?'入金済み':'未入金'}</span>
+          <svg class="tab-nav-card-chevron" width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,4 12,4 7,11"/></svg>
+        </div>
+      </button>
+      <div class="tab-nav-card-body">${bodyHtml}</div>
+    </div>`;
+  }).join('');
 }
 
-// ─── 初期化 ─────────────────────────────────────────
-async function init() {
-  document.getElementById('cardsArea').innerHTML =
-    '<div class="add-row" style="margin-bottom:14px;color:#888;">📡 データを読み込んでいます...</div>';
-  const data = await loadDataAsync();
-  renderCards(data);
+// ─ 注文書ビュー ─
+function renderChumon(){
+  const q=document.getElementById('c-search').value.toLowerCase();
+  const from=document.getElementById('c-from').value;
+  const to=document.getElementById('c-to').value;
+  const items=[];
+  ALL_DATA.forEach(p=>getChumonList(p).forEach(c=>{
+    const txt=[ankenKey(p),oldAnken(p),kojiName(p),customerName(p),vendorName(c),docNo(c)].filter(Boolean).join(' ').toLowerCase();
+    if((!q||txt.includes(q))&&inRange(docDate(c),from,to))items.push({p,c});
+  }));
+  document.getElementById('c-total').textContent=items.length;
+  document.getElementById('c-total-amt').textContent=fmtYen(items.reduce((s,x)=>s+docAmt(x.c),0)||null);
+  const area=document.getElementById('chumon-area');
+  if(!items.length){area.innerHTML='<div class="empty">注文書がありません</div>';return;}
+  area.innerHTML=items.map(({p,c})=>{
+    const bodyHtml=`
+      <div class="tab-detail-row"><span class="tab-detail-label">案件</span><span class="tab-detail-value">${kojiName(p)}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">業者名</span><span class="tab-detail-value">${vendorName(c)}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">注文日</span><span class="tab-detail-value">${fmtDate(docDate(c))}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">納期</span><span class="tab-detail-value">${fmtDate(c.納期)}</span></div>
+      <div style="margin-top:10px;">${pdfTag(docPdf(c),'注文書PDF')}</div>`;
+    return`
+    <div class="tab-nav-card status-注文">
+      <button class="tab-nav-card-header" onclick="toggleTabCard(this)">
+        <div class="tab-nav-card-left">
+          <span class="tab-nav-card-id">${docNo(c)||'-'}</span>
+          <div class="tab-nav-card-name">${vendorName(c)}</div>
+          <div class="tab-nav-card-sub">${kojiName(p)} <span class="view-anken-ref">${ankenKey(p)}</span></div>
+        </div>
+        <div class="tab-nav-card-right">
+          <div class="tab-nav-card-amount">${fmtYen(docAmt(c))}</div>
+          <svg class="tab-nav-card-chevron" width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,4 12,4 7,11"/></svg>
+        </div>
+      </button>
+      <div class="tab-nav-card-body">${bodyHtml}</div>
+    </div>`;
+  }).join('');
 }
 
-init().then(() => {
-  const params = new URLSearchParams(window.location.search);
-  const anken = params.get('anken');
-  if (!anken) return;
+// ─ 契約書ビュー ─
+function setKeiyakuFilter(f){
+  keiyakuFilter=f;
+  ['all','signed','pending'].forEach(k=>document.getElementById('k-chip-'+k)?.classList.toggle('active',k===f));
+  renderKeiyaku();
+}
+function renderKeiyaku(){
+  const q=document.getElementById('k-search').value.toLowerCase();
+  const from=document.getElementById('k-from').value;
+  const to=document.getElementById('k-to').value;
+  // 契約書を flatten（複数契約対応）
+  const items=[];
+  ALL_DATA.forEach(p=>{
+    const kList=getKeiyakuList(p);
+    if(!kList.length){
+      // 契約書がない案件もフィルタ次第で表示する：未締結扱い
+      return;
+    }
+    kList.forEach((k,ki)=>{
+      const txt=[ankenKey(p),oldAnken(p),kojiName(p),customerName(p),customerRep(p),docNo(k)].filter(Boolean).join(' ').toLowerCase();
+      const isSigned=keiyakuStatusOf(k)==='締結済み';
+      if((!q||txt.includes(q))&&inRange(docDate(k),from,to)&&(keiyakuFilter==='all'||(keiyakuFilter==='signed'&&isSigned)||(keiyakuFilter==='pending'&&!isSigned))){
+        items.push({p,k,ki});
+      }
+    });
+  });
+  const signed=items.filter(x=>keiyakuStatusOf(x.k)==='締結済み');
+  document.getElementById('k-total').textContent=items.length;
+  document.getElementById('k-signed').textContent=signed.length;
+  document.getElementById('k-pending').textContent=items.length-signed.length;
+  const area=document.getElementById('keiyaku-area');
+  if(!items.length){area.innerHTML='<div class="empty">該当する契約書がありません</div>';return;}
+  area.innerHTML=items.map(({p,k,ki})=>{
+    const isSigned=keiyakuStatusOf(k)==='締結済み';
+    const bodyHtml=`
+      <div class="tab-detail-row"><span class="tab-detail-label">顧客</span><span class="tab-detail-value">${customerName(p)}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">施工場所</span><span class="tab-detail-value">${p.施工場所||'-'}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">契約番号</span><span class="tab-detail-value">${docNo(k)||'-'}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">契約日</span><span class="tab-detail-value">${fmtDate(docDate(k))}</span></div>
+      ${docAmt(k)?`<div class="tab-detail-row"><span class="tab-detail-label">契約金額</span><span class="tab-detail-value amount">${fmtYen(docAmt(k))}</span></div>`:''}
+      <div style="margin-top:10px;">${pdfTag(docPdf(k),'契約書PDF')}</div>`;
+    return`
+    <div class="tab-nav-card status-${isSigned?'締結済み':'未締結'}">
+      <button class="tab-nav-card-header" onclick="toggleTabCard(this)">
+        <div class="tab-nav-card-left">
+          <span class="tab-nav-card-id">${docNo(k)||ankenKey(p)}</span>
+          <div class="tab-nav-card-name">${kojiName(p)}</div>
+          <div class="tab-nav-card-sub">${customerName(p)} <span class="view-anken-ref">${ankenKey(p)}</span></div>
+        </div>
+        <div class="tab-nav-card-right">
+          ${docAmt(k)?`<div class="tab-nav-card-amount">${fmtYen(docAmt(k))}</div>`:''}
+          <span class="badge ${isSigned?'b-締結済み':'b-未締結'}">${keiyakuStatusOf(k)}</span>
+          <svg class="tab-nav-card-chevron" width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,4 12,4 7,11"/></svg>
+        </div>
+      </button>
+      <div class="tab-nav-card-body">${bodyHtml}</div>
+    </div>`;
+  }).join('');
+}
 
-  const statsBar = document.querySelector('.stats-bar');
-  const searchBar = document.querySelector('.search-bar');
-  if (statsBar) statsBar.style.display = 'none';
-  if (searchBar) searchBar.style.display = 'none';
+// ─ 原価ビュー ─
+function renderGenka(){
+  const q=document.getElementById('g-search').value.toLowerCase();
+  const items=ALL_DATA.filter(p=>{
+    const txt=[ankenKey(p),oldAnken(p),kojiName(p),customerName(p),customerRep(p)].filter(Boolean).join(' ').toLowerCase();
+    return!q||txt.includes(q);
+  });
+  let tg=0,tu=0;
+  items.forEach(p=>{
+    const g=p.原価||{};
+    const gt=(g.労務費||0)+(g.材料費||0)+(g.外注費||0)+(g.経費||0);
+    const u=uriageOf(p);
+    tg+=gt;tu+=u;
+  });
+  const avgRate=tu&&tg?Math.round((1-tg/tu)*100):null;
+  document.getElementById('g-total').textContent=items.length;
+  document.getElementById('g-total-genka').textContent=fmtYen(tg||null);
+  document.getElementById('g-total-uri').textContent=fmtYen(tu||null);
+  document.getElementById('g-avg-rate').textContent=avgRate!==null?avgRate+'%':'-';
+  const area=document.getElementById('genka-area');
+  if(!items.length){area.innerHTML='<div class="empty">該当する案件がありません</div>';return;}
+  area.innerHTML=items.map(p=>{
+    const g=p.原価||{};
+    const gt=(g.労務費||0)+(g.材料費||0)+(g.外注費||0)+(g.経費||0);
+    const u=uriageOf(p);
+    const rate=u&&gt?Math.round((1-gt/u)*100):null;
+    const rc=rate===null?'#999':rate>=80?'#1a7a30':rate>=60?'#d97706':'#dc2626';
+    const rateClass=rate===null?'default':rate>=80?'受注済':rate>=60?'見積提出予定':'未入金';
+    const genkaBarHtml=gt>0?(()=>{
+      const colors=['#3b82f6','#10b981','#f59e0b','#ef4444'];
+      const gi=[['労務費',g.労務費||0,colors[0]],['材料費',g.材料費||0,colors[1]],['外注費',g.外注費||0,colors[2]],['経費',g.経費||0,colors[3]]];
+      const bars=gi.map(([k,v,c])=>v?`<div class="genka-bar-fill" style="width:${Math.round(v/gt*100)}%;background:${c};"></div>`:'').join('');
+      const legend=gi.map(([k,v,c])=>v?`<span><span class="genka-dot" style="background:${c};"></span>${k} ${fmtYen(v)}</span>`:'').join('');
+      return`<div class="genka-bar">${bars}</div><div class="genka-legend">${legend}</div>`;
+    })():'';
+    const bodyHtml=`
+      <div class="tab-detail-row"><span class="tab-detail-label">売上</span><span class="tab-detail-value amount nyukin">${fmtYen(u||null)}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">原価合計</span><span class="tab-detail-value amount minyukin">${fmtYen(gt||null)}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">粗利</span><span class="tab-detail-value amount" style="color:${rc};">${u&&gt?fmtYen(u-gt):'-'}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">労務費</span><span class="tab-detail-value">${fmtYen(g.労務費||null)}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">材料費</span><span class="tab-detail-value">${fmtYen(g.材料費||null)}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">外注費</span><span class="tab-detail-value">${fmtYen(g.外注費||null)}</span></div>
+      <div class="tab-detail-row"><span class="tab-detail-label">経費</span><span class="tab-detail-value">${fmtYen(g.経費||null)}</span></div>
+      ${gt>0?`<div style="margin-top:12px;">${genkaBarHtml}</div>`:'<div class="empty-hint" style="margin-top:8px;">原価未入力</div>'}`;
+    return`
+    <div class="tab-nav-card status-${rateClass}">
+      <button class="tab-nav-card-header" onclick="toggleTabCard(this)">
+        <div class="tab-nav-card-left">
+          <span class="tab-nav-card-id">${ankenKey(p)}</span>
+          <div class="tab-nav-card-name">${kojiName(p)}</div>
+          <div class="tab-nav-card-sub">${customerName(p)}</div>
+        </div>
+        <div class="tab-nav-card-right">
+          ${rate!==null?`<div class="tab-nav-card-amount" style="color:${rc};">粗利率 ${rate}%</div>`:'<div class="tab-nav-card-amount" style="color:#999;font-size:13px;">未入力</div>'}
+          <svg class="tab-nav-card-chevron" width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,4 12,4 7,11"/></svg>
+        </div>
+      </button>
+      <div class="tab-nav-card-body">${bodyHtml}</div>
+    </div>`;
+  }).join('');
+}
 
-  const header = document.querySelector('.page-header');
-  if (header) {
-    const backBtn = document.createElement('a');
-    backBtn.href = BASE_URL + '案件台帳_アートレイズ.html';
-    backBtn.textContent = '← 案件台帳に戻る';
-    backBtn.style.cssText = 'display:inline-block;margin-bottom:10px;color:#2563eb;font-size:13px;font-weight:700;text-decoration:none;';
-    header.parentNode.insertBefore(backBtn, header);
+// ─ GitHub API 編集機能 ─
+const GH_REPO='kameisatoru-svg/genba-navi';
+const GH_FILE='data.json';
+const GH_API=`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`;
+const PAT_KEY='artrise_gh_pat';
+
+function getPAT(){return localStorage.getItem(PAT_KEY)||'';}
+function savePAT(t){localStorage.setItem(PAT_KEY,t);}
+
+// PAT設定モーダル
+function showPATModal(callback){
+  let m=document.getElementById('pat-modal');
+  if(!m){
+    m=document.createElement('div');
+    m.id='pat-modal';
+    m.innerHTML=`
+      <div class="pat-modal-backdrop" onclick="closePATModal()"></div>
+      <div class="pat-modal-box">
+        <div class="pat-modal-title">GitHub Token を設定</div>
+        <div class="pat-modal-desc">初回のみ必要です。localStorageに保存されます（GitHubには送信されません）。</div>
+        <input type="password" id="pat-input" class="pat-input" placeholder="ghp_xxxxxxxxxxxx">
+        <div class="pat-modal-actions">
+          <button class="edit-save-btn" onclick="confirmPAT()">保存して続ける</button>
+          <button class="edit-cancel-btn" onclick="closePATModal()">キャンセル</button>
+        </div>
+      </div>`;
+    document.body.appendChild(m);
   }
+  m._callback=callback;
+  m.style.display='flex';
+  setTimeout(()=>document.getElementById('pat-input')?.focus(),100);
+}
+function closePATModal(){
+  const m=document.getElementById('pat-modal');
+  if(m)m.style.display='none';
+}
+function confirmPAT(){
+  const val=document.getElementById('pat-input')?.value.trim();
+  if(!val){showToast('トークンを入力してください');return;}
+  savePAT(val);
+  closePATModal();
+  const m=document.getElementById('pat-modal');
+  if(m?._callback)m._callback();
+}
 
-  const input = document.getElementById('searchInput');
-  if (input) {
-    input.value = anken;
-    const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    renderCards(data);
+// 編集パネル開閉
+function toggleEditPanel(safeId, e){
+  e.stopPropagation();
+  const panel=document.getElementById('edit-'+safeId);
+  if(!panel)return;
+  const isOpen=panel.classList.toggle('open');
+  // カードを開いた状態にする
+  if(isOpen)panel.closest('.card').classList.add('open');
+}
+
+// 保存処理
+async function saveEdit(safeId, ankenNo, e){
+  e.stopPropagation();
+  const pat=getPAT();
+  if(!pat){showPATModal(()=>saveEdit(safeId,ankenNo,e));return;}
+
+  const statusEl=document.getElementById('edit-status-'+safeId);
+  const newStatus=document.getElementById('sel-status-'+safeId)?.value;
+  const newKeiyaku=document.getElementById('sel-keiyaku-'+safeId)?.value;
+  const nyukinSel=document.getElementById('sel-nyukin-'+safeId)?.value;
+
+  statusEl.textContent='保存中...';statusEl.className='edit-status saving';
+
+  try{
+    // 1. 現在のdata.jsonとSHAを取得
+    const res=await fetch(GH_API,{headers:{Authorization:`token ${pat}`,'Accept':'application/vnd.github.v3+json'}});
+    if(res.status===401){localStorage.removeItem(PAT_KEY);showToast('トークンが無効です。再設定してください');showPATModal(()=>saveEdit(safeId,ankenNo,e));statusEl.textContent='';return;}
+    if(!res.ok)throw new Error('取得失敗 '+res.status);
+    const fileData=await res.json();
+    const sha=fileData.sha;
+    // Base64→UTF-8を正しくデコード（日本語キー対応）
+    const raw=atob(fileData.content.replace(/\n/g,''));
+    const bytes=new Uint8Array(raw.length).map((_,i)=>raw.charCodeAt(i));
+    const currentJson=JSON.parse(new TextDecoder('utf-8').decode(bytes));
+
+    // 2. 該当案件を更新（新ルール：案件キー優先・旧案件番号も互換）
+    const ankenList=currentJson.案件||currentJson.anken||Object.values(currentJson).find(v=>Array.isArray(v)&&v[0]?.案件キー);
+    if(!ankenList)throw new Error('data.jsonの案件リストが見つかりません: keys='+Object.keys(currentJson).join(','));
+    const idx=ankenList.findIndex(p=>ankenKey(p)===ankenNo||p.案件番号===ankenNo||p.旧案件番号===ankenNo);
+    if(idx===-1)throw new Error('案件が見つかりません: '+ankenNo);
+
+    ankenList[idx].ステータス=newStatus;
+    // 契約書ステータス更新（配列対応：全契約書のステータスを更新／なければ新規作成）
+    const kArr=Array.isArray(ankenList[idx].契約書)?ankenList[idx].契約書:(ankenList[idx].契約書?[ankenList[idx].契約書]:[]);
+    if(kArr.length){
+      kArr.forEach(k=>{k.ステータス=newKeiyaku;});
+      ankenList[idx].契約書=kArr;
+    }else{
+      ankenList[idx].契約書=[{ステータス:newKeiyaku}];
+    }
+
+    // 入金状況の更新（請求は配列前提）
+    if(nyukinSel&&nyukinSel!=='none'){
+      const match=nyukinSel.match(/^r(\d+)-(nyukin|minyukin)$/);
+      if(match){
+        const ri=parseInt(match[1]);
+        const sArr=Array.isArray(ankenList[idx].請求)?ankenList[idx].請求:(ankenList[idx].請求?[ankenList[idx].請求]:[]);
+        if(sArr[ri]){
+          sArr[ri].入金状況=match[2];
+          if(match[2]==='nyukin'&&!sArr[ri].入金日){
+            const today=new Date().toISOString().split('T')[0];
+            sArr[ri].入金日=today;
+          }
+          ankenList[idx].請求=sArr;
+        }
+      }
+    }
+
+    // 3. GitHubにPUT（UTF-8→Base64を正しくエンコード）
+    const jsonStr=JSON.stringify(currentJson,null,2);
+    const encBytes=new TextEncoder().encode(jsonStr);
+    const encChars=Array.from(encBytes).map(b=>String.fromCharCode(b)).join('');
+    const newContent=btoa(encChars);
+    const putRes=await fetch(GH_API,{
+      method:'PUT',
+      headers:{Authorization:`token ${pat}`,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
+      body:JSON.stringify({message:`アプリ更新: ${ankenNo} ステータス→${newStatus}`,content:newContent,sha})
+    });
+    if(!putRes.ok)throw new Error('保存失敗 '+putRes.status);
+
+    // 4. ローカルのALL_DATAも即時更新
+    ALL_DATA=ankenList;
+    localStorage.setItem(LS_KEY,JSON.stringify(ALL_DATA));
+
+    statusEl.textContent='✓ 保存しました';statusEl.className='edit-status success';
+    setTimeout(()=>{
+      document.getElementById('edit-'+safeId)?.classList.remove('open');
+      statusEl.textContent='';
+      renderAll();
+    },1200);
+
+  }catch(err){
+    statusEl.textContent='エラー: '+err.message;statusEl.className='edit-status error';
   }
-});
+}
+
+// ─ Sheets編集 ─
+const SHEETS_URL='https://docs.google.com/spreadsheets/d/1M7CPRijH446h63LlDYIZGzwSSfUZnvqYT0VSRoEy2PU/edit';
+function openSheets(ankenNo, e){
+  e.stopPropagation();
+  // 案件番号をクリップボードにコピー
+  navigator.clipboard.writeText(ankenNo).catch(()=>{});
+  // トースト表示
+  showToast(`「${ankenNo}」をコピーしました\nSheets内でCtrl+Fで検索してください`);
+  // Sheetsを新タブで開く
+  window.open(SHEETS_URL, '_blank');
+}
+function showToast(msg){
+  let t=document.getElementById('sheets-toast');
+  if(!t){t=document.createElement('div');t.id='sheets-toast';document.body.appendChild(t);}
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ─ 他タブのカード展開 ─
+function toggleTabCard(btn){
+  const card=btn.closest('.tab-nav-card');
+  card.classList.toggle('open');
+}
+
+function toggleMeisai(id,btn){
+  const wrap=document.getElementById(id);
+  if(!wrap)return;
+  const isOpen=wrap.classList.toggle('open');
+  btn.classList.toggle('open',isOpen);
+  btn.innerHTML='<svg class="meisai-toggle__chevron" width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><polygon points="2,1 8,5 2,9"/></svg>'+(isOpen?'明細を隠す':'明細を表示');
+}
+
+loadData();
 </script>
 </body>
 </html>
