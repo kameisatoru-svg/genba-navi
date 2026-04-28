@@ -267,24 +267,129 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 <script>
 const BASE_URL='https://kameisatoru-svg.github.io/genba-navi/';
 const DATA_URL=BASE_URL+'data.json';
-const LS_KEY='artrise_allinone_v1';
+const LS_KEY='artrise_genka_v2';
 let ALL_DATA=[];
 let currentTab='anken';
 let seikyuFilter='all';
 let keiyakuFilter='all';
 let ankenStatusFilter='all';
 
+/* ═══════════════════════════════════════════════════════════
+   新ルール対応アダプター（2026/4/28 改修）
+   ・data.json の新構造（取引先マスター・案件配列）を
+     旧構造（案件番号・工事名・法人名・代表者・見積オブジェクト等）に変換
+   ・既存の renderXXX() 関数群はそのまま動く
+   ═══════════════════════════════════════════════════════════ */
+let TORIHIKI_MAP={}; // 略称 → 取引先マスターオブジェクト
+
+function buildTorihikiMap(json){
+  const map={};
+  // 新構造：取引先マスター（推奨）
+  (json.取引先マスター||[]).forEach(v => {
+    if(v.略称) map[v.略称]=v;
+    if(v.id) map[v.id]=v;
+  });
+  // 旧構造フォールバック：顧客マスター・業者マスター
+  (json.顧客マスター||[]).forEach(c => {
+    if(c.顧客略) map[c.顧客略]={
+      id:c.旧T番号||c.id||'', 略称:c.顧客略,
+      正式名称:c.正式名称||'', basic:{rep:c.代表者||'',contact:c.担当者||''},
+      contact:{tel:c.電話||'',mail:c.メール||'',address:c.住所||'',touroku:c.登録番号||''},
+      memo:c.備考||''
+    };
+  });
+  (json.業者マスター||[]).forEach(g => {
+    if(g.業者略) map[g.業者略]={
+      id:g.旧T番号||g.id||'', 略称:g.業者略,
+      正式名称:g.正式名称||'', basic:{rep:'',contact:''},
+      contact:{tel:'',mail:'',address:'',touroku:''},
+      memo:g.備考||''
+    };
+  });
+  return map;
+}
+
+function adaptAnken(p){
+  // 新形式 p（案件キー・正式工事名・顧客略・見積配列等）→ 旧形式に変換
+  const cust=TORIHIKI_MAP[p.顧客略]||{};
+  const ms=Array.isArray(p.見積)?p.見積:(p.見積?[p.見積]:[]);
+  const m0=ms[0]||{};
+  const cs=Array.isArray(p.契約書)?p.契約書:(p.契約書?[p.契約書]:[]);
+  const k0=cs[0]||{};
+  const seikyuArr=(Array.isArray(p.請求)?p.請求:(p.請求?[p.請求]:[])).map(r=>({
+    請求番号:r.請求番号||r.書類番号||'',
+    請求金額:r.請求金額!=null?r.請求金額:(r.金額||0),
+    請求日:r.請求日||r.発行日||'',
+    支払期限:r.支払期限||'',
+    入金状況:r.入金状況||'',
+    入金日:r.入金日||'',
+    PDF:r.PDF||r.ファイル||'',
+    備考:r.備考||'',
+    明細:r.明細||[],
+    税抜合計:r.税抜合計, 消費税:r.消費税, 税込合計:r.税込合計
+  }));
+  const chumonArr=(Array.isArray(p.注文書)?p.注文書:(p.注文書?[p.注文書]:[])).map(c=>{
+    const v=TORIHIKI_MAP[c.業者略]||{};
+    return {
+      注文番号:c.注文番号||c.書類番号||'',
+      業者名:c.業者名||v.正式名称||v.略称||'',
+      業者略:c.業者略||'',
+      注文金額:c.注文金額!=null?c.注文金額:(c.金額||0),
+      注文日:c.注文日||c.発行日||'',
+      納期:c.納期||'',
+      PDF:c.PDF||c.ファイル||''
+    };
+  });
+  return {
+    ...p, // 元のプロパティは保持
+    案件番号: p.案件キー||p.案件番号||p.旧案件番号||'-',
+    工事名: p.正式工事名||p.工事名||'-',
+    法人名: cust.正式名称||p.法人名||'',
+    代表者: cust.basic?.rep||p.代表者||'',
+    施工場所: p.施工場所||'',
+    ステータス: p.ステータス||'',
+    元請フラグ: p.元請フラグ||false,
+    元請名: p.元請名||'',
+    備考: p.備考||'',
+    driveUrl: p.driveUrl||'',
+    見積: {
+      見積番号: m0.見積番号||m0.書類番号||'',
+      見積日: m0.見積日||m0.発行日||'',
+      見積金額: m0.見積金額!=null?m0.見積金額:(m0.金額||0),
+      備考: m0.備考||'',
+      PDF: m0.PDF||m0.ファイル||'',
+      明細: m0.明細||[]
+    },
+    請求: seikyuArr,
+    注文書: chumonArr,
+    契約書: {
+      契約番号: k0.契約番号||k0.書類番号||'',
+      契約日: k0.契約日||'',
+      契約金額: k0.契約金額!=null?k0.契約金額:(k0.金額||0),
+      ステータス: k0.ステータス||'',
+      PDF: k0.PDF||k0.ファイル||''
+    },
+    原価: p.原価||{}
+  };
+}
+
 async function loadData(){
   try{
     const res=await fetch(DATA_URL+'?v='+Date.now());
     if(!res.ok)throw new Error('HTTP '+res.status);
     const json=await res.json();
-    ALL_DATA=json.案件||[];
-    localStorage.setItem(LS_KEY,JSON.stringify(ALL_DATA));
+    TORIHIKI_MAP=buildTorihikiMap(json);
+    const rawAnken=json.案件||[];
+    ALL_DATA=rawAnken.map(adaptAnken);
+    localStorage.setItem(LS_KEY,JSON.stringify({anken:ALL_DATA,torihiki:TORIHIKI_MAP}));
     setSourceBadge('fetch',json.最終更新||'');
     document.getElementById('lastUpdated').textContent='最終更新：'+(json.最終更新||'-');
   }catch(e){
-    try{ALL_DATA=JSON.parse(localStorage.getItem(LS_KEY)||'[]');}catch(e2){ALL_DATA=[];}
+    try{
+      const cache=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+      ALL_DATA=cache.anken||[];
+      TORIHIKI_MAP=cache.torihiki||{};
+    }catch(e2){ALL_DATA=[];TORIHIKI_MAP={};}
     setSourceBadge('local','');
   }
   renderAll();
