@@ -307,131 +307,50 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 
 <script>
 /* ═══════════════════════════════════════════════════════════
-   取引先データ（案C採用：静的JS配列で保持）
-   案件台帳は data.json から動的読込みするが、
-   取引先台帳は詳細フィールド（関係性/業種/メモ等）が豊富で
-   data.json に無いため、このHTML内で一元管理する。
-   新規追加・修正はこの配列を直接編集する。
+   取引先データ（2026/4/28 改修）
+   ・ data.json の「取引先マスター」をフェッチして使用
+   ・ 関連案件 (cases) は「案件」配列から逆引きで動的生成
+   ・ 新規追加・修正は data.json を直接編集
    ═══════════════════════════════════════════════════════════ */
-const VENDORS = [
-  {
-    id:"T-001", name:"社会福祉法人 玉寿会（さくら苑）",
-    rel:["顧客"], type:["公共施設"],
-    basic:{ contact:"西 俊至 様（事務課長）", rep:"山田 勝徳 理事長" },
-    contact:{ tel:"096-875-1139", mobile:"", fax:"", mail:"nishi@sakura-en.com", address:"熊本県玉名市伊倉北方1533", touroku:"" },
-    cases:[ {num:"AR-2026-0004", title:"床工事"} ],
-    memo:"契約日：令和8年3月16日。第1期3/21〜22施工。第2期4/18〜20予定。税込¥9,990,200。",
-    search:"t-001 さくら苑 玉寿会 西俊至 山田勝徳 熊本 玉名"
-  },
-  {
-    id:"T-002", name:"松村整骨院（愛の治療院）",
-    rel:["顧客"], type:["住宅・個人"],
-    basic:{ contact:"松村 様", rep:"" },
-    contact:{ tel:"", mobile:"", fax:"", mail:"", address:"大分県別府市（詳細未登録）", touroku:"" },
-    cases:[ {num:"AR-2026-0005", title:"外装補修"} ],
-    memo:"外壁コーキング・看板シート張替他（¥206,195税込）。紹介経由（元同級生の妻が勤務）。",
-    search:"t-002 松村整骨院 愛の治療院 松村 別府 外装 看板"
-  },
-  {
-    id:"T-003", name:"株式会社 信和",
-    rel:["顧客","元請"], type:["ゼネコン・元請"],
-    basic:{ contact:"加藤 博和 様", rep:"清家 和子" },
-    contact:{ tel:"0977-21-9640", mobile:"090-3607-5427", fax:"0977-21-9669", mail:"h-katou@ctb.ne.jp", address:"〒874-0942　大分県別府市千代町6-3", touroku:"" },
-    cases:[ {num:"AR-2026-0006", title:"アルミアングル"}, {num:"AR-2026-0007", title:"ルーツブロア"} ],
-    memo:"元請として発注いただくケースと、協力業者として連携するケースあり。過去：ビーコンプラザ トイレ・シャワー室改修工事 等。",
-    search:"t-003 信和 加藤博和 清家和子 別府 ゼネコン 元請 ビーコンプラザ"
-  },
-  {
-    id:"T-004", name:"小田工業",
-    rel:["業者"], type:["左官"],
-    basic:{ contact:"", rep:"小田 勝美" },
-    contact:{ tel:"0977-66-4198", mobile:"090-3320-5931", fax:"", mail:"", address:"別府市中須賀東町5-3組", touroku:"T3-8103-2472-2011", furikomi:"大分県信用組合 上人支店（普通）4034903" },
-    cases:[ {num:"AR-2026-0007", title:"ルーツブロア"} ],
-    memo:"無収縮モルタル塗り工事。請求書より情報取得（令和8年3月14日付）。",
-    search:"t-004 小田工業 小田勝美 別府 左官 モルタル"
-  },
-  {
-    id:"T-005", name:"塩出木工",
-    rel:["業者"], type:["木工事","建具・サッシ"],
-    basic:{ contact:"", rep:"" },
-    contact:{ tel:"", mobile:"", fax:"", mail:"y-siodew@ctb.ne.jp", address:"", touroku:"" },
-    cases:[ {num:"AR-2026-0006", title:"アルミアングル"} ],
-    memo:"AR-2026-0006の下請。住所・TEL・登録番号は追加情報待ち。",
-    search:"t-005 塩出木工 木工 建具 アルミ 別府"
-  },
-  {
-    id:"T-006", name:"有限会社 インテリア中津屋",
-    rel:["業者"], type:["床工事","内装"],
-    basic:{ contact:"佐藤", rep:"" },
-    contact:{ tel:"0978-63-0081", mobile:"", fax:"0978-63-1833", mail:"", address:"〒873-0001　杵築市煙硝倉1306-1", touroku:"T2320002015061" },
-    cases:[ {num:"AR-2026-0004", title:"床工事（第2期）"} ],
-    memo:"さくら苑 第2期（4/18〜20）で使用。担当者・携帯は追加情報待ち。",
-    search:"t-006 インテリア中津屋 杵築 床 内装 フローリング タイル 佐藤"
-  },
-  {
-    id:"T-007", name:"いわい装飾",
-    rel:["業者"], type:["内装"],
-    basic:{ contact:"岩井 健一", rep:"" },
-    contact:{ tel:"", mobile:"", fax:"", mail:"", address:"〒874-0912　別府市南須賀1組", touroku:"T2810104242784" },
-    cases:[ {num:"AR-2026-0004", title:"床工事（第2期）"} ],
-    memo:"さくら苑 第2期（4/18〜20）で使用。TEL・メールは追加情報待ち。",
-    search:"t-007 いわい装飾 岩井健一 別府 内装 壁紙 クロス 装飾"
-  },
-  {
-    id:"T-008", name:"有限会社ウインズコーポレーション",
-    rel:["顧客"], type:["店舗・法人"],
-    basic:{ contact:"", rep:"" },
-    contact:{ tel:"", mobile:"", fax:"", mail:"", address:"", touroku:"（補完待ち）" },
-    cases:[ {num:"AR-26-008", title:"民泊客家 ロールスクリーン補修"} ],
-    memo:"民泊客家（大村さん）オーナー企業。登録番号補完待ち。",
-    search:"t-008 ウインズコーポレーション 民泊 客家 大村"
-  },
-  {
-    id:"T-009", name:"株式会社信用産業",
-    rel:["顧客"], type:["店舗・法人"],
-    basic:{ contact:"", rep:"江田 至 様" },
-    contact:{ tel:"", mobile:"", fax:"", mail:"i.kohda@ssg.co.jp", address:"", touroku:"" },
-    cases:[ {num:"AR-26-010", title:"うた乃別府本店 厨房改装工事"}, {num:"AR-26-012", title:"うた乃別府本店 階段閉鎖工事"} ],
-    memo:"うた乃別府本店・うた乃総本店のオーナー企業。過去：製麺室塗装・スチコン設置付帯・エアコン取替等（¥671,000税込・2026/02/21）。厨房工事はタニコー大分営業所と連携。",
-    search:"t-009 信用産業 江田至 別府 うた乃 厨房 飲食店"
-  },
-  {
-    id:"T-010", name:"株式会社バイオメディカル",
-    rel:["顧客"], type:["店舗・法人"],
-    basic:{ contact:"坂本 様", rep:"衛藤 和三" },
-    contact:{ tel:"", mobile:"", fax:"", mail:"biomedical.sakamoto@gmail.com", address:"", touroku:"" },
-    cases:[ {num:"", title:"アクリル加工（¥38,500税込）"} ],
-    memo:"アクリル加工（¥38,500税込）。",
-    search:"t-010 バイオメディカル アクリル加工 坂本 衛藤"
-  },
-  {
-    id:"T-011", name:"株式会社ネクサスプラザ",
-    rel:["顧客"], type:["店舗・法人"],
-    basic:{ contact:"力武 太郎 様（代表取締役）", rep:"力武 太郎" },
-    contact:{ tel:"", mobile:"", fax:"", mail:"t-rikitake@nexusplaza.com", address:"大分県大分市府内町3丁目7番7号", touroku:"" },
-    cases:[ {num:"AR-26-011", title:"自火報制御盤修理・排煙窓金物固定（¥114,180税込）"} ],
-    memo:"飲食事業（串焼きのたつみ・焼肉のたつみ等）・不動産事業。府内町ネクサスプラザビル（旧セントラルプラザビル）オーナー。設立：平成25年10月20日。",
-    search:"t-011 ネクサスプラザ 力武太郎 府内町 大分 飲食 不動産 たつみ"
-  },
-  {
-    id:"T-012", name:"未来システム熊本",
-    rel:["顧客"], type:["店舗・法人"],
-    basic:{ contact:"綾部 圭祐", rep:"" },
-    contact:{ tel:"090-4358-0576", mobile:"", fax:"", mail:"mirai_system@oregano.ocn.ne.jp", address:"〒861-8035 熊本県熊本市東区御領5丁目3-13", touroku:"" },
-    cases:[],
-    memo:"営業所住所（2026/4/3登録）。",
-    search:"t-012 未来システム 熊本 綾部圭祐"
-  },
-  {
-    id:"T-013", name:"株式会社島津製作所",
-    rel:["顧客","元請"], type:["ゼネコン・元請"],
-    basic:{ contact:"竹村 勝利", rep:"" },
-    contact:{ tel:"", mobile:"", fax:"", mail:"ktake@shimadzu.co.jp", address:"", touroku:"" },
-    cases:[ {num:"AR-26-013", title:"大分リハビリテーション病院 一般撮影室内装工事"} ],
-    memo:"大分リハビリテーション病院関連。施工日程：7/18（土）〜19（日）。5月連休明けに確定予定。",
-    search:"t-013 島津製作所 竹村勝利 大分 リハビリ 撮影室"
+let VENDORS = [];
+let ANKEN_LIST = [];
+
+/* data.json を読み込んで VENDORS を構築 */
+async function loadData(){
+  try{
+    const res = await fetch('data.json?v=' + Date.now());
+    const data = await res.json();
+    const master = data['取引先マスター'] || [];
+    ANKEN_LIST = data['案件'] || [];
+
+    VENDORS = master.map(v => ({
+      id: v.id,
+      name: v['正式名称'] || '',
+      ryaku: v['略称'] || '',
+      rel: v.rel || [],
+      type: v.type || [],
+      basic: v.basic || {},
+      contact: v.contact || {},
+      memo: v.memo || '',
+      search: v.search || '',
+      cases: computeCases(v['略称'])
+    }));
+  }catch(e){
+    console.error('data.json 読み込みエラー:', e);
+    VENDORS = [];
   }
-];
+}
+
+/* 案件配列から「顧客略 == ryaku」の案件を逆引き */
+function computeCases(ryaku){
+  if(!ryaku) return [];
+  return ANKEN_LIST
+    .filter(a => a['顧客略'] === ryaku)
+    .map(a => ({
+      num: a['旧案件番号'] || a['案件キー'],
+      title: a['正式工事名'] || a['案件キー'] || ''
+    }));
+}
 
 /* ═══════════════════════════════════════════════════════════
    状態
@@ -734,7 +653,7 @@ function clearSelection(){
 /* ═══════════════════════════════════════════════════════════
    初期化
    ═══════════════════════════════════════════════════════════ */
-renderVendors();
+loadData().then(() => renderVendors());
 </script>
 </body>
 </html>
