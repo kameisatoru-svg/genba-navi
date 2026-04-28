@@ -141,9 +141,16 @@
     color: var(--white) !important;
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 4px 28px;
   }
   .band-label { color: #dddddd !important; margin-right: 4px; }
+  .koji-name {
+    font-family: 'Yu Mincho','Hiragino Mincho ProN',serif;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
 
   /* ===== 発注金額ボックス：ダークグレー＋白抜き ===== */
   .amount-box {
@@ -320,7 +327,7 @@
 
   <!-- 工事概要帯 -->
   <div class="project-band">
-    <span><span class="band-label">工事件名：</span></span>
+    <span><span class="band-label">工事件名：</span><span class="koji-name"></span></span>
     <span><span class="band-label">施工場所：</span></span>
     <span><span class="band-label">工期：</span></span>
   </div>
