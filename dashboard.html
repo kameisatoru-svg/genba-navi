@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ja"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>ダッシュボード｜現場ナビ</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1e2d40">
+<link rel="stylesheet" href="common.css">
+<style>
+/* body：flex縦並びレイアウトだけページ固有 */
+body{display:flex;flex-direction:column;}
+
+/* ヘッダー */
+.header{background:var(--navy);padding:env(safe-area-inset-top,0) 0 0;flex-shrink:0;}
+.header-inner{height:56px;display:flex;align-items:center;padding:0 8px 0 4px;}
+.header-back{width:44px;height:44px;border:none;background:transparent;color:rgba(255,255,255,0.85);cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:8px;flex-shrink:0;}
+.header-back:active{background:rgba(255,255,255,0.12);}
+.header-title{font-size:16px;font-weight:800;color:var(--white);letter-spacing:0.04em;flex:1;}
+.header-date{font-size:11px;color:rgba(255,255,255,0.55);text-align:right;line-height:1.5;padding-right:8px;}
+
+/* スクロールエリア */
+.scroll-area{padding:20px 16px max(24px,env(safe-area-inset-bottom));}
+
+/* 今日の日付カード */
+.today-card{background:var(--navy2);border-radius:16px;padding:16px 18px;margin-bottom:16px;display:flex;align-items:center;gap:14px;}
+.today-icon{width:44px;height:44px;border-radius:12px;background:rgba(200,169,110,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.today-body{flex:1;}
+.today-label{font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:2px;}
+.today-val{font-size:14px;font-weight:700;color:var(--white);line-height:1.4;}
+
+/* KPI */
+.sec-title{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:0.08em;margin-bottom:10px;padding-left:2px;}
+
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.kpi-card{background:var(--white);border-radius:14px;padding:14px 14px 12px;box-shadow:0 2px 8px rgba(30,45,64,0.07);}
+.kpi-label{font-size:10px;color:var(--text2);margin-bottom:4px;letter-spacing:0.04em;}
+.kpi-val{font-size:20px;font-weight:900;color:var(--navy);letter-spacing:-0.02em;line-height:1.1;}
+.kpi-val small{font-size:11px;font-weight:400;color:var(--text2);margin-left:2px;}
+.kpi-sub{font-size:10px;color:var(--text2);margin-top:3px;}
+.kpi-accent{color:var(--accent);}
+.kpi-green{color:var(--green);}
+.kpi-blue{color:var(--blue);}
+
+.kpi-bar-wrap{background:var(--white);border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(30,45,64,0.07);margin-bottom:10px;}
+.kpi-bar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.kpi-bar-label{font-size:10px;color:var(--text2);}
+.kpi-bar-pct{font-size:13px;font-weight:700;color:var(--navy);}
+.kpi-bar-bg{height:8px;background:rgba(30,45,64,0.1);border-radius:99px;overflow:hidden;}
+.kpi-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),#e8c07e);transition:width 0.8s ease;}
+
+.anken-list{background:var(--white);border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(30,45,64,0.07);margin-bottom:10px;}
+.anken-row{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid rgba(30,45,64,0.06);}
+.anken-row:last-child{border-bottom:none;}
+.anken-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.anken-body{flex:1;min-width:0;}
+.anken-name{font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.anken-status{font-size:10px;color:var(--text2);margin-top:1px;}
+.anken-amount{font-size:12px;font-weight:700;color:var(--navy);white-space:nowrap;}
+.kpi-loading{text-align:center;padding:20px;color:var(--text2);font-size:12px;}
+.kpi-error{text-align:center;padding:12px;color:#c0392b;font-size:11px;}
+
+/* 今の動き：トピック3分割グリッド */
+.topic-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;}
+.topic-cell{background:var(--white);border-radius:14px;padding:12px 12px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(30,45,64,0.07);}
+.topic-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.topic-body{flex:1;min-width:0;}
+.topic-label{font-size:10px;color:var(--text2);letter-spacing:0.04em;margin-bottom:2px;white-space:nowrap;}
+.topic-count{font-size:22px;font-weight:900;color:var(--navy);line-height:1;letter-spacing:-0.02em;}
+.topic-count small{font-size:11px;font-weight:400;color:var(--text2);margin-left:2px;}
+
+.sub-title{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:0.08em;margin:14px 0 8px 2px;}
+.sub-title span{font-weight:400;margin-left:4px;}
+
+.footer-info{text-align:center;font-size:10px;color:var(--text2);opacity:0.6;padding:4px 0 8px;}
+</style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<div class="header">
+  <div class="header-inner">
+    <button class="header-back" onclick="location.href='index.html'" title="戻る">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <path d="M14 4 L7 11 L14 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+    </button>
+    <div class="header-title">ダッシュボード</div>
+    <div class="header-date" id="headerDate">--/-- --:--</div>
+  </div>
+</div>
+
+<!-- スクロールエリア -->
+<div class="scroll-area">
+
+  <!-- 今日の日付カード -->
+  <div class="today-card">
+    <div class="today-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="4" width="18" height="17" rx="3" stroke="#c8a96e" stroke-width="1.5" fill="none"></rect>
+        <line x1="3" y1="9" x2="21" y2="9" stroke="#c8a96e" stroke-width="1.5"></line>
+        <line x1="8" y1="2" x2="8" y2="6" stroke="#c8a96e" stroke-width="1.5" stroke-linecap="round"></line>
+        <line x1="16" y1="2" x2="16" y2="6" stroke="#c8a96e" stroke-width="1.5" stroke-linecap="round"></line>
+      </svg>
+    </div>
+    <div class="today-body">
+      <div class="today-label">TODAY</div>
+      <div class="today-val" id="todayDate">読み込み中...</div>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="sec-title">経営サマリー</div>
+  <div id="kpiArea">
+    <div class="kpi-loading">データ読み込み中...</div>
+  </div>
+
+  <div class="footer-info">株式会社アート・レイズ　現場ナビ v2.0</div>
+
+</div>
+
+<script>
+function updateDate(){
+  const now = new Date();
+  const days = ['日','月','火','水','木','金','土'];
+  const d = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日（${days[now.getDay()]}）`;
+  document.getElementById('todayDate').textContent = d;
+  document.getElementById('headerDate').textContent =
+    `${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+}
+updateDate();
+setInterval(updateDate, 60000);
+
+const ANKEN_CSV_URL = 'https://docs.google.com/spreadsheets/d/1M7CPRijH446h63LlDYIZGzwSSfUZnvqYT0VSRoEy2PU/export?format=csv&sheet=Sheet1';
+const STATUS_ORDER = ['施工中','見積作成中','見積提出済み','請求済み','入金済み','完了'];
+
+function parseCSV(text){
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.replace(/"/g,'').trim());
+  return lines.slice(1).map(line => {
+    const vals = [];
+    let cur = '', inQ = false;
+    for(const c of line){
+      if(c==='"'){ inQ=!inQ; }
+      else if(c===','&&!inQ){ vals.push(cur.trim()); cur=''; }
+      else cur+=c;
+    }
+    vals.push(cur.trim());
+    const obj = {};
+    headers.forEach((h,i) => obj[h] = (vals[i]||'').replace(/"/g,''));
+    return obj;
+  });
+}
+
+function fmt(n){
+  if(!n || isNaN(n)) return '-';
+  return '¥' + Number(n).toLocaleString();
+}
+
+function renderKPI(rows){
+  const active = rows.filter(r => r['ステータス'] !== '完了');
+  const totalMitsumori = active.reduce((s,r) => s + (parseFloat(r['見積金額'])||0), 0);
+  const totalSeikyu    = active.reduce((s,r) => s + (parseFloat(r['請求金額'])||0), 0);
+  const totalNyukin    = active.filter(r => r['入金状況']==='入金済み')
+                               .reduce((s,r) => s + (parseFloat(r['請求金額'])||0), 0);
+  const nyukinRate     = totalSeikyu > 0 ? Math.round(totalNyukin / totalSeikyu * 100) : 0;
+  const activeCount    = active.filter(r => !['入金済み','完了'].includes(r['ステータス'])).length;
+
+  const mitsumoriCount = active.filter(r => ['見積作成中','見積提出済み'].includes(r['ステータス'])).length;
+  const sekoCount      = active.filter(r => r['ステータス']==='施工中').length;
+  const nyukinMachi    = active.filter(r => r['ステータス']==='請求済み').length;
+
+  const sorted = [...active].sort((a,b) =>
+    STATUS_ORDER.indexOf(a['ステータス']) - STATUS_ORDER.indexOf(b['ステータス'])
+  );
+
+  const dotColor = {
+    '施工中':'#f39c12','見積提出済み':'#1a6fc4','見積作成中':'#9b59b6',
+    '請求済み':'#1a7a30','入金済み':'#27ae60','完了':'#95a5a6'
+  };
+
+  let html = `
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">受注総額（見積）</div>
+        <div class="kpi-val kpi-accent">${fmt(totalMitsumori)}</div>
+        <div class="kpi-sub">進行中 ${active.length}件</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">請求済み金額</div>
+        <div class="kpi-val kpi-blue">${fmt(totalSeikyu)}</div>
+        <div class="kpi-sub">入金済 ${fmt(totalNyukin)}</div>
+      </div>
+    </div>
+    <div class="kpi-bar-wrap">
+      <div class="kpi-bar-header">
+        <div class="kpi-bar-label">入金率（請求済みに対する入金済み）</div>
+        <div class="kpi-bar-pct">${nyukinRate}%</div>
+      </div>
+      <div class="kpi-bar-bg">
+        <div class="kpi-bar-fill" style="width:${nyukinRate}%"></div>
+      </div>
+    </div>
+    <div class="topic-grid">
+      <div class="topic-cell">
+        <div class="topic-dot" style="background:#9b59b6;"></div>
+        <div class="topic-body">
+          <div class="topic-label">見積対応中</div>
+          <div class="topic-count">${mitsumoriCount}<small>件</small></div>
+        </div>
+      </div>
+      <div class="topic-cell">
+        <div class="topic-dot" style="background:#f39c12;"></div>
+        <div class="topic-body">
+          <div class="topic-label">施工中</div>
+          <div class="topic-count">${sekoCount}<small>件</small></div>
+        </div>
+      </div>
+      <div class="topic-cell">
+        <div class="topic-dot" style="background:#1a7a30;"></div>
+        <div class="topic-body">
+          <div class="topic-label">入金待ち</div>
+          <div class="topic-count">${nyukinMachi}<small>件</small></div>
+        </div>
+      </div>
+    </div>
+    <div class="sub-title">進行中案件 <span>(${activeCount}件)</span></div>
+    <div class="anken-list">`;
+
+  sorted.forEach(r => {
+    const status = r['ステータス'] || '';
+    const dot = dotColor[status] || '#aaa';
+    const amt = r['請求金額'] ? fmt(r['請求金額']) : (r['見積金額'] ? fmt(r['見積金額']) : '-');
+    const name = r['工事名'] || '-';
+    html += `
+      <div class="anken-row">
+        <div class="anken-dot" style="background:${dot};"></div>
+        <div class="anken-body">
+          <div class="anken-name">${name}</div>
+          <div class="anken-status">${status}　${r['案件番号']||''}</div>
+        </div>
+        <div class="anken-amount">${amt}</div>
+      </div>`;
+  });
+
+  html += `</div>`;
+  document.getElementById('kpiArea').innerHTML = html;
+}
+
+async function loadKPI(){
+  try {
+    const res = await fetch(ANKEN_CSV_URL + '&t=' + Date.now());
+    if(!res.ok) throw new Error('fetch failed');
+    const text = await res.text();
+    const rows = parseCSV(text);
+    renderKPI(rows);
+  } catch(e) {
+    document.getElementById('kpiArea').innerHTML =
+      '<div class="kpi-error">データの読み込みに失敗しました。<br>ネットワークを確認してください。</div>';
+  }
+}
+
+loadKPI();
+</script>
+</body></html>
