@@ -637,6 +637,7 @@ const oldAnken = p => p.旧案件番号 || (p.案件番号 && p.案件キー ? p
 const kojiName = p => p.正式工事名 || p.工事名 || '-';
 const customerName = p => (CUSTOMERS[p.顧客略]?.正式名称) || p.法人名 || p.代表者 || '-';
 const customerRep = p => (CUSTOMERS[p.顧客略]?.代表者) || p.代表者 || '-';
+const customerContact = p => (CUSTOMERS[p.顧客略]?.担当者) || p.担当者 || '';
 const vendorName = c => (VENDORS[c.業者略]?.正式名称) || c.業者名 || '-';
 // 配列保証（旧構造の単一オブジェクトもラップ）
 const asArray = v => Array.isArray(v) ? v : (v && typeof v === 'object' && Object.keys(v).length ? [v] : []);
@@ -669,11 +670,35 @@ const uriageOf = p => {
   return ms.reduce((mx, m) => Math.max(mx, docAmt(m)), 0);
 };
 
-// マスター情報のロード（顧客/業者マスターを連想配列に変換）
+// マスター情報のロード（取引先マスター → CUSTOMERS / VENDORS に振り分け）
+// 新構造: 取引先マスター[{id, 略称, 正式名称, rel:[顧客|業者|元請|...], basic:{rep,contact}, contact:{...}}]
 function loadMasters(json){
-  CUSTOMERS = Object.fromEntries((json.顧客マスター || []).map(c => [c.顧客略, c]));
-  VENDORS = Object.fromEntries((json.業者マスター || []).map(v => [v.業者略, v]));
-  // 旧構造 取引先 配列のフォールバック
+  CUSTOMERS = {};
+  VENDORS = {};
+  // 新構造（取引先マスター）対応
+  (json.取引先マスター || []).forEach(t => {
+    if(!t.略称) return;
+    const entry = {
+      顧客略: t.略称,
+      業者略: t.略称,
+      id: t.id || '',
+      正式名称: t.正式名称 || '',
+      代表者: t.basic?.rep || '',
+      担当者: t.basic?.contact || '',
+      tel: t.contact?.tel || '',
+      mobile: t.contact?.mobile || '',
+      mail: t.contact?.mail || '',
+      address: t.contact?.address || '',
+      memo: t.memo || ''
+    };
+    const rel = Array.isArray(t.rel) ? t.rel : [];
+    if(rel.includes('顧客') || rel.includes('元請')) CUSTOMERS[t.略称] = entry;
+    if(rel.includes('業者')) VENDORS[t.略称] = entry;
+  });
+  // 旧構造（顧客マスター・業者マスター）も互換維持
+  (json.顧客マスター || []).forEach(c => { if(c.顧客略 && !CUSTOMERS[c.顧客略]) CUSTOMERS[c.顧客略] = c; });
+  (json.業者マスター || []).forEach(v => { if(v.業者略 && !VENDORS[v.業者略]) VENDORS[v.業者略] = v; });
+  // さらに旧構造 取引先 配列のフォールバック
   if(!Object.keys(CUSTOMERS).length && Array.isArray(json.取引先)){
     json.取引先.forEach(t => {
       const key = t.取引先番号 || t.取引先名;
@@ -826,14 +851,16 @@ function buildAnkenCard(p){
   const keiyakuColor=keiyakuStatus==='締結済み'?'#1a7a30':'#d97706';
   // DOM ID（配列インデックス方式・日本語キー衝突回避）
   const safeId=safeAnkenId(p);
-  // 顧客名・代表者（マスター優先）
+  // 顧客名・代表者・担当者（マスター優先）
   const cName=customerName(p);
   const cRep=customerRep(p);
+  const cContact=customerContact(p);
 
   // ── 詳細セクションHTML生成 ──
   const detailBasic=`
     <div class="info-grid">
       <div class="info-item"><span class="info-label">法人名</span><span class="info-value">${cName}</span></div>
+      ${cContact?`<div class="info-item"><span class="info-label">担当者</span><span class="info-value">${cContact}</span></div>`:''}
       <div class="info-item"><span class="info-label">代表者</span><span class="info-value">${cRep}</span></div>
       <div class="info-item"><span class="info-label">施工場所</span><span class="info-value">${p.施工場所||'-'}</span></div>
       ${p.元請フラグ?`<div class="info-item"><span class="info-label">元請</span><span class="info-value" style="color:#b45309;">${p.元請名||'-'}</span></div>`:''}
