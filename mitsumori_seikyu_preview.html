@@ -275,6 +275,10 @@ tr.dragging{opacity:0.4;}
       <div class="fgroup"><label>工事件名</label><input id="kojimei" type="text" value="" placeholder="例：〇〇邸 外壁塗装工事" oninput="render()"></div>
       <div class="fgroup"><label>施工場所</label><input id="seshubasho" type="text" value="" placeholder="例：大分県別府市〇〇" oninput="render()"></div>
       <div class="fgroup" id="koki-wrap" style="display:none;"><label>工事期間</label><input id="koki" type="text" value="" oninput="render()" placeholder="例：2026/4/22 または 2026/4/1〜2026/4/30"></div>
+      <div class="fgroup-row">
+        <div class="fgroup"><label>案件キー（PDFファイル名用）</label><input id="ankenKey" type="text" value="" placeholder="例：ネクサス-串たつ外壁-26" oninput="updateDocTitle()"></div>
+        <div class="fgroup" style="flex:0 0 110px;"><label>サフィックス（任意）</label><input id="fileSuffix" type="text" value="" placeholder="例：第1期・改1" oninput="updateDocTitle()"></div>
+      </div>
       <hr class="section-sep">
       <div id="items-editor"></div>
       <div class="total-box" id="total-box"></div>
@@ -458,6 +462,28 @@ function switchMode(v){
   render();
 }
 
+// ── タイトル更新（タブ表示・PDF初期ファイル名）──
+// 短縮一文字方式に従って document.title を組み立てる：
+//   サフィックスあり：[短縮]_[サフィックス]_[案件キー]
+//   サフィックスなし：[短縮]_[案件キー]
+//   案件キー未入力時：書類種別ラベル（プレビュー用）にフォールバック
+function updateDocTitle(){
+  const SHORT = {mitsumori:'見', seikyu:'請'};
+  const ankenEl = document.getElementById('ankenKey');
+  const sufEl = document.getElementById('fileSuffix');
+  const ankenKey = ankenEl ? ankenEl.value.trim() : '';
+  const suffix = sufEl ? sufEl.value.trim() : '';
+  const tan = SHORT[docType] || '';
+  let fname;
+  if(ankenKey){
+    fname = suffix ? `${tan}_${suffix}_${ankenKey}` : `${tan}_${ankenKey}`;
+  } else {
+    // 案件キー未入力時は従来のプレビュー用ラベル
+    fname = LABELS[docType].topbarTitle;
+  }
+  document.title = fname;
+}
+
 // ── 書類種別切替 ──
 function switchDocType(type){
   docType = type;
@@ -469,7 +495,7 @@ function switchDocType(type){
   document.getElementById('dt-seikyu').classList.toggle('active', type==='seikyu');
 
   // タイトルタグ
-  document.title = L.topbarTitle;
+  updateDocTitle();
 
   // 入力ラベル
   document.getElementById('label-docNo').textContent = L.docNoLabel;
@@ -983,7 +1009,7 @@ function render(){
       <div class="header-left" style="text-align:right;">
         <div>
           <div class="company-name"><span class="co-prefix">株式会社</span>アート・レイズ</div>
-          <div class="company-info">〒874-0829　大分県別府市上原町13番25号<br>TEL　0977-21-0603　担当：亀井 悟</div>
+          <div class="company-info">〒874-0829　大分県別府市上原町13番25号<br>TEL　0977-21-0603　担当：亀井 悟<br>登録番号：T4320001006992</div>
         </div>
         <img class="kakuin" src="${KAKUIN}" alt="角印">
       </div>
@@ -1577,7 +1603,7 @@ function buildDocHTML(){
       </div>`;
 
   return `<!DOCTYPE html>
-<html lang="ja"><head><meta charset="UTF-8"><title>${L.topbarTitle}_${mno}</title>
+<html lang="ja"><head><meta charset="UTF-8"><title>${document.title}</title>
 <style>${TMPL_CSS}
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    スマートフォン対応（768px以下）
@@ -1668,7 +1694,7 @@ function buildDocHTML(){
     <div class="header-left" style="text-align:right;">
       <div>
         <div class="company-name"><span class="co-prefix">株式会社</span>アート・レイズ</div>
-        <div class="company-info">〒874-0829　大分県別府市上原町13番25号<br>TEL　0977-21-0603　担当：亀井 悟</div>
+        <div class="company-info">〒874-0829　大分県別府市上原町13番25号<br>TEL　0977-21-0603　担当：亀井 悟<br>登録番号：T4320001006992</div>
       </div>
       <img class="kakuin" src="${KAKUIN}" alt="角印">
     </div>
