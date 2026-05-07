@@ -29,27 +29,49 @@ body{display:flex;flex-direction:column;}
 .today-body{flex:1;}
 .today-label{font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:2px;}
 .today-val{font-size:14px;font-weight:700;color:var(--white);line-height:1.4;}
+.fy-tag{font-size:10px;color:var(--accent);margin-left:8px;font-weight:600;}
 
-/* KPI */
+/* セクションタイトル */
 .sec-title{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:0.08em;margin-bottom:10px;padding-left:2px;}
 
-.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
-.kpi-card{background:var(--white);border-radius:14px;padding:14px 14px 12px;box-shadow:0 2px 8px rgba(30,45,64,0.07);}
-.kpi-label{font-size:10px;color:var(--text2);margin-bottom:4px;letter-spacing:0.04em;}
-.kpi-val{font-size:20px;font-weight:900;color:var(--navy);letter-spacing:-0.02em;line-height:1.1;}
-.kpi-val small{font-size:11px;font-weight:400;color:var(--text2);margin-left:2px;}
-.kpi-sub{font-size:10px;color:var(--text2);margin-top:3px;}
-.kpi-accent{color:var(--accent);}
-.kpi-green{color:var(--green);}
-.kpi-blue{color:var(--blue);}
+/* 経営サマリーカード（今期/当月の2カード並列） */
+.sales-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.sales-card{
+  background:var(--white);
+  border-radius:16px;
+  padding:14px 14px 12px;
+  box-shadow:0 2px 10px rgba(30,45,64,0.07);
+  display:flex;flex-direction:column;
+}
+.sales-card.this-fy{border-top:3px solid var(--accent);}
+.sales-card.this-month{border-top:3px solid #1a6fc4;}
 
-.kpi-bar-wrap{background:var(--white);border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(30,45,64,0.07);margin-bottom:10px;}
-.kpi-bar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-.kpi-bar-label{font-size:10px;color:var(--text2);}
-.kpi-bar-pct{font-size:13px;font-weight:700;color:var(--navy);}
-.kpi-bar-bg{height:8px;background:rgba(30,45,64,0.1);border-radius:99px;overflow:hidden;}
-.kpi-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),#e8c07e);transition:width 0.8s ease;}
+.sales-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;}
+.sales-period-label{font-size:11px;font-weight:800;color:var(--navy);letter-spacing:0.04em;}
+.sales-period-sub{font-size:9px;color:var(--text2);}
 
+/* 受注メイン金額 */
+.sales-main{margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid rgba(30,45,64,0.08);}
+.sales-main-label{font-size:10px;color:var(--text2);margin-bottom:3px;}
+.sales-main-val{font-size:19px;font-weight:900;color:var(--navy);letter-spacing:-0.02em;line-height:1.1;}
+.sales-main-val small{font-size:10px;font-weight:400;color:var(--text2);margin-left:2px;}
+.sales-main-sub{font-size:10px;color:var(--text2);margin-top:3px;}
+
+/* サブ行（原価・粗利・粗利率） */
+.sales-sub-row{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;padding:4px 0;}
+.sales-sub-row .lbl{color:var(--text2);}
+.sales-sub-row .val{font-weight:700;color:var(--navy);font-size:13px;}
+.sales-sub-row .val.profit{color:#1a7a30;}
+.sales-sub-row .val.minus{color:#c0392b;}
+.sales-sub-row .val.cost{color:#d97706;}
+
+.sales-month-empty{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:var(--text2);text-align:center;line-height:1.5;
+  padding:8px 4px;
+}
+
+/* 進行中案件 */
 .anken-list{background:var(--white);border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(30,45,64,0.07);margin-bottom:10px;}
 .anken-row{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid rgba(30,45,64,0.06);}
 .anken-row:last-child{border-bottom:none;}
@@ -58,12 +80,10 @@ body{display:flex;flex-direction:column;}
 .anken-name{font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .anken-status{font-size:10px;color:var(--text2);margin-top:1px;}
 .anken-amount{font-size:12px;font-weight:700;color:var(--navy);white-space:nowrap;}
-.kpi-loading{text-align:center;padding:20px;color:var(--text2);font-size:12px;}
-.kpi-error{text-align:center;padding:12px;color:#c0392b;font-size:11px;}
 
-/* 今の動き：トピック3分割グリッド */
+/* トピック3分割（見積対応中・施工中・入金待ち） */
 .topic-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;}
-.topic-cell{background:var(--white);border-radius:14px;padding:12px 12px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(30,45,64,0.07);}
+.topic-cell{background:var(--white);border-radius:14px;padding:12px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(30,45,64,0.07);}
 .topic-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
 .topic-body{flex:1;min-width:0;}
 .topic-label{font-size:10px;color:var(--text2);letter-spacing:0.04em;margin-bottom:2px;white-space:nowrap;}
@@ -72,6 +92,9 @@ body{display:flex;flex-direction:column;}
 
 .sub-title{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:0.08em;margin:14px 0 8px 2px;}
 .sub-title span{font-weight:400;margin-left:4px;}
+
+.kpi-loading{text-align:center;padding:20px;color:var(--text2);font-size:12px;}
+.kpi-error{text-align:center;padding:12px;color:#c0392b;font-size:11px;}
 
 .footer-info{text-align:center;font-size:10px;color:var(--text2);opacity:0.6;padding:4px 0 8px;}
 </style>
@@ -106,11 +129,14 @@ body{display:flex;flex-direction:column;}
     </div>
     <div class="today-body">
       <div class="today-label">TODAY</div>
-      <div class="today-val" id="todayDate">読み込み中...</div>
+      <div class="today-val">
+        <span id="todayDate">読み込み中...</span>
+        <span class="fy-tag" id="fyTag"></span>
+      </div>
     </div>
   </div>
 
-  <!-- KPI -->
+  <!-- 経営サマリー -->
   <div class="sec-title">経営サマリー</div>
   <div id="kpiArea">
     <div class="kpi-loading">データ読み込み中...</div>
@@ -128,80 +154,284 @@ function updateDate(){
   document.getElementById('todayDate').textContent = d;
   document.getElementById('headerDate').textContent =
     `${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+  // 期表示（8月決算・9月開始）
+  const fy = getFiscalYear(now);
+  document.getElementById('fyTag').textContent = `第${fy.fyNum}期 ${fy.fyStart.getFullYear()}/9〜${fy.fyEnd.getFullYear()}/8`;
 }
-updateDate();
-setInterval(updateDate, 60000);
 
-const ANKEN_CSV_URL = 'https://docs.google.com/spreadsheets/d/1M7CPRijH446h63LlDYIZGzwSSfUZnvqYT0VSRoEy2PU/export?format=csv&sheet=Sheet1';
-const STATUS_ORDER = ['施工中','見積作成中','見積提出済み','請求済み','入金済み','完了'];
+// 8月決算ART-RAYS用：期の境界を返す
+// 9/1〜翌8/31。基準日が9月以降なら今年の9月始まり、8月以前なら去年の9月始まり
+function getFiscalYear(baseDate){
+  const y = baseDate.getFullYear();
+  const m = baseDate.getMonth(); // 0=1月
+  const fyStart = m >= 8 ? new Date(y, 8, 1) : new Date(y - 1, 8, 1);
+  const fyEnd   = new Date(fyStart.getFullYear() + 1, 7, 31, 23, 59, 59);
+  // ART-RAYSの第N期：今期は2025/9〜2026/8 → 仮に第N期とする（具体期数は未確定）
+  // ここでは年度を見出しに使うのみ
+  const fyNum = fyStart.getFullYear() - 2024 + 1; // 2025始まり=第2期 等の暫定計算（後で正確値に更新可）
+  return { fyStart, fyEnd, fyNum };
+}
 
-function parseCSV(text){
-  const lines = text.trim().split('\n');
-  const headers = lines[0].split(',').map(h => h.replace(/"/g,'').trim());
-  return lines.slice(1).map(line => {
-    const vals = [];
-    let cur = '', inQ = false;
-    for(const c of line){
-      if(c==='"'){ inQ=!inQ; }
-      else if(c===','&&!inQ){ vals.push(cur.trim()); cur=''; }
-      else cur+=c;
-    }
-    vals.push(cur.trim());
-    const obj = {};
-    headers.forEach((h,i) => obj[h] = (vals[i]||'').replace(/"/g,''));
-    return obj;
+// 当月の境界
+function getCurrentMonth(baseDate){
+  const y = baseDate.getFullYear();
+  const m = baseDate.getMonth();
+  return {
+    mStart: new Date(y, m, 1),
+    mEnd: new Date(y, m + 1, 0, 23, 59, 59)
+  };
+}
+
+// 文字列→Date（"2026-05-13" 形式に対応・空文字や不正値はnull）
+function toDate(s){
+  if(!s || typeof s !== 'string') return null;
+  const t = s.trim();
+  if(!t) return null;
+  const d = new Date(t);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+// 期間内判定
+function inRange(d, start, end){
+  if(!d) return false;
+  return d >= start && d <= end;
+}
+
+// 着工日の決定（フォールバック付き）
+// ①着工日フィールド ②契約書の最古契約日 ③請求書の最古発行日 ④それでもなければnull（集計対象外）
+function getStartDate(anken){
+  // ①
+  const f1 = toDate(anken['着工日']);
+  if(f1) return f1;
+
+  // ②契約書の最古契約日
+  const keiyaku = anken['契約書'] || [];
+  const keiyakuDates = keiyaku
+    .map(k => toDate(k['契約日']))
+    .filter(Boolean)
+    .sort((a,b) => a - b);
+  if(keiyakuDates.length > 0) return keiyakuDates[0];
+
+  // ③請求書の最古発行日
+  const seikyu = anken['請求'] || [];
+  const seikyuDates = seikyu
+    .map(s => toDate(s['発行日']))
+    .filter(Boolean)
+    .sort((a,b) => a - b);
+  if(seikyuDates.length > 0) return seikyuDates[0];
+
+  // ④
+  return null;
+}
+
+// 集計対象案件か判定
+function isTarget(anken){
+  const status = anken['ステータス'] || '';
+  // 保守管理（継続）系を除外
+  if(status.includes('保守管理')) return false;
+  // 中止案件は別配列にあるので案件配列内なら問題なし
+  return true;
+}
+
+// 受注金額の決定
+// 請求書が1件以上 → 請求金額合計
+// なければ → 見積で「採用版」を集計（第N期は全合算、改N/旧A/合_は最新採用のみ）
+function getJuchuAmount(anken){
+  const seikyu = anken['請求'] || [];
+  if(seikyu.length > 0){
+    return seikyu.reduce((sum, s) => sum + (Number(s['金額']) || 0), 0);
+  }
+
+  const mits = anken['見積'] || [];
+  if(mits.length === 0) return 0;
+
+  // 採用版抽出ロジック
+  // - サフィックスを書類番号から推定（"見_第1期_..." "見_改1_..." "見_旧A_..." "見_合_..."）
+  // - 「旧A/B/C」「合_」は除外
+  // - 「第N期」は全部合算（重複合算OK）
+  // - 「改N」は最新（最大N）のみ採用
+  // - サフィックスなしは採用版1本扱い
+  const valid = mits.filter(m => {
+    const no = m['書類番号'] || '';
+    if(/_旧[ABC]/.test(no)) return false;
+    if(/_合_/.test(no)) return false;
+    return true;
   });
+
+  if(valid.length === 0) return 0;
+
+  // 第N期 / 改N / なし に分類
+  const kiList = [];   // 第N期
+  const kaiList = [];  // 改N
+  const plain = [];    // サフィックスなし or 不明
+  valid.forEach(m => {
+    const no = m['書類番号'] || '';
+    if(/_第\d+期/.test(no)) kiList.push(m);
+    else if(/_改(\d+)/.test(no)) kaiList.push(m);
+    else plain.push(m);
+  });
+
+  let total = 0;
+  // 第N期 → 全合算
+  total += kiList.reduce((s, m) => s + (Number(m['金額']) || 0), 0);
+  // 改N → 最大Nの金額のみ採用
+  if(kaiList.length > 0){
+    const sorted = [...kaiList].sort((a,b) => {
+      const na = parseInt((a['書類番号'] || '').match(/_改(\d+)/)?.[1] || '0', 10);
+      const nb = parseInt((b['書類番号'] || '').match(/_改(\d+)/)?.[1] || '0', 10);
+      return nb - na;
+    });
+    total += Number(sorted[0]['金額']) || 0;
+  }
+  // サフィックスなし → 全合算（複数案併記の場合は最新発行日のみが採用というのが常識的だが、現状は全合算で安全側）
+  // ただし第N期や改Nが既にある場合はサフィックスなしを採用しない（重複防止）
+  if(kiList.length === 0 && kaiList.length === 0){
+    if(plain.length === 1){
+      total += Number(plain[0]['金額']) || 0;
+    } else if(plain.length > 1){
+      // 複数ある場合は最新発行日のものを採用
+      const sortedP = [...plain].sort((a,b) => {
+        const da = toDate(a['発行日']);
+        const db = toDate(b['発行日']);
+        if(!da) return 1;
+        if(!db) return -1;
+        return db - da;
+      });
+      total += Number(sortedP[0]['金額']) || 0;
+    }
+  }
+
+  return total;
+}
+
+// 原価合計
+function getGenkaTotal(anken){
+  const g = anken['原価'];
+  if(!g || typeof g !== 'object') return 0;
+  return Number(g['合計']) || 0;
 }
 
 function fmt(n){
-  if(!n || isNaN(n)) return '-';
+  if(n === null || n === undefined || isNaN(n)) return '-';
   return '¥' + Number(n).toLocaleString();
 }
 
-function renderKPI(rows){
-  const active = rows.filter(r => r['ステータス'] !== '完了');
-  const totalMitsumori = active.reduce((s,r) => s + (parseFloat(r['見積金額'])||0), 0);
-  const totalSeikyu    = active.reduce((s,r) => s + (parseFloat(r['請求金額'])||0), 0);
-  const totalNyukin    = active.filter(r => r['入金状況']==='入金済み')
-                               .reduce((s,r) => s + (parseFloat(r['請求金額'])||0), 0);
-  const nyukinRate     = totalSeikyu > 0 ? Math.round(totalNyukin / totalSeikyu * 100) : 0;
-  const activeCount    = active.filter(r => !['入金済み','完了'].includes(r['ステータス'])).length;
+function fmtPct(n){
+  if(n === null || n === undefined || isNaN(n)) return '-';
+  return n.toFixed(1) + '%';
+}
 
-  const mitsumoriCount = active.filter(r => ['見積作成中','見積提出済み'].includes(r['ステータス'])).length;
-  const sekoCount      = active.filter(r => r['ステータス']==='施工中').length;
-  const nyukinMachi    = active.filter(r => r['ステータス']==='請求済み').length;
+function renderKPI(data){
+  const ankenList = (data['案件'] || []).filter(isTarget);
 
-  const sorted = [...active].sort((a,b) =>
-    STATUS_ORDER.indexOf(a['ステータス']) - STATUS_ORDER.indexOf(b['ステータス'])
-  );
+  const now = new Date();
+  const fy = getFiscalYear(now);
+  const cm = getCurrentMonth(now);
+
+  // 今期集計
+  let fyJuchu = 0, fyGenka = 0, fyCount = 0;
+  // 当月集計
+  let cmJuchu = 0, cmCount = 0;
+
+  ankenList.forEach(a => {
+    const startDate = getStartDate(a);
+    const juchu = getJuchuAmount(a);
+    const genka = getGenkaTotal(a);
+
+    if(inRange(startDate, fy.fyStart, fy.fyEnd)){
+      fyJuchu += juchu;
+      fyGenka += genka;
+      fyCount++;
+    }
+    if(inRange(startDate, cm.mStart, cm.mEnd)){
+      cmJuchu += juchu;
+      cmCount++;
+    }
+  });
+
+  const fyArari = fyJuchu - fyGenka;
+  const fyArariRate = fyJuchu > 0 ? (fyArari / fyJuchu * 100) : null;
+
+  // 進行中案件カードデータ
+  const STATUS_ORDER = ['施工中','見積作成中','見積提出済み','請求済み','入金済み','完了'];
+  const active = ankenList.filter(a => {
+    const s = a['ステータス'] || '';
+    return s !== '完了' && !s.includes('完了');
+  });
+  const sorted = [...active].sort((a,b) => {
+    const sa = a['ステータス'] || '';
+    const sb = b['ステータス'] || '';
+    const ia = STATUS_ORDER.findIndex(x => sa.includes(x));
+    const ib = STATUS_ORDER.findIndex(x => sb.includes(x));
+    return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+  });
 
   const dotColor = {
-    '施工中':'#f39c12','見積提出済み':'#1a6fc4','見積作成中':'#9b59b6',
-    '請求済み':'#1a7a30','入金済み':'#27ae60','完了':'#95a5a6'
+    '施工中':'#f39c12','見積提出済み':'#2563eb','見積作成中':'#9b59b6',
+    '請求済み':'#1a7a30','入金済み':'#9ca3af','施工予定':'#d97706'
+  };
+  const getDotColor = (s) => {
+    for(const key in dotColor){
+      if(s && s.includes(key)) return dotColor[key];
+    }
+    return '#aaa';
   };
 
+  const mitsumoriCount = active.filter(a => {
+    const s = a['ステータス'] || '';
+    return s.includes('見積作成中') || s.includes('見積提出済み');
+  }).length;
+  const sekoCount = active.filter(a => (a['ステータス'] || '').includes('施工中')).length;
+  const nyukinMachi = active.filter(a => (a['ステータス'] || '').includes('請求済み')).length;
+
+  // ===========================================================
+  // HTML生成
+  // ===========================================================
   let html = `
-    <div class="kpi-grid">
-      <div class="kpi-card">
-        <div class="kpi-label">受注総額（見積）</div>
-        <div class="kpi-val kpi-accent">${fmt(totalMitsumori)}</div>
-        <div class="kpi-sub">進行中 ${active.length}件</div>
+    <div class="sales-grid">
+      <!-- 今期カード -->
+      <div class="sales-card this-fy">
+        <div class="sales-head">
+          <div class="sales-period-label">今期</div>
+          <div class="sales-period-sub">${fy.fyStart.getFullYear()}/9〜</div>
+        </div>
+        <div class="sales-main">
+          <div class="sales-main-label">受注総額</div>
+          <div class="sales-main-val">${fmt(fyJuchu)}</div>
+          <div class="sales-main-sub">${fyCount}件</div>
+        </div>
+        <div class="sales-sub-row">
+          <div class="lbl">原価</div>
+          <div class="val cost">${fmt(fyGenka)}</div>
+        </div>
+        <div class="sales-sub-row">
+          <div class="lbl">粗利</div>
+          <div class="val ${fyArari >= 0 ? 'profit' : 'minus'}">${fmt(fyArari)}</div>
+        </div>
+        <div class="sales-sub-row">
+          <div class="lbl">粗利率</div>
+          <div class="val ${fyArari >= 0 ? 'profit' : 'minus'}">${fyArariRate !== null ? fmtPct(fyArariRate) : '-'}</div>
+        </div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-label">請求済み金額</div>
-        <div class="kpi-val kpi-blue">${fmt(totalSeikyu)}</div>
-        <div class="kpi-sub">入金済 ${fmt(totalNyukin)}</div>
+
+      <!-- 当月カード -->
+      <div class="sales-card this-month">
+        <div class="sales-head">
+          <div class="sales-period-label">当月</div>
+          <div class="sales-period-sub">${cm.mStart.getMonth()+1}月</div>
+        </div>
+        <div class="sales-main">
+          <div class="sales-main-label">受注総額</div>
+          <div class="sales-main-val">${fmt(cmJuchu)}</div>
+          <div class="sales-main-sub">着工 ${cmCount}件</div>
+        </div>
+        <div class="sales-month-empty">
+          ※当月分の原価・粗利は<br>今期累計に含まれます
+        </div>
       </div>
     </div>
-    <div class="kpi-bar-wrap">
-      <div class="kpi-bar-header">
-        <div class="kpi-bar-label">入金率（請求済みに対する入金済み）</div>
-        <div class="kpi-bar-pct">${nyukinRate}%</div>
-      </div>
-      <div class="kpi-bar-bg">
-        <div class="kpi-bar-fill" style="width:${nyukinRate}%"></div>
-      </div>
-    </div>
+
     <div class="topic-grid">
       <div class="topic-cell">
         <div class="topic-dot" style="background:#9b59b6;"></div>
@@ -225,42 +455,46 @@ function renderKPI(rows){
         </div>
       </div>
     </div>
-    <div class="sub-title">進行中案件 <span>(${activeCount}件)</span></div>
+
+    <div class="sub-title">進行中案件 <span>(${active.length}件)</span></div>
     <div class="anken-list">`;
 
-  sorted.forEach(r => {
-    const status = r['ステータス'] || '';
-    const dot = dotColor[status] || '#aaa';
-    const amt = r['請求金額'] ? fmt(r['請求金額']) : (r['見積金額'] ? fmt(r['見積金額']) : '-');
-    const name = r['工事名'] || '-';
+  sorted.forEach(a => {
+    const status = a['ステータス'] || '';
+    const dot = getDotColor(status);
+    const juchu = getJuchuAmount(a);
+    const name = a['正式工事名'] || a['現場+工事'] || a['案件キー'] || '-';
     html += `
       <div class="anken-row">
         <div class="anken-dot" style="background:${dot};"></div>
         <div class="anken-body">
           <div class="anken-name">${name}</div>
-          <div class="anken-status">${status}　${r['案件番号']||''}</div>
+          <div class="anken-status">${status}　${a['案件キー'] || ''}</div>
         </div>
-        <div class="anken-amount">${amt}</div>
+        <div class="anken-amount">${juchu > 0 ? fmt(juchu) : '-'}</div>
       </div>`;
   });
 
   html += `</div>`;
+
   document.getElementById('kpiArea').innerHTML = html;
 }
 
 async function loadKPI(){
   try {
-    const res = await fetch(ANKEN_CSV_URL + '&t=' + Date.now());
+    const res = await fetch('data.json?t=' + Date.now());
     if(!res.ok) throw new Error('fetch failed');
-    const text = await res.text();
-    const rows = parseCSV(text);
-    renderKPI(rows);
+    const data = await res.json();
+    renderKPI(data);
   } catch(e) {
+    console.error(e);
     document.getElementById('kpiArea').innerHTML =
       '<div class="kpi-error">データの読み込みに失敗しました。<br>ネットワークを確認してください。</div>';
   }
 }
 
+updateDate();
+setInterval(updateDate, 60000);
 loadKPI();
 </script>
 </body></html>
