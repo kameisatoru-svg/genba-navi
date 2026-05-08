@@ -2944,34 +2944,103 @@ async function exportBCS_CSV(){
 
 const DATA_JSON_URL = 'https://kameisatoru-svg.github.io/genba-navi/data.json';
 
-// 起動時に data.json をfetch
+// 起動時に data.json を多段フォールバックで読み込み
+// ① 同階層の相対パス（./data.json）← GitHub Pages上で動作
+// ② GitHub Pages 絶対URL ← 別場所のサーバー上から開いた場合に動く
+// 両方失敗（file://直開き等）したらモーダル表示時に手動アップロード案内
 async function loadAnkenData(){
+  // ① 相対パス
+  try{
+    const res = await fetch('./data.json', {cache: 'no-cache'});
+    if(res.ok){
+      ankenData = await res.json();
+      ankenDataLoaded = true;
+      enableAnkenBtn();
+      console.log('案件データ読み込み: 相対パス成功');
+      return;
+    }
+  } catch(e){ /* file:// では大抵ここで失敗 */ }
+
+  // ② 絶対URL
   try{
     const res = await fetch(DATA_JSON_URL, {cache: 'no-cache'});
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    ankenData = await res.json();
+    if(res.ok){
+      ankenData = await res.json();
+      ankenDataLoaded = true;
+      enableAnkenBtn();
+      console.log('案件データ読み込み: GitHub Pages成功');
+      return;
+    }
+  } catch(e){ /* file:// では Failed to fetch */ }
+
+  // 両方失敗：手動アップロード可能にする
+  console.warn('案件データ自動取得失敗。モーダル表示時に手動アップロード案内します。');
+  ankenDataLoaded = false;
+  // ボタン自体は表示する（押したら手動アップロード案内）
+  const ankenBtn = document.getElementById('ankenSelectBtn');
+  if(ankenBtn && docType === 'mitsumori'){
+    ankenBtn.style.display = 'inline-block';
+    ankenBtn.title = 'data.jsonを手動で読み込んで案件選択';
+  }
+}
+
+function enableAnkenBtn(){
+  const ankenBtn = document.getElementById('ankenSelectBtn');
+  if(ankenBtn && docType === 'mitsumori'){
+    ankenBtn.style.display = 'inline-block';
+  }
+}
+
+// data.jsonを手動アップロード
+async function handleDataJsonUpload(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  event.target.value = '';
+  try{
+    const text = await file.text();
+    ankenData = JSON.parse(text);
     ankenDataLoaded = true;
-    // 見積モードで起動していればボタン有効化
-    const ankenBtn = document.getElementById('ankenSelectBtn');
-    if(ankenBtn && docType === 'mitsumori'){
-      ankenBtn.style.display = 'inline-block';
+    showAnkenToast(`✅ data.json を読み込みました（案件 ${(ankenData.案件||[]).length} 件）`);
+    // モーダルが開いていれば即リスト更新
+    const modal = document.getElementById('anken-modal');
+    if(modal && modal.style.display === 'flex'){
+      renderAnkenList(ankenData.案件 || []);
+      const status = document.getElementById('anken-status');
+      if(status) status.textContent = `案件 ${(ankenData.案件||[]).length} 件・キーワードで絞り込み可能`;
     }
   } catch(e){
-    console.warn('data.json取得失敗：', e.message);
-    ankenDataLoaded = false;
+    alert('data.json読込エラー: ' + e.message);
   }
 }
 
 // モーダルを開く
 function openAnkenSelector(){
-  if(!ankenDataLoaded){
-    alert('案件データがまだ読み込まれていません。少し待ってから再度お試しください。');
-    return;
-  }
   const modal = document.getElementById('anken-modal');
   modal.style.display = 'flex';
   const search = document.getElementById('anken-search');
   search.value = '';
+
+  if(!ankenDataLoaded){
+    // 自動取得失敗時：手動アップロード案内
+    const wrap = document.getElementById('anken-list');
+    wrap.innerHTML = `<div style="padding:32px 20px;text-align:center;">
+      <div style="font-size:13px;color:#444;margin-bottom:14px;line-height:1.6;">
+        案件データ（data.json）の自動取得に失敗しました。<br>
+        <span style="font-size:11px;color:#888;">ローカル直開き（file://）の場合、ブラウザのセキュリティ制限で外部URLにアクセスできません。</span>
+      </div>
+      <button onclick="document.getElementById('anken-data-input').click()" style="padding:10px 20px;background:#4a6090;color:#fff;border:none;border-radius:4px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;">📁 data.json を選択して読み込む</button>
+      <input type="file" id="anken-data-input" accept=".json,application/json" style="display:none" onchange="handleDataJsonUpload(event)">
+      <div style="font-size:11px;color:#888;margin-top:18px;line-height:1.5;">
+        または GitHub Pages 経由で雛形を開く：<br>
+        <code style="font-size:10px;background:#f0f0f0;padding:2px 6px;border-radius:3px;display:inline-block;margin-top:4px;">https://kameisatoru-svg.github.io/<br>genba-navi/mitsumori_seikyu_preview.html</code>
+      </div>
+    </div>`;
+    const status = document.getElementById('anken-status');
+    if(status) status.textContent = '案件データ未取得';
+    search.focus();
+    return;
+  }
+
   search.focus();
   renderAnkenList(ankenData.案件 || []);
   const status = document.getElementById('anken-status');
@@ -3033,6 +3102,16 @@ function renderAnkenList(list){
       <div style="font-size:10px;color:#888;margin-top:2px;">${escH(place)}　<span style="color:#aaa;">${escH(status)}</span></div>
     </div>`;
   }).join('');
+}
+
+// HTML本文用エスケープ
+function escH(s){
+  return String(s||'')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
 }
 
 // 属性用エスケープ
