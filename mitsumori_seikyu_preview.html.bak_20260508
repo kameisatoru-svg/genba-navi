@@ -241,12 +241,10 @@ tr.dragging{opacity:0.4;}
     <span class="mode-label" style="margin-left:10px;">モード：</span>
     <select class="mode-select" id="mode-select" onchange="switchMode(this.value)">
       <option value="flat">フラット（単一明細）</option>
-      <option value="group">大項目・小項目</option>
+      <option value="group" selected>大項目・小項目</option>
       <option value="lump" id="mode-lump" style="display:none;">1式表記</option>
     </select>
     <button class="btn btn-gold sp-hidden-sm" onclick="printHTML()">印刷・PDF保存</button>
-    <button class="btn sp-hidden-sm" style="background:#4a6090;color:#fff;border:1px solid #6a80b0;" onclick="document.getElementById('bcs-csv-input').click()" title="BCS.CSVや一般的なCSVを読み込んで雛形に取り込む">BCS.CSV読込</button>
-    <input type="file" id="bcs-csv-input" accept=".csv,text/csv" style="display:none" onchange="handleBcsCsvImport(event)">
     <button class="btn sp-hidden-sm" style="background:#3a5070;color:#fff;border:1px solid #5a7090;" onclick="exportBCS_CSV()" title="建築みつも郎12等で読み込めるBCS.CSV形式でエクスポート">BCS.CSV出力</button>
     <button class="btn sp-hidden-sm" id="discount-btn" style="background:#5a4070;color:#fff;border:1px solid #7a5090;" onclick="applyDiscount()" title="全明細の単価に割引率を掛けて再計算（100円未満は端数調整で自動補正）">割引見積生成</button>
     <button class="btn sp-hidden-sm" id="discount-revert-btn" style="background:#704040;color:#fff;border:1px solid #905858;display:none;" onclick="revertDiscount()" title="割引適用前の単価に戻す">元に戻す</button>
@@ -271,17 +269,17 @@ tr.dragging{opacity:0.4;}
   <div class="editor">
     <div class="editor-head"><h2>積算編集</h2></div>
     <div class="editor-body">
-      <div class="fgroup"><label>宛名（会社名）</label><input id="atena" type="text" value="" placeholder="例：株式会社〇〇" oninput="render()"></div>
+      <div class="fgroup"><label>宛名（会社名）</label><input id="atena" type="text" value="株式会社テスト" placeholder="例：株式会社〇〇" oninput="render()"></div>
       <div class="fgroup-row">
         <div class="fgroup"><label id="label-docNo">見積番号</label><input id="mitsumoriNo" type="text" value="AR-26-XXX-M1" oninput="render()"></div>
         <div class="fgroup"><label>発行日</label><input id="hakkoDate" type="date" oninput="render()"></div>
       </div>
       <div class="fgroup" id="shiharai-wrap" style="display:none;"><label>お支払期限</label><input id="shiharaiDate" type="date" oninput="render()"></div>
-      <div class="fgroup"><label>工事件名</label><input id="kojimei" type="text" value="" placeholder="例：〇〇邸 外壁塗装工事" oninput="render()"></div>
-      <div class="fgroup"><label>施工場所</label><input id="seshubasho" type="text" value="" placeholder="例：大分県別府市〇〇" oninput="render()"></div>
+      <div class="fgroup"><label>工事件名</label><input id="kojimei" type="text" value="テスト工事 内装リフォーム" placeholder="例：〇〇邸 外壁塗装工事" oninput="render()"></div>
+      <div class="fgroup"><label>施工場所</label><input id="seshubasho" type="text" value="大分県別府市上原町13-25" placeholder="例：大分県別府市〇〇" oninput="render()"></div>
       <div class="fgroup" id="koki-wrap" style="display:none;"><label>工事期間</label><input id="koki" type="text" value="" oninput="render()" placeholder="例：2026/4/22 または 2026/4/1〜2026/4/30"></div>
       <div class="fgroup-row">
-        <div class="fgroup"><label>案件キー（PDFファイル名用）<button type="button" id="ankenSelectBtn" onclick="openAnkenSelector()" style="margin-left:8px;padding:2px 8px;background:#4a6090;color:#fff;border:1px solid #6a80b0;border-radius:3px;font-size:10px;cursor:pointer;font-family:inherit;display:none;" title="data.jsonから案件を選んで表書を自動入力">📋 案件選択</button></label><input id="ankenKey" type="text" value="" placeholder="例：ネクサス-串たつ外壁-26" oninput="updateDocTitle()"></div>
+        <div class="fgroup"><label>案件キー（PDFファイル名用）</label><input id="ankenKey" type="text" value="テスト-内装-26" placeholder="例：ネクサス-串たつ外壁-26" oninput="updateDocTitle()"></div>
         <div class="fgroup" style="flex:0 0 110px;"><label>サフィックス（任意）</label><input id="fileSuffix" type="text" value="" placeholder="例：第1期・改1" oninput="updateDocTitle()"></div>
       </div>
       <hr class="section-sep">
@@ -390,15 +388,11 @@ const TMPL_CSS = `
   .detail-table .subtotal-row td{background:var(--subtotal-bg)!important;font-weight:700;}
 `;
 
-let mode = 'flat';
+let mode = 'group';
 let docType = 'mitsumori'; // 'mitsumori' or 'seikyu'
 let shokeihiRate = 15; // 諸経費率（%）
 let nebiki = 0;        // 値引き額
 let hasuChousei = 0;   // 端数調整（BCS.CSV出力用・プラスマイナス両方可）
-
-// ── 案件選択機能の状態（実装本体は末尾） ──
-let ankenData = null;        // data.json 全体
-let ankenDataLoaded = false; // 取得完了フラグ
 
 // ── 書類種別ごとのラベル定義 ──
 const LABELS = {
@@ -448,8 +442,22 @@ const flatItems = [
 let groupSummaryItems = [];
 
 const groupItems = [
-  {name:'',pageBreak:false,middleItems:[],items:[
-    {name:'',qty:'',unit:'',price:'',note:''},
+  {name:'解体工事',pageBreak:false,items:[
+    {name:'壁間仕切り撤去',qty:62,unit:'㎡',price:2000,note:''},
+    {name:'床塩ビタイル撤去',qty:148,unit:'㎡',price:1500,note:''},
+    {name:'廃材運搬処分費',qty:1,unit:'式',price:85000,note:''},
+  ]},
+  {name:'内装工事',pageBreak:false,items:[
+    {name:'壁ビニールクロス貼',qty:144,unit:'㎡',price:1850,note:''},
+    {name:'天井ビニールクロス貼',qty:120,unit:'㎡',price:1800,note:''},
+    {name:'床長尺シート貼',qty:68.9,unit:'㎡',price:5500,note:''},
+    {name:'既存天井カセットエアコンオーバーホール費',qty:8,unit:'台',price:48000,note:''},
+    {name:'資材運搬・搬入費',qty:1,unit:'式',price:55000,note:''},
+  ]},
+  {name:'電気工事',pageBreak:false,items:[
+    {name:'電灯配線工事費',qty:1,unit:'式',price:123000,note:''},
+    {name:'コンセント配線工事費',qty:1,unit:'式',price:78000,note:''},
+    {name:'照明器具',qty:1,unit:'式',price:250000,note:'取替用電球共'},
   ]},
 ];
 
@@ -552,12 +560,6 @@ function switchDocType(type){
   }
 
   // 支払期限：自動デフォルトはセットしない（空欄ならお支払期限行は非表示）
-
-  // 案件選択ボタン：見積書モード時のみ表示
-  const ankenBtn = document.getElementById('ankenSelectBtn');
-  if(ankenBtn){
-    ankenBtn.style.display = (type==='mitsumori' && ankenDataLoaded) ? 'inline-block' : 'none';
-  }
 
   render();
 }
@@ -778,125 +780,54 @@ function renderGroupBlocks(){
   if(!wrap)return;
   wrap.innerHTML='';
   groupItems.forEach((g,gi)=>{
-    if(!g.middleItems) g.middleItems=[];
     const div=document.createElement('div');
     div.className='group-block';
-    const hasMiddle = g.middleItems.length>0;
-    const gSub = calcGroupTotal(g);
-
-    // ── 大項目ヘッダー ──
-    let html=`
+    const gSub=g.items.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0),0);
+    let rowsHtml='';
+    g.items.forEach((it,ii)=>{
+      rowsHtml+=`<tr>
+        <td style="width:18px;padding:2px 0;cursor:grab" class="drag-handle" title="ドラッグで並び替え">⠿</td>
+        <td><input value="${it.name}" oninput="groupItems[${gi}].items[${ii}].name=this.value;render()" onkeydown="enterNav(event)"></td>
+        <td><input class="r" type="number" value="${it.qty||''}" oninput="groupItems[${gi}].items[${ii}].qty=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
+        <td><input value="${it.unit||''}" oninput="groupItems[${gi}].items[${ii}].unit=this.value;render()" style="max-width:32px" onkeydown="enterNav(event)"></td>
+        <td><input class="r" type="number" value="${it.price||''}" oninput="groupItems[${gi}].items[${ii}].price=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
+        <td><input class="r amt-cell" readonly value="${(parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):''}" style="color:var(--sub)"></td>
+        <td><input value="${it.note}" oninput="groupItems[${gi}].items[${ii}].note=this.value;render()" onkeydown="enterNav(event)"></td>
+        <td><button class="del-btn" onclick="groupDelItem(${gi},${ii})">✕</button></td>
+      </tr>`;
+    });
+    div.innerHTML=`
       <div class="group-header">
         <input value="${g.name}" oninput="groupItems[${gi}].name=this.value;render()" placeholder="大項目名">
         <button class="pb-btn${g.pageBreak?' on':''}" title="この工事の前で改ページ" onclick="groupTogglePageBreak(${gi})">改頁</button>
-        <button class="add-middle-btn" onclick="groupAddMiddle(${gi})" title="中項目を追加">＋ 中項目</button>
         <button class="group-del-btn" onclick="groupDelGroup(${gi})">✕ 削除</button>
-      </div>`;
-
-    if(hasMiddle){
-      // ── 中項目モード（3層表示） ──
-      g.middleItems.forEach((m,mi)=>{
-        const mSub = calcMiddleTotal(m);
-        let mRows='';
-        m.items.forEach((it,ii)=>{
-          mRows+=`<tr>
-            <td style="width:18px;padding:2px 0;cursor:grab" class="drag-handle" title="ドラッグで並び替え">⠿</td>
-            <td><input value="${it.name}" oninput="groupItems[${gi}].middleItems[${mi}].items[${ii}].name=this.value;render()" onkeydown="enterNav(event)"></td>
-            <td><input class="r" type="number" value="${it.qty||''}" oninput="groupItems[${gi}].middleItems[${mi}].items[${ii}].qty=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
-            <td><input value="${it.unit||''}" oninput="groupItems[${gi}].middleItems[${mi}].items[${ii}].unit=this.value;render()" style="max-width:32px" onkeydown="enterNav(event)"></td>
-            <td><input class="r" type="number" value="${it.price||''}" oninput="groupItems[${gi}].middleItems[${mi}].items[${ii}].price=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
-            <td><input class="r amt-cell" readonly value="${(parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):''}" style="color:var(--sub)"></td>
-            <td><input value="${it.note}" oninput="groupItems[${gi}].middleItems[${mi}].items[${ii}].note=this.value;render()" onkeydown="enterNav(event)"></td>
-            <td><button class="del-btn" onclick="groupDelMiddleItem(${gi},${mi},${ii})">✕</button></td>
-          </tr>`;
-        });
-        html+=`
-          <div class="middle-block" style="margin:8px 0 8px 16px;border-left:3px solid #c8c8c8;padding-left:10px;background:#f7f7f5;">
-            <div class="middle-header" style="display:flex;align-items:center;gap:6px;padding:4px 0;">
-              <span style="font-size:11px;color:#888;flex-shrink:0;">▸ 中項目</span>
-              <input value="${m.name}" oninput="groupItems[${gi}].middleItems[${mi}].name=this.value;render()" placeholder="中項目名（例：給水・排水・床仕上げ）" style="flex:1;font-weight:600;background:#fff;">
-              <button class="del-btn" onclick="groupDelMiddle(${gi},${mi})" title="中項目を削除">✕</button>
-            </div>
-            <div style="overflow-x:auto">
-              <table class="group-items-table">
-                <thead><tr>
-                  <th class="gcol-drag"></th>
-                  <th class="gcol-name">品名</th>
-                  <th class="gcol-qty">数量</th>
-                  <th class="gcol-unit">単位</th>
-                  <th class="gcol-price">単価</th>
-                  <th class="gcol-amt">金額</th>
-                  <th class="gcol-note">備考</th>
-                  <th class="gcol-del"></th>
-                </tr></thead>
-                <tbody data-mi="${mi}">${mRows}</tbody>
-              </table>
-            </div>
-            <button class="add-item-btn" onclick="groupAddMiddleItem(${gi},${mi})">＋ 小項目追加</button>
-            <div class="middle-subtotal" style="text-align:right;padding:4px 8px;background:#ececec;font-size:11.5px;font-weight:600;color:#444;">${m.name||'中項目'} 計：${fmtN(mSub)}</div>
-          </div>`;
-      });
-      html+=`<div class="group-subtotal">大項目 計：${fmtN(gSub)}</div>`;
-    } else {
-      // ── 従来モード（中項目なし・フラット） ──
-      let rowsHtml='';
-      g.items.forEach((it,ii)=>{
-        rowsHtml+=`<tr>
-          <td style="width:18px;padding:2px 0;cursor:grab" class="drag-handle" title="ドラッグで並び替え">⠿</td>
-          <td><input value="${it.name}" oninput="groupItems[${gi}].items[${ii}].name=this.value;render()" onkeydown="enterNav(event)"></td>
-          <td><input class="r" type="number" value="${it.qty||''}" oninput="groupItems[${gi}].items[${ii}].qty=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
-          <td><input value="${it.unit||''}" oninput="groupItems[${gi}].items[${ii}].unit=this.value;render()" style="max-width:32px" onkeydown="enterNav(event)"></td>
-          <td><input class="r" type="number" value="${it.price||''}" oninput="groupItems[${gi}].items[${ii}].price=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
-          <td><input class="r amt-cell" readonly value="${(parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):''}" style="color:var(--sub)"></td>
-          <td><input value="${it.note}" oninput="groupItems[${gi}].items[${ii}].note=this.value;render()" onkeydown="enterNav(event)"></td>
-          <td><button class="del-btn" onclick="groupDelItem(${gi},${ii})">✕</button></td>
-        </tr>`;
-      });
-      html+=`
-        <div style="overflow-x:auto">
-          <table class="group-items-table">
-            <thead><tr>
-              <th class="gcol-drag"></th>
-              <th class="gcol-name">品名</th>
-              <th class="gcol-qty">数量</th>
-              <th class="gcol-unit">単位</th>
-              <th class="gcol-price">単価</th>
-              <th class="gcol-amt">金額</th>
-              <th class="gcol-note">備考</th>
-              <th class="gcol-del"></th>
-            </tr></thead>
-            <tbody>${rowsHtml}</tbody>
-          </table>
-        </div>
-        <button class="add-item-btn" onclick="groupAddItem(${gi})">＋ 小項目追加</button>
-        <div class="group-subtotal">小計：${fmtN(gSub)}</div>`;
-    }
-
-    div.innerHTML=html;
+      </div>
+      <div style="overflow-x:auto">
+        <table class="group-items-table">
+          <thead><tr>
+            <th class="gcol-drag"></th>
+            <th class="gcol-name">品名</th>
+            <th class="gcol-qty">数量</th>
+            <th class="gcol-unit">単位</th>
+            <th class="gcol-price">単価</th>
+            <th class="gcol-amt">金額</th>
+            <th class="gcol-note">備考</th>
+            <th class="gcol-del"></th>
+          </tr></thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+      </div>
+      <button class="add-item-btn" onclick="groupAddItem(${gi})">＋ 小項目追加</button>
+      <div class="group-subtotal">小計：${fmtN(gSub)}</div>`;
     wrap.appendChild(div);
-
     // 小項目ドラッグ登録
-    if(hasMiddle){
-      // 中項目ごとに登録
-      g.middleItems.forEach((m,mi)=>{
-        const mtbody=div.querySelector(`tbody[data-mi="${mi}"]`);
-        if(mtbody){
-          initDragRows(mtbody,
-            ()=>groupItems[gi].middleItems[mi].items,
-            arr=>{groupItems[gi].middleItems[mi].items.splice(0,groupItems[gi].middleItems[mi].items.length,...arr);},
-            ()=>{renderGroupBlocks();render();}
-          );
-        }
-      });
-    } else {
-      const gtbody=div.querySelector('tbody');
-      if(gtbody){
-        initDragRows(gtbody,
-          ()=>groupItems[gi].items,
-          arr=>{groupItems[gi].items.splice(0,groupItems[gi].items.length,...arr);},
-          ()=>{renderGroupBlocks();render();}
-        );
-      }
+    const gtbody=div.querySelector('tbody');
+    if(gtbody){
+      initDragRows(gtbody,
+        ()=>groupItems[gi].items,
+        arr=>{groupItems[gi].items.splice(0,groupItems[gi].items.length,...arr);},
+        ()=>{renderGroupBlocks();render();}
+      );
     }
   });
 }
@@ -905,46 +836,10 @@ function groupTogglePageBreak(gi){
   groupItems[gi].pageBreak=!groupItems[gi].pageBreak;
   renderGroupBlocks();render();
 }
-function groupAddGroup(){groupItems.push({name:'新規大項目',pageBreak:false,middleItems:[],items:[{name:'',qty:1,unit:'㎡',price:0,note:''}]});renderGroupBlocks();render();}
+function groupAddGroup(){groupItems.push({name:'新規大項目',pageBreak:false,items:[{name:'',qty:1,unit:'㎡',price:0,note:''}]});renderGroupBlocks();render();}
 function groupDelGroup(gi){groupItems.splice(gi,1);renderGroupBlocks();render();}
 function groupAddItem(gi){groupItems[gi].items.push({name:'',qty:'',unit:'',price:'',note:''});renderGroupBlocks();render();}
 function groupDelItem(gi,ii){groupItems[gi].items.splice(ii,1);renderGroupBlocks();render();}
-
-// ── 中項目（3層化）操作 ──
-// 既存 groupItems[].items は middleItems が空の時のフォールバック（後方互換）
-// middleItems が1件以上のときは items は使わず middleItems[].items を使う
-function groupAddMiddle(gi){
-  if(!groupItems[gi].middleItems) groupItems[gi].middleItems=[];
-  groupItems[gi].middleItems.push({name:'',items:[{name:'',qty:'',unit:'',price:'',note:''}]});
-  renderGroupBlocks();render();
-}
-function groupDelMiddle(gi,mi){
-  if(!confirm('この中項目（配下の小項目を含む）を削除しますか？')) return;
-  groupItems[gi].middleItems.splice(mi,1);
-  renderGroupBlocks();render();
-}
-function groupAddMiddleItem(gi,mi){
-  groupItems[gi].middleItems[mi].items.push({name:'',qty:'',unit:'',price:'',note:''});
-  renderGroupBlocks();render();
-}
-function groupDelMiddleItem(gi,mi,ii){
-  groupItems[gi].middleItems[mi].items.splice(ii,1);
-  renderGroupBlocks();render();
-}
-// 大項目の合計（middleItems優先・なければ items）
-function calcGroupTotal(g){
-  if(g.middleItems && g.middleItems.length>0){
-    let s=0;
-    g.middleItems.forEach(m=>{
-      m.items.forEach(it=>{ s+=(parseFloat(it.qty)||0)*(parseFloat(it.price)||0); });
-    });
-    return s;
-  }
-  return g.items.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0),0);
-}
-function calcMiddleTotal(m){
-  return m.items.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0),0);
-}
 
 // ── 合計計算 ──
 function calcTotals(){
@@ -955,15 +850,7 @@ function calcTotals(){
     // 1式表記モード：groupSummaryItemsのみ合計（大項目は使わない）
     groupSummaryItems.forEach(it=>subtotal+=(parseFloat(it.qty)||0)*(parseFloat(it.price)||0));
   } else {
-    groupItems.forEach(g=>{
-      if(g.middleItems && g.middleItems.length>0){
-        g.middleItems.forEach(m=>{
-          m.items.forEach(it=>subtotal+=(parseFloat(it.qty)||0)*(parseFloat(it.price)||0));
-        });
-      } else {
-        g.items.forEach(it=>subtotal+=(parseFloat(it.qty)||0)*(parseFloat(it.price)||0));
-      }
-    });
+    groupItems.forEach(g=>g.items.forEach(it=>subtotal+=(parseFloat(it.qty)||0)*(parseFloat(it.price)||0)));
     groupSummaryItems.forEach(it=>subtotal+=(parseFloat(it.qty)||0)*(parseFloat(it.price)||0));
   }
   // 1式表記（請求書）・請求書の他モード時は諸経費・値引きを適用しない
@@ -1086,7 +973,7 @@ function render(){
   } else {
     // 1ページ目：大項目一覧（1式）＋単一明細
     const groupRows=groupItems.map(g=>{
-      const gSub=calcGroupTotal(g);
+      const gSub=g.items.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0),0);
       return `<tr>
         <td>${g.name}</td>
         <td>1</td><td>式</td>
@@ -1194,47 +1081,22 @@ function render(){
     const kojimei2=document.getElementById('kojimei').value;
     let allRows='';
     groupItems.forEach((g,gi)=>{
-      const gSub=calcGroupTotal(g);
+      const gSub=g.items.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0),0);
       // セクションヘッダー行（工事名・黒帯）。改頁フラグはクラスで付与
       const pbClass=gi>0&&g.pageBreak?' class="group-section-header pb-row-mark"':' class="group-section-header"';
       allRows+=`<tr${pbClass}><td colspan="5" style="background:#444;color:#fff;font-weight:700;font-size:11.5px;padding:5px 8px;text-align:left;">■ ${g.name}　工事明細</td></tr>`;
-
-      const hasMiddle = g.middleItems && g.middleItems.length>0;
-      if(hasMiddle){
-        // 中項目モード：中項目見出し→明細→中項目計
-        g.middleItems.forEach(m=>{
-          const mSub = calcMiddleTotal(m);
-          // 中項目見出し行（グレー陰影）
-          allRows+=`<tr class="middle-section-header"><td colspan="5" style="background:#d8d8d8;color:#222;font-weight:700;font-size:11px;padding:4px 8px 4px 16px;text-align:left;">▸ ${m.name||'中項目'}</td></tr>`;
-          // 明細行
-          m.items.forEach(it=>{
-            const amt=(it.qty&&it.price)?fmtN(it.qty*it.price):'';
-            allRows+=`<tr class="group-item-row" data-gi="${gi}">
-              <td style="padding-left:20px">${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
-              <td>${it.qty||''}</td><td>${it.unit||''}</td>
-              <td>${(it.price&&it.price!='0'&&it.price!==0)?fmtN(it.price):''}</td>
-              <td>${amt}</td>
-            </tr>`;
-          });
-          // 中項目計
-          allRows+=`<tr class="middle-subtotal-row"><td colspan="4" style="text-align:right;background:#efefef;font-size:11px;padding:3px 8px;color:#444;">${m.name||'中項目'} 計</td><td style="background:#efefef;text-align:right;padding:3px 8px;font-size:11px;color:#444;">${fmtN(mSub)}</td></tr>`;
-        });
-        // 大項目計
-        allRows+=`<tr class="group-subtotal-row"><td colspan="4" style="text-align:right;background:#e8e8e8;font-weight:700;padding:5px 8px;">${g.name||'大項目'} 計</td><td style="background:#e8e8e8;font-weight:700;text-align:right;padding:5px 8px;">${fmtN(gSub)}</td></tr>`;
-      } else {
-        // 従来モード：小項目行
-        g.items.forEach(it=>{
-          const amt=(it.qty&&it.price)?fmtN(it.qty*it.price):'';
-          allRows+=`<tr class="group-item-row" data-gi="${gi}">
-            <td>${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
-            <td>${it.qty||''}</td><td>${it.unit||''}</td>
-            <td>${(it.price&&it.price!='0'&&it.price!==0)?fmtN(it.price):''}</td>
-            <td>${amt}</td>
-          </tr>`;
-        });
-        // 小計行
-        allRows+=`<tr class="group-subtotal-row"><td colspan="4" style="text-align:right;background:#e8e8e8;font-weight:700;padding:5px 8px;">小　計</td><td style="background:#e8e8e8;font-weight:700;text-align:right;padding:5px 8px;">${fmtN(gSub)}</td></tr>`;
-      }
+      // 小項目行
+      g.items.forEach(it=>{
+        const amt=(it.qty&&it.price)?fmtN(it.qty*it.price):'';
+        allRows+=`<tr class="group-item-row" data-gi="${gi}">
+          <td>${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+          <td>${it.qty||''}</td><td>${it.unit||''}</td>
+          <td>${(it.price&&it.price!='0'&&it.price!==0)?fmtN(it.price):''}</td>
+          <td>${amt}</td>
+        </tr>`;
+      });
+      // 小計行
+      allRows+=`<tr class="group-subtotal-row"><td colspan="4" style="text-align:right;background:#e8e8e8;font-weight:700;padding:5px 8px;">小　計</td><td style="background:#e8e8e8;font-weight:700;text-align:right;padding:5px 8px;">${fmtN(gSub)}</td></tr>`;
     });
     const detailPageHtml=`<div class="doc-page" id="group-detail-page" style="margin-top:20px;">
       <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:12px;">
@@ -1712,7 +1574,7 @@ function buildDocHTML(){
   } else {
     // 1ページ目：大項目一覧
     const groupRows=groupItems.map(g=>{
-      const gSub=calcGroupTotal(g);
+      const gSub=g.items.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0),0);
       return `<tr>
         <td ${tdStyleL}>${g.name}</td>
         <td ${tdStyle}>1</td><td ${tdStyle}>式</td>
@@ -1903,56 +1765,25 @@ ${(()=>{
   if(mode!=='group')return '';
   // 工種ごとに1ページ発行（改頁を確実にするため.page page-breakを個別に生成）
   return groupItems.map((g,gi)=>{
-    const gSub=calcGroupTotal(g);
+    const gSub=g.items.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0),0);
     let rows='';
     rows+=`<tr style="background:#444;color:#fff;font-weight:700;font-size:11.5px;">
       <td colspan="5" style="padding:5px 8px;text-align:left;">■ ${g.name}　工事明細</td>
     </tr>`;
-    const hasMiddle = g.middleItems && g.middleItems.length>0;
-    if(hasMiddle){
-      g.middleItems.forEach(m=>{
-        const mSub = calcMiddleTotal(m);
-        // 中項目見出し（グレー）
-        rows+=`<tr style="background:#d8d8d8;color:#222;font-weight:700;font-size:11px;">
-          <td colspan="5" style="padding:4px 8px 4px 16px;text-align:left;">▸ ${m.name||'中項目'}</td>
-        </tr>`;
-        m.items.forEach(it=>{
-          const amt=(it.qty&&it.price&&it.price!='0'&&it.price!==0)?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
-          rows+=`<tr>
-            <td style="text-align:left;padding-left:20px;">${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
-            <td style="text-align:right;">${it.qty||''}</td>
-            <td style="text-align:right;">${it.unit||''}</td>
-            <td style="text-align:right;">${(it.price&&it.price!='0'&&it.price!==0)?fmtN(it.price):''}</td>
-            <td style="text-align:right;">${amt}</td>
-          </tr>`;
-        });
-        // 中項目計（淡色）
-        rows+=`<tr class="middle-subtotal-row">
-          <td colspan="4" style="text-align:right;background:#efefef;font-size:11px;padding:3px 8px;color:#444;">${m.name||'中項目'} 計</td>
-          <td style="text-align:right;background:#efefef;font-size:11px;padding:3px 8px;color:#444;">${fmtN(mSub)}</td>
-        </tr>`;
-      });
-      // 大項目計
-      rows+=`<tr class="subtotal-row">
-        <td colspan="4" style="text-align:right;background:#e8e8e8;font-weight:700;">${g.name||'大項目'} 計</td>
-        <td style="text-align:right;background:#e8e8e8;font-weight:700;">${fmtN(gSub)}</td>
+    g.items.forEach(it=>{
+      const amt=(it.qty&&it.price&&it.price!='0'&&it.price!==0)?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
+      rows+=`<tr>
+        <td style="text-align:left;">${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+        <td style="text-align:right;">${it.qty||''}</td>
+        <td style="text-align:right;">${it.unit||''}</td>
+        <td style="text-align:right;">${(it.price&&it.price!='0'&&it.price!==0)?fmtN(it.price):''}</td>
+        <td style="text-align:right;">${amt}</td>
       </tr>`;
-    } else {
-      g.items.forEach(it=>{
-        const amt=(it.qty&&it.price&&it.price!='0'&&it.price!==0)?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
-        rows+=`<tr>
-          <td style="text-align:left;">${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
-          <td style="text-align:right;">${it.qty||''}</td>
-          <td style="text-align:right;">${it.unit||''}</td>
-          <td style="text-align:right;">${(it.price&&it.price!='0'&&it.price!==0)?fmtN(it.price):''}</td>
-          <td style="text-align:right;">${amt}</td>
-        </tr>`;
-      });
-      rows+=`<tr class="subtotal-row">
-        <td colspan="4" style="text-align:right;background:#e8e8e8;font-weight:700;">小　計</td>
-        <td style="text-align:right;background:#e8e8e8;font-weight:700;">${fmtN(gSub)}</td>
-      </tr>`;
-    }
+    });
+    rows+=`<tr class="subtotal-row">
+      <td colspan="4" style="text-align:right;background:#e8e8e8;font-weight:700;">小　計</td>
+      <td style="text-align:right;background:#e8e8e8;font-weight:700;">${fmtN(gSub)}</td>
+    </tr>`;
     return `<div class="page page-break" style="page-break-before:always;break-before:page;">
       <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:12px;">
         <div style="font-family:'Yu Mincho',serif;font-size:15px;font-weight:700;color:#111;">工 事 明 細</div>
@@ -2097,14 +1928,6 @@ function applyDiscount(){
       const p = parseFloat(it.price)||0;
       it.price = Math.round(p * factor);
     });
-    if(g.middleItems){
-      g.middleItems.forEach(m=>{
-        m.items.forEach(it=>{
-          const p = parseFloat(it.price)||0;
-          it.price = Math.round(p * factor);
-        });
-      });
-    }
   });
   groupSummaryItems.forEach(it=>{
     const p = parseFloat(it.price)||0;
@@ -2117,17 +1940,9 @@ function applyDiscount(){
     subtotal = flatItems.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0), 0);
   } else if(mode==='group'){
     groupItems.forEach(g=>{
-      if(g.middleItems && g.middleItems.length>0){
-        g.middleItems.forEach(m=>{
-          m.items.forEach(it=>{
-            subtotal += (parseFloat(it.qty)||0)*(parseFloat(it.price)||0);
-          });
-        });
-      } else {
-        g.items.forEach(it=>{
-          subtotal += (parseFloat(it.qty)||0)*(parseFloat(it.price)||0);
-        });
-      }
+      g.items.forEach(it=>{
+        subtotal += (parseFloat(it.qty)||0)*(parseFloat(it.price)||0);
+      });
     });
   } else if(mode==='lump'){
     subtotal = groupSummaryItems.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0), 0);
@@ -2204,422 +2019,6 @@ function revertDiscount(silent){
   if(discountBtn) discountBtn.textContent = '割引見積生成';
   
   if(!silent) alert('元のデータに戻しました。');
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// BCS.CSV読込（柔軟解析・複数フォーマット対応）
-// 対応形式:
-//   ① BCS.CSV標準（19列・P/D/T/A行属性・c8階層・CP932 or UTF-8）
-//   ② ヘッダー付き簡易CSV（品名・数量・単位・単価・備考 等）
-//   ③ ヘッダーなしフラットCSV（最低限：名称・数量・単価）
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-// CSV1行をフィールド配列にパース（ダブルクォート・カンマ対応）
-function parseBcsCsvLine(line){
-  const fields = [];
-  let cur = '';
-  let inQuote = false;
-  let i = 0;
-  while(i < line.length){
-    const ch = line[i];
-    if(inQuote){
-      if(ch === '"'){
-        if(line[i+1] === '"'){ cur += '"'; i += 2; continue; }
-        inQuote = false; i++; continue;
-      }
-      cur += ch; i++;
-    } else {
-      if(ch === '"'){ inQuote = true; i++; continue; }
-      if(ch === ','){ fields.push(cur); cur = ''; i++; continue; }
-      cur += ch; i++;
-    }
-  }
-  fields.push(cur);
-  return fields;
-}
-
-// 文字コード自動判定して読み込み
-async function readCsvFileAuto(file){
-  const Encoding = await loadEncodingJS();
-  const buf = await file.arrayBuffer();
-  const u8 = new Uint8Array(buf);
-  // BOM判定
-  if(u8.length >= 3 && u8[0] === 0xEF && u8[1] === 0xBB && u8[2] === 0xBF){
-    return new TextDecoder('utf-8').decode(u8.slice(3));
-  }
-  // encoding.js で自動判定
-  const detected = Encoding.detect(u8);
-  if(detected === 'UTF8'){
-    return new TextDecoder('utf-8').decode(u8);
-  }
-  // SJIS/CP932として復号
-  const unicodeArr = Encoding.convert(u8, {to: 'UNICODE', from: detected || 'SJIS'});
-  return Encoding.codeToString(unicodeArr);
-}
-
-// 数値抽出（カンマ・通貨記号除去）
-function parseBcsNum(v){
-  if(v === null || v === undefined || v === '') return 0;
-  const s = String(v).replace(/[¥,\s]/g, '');
-  const n = parseFloat(s);
-  return isNaN(n) ? 0 : n;
-}
-
-// CSV内容を解析して中間表現を返す
-// 戻り値: {format, groups, flatItems, lumpItems, shokeihiRate, nebiki, hasuChousei, mode}
-function analyzeBcsCsv(text){
-  // CRLF/LF統一・空行除去
-  const lines = text.replace(/\r\n/g, '\n').split('\n').filter(l => l.trim() !== '');
-  if(lines.length === 0) throw new Error('CSVが空です');
-
-  const rowsRaw = lines.map(parseBcsCsvLine);
-
-  // ── 形式判定 ──
-  // 19列構造で10列目に P/D/T/A が含まれる → BCS標準
-  const isBcsStd = rowsRaw.some(r => r.length >= 11 && /^[PDTA]$/.test(String(r[9]).trim()));
-
-  if(isBcsStd){
-    return analyzeBcsStandard(rowsRaw);
-  } else {
-    return analyzeSimpleCsv(rowsRaw);
-  }
-}
-
-// BCS.CSV標準（19列）の解析
-function analyzeBcsStandard(rows){
-  // 行属性別に分類しながら大項目→中項目→明細の階層を再構築
-  // c1=大分類インデックス・c8=階層レベル（1=大,2=中,3=明細）・c10=行属性
-  const groups = []; // [{name, middleItems:[{name,items}], items, total}]
-  let currentGroup = null;
-  let currentMiddle = null;
-  let detectedMode = null;
-  let shokeihiRate = 0;
-  let nebiki = 0;
-  let hasuChousei = 0;
-
-  // 特殊大項目の名称判定（諸経費・値引き・端数調整）
-  const isShokeihi = (n) => /諸経費|経費/.test(n);
-  const isNebiki = (n) => /値引|割引/.test(n);
-  const isHasuChousei = (n) => /端数調整|端数/.test(n);
-
-  rows.forEach(r => {
-    const colA = parseInt(r[0]) || 0;
-    const c8 = parseInt(r[7]) || 0;
-    const c9 = r[8];
-    const attr = String(r[9] || '').trim();
-    const name = String(r[10] || '').trim();
-    const note = String(r[11] || '').trim();
-    const qty = parseBcsNum(r[12]);
-    const unit = String(r[13] || '').trim();
-    const price = parseBcsNum(r[14]);
-    const totalCol = parseBcsNum(r[14]); // P行のとき大項目総額として使う（出力側と整合）
-    const tail = String(r[16] || '').trim(); // A行のはみ出し名称
-
-    if(attr === 'P'){
-      if(c8 === 1){
-        // 大項目P行
-        // 特殊判定（諸経費・値引き・端数調整）
-        if(isShokeihi(name)){
-          // 諸経費は totalCol が金額。直前までの全明細合計から率を逆算
-          let prevTotal = 0;
-          groups.forEach(g => {
-            if(g.middleItems.length > 0){
-              g.middleItems.forEach(m => {
-                m.items.forEach(it => {
-                  prevTotal += (it.qty||0) * (it.price||0);
-                });
-              });
-            } else {
-              g.items.forEach(it => {
-                prevTotal += (it.qty||0) * (it.price||0);
-              });
-            }
-          });
-          if(prevTotal > 0 && totalCol > 0){
-            // 0.1%単位で四捨五入
-            shokeihiRate = Math.round((totalCol / prevTotal) * 1000) / 10;
-          }
-          return; // 通常groupには加えない
-        }
-        if(isNebiki(name)){
-          nebiki = Math.abs(totalCol || price);
-          return;
-        }
-        if(isHasuChousei(name)){
-          hasuChousei = totalCol || (qty * price);
-          return;
-        }
-        // 通常の大項目
-        currentGroup = {name, middleItems: [], items: [], total: totalCol};
-        currentMiddle = null;
-        groups.push(currentGroup);
-      } else if(c8 === 2){
-        // 中項目P行
-        if(currentGroup){
-          currentMiddle = {name, items: []};
-          currentGroup.middleItems.push(currentMiddle);
-        }
-      }
-      // c8=空欄や0の「全体トップP行」は無視（行1の「大分リハ病院 一般」のような全体集計用）
-    } else if(attr === 'D'){
-      const item = {name, qty, unit: unit || '式', price, note};
-      if(c8 === 3 && currentMiddle){
-        // 中項目配下の明細
-        currentMiddle.items.push(item);
-      } else if(c8 === 2 && currentGroup){
-        // 中項目を使わない場合の明細（大項目直下）
-        currentGroup.items.push(item);
-      } else if(c8 === 2 && currentMiddle){
-        // フォールバック：直前の中項目に
-        currentMiddle.items.push(item);
-      } else if(currentMiddle){
-        currentMiddle.items.push(item);
-      } else if(currentGroup){
-        currentGroup.items.push(item);
-      }
-    } else if(attr === 'A'){
-      // はみ出し名称 → 直前の明細に連結
-      if(tail){
-        let lastItem = null;
-        if(currentMiddle && currentMiddle.items.length > 0){
-          lastItem = currentMiddle.items[currentMiddle.items.length-1];
-        } else if(currentGroup && currentGroup.items.length > 0){
-          lastItem = currentGroup.items[currentGroup.items.length-1];
-        }
-        if(lastItem) lastItem.name = (lastItem.name || '') + tail;
-      }
-    }
-    // T行は無視（合計は雛形側で再計算）
-  });
-
-  // ── モード判定 ──
-  if(groups.length === 0){
-    throw new Error('明細が見つかりませんでした。');
-  }
-  if(groups.length === 1 && /工事一式|一式/.test(groups[0].name)){
-    detectedMode = 'lump';
-  } else if(groups.length === 1 && groups[0].middleItems.length === 0 && /^明細$/.test(groups[0].name)){
-    detectedMode = 'flat';
-  } else {
-    detectedMode = 'group';
-  }
-
-  return {
-    format: 'BCS.CSV標準',
-    groups,
-    mode: detectedMode,
-    shokeihiRate,
-    nebiki,
-    hasuChousei
-  };
-}
-
-// 簡易CSV（ヘッダー付き or なし）の解析
-function analyzeSimpleCsv(rows){
-  // ヘッダー判定：1行目に「品名」「名称」「数量」「単価」等の語が含まれる
-  const HEADER_PATTERN = /品名|名称|工事内容|内容|数量|単価|単位|備考|金額|摘要/;
-  const firstRowText = rows[0].join('|');
-  const hasHeader = HEADER_PATTERN.test(firstRowText);
-
-  // ヘッダー位置マッピング
-  let colMap = {name: 0, qty: 1, unit: 2, price: 3, note: 4};
-  let dataRows = rows;
-  if(hasHeader){
-    const header = rows[0].map(h => String(h).trim());
-    dataRows = rows.slice(1);
-    header.forEach((h, idx) => {
-      if(/品名|名称|工事内容|内容|摘要/.test(h)) colMap.name = idx;
-      else if(/^数量$|^数$/.test(h)) colMap.qty = idx;
-      else if(/単位/.test(h)) colMap.unit = idx;
-      else if(/単価/.test(h)) colMap.price = idx;
-      else if(/備考|note|note/i.test(h)) colMap.note = idx;
-    });
-  }
-
-  // 明細抽出（名称があり数量or単価が0より大きい行のみ）
-  const items = [];
-  dataRows.forEach(r => {
-    const name = String(r[colMap.name] || '').trim();
-    const qty = parseBcsNum(r[colMap.qty]);
-    const unit = String(r[colMap.unit] || '').trim();
-    const price = parseBcsNum(r[colMap.price]);
-    const note = String(r[colMap.note] || '').trim();
-    if(!name) return;
-    // 集計行・合計行を除外
-    if(/^(小計|合計|総合計|計|消費税|税込|税抜)/.test(name)) return;
-    items.push({name, qty: qty || 1, unit: unit || '式', price, note});
-  });
-
-  if(items.length === 0){
-    throw new Error('明細が見つかりませんでした。');
-  }
-
-  // 簡易CSVは1つの大項目（"明細"）として扱う＝flatモードに自動変換
-  return {
-    format: hasHeader ? 'ヘッダー付きCSV' : 'シンプルCSV',
-    groups: [{name: '明細', middleItems: [], items, total: 0}],
-    mode: 'flat',
-    flatItems: items,
-    shokeihiRate: 0,
-    nebiki: 0,
-    hasuChousei: 0
-  };
-}
-
-// CSV読込メインハンドラ（input[type=file]のonchange）
-async function handleBcsCsvImport(event){
-  const file = event.target.files[0];
-  if(!file){ return; }
-  // input をリセット（同じファイルを連続選択できるように）
-  event.target.value = '';
-
-  let text, parsed;
-  try{
-    text = await readCsvFileAuto(file);
-    parsed = analyzeBcsCsv(text);
-  } catch(e){
-    alert('CSV読込エラー: ' + e.message);
-    return;
-  }
-
-  // 中項目を含む大項目数・明細総数を集計
-  let groupWithMiddleCount = 0;
-  let totalDetails = 0;
-  parsed.groups.forEach(g => {
-    if(g.middleItems.length > 0){
-      groupWithMiddleCount++;
-      g.middleItems.forEach(m => totalDetails += m.items.length);
-    } else {
-      totalDetails += g.items.length;
-    }
-  });
-
-  // 確認ダイアログ
-  const summary = [
-    `形式：${parsed.format}`,
-    `モード：${parsed.mode === 'flat' ? 'フラット' : (parsed.mode === 'lump' ? '1式表記' : '大項目・小項目')}`,
-    `大項目：${parsed.groups.length}件${groupWithMiddleCount > 0 ? `（中項目あり：${groupWithMiddleCount}件）` : ''}`,
-    `明細：${totalDetails}行`,
-    parsed.shokeihiRate > 0 ? `諸経費：${parsed.shokeihiRate}%` : null,
-    parsed.nebiki > 0 ? `値引き：¥${parsed.nebiki.toLocaleString()}` : null,
-    parsed.hasuChousei !== 0 ? `端数調整：¥${parsed.hasuChousei.toLocaleString()}` : null,
-  ].filter(Boolean).join('\n');
-
-  // 既存データ有無チェック
-  const hasExistingData =
-    flatItems.some(it => it.name) ||
-    groupItems.some(g => g.name || g.items.some(it => it.name) || (g.middleItems||[]).some(m => m.name || m.items.some(it => it.name))) ||
-    groupSummaryItems.some(it => it.name);
-
-  let action;
-  if(hasExistingData){
-    // 3択ダイアログ：confirmを2段階で実装
-    // [OK]=置換, [キャンセル]=次の質問へ
-    const r1 = confirm(
-      `CSVを読み込みました\n\n${summary}\n\n────────────\n` +
-      `既存データがあります。\n\n` +
-      `「OK」= 既存データを置換\n` +
-      `「キャンセル」= 次の選択肢へ`
-    );
-    if(r1){
-      action = 'replace';
-    } else {
-      const r2 = confirm(
-        `「OK」= 末尾に追加\n「キャンセル」= 取り込みを中止`
-      );
-      action = r2 ? 'append' : null;
-    }
-  } else {
-    // 既存データなしならそのまま置換
-    const ok = confirm(`CSVを読み込みました\n\n${summary}\n\n読み込みますか？`);
-    action = ok ? 'replace' : null;
-  }
-
-  if(!action){ return; }
-
-  applyCsvImport(parsed, action);
-}
-
-// 解析結果を雛形に反映
-function applyCsvImport(parsed, action){
-  // ── モード切替（置換時のみ）──
-  if(action === 'replace'){
-    mode = parsed.mode;
-    const modeSelect = document.getElementById('mode-select');
-    if(modeSelect) modeSelect.value = mode;
-
-    // 既存データクリア
-    flatItems.splice(0, flatItems.length);
-    groupItems.splice(0, groupItems.length);
-    groupSummaryItems.splice(0, groupSummaryItems.length);
-
-    // 諸経費・値引き・端数調整も復元
-    if(parsed.shokeihiRate > 0){
-      shokeihiRate = parsed.shokeihiRate;
-      const shokeihiInput = document.getElementById('shokeihiRateInput');
-      if(shokeihiInput) shokeihiInput.value = shokeihiRate;
-    }
-    if(parsed.nebiki > 0){
-      nebiki = parsed.nebiki;
-      const nebikiInput = document.getElementById('nebikiInput');
-      if(nebikiInput) nebikiInput.value = nebiki;
-    }
-    if(parsed.hasuChousei !== 0){
-      hasuChousei = parsed.hasuChousei;
-      const hasuInput = document.getElementById('hasuChouseiInput');
-      if(hasuInput) hasuInput.value = hasuChousei;
-    }
-  }
-
-  // ── データ投入 ──
-  if(parsed.mode === 'flat'){
-    // フラットモード：全明細を flatItems に
-    const allItems = [];
-    parsed.groups.forEach(g => {
-      g.items.forEach(it => allItems.push({...it}));
-      g.middleItems.forEach(m => m.items.forEach(it => allItems.push({...it})));
-    });
-    if(action === 'replace'){
-      flatItems.splice(0, 0, ...allItems);
-    } else {
-      flatItems.push(...allItems);
-    }
-  } else if(parsed.mode === 'lump'){
-    // 1式表記：全明細を groupSummaryItems に
-    const allItems = [];
-    parsed.groups.forEach(g => {
-      g.items.forEach(it => allItems.push({...it}));
-      g.middleItems.forEach(m => m.items.forEach(it => allItems.push({...it})));
-    });
-    if(action === 'replace'){
-      groupSummaryItems.splice(0, 0, ...allItems);
-    } else {
-      groupSummaryItems.push(...allItems);
-    }
-  } else {
-    // groupモード：階層をそのまま再現
-    const newGroups = parsed.groups.map(g => ({
-      name: g.name || '',
-      pageBreak: false,
-      middleItems: g.middleItems.map(m => ({
-        name: m.name || '',
-        items: m.items.length > 0 ? m.items.map(it => ({...it})) : [{name:'',qty:'',unit:'',price:'',note:''}]
-      })),
-      items: g.items.length > 0 ? g.items.map(it => ({...it})) : (g.middleItems.length > 0 ? [] : [{name:'',qty:'',unit:'',price:'',note:''}])
-    }));
-    if(action === 'replace'){
-      groupItems.splice(0, 0, ...newGroups);
-    } else {
-      groupItems.push(...newGroups);
-    }
-  }
-
-  // ── UI再描画 ──
-  if(typeof renderEditor === 'function') renderEditor();
-  if(typeof render === 'function') render();
-  if(typeof renderGroupBlocks === 'function') renderGroupBlocks();
-
-  alert(`✅ 取り込み完了\n${parsed.format} を「${action === 'replace' ? '置換' : '末尾に追加'}」しました。`);
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2774,88 +2173,21 @@ async function exportBCS_CSV(){
       
     } else if(mode==='group'){
       // グループ: 各groupItemを大分類として展開
-      // 大項目に有効明細があるかチェック（middleItems優先）
-      const hasValidItems = (g) => {
-        if(g.middleItems && g.middleItems.length>0){
-          return g.middleItems.some(m=>m.items.some(it=>it.name&&(it.qty||0)>0));
-        }
-        return g.items.some(it=>it.name&&(it.qty||0)>0);
-      };
-      const validGroups = groupItems.filter(hasValidItems);
+      const validGroups = groupItems.filter(g=>g.items.some(it=>it.name&&(it.qty||0)>0));
       if(validGroups.length===0){
         alert('明細が空です。大項目に1行以上入力してください。');
         return;
       }
-
+      
       validGroups.forEach(g => {
         const colA = nextColA++;
-        const hasMiddle = g.middleItems && g.middleItems.length>0;
-
-        // 大項目合計を先に計算
-        let groupTotal = 0;
-        if(hasMiddle){
-          g.middleItems.forEach(m=>{
-            m.items.forEach(it=>{
-              if(it.name&&(it.qty||0)>0){
-                groupTotal += (parseFloat(it.qty)||0)*(parseFloat(it.price)||0);
-              }
-            });
-          });
-        } else {
-          g.items.forEach(it=>{
-            if(it.name&&(it.qty||0)>0){
-              groupTotal += (parseFloat(it.qty)||0)*(parseFloat(it.price)||0);
-            }
-          });
-        }
+        const validItems = g.items.filter(it=>it.name&&(it.qty||0)>0);
+        const groupTotal = validItems.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0),0);
         grandTotal += groupTotal;
-
-        // 大項目P行（c8=1）
+        
         rows.push(bcsRow(colA,'','','','','','',1,'','P',g.name||('大項目'+(colA-1)),'',1,'式',groupTotal,'','','',''));
         const seqRef = {value: 1};
-
-        if(hasMiddle){
-          // 中項目あり：中項目ごとにP行(c8=2)→明細(c8=3)→T行
-          g.middleItems.forEach(m=>{
-            const validMItems = m.items.filter(it=>it.name&&(it.qty||0)>0);
-            if(validMItems.length===0) return;
-            const middleTotal = validMItems.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0),0);
-            const seqMid = seqRef.value++;
-            // 中項目P行（c8=2でサブ階層を表現）
-            rows.push(bcsRow(colA,'','','','','','',2,seqMid,'P',m.name||'中項目','',1,'式',middleTotal,'','','',''));
-            // 明細はc8=3, c9=連番
-            const detailSeq = {value: 1};
-            validMItems.forEach(it=>{
-              const fullName = it.name || '';
-              const noOver = visualLen(fullName) <= NAME_MAX_VISUAL;
-              let headName, tailName;
-              if(noOver){ headName = fullName; tailName = ''; }
-              else { [headName, tailName] = splitByVisualLen(fullName, NAME_MAX_VISUAL); }
-              const ds = detailSeq.value++;
-              rows.push(bcsRow(
-                colA,'','','','','','',3,ds,
-                'D', headName, it.note||'',
-                parseFloat(it.qty)||0, it.unit||'式', parseFloat(it.price)||0,
-                '','','',''
-              ));
-              if(tailName){
-                const dsA = detailSeq.value++;
-                rows.push(bcsRow(
-                  colA,'','','','','','',3,dsA,
-                  'A', '', '', '', '', '',
-                  '', tailName, '', ''
-                ));
-              }
-            });
-            // 中項目T行
-            rows.push(bcsRow(colA,'','','','','','',2,seqMid,'T',(m.name||'中項目')+'計','','','','','','','',''));
-          });
-        } else {
-          // 従来通り：明細直下
-          const validItems = g.items.filter(it=>it.name&&(it.qty||0)>0);
-          validItems.forEach(it => pushDetailRow(colA, seqRef, it));
-        }
-        // 大項目T行
+        validItems.forEach(it => pushDetailRow(colA, seqRef, it));
         rows.push(bcsRow(colA,'','','','','','',2,'','T',(g.name||'大項目'+(colA-1))+'計','','','','','','','',''));
       });
       
@@ -2936,245 +2268,7 @@ async function exportBCS_CSV(){
     alert('BCS.CSV出力に失敗しました：\n'+err.message);
   }
 }
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 案件選択機能（見積書モード専用）
-// data.json から案件情報を取得して表書を自動充填
-// ※ ankenData / ankenDataLoaded はグローバル冒頭で宣言済み
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-const DATA_JSON_URL = 'https://kameisatoru-svg.github.io/genba-navi/data.json';
-
-// 起動時に data.json をfetch
-async function loadAnkenData(){
-  try{
-    const res = await fetch(DATA_JSON_URL, {cache: 'no-cache'});
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    ankenData = await res.json();
-    ankenDataLoaded = true;
-    // 見積モードで起動していればボタン有効化
-    const ankenBtn = document.getElementById('ankenSelectBtn');
-    if(ankenBtn && docType === 'mitsumori'){
-      ankenBtn.style.display = 'inline-block';
-    }
-  } catch(e){
-    console.warn('data.json取得失敗：', e.message);
-    ankenDataLoaded = false;
-  }
-}
-
-// モーダルを開く
-function openAnkenSelector(){
-  if(!ankenDataLoaded){
-    alert('案件データがまだ読み込まれていません。少し待ってから再度お試しください。');
-    return;
-  }
-  const modal = document.getElementById('anken-modal');
-  modal.style.display = 'flex';
-  const search = document.getElementById('anken-search');
-  search.value = '';
-  search.focus();
-  renderAnkenList(ankenData.案件 || []);
-  const status = document.getElementById('anken-status');
-  status.textContent = `案件 ${(ankenData.案件||[]).length} 件・キーワードで絞り込み可能`;
-}
-
-function closeAnkenSelector(){
-  document.getElementById('anken-modal').style.display = 'none';
-}
-
-// モーダル外クリックで閉じる
-document.addEventListener('click', function(e){
-  const modal = document.getElementById('anken-modal');
-  if(modal && e.target === modal) closeAnkenSelector();
-});
-// ESCキーで閉じる
-document.addEventListener('keydown', function(e){
-  if(e.key === 'Escape'){
-    const modal = document.getElementById('anken-modal');
-    if(modal && modal.style.display === 'flex') closeAnkenSelector();
-  }
-});
-
-// 検索でリスト絞り込み
-function filterAnkenList(){
-  const q = document.getElementById('anken-search').value.trim().toLowerCase();
-  const all = ankenData.案件 || [];
-  if(!q){
-    renderAnkenList(all);
-    document.getElementById('anken-status').textContent = `案件 ${all.length} 件`;
-    return;
-  }
-  const filtered = all.filter(a => {
-    const haystack = [
-      a.案件キー, a.正式工事名, a.顧客略, a.施工場所, a.備考, a.旧案件番号
-    ].filter(Boolean).join(' ').toLowerCase();
-    return haystack.includes(q);
-  });
-  renderAnkenList(filtered);
-  document.getElementById('anken-status').textContent = `${filtered.length} / ${all.length} 件`;
-}
-
-// 案件リストを描画
-function renderAnkenList(list){
-  const wrap = document.getElementById('anken-list');
-  if(list.length === 0){
-    wrap.innerHTML = '<div style="padding:40px 20px;text-align:center;color:#888;font-size:12px;">該当する案件がありません</div>';
-    return;
-  }
-  wrap.innerHTML = list.map(a => {
-    const key = a.案件キー || '';
-    const name = a.正式工事名 || '';
-    const place = a.施工場所 || '';
-    const status = a.ステータス || '';
-    const oldNo = a.旧案件番号 ? `<span style="font-size:10px;color:#888;margin-left:6px;">(${a.旧案件番号})</span>` : '';
-    return `<div onclick="selectAnken('${escAttr(key)}')" style="padding:10px 18px;border-bottom:1px solid #eee;cursor:pointer;transition:background 0.1s;" onmouseover="this.style.background='#f0f4f8'" onmouseout="this.style.background='transparent'">
-      <div style="font-size:13px;font-weight:600;color:#333;">${escH(name)}${oldNo}</div>
-      <div style="font-size:11px;color:#666;margin-top:2px;">${escH(key)}</div>
-      <div style="font-size:10px;color:#888;margin-top:2px;">${escH(place)}　<span style="color:#aaa;">${escH(status)}</span></div>
-    </div>`;
-  }).join('');
-}
-
-// 属性用エスケープ
-function escAttr(s){
-  return String(s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
-}
-
-// 案件を選択 → 表書を自動充填
-function selectAnken(ankenKey){
-  const a = (ankenData.案件 || []).find(x => x.案件キー === ankenKey);
-  if(!a){ alert('案件が見つかりません'); return; }
-
-  // 取引先マスターから顧客情報を取得
-  const customer = (ankenData.取引先マスター || []).find(t => t.略称 === a.顧客略);
-
-  // 1. 案件キー
-  const ankenInput = document.getElementById('ankenKey');
-  if(ankenInput) ankenInput.value = a.案件キー || '';
-
-  // 2. 宛先（送り状名）正式名称＋御中
-  if(customer){
-    const atena = document.getElementById('atena');
-    if(atena){
-      // 「様」で終わる個人名等は御中をつけない
-      const fullname = customer.正式名称 || '';
-      const isCompany = /株式会社|有限会社|合同会社|合資会社|社会福祉法人|医療法人|学校法人|宗教法人|NPO|協同組合/.test(fullname);
-      atena.value = isCompany ? `${fullname} 御中` : fullname;
-    }
-  }
-
-  // 3. 工事件名
-  const kojimei = document.getElementById('kojimei');
-  if(kojimei) kojimei.value = a.正式工事名 || '';
-
-  // 4. 施工場所
-  const seshu = document.getElementById('seshubasho');
-  if(seshu) seshu.value = a.施工場所 || '';
-
-  // 5. 書類番号（お客様向け番号）自動採番
-  if(customer){
-    const docNoEl = document.getElementById('mitsumoriNo');
-    if(docNoEl){
-      const tNum = customer.id.replace(/^T-/, ''); // T-013 → 013
-      const today = new Date();
-      const yymmdd = String(today.getFullYear()).slice(2) +
-                     String(today.getMonth()+1).padStart(2,'0') +
-                     String(today.getDate()).padStart(2,'0');
-      const prefix = `ARS-T${tNum}-${yymmdd}-`;
-      // 既存データから同プレフィックスの最大連番を探す
-      const seq = nextDocNumberSeq(prefix);
-      docNoEl.value = `${prefix}${String(seq).padStart(2,'0')}`;
-    }
-  }
-
-  // 6. 発行日（今日）
-  const hakkoEl = document.getElementById('hakkoDate');
-  if(hakkoEl){
-    const today = new Date();
-    const ymd = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-    hakkoEl.value = ymd;
-  }
-
-  // 7. 有効期限（+14日） 雛形に専用フィールドがある場合のみ
-  // 現雛形は備考欄に「有効期限は発行日より30日間」と書く運用なので、
-  // 14日固定のフィールドは現状なし。発行日基準で有効期限が表示される（既存ロジック）。
-  // 注：もし専用フィールド(yukoDate等)が将来追加されたら下記の通り：
-  // const yukoEl = document.getElementById('yukoDate');
-  // if(yukoEl){ ... +14日セット ... }
-
-  // タイトル更新
-  if(typeof updateDocTitle === 'function') updateDocTitle();
-  if(typeof render === 'function') render();
-
-  closeAnkenSelector();
-
-  // 完了通知（短時間トースト）
-  showAnkenToast(`✅ 「${a.正式工事名}」の表書を入力しました`);
-}
-
-// 同プレフィックスの既存書類から次の連番を計算
-// 形式: ARS-T013-260508-NN
-function nextDocNumberSeq(prefix){
-  const found = new Set();
-  if(!ankenData || !ankenData.案件) return 1;
-  ankenData.案件.forEach(a => {
-    (a.見積 || []).forEach(d => {
-      const num = d.お客様向け番号 || '';
-      if(num.startsWith(prefix)){
-        const tail = num.slice(prefix.length);
-        const n = parseInt(tail, 10);
-        if(!isNaN(n)) found.add(n);
-      }
-    });
-    (a.請求 || []).forEach(d => {
-      const num = d.お客様向け番号 || '';
-      if(num.startsWith(prefix)){
-        const tail = num.slice(prefix.length);
-        const n = parseInt(tail, 10);
-        if(!isNaN(n)) found.add(n);
-      }
-    });
-  });
-  let next = 1;
-  while(found.has(next)) next++;
-  return next;
-}
-
-// 完了トースト
-function showAnkenToast(msg){
-  let toast = document.getElementById('anken-toast');
-  if(!toast){
-    toast = document.createElement('div');
-    toast.id = 'anken-toast';
-    toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#3a5070;color:#fff;padding:10px 16px;border-radius:6px;font-size:12px;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,0.2);z-index:10000;opacity:0;transition:opacity 0.2s;';
-    document.body.appendChild(toast);
-  }
-  toast.textContent = msg;
-  toast.style.opacity = '1';
-  clearTimeout(toast._timer);
-  toast._timer = setTimeout(()=>{ toast.style.opacity = '0'; }, 2400);
-}
-
-// 起動時に案件データを取得
-window.addEventListener('DOMContentLoaded', loadAnkenData);
 
 </script>
-<!-- ━━━ 案件選択モーダル（見積書専用） ━━━ -->
-<div id="anken-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;font-family:inherit;">
-  <div style="background:#fff;width:min(720px,92vw);max-height:85vh;border-radius:8px;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,0.3);">
-    <div style="padding:14px 18px;border-bottom:1px solid #ddd;display:flex;align-items:center;justify-content:space-between;background:#3a5070;color:#fff;border-radius:8px 8px 0 0;">
-      <div style="font-size:14px;font-weight:600;">📋 案件を選択</div>
-      <button onclick="closeAnkenSelector()" style="background:transparent;border:none;color:#fff;font-size:18px;cursor:pointer;padding:0 4px;">✕</button>
-    </div>
-    <div style="padding:12px 18px;border-bottom:1px solid #eee;">
-      <input id="anken-search" type="text" placeholder="案件キー・工事名・顧客名・施工場所で検索（例：島津・うた乃・別府）" style="width:100%;padding:8px 12px;border:1px solid #ccc;border-radius:4px;font-size:13px;font-family:inherit;" oninput="filterAnkenList()" autocomplete="off">
-      <div id="anken-status" style="font-size:11px;color:#888;margin-top:4px;">案件データを読み込み中…</div>
-    </div>
-    <div id="anken-list" style="flex:1;overflow-y:auto;padding:0;"></div>
-    <div style="padding:10px 18px;border-top:1px solid #eee;display:flex;justify-content:flex-end;gap:8px;background:#f7f7f5;border-radius:0 0 8px 8px;">
-      <button onclick="closeAnkenSelector()" style="padding:6px 16px;background:#888;color:#fff;border:none;border-radius:4px;cursor:pointer;font-family:inherit;font-size:12px;">キャンセル</button>
-    </div>
-  </div>
-</div>
 </body>
 </html>
