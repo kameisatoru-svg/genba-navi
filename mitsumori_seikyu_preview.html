@@ -245,6 +245,7 @@ tr.dragging{opacity:0.4;}
       <option value="lump" id="mode-lump" style="display:none;">1式表記</option>
     </select>
     <button class="btn btn-gold sp-hidden-sm" onclick="printHTML()">印刷・PDF保存</button>
+    <button class="btn sp-hidden-sm" style="background:#7a4040;color:#fff;border:1px solid #9a5858;" onclick="clearAllData()" title="表書・明細・全設定を初期状態にリセット">🗑 クリア</button>
     <button class="btn sp-hidden-sm" style="background:#5a7050;color:#fff;border:1px solid #7a9070;" onclick="openCsvPasteModal()" title="チャット出力のCSVテキストを貼り付けて読み込む（UTF-8専用・推奨）">📋 貼付で読込</button>
     <button class="btn sp-hidden-sm" style="background:#4a6090;color:#fff;border:1px solid #6a80b0;" onclick="document.getElementById('bcs-csv-input').click()" title="BCS.CSVや一般的なCSVファイルを読み込む（建築みつも朗のCP932にも対応）">📁 ファイル読込</button>
     <input type="file" id="bcs-csv-input" accept=".csv,text/csv" style="display:none" onchange="handleBcsCsvImport(event)">
@@ -2675,6 +2676,80 @@ function applyCsvPaste(){
 
   applyCsvImport(parsed, action);
   closeCsvPasteModal();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 全データクリア（表書・明細・全設定を初期状態へ）
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+function clearAllData(){
+  if(!confirm('全データをクリアします。\n\n表書・明細・諸経費・値引き等すべてが初期状態に戻ります。\n\nよろしいですか？')){
+    return;
+  }
+
+  // ── 割引バックアップを消す ──
+  discountBackup = null;
+
+  // ── 表書フォームをクリア ──
+  const clearVal = (id, def) => {
+    const el = document.getElementById(id);
+    if(el) el.value = (def !== undefined ? def : '');
+  };
+  clearVal('atena');
+  clearVal('mitsumoriNo', 'AR-26-XXX-M1');
+  clearVal('hakkoDate', new Date().toISOString().slice(0,10)); // 今日
+  clearVal('shiharaiDate');
+  clearVal('kojimei');
+  clearVal('seshubasho');
+  clearVal('koki');
+  clearVal('ankenKey');
+  clearVal('fileSuffix');
+  clearVal('bikou');
+  // 備考のauto-fillフラグを戻す
+  const bikouEl = document.getElementById('bikou');
+  if(bikouEl) bikouEl.dataset.auto = '1';
+
+  // ── 数値設定をクリア（デフォルト値へ） ──
+  shokeihiRate = 15;
+  nebiki = 0;
+  hasuChousei = 0;
+  clearVal('shokeihiRateInput', '15');
+  clearVal('nebikiInput', '0');
+  clearVal('hasuChouseiInput', '0');
+
+  // ── 明細データを初期1行にリセット ──
+  flatItems.splice(0, flatItems.length,
+    {name:'',qty:'',unit:'',price:'',note:'',pageBreak:false},
+    {name:'',qty:'',unit:'',price:'',note:'',pageBreak:false},
+    {name:'',qty:'',unit:'',price:'',note:'',pageBreak:false}
+  );
+  groupItems.splice(0, groupItems.length,
+    {name:'',pageBreak:false,middleItems:[],items:[
+      {name:'',qty:'',unit:'',price:'',note:''}
+    ]}
+  );
+  groupSummaryItems.splice(0, groupSummaryItems.length);
+
+  // ── モード・書類タイプを初期化（見積書・フラット） ──
+  mode = 'flat';
+  const modeSelect = document.getElementById('mode-select');
+  if(modeSelect) modeSelect.value = 'flat';
+
+  // 割引ボタン表示も戻す
+  const revertBtn = document.getElementById('discount-revert-btn');
+  if(revertBtn) revertBtn.style.display = 'none';
+  const discountBtn = document.getElementById('discount-btn');
+  if(discountBtn) discountBtn.textContent = '割引見積生成';
+
+  // 書類タイプを見積書へ（既にmitsumoriなら何も起きない）
+  if(typeof switchDocType === 'function') switchDocType('mitsumori');
+
+  // ── UI再描画 ──
+  if(typeof renderEditor === 'function') renderEditor();
+  if(typeof render === 'function') render();
+  if(typeof updateDocTitle === 'function') updateDocTitle();
+
+  alert('✅ 全データをクリアしました。');
 }
 
 async function handleBcsCsvImport(event){
