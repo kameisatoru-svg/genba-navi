@@ -1406,7 +1406,7 @@ function checkAndPaginateGroup(){
 
     const pg=document.createElement('div');
     pg.className='doc-page group-overflow-page';
-    pg.style.marginTop='20px';
+    pg.style.cssText='margin-top:20px;page-break-before:always;break-before:page;';
 
     // ヘッダー
     const hd=document.createElement('div');
