@@ -946,6 +946,24 @@ function calcMiddleTotal(m){
   return m.items.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0),0);
 }
 
+// ── 階層プレフィックス生成（2026/5/9、建築みつも朗互換）──
+// 大項目番号 gi について A, B, C, ..., Z, AA, AB ... を返す
+function groupPrefix(gi){
+  let n = gi, s = '';
+  do { s = String.fromCharCode(65 + (n % 26)) + s; n = Math.floor(n / 26) - 1; } while(n >= 0);
+  return s;
+}
+// 「A 内装工事」のような表示名を返す
+function prefixedGroupName(gi, g){
+  const nm = (g && g.name) ? g.name : ('大項目'+(gi+1));
+  return groupPrefix(gi) + ' ' + nm;
+}
+// 「A-1 壁工事」のような表示名を返す
+function prefixedMiddleName(gi, mi, m){
+  const nm = (m && m.name) ? m.name : '中項目';
+  return groupPrefix(gi) + '-' + (mi+1) + ' ' + nm;
+}
+
 // ── 合計計算 ──
 function calcTotals(){
   let subtotal=0;
