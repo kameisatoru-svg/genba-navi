@@ -2338,6 +2338,20 @@ function analyzeBcsCsv(text){
 
   const rowsRaw = dataLines.map(parseBcsCsvLine);
 
+  // ── データ行ゼロ（メタ行のみ）対応 ──
+  // メタのみ貼付ケースでは空のparsed結果を返してメタ情報だけ呼び出し側に渡す
+  if(rowsRaw.length === 0){
+    return {
+      format: 'メタ情報のみ',
+      mode: mode, // 現在のモード維持
+      groups: [],
+      shokeihiRate: 0,
+      nebiki: 0,
+      hasuChousei: 0,
+      meta: meta
+    };
+  }
+
   // ── 形式判定 ──
   // 19列構造で10列目に P/D/T/A が含まれる → BCS標準
   const isBcsStd = rowsRaw.some(r => r.length >= 11 && /^[PDTA]$/.test(String(r[9]).trim()));
