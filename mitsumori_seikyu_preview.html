@@ -33,6 +33,9 @@ body{font-family:"Meiryo","Yu Gothic",sans-serif;background:var(--bg);height:100
 .tb-btn:active{background:rgba(255,255,255,0.16);}
 .tb-btn-gold{background:var(--gold);color:var(--navy);font-weight:700;}
 .tb-btn-gold:hover{background:#d4b97e;}
+.tb-btn-pdf{background:#c0392b;color:#fff;font-weight:700;}
+.tb-btn-pdf:hover{background:#d8463a;}
+.tb-btn-pdf:disabled{background:#888;cursor:wait;opacity:0.7;}
 .tb-btn-primary{background:#2a3f58;border-color:rgba(255,255,255,0.18);}
 .tb-btn-primary:hover{background:#34516f;}
 .tb-btn-menu{padding:6px 8px;background:transparent;border-color:rgba(255,255,255,0.18);}
@@ -196,8 +199,9 @@ tr.dragging{opacity:0.4;}
   .topbar-title{display:none;}
   .tb-btn .tb-label{display:none;}
   .tb-btn{padding:8px;width:40px;justify-content:center;gap:0;}
-  .tb-btn-gold{width:auto;padding:8px 14px;}
-  .tb-btn-gold .tb-label{display:inline;font-weight:700;}
+  /* PDFボタンはスマホでもラベル残す（一番使う機能） */
+  .tb-btn-pdf{width:auto;padding:8px 12px;}
+  .tb-btn-pdf .tb-label{display:inline;font-weight:700;font-size:11px;}
   .tb-btn svg{width:20px;height:20px;}
   .topbar-actions{gap:6px;}
   /* ⋮メニュー：スマホでは画面右端から少し離して */
@@ -302,6 +306,15 @@ tr.dragging{opacity:0.4;}
         <circle cx="17.5" cy="11.5" r="0.7" fill="currentColor"/>
       </svg>
       <span class="tb-label">印刷</span>
+    </button>
+    <button class="tb-btn tb-btn-pdf" id="tb-savepdf-btn" onclick="savePDF()" title="PDFファイルとして保存（スマホ推奨）">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 3 L7 3 Q5 3 5 5 L5 19 Q5 21 7 21 L17 21 Q19 21 19 19 L19 11"/>
+        <path d="M14 3 L14 8 L19 8 L19 11"/>
+        <path d="M14 3 L19 8" opacity="0.4"/>
+        <text x="12" y="18" font-size="6" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none" font-family="sans-serif">PDF</text>
+      </svg>
+      <span class="tb-label">PDF</span>
     </button>
     <button class="tb-btn tb-btn-primary" onclick="openCsvPasteModal()" title="CSVテキストを貼り付けて読込">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -2122,6 +2135,82 @@ window.addEventListener('load',function(){
 });
 ADJSCRIPT_END
 </body></html>`;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// PDF保存（html2pdf.js でブラウザ内PDF生成・スマホ完結）
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function loadHtml2Pdf(){
+  return new Promise((resolve, reject)=>{
+    if(window.html2pdf){ resolve(window.html2pdf); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js';
+    s.onload = ()=>resolve(window.html2pdf);
+    s.onerror = ()=>reject(new Error('html2pdf.js の読み込みに失敗しました'));
+    document.head.appendChild(s);
+  });
+}
+
+async function savePDF(){
+  // ボタンをローディング表示にする（連打防止）
+  const btn = document.getElementById('tb-savepdf-btn');
+  const originalLabel = btn ? btn.querySelector('.tb-label') : null;
+  const labelText = originalLabel ? originalLabel.textContent : '';
+  if(originalLabel) originalLabel.textContent = '生成中…';
+  if(btn) btn.disabled = true;
+
+  try{
+    const html2pdfFn = await loadHtml2Pdf();
+
+    // プレビューDOMをクローンして印刷向け処理を施す
+    const previewInner = document.getElementById('preview-inner');
+    if(!previewInner){ alert('プレビューが見つかりません'); return; }
+    const clone = previewInner.cloneNode(true);
+    // transform解除
+    clone.style.transform = 'none';
+    clone.style.width = 'auto';
+    clone.style.marginBottom = '0';
+
+    // ページ単位でPDF化するため、各 .doc-page にpage-break-afterを付与
+    clone.querySelectorAll('.doc-page').forEach((pg, i, all)=>{
+      pg.style.boxShadow = 'none';
+      pg.style.margin = '0 auto';
+      if(i < all.length - 1){
+        pg.style.pageBreakAfter = 'always';
+      }
+    });
+
+    // ファイル名 = document.title（updateDocTitleで生成済み）
+    const fileBase = (document.title || 'document').replace(/[\\\/:*?"<>|]/g, '_');
+    const filename = fileBase + '.pdf';
+
+    const opt = {
+      margin: 0,
+      filename: filename,
+      image: { type: 'jpeg', quality: 0.95 },
+      html2canvas: {
+        scale: 2,                    // 高解像度（300dpi相当）
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+      },
+      jsPDF: {
+        unit: 'mm',
+        format: 'a4',
+        orientation: 'portrait',
+        compress: true
+      },
+      pagebreak: { mode: ['css', 'legacy'] }
+    };
+
+    await html2pdfFn().set(opt).from(clone).save();
+  } catch(err){
+    console.error(err);
+    alert('PDF保存に失敗しました：' + (err.message || err));
+  } finally {
+    if(originalLabel) originalLabel.textContent = labelText;
+    if(btn) btn.disabled = false;
+  }
 }
 
 function printHTML(){
