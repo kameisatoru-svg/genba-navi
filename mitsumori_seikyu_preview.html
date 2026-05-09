@@ -2175,8 +2175,14 @@ async function savePDF(){
     clone.querySelectorAll('.doc-page').forEach((pg, i, all)=>{
       pg.style.boxShadow = 'none';
       pg.style.margin = '0 auto';
+      // ★ min-heightを撤廃（コンテンツ実高で出力・末尾の空白ページ防止）
+      pg.style.minHeight = '0';
       if(i < all.length - 1){
         pg.style.pageBreakAfter = 'always';
+      } else {
+        // 最終ページは page-break を絶対に発生させない
+        pg.style.pageBreakAfter = 'avoid';
+        pg.style.breakAfter = 'avoid';
       }
     });
 
