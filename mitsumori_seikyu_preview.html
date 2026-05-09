@@ -245,7 +245,8 @@ tr.dragging{opacity:0.4;}
       <option value="lump" id="mode-lump" style="display:none;">1式表記</option>
     </select>
     <button class="btn btn-gold sp-hidden-sm" onclick="printHTML()">印刷・PDF保存</button>
-    <button class="btn sp-hidden-sm" style="background:#4a6090;color:#fff;border:1px solid #6a80b0;" onclick="document.getElementById('bcs-csv-input').click()" title="BCS.CSVや一般的なCSVを読み込んで雛形に取り込む">BCS.CSV読込</button>
+    <button class="btn sp-hidden-sm" style="background:#5a7050;color:#fff;border:1px solid #7a9070;" onclick="openCsvPasteModal()" title="チャット出力のCSVテキストを貼り付けて読み込む（UTF-8専用・推奨）">📋 貼付で読込</button>
+    <button class="btn sp-hidden-sm" style="background:#4a6090;color:#fff;border:1px solid #6a80b0;" onclick="document.getElementById('bcs-csv-input').click()" title="BCS.CSVや一般的なCSVファイルを読み込む（建築みつも朗のCP932にも対応）">📁 ファイル読込</button>
     <input type="file" id="bcs-csv-input" accept=".csv,text/csv" style="display:none" onchange="handleBcsCsvImport(event)">
     <button class="btn sp-hidden-sm" style="background:#3a5070;color:#fff;border:1px solid #5a7090;" onclick="exportBCS_CSV()" title="建築みつも郎12等で読み込めるBCS.CSV形式でエクスポート">BCS.CSV出力</button>
     <button class="btn sp-hidden-sm" id="discount-btn" style="background:#5a4070;color:#fff;border:1px solid #7a5090;" onclick="applyDiscount()" title="全明細の単価に割引率を掛けて再計算（100円未満は端数調整で自動補正）">割引見積生成</button>
@@ -2534,6 +2535,134 @@ function analyzeSimpleCsv(rows){
 }
 
 // CSV読込メインハンドラ（input[type=file]のonchange）
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// CSV貼付モーダル（ARTRAYS拡張・UTF-8直貼り）
+// ファイル選択を経由せずチャット出力を即取り込める
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+function openCsvPasteModal(){
+  const modal = document.getElementById('csv-paste-modal');
+  if(!modal) return;
+  modal.style.display = 'flex';
+  setTimeout(()=>{
+    const ta = document.getElementById('csv-paste-textarea');
+    if(ta) ta.focus();
+  }, 50);
+}
+
+function closeCsvPasteModal(){
+  const modal = document.getElementById('csv-paste-modal');
+  if(modal) modal.style.display = 'none';
+}
+
+function applyCsvPaste(){
+  const ta = document.getElementById('csv-paste-textarea');
+  if(!ta) return;
+  const text = ta.value.trim();
+  if(!text){
+    alert('CSVテキストが空です。');
+    return;
+  }
+
+  let parsed;
+  try{
+    parsed = analyzeBcsCsv(text);
+  } catch(e){
+    alert('CSV解析エラー: ' + e.message);
+    return;
+  }
+
+  // メタ行・明細件数の集計
+  const groupCount = parsed.groups ? parsed.groups.length : 0;
+  let totalDetails = 0;
+  if(parsed.groups){
+    parsed.groups.forEach(g => {
+      totalDetails += (g.items||[]).length;
+      (g.middleItems||[]).forEach(m => totalDetails += m.items.length);
+    });
+  }
+  const metaCount = parsed.meta ? Object.keys(parsed.meta).length : 0;
+
+  // メタのみ（明細なし）→ 表書だけ充填
+  if(metaCount > 0 && totalDetails === 0){
+    const m = parsed.meta;
+    const metaList = [
+      m.ankenKey   ? `案件：${m.ankenKey}` : null,
+      m.docNumber  ? `書類番号：${m.docNumber}` : null,
+      m.customerName ? `宛名：${m.customerName}` : null,
+      m.kojimei    ? `件名：${m.kojimei}` : null,
+    ].filter(Boolean).join('\n');
+    if(!confirm(`明細データなし・メタ情報のみ検出。\n\n${metaList}\n\n表書フォームへ充填しますか？`)){
+      return;
+    }
+    applyCsvImport({
+      ...parsed,
+      mode: mode,
+      groups: [],
+      shokeihiRate: parsed.shokeihiRate || 0,
+      nebiki: parsed.nebiki || 0,
+      hasuChousei: parsed.hasuChousei || 0,
+      format: 'メタ情報のみ'
+    }, 'meta_only');
+    closeCsvPasteModal();
+    alert('✅ 表書フォームを更新しました。');
+    return;
+  }
+
+  // 通常ルート（明細あり）
+  let groupWithMiddleCount = 0;
+  parsed.groups.forEach(g => {
+    if(g.middleItems.length > 0) groupWithMiddleCount++;
+  });
+
+  const metaSummary = (parsed.meta && (parsed.meta.ankenKey || parsed.meta.kojimei || parsed.meta.docNumber)) ? [
+    parsed.meta.ankenKey   ? `案件：${parsed.meta.ankenKey}` : null,
+    parsed.meta.docNumber  ? `書類番号：${parsed.meta.docNumber}` : null,
+    parsed.meta.customerName ? `宛名：${parsed.meta.customerName}` : null,
+    parsed.meta.kojimei    ? `件名：${parsed.meta.kojimei}` : null,
+  ].filter(Boolean).join('\n') : '';
+
+  const summary = [
+    metaSummary,
+    metaSummary ? '────────────' : null,
+    `形式：${parsed.format}`,
+    `モード：${parsed.mode === 'flat' ? 'フラット' : (parsed.mode === 'lump' ? '1式表記' : '大項目・小項目')}`,
+    `大項目：${parsed.groups.length}件${groupWithMiddleCount > 0 ? `（中項目あり：${groupWithMiddleCount}件）` : ''}`,
+    `明細：${totalDetails}行`,
+    parsed.shokeihiRate > 0 ? `諸経費：${parsed.shokeihiRate}%` : null,
+    parsed.nebiki > 0 ? `値引き：¥${parsed.nebiki.toLocaleString()}` : null,
+    parsed.hasuChousei !== 0 ? `端数調整：¥${parsed.hasuChousei.toLocaleString()}` : null,
+  ].filter(Boolean).join('\n');
+
+  const hasExistingData =
+    flatItems.some(it => it.name) ||
+    groupItems.some(g => g.name || g.items.some(it => it.name) || (g.middleItems||[]).some(m => m.name || m.items.some(it => it.name))) ||
+    groupSummaryItems.some(it => it.name);
+
+  let action;
+  if(hasExistingData){
+    const r1 = confirm(
+      `CSVを読み込みました\n\n${summary}\n\n────────────\n` +
+      `既存データがあります。\n\n` +
+      `「OK」= 既存データを置換\n「キャンセル」= 次の選択肢へ`
+    );
+    if(r1){
+      action = 'replace';
+    } else {
+      const r2 = confirm(`「OK」= 末尾に追加\n「キャンセル」= 取り込みを中止`);
+      action = r2 ? 'append' : null;
+    }
+  } else {
+    const ok = confirm(`CSVを読み込みました\n\n${summary}\n\n読み込みますか？`);
+    action = ok ? 'replace' : null;
+  }
+
+  if(!action) return;
+
+  applyCsvImport(parsed, action);
+  closeCsvPasteModal();
+}
+
 async function handleBcsCsvImport(event){
   const file = event.target.files[0];
   if(!file){ return; }
@@ -2617,8 +2746,8 @@ async function handleBcsCsvImport(event){
 
 // 解析結果を雛形に反映
 function applyCsvImport(parsed, action){
-  // ── #META: 行から表書フィールドを充填（置換時のみ）──
-  if(action === 'replace' && parsed.meta && Object.keys(parsed.meta).length > 0){
+  // ── #META: 行から表書フィールドを充填（置換時 or メタのみ時）──
+  if((action === 'replace' || action === 'meta_only') && parsed.meta && Object.keys(parsed.meta).length > 0){
     const meta = parsed.meta;
     // docType（mitsumori / seikyu）を先に切替
     if(meta.docType && (meta.docType === 'mitsumori' || meta.docType === 'seikyu')){
@@ -2664,6 +2793,11 @@ function applyCsvImport(parsed, action){
     }
     // ファイル名・タイトルを更新
     if(typeof updateDocTitle === 'function') updateDocTitle();
+  }
+
+  // メタのみなら明細処理はスキップして終了
+  if(action === 'meta_only'){
+    return;
   }
 
   // ── モード切替（置換時のみ）──
@@ -3376,6 +3510,30 @@ window.addEventListener('DOMContentLoaded', loadAnkenData);
     <div id="anken-list" style="flex:1;overflow-y:auto;padding:0;"></div>
     <div style="padding:10px 18px;border-top:1px solid #eee;display:flex;justify-content:flex-end;gap:8px;background:#f7f7f5;border-radius:0 0 8px 8px;">
       <button onclick="closeAnkenSelector()" style="padding:6px 16px;background:#888;color:#fff;border:none;border-radius:4px;cursor:pointer;font-family:inherit;font-size:12px;">キャンセル</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 📋 CSV貼付モーダル（ARTRAYS拡張・UTF-8直貼り用） ========== -->
+<div id="csv-paste-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:8px;max-width:780px;width:100%;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,0.4);">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--navy);color:#fff;border-radius:8px 8px 0 0;">
+      <h3 style="font-size:14px;font-weight:600;letter-spacing:0.04em;">📋 CSVを貼り付けて読み込む</h3>
+      <button onclick="closeCsvPasteModal()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:0 4px;">✕</button>
+    </div>
+    <div style="padding:14px 18px;font-size:11.5px;color:var(--sub);line-height:1.7;background:#f8f8f6;border-bottom:1px solid var(--border);">
+      ・<b>UTF-8専用</b>です。建築みつも朗からのCP932 CSVは「📁 ファイル読込」を使ってください。<br>
+      ・メタ行（<code>#META: key=value</code>）と明細CSVを混在させて貼り付けOKです。<br>
+      ・空欄でキャンセル。明細CSVなしでメタ行だけ貼ると表書だけ充填されます。
+    </div>
+    <div style="padding:14px 18px;flex:1;overflow:auto;">
+      <textarea id="csv-paste-textarea"
+        style="width:100%;height:340px;font-family:'Consolas','Menlo',monospace;font-size:12px;border:1px solid var(--border);border-radius:4px;padding:10px;line-height:1.5;resize:vertical;color:#111;background:#fafafa;"
+        placeholder="#META: ankenKey=玉寿会-さくら床-26&#10;#META: docType=mitsumori&#10;#META: docNumber=見_第1期_玉寿会-さくら床-26&#10;#META: customerName=社会福祉法人 玉寿会(さくら苑)&#10;#META: kojimei=さくら苑 床工事&#10;#META: shisetsu=熊本県玉名市&#10;#META: issueDate=2026-02-27&#10;#META: shokeihiRate=15&#10;品名,数量,単位,単価,備考&#10;ウッドタイル張替,80,㎡,4500,玄関ホール"></textarea>
+    </div>
+    <div style="padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;background:#f8f8f6;border-radius:0 0 8px 8px;">
+      <button onclick="closeCsvPasteModal()" style="padding:8px 18px;background:#f0f2f4;color:var(--navy);border:1px solid var(--border);border-radius:4px;font-size:12px;cursor:pointer;font-family:inherit;">キャンセル</button>
+      <button onclick="applyCsvPaste()" style="padding:8px 22px;background:var(--gold);color:var(--navy);border:none;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">読み込む</button>
     </div>
   </div>
 </div>
