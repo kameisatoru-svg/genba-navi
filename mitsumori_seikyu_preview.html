@@ -1215,15 +1215,15 @@ function render(){
       const gSub=calcGroupTotal(g);
       // セクションヘッダー行（工事名・黒帯）。改頁フラグはクラスで付与
       const pbClass=gi>0&&g.pageBreak?' class="group-section-header pb-row-mark"':' class="group-section-header"';
-      allRows+=`<tr${pbClass}><td colspan="5" style="background:#444;color:#fff;font-weight:700;font-size:11.5px;padding:5px 8px;text-align:left;">■ ${g.name}　工事明細</td></tr>`;
+      allRows+=`<tr${pbClass}><td colspan="5" style="background:#444;color:#fff;font-weight:700;font-size:11.5px;padding:5px 8px;text-align:left;">■ ${prefixedGroupName(gi,g)}　工事明細</td></tr>`;
 
       const hasMiddle = g.middleItems && g.middleItems.length>0;
       if(hasMiddle){
         // 中項目モード：中項目見出し→明細→中項目計
-        g.middleItems.forEach(m=>{
+        g.middleItems.forEach((m,mi)=>{
           const mSub = calcMiddleTotal(m);
           // 中項目見出し行（グレー陰影）
-          allRows+=`<tr class="middle-section-header"><td colspan="5" style="background:#d8d8d8;color:#222;font-weight:700;font-size:11px;padding:4px 8px 4px 16px;text-align:left;">▸ ${m.name||'中項目'}</td></tr>`;
+          allRows+=`<tr class="middle-section-header"><td colspan="5" style="background:#d8d8d8;color:#222;font-weight:700;font-size:11px;padding:4px 8px 4px 16px;text-align:left;">▸ ${prefixedMiddleName(gi,mi,m)}</td></tr>`;
           // 明細行
           m.items.forEach(it=>{
             const amt=(it.qty&&it.price)?fmtN(it.qty*it.price):'';
@@ -1235,10 +1235,10 @@ function render(){
             </tr>`;
           });
           // 中項目計
-          allRows+=`<tr class="middle-subtotal-row"><td colspan="4" style="text-align:right;background:#efefef;font-size:11px;padding:3px 8px;color:#444;">${m.name||'中項目'} 計</td><td style="background:#efefef;text-align:right;padding:3px 8px;font-size:11px;color:#444;">${fmtN(mSub)}</td></tr>`;
+          allRows+=`<tr class="middle-subtotal-row"><td colspan="4" style="text-align:right;background:#efefef;font-size:11px;padding:3px 8px;color:#444;">${prefixedMiddleName(gi,mi,m)} 計</td><td style="background:#efefef;text-align:right;padding:3px 8px;font-size:11px;color:#444;">${fmtN(mSub)}</td></tr>`;
         });
         // 大項目計
-        allRows+=`<tr class="group-subtotal-row"><td colspan="4" style="text-align:right;background:#e8e8e8;font-weight:700;padding:5px 8px;">${g.name||'大項目'} 計</td><td style="background:#e8e8e8;font-weight:700;text-align:right;padding:5px 8px;">${fmtN(gSub)}</td></tr>`;
+        allRows+=`<tr class="group-subtotal-row"><td colspan="4" style="text-align:right;background:#e8e8e8;font-weight:700;padding:5px 8px;">${prefixedGroupName(gi,g)} 計</td><td style="background:#e8e8e8;font-weight:700;text-align:right;padding:5px 8px;">${fmtN(gSub)}</td></tr>`;
       } else {
         // 従来モード：小項目行
         g.items.forEach(it=>{
