@@ -1103,10 +1103,10 @@ function render(){
     </table>`;
   } else {
     // 1ページ目：大項目一覧（1式）＋単一明細
-    const groupRows=groupItems.map(g=>{
+    const groupRows=groupItems.map((g,gi)=>{
       const gSub=calcGroupTotal(g);
       return `<tr>
-        <td>${g.name}</td>
+        <td>${prefixedGroupName(gi,g)}</td>
         <td>1</td><td>式</td>
         <td></td>
         <td>${fmtN(gSub)}</td>
