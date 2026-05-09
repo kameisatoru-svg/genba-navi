@@ -16,6 +16,43 @@ body{font-family:"Meiryo","Yu Gothic",sans-serif;background:var(--bg);height:100
 .btn-outline:hover{background:rgba(255,255,255,0.1);}
 .btn-gold{background:var(--gold);color:var(--navy);font-weight:700;}
 .btn-gold:hover{background:#d4b97e;}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   トップバー新ボタン（SVGアイコン化・現場ナビ準拠）
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.tb-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 12px;height:36px;
+  border-radius:6px;border:1px solid transparent;
+  font-size:12px;font-family:inherit;cursor:pointer;
+  background:transparent;color:#fff;
+  transition:background 0.15s;
+}
+.tb-btn svg{width:18px;height:18px;flex-shrink:0;}
+.tb-btn:hover{background:rgba(255,255,255,0.08);}
+.tb-btn:active{background:rgba(255,255,255,0.16);}
+.tb-btn-gold{background:var(--gold);color:var(--navy);font-weight:700;}
+.tb-btn-gold:hover{background:#d4b97e;}
+.tb-btn-primary{background:#2a3f58;border-color:rgba(255,255,255,0.18);}
+.tb-btn-primary:hover{background:#34516f;}
+.tb-btn-menu{padding:6px 8px;background:transparent;border-color:rgba(255,255,255,0.18);}
+.tb-btn-menu:hover{background:rgba(255,255,255,0.10);}
+
+/* ⋮メニューのアイテム */
+.tm-item{
+  display:flex;align-items:center;gap:12px;
+  width:100%;padding:12px 16px;
+  background:none;border:none;cursor:pointer;
+  font-size:13px;font-family:inherit;text-align:left;
+  color:var(--text);
+  transition:background 0.12s;
+}
+.tm-item:hover{background:#f0f2f4;}
+.tm-item:active{background:#e8ecf0;}
+.tm-icon{width:20px;height:20px;color:var(--navy);flex-shrink:0;}
+.tm-sep{height:1px;background:#eee;margin:2px 0;}
+.tm-danger{color:#a04040;}
+.tm-danger .tm-icon{color:#a04040;}
 .mode-label{font-size:11px;color:rgba(255,255,255,0.6);margin-right:4px;}
 .doctype-toggle{display:inline-flex;background:#2a3f58;border:1px solid rgba(255,255,255,0.25);border-radius:4px;overflow:hidden;}
 .dt-btn{padding:4px 12px;font-size:11px;background:transparent;color:#fff;border:none;cursor:pointer;font-family:inherit;letter-spacing:0.04em;}
@@ -154,6 +191,18 @@ tr.dragging{opacity:0.4;}
    JS一切変更なし・CSSのみ
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 @media (max-width:768px){
+  /* トップバー：スマホではラベル隠す・ボタン正方形化 */
+  .topbar{padding:0 8px;}
+  .topbar-title{display:none;}
+  .tb-btn .tb-label{display:none;}
+  .tb-btn{padding:8px;width:40px;justify-content:center;gap:0;}
+  .tb-btn-gold{width:auto;padding:8px 14px;}
+  .tb-btn-gold .tb-label{display:inline;font-weight:700;}
+  .tb-btn svg{width:20px;height:20px;}
+  .topbar-actions{gap:6px;}
+  /* ⋮メニュー：スマホでは画面右端から少し離して */
+  #top-menu{right:6px;top:50px;}
+
   /* タブバー（スマホのみ表示） */
   .sp-tabbar{
     display:flex!important;
@@ -233,26 +282,92 @@ tr.dragging{opacity:0.4;}
 <div class="topbar">
   <span class="topbar-title" id="topbar-title">見積書プレビュー</span>
   <div class="topbar-actions">
-    <span class="mode-label">書類：</span>
+    <span class="mode-label sp-hidden-sm">書類：</span>
     <div class="doctype-toggle">
       <button class="dt-btn active" id="dt-mitsumori" onclick="switchDocType('mitsumori')">見積書</button>
       <button class="dt-btn" id="dt-seikyu" onclick="switchDocType('seikyu')">請求書</button>
     </div>
-    <span class="mode-label" style="margin-left:10px;">モード：</span>
+    <span class="mode-label sp-hidden-sm" style="margin-left:10px;">モード：</span>
     <select class="mode-select" id="mode-select" onchange="switchMode(this.value)">
       <option value="flat">フラット（単一明細）</option>
       <option value="group">大項目・小項目</option>
       <option value="lump" id="mode-lump" style="display:none;">1式表記</option>
     </select>
-    <button class="btn btn-gold sp-hidden-sm" onclick="printHTML()">印刷・PDF保存</button>
-    <button class="btn sp-hidden-sm" style="background:#7a4040;color:#fff;border:1px solid #9a5858;" onclick="clearAllData()" title="表書・明細・全設定を初期状態にリセット">🗑 クリア</button>
-    <button class="btn sp-hidden-sm" style="background:#5a7050;color:#fff;border:1px solid #7a9070;" onclick="openCsvPasteModal()" title="チャット出力のCSVテキストを貼り付けて読み込む（UTF-8専用・推奨）">📋 貼付で読込</button>
-    <button class="btn sp-hidden-sm" style="background:#4a6090;color:#fff;border:1px solid #6a80b0;" onclick="document.getElementById('bcs-csv-input').click()" title="BCS.CSVや一般的なCSVファイルを読み込む（建築みつも朗のCP932にも対応）">📁 ファイル読込</button>
+    <!-- 主要ボタン3つ（常駐：印刷・貼付・⋮） -->
+    <button class="tb-btn tb-btn-gold" onclick="printHTML()" title="印刷・PDF保存">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="6" y="3" width="12" height="6" rx="1"/>
+        <path d="M6 18 L4 18 Q3 18 3 17 L3 11 Q3 9 5 9 L19 9 Q21 9 21 11 L21 17 Q21 18 20 18 L18 18"/>
+        <rect x="6" y="14" width="12" height="7" rx="1"/>
+        <circle cx="17.5" cy="11.5" r="0.7" fill="currentColor"/>
+      </svg>
+      <span class="tb-label">印刷</span>
+    </button>
+    <button class="tb-btn tb-btn-primary" onclick="openCsvPasteModal()" title="CSVテキストを貼り付けて読込">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="6" y="4" width="12" height="17" rx="2"/>
+        <rect x="9" y="2" width="6" height="4" rx="1" fill="currentColor" stroke="none" opacity="0.85"/>
+        <path d="M12 11 L12 17 M9 14 L12 17 L15 14"/>
+      </svg>
+      <span class="tb-label">貼付</span>
+    </button>
+    <button class="tb-btn tb-btn-menu" onclick="toggleTopMenu(event)" title="その他のメニュー" id="tb-menu-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <circle cx="12" cy="5" r="1.4" fill="currentColor"/>
+        <circle cx="12" cy="12" r="1.4" fill="currentColor"/>
+        <circle cx="12" cy="19" r="1.4" fill="currentColor"/>
+      </svg>
+    </button>
+    <!-- 隠しファイル入力 -->
     <input type="file" id="bcs-csv-input" accept=".csv,text/csv" style="display:none" onchange="handleBcsCsvImport(event)">
-    <button class="btn sp-hidden-sm" style="background:#3a5070;color:#fff;border:1px solid #5a7090;" onclick="exportBCS_CSV()" title="建築みつも郎12等で読み込めるBCS.CSV形式でエクスポート">BCS.CSV出力</button>
-    <button class="btn sp-hidden-sm" id="discount-btn" style="background:#5a4070;color:#fff;border:1px solid #7a5090;" onclick="applyDiscount()" title="全明細の単価に割引率を掛けて再計算（100円未満は端数調整で自動補正）">割引見積生成</button>
-    <button class="btn sp-hidden-sm" id="discount-revert-btn" style="background:#704040;color:#fff;border:1px solid #905858;display:none;" onclick="revertDiscount()" title="割引適用前の単価に戻す">元に戻す</button>
   </div>
+</div>
+
+<!-- ⋮トップメニュー（その他操作） -->
+<div id="top-menu" style="display:none;position:fixed;top:54px;right:8px;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,0.18);z-index:9000;min-width:220px;overflow:hidden;">
+  <button class="tm-item" onclick="closeTopMenu();document.getElementById('bcs-csv-input').click()">
+    <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 3 L7 3 Q5 3 5 5 L5 19 Q5 21 7 21 L17 21 Q19 21 19 19 L19 8 Z"/>
+      <path d="M14 3 L14 8 L19 8"/>
+      <path d="M12 12 L12 17 M9 15 L12 18 L15 15" opacity="0.85"/>
+    </svg>
+    <span>ファイル読込（CSV）</span>
+  </button>
+  <button class="tm-item" onclick="closeTopMenu();exportBCS_CSV()">
+    <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 3 L7 3 Q5 3 5 5 L5 19 Q5 21 7 21 L17 21 Q19 21 19 19 L19 8 Z"/>
+      <path d="M14 3 L14 8 L19 8"/>
+      <path d="M12 18 L12 12 M9 15 L12 12 L15 15" opacity="0.85"/>
+    </svg>
+    <span>BCS.CSV出力</span>
+  </button>
+  <div class="tm-sep"></div>
+  <button class="tm-item" id="tm-discount" onclick="closeTopMenu();applyDiscount()">
+    <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="6" y1="18" x2="18" y2="6"/>
+      <circle cx="8" cy="8" r="2"/>
+      <circle cx="16" cy="16" r="2"/>
+    </svg>
+    <span>割引見積生成</span>
+  </button>
+  <button class="tm-item" id="tm-revert" style="display:none;" onclick="closeTopMenu();revertDiscount()">
+    <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 12 L9 8 L9 11 Q15 11 17 14 Q19 17 18 20"/>
+      <path d="M5 12 L9 16"/>
+    </svg>
+    <span>元に戻す（割引解除）</span>
+  </button>
+  <div class="tm-sep"></div>
+  <button class="tm-item tm-danger" onclick="closeTopMenu();clearAllData()">
+    <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 7 L19 7"/>
+      <path d="M9 7 L9 5 Q9 3 11 3 L13 3 Q15 3 15 5 L15 7"/>
+      <path d="M7 7 L8 20 Q8 21 9 21 L15 21 Q16 21 16 20 L17 7"/>
+      <line x1="11" y1="11" x2="11" y2="17" opacity="0.6"/>
+      <line x1="13" y1="11" x2="13" y2="17" opacity="0.6"/>
+    </svg>
+    <span>全データクリア</span>
+  </button>
 </div>
 <!-- スマホ用タブバー -->
 <div class="sp-tabbar" style="display:none">
@@ -2107,6 +2222,53 @@ function spGoTab(tab){
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 // 退避バッファ（適用前のデータを保持）
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ⋮トップメニュー開閉
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function toggleTopMenu(e){
+  if(e) e.stopPropagation();
+  const menu = document.getElementById('top-menu');
+  if(!menu) return;
+  if(menu.style.display === 'block'){
+    menu.style.display = 'none';
+  } else {
+    // 割引適用中なら「元に戻す」を見せる
+    const tmRevert = document.getElementById('tm-revert');
+    const tmDiscount = document.getElementById('tm-discount');
+    if(tmRevert && tmDiscount){
+      if(typeof discountBackup !== 'undefined' && discountBackup){
+        tmRevert.style.display = 'flex';
+        tmDiscount.style.display = 'none';
+      } else {
+        tmRevert.style.display = 'none';
+        tmDiscount.style.display = 'flex';
+      }
+    }
+    menu.style.display = 'block';
+    // 外側クリックで閉じる（次のクリックで一度だけ反応）
+    setTimeout(()=>{
+      document.addEventListener('click', closeTopMenuOnOutside, {once:true});
+    }, 0);
+  }
+}
+function closeTopMenu(){
+  const menu = document.getElementById('top-menu');
+  if(menu) menu.style.display = 'none';
+}
+function closeTopMenuOnOutside(e){
+  const menu = document.getElementById('top-menu');
+  const btn  = document.getElementById('tb-menu-btn');
+  if(!menu) return;
+  if(menu.contains(e.target) || (btn && btn.contains(e.target))){
+    // メニュー内/ボタン上クリックは無視（リスナー再登録）
+    setTimeout(()=>{
+      document.addEventListener('click', closeTopMenuOnOutside, {once:true});
+    }, 0);
+    return;
+  }
+  menu.style.display = 'none';
+}
+
 let discountBackup = null; // {flatItems:[...], groupItems:[...], groupSummaryItems:[...], hasuChousei:N, rate:N}
 
 function applyDiscount(){
