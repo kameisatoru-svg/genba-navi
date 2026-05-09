@@ -1990,11 +1990,40 @@ ADJSCRIPT_END
 }
 
 function printHTML(){
-  let html=buildDocHTML();
-  // プレースホルダーを実際のscriptタグに置換（テンプレートリテラル内でのscriptタグ問題を回避）
-  const adjScript='<script>'+html.split('ADJSCRIPT_START')[1].split('ADJSCRIPT_END')[0]+'<\/script>';
-  html=html.replace(/ADJSCRIPT_START[\s\S]*?ADJSCRIPT_END/,adjScript);
-  // Blob URLをaタグでダウンロード→Chromeで開く→Ctrl+P
+  // プレビューDOMをそのまま使う方式（2026/5/9）
+  // buildDocHTMLでの独自再構築はやめ、#preview-inner の現状DOMをそのまま新タブへ
+  const previewInner=document.getElementById('preview-inner');
+  if(!previewInner){alert('プレビューが見つかりません'); return;}
+
+  // ページ内の style タグをすべて収集（プレビューと同じ見た目を保つ）
+  const styles=Array.from(document.querySelectorAll('style')).map(s=>s.outerHTML).join('\n');
+
+  // 印刷用に transform 解除したHTMLを生成
+  const html=`<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>印刷プレビュー</title>
+${styles}
+<style>
+  /* 印刷用追加CSS：transform解除・余白整理 */
+  body{background:#fff!important;margin:0;padding:0;}
+  #preview-inner{transform:none!important;width:auto!important;margin:0!important;}
+  .doc-page,.page{box-shadow:none!important;margin:0 auto!important;}
+  /* 印刷プレビューでの複数ページを保証 */
+  .group-overflow-page,.overflow-page,.page-break{page-break-before:always;break-before:page;}
+  @page{margin:0;size:A4;}
+</style>
+</head>
+<body>
+${previewInner.outerHTML}
+<scr`+`ipt>
+  // 読み込み完了後、少し間を置いて印刷ダイアログ
+  window.addEventListener('load', () => { setTimeout(() => window.print(), 400); });
+<\/scr`+`ipt>
+</body>
+</html>`;
+
   const blob=new Blob([html],{type:'text/html;charset=utf-8'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
