@@ -1379,37 +1379,6 @@ function checkAndPaginateGroup(){
 
   // 全ての改ページ位置をマージ（重複除去・ソート）
   const allBreaks=[...new Set([...breakPoints,...autoBreakPoints])].sort((a,b)=>a-b);
-
-  // ── 3層化対応：見出し孤立・小計孤立を防ぐガード ──
-  // bp は「allRows[bp] が次ページの先頭になる」位置
-  // 1) 直前(prev)が見出し系なら、見出しが前ページ末尾に孤立 → bp を1つ手前にずらして見出しごと次ページへ
-  // 2) 当該行(cur)が小計系なら、小計が次ページ先頭に孤立 → bp を1つ進めて小計を前ページに含める
-  for(let i=0;i<allBreaks.length;i++){
-    let bp=allBreaks[i];
-    let safety=3; // 連鎖ずらしの上限（無限ループ防止）
-    while(safety-->0){
-      const prev=allRows[bp-1];
-      const cur=allRows[bp];
-      if(!prev||!cur)break;
-      let moved=false;
-      // 見出し孤立ガード
-      if(prev.classList.contains('group-section-header')||prev.classList.contains('middle-section-header')){
-        const lower=(i>0?allBreaks[i-1]:0);
-        if(bp-1>lower){ bp--; moved=true; }
-      }
-      // 小計孤立ガード（見出しガードより後に評価）
-      if(!moved && (cur.classList.contains('middle-subtotal-row')||cur.classList.contains('group-subtotal-row'))){
-        if(bp+1<allRows.length){ bp++; moved=true; }
-      }
-      if(!moved)break;
-    }
-    allBreaks[i]=bp;
-  }
-  // ガード処理後の重複除去・再ソート
-  const _dedup=[...new Set(allBreaks)].sort((a,b)=>a-b);
-  allBreaks.length=0;
-  allBreaks.push(..._dedup);
-
   if(allBreaks.length===0)return;
 
   // ページに分割してDOMを再構築
