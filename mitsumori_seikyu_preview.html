@@ -2319,17 +2319,37 @@ function analyzeBcsCsv(text){
   const lines = text.replace(/\r\n/g, '\n').split('\n').filter(l => l.trim() !== '');
   if(lines.length === 0) throw new Error('CSVが空です');
 
-  const rowsRaw = lines.map(parseBcsCsvLine);
+  // ── #META: 行を吸収（ARTRAYS拡張・案件情報の事前充填用）──
+  // 形式：「#META: key=value」 または 「# META: key=value」
+  // BCS互換：建築みつも朗等は # で始まる行を無視するので互換性維持
+  const meta = {};
+  const dataLines = [];
+  const metaRe = /^\s*#\s*META\s*:\s*([A-Za-z][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$/;
+  lines.forEach(line => {
+    const m = line.match(metaRe);
+    if(m){
+      meta[m[1]] = m[2];
+    } else if(!/^\s*#/.test(line)){
+      // # で始まるその他の行（コメント）も無視
+      dataLines.push(line);
+    }
+  });
+
+  const rowsRaw = dataLines.map(parseBcsCsvLine);
 
   // ── 形式判定 ──
   // 19列構造で10列目に P/D/T/A が含まれる → BCS標準
   const isBcsStd = rowsRaw.some(r => r.length >= 11 && /^[PDTA]$/.test(String(r[9]).trim()));
 
+  let parsed;
   if(isBcsStd){
-    return analyzeBcsStandard(rowsRaw);
+    parsed = analyzeBcsStandard(rowsRaw);
   } else {
-    return analyzeSimpleCsv(rowsRaw);
+    parsed = analyzeSimpleCsv(rowsRaw);
   }
+  // メタ情報を解析結果に添付
+  parsed.meta = meta;
+  return parsed;
 }
 
 // BCS.CSV標準（19列）の解析
@@ -2542,7 +2562,15 @@ async function handleBcsCsvImport(event){
   });
 
   // 確認ダイアログ
+  const metaSummary = (parsed.meta && (parsed.meta.ankenKey || parsed.meta.kojimei || parsed.meta.docNumber)) ? [
+    parsed.meta.ankenKey   ? `案件：${parsed.meta.ankenKey}` : null,
+    parsed.meta.docNumber  ? `書類番号：${parsed.meta.docNumber}` : null,
+    parsed.meta.customerName ? `宛名：${parsed.meta.customerName}` : null,
+    parsed.meta.kojimei    ? `件名：${parsed.meta.kojimei}` : null,
+  ].filter(Boolean).join('\n') : '';
   const summary = [
+    metaSummary,
+    metaSummary ? '────────────' : null,
     `形式：${parsed.format}`,
     `モード：${parsed.mode === 'flat' ? 'フラット' : (parsed.mode === 'lump' ? '1式表記' : '大項目・小項目')}`,
     `大項目：${parsed.groups.length}件${groupWithMiddleCount > 0 ? `（中項目あり：${groupWithMiddleCount}件）` : ''}`,
@@ -2589,6 +2617,55 @@ async function handleBcsCsvImport(event){
 
 // 解析結果を雛形に反映
 function applyCsvImport(parsed, action){
+  // ── #META: 行から表書フィールドを充填（置換時のみ）──
+  if(action === 'replace' && parsed.meta && Object.keys(parsed.meta).length > 0){
+    const meta = parsed.meta;
+    // docType（mitsumori / seikyu）を先に切替
+    if(meta.docType && (meta.docType === 'mitsumori' || meta.docType === 'seikyu')){
+      if(typeof switchDocType === 'function'){
+        switchDocType(meta.docType);
+      }
+    }
+    // 各フォームフィールドへ反映
+    const setVal = (id, v) => {
+      const el = document.getElementById(id);
+      if(el && v !== undefined && v !== null && v !== ''){ el.value = v; }
+    };
+    setVal('atena',         meta.customerName);
+    setVal('mitsumoriNo',   meta.docNumber);
+    setVal('hakkoDate',     meta.issueDate);
+    setVal('shiharaiDate',  meta.shiharaiDate);
+    setVal('kojimei',       meta.kojimei);
+    setVal('seshubasho',    meta.shisetsu);
+    setVal('koki',          meta.koki);
+    setVal('ankenKey',      meta.ankenKey);
+    setVal('fileSuffix',    meta.fileSuffix);
+    // 諸経費率・値引き・端数調整は数値変数にも反映
+    if(meta.shokeihiRate !== undefined && meta.shokeihiRate !== ''){
+      const v = parseFloat(meta.shokeihiRate);
+      if(!isNaN(v)){
+        shokeihiRate = v;
+        setVal('shokeihiRateInput', v);
+      }
+    }
+    if(meta.nebiki !== undefined && meta.nebiki !== ''){
+      const v = parseFloat(meta.nebiki);
+      if(!isNaN(v)){
+        nebiki = v;
+        setVal('nebikiInput', v);
+      }
+    }
+    if(meta.hasuChousei !== undefined && meta.hasuChousei !== ''){
+      const v = parseFloat(meta.hasuChousei);
+      if(!isNaN(v)){
+        hasuChousei = v;
+        setVal('hasuChouseiInput', v);
+      }
+    }
+    // ファイル名・タイトルを更新
+    if(typeof updateDocTitle === 'function') updateDocTitle();
+  }
+
   // ── モード切替（置換時のみ）──
   if(action === 'replace'){
     mode = parsed.mode;
