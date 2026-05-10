@@ -514,6 +514,59 @@ canvas#wall-cv{touch-action:none;}
   </button>
 </div>
 
+<!-- 案件保存モーダル -->
+<div class="modal-overlay hidden" id="save-modal" onclick="closeSaveModal(event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <span style="font-size:18px">💾</span>
+      案件として保存
+    </div>
+    <div class="modal-body">
+      <div class="modal-label">案件名</div>
+      <input class="modal-input" id="save-name" type="text" placeholder="例：玉寿会-さくら床-26" maxlength="60">
+      <div style="font-size:11px;color:var(--text2);margin-top:8px;line-height:1.6">現在の入力・選択・計算結果をブラウザに保存します。同名の案件があれば上書きされます。</div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-cancel" onclick="closeSaveModal(null)">キャンセル</button>
+      <button class="modal-send" id="save-confirm-btn" onclick="doSaveProject()">保存する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 履歴モーダル -->
+<div class="modal-overlay hidden" id="load-modal" onclick="closeLoadModal(event)">
+  <div class="modal-box modal-wide">
+    <div class="modal-head">
+      <span style="font-size:18px">📂</span>
+      保存済み案件
+    </div>
+    <div class="modal-body">
+      <div class="history-list" id="history-list"></div>
+    </div>
+    <div class="modal-footer" style="grid-template-columns:1fr">
+      <button class="modal-cancel" onclick="closeLoadModal(null)">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- TSV出力モーダル -->
+<div class="modal-overlay hidden" id="tsv-modal" onclick="closeTsvModal(event)">
+  <div class="modal-box modal-wide">
+    <div class="modal-head">
+      <span style="font-size:18px">📋</span>
+      発注書（TSV形式）
+    </div>
+    <div class="modal-body">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:8px;line-height:1.6">下記をスプレッドシート／LINE／メール等に貼り付けてご利用ください。</div>
+      <textarea class="modal-tsv-area" id="tsv-text" readonly></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-cancel" onclick="closeTsvModal(null)">閉じる</button>
+      <button class="modal-copy-btn" id="tsv-copy-btn" onclick="copyTsvToClipboard()">クリップボードへコピー</button>
+    </div>
+  </div>
+</div>
+
 <!-- 作図へ送るモーダル -->
 <div class="modal-overlay hidden" id="zumen-modal" onclick="closeZumenModal(event)">
   <div class="modal-box">
