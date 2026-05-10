@@ -540,6 +540,11 @@ canvas#wall-cv{touch-action:none;}
     <button class="cat-btn" onclick="setCat('wall',this)">壁</button>
     <button class="cat-btn" onclick="setCat('floor',this)">床</button>
   </div>
+  <div class="util-row">
+    <button class="util-btn" id="util-save" onclick="openSaveModal()"><span class="util-ic">💾</span>保存</button>
+    <button class="util-btn" id="util-load" onclick="openLoadModal()"><span class="util-ic">📂</span>履歴</button>
+    <button class="util-btn" id="util-tsv" onclick="openTsvModal()"><span class="util-ic">📋</span>TSV</button>
+  </div>
   <div id="mat-list" class="mat-row"></div>
   <div id="sub-area"></div>
   <div id="pat-area"></div>
