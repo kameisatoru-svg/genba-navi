@@ -629,6 +629,224 @@ window.addEventListener('resize',function(){
   },120);
 });
 
+// ══════════ 案件保存 / 履歴 / 発注書TSV ══════════
+var _lastOrder=null;
+var _SAVES_KEY='genba_saves';
+
+function getDateStr(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+
+function parseQty(s){
+  var m=(''+s).match(/^([\d.,]+)(.*)$/);
+  if(!m)return{n:0,u:''};
+  return{n:parseFloat(m[1].replace(/,/g,'')),u:(m[2]||'').trim()};
+}
+
+function setOrder(items,title){
+  if(!items||!items.length){_lastOrder=null;}
+  else{_lastOrder={title:title||'材料発注',date:getDateStr(),items:items};}
+  refreshUtilIndicators();
+}
+
+function refreshUtilIndicators(){
+  var tsvBtn=document.getElementById('util-tsv');
+  if(tsvBtn)tsvBtn.classList.toggle('has-data',!!(_lastOrder&&_lastOrder.items&&_lastOrder.items.length));
+  var loadBtn=document.getElementById('util-load');
+  if(loadBtn){
+    try{var saves=JSON.parse(localStorage.getItem(_SAVES_KEY)||'{}');loadBtn.classList.toggle('has-data',Object.keys(saves).length>0);}catch(e){}
+  }
+}
+
+// ── 状態キャプチャ／復元 ──
+function captureState(){
+  var formInputs={};
+  ['L','W','BL','BW','LOSS','PRICE','REPEAT','COAT','MAWARI_PRICE','HABAKI_PRICE','NEDA_PRICE'].forEach(function(k){
+    var e=document.getElementById('f-'+k);if(e)formInputs[k]=e.value;
+  });
+  formInputs.MAWARI_TYPE=fsel('MAWARI_TYPE');
+  formInputs.HABAKI_TYPE=fsel('HABAKI_TYPE');
+  formInputs.HABAKI_H=fsel('HABAKI_H');
+  return{
+    cat:curCat,matIdx:curMatIdx,pat:curPat,
+    floorType:curFloorType,tileType:curTileType,
+    sheetW:curSheetW,flooringType:curFlooringType,
+    nedaLen:window.curNedaLen||3,
+    formInputs:formInputs,
+    wall:{
+      faceIdx:curFaceIdx,
+      faceData:faceData,faceInputs:faceInputs,
+      faceOpenings:faceOpenings,faceSelId:faceSelId,faceOidSeq:faceOidSeq
+    },
+    lastOrder:_lastOrder
+  };
+}
+
+function restoreState(s){
+  curCat=s.cat||'ceil';curMatIdx=s.matIdx||0;curPat=s.pat||'通し目地';
+  curFloorType=s.floorType||'タイル';curTileType=s.tileType||'Pタイル';
+  curSheetW=s.sheetW||1820;curFlooringType=s.flooringType||'フローリング';
+  window.curNedaLen=s.nedaLen||3;
+  if(s.wall){
+    curFaceIdx=s.wall.faceIdx||0;
+    faceData=s.wall.faceData||[null,null,null,null];
+    faceInputs=s.wall.faceInputs||[null,null,null,null];
+    faceOpenings=s.wall.faceOpenings||[[],[],[],[]];
+    faceSelId=s.wall.faceSelId||[null,null,null,null];
+    faceOidSeq=s.wall.faceOidSeq||[0,0,0,0];
+  }
+  _lastOrder=s.lastOrder||null;
+  document.querySelectorAll('.cat-btn').forEach(function(b){b.className='cat-btn';});
+  var idx={ceil:0,wall:1,floor:2}[curCat];
+  var btns=document.querySelectorAll('.cat-btn');
+  if(btns[idx])btns[idx].className='cat-btn ac-'+curCat;
+  document.getElementById('header-cat').textContent={ceil:'天井',wall:'壁',floor:'床'}[curCat];
+  document.getElementById('result-area').innerHTML='';
+  if(curCat==='floor')renderFloorUI();
+  else if(curCat==='wall')renderWallUI();
+  else renderMats();
+  setTimeout(function(){
+    Object.keys(s.formInputs||{}).forEach(function(k){
+      var e=document.getElementById('f-'+k);
+      if(e&&s.formInputs[k]!=null&&s.formInputs[k]!=='')e.value=s.formInputs[k];
+    });
+    if(curCat==='wall'&&document.getElementById('wall-cv'))redrawWall();
+  },80);
+  refreshUtilIndicators();
+}
+
+// ── 保存モーダル ──
+function openSaveModal(){
+  var nameInput=document.getElementById('save-name');
+  nameInput.value='';
+  document.getElementById('save-modal').classList.remove('hidden');
+  setTimeout(function(){nameInput.focus();},100);
+}
+function closeSaveModal(e){
+  if(e&&e.target!==document.getElementById('save-modal'))return;
+  document.getElementById('save-modal').classList.add('hidden');
+}
+function doSaveProject(){
+  var name=document.getElementById('save-name').value.trim();
+  if(!name){alert('案件名を入力してください。');return;}
+  if(curCat==='wall')saveCurrentFaceInputs();
+  var saves;
+  try{saves=JSON.parse(localStorage.getItem(_SAVES_KEY)||'{}');}catch(e){saves={};}
+  saves[name]={state:captureState(),savedAt:new Date().toISOString()};
+  try{
+    localStorage.setItem(_SAVES_KEY,JSON.stringify(saves));
+    closeSaveModal(null);
+    showToast('💾 「'+name+'」を保存しました');
+    refreshUtilIndicators();
+  }catch(err){alert('保存に失敗しました: '+err.message);}
+}
+
+// ── 履歴モーダル ──
+function openLoadModal(){renderHistoryList();document.getElementById('load-modal').classList.remove('hidden');}
+function closeLoadModal(e){
+  if(e&&e.target!==document.getElementById('load-modal'))return;
+  document.getElementById('load-modal').classList.add('hidden');
+}
+function renderHistoryList(){
+  var saves;try{saves=JSON.parse(localStorage.getItem(_SAVES_KEY)||'{}');}catch(e){saves={};}
+  var names=Object.keys(saves).sort(function(a,b){return(saves[b].savedAt||'').localeCompare(saves[a].savedAt||'');});
+  var el=document.getElementById('history-list');
+  if(!names.length){
+    el.innerHTML='<div class="history-empty">保存済み案件はありません。<br><br>計算結果を「💾 保存」で記録すると、ここから呼び出せます。</div>';
+    return;
+  }
+  var h='';
+  names.forEach(function(n){
+    var s=saves[n];
+    var savedAt=s.savedAt?new Date(s.savedAt):null;
+    var dateStr=savedAt?(savedAt.getFullYear()+'/'+(savedAt.getMonth()+1)+'/'+savedAt.getDate()+' '+String(savedAt.getHours()).padStart(2,'0')+':'+String(savedAt.getMinutes()).padStart(2,'0')):'';
+    var cat=s.state&&s.state.cat?{ceil:'天井',wall:'壁',floor:'床'}[s.state.cat]:'';
+    var safeN=(n+'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    var dispN=(n+'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    h+='<div class="history-item">';
+    h+='<div class="history-item-info" onclick="loadProject(\''+safeN+'\')">';
+    h+='<div class="history-name">'+dispN+'</div>';
+    h+='<div class="history-meta">'+cat+' ・ '+dateStr+'</div>';
+    h+='</div>';
+    h+='<div class="history-actions">';
+    h+='<button class="history-open" onclick="loadProject(\''+safeN+'\')">開く</button>';
+    h+='<button class="history-del" onclick="deleteProject(\''+safeN+'\')" title="削除">🗑</button>';
+    h+='</div>';
+    h+='</div>';
+  });
+  el.innerHTML=h;
+}
+function loadProject(name){
+  var saves;try{saves=JSON.parse(localStorage.getItem(_SAVES_KEY)||'{}');}catch(e){saves={};}
+  if(!saves[name]){alert('案件が見つかりません: '+name);return;}
+  try{
+    restoreState(saves[name].state||{});
+    closeLoadModal(null);
+    showToast('📂 「'+name+'」を読み込みました');
+  }catch(err){alert('読み込みに失敗しました: '+err.message);}
+}
+function deleteProject(name){
+  if(!confirm('「'+name+'」を削除しますか？'))return;
+  var saves;try{saves=JSON.parse(localStorage.getItem(_SAVES_KEY)||'{}');}catch(e){saves={};}
+  delete saves[name];
+  localStorage.setItem(_SAVES_KEY,JSON.stringify(saves));
+  renderHistoryList();
+  refreshUtilIndicators();
+  showToast('🗑 削除しました');
+}
+
+// ── TSV出力モーダル ──
+function buildTsv(){
+  if(!_lastOrder||!_lastOrder.items.length)return'';
+  var lines=[];
+  lines.push('案件名\t'+_lastOrder.title);
+  lines.push('作成日\t'+_lastOrder.date);
+  lines.push('');
+  lines.push(['カテゴリ','材料名','規格','発注数','単位','単価','金額','備考'].join('\t'));
+  var total=0;
+  _lastOrder.items.forEach(function(it){
+    var qtyStr=(typeof it.qty==='number')?(it.qty%1===0?String(it.qty):it.qty.toFixed(1)):it.qty;
+    lines.push([
+      it.cat||'',it.name||'',it.spec||'',
+      qtyStr,it.unit||'',
+      it.price?it.price.toLocaleString():'',
+      it.cost?it.cost.toLocaleString():'',
+      it.note||''
+    ].join('\t'));
+    total+=(it.cost||0);
+  });
+  lines.push('');
+  lines.push('合計\t\t\t\t\t\t¥'+total.toLocaleString());
+  return lines.join('\n');
+}
+
+function openTsvModal(){
+  if(!_lastOrder||!_lastOrder.items.length){alert('まず計算を実行してください。');return;}
+  document.getElementById('tsv-text').value=buildTsv();
+  var btn=document.getElementById('tsv-copy-btn');
+  btn.classList.remove('copied');btn.textContent='クリップボードへコピー';
+  document.getElementById('tsv-modal').classList.remove('hidden');
+}
+function closeTsvModal(e){
+  if(e&&e.target!==document.getElementById('tsv-modal'))return;
+  document.getElementById('tsv-modal').classList.add('hidden');
+}
+function copyTsvToClipboard(){
+  var text=document.getElementById('tsv-text').value;
+  var btn=document.getElementById('tsv-copy-btn');
+  function ok(){
+    btn.classList.add('copied');btn.textContent='✓ コピーしました';
+    setTimeout(function(){btn.classList.remove('copied');btn.textContent='クリップボードへコピー';},2000);
+  }
+  function fb(){
+    var ta=document.getElementById('tsv-text');
+    ta.removeAttribute('readonly');ta.select();
+    try{document.execCommand('copy');ta.setAttribute('readonly','readonly');ok();}
+    catch(e){ta.setAttribute('readonly','readonly');alert('コピーに失敗しました。手動で選択してコピーしてください。');}
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(ok).catch(fb);
+  }else{fb();}
+}
+
 function getOpenings(){return faceOpenings[curFaceIdx];}
 function setOpenings(a){faceOpenings[curFaceIdx]=a;}
 
