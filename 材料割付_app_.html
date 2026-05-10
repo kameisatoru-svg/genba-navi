@@ -1211,6 +1211,10 @@ function doCompaneCalc(){
   var doDraw=function(){drawCompaneViz(L,W,BL,BW,eH,eV,cols,rows,nedaCount,PITCH);addZoomButtons();};
   _lastVizRedraw=doDraw;
   setTimeout(doDraw,50);
+  // ── 発注データ記録 ──
+  var items=[{cat:'床',name:'コンパネ',spec:BL+'×'+BW+'mm',qty:total,unit:'枚',price:price,cost:total*price,note:'ロス'+loss+'%込（レンガ張り）'}];
+  if(nedaPrice>0||nedaCount>0)items.push({cat:'根太',name:'45×45材',spec:nedaLen+'m材',qty:nedaCount,unit:'本',price:nedaPrice,cost:nedaCount*nedaPrice,note:'303mmピッチ'});
+  setOrder(items,'[床] コンパネ＋根太');
 }
 
 function drawCompaneViz(L,W,BL,BW,eH,eV,cols,rows,nedaCount,PITCH){
@@ -1239,9 +1243,27 @@ function renderFlooringForm(){var def=floorDefaults[curFlooringType];document.ge
 
 function doFloorCalc(){
   var L=fv('L'),W=fv('W'),loss=fv('LOSS'),price=fv('PRICE');
-  if(curFloorType==='タイル'){renderResult(calcFloorTile({L:L,W:W,BL:fv('BL'),BW:fv('BW'),LOSS:loss,PRICE:price},curPat),'floor');}
-  else if(curFloorType==='長尺シート'){var tate=calcSheetDir(L,W,curSheetW,loss,price,'縦割り');var yoko=calcSheetDir(L,W,curSheetW,loss,price,'横割り');renderSheetResult(tate,yoko,L,W);}
-  else{renderResult(calcFlooringMat({L:L,W:W,BL:fv('BL'),BW:fv('BW'),LOSS:loss,PRICE:price},curPat),'floor');}
+  if(curFloorType==='タイル'){
+    var r=calcFloorTile({L:L,W:W,BL:fv('BL'),BW:fv('BW'),LOSS:loss,PRICE:price},curPat);
+    renderResult(r,'floor');
+    var items=[],qi=(r.m||[]).find(function(x){return x.l.indexOf('発注')>=0;});
+    if(qi){var q=parseQty(qi.v);items.push({cat:'床',name:curTileType,spec:fv('BL')+'×'+fv('BW')+'mm',qty:q.n,unit:q.u||'枚',price:price,cost:Math.round(q.n*price),note:'ロス'+loss+'%'+(curPat==='ダイヤ張り'?'+ダイヤ7%':'')+'込'});}
+    setOrder(items,'[床] '+curTileType);
+  }
+  else if(curFloorType==='長尺シート'){
+    var tate=calcSheetDir(L,W,curSheetW,loss,price,'縦割り');
+    var yoko=calcSheetDir(L,W,curSheetW,loss,price,'横割り');
+    renderSheetResult(tate,yoko,L,W);
+    var best=tate.ordM<=yoko.ordM?tate:yoko;
+    setOrder([{cat:'床',name:'長尺シート',spec:curSheetW+'mm幅 / '+best.dir,qty:best.ordM,unit:'m',price:price,cost:best.costOrd||Math.round(best.ordM*price),note:'ロス'+loss+'%込 ('+best.cols+'本×'+best.lenPerCol.toFixed(2)+'m)'}],'[床] 長尺シート '+curSheetW+'mm');
+  }
+  else{
+    var r2=calcFlooringMat({L:L,W:W,BL:fv('BL'),BW:fv('BW'),LOSS:loss,PRICE:price},curPat);
+    renderResult(r2,'floor');
+    var items2=[],qi2=(r2.m||[]).find(function(x){return x.l.indexOf('発注')>=0;});
+    if(qi2){var q2=parseQty(qi2.v);items2.push({cat:'床',name:curFlooringType,spec:fv('BL')+'×'+fv('BW')+'mm',qty:q2.n,unit:q2.u||'枚',price:price,cost:Math.round(q2.n*price),note:'ロス'+loss+'%込'});}
+    setOrder(items2,'[床] '+curFlooringType);
+  }
 }
 
 function renderSheetResult(tate,yoko,L,W){
