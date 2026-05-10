@@ -1068,6 +1068,23 @@ function doWallFaceCalc(){
   faceData[curFaceIdx]={result:r,inp:inp,fIdx:curFaceIdx};
   renderFaceTabsAndForm();renderResult(r,'wall');
   var cb=document.getElementById('fc-'+curFaceIdx);if(cb){cb.checked=true;updateFaceCheckStyle(curFaceIdx);}
+  // ── 発注データ記録 ──
+  var items=[],spec='';
+  if(m.name==='ビニールクロス')spec='幅'+inp.BL+'mm'+(inp.REPEAT?' / リピート'+inp.REPEAT+'mm':'');
+  else if(m.name==='塗装')spec=(inp.COAT||1)+'回塗り';
+  else if(m.name==='硬質塩ビシート')spec=inp.BL+'×'+inp.BW+'mm';
+  if(r.ordM!=null){
+    var unit=m.name==='塗装'?'m²':'m';
+    items.push({cat:'壁('+FACES[curFaceIdx]+'面)',name:m.name,spec:spec,qty:r.ordM,unit:unit,price:inp.PRICE||0,cost:r.costOrd||0,note:'ロス'+inp.LOSS+'%込'});
+  }else{
+    var qi=(r.m||[]).find(function(x){return x.l.indexOf('発注')>=0;});
+    if(qi){var q=parseQty(qi.v);items.push({cat:'壁('+FACES[curFaceIdx]+'面)',name:m.name,spec:spec,qty:q.n,unit:q.u||'枚',price:inp.PRICE||0,cost:Math.round(q.n*(inp.PRICE||0)),note:'ロス'+inp.LOSS+'%込'});}
+  }
+  if(r.trim){
+    var tOrd=parseFloat(r.trim.order)||0;var tPrice=tOrd>0?Math.round(r.trim.cost/tOrd):0;
+    items.push({cat:'巾木('+FACES[curFaceIdx]+'面)',name:r.trim.type,spec:'',qty:tOrd,unit:'m',price:tPrice,cost:r.trim.cost,note:'周長'+r.trim.perim+'m + 5%'});
+  }
+  setOrder(items,'[壁・'+FACES[curFaceIdx]+'面] '+m.name);
 }
 
 function doWallSummary(){
