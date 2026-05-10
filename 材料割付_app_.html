@@ -875,7 +875,9 @@ function doCompaneCalc(){
   if(price>0&&nedaPrice>0){h+='<div class="summary-card"><div class="summary-title">📋 合計（コンパネ＋根太）</div><div class="summary-row"><span>コンパネ材料費</span><span>'+fmt(total*price)+'</span></div><div class="summary-row"><span>根太材料費</span><span>'+fmt(nedaCount*nedaPrice)+'</span></div><div class="summary-row"><span>合計</span><span>'+fmt(total*price+nedaCount*nedaPrice)+'</span></div></div>';}
   h+='</div>';
   document.getElementById('result-area').innerHTML=h;
-  setTimeout(function(){drawCompaneViz(L,W,BL,BW,eH,eV,cols,rows,nedaCount,PITCH);},50);
+  var doDraw=function(){drawCompaneViz(L,W,BL,BW,eH,eV,cols,rows,nedaCount,PITCH);addZoomButtons();};
+  _lastVizRedraw=doDraw;
+  setTimeout(doDraw,50);
 }
 
 function drawCompaneViz(L,W,BL,BW,eH,eV,cols,rows,nedaCount,PITCH){
