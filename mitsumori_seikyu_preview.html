@@ -2908,11 +2908,20 @@ function analyzeSection2Csv(dataLines, meta){
       const bigNorm = big.trim();
       const useMid = mid && midNorm !== bigNorm;
 
+      // 単価・金額の整合性補正
+      // ① 単価が空 or 0 で金額が入っている → 単価 = 金額 ÷ 数量（数量0は1扱い）
+      // ② 雛形のテーブル描画は 数量×単価=金額 で再計算するため、単価が無いと金額が0になる
+      let effectivePrice = price;
+      let effectiveQty = qty || 1;
+      if((!price || price === 0) && amount){
+        effectivePrice = amount / effectiveQty;
+      }
+
       const item = {
         name: itemName,
-        qty: qty || 1,
+        qty: effectiveQty,
         unit: unit || '式',
-        price,
+        price: effectivePrice,
         note: [spec, note].filter(s => s).join(' / ')
       };
 
