@@ -997,6 +997,7 @@ function setCat(cat,btn){
   btn.className='cat-btn ac-'+cat;
   document.getElementById('header-cat').textContent={ceil:'天井',wall:'壁',floor:'床'}[cat];
   document.getElementById('result-area').innerHTML='';
+  setOrder([],null);
   if(cat==='floor'){renderFloorUI();}
   else if(cat==='wall'){renderWallUI();}
   else{renderMats();}
@@ -1105,6 +1106,27 @@ function renderWallSummary(idxs){
   h+='</div>';
   idxs.forEach(function(i){var fd=faceData[i];if(!fd)return;h+='<div class="face-result-header">'+FACES[i]+'面 — '+fd.result.matName+'</div>'+buildResultHTML(fd.result,'wall');});
   h+='</div>';document.getElementById('result-area').innerHTML=h;
+  // ── 発注データ記録（まとめ） ──
+  var items=[],mName=cats.wall.mats[curMatIdx].name;
+  idxs.forEach(function(i){
+    var fd=faceData[i];if(!fd)return;var r=fd.result,inp=fd.inp;
+    var spec='';
+    if(mName==='ビニールクロス')spec='幅'+inp.BL+'mm'+(inp.REPEAT?' / リピート'+inp.REPEAT+'mm':'');
+    else if(mName==='塗装')spec=(inp.COAT||1)+'回塗り';
+    else if(mName==='硬質塩ビシート')spec=inp.BL+'×'+inp.BW+'mm';
+    if(r.ordM!=null){
+      var unit=mName==='塗装'?'m²':'m';
+      items.push({cat:'壁('+FACES[i]+'面)',name:mName,spec:spec,qty:r.ordM,unit:unit,price:inp.PRICE||0,cost:r.costOrd||0,note:'ロス'+inp.LOSS+'%込'});
+    }else{
+      var qi=(r.m||[]).find(function(x){return x.l.indexOf('発注')>=0;});
+      if(qi){var q=parseQty(qi.v);items.push({cat:'壁('+FACES[i]+'面)',name:mName,spec:spec,qty:q.n,unit:q.u||'枚',price:inp.PRICE||0,cost:Math.round(q.n*(inp.PRICE||0)),note:'ロス'+inp.LOSS+'%込'});}
+    }
+    if(r.trim){
+      var tOrd=parseFloat(r.trim.order)||0;var tPrice=tOrd>0?Math.round(r.trim.cost/tOrd):0;
+      items.push({cat:'巾木('+FACES[i]+'面)',name:r.trim.type,spec:'',qty:tOrd,unit:'m',price:tPrice,cost:r.trim.cost,note:'周長'+r.trim.perim+'m + 5%'});
+    }
+  });
+  setOrder(items,'[壁まとめ] '+mName+' ('+idxs.map(function(i){return FACES[i];}).join('・')+'面)');
 }
 
 // ── 開口 ──
