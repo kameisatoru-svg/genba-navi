@@ -504,6 +504,17 @@ var faceSelId=[null,null,null,null];
 var faceOidSeq=[0,0,0,0];
 var moveStep=10;
 
+// ── Z Fold5対応：リサイズ/fold追従 ──
+var _lastVizRedraw=null,_resizeT=null;
+window.addEventListener('resize',function(){
+  if(_resizeT)clearTimeout(_resizeT);
+  _resizeT=setTimeout(function(){
+    if(document.getElementById('wall-cv'))redrawWall();
+    if(_lastVizRedraw)_lastVizRedraw();
+    addZoomButtons();
+  },120);
+});
+
 function getOpenings(){return faceOpenings[curFaceIdx];}
 function setOpenings(a){faceOpenings[curFaceIdx]=a;}
 
