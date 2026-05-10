@@ -2611,11 +2611,17 @@ function analyzeBcsCsv(text){
   }
 
   // ── 形式判定 ──
-  // 19列構造で10列目に P/D/T/A が含まれる → BCS標準
-  const isBcsStd = rowsRaw.some(r => r.length >= 11 && /^[PDTA]$/.test(String(r[9]).trim()));
+  // ① 2セクション形式（mitsumori-pdf-to-csv出力）：先頭付近に「01_見積ヘッダ」「02_内訳明細」セクションマーカー
+  //    かつ02側に row_type 列がある
+  const isSection2 = dataLines.some(l => /^\s*01_見積ヘッダ\s*$/.test(l))
+                  && dataLines.some(l => /^\s*02_内訳明細\s*$/.test(l));
+  // ② 19列構造で10列目に P/D/T/A が含まれる → BCS標準
+  const isBcsStd = !isSection2 && rowsRaw.some(r => r.length >= 11 && /^[PDTA]$/.test(String(r[9]).trim()));
 
   let parsed;
-  if(isBcsStd){
+  if(isSection2){
+    parsed = analyzeSection2Csv(dataLines, meta);
+  } else if(isBcsStd){
     parsed = analyzeBcsStandard(rowsRaw);
   } else {
     parsed = analyzeSimpleCsv(rowsRaw);
@@ -2746,6 +2752,202 @@ function analyzeBcsStandard(rows){
 
   return {
     format: 'BCS.CSV標準',
+    groups,
+    mode: detectedMode,
+    shokeihiRate,
+    nebiki,
+    hasuChousei
+  };
+}
+
+// 2セクション形式CSV（mitsumori-pdf-to-csv出力）の解析
+// 形式：
+//   01_見積ヘッダ
+//   書類種別,発行日,見積番号,発行元会社名,取引先会社名,工事件名,小計,消費税,合計金額
+//   見積書,2025-01-23,,株式会社アート・レイズ,株式会社 大分ビルダー,仮）...,3100000,310000,3410000
+//
+//   02_内訳明細
+//   見積番号,大項目コード,大項目名,中項目名,小項目名,仕様・摘要,数量,単位,単価,金額,備考,row_type
+//   ,A,仮設工事,,,,1,式,,150200,,大項目小計
+//   ,A,仮設工事,A.仮設工事,墨出し・養生・片付け清掃費,,24,㎡,1750,42000,店舗A,小項目
+//   ...
+function analyzeSection2Csv(dataLines, meta){
+  // ── セクション分割 ──
+  // 「01_見積ヘッダ」「02_内訳明細」をマーカーとして区分
+  let section = null; // 'header' | 'detail' | null
+  const headerLines = [];
+  const detailLines = [];
+  dataLines.forEach(line => {
+    if(/^\s*01_見積ヘッダ\s*$/.test(line)){ section = 'header'; return; }
+    if(/^\s*02_内訳明細\s*$/.test(line))   { section = 'detail'; return; }
+    if(section === 'header') headerLines.push(line);
+    else if(section === 'detail') detailLines.push(line);
+  });
+
+  // ── ヘッダセクション解析 ──
+  // 1行目=列名、2行目=値
+  if(headerLines.length >= 2){
+    const headerCols = parseBcsCsvLine(headerLines[0]).map(s => String(s).trim());
+    const headerVals = parseBcsCsvLine(headerLines[1]);
+    const headerMap = {};
+    headerCols.forEach((col, idx) => {
+      headerMap[col] = String(headerVals[idx] || '').trim();
+    });
+    // metaに流し込み（既存metaを上書きしない）
+    // 既存システムのメタキー名（applyCsvImport側）に合わせる
+    const setMeta = (key, val) => {
+      if(val && !meta[key]) meta[key] = val;
+    };
+    // 書類種別：「見積書」→ mitsumori、「請求書」→ seikyu
+    if(headerMap['書類種別']){
+      if(/見積/.test(headerMap['書類種別'])) setMeta('docType', 'mitsumori');
+      else if(/請求/.test(headerMap['書類種別'])) setMeta('docType', 'seikyu');
+    }
+    setMeta('issueDate',    headerMap['発行日']);
+    setMeta('docNumber',    headerMap['見積番号']);
+    setMeta('customerName', headerMap['取引先会社名']);
+    setMeta('kojimei',      headerMap['工事件名']);
+  }
+
+  // ── 明細セクション解析 ──
+  if(detailLines.length === 0){
+    throw new Error('02_内訳明細セクションが空です。');
+  }
+  const detailHeader = parseBcsCsvLine(detailLines[0]).map(s => String(s).trim());
+  const idx = {
+    code:   detailHeader.indexOf('大項目コード'),
+    big:    detailHeader.indexOf('大項目名'),
+    mid:    detailHeader.indexOf('中項目名'),
+    small:  detailHeader.indexOf('小項目名'),
+    spec:   detailHeader.indexOf('仕様・摘要'),
+    qty:    detailHeader.indexOf('数量'),
+    unit:   detailHeader.indexOf('単位'),
+    price:  detailHeader.indexOf('単価'),
+    amount: detailHeader.indexOf('金額'),
+    note:   detailHeader.indexOf('備考'),
+    rowType:detailHeader.indexOf('row_type')
+  };
+
+  const groups = [];
+  let currentGroup = null;
+  let currentMiddle = null;
+  let shokeihiRate = 0;
+  let nebiki = 0;
+  let hasuChousei = 0;
+  const isShokeihi = (n) => /諸経費|経費/.test(n);
+  const isNebiki = (n) => /値引|割引/.test(n);
+  const isHasuChousei = (n) => /端数調整|端数/.test(n);
+
+  // 大項目（小計行）を先に収集してマップ化＝順序維持しつつ参照用に
+  const detailRows = detailLines.slice(1).map(parseBcsCsvLine);
+
+  // まず大項目小計行を順次処理して groups の枠を作る
+  // （小項目行のコードが揃わないケースに備えて、大項目コード→group参照を保持）
+  const groupByCode = {};
+
+  detailRows.forEach(r => {
+    const rowType = String(r[idx.rowType] || '').trim();
+    const code    = String(r[idx.code] || '').trim();
+    const big     = String(r[idx.big] || '').trim();
+    const mid     = String(r[idx.mid] || '').trim();
+    const small   = String(r[idx.small] || '').trim();
+    const spec    = String(r[idx.spec] || '').trim();
+    const qty     = parseBcsNum(r[idx.qty]);
+    const unit    = String(r[idx.unit] || '').trim();
+    const price   = parseBcsNum(r[idx.price]);
+    const amount  = parseBcsNum(r[idx.amount]);
+    const note    = String(r[idx.note] || '').trim();
+
+    if(rowType === '大項目小計'){
+      // 諸経費・値引き・端数調整は特殊扱い
+      if(isShokeihi(big)){
+        // 直前までの大項目合計から率を逆算
+        let prevTotal = 0;
+        groups.forEach(g => { prevTotal += (g.total || 0); });
+        if(prevTotal > 0 && amount > 0){
+          shokeihiRate = Math.round((amount / prevTotal) * 1000) / 10;
+        }
+        return;
+      }
+      if(isNebiki(big)){
+        nebiki = Math.abs(amount);
+        return;
+      }
+      if(isHasuChousei(big)){
+        hasuChousei = amount;
+        return;
+      }
+      // 通常の大項目
+      const grp = {name: big, middleItems: [], items: [], total: amount};
+      groups.push(grp);
+      if(code) groupByCode[code] = grp;
+    } else if(rowType === '調整'){
+      // 大項目コード無し・小項目名が【調整値引】等
+      const tag = small || big || spec;
+      if(isHasuChousei(tag) || /調整/.test(tag)){
+        hasuChousei += amount; // 累積（マイナス値もそのまま）
+      } else if(isNebiki(tag)){
+        nebiki += Math.abs(amount);
+      } else {
+        // 不明な調整は端数調整として吸収
+        hasuChousei += amount;
+      }
+    } else if(rowType === '小項目'){
+      // 大項目コードから所属を解決
+      let grp = groupByCode[code];
+      if(!grp){
+        // 小計行が無いケース：その場で生成
+        grp = {name: big || ('項目'+code), middleItems: [], items: [], total: 0};
+        groups.push(grp);
+        if(code) groupByCode[code] = grp;
+      }
+      // 名称：小項目名を優先、無ければ中項目名、それも無ければ仕様
+      const itemName = small || mid || spec;
+      // 中項目（mid）が大項目名と実質同じなら中項目化しない＝大項目直下に配置
+      const midNorm = mid.replace(/^[A-Z]\./, '').trim();
+      const bigNorm = big.trim();
+      const useMid = mid && midNorm !== bigNorm;
+
+      const item = {
+        name: itemName,
+        qty: qty || 1,
+        unit: unit || '式',
+        price,
+        note: [spec, note].filter(s => s).join(' / ')
+      };
+
+      if(useMid){
+        // 中項目があれば階層化
+        let middle = grp.middleItems.find(m => m.name === mid);
+        if(!middle){
+          middle = {name: mid, items: []};
+          grp.middleItems.push(middle);
+        }
+        middle.items.push(item);
+      } else {
+        grp.items.push(item);
+      }
+    }
+    // それ以外のrow_typeは無視
+  });
+
+  if(groups.length === 0){
+    throw new Error('明細（小項目）が見つかりませんでした。');
+  }
+
+  // ── モード判定 ──
+  let detectedMode;
+  if(groups.length === 1 && /工事一式|一式/.test(groups[0].name)){
+    detectedMode = 'lump';
+  } else if(groups.length === 1 && groups[0].middleItems.length === 0){
+    // 単一大項目で中項目も無い → flat も可だが、グループ名が「明細」以外なら group のまま
+    detectedMode = /^明細$/.test(groups[0].name) ? 'flat' : 'group';
+  } else {
+    detectedMode = 'group';
+  }
+
+  return {
+    format: '2セクションCSV',
     groups,
     mode: detectedMode,
     shokeihiRate,
