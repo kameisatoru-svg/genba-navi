@@ -1513,14 +1513,21 @@ function checkAndPaginateGroup(){
 
   allSegEnds.forEach(segEnd=>{
     let cumH=0;
-    for(let i=segStart;i<segEnd;i++){
+    let i=segStart;
+    while(i<segEnd){
       cumH+=allRows[i].offsetHeight;
       if(cumH>availH){
+        // 現在の行 i がはみ出した → 行 i の手前で分割
+        // ただし segStart からの最低1行は確保（segStart+1）
         const bp=Math.max(segStart+1, i);
         autoBreakPoints.push(bp);
-        cumH=allRows[i].offsetHeight; // 新セグメント開始
+        // 新セグメント開始：i を bp に巻き戻し、cumH をリセット
         segStart=bp;
+        i=bp;
+        cumH=0;
+        continue;
       }
+      i++;
     }
     segStart=segEnd;
   });
