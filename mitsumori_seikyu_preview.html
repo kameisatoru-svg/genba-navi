@@ -1476,7 +1476,7 @@ function checkAndPaginateGroup(){
 
   const detailPage=document.getElementById('group-detail-page');
   const tbl=document.getElementById('group-detail-tbl');
-  if(!detailPage||!tbl)return;
+  if(!detailPage||!tbl){ console.warn('[paginate] detailPage or tbl missing'); return; }
 
   const mno=document.getElementById('mitsumoriNo').value;
   const kojimei=document.getElementById('kojimei').value;
@@ -1490,11 +1490,17 @@ function checkAndPaginateGroup(){
   const footerH=footer?footer.offsetHeight+20:40;
 
   const availH=getA4ContentH() - tblTop - theadH - footerH;
-  if(availH<=0)return;
+  console.log('[paginate] getA4ContentH=', getA4ContentH(), 'tblTop=', tblTop, 'theadH=', theadH, 'footerH=', footerH, 'availH=', availH);
+  if(availH<=0){ console.warn('[paginate] availH<=0, abort'); return; }
 
   const tbody=tbl.querySelector('tbody');
-  if(!tbody)return;
+  if(!tbody){ console.warn('[paginate] tbody missing'); return; }
   const allRows=Array.from(tbody.querySelectorAll('tr'));
+  console.log('[paginate] tbody tr count =', allRows.length);
+  // 各行の高さも出す
+  let sumH = 0;
+  allRows.forEach((tr,i)=>{ sumH += tr.offsetHeight; });
+  console.log('[paginate] total row height sum =', sumH, ' (availH =', availH, ')');
 
   // まず手動改頁フラグ（pb-row-mark）の位置を適用してから
   // 各ページ内でA4高さを超えたら自動分割
@@ -1534,7 +1540,8 @@ function checkAndPaginateGroup(){
 
   // 全ての改ページ位置をマージ（重複除去・ソート）
   const allBreaks=[...new Set([...breakPoints,...autoBreakPoints])].sort((a,b)=>a-b);
-  if(allBreaks.length===0)return;
+  console.log('[paginate] breakPoints=', breakPoints, ' autoBreakPoints=', autoBreakPoints, ' allBreaks=', allBreaks);
+  if(allBreaks.length===0){ console.warn('[paginate] no breaks, return'); return; }
 
   // ページに分割してDOMを再構築
   // まず元のdetailPageのtbodyを1ページ目分だけ残す
