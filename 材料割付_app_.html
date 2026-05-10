@@ -533,6 +533,49 @@ function getOpeningPerim(){var t=0;getOpenings().forEach(function(o){if(o.type==
 function bothInside(x1,x2,op){var E=0.5;return(x1>op.x+E&&x1<op.x+op.w-E)&&(x2>op.x+E&&x2<op.x+op.w-E);}
 function toHonStr(arr){var m={};arr.forEach(function(l){if(l>0)m[l]=(m[l]||0)+1;});return Object.keys(m).map(Number).sort(function(a,b){return b-a;}).map(function(k){return k+'mm × '+m[k]+'本';}).join('　');}
 
+// ── canvas拡大ボタン付与＆フルスクリーン表示 ──
+function addZoomButtons(){
+  document.querySelectorAll('.vw2').forEach(function(box){
+    if(box.querySelector('.vw-zoom-btn'))return;
+    var cv=box.querySelector('canvas');if(!cv)return;
+    var lbl=box.querySelector('.vl');
+    var title=lbl?lbl.textContent.replace(/[（(].*$/,'').trim():'割り付け図';
+    var btn=document.createElement('button');
+    btn.className='vw-zoom-btn';btn.innerHTML='⛶';btn.title='拡大表示';
+    btn.setAttribute('aria-label','拡大表示');
+    btn.addEventListener('click',function(e){e.stopPropagation();showCanvasZoom(cv,title);});
+    box.appendChild(btn);
+  });
+}
+
+function showCanvasZoom(srcCanvas,title){
+  var existing=document.getElementById('cv-zoom-modal');
+  if(existing)document.body.removeChild(existing);
+  var modal=document.createElement('div');
+  modal.id='cv-zoom-modal';modal.className='cv-fullscreen';
+  modal.innerHTML='<div class="cv-fs-head"><div class="cv-fs-title">'+title+' — 拡大表示</div><button class="cv-fs-close" aria-label="閉じる">×</button></div><div class="cv-fs-body"><canvas></canvas></div>';
+  document.body.appendChild(modal);
+  var target=modal.querySelector('canvas');
+  var body=modal.querySelector('.cv-fs-body');
+  var bw=body.clientWidth-32,bh=body.clientHeight-32;
+  var srcW=srcCanvas.offsetWidth||srcCanvas.width,srcH=srcCanvas.offsetHeight||srcCanvas.height;
+  if(srcW<=0||srcH<=0){srcW=400;srcH=300;}
+  var ratio=srcW/srcH,tw,th;
+  if(bw/bh>ratio){th=bh;tw=th*ratio;}else{tw=bw;th=tw/ratio;}
+  var dpr=window.devicePixelRatio||1;
+  target.width=Math.round(tw*dpr);target.height=Math.round(th*dpr);
+  target.style.width=tw+'px';target.style.height=th+'px';
+  var ctx=target.getContext('2d');
+  ctx.imageSmoothingEnabled=true;
+  if('imageSmoothingQuality' in ctx)ctx.imageSmoothingQuality='high';
+  ctx.drawImage(srcCanvas,0,0,target.width,target.height);
+  function close(){if(modal.parentNode)modal.parentNode.removeChild(modal);document.removeEventListener('keydown',esc);}
+  function esc(e){if(e.key==='Escape')close();}
+  modal.querySelector('.cv-fs-close').addEventListener('click',close);
+  modal.addEventListener('click',function(e){if(e.target===modal)close();});
+  document.addEventListener('keydown',esc);
+}
+
 function calcSheetDir(L,W,sw,loss,price,dir){
   var cols,lenPerCol,edgeMm;
   if(dir==='縦割り'){cols=Math.ceil(W/sw);lenPerCol=L/1000;edgeMm=cols*sw-W;}
