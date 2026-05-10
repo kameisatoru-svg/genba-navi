@@ -915,13 +915,16 @@ function renderSheetResult(tate,yoko,L,W){
   [tate,yoko].forEach(function(s){var isBest=s.dir===best;h+='<div class="sheet-card'+(isBest?' best':'')+'">';h+='<div class="sct"><span>'+s.dir+'</span>'+(isBest?'<span class="bb">ロス少</span>':'')+'</div><div class="sv">'+s.ordM.toFixed(1)+'m</div><div class="ss">発注数（ロス込）</div><div class="sd">'+s.cols+'本　×　'+s.lenPerCol.toFixed(2)+'m/本<br>正味 '+s.totalM.toFixed(1)+'m<br>端材 '+(s.edgeMm>0?s.edgeMm+'mm':'なし')+(s.costOrd>0?'<br>材料費 ¥'+s.costOrd.toLocaleString():'')+'</div></div>';});
   h+='</div><div class="viz-row"><div class="vw-sheet"><div class="vl">縦割り</div><canvas id="cv-tate" height="170"></canvas></div><div class="vw-sheet"><div class="vl">横割り</div><canvas id="cv-yoko" height="170"></canvas></div></div></div>';
   document.getElementById('result-area').innerHTML=h;
-  setTimeout(function(){
+  var doDraw=function(){
     var cv0=document.getElementById('cv-tate');if(!cv0)return;
     var CW=cv0.offsetWidth||200,CH=170,mL=8,mR=30,mT=8,mB=30,sc=Math.min((CW-mL-mR)/L,(CH-mT-mB)/W);
     var rw=L*sc,rh=W*sc,ox=mL,oy=mT;
     drawSheetCanvas('cv-tate',tate,L,W,sc,ox,oy,rw,rh,CW,CH,'縦');
     drawSheetCanvas('cv-yoko',yoko,L,W,sc,ox,oy,rw,rh,CW,CH,'横');
-  },60);
+    addZoomButtons();
+  };
+  _lastVizRedraw=doDraw;
+  setTimeout(doDraw,60);
 }
 
 function drawSheetCanvas(cvId,s,L,W,sc,ox,oy,rw,rh,CW,CH,lineDir){
@@ -973,7 +976,13 @@ function doCalc(){
 // ── 結果描画 ──
 function renderResult(r,cc){
   document.getElementById('result-area').innerHTML='<div style="margin-top:14px">'+buildResultHTML(r,cc)+'</div>';
-  if(r.viz&&r.viz.tW){setTimeout(function(){drawViz(r.viz,cc);},50);}
+  if(r.viz&&r.viz.tW){
+    _lastVizRedraw=function(){drawViz(r.viz,cc);addZoomButtons();};
+    setTimeout(_lastVizRedraw,50);
+  }else{
+    _lastVizRedraw=null;
+    setTimeout(addZoomButtons,30);
+  }
 }
 
 function buildResultHTML(r,cc){
