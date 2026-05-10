@@ -1305,7 +1305,21 @@ function renderCeilForm(){
 }
 function doCalc(){
   var m=cats[curCat].mats[curMatIdx],keys=['L','W','BL','BW','LOSS','PRICE','REPEAT','COAT','MAWARI_PRICE','HABAKI_PRICE'],d={};
-  keys.forEach(function(k){d[k]=fv(k);});renderResult(m.calc(d,curPat),curCat);
+  keys.forEach(function(k){d[k]=fv(k);});
+  var r=m.calc(d,curPat);renderResult(r,curCat);
+  // ── 発注データ記録 ──
+  var items=[],catLabel={ceil:'天井',wall:'壁',floor:'床'}[curCat]||'';
+  var qtyItem=(r.m||[]).find(function(x){return x.l.indexOf('発注')>=0;});
+  if(qtyItem){
+    var q=parseQty(qtyItem.v);
+    items.push({cat:catLabel,name:m.name,spec:d.BL+'×'+d.BW+'mm',qty:q.n,unit:q.u||'枚',price:d.PRICE,cost:Math.round(q.n*d.PRICE),note:'ロス'+d.LOSS+'%'+(curPat==='ダイヤ張り'?'+ダイヤ7%':'')+'込'});
+  }
+  if(r.trim){
+    var tOrd=parseFloat(r.trim.order)||0;
+    var tPrice=tOrd>0?Math.round(r.trim.cost/tOrd):0;
+    items.push({cat:r.trim.name,name:r.trim.type,spec:'',qty:tOrd,unit:'m',price:tPrice,cost:r.trim.cost,note:'周長'+r.trim.perim+'m + 5%'});
+  }
+  setOrder(items,'['+catLabel+'] '+m.name);
 }
 
 // ── 結果描画 ──
