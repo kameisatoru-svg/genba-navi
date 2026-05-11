@@ -633,6 +633,40 @@ canvas#wall-cv{touch-action:none;}
   </div>
 </div>
 
+<!-- 部屋追加/編集モーダル -->
+<div class="modal-overlay hidden" id="room-modal" onclick="closeRoomModal(event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <span style="font-size:18px">🏠</span>
+      <span id="room-modal-title">部屋を追加</span>
+    </div>
+    <div class="modal-body">
+      <div class="modal-label">部屋名</div>
+      <input class="modal-input" id="room-name" type="text" placeholder="例：101号室／廊下／受付" maxlength="40">
+      <div class="modal-label" style="margin-top:14px">寸法（mm）</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div>
+          <div style="font-size:11px;color:var(--text2);margin-bottom:3px">幅（横）</div>
+          <input class="modal-input" id="room-W" type="number" value="3000" inputmode="numeric">
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text2);margin-bottom:3px">長さ（縦）</div>
+          <input class="modal-input" id="room-L" type="number" value="4000" inputmode="numeric">
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text2);margin-bottom:3px">天井高</div>
+          <input class="modal-input" id="room-H" type="number" value="2400" inputmode="numeric">
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text2);margin-top:10px;line-height:1.6">床・天井のサイズと、壁A〜D（A=上辺、時計回りにB→C→D）の各面寸法に自動反映されます。</div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-cancel" onclick="closeRoomModal(null)">キャンセル</button>
+      <button class="modal-send" id="room-send-btn" onclick="doSubmitRoom()">確定</button>
+    </div>
+  </div>
+</div>
+
 <!-- 作図へ送るモーダル -->
 <div class="modal-overlay hidden" id="zumen-modal" onclick="closeZumenModal(event)">
   <div class="modal-box">
@@ -672,10 +706,10 @@ canvas#wall-cv{touch-action:none;}
 </div>
 
 <script>
-var curCat='ceil',curMatIdx=0,curPat='通し目地';
+var curCat='floor',curMatIdx=0,curPat='通し目地';
 var curFloorType='タイル',curTileType='Pタイル',curSheetW=1820,curFlooringType='フローリング';
 
-var FACES=['東','西','南','北'];
+var FACES=['A','B','C','D'];
 var curFaceIdx=0;
 var faceData=[null,null,null,null];
 var faceInputs=[null,null,null,null];
