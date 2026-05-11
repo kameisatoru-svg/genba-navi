@@ -1507,11 +1507,16 @@ function rowHtml(a) {
 // 備考から月日パターン("4/18-20" / "5/25-27施工" / "7/18(土)-19(日)")を抽出
 function extractDateRanges(text, defaultYear) {
   if (!text) return [];
+  // 元号年(R8/1/20)・西暦(2026/4/13)等の完全日付は先に除去(MM/DD部分の誤検出を防ぐ)
+  const scanText = text
+    .replace(/\d{4}\/\d{1,2}\/\d{1,2}/g, ' ')                       // 2026/4/13
+    .replace(/(?:R|令和)\s*\d+\s*\/\s*\d+\s*\/\s*\d+/g, ' ')        // R8/1/20 / 令和8/1/20
+    .replace(/(?:H|平成)\s*\d+\s*\/\s*\d+\s*\/\s*\d+/g, ' ');       // H30/12/1 / 平成30/12/1
   const ranges = [];
   // 括弧曜日を許容: (\d/\d)(...曜?)(-\d(/\d)?)?
   const re = /(\d{1,2})\/(\d{1,2})(?:[\(（][^)）]*[\)）])?(?:[\-〜~](\d{1,2})(?:\/(\d{1,2}))?)?/g;
   let m;
-  while ((m = re.exec(text)) != null) {
+  while ((m = re.exec(scanText)) != null) {
     const mo1 = parseInt(m[1], 10);
     const d1  = parseInt(m[2], 10);
     if (!(mo1 >= 1 && mo1 <= 12 && d1 >= 1 && d1 <= 31)) continue;
