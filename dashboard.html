@@ -2669,6 +2669,14 @@ function renderTimeline() {
 
   svg += `</svg>`;
   replaceSectionBody('#sec-timeline', legend + `<div class="timeline-wrap">${svg}</div>`);
+
+  // タイムラインラベルクリック → 案件モーダル
+  $$('#sec-timeline .timeline-label-link').forEach(el => {
+    el.addEventListener('click', () => {
+      const a = findAnken(el.dataset.key);
+      if (a) showAnkenModal(a);
+    });
+  });
 }
 
 /* ============================================================
@@ -3200,17 +3208,24 @@ function bindEvents() {
     window.print();
   });
 
-  // モーダル閉じる: ✕ボタン / 背景クリック / ESCキー
-  $('#modal-close')?.addEventListener('click', closePartnerModal);
+  // 取引先モーダル閉じる: ✕ボタン / 背景クリック
+  $('#modal-close')?.addEventListener('click', () => closePartnerModal());
   $('#partner-modal')?.addEventListener('click', (e) => {
     if (e.target.id === 'partner-modal') closePartnerModal();
   });
+  // 案件モーダル閉じる: ✕ボタン / 背景クリック
+  $('#anken-modal-close')?.addEventListener('click', () => closeAnkenModal());
+  $('#anken-modal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'anken-modal') closeAnkenModal();
+  });
+
+  // ESC: 案件モーダル → 取引先モーダル → 検索結果 の順に閉じる
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      if ($('#partner-modal')?.classList.contains('show')) closePartnerModal();
-      const sr = $('#search-results');
-      if (sr?.classList.contains('show')) sr.classList.remove('show');
-    }
+    if (e.key !== 'Escape') return;
+    if ($('#anken-modal')?.classList.contains('show'))   { closeAnkenModal();   return; }
+    if ($('#partner-modal')?.classList.contains('show')) { closePartnerModal(); return; }
+    const sr = $('#search-results');
+    if (sr?.classList.contains('show')) sr.classList.remove('show');
   });
 
   // 取引先カードのキーボード操作(Enter/Space で開く)
