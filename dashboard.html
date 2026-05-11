@@ -2057,6 +2057,21 @@ function renderKanban() {
   }).join('');
 
   replaceSectionBody('#sec-kanban', `<div class="kanban-board">${cols}</div>`);
+
+  // カンバンカードクリック → 案件モーダル
+  $$('#sec-kanban .kanban-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const a = findAnken(card.dataset.key);
+      if (a) showAnkenModal(a);
+    });
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const a = findAnken(card.dataset.key);
+        if (a) showAnkenModal(a);
+      }
+    });
+  });
 }
 
 function kanbanCard(a) {
@@ -2065,13 +2080,13 @@ function kanbanCard(a) {
   const memo = memoFull.length > 32 ? memoFull.substring(0, 32) + '…' : memoFull;
   const motoke = a['元請フラグ'] ? ` <span class="motoke-tag">元請</span>` : '';
   return `
-    <a class="kanban-card" href="${escapeHtml(summaryUrl(a))}" target="_blank" rel="noopener" title="${escapeHtml(a['案件キー'])} のサマリーを開く">
+    <div class="kanban-card" role="button" tabindex="0" data-key="${escapeHtml(a['案件キー'])}" aria-label="${escapeHtml(a['案件キー'])} の詳細を開く" title="クリックで案件詳細を表示">
       <div class="kanban-key">${escapeHtml(a['案件キー'])}</div>
       <div class="kanban-title">${escapeHtml(a['正式工事名'] || '')}</div>
       <div class="kanban-cust">${escapeHtml(a['顧客略'] || '')}${motoke}</div>
       ${amt > 0 ? `<div class="kanban-amt">${formatYen(amt)}</div>` : ''}
       ${memo ? `<div class="kanban-memo">${escapeHtml(memo)}</div>` : ''}
-    </a>
+    </div>
   `;
 }
 
@@ -2232,10 +2247,12 @@ function rowHtml(a) {
   const estAmt = est?.['金額'] || 0;
   const invAmt = totalInvoiced(a);
   const partner = findPartner(a['顧客略']);
-  const tBadge = partner ? `<span class="t-badge">${escapeHtml(partner['id'])}</span>` : '';
+  const tBadge = partner
+    ? `<button class="t-badge anken-key-btn" data-pid="${escapeHtml(partner['id'])}" type="button" title="取引先詳細を開く" style="background:var(--secondary);color:var(--primary);">${escapeHtml(partner['id'])}</button> `
+    : '';
   return `
     <tr>
-      <td class="anken-key"><a href="${escapeHtml(summaryUrl(a))}" target="_blank" rel="noopener">${escapeHtml(a['案件キー'])}</a></td>
+      <td class="anken-key"><button class="anken-key-btn" data-key="${escapeHtml(a['案件キー'])}" type="button" title="案件詳細を開く">${escapeHtml(a['案件キー'])}</button></td>
       <td>${tBadge}${escapeHtml(a['顧客略'] || '')}</td>
       <td>${escapeHtml(a['正式工事名'] || '')}</td>
       <td>${statusBadge(a['ステータス'])}</td>
