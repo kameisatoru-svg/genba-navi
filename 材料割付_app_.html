@@ -1486,9 +1486,10 @@ function showCanvasZoom(srcCanvas,title){
 
 function calcSheetDir(L,W,sw,loss,price,dir){
   var cols,lenPerCol,edgeMm;
-  if(dir==='縦割り'){cols=Math.ceil(W/sw);lenPerCol=L/1000;edgeMm=cols*sw-W;}
-  else{cols=Math.ceil(L/sw);lenPerCol=W/1000;edgeMm=cols*sw-L;}
-  if(edgeMm>=sw)edgeMm=0;
+  if(dir==='縦割り'){cols=Math.ceil(W/sw);lenPerCol=L/1000;edgeMm=W-(cols-1)*sw;}
+  else{cols=Math.ceil(L/sw);lenPerCol=W/1000;edgeMm=(dir==='縦割り'?W:L)-(cols-1)*sw;}
+  // 切り出し最終本の「使った幅」。割り切れる場合は0（カット不要）
+  if(edgeMm===sw||edgeMm<=0)edgeMm=0;
   var totalM=cols*lenPerCol,ordM=Math.ceil(totalM*(1+loss/100)*10)/10;
   return{dir:dir,cols:cols,lenPerCol:lenPerCol,edgeMm:edgeMm,totalM:totalM,ordM:ordM,costOrd:Math.round(ordM*price)};
 }
