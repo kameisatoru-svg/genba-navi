@@ -430,9 +430,9 @@ canvas#wall-cv{touch-action:none;}
 }
 .cv-fs-body canvas{display:block;}
 
-/* ══════════ ユーティリティバー（保存/履歴/TSV） ══════════ */
+/* ══════════ ユーティリティバー（保存/履歴/TSV/PDF） ══════════ */
 .util-row{
-  display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px;
+  display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:12px;
 }
 .util-btn{
   padding:9px 4px;border:1.5px solid rgba(30,45,64,0.15);
@@ -697,6 +697,7 @@ canvas#wall-cv{touch-action:none;}
     <button class="util-btn" id="util-save" onclick="openSaveModal()"><span class="util-ic">💾</span>保存</button>
     <button class="util-btn" id="util-load" onclick="openLoadModal()"><span class="util-ic">📂</span>履歴</button>
     <button class="util-btn" id="util-tsv" onclick="openTsvModal()"><span class="util-ic">📋</span>TSV</button>
+    <button class="util-btn" id="util-pdf" onclick="openPdfReport()"><span class="util-ic">📄</span>PDF</button>
   </div>
   <div id="mat-list" class="mat-row"></div>
   <div id="sub-area"></div>
