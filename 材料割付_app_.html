@@ -745,6 +745,7 @@ function setOrder(items,title){
   if(!items||!items.length){_lastOrder=null;}
   else{_lastOrder={title:title||'材料発注',date:getDateStr(),items:items};}
   refreshUtilIndicators();
+  if(typeof autoSaveState==='function')autoSaveState(false);
 }
 
 function refreshUtilIndicators(){
