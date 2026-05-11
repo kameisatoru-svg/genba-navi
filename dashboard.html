@@ -609,6 +609,162 @@ a { color: inherit; text-decoration: none; }
 .nyukin-mark.none { color: var(--text-mute); font-weight: 400; }
 .nyukin-mark .icon { width: 14px; height: 14px; }
 
+/* ============================================================
+   Phase 3: リマインド / 売上推移グラフ / タイムライン
+   ============================================================ */
+
+/* ----- Section 5: リマインド ----- */
+.reminders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+}
+.reminder-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--reminder-color, var(--accent));
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  text-decoration: none;
+  color: var(--text);
+  transition: var(--transition);
+}
+.reminder-card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+.reminder-card.reminder-danger  { --reminder-color: var(--danger); }
+.reminder-card.reminder-warn    { --reminder-color: var(--warn); }
+.reminder-card.reminder-success { --reminder-color: var(--success); }
+
+.reminder-icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--reminder-color);
+}
+.reminder-icon .icon { width: 24px; height: 24px; }
+.reminder-body { flex: 1; min-width: 0; }
+.reminder-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--reminder-color);
+  margin-bottom: 2px;
+  letter-spacing: 0.02em;
+}
+.reminder-anken {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary);
+  word-break: break-all;
+  line-height: 1.3;
+}
+.reminder-book {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-sub);
+  word-break: break-all;
+  margin-top: 1px;
+}
+.reminder-meta {
+  font-size: 11px;
+  color: var(--text-sub);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+.reminder-days {
+  font-family: var(--font-mono);
+  color: var(--danger);
+  font-weight: 700;
+  margin-left: 4px;
+}
+.reminders-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  color: var(--success);
+  font-size: 13px;
+}
+.reminders-empty .icon { color: var(--success); width: 22px; height: 22px; }
+.reminders-summary {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+  font-size: 11px;
+  color: var(--text-sub);
+  flex-wrap: wrap;
+}
+.reminders-summary .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+.reminders-summary .chip .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+}
+.reminders-summary .chip.danger  .dot { background: var(--danger); }
+.reminders-summary .chip.warn    .dot { background: var(--warn); }
+.reminders-summary .chip.success .dot { background: var(--success); }
+
+/* ----- Section 6: 売上推移グラフ ----- */
+.chart-wrap {
+  position: relative;
+  height: 280px;
+  width: 100%;
+}
+.chart-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--text-mute);
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* ----- Section 7: タイムライン ----- */
+.timeline-legend {
+  display: flex;
+  gap: 14px;
+  font-size: 11px;
+  color: var(--text-sub);
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  padding: 0 2px;
+}
+.timeline-legend .lg-item { display: inline-flex; align-items: center; gap: 5px; }
+.timeline-legend .lg-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.timeline-legend .lg-bar { width: 16px; height: 10px; border-radius: 2px; border: 1px solid; flex-shrink: 0; }
+.timeline-legend .lg-line { width: 16px; height: 1px; border-top: 1.5px dashed var(--danger); flex-shrink: 0; }
+
+.timeline-wrap {
+  overflow-x: auto;
+  overflow-y: visible;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fefcf8;
+  -webkit-overflow-scrolling: touch;
+}
+.timeline-svg {
+  display: block;
+}
+.timeline-empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--text-mute);
+  font-style: italic;
+}
+
 /* レスポンシブ補足(Phase 4で詳細化) */
 @media (max-width: 1199px) {
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
@@ -618,6 +774,8 @@ a { color: inherit; text-decoration: none; }
   .kpi-value { font-size: 1.4em; }
   .table-filters { padding: 8px; }
   .table-filters .q-wrap { width: 100%; flex: 1 1 100%; }
+  .reminders-grid { grid-template-columns: 1fr; }
+  .chart-wrap { height: 240px; }
 }
 
 /* ----- レスポンシブ (Phase 4で詳細化) ----- */
