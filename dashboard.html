@@ -119,9 +119,12 @@ a { color: inherit; text-decoration: none; }
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: var(--radius);
-  padding: 6px 14px;
+  padding: 6px 12px;
   font-size: 12px;
   transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 .dash-btn:hover { background: rgba(255, 255, 255, 0.20); }
 .dash-btn:active { transform: translateY(1px); }
@@ -151,6 +154,7 @@ a { color: inherit; text-decoration: none; }
   gap: 8px;
   border-left: 4px solid var(--accent);
   padding-left: 12px;
+  line-height: 1.3;
 }
 .section-title .badge {
   font-size: 11px;
