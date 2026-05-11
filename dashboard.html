@@ -1866,15 +1866,65 @@ function nyukinStatus(anken) {
   return 'none';
 }
 
-// サマリーHTMLのURL組み立て
-function summaryUrl(anken) {
-  const folder = FOLDER_MAP[anken['顧客略']] || anken['顧客略'];
-  return `./AR-2026/${folder}/${anken['案件キー']}/サマリー.html`;
+// 案件キー → 案件オブジェクト(中止案件含む)
+function findAnken(key) {
+  return [...(STATE.案件 || []), ...(STATE.中止案件 || [])]
+    .find(a => a['案件キー'] === key) || null;
 }
 
 // 取引先(顧客略 → 取引先オブジェクト)を引く
 function findPartner(ryaku) {
   return STATE.取引先マスター.find(t => t['略称'] === ryaku) || null;
+}
+
+// 取引先(T番号 → オブジェクト)
+function findPartnerById(pid) {
+  return STATE.取引先マスター.find(t => t['id'] === pid) || null;
+}
+
+/* ============================================================
+   モーダル共通(スクロールロック・トースト・コピー)
+   ============================================================ */
+function lockBodyScroll(on) {
+  document.body.style.overflow = on ? 'hidden' : '';
+}
+
+function showToast(msg) {
+  const el = $('#toast');
+  if (!el) return;
+  $('#toast-msg').textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+async function copyToClipboard(text, msg) {
+  try {
+    if (navigator.clipboard && window.isSecureContext !== false) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    showToast(msg || 'コピーしました');
+  } catch (e) {
+    logError('clipboard failed', e);
+    showToast('コピーに失敗しました');
+  }
+}
+
+// Google Drive / Gmail 検索URL組み立て
+function driveSearchUrl(q) {
+  return `https://drive.google.com/drive/u/0/search?q=${encodeURIComponent(q)}`;
+}
+function gmailSearchUrl(q) {
+  return `https://mail.google.com/mail/u/0/#search/${encodeURIComponent(q)}`;
 }
 
 // ステータスバッジHTML
