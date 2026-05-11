@@ -619,6 +619,10 @@ canvas#wall-cv{touch-action:none;}
       発注書（TSV形式）
     </div>
     <div class="modal-body">
+      <div class="tsv-mode-buttons" id="tsv-mode-buttons" style="display:none">
+        <label class="tsv-mode-btn checked"><input type="radio" name="tsv-mode" value="current" checked onchange="updateTsvText()">現在の部屋のみ</label>
+        <label class="tsv-mode-btn"><input type="radio" name="tsv-mode" value="all" onchange="updateTsvText()">全室合算</label>
+      </div>
       <div style="font-size:11px;color:var(--text2);margin-bottom:8px;line-height:1.6">下記をスプレッドシート／LINE／メール等に貼り付けてご利用ください。</div>
       <textarea class="modal-tsv-area" id="tsv-text" readonly></textarea>
     </div>
