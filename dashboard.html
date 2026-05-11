@@ -1502,6 +1502,375 @@ function rowHtml(a) {
 }
 
 /* ============================================================
+   Section 5: リマインド
+   ============================================================ */
+// 備考から月日パターン("4/18-20" / "5/25-27施工" / "7/18(土)-19(日)")を抽出
+function extractDateRanges(text, defaultYear) {
+  if (!text) return [];
+  const ranges = [];
+  // 括弧曜日を許容: (\d/\d)(...曜?)(-\d(/\d)?)?
+  const re = /(\d{1,2})\/(\d{1,2})(?:[\(（][^)）]*[\)）])?(?:[\-〜~](\d{1,2})(?:\/(\d{1,2}))?)?/g;
+  let m;
+  while ((m = re.exec(text)) != null) {
+    const mo1 = parseInt(m[1], 10);
+    const d1  = parseInt(m[2], 10);
+    if (!(mo1 >= 1 && mo1 <= 12 && d1 >= 1 && d1 <= 31)) continue;
+    let mo2 = mo1, d2 = d1;
+    if (m[3]) {
+      if (m[4]) { mo2 = parseInt(m[3], 10); d2 = parseInt(m[4], 10); }
+      else      { d2  = parseInt(m[3], 10); }
+    }
+    if (!(mo2 >= 1 && mo2 <= 12 && d2 >= 1 && d2 <= 31)) { mo2 = mo1; d2 = d1; }
+    ranges.push({
+      start: new Date(defaultYear, mo1 - 1, d1),
+      end:   new Date(defaultYear, mo2 - 1, d2),
+      raw:   m[0]
+    });
+  }
+  return ranges;
+}
+
+function renderReminders() {
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const reminders = [];
+
+  STATE.案件.forEach(a => {
+    // 🟡 30日経過進展なし見積
+    if (a['ステータス'] === '見積提出済み' && (!a['請求'] || a['請求'].length === 0)) {
+      const est = latestEstimate(a);
+      if (est && est['発行日']) {
+        const days = daysSince(est['発行日']);
+        if (days != null && days >= 30) {
+          reminders.push({
+            level: 'warn',
+            icon:  'icon-document',
+            title: '見積提出後 進展なし',
+            anken: a,
+            book:  est['書類番号'] || '',
+            days,
+            meta:  `見積発行: ${est['発行日']}`
+          });
+        }
+      }
+    }
+
+    // 🔴 60日経過未入金
+    (a['請求'] || []).forEach(inv => {
+      if (inv['入金状況'] === 'minyukin' && inv['発行日']) {
+        const days = daysSince(inv['発行日']);
+        if (days != null && days >= 60) {
+          reminders.push({
+            level: 'danger',
+            icon:  'icon-invoice',
+            title: '請求書発行後60日経過・未入金',
+            anken: a,
+            book:  inv['書類番号'] || '',
+            days,
+            meta:  `請求発行: ${inv['発行日']} / ${formatYen(inv['金額'] || 0)}`
+          });
+        }
+      }
+    });
+
+    // 🔴 完工後 請求未確定
+    // ステータス∉{完了, 施工中, 施工予定, 中止, 見積提出済み, 保守管理(継続)} かつ請求なし
+    const exempt = ['完了(請求書作成済み)', '施工中', '施工予定', '中止', '見積提出済み', '保守管理(継続)'];
+    if (!exempt.includes(a['ステータス']) && (!a['請求'] || a['請求'].length === 0)) {
+      const est = latestEstimate(a);
+      const days = est?.['発行日'] ? daysSince(est['発行日']) : null;
+      reminders.push({
+        level: 'danger',
+        icon:  'icon-warning-triangle',
+        title: '完工後 請求未確定',
+        anken: a,
+        book:  est?.['書類番号'] || '',
+        days,
+        meta:  '請求書を発行してください'
+      });
+    }
+
+    // 🟢 今週の施工予定: 備考の月日パターンが今日±7日内
+    if (a['ステータス'] === '施工予定') {
+      const ranges = extractDateRanges(a['備考'] || '', today.getFullYear());
+      ranges.forEach(r => {
+        const diff = Math.floor((r.start - today) / 86400000);
+        if (diff >= -2 && diff <= 7) {
+          const fmt = `${r.start.getMonth() + 1}/${r.start.getDate()}` +
+            (r.end > r.start ? `-${r.end.getMonth() + 1}/${r.end.getDate()}` : '');
+          reminders.push({
+            level: 'success',
+            icon:  'icon-calendar',
+            title: '今週の施工予定',
+            anken: a,
+            book:  '',
+            days:  null,
+            meta:  `予定日: ${fmt}`
+          });
+        }
+      });
+    }
+  });
+
+  // ソート: danger → warn → success / 経過日数降順
+  const order = { danger: 0, warn: 1, success: 2 };
+  reminders.sort((x, y) =>
+    order[x.level] - order[y.level] || ((y.days || 0) - (x.days || 0)));
+
+  const cnt = { danger: 0, warn: 0, success: 0 };
+  reminders.forEach(r => cnt[r.level]++);
+
+  const summaryHtml = `
+    <div class="reminders-summary">
+      <span class="chip danger"><span class="dot"></span>緊急 ${cnt.danger}件</span>
+      <span class="chip warn"><span class="dot"></span>注意 ${cnt.warn}件</span>
+      <span class="chip success"><span class="dot"></span>今週予定 ${cnt.success}件</span>
+    </div>
+  `;
+
+  const body = reminders.length === 0
+    ? `<div class="reminders-empty">
+         <svg class="icon"><use href="#icon-check-circle"/></svg>
+         該当するリマインドはありません
+       </div>`
+    : `<div class="reminders-grid">${reminders.map(reminderCard).join('')}</div>`;
+
+  replaceSectionBody('#sec-reminders', summaryHtml + body);
+}
+
+function reminderCard(r) {
+  const daysHtml = (typeof r.days === 'number')
+    ? `<span class="reminder-days">(${r.days}日経過)</span>` : '';
+  return `
+    <a class="reminder-card reminder-${r.level}" href="${escapeHtml(summaryUrl(r.anken))}" target="_blank" rel="noopener">
+      <div class="reminder-icon"><svg class="icon"><use href="#${r.icon}"/></svg></div>
+      <div class="reminder-body">
+        <div class="reminder-title">${escapeHtml(r.title)}</div>
+        <div class="reminder-anken">${escapeHtml(r.anken['案件キー'])}</div>
+        ${r.book ? `<div class="reminder-book">${escapeHtml(r.book)}</div>` : ''}
+        <div class="reminder-meta">${escapeHtml(r.meta)}${daysHtml}</div>
+      </div>
+    </a>
+  `;
+}
+
+/* ============================================================
+   Section 6: 売上推移グラフ (Chart.js)
+   ============================================================ */
+function ensureChart() {
+  if (window.Chart) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    let tries = 0;
+    const t = setInterval(() => {
+      if (window.Chart) { clearInterval(t); resolve(); }
+      else if (++tries > 50) { clearInterval(t); reject(new Error('Chart.js loading timeout')); }
+    }, 100);
+  });
+}
+
+let _salesChart = null;
+
+function renderChart() {
+  if (!window.Chart) {
+    replaceSectionBody('#sec-chart', `<div class="chart-loading">Chart.js 読込中…</div>`);
+    ensureChart()
+      .then(renderChart)
+      .catch(e => replaceSectionBody('#sec-chart',
+        `<div class="chart-loading">Chart.js を読み込めませんでした: ${escapeHtml(e.message)}</div>`));
+    return;
+  }
+
+  const today = new Date();
+  const months = [];
+  for (let i = -6; i <= 3; i++) {
+    const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
+    months.push({
+      ym:    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
+      label: `${d.getFullYear() === today.getFullYear() ? '' : (d.getFullYear() + '/')}${d.getMonth() + 1}月`
+    });
+  }
+
+  const seriesInv = months.map(() => 0); // 請求(未入金)
+  const seriesNyu = months.map(() => 0); // 入金済み
+  const seriesEst = months.map(() => 0); // 見積中(請求未発生)
+
+  STATE.案件.forEach(a => {
+    (a['請求'] || []).forEach(inv => {
+      const ym = (inv['発行日'] || '').substring(0, 7);
+      const idx = months.findIndex(m => m.ym === ym);
+      if (idx < 0) return;
+      const amt = inv['金額'] || 0;
+      if (inv['入金状況'] === 'nyukin') seriesNyu[idx] += amt;
+      else                              seriesInv[idx] += amt;
+    });
+    const hasInv = (a['請求'] || []).length > 0;
+    if (!hasInv) {
+      (a['見積'] || []).forEach(est => {
+        const ym = (est['発行日'] || '').substring(0, 7);
+        const idx = months.findIndex(m => m.ym === ym);
+        if (idx < 0) return;
+        seriesEst[idx] += est['金額'] || 0;
+      });
+    }
+  });
+
+  replaceSectionBody('#sec-chart', `<div class="chart-wrap"><canvas id="sales-chart"></canvas></div>`);
+  const ctx = $('#sales-chart').getContext('2d');
+
+  if (_salesChart) _salesChart.destroy();
+
+  _salesChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: months.map(m => m.label),
+      datasets: [
+        { label: '入金済み',         data: seriesNyu, backgroundColor: 'rgba(74,124,78,0.85)',  borderColor: '#4a7c4e', borderWidth: 1 },
+        { label: '請求(未入金)',     data: seriesInv, backgroundColor: 'rgba(122,157,111,0.75)', borderColor: '#7a9d6f', borderWidth: 1 },
+        { label: '見積中(請求未発生)', data: seriesEst, backgroundColor: 'rgba(212,165,116,0.75)', borderColor: '#d4a574', borderWidth: 1 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 11, family: "Hiragino Sans, Yu Gothic, Meiryo, sans-serif" } } },
+        tooltip: {
+          callbacks: { label: c => `${c.dataset.label}: ¥${c.parsed.y.toLocaleString()}` }
+        }
+      },
+      scales: {
+        x: { stacked: true, grid: { display: false }, ticks: { font: { size: 11 } } },
+        y: {
+          stacked: true,
+          beginAtZero: true,
+          grid: { color: 'rgba(0,0,0,0.05)' },
+          ticks: {
+            font: { size: 11, family: 'Consolas, monospace' },
+            callback: v => v >= 1000000 ? (v / 1000000) + 'M' : (v / 1000) + 'k'
+          }
+        }
+      }
+    }
+  });
+}
+
+/* ============================================================
+   Section 7: タイムライン (SVG)
+   ============================================================ */
+function renderTimeline() {
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const startDate = new Date(today.getTime() - 30 * 86400000);
+  const endDate   = new Date(today.getTime() + 90 * 86400000);
+  const totalDays = 121;
+  const dayPx  = 6;
+  const labelW = 170;
+  const rowH   = 30;
+  const W      = totalDays * dayPx;
+
+  // 中止・保守管理を除く + 最大15件
+  const items = (STATE.案件 || [])
+    .filter(a => !['中止', '保守管理(継続)'].includes(a['ステータス']))
+    .slice(0, 15);
+
+  const xFor = (date) => {
+    const days = Math.floor((date - startDate) / 86400000);
+    return Math.max(0, Math.min(W, days * dayPx));
+  };
+
+  const H = Math.max(items.length, 1) * rowH + 40;
+
+  const legend = `
+    <div class="timeline-legend">
+      <span class="lg-item"><span class="lg-dot" style="background:#6c8eb5;"></span>見積発行</span>
+      <span class="lg-item"><span class="lg-bar" style="background:rgba(212,165,116,0.5);border-color:#d4a574;"></span>施工予定(備考抽出)</span>
+      <span class="lg-item"><span class="lg-dot" style="background:#7a9d6f;"></span>請求発行</span>
+      <span class="lg-item"><span class="lg-dot" style="background:#4a7c4e;"></span>入金</span>
+      <span class="lg-item"><span class="lg-line"></span>今日</span>
+      <span class="lg-item" style="margin-left:auto;color:var(--text-mute);">期間: 今日-30日 〜 今日+90日 / 最大15件</span>
+    </div>
+  `;
+
+  if (items.length === 0) {
+    replaceSectionBody('#sec-timeline', legend + `<div class="timeline-empty">表示できる案件がありません</div>`);
+    return;
+  }
+
+  let svg = `<svg width="${labelW + W}" height="${H}" xmlns="http://www.w3.org/2000/svg" class="timeline-svg">`;
+
+  // 月境界線・月ラベル
+  const cur = new Date(startDate); cur.setHours(0, 0, 0, 0);
+  while (cur <= endDate) {
+    if (cur.getDate() === 1) {
+      const x = labelW + xFor(cur);
+      svg += `<line x1="${x}" y1="20" x2="${x}" y2="${H}" stroke="#e7dec9" stroke-width="1"/>`;
+      svg += `<text x="${x + 4}" y="14" font-size="11" fill="#8b9095" font-family="Consolas, monospace">${cur.getFullYear()}/${cur.getMonth() + 1}</text>`;
+    }
+    cur.setDate(cur.getDate() + 1);
+  }
+
+  // 今日の縦線
+  const todayX = labelW + xFor(today);
+  svg += `<line x1="${todayX}" y1="20" x2="${todayX}" y2="${H}" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="3,3"/>`;
+  svg += `<text x="${todayX + 4}" y="${H - 6}" font-size="10" fill="#c0392b" font-family="Consolas, monospace">今日</text>`;
+
+  // 各行
+  items.forEach((a, i) => {
+    const y = 28 + i * rowH;
+    const cy = y + rowH / 2 - 6;
+
+    // 縞背景
+    if (i % 2 === 0) {
+      svg += `<rect x="0" y="${y - rowH / 2 + 6}" width="${labelW + W}" height="${rowH}" fill="rgba(212,165,116,0.05)"/>`;
+    }
+
+    // ラベル
+    const lbl = a['案件キー'].length > 16 ? a['案件キー'].substring(0, 16) + '…' : a['案件キー'];
+    svg += `<text x="${labelW - 8}" y="${cy + 4}" font-size="11" text-anchor="end" font-family="Consolas, monospace" fill="#1e2d40">${escapeHtml(lbl)}<title>${escapeHtml(a['案件キー'])}</title></text>`;
+
+    // 行のガイドライン
+    svg += `<line x1="${labelW}" y1="${cy}" x2="${labelW + W}" y2="${cy}" stroke="#f0eee5" stroke-width="1"/>`;
+
+    // 見積発行(青ドット)
+    (a['見積'] || []).forEach(e => {
+      const d = parseDate(e['発行日']);
+      if (!d || d < startDate || d > endDate) return;
+      const x = labelW + xFor(d);
+      const title = `見積発行 ${e['発行日']} / ${e['書類番号'] || ''} / ${formatYen(e['金額'] || 0)}`;
+      svg += `<circle cx="${x}" cy="${cy}" r="4" fill="#6c8eb5" stroke="#fff" stroke-width="1"><title>${escapeHtml(title)}</title></circle>`;
+    });
+
+    // 施工予定(オレンジバー・備考から抽出)
+    const ranges = extractDateRanges(a['備考'] || '', today.getFullYear());
+    ranges.forEach(r => {
+      if (r.end < startDate || r.start > endDate) return;
+      const x1 = labelW + xFor(r.start < startDate ? startDate : r.start);
+      const x2 = labelW + xFor(r.end   > endDate   ? endDate   : r.end);
+      const w  = Math.max(4, x2 - x1 + dayPx);
+      const title = `施工予定 ${r.raw}`;
+      svg += `<rect x="${x1}" y="${cy - 6}" width="${w}" height="12" rx="2" fill="rgba(212,165,116,0.45)" stroke="#d4a574" stroke-width="1"><title>${escapeHtml(title)}</title></rect>`;
+    });
+
+    // 請求発行(緑ドット) + 入金(濃緑ドット)
+    (a['請求'] || []).forEach(inv => {
+      const d = parseDate(inv['発行日']);
+      if (d && d >= startDate && d <= endDate) {
+        const x = labelW + xFor(d);
+        const t = `請求発行 ${inv['発行日']} / ${inv['書類番号'] || ''} / ${formatYen(inv['金額'] || 0)}`;
+        svg += `<circle cx="${x}" cy="${cy}" r="4" fill="#7a9d6f" stroke="#fff" stroke-width="1"><title>${escapeHtml(t)}</title></circle>`;
+      }
+      const dN = parseDate(inv['入金日']);
+      if (dN && dN >= startDate && dN <= endDate) {
+        const x = labelW + xFor(dN);
+        const t = `入金 ${inv['入金日']}`;
+        svg += `<circle cx="${x}" cy="${cy}" r="4" fill="#4a7c4e" stroke="#fff" stroke-width="1"><title>${escapeHtml(t)}</title></circle>`;
+      }
+    });
+  });
+
+  svg += `</svg>`;
+  replaceSectionBody('#sec-timeline', legend + `<div class="timeline-wrap">${svg}</div>`);
+}
+
+/* ============================================================
    セクション本体の置き換えヘルパー
    (section-title はそのまま残し、それ以降の中身を入れ替える)
    ============================================================ */
@@ -1550,7 +1919,10 @@ async function loadData() {
     renderKpi();
     renderKanban();
     renderTable();
-    // Phase 3以降: renderReminders(); renderChart(); renderTimeline(); renderPartners();
+    renderReminders();
+    renderChart();
+    renderTimeline();
+    // Phase 4: renderPartners(); buildSearchIndex();
 
   } catch (e) {
     logError('failed to load data.json', e);
