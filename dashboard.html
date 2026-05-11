@@ -947,6 +947,96 @@ function $$(sel) { return Array.from(document.querySelectorAll(sel)); }
 function log(...args) { console.log('[dashboard]', ...args); }
 function logError(...args) { console.error('[dashboard]', ...args); }
 
+function escapeHtml(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function uniq(arr) { return Array.from(new Set(arr)); }
+
+// 金額フォーマット(短縮)
+function formatYen(n) {
+  if (!n || n === 0) return '-';
+  return `¥${Number(n).toLocaleString()}`;
+}
+// 金額フォーマット(税込サフィックス付き・要件)
+function formatYenLong(n) {
+  if (!n || n === 0) return '-';
+  return `¥${Number(n).toLocaleString()}税込`;
+}
+
+// 日付パース(空文字対応)
+function parseDate(s) {
+  if (!s) return null;
+  const d = new Date(s);
+  return isNaN(d) ? null : d;
+}
+function daysSince(s) {
+  const d = parseDate(s);
+  return d ? Math.floor((Date.now() - d.getTime()) / 86400000) : null;
+}
+
+// 最新の請求/見積を返す(発行日降順)
+function latestInvoice(anken) {
+  const arr = (anken['請求'] || []).slice().sort((a, b) =>
+    (b['発行日'] || '').localeCompare(a['発行日'] || ''));
+  return arr[0] || null;
+}
+function latestEstimate(anken) {
+  const arr = (anken['見積'] || []).slice().sort((a, b) =>
+    (b['発行日'] || '').localeCompare(a['発行日'] || ''));
+  return arr[0] || null;
+}
+// カンバン表示用の代表金額:請求(最新)>見積(最新)
+function latestAmount(anken) {
+  const inv = latestInvoice(anken);
+  if (inv && inv['金額']) return inv['金額'];
+  const est = latestEstimate(anken);
+  if (est && est['金額']) return est['金額'];
+  return 0;
+}
+// 請求済み金額の合計
+function totalInvoiced(anken) {
+  return (anken['請求'] || []).reduce((s, x) => s + (x['金額'] || 0), 0);
+}
+// 入金状況サマリー: 'ok'=全件入金 / 'ng'=未入金あり / 'mixed'=混在 / 'none'=請求なし
+function nyukinStatus(anken) {
+  const arr = anken['請求'] || [];
+  if (arr.length === 0) return 'none';
+  const hasOk = arr.some(x => x['入金状況'] === 'nyukin');
+  const hasNg = arr.some(x => x['入金状況'] === 'minyukin');
+  if (hasOk && hasNg) return 'mixed';
+  if (hasOk) return 'ok';
+  if (hasNg) return 'ng';
+  return 'none';
+}
+
+// サマリーHTMLのURL組み立て
+function summaryUrl(anken) {
+  const folder = FOLDER_MAP[anken['顧客略']] || anken['顧客略'];
+  return `./AR-2026/${folder}/${anken['案件キー']}/サマリー.html`;
+}
+
+// 取引先(顧客略 → 取引先オブジェクト)を引く
+function findPartner(ryaku) {
+  return STATE.取引先マスター.find(t => t['略称'] === ryaku) || null;
+}
+
+// ステータスバッジHTML
+function statusBadge(status) {
+  const m = STATUS_META[status] || { color: 'var(--text-mute)', icon: 'icon-document' };
+  return `<span class="status-badge" style="--st:${m.color};"><svg class="icon"><use href="#${m.icon}"/></svg>${escapeHtml(status)}</span>`;
+}
+
+// 入金状況マークHTML
+function nyukinMark(anken) {
+  const s = nyukinStatus(anken);
+  if (s === 'ok')    return `<span class="nyukin-mark ok"><svg class="icon"><use href="#icon-check-circle"/></svg>入金済</span>`;
+  if (s === 'ng')    return `<span class="nyukin-mark ng"><svg class="icon"><use href="#icon-warning-triangle"/></svg>未入金</span>`;
+  if (s === 'mixed') return `<span class="nyukin-mark ng"><svg class="icon"><use href="#icon-warning-triangle"/></svg>一部未入金</span>`;
+  return `<span class="nyukin-mark none">-</span>`;
+}
+
 // --- 現在日時を更新 ---
 function updateCurrentDatetime() {
   const now = new Date();
