@@ -564,6 +564,18 @@ canvas#wall-cv{touch-action:none;}
   </button>
 </div>
 
+<!-- 部屋（ルーム）タブバー -->
+<div class="room-bar">
+  <div class="room-row">
+    <div class="room-tabs-scroll">
+      <div class="room-tabs" id="room-tabs"></div>
+    </div>
+    <button class="room-icon-btn" onclick="addRoomPrompt()" title="部屋を追加">＋</button>
+    <button class="room-icon-btn" onclick="renameRoomPrompt()" title="部屋名を変更">✎</button>
+    <button class="room-icon-btn" onclick="removeRoomPrompt()" title="部屋を削除">－</button>
+  </div>
+</div>
+
 <!-- 案件保存モーダル -->
 <div class="modal-overlay hidden" id="save-modal" onclick="closeSaveModal(event)">
   <div class="modal-box">
