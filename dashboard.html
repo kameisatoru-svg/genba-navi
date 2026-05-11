@@ -2240,6 +2240,23 @@ function redrawTableBody() {
 
   // 件数
   $('#table-count').innerHTML = `全 <strong>${all.length}</strong> 件中 <strong>${rows.length}</strong> 件表示`;
+
+  // 案件キークリック → 案件モーダル
+  $$('#table-body .anken-key-btn[data-key]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const a = findAnken(btn.dataset.key);
+      if (a) showAnkenModal(a);
+    });
+  });
+  // T番号クリック → 取引先モーダル
+  $$('#table-body .anken-key-btn[data-pid]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const p = findPartnerById(btn.dataset.pid);
+      if (p) showPartnerModal(p);
+    });
+  });
 }
 
 function rowHtml(a) {
