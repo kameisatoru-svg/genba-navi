@@ -1917,11 +1917,53 @@ function drawSheetCanvas(cvId,s,L,W,sc,ox,oy,rw,rh,CW,CH,lineDir){
   var cv=document.getElementById(cvId);if(!cv)return;
   var ctx=setupCanvas(cv,CW,CH);ctx.clearRect(0,0,CW,CH);
   var swPx=curSheetW*sc;
-  ctx.fillStyle='rgba(154,90,16,0.04)';ctx.fillRect(ox,oy,rw,rh);
-  function drawHorizDim(x1,x2,y,label){ctx.strokeStyle='rgba(154,90,16,0.7)';ctx.fillStyle='rgba(154,90,16,0.7)';ctx.lineWidth=0.9;ctx.beginPath();ctx.moveTo(x1,y);ctx.lineTo(x2,y);ctx.stroke();ctx.beginPath();ctx.moveTo(x1,y-3);ctx.lineTo(x1,y+3);ctx.stroke();ctx.beginPath();ctx.moveTo(x2,y-3);ctx.lineTo(x2,y+3);ctx.stroke();ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(label,(x1+x2)/2,y+5);}
-  function drawVertDim(x,y1,y2,label){ctx.strokeStyle='rgba(154,90,16,0.7)';ctx.fillStyle='rgba(154,90,16,0.7)';ctx.lineWidth=0.9;ctx.beginPath();ctx.moveTo(x,y1);ctx.lineTo(x,y2);ctx.stroke();ctx.beginPath();ctx.moveTo(x-3,y1);ctx.lineTo(x+3,y1);ctx.stroke();ctx.beginPath();ctx.moveTo(x-3,y2);ctx.lineTo(x+3,y2);ctx.stroke();ctx.save();ctx.translate(x+12,(y1+y2)/2);ctx.rotate(Math.PI/2);ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,0,0);ctx.restore();}
-  if(lineDir==='縦'){for(var i=0;i<s.cols;i++){var x1=ox+i*swPx,bw=Math.min(swPx,ox+rw-x1);if(bw<=0)break;ctx.fillStyle=i%2===0?'rgba(154,90,16,0.05)':'rgba(154,90,16,0.12)';ctx.fillRect(x1,oy,bw,rh);}if(s.edgeMm>0){ctx.fillStyle='rgba(154,90,16,0.22)';ctx.fillRect(ox+rw-s.edgeMm*sc,oy,s.edgeMm*sc,rh);}ctx.strokeStyle='rgba(154,90,16,0.3)';ctx.lineWidth=0.8;for(var i2=1;i2<s.cols;i2++){var lx=ox+i2*swPx;if(lx>ox+rw)break;ctx.beginPath();ctx.moveTo(lx,oy);ctx.lineTo(lx,oy+rh);ctx.stroke();}if(s.edgeMm>0)drawHorizDim(ox+rw-s.edgeMm*sc,ox+rw,oy+rh+10,s.edgeMm+'mm');ctx.fillStyle='rgba(90,106,122,0.6)';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(s.cols+'本',ox+rw/2,oy+rh+(s.edgeMm>0?22:6));}
-  else{for(var j=0;j<s.cols;j++){var y1=oy+j*swPx,bh=Math.min(swPx,oy+rh-y1);if(bh<=0)break;ctx.fillStyle=j%2===0?'rgba(154,90,16,0.05)':'rgba(154,90,16,0.12)';ctx.fillRect(ox,y1,rw,bh);}if(s.edgeMm>0){ctx.fillStyle='rgba(154,90,16,0.22)';ctx.fillRect(ox,oy+rh-s.edgeMm*sc,rw,s.edgeMm*sc);}ctx.strokeStyle='rgba(154,90,16,0.3)';ctx.lineWidth=0.8;for(var j2=1;j2<s.cols;j2++){var ly=oy+j2*swPx;if(ly>oy+rh)break;ctx.beginPath();ctx.moveTo(ox,ly);ctx.lineTo(ox+rw,ly);ctx.stroke();}if(s.edgeMm>0)drawVertDim(ox+rw+10,oy+rh-s.edgeMm*sc,oy+rh,s.edgeMm+'mm');ctx.fillStyle='rgba(90,106,122,0.6)';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(s.cols+'本',ox+rw/2,oy+rh+6);}
+  // 室内背景
+  ctx.fillStyle='rgba(154,90,16,0.05)';ctx.fillRect(ox,oy,rw,rh);
+  function drawHorizDim(x1,x2,y,label){ctx.strokeStyle='rgba(154,90,16,0.85)';ctx.fillStyle='rgba(154,90,16,0.85)';ctx.lineWidth=0.9;ctx.beginPath();ctx.moveTo(x1,y);ctx.lineTo(x2,y);ctx.stroke();ctx.beginPath();ctx.moveTo(x1,y-3);ctx.lineTo(x1,y+3);ctx.stroke();ctx.beginPath();ctx.moveTo(x2,y-3);ctx.lineTo(x2,y+3);ctx.stroke();ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(label,(x1+x2)/2,y+5);}
+  function drawVertDim(x,y1,y2,label){ctx.strokeStyle='rgba(154,90,16,0.85)';ctx.fillStyle='rgba(154,90,16,0.85)';ctx.lineWidth=0.9;ctx.beginPath();ctx.moveTo(x,y1);ctx.lineTo(x,y2);ctx.stroke();ctx.beginPath();ctx.moveTo(x-3,y1);ctx.lineTo(x+3,y1);ctx.stroke();ctx.beginPath();ctx.moveTo(x-3,y2);ctx.lineTo(x+3,y2);ctx.stroke();ctx.save();ctx.translate(x+12,(y1+y2)/2);ctx.rotate(Math.PI/2);ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,0,0);ctx.restore();}
+  if(lineDir==='縦'){
+    // 切り出し最終本（カット幅 edgeMm）のハイライト：canvas右端側
+    if(s.edgeMm>0&&s.cols>0){
+      var cutX1=ox+(s.cols-1)*swPx;
+      var cutX2=Math.min(cutX1+s.edgeMm*sc,ox+rw);
+      ctx.fillStyle='rgba(154,90,16,0.22)';
+      ctx.fillRect(cutX1,oy,cutX2-cutX1,rh);
+    }
+    // 区切り線（cols-1本）
+    ctx.strokeStyle='rgba(154,90,16,0.6)';ctx.lineWidth=1;
+    for(var i=1;i<s.cols;i++){
+      var lx=ox+i*swPx;if(lx>ox+rw)break;
+      ctx.beginPath();ctx.moveTo(lx,oy);ctx.lineTo(lx,oy+rh);ctx.stroke();
+    }
+    // 切り出し本の使用幅ラベル
+    if(s.edgeMm>0){
+      var d1=ox+(s.cols-1)*swPx;
+      var d2=Math.min(d1+s.edgeMm*sc,ox+rw);
+      drawHorizDim(d1,d2,oy+rh+10,s.edgeMm+'mm');
+    }
+    ctx.fillStyle='rgba(90,106,122,0.7)';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';
+    ctx.fillText(s.cols+'本',ox+rw/2,oy+rh+(s.edgeMm>0?22:6));
+  }else{
+    // 切り出し最終本：canvas下端側
+    if(s.edgeMm>0&&s.cols>0){
+      var cutY1=oy+(s.cols-1)*swPx;
+      var cutY2=Math.min(cutY1+s.edgeMm*sc,oy+rh);
+      ctx.fillStyle='rgba(154,90,16,0.22)';
+      ctx.fillRect(ox,cutY1,rw,cutY2-cutY1);
+    }
+    ctx.strokeStyle='rgba(154,90,16,0.6)';ctx.lineWidth=1;
+    for(var j=1;j<s.cols;j++){
+      var ly=oy+j*swPx;if(ly>oy+rh)break;
+      ctx.beginPath();ctx.moveTo(ox,ly);ctx.lineTo(ox+rw,ly);ctx.stroke();
+    }
+    if(s.edgeMm>0){
+      var e1=oy+(s.cols-1)*swPx;
+      var e2=Math.min(e1+s.edgeMm*sc,oy+rh);
+      drawVertDim(ox+rw+10,e1,e2,s.edgeMm+'mm');
+    }
+    ctx.fillStyle='rgba(90,106,122,0.7)';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';
+    ctx.fillText(s.cols+'本',ox+rw/2,oy+rh+6);
+  }
   ctx.strokeStyle='rgba(30,45,64,0.55)';ctx.lineWidth=1.5;ctx.strokeRect(ox,oy,rw,rh);
 }
 
