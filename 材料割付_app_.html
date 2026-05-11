@@ -722,8 +722,22 @@ function refreshUtilIndicators(){
   }
 }
 
-// ── 状態キャプチャ／復元 ──
-function captureState(){
+// ══════════ 部屋（ルーム）管理 ══════════
+var _rooms=[],_curRoomIdx=-1;
+
+function _newRoomState(){
+  return{
+    cat:'ceil',matIdx:0,pat:'通し目地',
+    floorType:'タイル',tileType:'Pタイル',
+    sheetW:1820,flooringType:'フローリング',
+    nedaLen:3,formInputs:{},
+    wall:{faceIdx:0,faceData:[null,null,null,null],faceInputs:[null,null,null,null],faceOpenings:[[],[],[],[]],faceSelId:[null,null,null,null],faceOidSeq:[0,0,0,0]},
+    lastOrder:null
+  };
+}
+
+function _captureCurrentRoomState(){
+  if(curCat==='wall')saveCurrentFaceInputs();
   var formInputs={};
   ['L','W','BL','BW','LOSS','PRICE','REPEAT','COAT','MAWARI_PRICE','HABAKI_PRICE','NEDA_PRICE'].forEach(function(k){
     var e=document.getElementById('f-'+k);if(e)formInputs[k]=e.value;
@@ -737,16 +751,12 @@ function captureState(){
     sheetW:curSheetW,flooringType:curFlooringType,
     nedaLen:window.curNedaLen||3,
     formInputs:formInputs,
-    wall:{
-      faceIdx:curFaceIdx,
-      faceData:faceData,faceInputs:faceInputs,
-      faceOpenings:faceOpenings,faceSelId:faceSelId,faceOidSeq:faceOidSeq
-    },
+    wall:{faceIdx:curFaceIdx,faceData:faceData,faceInputs:faceInputs,faceOpenings:faceOpenings,faceSelId:faceSelId,faceOidSeq:faceOidSeq},
     lastOrder:_lastOrder
   };
 }
 
-function restoreState(s){
+function _loadRoomStateToGlobals(s){
   curCat=s.cat||'ceil';curMatIdx=s.matIdx||0;curPat=s.pat||'通し目地';
   curFloorType=s.floorType||'タイル';curTileType=s.tileType||'Pタイル';
   curSheetW=s.sheetW||1820;curFlooringType=s.flooringType||'フローリング';
@@ -758,8 +768,14 @@ function restoreState(s){
     faceOpenings=s.wall.faceOpenings||[[],[],[],[]];
     faceSelId=s.wall.faceSelId||[null,null,null,null];
     faceOidSeq=s.wall.faceOidSeq||[0,0,0,0];
+  }else{
+    curFaceIdx=0;faceData=[null,null,null,null];faceInputs=[null,null,null,null];
+    faceOpenings=[[],[],[],[]];faceSelId=[null,null,null,null];faceOidSeq=[0,0,0,0];
   }
   _lastOrder=s.lastOrder||null;
+}
+
+function _renderRoomWorkspace(state){
   document.querySelectorAll('.cat-btn').forEach(function(b){b.className='cat-btn';});
   var idx={ceil:0,wall:1,floor:2}[curCat];
   var btns=document.querySelectorAll('.cat-btn');
@@ -770,12 +786,105 @@ function restoreState(s){
   else if(curCat==='wall')renderWallUI();
   else renderMats();
   setTimeout(function(){
-    Object.keys(s.formInputs||{}).forEach(function(k){
+    Object.keys(state.formInputs||{}).forEach(function(k){
       var e=document.getElementById('f-'+k);
-      if(e&&s.formInputs[k]!=null&&s.formInputs[k]!=='')e.value=s.formInputs[k];
+      if(e&&state.formInputs[k]!=null&&state.formInputs[k]!=='')e.value=state.formInputs[k];
     });
     if(curCat==='wall'&&document.getElementById('wall-cv'))redrawWall();
   },80);
+}
+
+function _escHtml(s){return(s+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function renderRoomTabs(){
+  var el=document.getElementById('room-tabs');if(!el)return;
+  var h='';
+  _rooms.forEach(function(r,i){
+    var active=i===_curRoomIdx?' active':'';
+    var lo=(i===_curRoomIdx)?_lastOrder:(r.state&&r.state.lastOrder);
+    var hasData=lo&&lo.items&&lo.items.length;
+    h+='<button class="room-tab'+active+(hasData?' has-data':'')+'" onclick="switchRoom('+i+')">'+_escHtml(r.name)+'</button>';
+  });
+  el.innerHTML=h;
+}
+
+function switchRoom(idx){
+  if(idx===_curRoomIdx||idx<0||idx>=_rooms.length)return;
+  if(_curRoomIdx>=0&&_curRoomIdx<_rooms.length)_rooms[_curRoomIdx].state=_captureCurrentRoomState();
+  _curRoomIdx=idx;
+  var st=_rooms[idx].state;
+  _loadRoomStateToGlobals(st);
+  _renderRoomWorkspace(st);
+  renderRoomTabs();
+  refreshUtilIndicators();
+}
+
+function addRoomPrompt(){
+  var name=prompt('部屋名を入力してください（例：101号室／廊下／受付）');
+  if(!name||!name.trim())return;
+  name=name.trim();
+  if(_rooms.some(function(r){return r.name===name;})){alert('同じ名前の部屋が既にあります。');return;}
+  if(_curRoomIdx>=0)_rooms[_curRoomIdx].state=_captureCurrentRoomState();
+  _rooms.push({name:name,state:_newRoomState()});
+  _curRoomIdx=_rooms.length-1;
+  var st=_rooms[_curRoomIdx].state;
+  _loadRoomStateToGlobals(st);
+  _renderRoomWorkspace(st);
+  renderRoomTabs();
+  refreshUtilIndicators();
+  showToast('🏠 「'+name+'」を追加しました');
+}
+
+function renameRoomPrompt(){
+  if(_curRoomIdx<0)return;
+  var cur=_rooms[_curRoomIdx].name;
+  var name=prompt('部屋名を変更',cur);
+  if(!name||!name.trim()||name===cur)return;
+  name=name.trim();
+  if(_rooms.some(function(r,i){return i!==_curRoomIdx&&r.name===name;})){alert('同じ名前の部屋が既にあります。');return;}
+  _rooms[_curRoomIdx].name=name;
+  renderRoomTabs();
+}
+
+function removeRoomPrompt(){
+  if(_curRoomIdx<0)return;
+  if(_rooms.length<=1){alert('最後の1部屋は削除できません。\n「＋」で新しい部屋を追加してから削除してください。');return;}
+  var cur=_rooms[_curRoomIdx].name;
+  if(!confirm('「'+cur+'」を削除しますか？\n（この部屋の入力・計算結果は失われます）'))return;
+  _rooms.splice(_curRoomIdx,1);
+  if(_curRoomIdx>=_rooms.length)_curRoomIdx=_rooms.length-1;
+  var st=_rooms[_curRoomIdx].state;
+  _loadRoomStateToGlobals(st);
+  _renderRoomWorkspace(st);
+  renderRoomTabs();
+  refreshUtilIndicators();
+  showToast('🗑 削除しました');
+}
+
+// ── 状態キャプチャ／復元（マルチルーム対応＋旧形式互換） ──
+function captureState(){
+  if(_curRoomIdx>=0&&_curRoomIdx<_rooms.length)_rooms[_curRoomIdx].state=_captureCurrentRoomState();
+  return{
+    version:2,
+    rooms:_rooms.map(function(r){return{name:r.name,state:r.state};}),
+    curRoomIdx:_curRoomIdx
+  };
+}
+
+function restoreState(s){
+  if(s&&s.rooms&&Array.isArray(s.rooms)&&s.rooms.length){
+    _rooms=s.rooms.map(function(r){return{name:r.name||'部屋',state:r.state||_newRoomState()};});
+    _curRoomIdx=Math.max(0,Math.min(s.curRoomIdx||0,_rooms.length-1));
+  }else if(s&&s.cat){
+    // 旧形式（単一部屋）→「部屋1」に包んで読込
+    _rooms=[{name:'部屋1',state:s}];_curRoomIdx=0;
+  }else{
+    _rooms=[{name:'部屋1',state:_newRoomState()}];_curRoomIdx=0;
+  }
+  var st=_rooms[_curRoomIdx].state;
+  _loadRoomStateToGlobals(st);
+  _renderRoomWorkspace(st);
+  renderRoomTabs();
   refreshUtilIndicators();
 }
 
