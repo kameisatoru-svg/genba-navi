@@ -914,6 +914,7 @@ function doSubmitRoom(){
     _rooms[_curRoomIdx].name=name;
     _applyDimsToCurrentRoom(dims);
     closeRoomModal(null);renderRoomTabs();refreshUtilIndicators();
+    autoSaveState(true);
     showToast('✎ 部屋を更新しました');
   }else{
     if(_rooms.some(function(r){return r.name===name;})){alert('同じ名前の部屋が既にあります。');return;}
@@ -926,6 +927,7 @@ function doSubmitRoom(){
     _renderRoomWorkspace(newSt);
     setTimeout(function(){_forceInjectDims(dims);},150);
     closeRoomModal(null);renderRoomTabs();refreshUtilIndicators();
+    autoSaveState(true);
     showToast('🏠 「'+name+'」を追加しました');
   }
 }
