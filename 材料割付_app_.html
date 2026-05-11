@@ -1341,13 +1341,23 @@ var cats={
     {name:'硬質塩ビシート',fields:[{label:'壁寸法',row:[{k:'L',lbl:'幅 mm'},{k:'W',lbl:'高さ mm'}],def:[3600,2400]},{label:'シートサイズ',row:[{k:'BL',lbl:'長さ mm'},{k:'BW',lbl:'幅 mm'}],def:[910,2420]},{label:'設定',row:[{k:'LOSS',lbl:'ロス率 %'},{k:'PRICE',lbl:'単価 円/枚'}],def:[5,1800]}],calc:calcGrid}]}
 };
 
-// ── カテゴリ切替 ──
+// ── カテゴリ切替（部屋対応：壁faceInputs等を保持する） ──
 function setCat(cat,btn){
+  if(_curRoomIdx>=0&&_rooms[_curRoomIdx]){
+    // 現状を部屋にスナップショット → cat だけ差し替えて再描画
+    _rooms[_curRoomIdx].state=_captureCurrentRoomState();
+    _rooms[_curRoomIdx].state.cat=cat;
+    _loadRoomStateToGlobals(_rooms[_curRoomIdx].state);
+    _renderRoomWorkspace(_rooms[_curRoomIdx].state);
+    setOrder([],null);
+    return;
+  }
+  // フォールバック（部屋未初期化時のみ）
   curCat=cat;curMatIdx=0;curPat='通し目地';curFaceIdx=0;
   faceData=[null,null,null,null];faceInputs=[null,null,null,null];
   faceOpenings=[[],[],[],[]];faceSelId=[null,null,null,null];faceOidSeq=[0,0,0,0];
   document.querySelectorAll('.cat-btn').forEach(function(b){b.className='cat-btn';});
-  btn.className='cat-btn ac-'+cat;
+  if(btn)btn.className='cat-btn ac-'+cat;
   document.getElementById('header-cat').textContent={ceil:'天井',wall:'壁',floor:'床'}[cat];
   document.getElementById('result-area').innerHTML='';
   setOrder([],null);
