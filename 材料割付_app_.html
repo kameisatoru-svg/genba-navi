@@ -557,7 +557,7 @@ canvas#wall-cv{touch-action:none;}
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
   </button>
   <div class="header-title">材料割付</div>
-  <div class="header-cat" id="header-cat">天井</div>
+  <div class="header-cat" id="header-cat">床</div>
   <button class="btn-zumen" onclick="openZumenModal()">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M2 4h20M6 4v16M18 4v16M6 12h12"/></svg>
     作図へ
@@ -655,9 +655,9 @@ canvas#wall-cv{touch-action:none;}
 
 <div class="scroll-area">
   <div class="cat-row">
-    <button class="cat-btn ac-ceil" onclick="setCat('ceil',this)">天井</button>
+    <button class="cat-btn ac-floor" onclick="setCat('floor',this)">床</button>
     <button class="cat-btn" onclick="setCat('wall',this)">壁</button>
-    <button class="cat-btn" onclick="setCat('floor',this)">床</button>
+    <button class="cat-btn" onclick="setCat('ceil',this)">天井</button>
   </div>
   <div class="util-row">
     <button class="util-btn" id="util-save" onclick="openSaveModal()"><span class="util-ic">💾</span>保存</button>
