@@ -715,11 +715,15 @@ function setOrder(items,title){
 
 function refreshUtilIndicators(){
   var tsvBtn=document.getElementById('util-tsv');
-  if(tsvBtn)tsvBtn.classList.toggle('has-data',!!(_lastOrder&&_lastOrder.items&&_lastOrder.items.length));
+  if(tsvBtn){
+    var hasAny=!!(_lastOrder&&_lastOrder.items&&_lastOrder.items.length)||(typeof _rooms!=='undefined'&&_rooms.some(function(r,i){var lo=(i===_curRoomIdx)?_lastOrder:(r.state&&r.state.lastOrder);return lo&&lo.items&&lo.items.length;}));
+    tsvBtn.classList.toggle('has-data',hasAny);
+  }
   var loadBtn=document.getElementById('util-load');
   if(loadBtn){
     try{var saves=JSON.parse(localStorage.getItem(_SAVES_KEY)||'{}');loadBtn.classList.toggle('has-data',Object.keys(saves).length>0);}catch(e){}
   }
+  if(typeof renderRoomTabs==='function')renderRoomTabs();
 }
 
 // ══════════ 部屋（ルーム）管理 ══════════
@@ -1760,7 +1764,10 @@ function showToast(msg){
 }
 
 // ── 初期化 ──
+_rooms=[{name:'部屋1',state:_newRoomState()}];
+_curRoomIdx=0;
 renderMats();
+renderRoomTabs();
 refreshUtilIndicators();
 </script>
 </body>
