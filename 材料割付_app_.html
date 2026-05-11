@@ -915,6 +915,7 @@ function doSubmitRoom(){
     _curRoomIdx=_rooms.length-1;
     _loadRoomStateToGlobals(newSt);
     _renderRoomWorkspace(newSt);
+    setTimeout(function(){_forceInjectDims(dims);},150);
     closeRoomModal(null);renderRoomTabs();refreshUtilIndicators();
     showToast('🏠 「'+name+'」を追加しました');
   }
