@@ -1690,6 +1690,25 @@ a { color: inherit; text-decoration: none; }
 </main>
 
 <!-- ============================================================
+     案件詳細モーダル(案E)
+     ============================================================ -->
+<div class="modal-overlay" id="anken-modal" role="dialog" aria-modal="true" aria-labelledby="anken-modal-title" aria-hidden="true">
+  <div class="modal" id="anken-modal-inner">
+    <div class="modal-head">
+      <div style="flex:1; min-width:0;">
+        <div class="modal-title anken-modal-key" id="anken-modal-title">案件キー</div>
+        <div class="modal-sub" id="anken-modal-subtitle"></div>
+      </div>
+      <button class="modal-close" id="anken-modal-close" aria-label="モーダルを閉じる" type="button">
+        <svg class="icon"><use href="#icon-x"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="anken-modal-body"></div>
+    <div class="modal-actions" id="anken-modal-actions"></div>
+  </div>
+</div>
+
+<!-- ============================================================
      取引先詳細モーダル(Phase 4)
      ============================================================ -->
 <div class="modal-overlay" id="partner-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
@@ -1705,7 +1724,16 @@ a { color: inherit; text-decoration: none; }
       </button>
     </div>
     <div class="modal-body" id="modal-body"></div>
+    <div class="modal-actions" id="partner-modal-actions"></div>
   </div>
+</div>
+
+<!-- ============================================================
+     トースト通知
+     ============================================================ -->
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <svg class="icon" aria-hidden="true"><use href="#icon-check-circle"/></svg>
+  <span id="toast-msg">コピーしました</span>
 </div>
 
 <!-- ============================================================
@@ -1745,18 +1773,7 @@ const STATE = {
   中止案件: []
 };
 
-// --- 顧客略 → AR-2026配下のフォルダ名マッピング ---
-const FOLDER_MAP = {
-  '玉寿会':   '玉寿会_さくら苑',
-  '松村':     '愛の治療院松村',
-  '信用産業': '信用産業',
-  'ウインズ': 'ウインズコーポレーション',
-  '信和':     '信和',
-  'ネクサス': 'ネクサスプラザ',
-  '島津':     '島津製作所',
-  '橘山':     '橘山建工',
-  '自社':     '_自社運営'
-};
+// 案E: FOLDER_MAP / summaryUrl は廃止(モーダル+Google Drive 検索方式へ移行)
 
 // --- ステータスメタ情報(色・アイコン) ---
 const STATUS_META = {
