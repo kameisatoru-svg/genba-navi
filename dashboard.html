@@ -2381,6 +2381,316 @@ function renderTimeline() {
 }
 
 /* ============================================================
+   Section 8: 取引先パネル + モーダル
+   ============================================================ */
+// 取引先の連絡先補完状態を判定
+function isPartnerIncomplete(p) {
+  const c = p['contact'] || {};
+  return !(c['touroku']) || !(c['tel'] || c['mobile']);
+}
+
+// 関連案件(顧客略 == p.略称)
+function partnerAnken(p) {
+  const ryaku = p['略称'];
+  return [
+    ...(STATE.案件     || []),
+    ...(STATE.中止案件 || [])
+  ].filter(a => a['顧客略'] === ryaku);
+}
+
+function renderPartners() {
+  const all = STATE.取引先マスター || [];
+  const html = `<div class="partners-grid">${all.map(partnerCard).join('')}</div>`;
+  replaceSectionBody('#sec-partners', html);
+
+  // クリックでモーダル
+  $$('#sec-partners .partner-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const pid = card.dataset.pid;
+      const p = all.find(x => x['id'] === pid);
+      if (p) showPartnerModal(p);
+    });
+  });
+}
+
+function partnerCard(p) {
+  const incomplete = isPartnerIncomplete(p);
+  const cnt = partnerAnken(p).length;
+  const relTags = (p['rel']  || []).map(t => `<span class="partner-tag rel">${escapeHtml(t)}</span>`).join('');
+  const typeTags = (p['type'] || []).map(t => `<span class="partner-tag">${escapeHtml(t)}</span>`).join('');
+  return `
+    <div class="partner-card${incomplete ? ' partner-incomplete' : ''}" data-pid="${escapeHtml(p['id'])}" role="button" tabindex="0" aria-label="${escapeHtml(p['略称'])} の詳細を開く"${incomplete ? ' title="連絡先補完待ち"' : ''}>
+      <div class="partner-head">
+        <span class="partner-id">${escapeHtml(p['id'])}</span>
+        <span class="partner-ryaku">${escapeHtml(p['略称'])}</span>
+      </div>
+      <div class="partner-name">${escapeHtml(p['正式名称'] || '')}</div>
+      <div class="partner-tags">${relTags}${typeTags}</div>
+      <div class="partner-meta">
+        <svg class="icon"><use href="#icon-document"/></svg>関連案件 ${cnt}件
+      </div>
+    </div>
+  `;
+}
+
+// モーダル表示
+function showPartnerModal(p) {
+  const c = p['contact'] || {};
+  const b = p['basic']   || {};
+
+  $('#modal-pid').textContent      = p['id'];
+  $('#modal-title').textContent    = p['略称'];
+  $('#modal-fullname').textContent = p['正式名称'] || '';
+
+  const cell = (v) => v
+    ? `<dd>${escapeHtml(v)}</dd>`
+    : `<dd class="empty">(未登録)</dd>`;
+  const mailCell = (v) => v
+    ? `<dd><a href="mailto:${escapeHtml(v)}">${escapeHtml(v)}</a></dd>`
+    : `<dd class="empty">(未登録)</dd>`;
+  const telCell = (v) => v
+    ? `<dd><a href="tel:${escapeHtml(v.replace(/[^0-9+]/g, ''))}">${escapeHtml(v)}</a></dd>`
+    : `<dd class="empty">(未登録)</dd>`;
+
+  const contactHtml = `
+    <div class="modal-section">
+      <div class="modal-section-title">基本情報</div>
+      <dl class="modal-contact-grid">
+        <dt><svg class="icon"><use href="#icon-id"/></svg>担当</dt>${cell(b['contact'])}
+        <dt><svg class="icon"><use href="#icon-id"/></svg>代表</dt>${cell(b['rep'])}
+        <dt><svg class="icon"><use href="#icon-phone"/></svg>TEL</dt>${telCell(c['tel'])}
+        <dt><svg class="icon"><use href="#icon-phone"/></svg>携帯</dt>${telCell(c['mobile'])}
+        <dt><svg class="icon"><use href="#icon-phone"/></svg>FAX</dt>${cell(c['fax'])}
+        <dt><svg class="icon"><use href="#icon-mail"/></svg>Mail</dt>${mailCell(c['mail'])}
+        <dt><svg class="icon"><use href="#icon-pin"/></svg>住所</dt>${cell(c['address'])}
+        <dt><svg class="icon"><use href="#icon-id"/></svg>登録番号</dt>${cell(c['touroku'])}
+        <dt><svg class="icon"><use href="#icon-bank"/></svg>振込先</dt>${cell(c['furikomi'])}
+      </dl>
+    </div>
+  `;
+
+  const memoHtml = p['memo']
+    ? `<div class="modal-section">
+         <div class="modal-section-title">メモ</div>
+         <div class="modal-memo">${escapeHtml(p['memo'])}</div>
+       </div>`
+    : '';
+
+  const ankenList = partnerAnken(p);
+  const ankenHtml = `
+    <div class="modal-section">
+      <div class="modal-section-title">関連案件 (${ankenList.length}件)</div>
+      ${ankenList.length === 0
+        ? `<div class="modal-empty">関連案件はありません</div>`
+        : `<div class="modal-anken-list">
+             ${ankenList.map(a => `
+               <a class="modal-anken-item" data-key="${escapeHtml(a['案件キー'])}">
+                 <span class="anken-key">${escapeHtml(a['案件キー'])}</span>
+                 <span class="anken-title">${escapeHtml(a['正式工事名'] || '')}</span>
+                 ${statusBadge(a['ステータス'])}
+               </a>`).join('')}
+           </div>`
+      }
+    </div>
+  `;
+
+  $('#modal-body').innerHTML = contactHtml + memoHtml + ankenHtml;
+
+  // 関連案件クリック → モーダル閉じてカンバン該当カードへスクロール&ハイライト
+  $$('#modal-body .modal-anken-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const key = el.dataset.key;
+      closePartnerModal();
+      scrollToAnken(key);
+    });
+  });
+
+  $('#partner-modal').classList.add('show');
+  $('#partner-modal').setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePartnerModal() {
+  $('#partner-modal').classList.remove('show');
+  $('#partner-modal').setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
+// 案件キーで該当カードをスクロール+ハイライト(カンバン→テーブル順)
+function scrollToAnken(key) {
+  // カンバンカードを探す
+  const card = $$('#sec-kanban .kanban-card').find(c => c.querySelector('.kanban-key')?.textContent === key);
+  if (card) {
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    flashHighlight(card);
+    return;
+  }
+  // テーブル行を探す(中止案件等カンバンに無いもの)
+  const row = $$('#dash-table tbody tr').find(tr => tr.querySelector('.anken-key')?.textContent === key);
+  if (row) {
+    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    flashHighlight(row);
+    return;
+  }
+  // 取引先パネルカード等(検索結果からのジャンプ用)
+  const sec = $('#sec-table');
+  if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function flashHighlight(el) {
+  el.classList.remove('search-hl');
+  void el.offsetWidth; // reflow
+  el.classList.add('search-hl');
+}
+
+/* ============================================================
+   Section 9: 横断検索バー(Lunr.js)
+   ============================================================ */
+let _lunrIdx = null;
+let _lunrDocs = {};
+
+function ensureLunr() {
+  if (window.lunr) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    let tries = 0;
+    const t = setInterval(() => {
+      if (window.lunr) { clearInterval(t); resolve(); }
+      else if (++tries > 50) { clearInterval(t); reject(new Error('Lunr.js loading timeout')); }
+    }, 100);
+  });
+}
+
+function buildSearchIndex() {
+  const input = $('#global-search');
+  input.disabled = true;
+  input.placeholder = '検索インデックス構築中...';
+
+  ensureLunr().then(() => {
+    // ドキュメント収集
+    _lunrDocs = {};
+    const docs = [];
+    [...(STATE.案件 || []), ...(STATE.中止案件 || [])].forEach(a => {
+      const id = `a:${a['案件キー']}`;
+      const body = [a['正式工事名'], a['顧客略'], a['備考'], a['施工場所'], a['旧案件番号'], a['ステータス'],
+        ...(a['見積'] || []).map(e => e['備考']),
+        ...(a['請求'] || []).map(r => r['備考'])
+      ].filter(Boolean).join(' ');
+      _lunrDocs[id] = { type: 'anken', title: a['案件キー'], sub: a['正式工事名'] || '', ref: a };
+      docs.push({ id, title: a['案件キー'], body });
+    });
+    (STATE.取引先マスター || []).forEach(p => {
+      const id = `p:${p['id']}`;
+      const body = [p['略称'], p['正式名称'], p['memo'], p['search'],
+        ...(p['rel']||[]), ...(p['type']||[]),
+        ...Object.values(p['basic'] || {}),
+        ...Object.values(p['contact'] || {})
+      ].filter(Boolean).join(' ');
+      _lunrDocs[id] = { type: 'partner', title: `${p['id']} ${p['略称']}`, sub: p['正式名称'] || '', ref: p };
+      docs.push({ id, title: `${p['id']} ${p['略称']}`, body });
+    });
+
+    // インデックス構築
+    _lunrIdx = lunr(function () {
+      this.ref('id');
+      this.field('title', { boost: 5 });
+      this.field('body');
+      // 日本語は単語境界が曖昧なため、tokenizer separator を拡張(空白+句読点+カンマ)
+      docs.forEach(d => this.add(d));
+    });
+
+    input.disabled = false;
+    input.placeholder = '検索 (案件キー・工事名・取引先・備考)';
+    log('lunr index built:', docs.length, 'docs');
+  }).catch(e => {
+    logError('lunr load failed', e);
+    input.placeholder = '検索を初期化できませんでした';
+  });
+
+  // イベント
+  let debounceTimer = null;
+  input.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => doSearch(input.value), 200);
+  });
+  input.addEventListener('focus', () => {
+    if (input.value.trim()) doSearch(input.value);
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-bar-inner')) {
+      $('#search-results').classList.remove('show');
+    }
+  });
+}
+
+function doSearch(q) {
+  const results = $('#search-results');
+  q = q.trim();
+  if (!q || !_lunrIdx) {
+    results.classList.remove('show');
+    results.innerHTML = '';
+    return;
+  }
+  let hits = [];
+  try {
+    // Lunrは完全一致重視なのでワイルドカード+前方一致を試す
+    const qPlain = q;
+    const qWild  = q.split(/\s+/).map(t => `*${t}*`).join(' ');
+    hits = _lunrIdx.search(qPlain);
+    if (hits.length === 0) hits = _lunrIdx.search(qWild);
+  } catch (e) {
+    // Lunrの予約語等で構文エラーになるケース
+    hits = [];
+  }
+  // フォールバック: 単純な部分一致(日本語に強い)
+  if (hits.length === 0) {
+    const qLow = q.toLowerCase();
+    hits = Object.keys(_lunrDocs)
+      .filter(id => {
+        const d = _lunrDocs[id];
+        const hay = (d.title + ' ' + d.sub + ' ' + JSON.stringify(d.ref)).toLowerCase();
+        return hay.includes(qLow);
+      })
+      .slice(0, 20)
+      .map(ref => ({ ref }));
+  }
+
+  if (hits.length === 0) {
+    results.innerHTML = `<div class="search-empty">「${escapeHtml(q)}」に一致する結果はありません</div>`;
+    results.classList.add('show');
+    return;
+  }
+
+  results.innerHTML = hits.slice(0, 20).map(h => {
+    const d = _lunrDocs[h.ref];
+    if (!d) return '';
+    const typeLabel = d.type === 'anken' ? '案件' : '取引先';
+    return `
+      <a class="search-result" data-ref="${escapeHtml(h.ref)}" role="option">
+        <span class="sr-type ${d.type}">${typeLabel}</span>
+        <span class="sr-title">${escapeHtml(d.title)}</span>
+        <div class="sr-sub">${escapeHtml(d.sub || '')}</div>
+      </a>
+    `;
+  }).join('');
+  results.classList.add('show');
+
+  $$('#search-results .search-result').forEach(el => {
+    el.addEventListener('click', () => {
+      const ref = el.dataset.ref;
+      const d = _lunrDocs[ref];
+      if (!d) return;
+      results.classList.remove('show');
+      if (d.type === 'anken') {
+        scrollToAnken(d.ref['案件キー']);
+      } else {
+        // 取引先 → モーダル表示
+        showPartnerModal(d.ref);
+      }
+    });
+  });
+}
+
+/* ============================================================
    セクション本体の置き換えヘルパー
    (section-title はそのまま残し、それ以降の中身を入れ替える)
    ============================================================ */
@@ -2432,7 +2742,8 @@ async function loadData() {
     renderReminders();
     renderChart();
     renderTimeline();
-    // Phase 4: renderPartners(); buildSearchIndex();
+    renderPartners();
+    buildSearchIndex();
 
   } catch (e) {
     logError('failed to load data.json', e);
