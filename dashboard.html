@@ -1134,6 +1134,145 @@ a { color: inherit; text-decoration: none; }
   font-size: 12px;
 }
 
+/* ----- 案件モーダル(案E) ----- */
+.anken-modal-key {
+  font-family: var(--font-mono);
+  font-size: 1em;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  word-break: break-all;
+  line-height: 1.25;
+}
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+.modal-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 12px;
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+  font-family: var(--font-base);
+  line-height: 1.2;
+}
+.modal-action-btn:hover {
+  border-color: var(--accent);
+  background: rgba(212, 165, 116, 0.10);
+}
+.modal-action-btn .icon { width: 14px; height: 14px; color: var(--accent); }
+.modal-action-btn.primary {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+.modal-action-btn.primary .icon { color: #fff; }
+.modal-action-btn.primary:hover { background: var(--primary-dark); }
+.modal-action-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* anken-partner-link(モーダル内の顧客→取引先モーダル) */
+.anken-partner-link {
+  color: var(--info);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.anken-partner-link:hover { text-decoration: underline; }
+
+.modal-doc-line {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-sub);
+  margin-top: 2px;
+  word-break: break-all;
+}
+.modal-cost-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 14px;
+  font-size: 13px;
+}
+.modal-cost-grid .cost-label {
+  font-size: 11px;
+  color: var(--text-sub);
+}
+.modal-cost-grid .cost-val {
+  font-family: var(--font-mono);
+  text-align: right;
+}
+.modal-cost-grid .cost-total {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  padding-top: 6px;
+  margin-top: 4px;
+  border-top: 1px dashed var(--border);
+  font-weight: 700;
+  color: var(--primary);
+}
+
+/* クリック可能な案件キー(テーブル内) */
+.anken-key-btn {
+  display: inline-block;
+  font-family: var(--font-mono);
+  color: var(--info);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+.anken-key-btn:hover { text-decoration: underline; }
+.anken-key-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* リマインド・カンバンカード・タイムラインラベルもボタンとして */
+.kanban-card { cursor: pointer; }
+.reminder-card { cursor: pointer; }
+.timeline-label-link { cursor: pointer; }
+.timeline-label-link:hover { fill: var(--info) !important; }
+
+/* ----- トースト通知 ----- */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--primary);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  font-size: 13px;
+  z-index: 300;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.toast .icon { color: var(--success); width: 16px; height: 16px; }
+
 /* ----- 詳細レスポンシブ ----- */
 @media (max-width: 1199px) {
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
