@@ -2625,6 +2625,133 @@ function renderTimeline() {
 }
 
 /* ============================================================
+   案件詳細モーダル(案E)
+   ============================================================ */
+function showAnkenModal(a) {
+  if (!a) return;
+  // 取引先モーダルが開いていれば閉じる
+  closePartnerModal(true);
+
+  $('#anken-modal-title').textContent    = a['案件キー'];
+  $('#anken-modal-subtitle').textContent = a['正式工事名'] || '';
+
+  const partner = findPartner(a['顧客略']);
+  const inv = latestInvoice(a);
+  const est = latestEstimate(a);
+  const cost = a['原価'] || {};
+
+  // 基本情報
+  const motoke = a['元請フラグ'] ? ' <span class="motoke-tag">元請</span>' : '';
+  const custCell = partner
+    ? `<a class="anken-partner-link" data-pid="${escapeHtml(partner['id'])}" tabindex="0"><span class="t-badge">${escapeHtml(partner['id'])}</span>${escapeHtml(a['顧客略'] || '')}</a>${motoke}`
+    : `${escapeHtml(a['顧客略'] || '-')}${motoke}`;
+
+  const basicHtml = `
+    <div class="modal-section">
+      <div class="modal-section-title">案件情報</div>
+      <dl class="modal-contact-grid">
+        <dt>ステータス</dt><dd>${statusBadge(a['ステータス'])}</dd>
+        <dt>正式工事名</dt><dd>${escapeHtml(a['正式工事名'] || '-')}</dd>
+        <dt>顧客</dt><dd>${custCell}</dd>
+        <dt>施工場所</dt><dd>${escapeHtml(a['施工場所'] || '-')}</dd>
+        <dt>旧案件番号</dt><dd>${escapeHtml(a['旧案件番号'] || '-')}</dd>
+      </dl>
+    </div>
+  `;
+
+  // 最新書類
+  const docCell = (doc, extra = '') => doc
+    ? `<dd>${formatYenLong(doc['金額'] || 0)} <span style="color:var(--text-sub);font-size:11px;">(${escapeHtml(doc['発行日'] || '?')})</span>${doc['書類番号'] ? `<div class="modal-doc-line">${escapeHtml(doc['書類番号'])}</div>` : ''}${extra}</dd>`
+    : `<dd class="empty">なし</dd>`;
+  const nyukinCell = `<dd>${nyukinMark(a)}${inv && inv['入金日'] ? ` <span style="color:var(--text-sub);font-size:11px;">(${escapeHtml(inv['入金日'])})</span>` : ''}</dd>`;
+  const docsHtml = `
+    <div class="modal-section">
+      <div class="modal-section-title">最新書類</div>
+      <dl class="modal-contact-grid">
+        <dt>最新見積</dt>${docCell(est)}
+        <dt>最新請求</dt>${docCell(inv)}
+        <dt>入金状況</dt>${nyukinCell}
+      </dl>
+    </div>
+  `;
+
+  // 原価集計(合計>0のみ表示)
+  let costHtml = '';
+  if (cost && (cost['合計'] || 0) > 0) {
+    costHtml = `
+      <div class="modal-section">
+        <div class="modal-section-title">原価集計 <span style="color:var(--text-mute);font-weight:400;text-transform:none;letter-spacing:normal;">(${cost['件数'] || 0}件 / ${escapeHtml(cost['最終集計日'] || '')})</span></div>
+        <div class="modal-cost-grid">
+          <span class="cost-label">労務費</span><span class="cost-val">${formatYen(cost['労務費'] || 0)}</span>
+          <span class="cost-label">材料費</span><span class="cost-val">${formatYen(cost['材料費'] || 0)}</span>
+          <span class="cost-label">外注費</span><span class="cost-val">${formatYen(cost['外注費'] || 0)}</span>
+          <span class="cost-label">経費</span><span class="cost-val">${formatYen(cost['経費'] || 0)}</span>
+          <div class="cost-total"><span>合計</span><span>${formatYen(cost['合計'])}</span></div>
+        </div>
+      </div>
+    `;
+  }
+
+  // 備考
+  const memoHtml = a['備考']
+    ? `<div class="modal-section">
+         <div class="modal-section-title">備考</div>
+         <div class="modal-memo">${escapeHtml(a['備考'])}</div>
+       </div>`
+    : '';
+
+  $('#anken-modal-body').innerHTML = basicHtml + docsHtml + costHtml + memoHtml;
+
+  // アクションボタン
+  const key = a['案件キー'];
+  $('#anken-modal-actions').innerHTML = `
+    <a class="modal-action-btn primary" href="${driveSearchUrl(key)}" target="_blank" rel="noopener">
+      <svg class="icon"><use href="#icon-folder"/></svg>Driveで案件を検索
+    </a>
+    <button class="modal-action-btn" data-copy="${escapeHtml(key)}" type="button">
+      <svg class="icon"><use href="#icon-copy"/></svg>案件キーをコピー
+    </button>
+    <a class="modal-action-btn" href="${gmailSearchUrl(key)}" target="_blank" rel="noopener">
+      <svg class="icon"><use href="#icon-mail"/></svg>Gmailで検索
+    </a>
+  `;
+
+  // 顧客リンク → 取引先モーダル
+  $$('#anken-modal-body .anken-partner-link').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      const p = findPartnerById(el.dataset.pid);
+      if (p) showPartnerModal(p);
+    });
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const p = findPartnerById(el.dataset.pid);
+        if (p) showPartnerModal(p);
+      }
+    });
+  });
+
+  // コピーボタン
+  $$('#anken-modal-actions [data-copy]').forEach(btn => {
+    btn.addEventListener('click', () => copyToClipboard(btn.dataset.copy, '案件キーをコピーしました'));
+  });
+
+  $('#anken-modal').classList.add('show');
+  $('#anken-modal').setAttribute('aria-hidden', 'false');
+  lockBodyScroll(true);
+}
+
+function closeAnkenModal(silent) {
+  const el = $('#anken-modal');
+  if (!el) return;
+  if (!el.classList.contains('show')) return;
+  el.classList.remove('show');
+  el.setAttribute('aria-hidden', 'true');
+  if (!silent) lockBodyScroll(false);
+}
+
+/* ============================================================
    Section 8: 取引先パネル + モーダル
    ============================================================ */
 // 取引先の連絡先補完状態を判定
@@ -2679,6 +2806,10 @@ function partnerCard(p) {
 
 // モーダル表示
 function showPartnerModal(p) {
+  if (!p) return;
+  // 案件モーダルが開いていれば閉じる
+  closeAnkenModal(true);
+
   const c = p['contact'] || {};
   const b = p['basic']   || {};
 
