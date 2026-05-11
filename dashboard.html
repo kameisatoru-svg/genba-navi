@@ -907,7 +907,7 @@ const STATE = {
   中止案件: []
 };
 
-// --- 顧客略 → AR-2026配下のフォルダ名マッピング (Phase 2で使用) ---
+// --- 顧客略 → AR-2026配下のフォルダ名マッピング ---
 const FOLDER_MAP = {
   '玉寿会':   '玉寿会_さくら苑',
   '松村':     '愛の治療院松村',
@@ -919,6 +919,26 @@ const FOLDER_MAP = {
   '橘山':     '橘山建工',
   '自社':     '_自社運営'
 };
+
+// --- ステータスメタ情報(色・アイコン) ---
+const STATUS_META = {
+  '見積提出済み':       { color: 'var(--status-mitsumori)', icon: 'icon-document' },
+  '施工予定':           { color: 'var(--status-yotei)',     icon: 'icon-calendar' },
+  '施工中':             { color: 'var(--status-shiko)',     icon: 'icon-hammer' },
+  '請求済み':           { color: 'var(--status-seikyu)',    icon: 'icon-invoice' },
+  '入金済み':           { color: 'var(--status-nyukin)',    icon: 'icon-check-circle' },
+  '完了(請求書作成済み)': { color: 'var(--status-kanryo)',    icon: 'icon-check-box' },
+  '保守管理(継続)':     { color: 'var(--status-hoshu)',     icon: 'icon-refresh' },
+  '中止':               { color: 'var(--status-chushi)',    icon: 'icon-warning-triangle' }
+};
+
+// --- カンバン6列定義 ---
+const KANBAN_COLS = [
+  '見積提出済み', '施工予定', '施工中',
+  '請求済み', '入金済み', '完了(請求書作成済み)'
+];
+// カンバンに表示しないステータス
+const KANBAN_HIDE = ['中止', '保守管理(継続)'];
 
 // --- ユーティリティ ---
 function $(sel) { return document.querySelector(sel); }
