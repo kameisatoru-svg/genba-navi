@@ -2912,32 +2912,7 @@ function closePartnerModal(silent) {
   if (!silent) lockBodyScroll(false);
 }
 
-// 案件キーで該当カードをスクロール+ハイライト(カンバン→テーブル順)
-function scrollToAnken(key) {
-  // カンバンカードを探す
-  const card = $$('#sec-kanban .kanban-card').find(c => c.querySelector('.kanban-key')?.textContent === key);
-  if (card) {
-    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    flashHighlight(card);
-    return;
-  }
-  // テーブル行を探す(中止案件等カンバンに無いもの)
-  const row = $$('#dash-table tbody tr').find(tr => tr.querySelector('.anken-key')?.textContent === key);
-  if (row) {
-    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    flashHighlight(row);
-    return;
-  }
-  // 取引先パネルカード等(検索結果からのジャンプ用)
-  const sec = $('#sec-table');
-  if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function flashHighlight(el) {
-  el.classList.remove('search-hl');
-  void el.offsetWidth; // reflow
-  el.classList.add('search-hl');
-}
+// 案E: scrollToAnken は廃止。すべての案件クリックは案件モーダルへ統一
 
 /* ============================================================
    Section 9: 横断検索バー(Lunr.js)
@@ -3076,10 +3051,10 @@ function doSearch(q) {
       const d = _lunrDocs[ref];
       if (!d) return;
       results.classList.remove('show');
+      $('#global-search').value = '';
       if (d.type === 'anken') {
-        scrollToAnken(d.ref['案件キー']);
+        showAnkenModal(d.ref);
       } else {
-        // 取引先 → モーダル表示
         showPartnerModal(d.ref);
       }
     });
