@@ -764,14 +764,17 @@ function refreshUtilIndicators(){
 var _rooms=[],_curRoomIdx=-1;
 
 function _newRoomState(){
-  return{
-    cat:'ceil',matIdx:0,pat:'通し目地',
+  var s={
+    cat:'floor',matIdx:0,pat:'通し目地',
     floorType:'タイル',tileType:'Pタイル',
     sheetW:1820,flooringType:'フローリング',
     nedaLen:3,formInputs:{},
     wall:{faceIdx:0,faceData:[null,null,null,null],faceInputs:[null,null,null,null],faceOpenings:[[],[],[],[]],faceSelId:[null,null,null,null],faceOidSeq:[0,0,0,0]},
-    lastOrder:null
+    lastOrder:null,
+    dims:{W:3000,L:4000,H:2400}
   };
+  _applyDimsToState(s,s.dims);
+  return s;
 }
 
 function _captureCurrentRoomState(){
@@ -815,7 +818,7 @@ function _loadRoomStateToGlobals(s){
 
 function _renderRoomWorkspace(state){
   document.querySelectorAll('.cat-btn').forEach(function(b){b.className='cat-btn';});
-  var idx={ceil:0,wall:1,floor:2}[curCat];
+  var idx={floor:0,wall:1,ceil:2}[curCat];
   var btns=document.querySelectorAll('.cat-btn');
   if(btns[idx])btns[idx].className='cat-btn ac-'+curCat;
   document.getElementById('header-cat').textContent={ceil:'天井',wall:'壁',floor:'床'}[curCat];
