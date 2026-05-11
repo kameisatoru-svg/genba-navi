@@ -788,6 +788,8 @@ function _captureCurrentRoomState(){
   formInputs.MAWARI_TYPE=fsel('MAWARI_TYPE');
   formInputs.HABAKI_TYPE=fsel('HABAKI_TYPE');
   formInputs.HABAKI_H=fsel('HABAKI_H');
+  // 既存の部屋状態から dims など「グローバルに反映されない情報」を引き継ぐ
+  var prev=(_curRoomIdx>=0&&_rooms[_curRoomIdx]&&_rooms[_curRoomIdx].state)||{};
   return{
     cat:curCat,matIdx:curMatIdx,pat:curPat,
     floorType:curFloorType,tileType:curTileType,
@@ -795,7 +797,8 @@ function _captureCurrentRoomState(){
     nedaLen:window.curNedaLen||3,
     formInputs:formInputs,
     wall:{faceIdx:curFaceIdx,faceData:faceData,faceInputs:faceInputs,faceOpenings:faceOpenings,faceSelId:faceSelId,faceOidSeq:faceOidSeq},
-    lastOrder:_lastOrder
+    lastOrder:_lastOrder,
+    dims:prev.dims  // 部屋寸法はグローバルにないので前回値から引き継ぐ
   };
 }
 
