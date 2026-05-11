@@ -818,6 +818,30 @@ a { color: inherit; text-decoration: none; }
   color: var(--text-mute);
   cursor: wait;
 }
+.search-hint {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-mute);
+  background: rgba(0, 0, 0, 0.05);
+  padding: 1px 6px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  pointer-events: none;
+  letter-spacing: 0.04em;
+}
+.search-input:focus ~ .search-hint { display: none; }
+
+/* キーボードフォーカススタイル(全カード共通) */
+.partner-card:focus-visible,
+.kanban-card:focus-visible,
+.reminder-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 
 .search-results {
   position: absolute;
@@ -1430,6 +1454,7 @@ a { color: inherit; text-decoration: none; }
              placeholder="検索中..." disabled
              aria-label="案件・取引先・備考を横断検索"
              autocomplete="off">
+      <span class="search-hint" id="search-hint" aria-hidden="true">Ctrl+K</span>
     </div>
     <div class="search-results" id="search-results" role="listbox" aria-label="検索結果"></div>
   </div>
