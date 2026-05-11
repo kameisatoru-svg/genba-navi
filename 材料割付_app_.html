@@ -945,6 +945,21 @@ function _applyDimsToCurrentRoom(dims){
   _applyDimsToState(_rooms[_curRoomIdx].state,dims);
   _loadRoomStateToGlobals(_rooms[_curRoomIdx].state);
   _renderRoomWorkspace(_rooms[_curRoomIdx].state);
+  // 確実にDOMへ反映（setTimeoutレースを回避）
+  setTimeout(function(){_forceInjectDims(dims);},150);
+}
+
+function _forceInjectDims(dims){
+  if(curCat==='floor'||curCat==='ceil'){
+    var fL=document.getElementById('f-L');if(fL)fL.value=dims.L;
+    var fW=document.getElementById('f-W');if(fW)fW.value=dims.W;
+  }else if(curCat==='wall'){
+    var fdims=[[dims.W,dims.H],[dims.L,dims.H],[dims.W,dims.H],[dims.L,dims.H]];
+    var cur=fdims[curFaceIdx]||fdims[0];
+    var fL=document.getElementById('f-L');if(fL)fL.value=cur[0];
+    var fW=document.getElementById('f-W');if(fW)fW.value=cur[1];
+    if(document.getElementById('wall-cv'))redrawWall();
+  }
 }
 
 function removeRoomPrompt(){
