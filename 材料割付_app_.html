@@ -993,9 +993,70 @@ function buildTsv(){
   return lines.join('\n');
 }
 
+function buildMultiRoomTsv(){
+  if(!_rooms.length)return'';
+  if(_curRoomIdx>=0)_rooms[_curRoomIdx].state=_captureCurrentRoomState();
+  var lines=[],totalCost=0,matAgg={},hasAny=false,roomCount=0;
+  lines.push('案件\t['+_rooms.length+'部屋] 全室合算');
+  lines.push('作成日\t'+getDateStr());
+  lines.push('');
+  lines.push(['部屋','カテゴリ','材料名','規格','発注数','単位','単価','金額','備考'].join('\t'));
+  _rooms.forEach(function(r){
+    var lo=r.state&&r.state.lastOrder;if(!lo||!lo.items||!lo.items.length)return;
+    roomCount++;
+    lo.items.forEach(function(it){
+      hasAny=true;
+      var qtyStr=(typeof it.qty==='number')?(it.qty%1===0?String(it.qty):it.qty.toFixed(1)):it.qty;
+      lines.push([
+        r.name,it.cat||'',it.name||'',it.spec||'',
+        qtyStr,it.unit||'',
+        it.price?it.price.toLocaleString():'',
+        it.cost?it.cost.toLocaleString():'',
+        it.note||''
+      ].join('\t'));
+      totalCost+=(it.cost||0);
+      var key=(it.name||'')+'|'+(it.spec||'')+'|'+(it.unit||'');
+      if(!matAgg[key])matAgg[key]={name:it.name||'',spec:it.spec||'',unit:it.unit||'',qty:0,cost:0};
+      matAgg[key].qty+=(typeof it.qty==='number'?it.qty:parseFloat(it.qty)||0);
+      matAgg[key].cost+=(it.cost||0);
+    });
+  });
+  if(!hasAny)return'計算済みのデータがありません。\n各部屋で「計算する」を押してから出力してください。';
+  lines.push('');
+  lines.push('【材料別合計】（'+roomCount+'部屋分）');
+  lines.push(['材料名','規格','発注数','単位','金額'].join('\t'));
+  Object.keys(matAgg).forEach(function(k){
+    var m=matAgg[k];
+    var qtyStr=m.qty%1===0?String(m.qty):m.qty.toFixed(1);
+    lines.push([m.name,m.spec,qtyStr,m.unit,'¥'+m.cost.toLocaleString()].join('\t'));
+  });
+  lines.push('');
+  lines.push('総合計\t\t\t\t¥'+totalCost.toLocaleString());
+  return lines.join('\n');
+}
+
+function updateTsvText(){
+  var checked=document.querySelector('input[name="tsv-mode"]:checked');
+  var mode=checked?checked.value:'current';
+  document.querySelectorAll('.tsv-mode-btn').forEach(function(b){
+    var inp=b.querySelector('input');
+    b.classList.toggle('checked',!!(inp&&inp.checked));
+  });
+  document.getElementById('tsv-text').value=(mode==='all')?buildMultiRoomTsv():buildTsv();
+}
+
 function openTsvModal(){
-  if(!_lastOrder||!_lastOrder.items.length){alert('まず計算を実行してください。');return;}
-  document.getElementById('tsv-text').value=buildTsv();
+  var hasCurrent=_lastOrder&&_lastOrder.items&&_lastOrder.items.length;
+  var hasAnyRoom=_rooms.some(function(r,i){
+    var lo=(i===_curRoomIdx)?_lastOrder:(r.state&&r.state.lastOrder);
+    return lo&&lo.items&&lo.items.length;
+  });
+  if(!hasCurrent&&!hasAnyRoom){alert('まず計算を実行してください。');return;}
+  var modeBox=document.getElementById('tsv-mode-buttons');
+  if(modeBox)modeBox.style.display=(_rooms.length>1)?'grid':'none';
+  var cur=document.querySelector('input[name="tsv-mode"][value="current"]');
+  if(cur)cur.checked=true;
+  updateTsvText();
   var btn=document.getElementById('tsv-copy-btn');
   btn.classList.remove('copied');btn.textContent='クリップボードへコピー';
   document.getElementById('tsv-modal').classList.remove('hidden');
