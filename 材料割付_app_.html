@@ -486,6 +486,56 @@ canvas#wall-cv{touch-action:none;}
 .modal-copy-btn:active{background:#b0935f;}
 .modal-copy-btn.copied{background:#1a7a3a;color:#fff;}
 
+/* ══════════ 部屋（ルーム）タブバー ══════════ */
+.room-bar{
+  background:var(--bg);padding:8px 14px 0;flex-shrink:0;
+  border-bottom:1px solid rgba(30,45,64,0.08);
+}
+.room-row{
+  display:flex;gap:6px;align-items:stretch;padding-bottom:8px;
+}
+.room-tabs-scroll{
+  flex:1;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;min-width:0;
+}
+.room-tabs-scroll::-webkit-scrollbar{display:none;}
+.room-tabs{display:flex;gap:5px;}
+.room-tab{
+  padding:7px 13px;border:1.5px solid rgba(30,45,64,0.15);
+  border-radius:18px;background:var(--white);color:var(--text2);
+  font-size:12px;font-weight:600;cursor:pointer;
+  font-family:inherit;white-space:nowrap;flex-shrink:0;
+}
+.room-tab.active{background:var(--navy);color:var(--white);border-color:var(--navy);}
+.room-tab.has-data{position:relative;padding-right:18px;}
+.room-tab.has-data::after{
+  content:'';position:absolute;top:50%;right:8px;transform:translateY(-50%);
+  width:6px;height:6px;border-radius:50%;background:var(--accent);
+}
+.room-tab.active.has-data::after{background:var(--white);}
+.room-icon-btn{
+  width:34px;height:34px;border:1.5px solid rgba(30,45,64,0.15);
+  border-radius:8px;background:var(--white);color:var(--text2);
+  font-size:14px;cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.room-icon-btn:active{background:var(--bg);}
+
+/* ══════════ TSVモード切替 ══════════ */
+.tsv-mode-buttons{
+  display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;
+}
+.tsv-mode-btn{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:8px 6px;border:1.5px solid rgba(30,45,64,0.15);
+  border-radius:8px;background:var(--white);font-size:12px;cursor:pointer;
+  font-family:inherit;color:var(--text2);
+}
+.tsv-mode-btn input{margin:0;cursor:pointer;}
+.tsv-mode-btn.checked{
+  background:var(--bf);border-color:var(--cf);color:var(--tf);font-weight:700;
+}
+
 /* ══════════ スティッキー計算ボタン（モバイル＝カバー画面） ══════════ */
 @media (max-width:599px){
   .calc-btn{
