@@ -765,17 +765,444 @@ a { color: inherit; text-decoration: none; }
   font-style: italic;
 }
 
-/* レスポンシブ補足(Phase 4で詳細化) */
+/* ============================================================
+   Phase 4: 横断検索バー / 取引先パネル / モーダル
+   ============================================================ */
+
+/* ----- Section 9: 横断検索バー(ヘッダー直下sticky) ----- */
+.search-bar {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 8px 24px;
+  position: sticky;
+  top: 56px;
+  z-index: 90;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+.search-bar-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+}
+.search-input-wrap {
+  position: relative;
+  width: 100%;
+}
+.search-input-wrap .icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-mute);
+  pointer-events: none;
+  width: 16px; height: 16px;
+}
+.search-input {
+  width: 100%;
+  font-family: var(--font-base);
+  font-size: 13px;
+  padding: 7px 12px 7px 34px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(212, 165, 116, 0.2);
+  background: #fff;
+}
+.search-input:disabled {
+  background: #f0eee5;
+  color: var(--text-mute);
+  cursor: wait;
+}
+
+.search-results {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  max-height: 60vh;
+  overflow-y: auto;
+  z-index: 91;
+  display: none;
+}
+.search-results.show { display: block; }
+.search-result {
+  display: block;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.search-result:hover { background: rgba(212, 165, 116, 0.10); }
+.search-result:last-child { border-bottom: none; }
+.search-result .sr-type {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-right: 6px;
+  font-weight: 700;
+}
+.search-result .sr-type.anken {   background: var(--primary); color: #fff; }
+.search-result .sr-type.partner { background: var(--accent);  color: #fff; }
+.search-result .sr-title {
+  font-weight: 700;
+  color: var(--primary);
+}
+.search-result .sr-sub {
+  font-size: 11px;
+  color: var(--text-sub);
+  margin-top: 2px;
+}
+.search-empty {
+  padding: 14px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-mute);
+  font-style: italic;
+}
+
+/* ハイライト */
+@keyframes hl-flash {
+  0%   { background: rgba(212, 165, 116, 0.45); }
+  100% { background: transparent; }
+}
+.search-hl { animation: hl-flash 1.4s ease-out; }
+
+/* ----- Section 8: 取引先パネル ----- */
+.partners-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+.partner-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  transition: var(--transition);
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.partner-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+.partner-card.partner-incomplete {
+  background: linear-gradient(180deg, #fdf6e7 0%, #fffdf7 100%);
+  border-color: rgba(243, 156, 18, 0.4);
+}
+.partner-card.partner-incomplete::after {
+  content: '';
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 14px; height: 14px;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f39c12' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M12 3 L22 20 L2 20 Z'/><line x1='12' y1='10' x2='12' y2='14'/><line x1='12' y1='17' x2='12' y2='17.5'/></svg>") center/contain no-repeat;
+  pointer-events: none;
+}
+.partner-head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.partner-id {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--secondary);
+  color: var(--primary);
+  padding: 1px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.02em;
+}
+.partner-ryaku {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1.3;
+}
+.partner-name {
+  font-size: 11px;
+  color: var(--text-sub);
+  line-height: 1.3;
+}
+.partner-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 3px;
+}
+.partner-tag {
+  display: inline-block;
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 8px;
+  background: rgba(30, 45, 64, 0.06);
+  color: var(--text-sub);
+  font-weight: 600;
+}
+.partner-tag.rel { background: rgba(30, 45, 64, 0.85); color: #fff; }
+.partner-meta {
+  font-size: 11px;
+  color: var(--text-mute);
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.partner-meta .icon { width: 12px; height: 12px; }
+
+/* ----- 取引先モーダル ----- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 45, 64, 0.55);
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 250;
+  padding: 5vh 16px 16px;
+  overflow-y: auto;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  max-width: 640px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.modal-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: #fff;
+}
+.modal-head .partner-id {
+  background: rgba(255, 255, 255, 0.20);
+  color: #fff;
+}
+.modal-head .modal-title {
+  flex: 1;
+  font-size: 1.1em;
+  font-weight: 800;
+  line-height: 1.3;
+}
+.modal-head .modal-sub {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 2px;
+  font-weight: 400;
+}
+.modal-close {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  width: 32px; height: 32px;
+  border-radius: var(--radius);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+.modal-close:hover { background: rgba(255, 255, 255, 0.15); }
+.modal-body {
+  padding: 14px 18px;
+  overflow-y: auto;
+  flex: 1;
+}
+.modal-section {
+  margin-bottom: 16px;
+}
+.modal-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.modal-contact-grid {
+  display: grid;
+  grid-template-columns: minmax(0, auto) 1fr;
+  gap: 6px 12px;
+  font-size: 13px;
+}
+.modal-contact-grid dt {
+  color: var(--text-sub);
+  font-size: 11px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.modal-contact-grid dt .icon { width: 12px; height: 12px; color: var(--accent); }
+.modal-contact-grid dd {
+  margin: 0;
+  color: var(--text);
+  word-break: break-all;
+}
+.modal-contact-grid dd.empty { color: var(--text-mute); font-style: italic; }
+.modal-contact-grid dd a { color: var(--info); }
+.modal-contact-grid dd a:hover { text-decoration: underline; }
+.modal-memo {
+  background: var(--bg);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+.modal-anken-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.modal-anken-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--bg);
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.modal-anken-item:hover { background: rgba(212, 165, 116, 0.15); }
+.modal-anken-item .anken-key {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--primary);
+}
+.modal-anken-item .anken-title {
+  flex: 1;
+  color: var(--text-sub);
+}
+.modal-empty {
+  color: var(--text-mute);
+  font-style: italic;
+  font-size: 12px;
+}
+
+/* ----- 詳細レスポンシブ ----- */
 @media (max-width: 1199px) {
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .kanban-board { grid-template-columns: repeat(6, 220px); }
 }
-@media (max-width: 600px) {
-  .kpi-grid { grid-template-columns: 1fr; }
-  .kpi-value { font-size: 1.4em; }
-  .table-filters { padding: 8px; }
-  .table-filters .q-wrap { width: 100%; flex: 1 1 100%; }
+@media (max-width: 767px) {
+  .dash-header { padding: 10px 12px; }
+  .dash-header-inner { gap: 10px; }
+  .dash-title { font-size: 1.05em; min-width: 0; flex: 1 1 100%; }
+  .dash-meta { font-size: 10px; gap: 8px; flex: 1 1 auto; }
+  .dash-main { padding: 12px; }
+  .dash-section { padding: 12px; margin-bottom: 16px; }
+  .section-title { font-size: 1em; padding-left: 10px; }
+  .search-bar { padding: 6px 12px; top: 0; position: static; }
+  .kpi-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .kpi-card { padding: 10px 12px; gap: 8px; }
+  .kpi-card .icon { width: 24px; height: 24px; }
+  .kpi-value { font-size: 1.2em; }
+  .kanban-board { grid-template-columns: repeat(6, 180px); gap: 8px; }
+  .kanban-col { min-width: 180px; }
   .reminders-grid { grid-template-columns: 1fr; }
-  .chart-wrap { height: 240px; }
+  .chart-wrap { height: 220px; }
+  .table-filters { padding: 8px; gap: 6px; }
+  .table-filters .form-group { flex: 1 1 calc(50% - 4px); }
+  .table-filters .q-wrap { flex: 1 1 100%; min-width: 0; }
+  .table-count { flex: 1 1 100%; text-align: right; }
+  .dash-table { font-size: 12px; }
+  .dash-table thead th, .dash-table tbody td { padding: 6px 8px; }
+  .partners-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .kpi-grid { grid-template-columns: 1fr; }
+  .partners-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 400px) {
+  /* Galaxy Z Fold5 縦持ち */
+  body { font-size: 12px; }
+  .dash-title { font-size: 0.95em; }
+  .dash-meta .label { display: none; }
+  .dash-btn { padding: 4px 8px; font-size: 11px; }
+  .kpi-value { font-size: 1.05em; }
+  .modal-overlay { padding: 0; }
+  .modal { max-height: 100vh; border-radius: 0; }
+}
+
+/* ============================================================
+   Phase 4: 印刷スタイル
+   ============================================================ */
+@media print {
+  body { background: #fff; font-size: 11px; }
+  .dash-header { position: static; box-shadow: none; background: #fff; color: #000; border-bottom: 2px solid #000; }
+  .dash-header-inner { padding: 0; }
+  .dash-title { color: #000; }
+  .dash-meta { color: #333; }
+  .dash-meta .label { color: #333; }
+  .dash-actions, .search-bar { display: none !important; }
+  .dash-main { padding: 12px; max-width: none; }
+  .dash-section { box-shadow: none; border: 1px solid #999; page-break-inside: avoid; margin-bottom: 14px; padding: 12px; }
+  .section-title { color: #000; border-left-color: #333; }
+
+  /* KPIは1行に収める */
+  .kpi-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .kpi-card { padding: 6px 8px; }
+  .kpi-card .icon { width: 18px; height: 18px; }
+  .kpi-value { font-size: 1.1em; }
+
+  /* カンバンは6列固定で印刷 */
+  .kanban-board { grid-template-columns: repeat(6, 1fr); overflow: visible; gap: 4px; }
+  .kanban-col { min-width: 0; page-break-inside: avoid; }
+  .kanban-card { page-break-inside: avoid; }
+
+  /* テーブルは全行表示 */
+  .table-wrap { overflow: visible; border: none; }
+  .dash-table thead th { background: #eee !important; color: #000; cursor: default; }
+  .dash-table tr { page-break-inside: avoid; }
+
+  /* タイムラインは横スクロールせず全幅で */
+  .timeline-wrap { overflow: visible; }
+  .timeline-svg { width: 100% !important; max-width: 100%; }
+
+  /* リマインドカードはリンクの下線消す */
+  .reminder-card { page-break-inside: avoid; box-shadow: none; }
+
+  /* 取引先 */
+  .partners-grid { grid-template-columns: repeat(3, 1fr); }
+  .partner-card { page-break-inside: avoid; box-shadow: none; }
+
+  /* モーダル・ローダー・エラーは印刷しない */
+  .modal-overlay, .loader-overlay, .error-banner, .search-results { display: none !important; }
+
+  /* フッター */
+  .dash-footer { color: #333; }
+  .dash-footer .links { display: none; }
 }
 
 /* ----- レスポンシブ (Phase 4で詳細化) ----- */
