@@ -419,8 +419,12 @@ a { color: inherit; text-decoration: none; }
       <div><span class="label">現在:</span><span class="value" id="current-datetime">--</span></div>
     </div>
     <div class="dash-actions">
-      <button class="dash-btn" id="btn-reload" aria-label="データ再読込">🔄 更新</button>
-      <button class="dash-btn" id="btn-print" aria-label="このページを印刷">🖨️ 印刷</button>
+      <button class="dash-btn" id="btn-reload" aria-label="データ再読込">
+        <svg class="icon" aria-hidden="true"><use href="#icon-refresh"/></svg>更新
+      </button>
+      <button class="dash-btn" id="btn-print" aria-label="このページを印刷">
+        <svg class="icon" aria-hidden="true"><use href="#icon-print"/></svg>印刷
+      </button>
     </div>
   </div>
 </header>
@@ -438,13 +442,19 @@ a { color: inherit; text-decoration: none; }
 
   <!-- Section 2: KPIカード -->
   <section class="dash-section" id="sec-kpi" aria-label="KPIカード">
-    <h2 class="section-title">📊 KPI <span class="badge">Section 2</span></h2>
+    <h2 class="section-title">
+      <svg class="icon" aria-hidden="true"><use href="#icon-clipboard"/></svg>
+      KPI <span class="badge">Section 2</span>
+    </h2>
     <div class="placeholder">Phase 2で実装予定</div>
   </section>
 
   <!-- Section 3: ステータスカンバン -->
   <section class="dash-section" id="sec-kanban" aria-label="ステータスカンバン">
-    <h2 class="section-title">📋 ステータスカンバン <span class="badge">Section 3</span></h2>
+    <h2 class="section-title">
+      <svg class="icon" aria-hidden="true"><use href="#icon-stack"/></svg>
+      ステータスカンバン <span class="badge">Section 3</span>
+    </h2>
     <div class="placeholder">Phase 2で実装予定</div>
   </section>
 
