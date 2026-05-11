@@ -2871,24 +2871,45 @@ function showPartnerModal(p) {
 
   $('#modal-body').innerHTML = contactHtml + memoHtml + ankenHtml;
 
-  // 関連案件クリック → モーダル閉じてカンバン該当カードへスクロール&ハイライト
+  // 関連案件クリック → 案件モーダルを開く
   $$('#modal-body .modal-anken-item').forEach(el => {
     el.addEventListener('click', () => {
       const key = el.dataset.key;
-      closePartnerModal();
-      scrollToAnken(key);
+      const a = findAnken(key);
+      if (a) showAnkenModal(a);
     });
+  });
+
+  // 取引先モーダルのアクションボタン
+  const mailAddr = c['mail'] || '';
+  const gmailQ   = mailAddr || p['略称'];
+  $('#partner-modal-actions').innerHTML = `
+    <a class="modal-action-btn primary" href="${driveSearchUrl(p['略称'])}" target="_blank" rel="noopener">
+      <svg class="icon"><use href="#icon-folder"/></svg>Driveで取引先を検索
+    </a>
+    <button class="modal-action-btn" data-copy="${escapeHtml(p['id'])}" type="button">
+      <svg class="icon"><use href="#icon-copy"/></svg>T番号をコピー
+    </button>
+    <a class="modal-action-btn" href="${gmailSearchUrl(gmailQ)}" target="_blank" rel="noopener" title="${mailAddr ? 'メールアドレスで検索' : '略称で検索'}">
+      <svg class="icon"><use href="#icon-mail"/></svg>Gmailで検索
+    </a>
+  `;
+  $$('#partner-modal-actions [data-copy]').forEach(btn => {
+    btn.addEventListener('click', () => copyToClipboard(btn.dataset.copy, 'T番号をコピーしました'));
   });
 
   $('#partner-modal').classList.add('show');
   $('#partner-modal').setAttribute('aria-hidden', 'false');
-  document.body.style.overflow = 'hidden';
+  lockBodyScroll(true);
 }
 
-function closePartnerModal() {
-  $('#partner-modal').classList.remove('show');
-  $('#partner-modal').setAttribute('aria-hidden', 'true');
-  document.body.style.overflow = '';
+function closePartnerModal(silent) {
+  const el = $('#partner-modal');
+  if (!el) return;
+  if (!el.classList.contains('show')) return;
+  el.classList.remove('show');
+  el.setAttribute('aria-hidden', 'true');
+  if (!silent) lockBodyScroll(false);
 }
 
 // 案件キーで該当カードをスクロール+ハイライト(カンバン→テーブル順)
