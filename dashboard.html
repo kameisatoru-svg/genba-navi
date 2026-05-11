@@ -211,7 +211,7 @@ a { color: inherit; text-decoration: none; }
   display: none;
 }
 .error-banner.show { display: block; }
-.error-banner .title { font-weight: 700; margin-bottom: 4px; }
+.error-banner .title { font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
 .error-banner code { font-family: var(--font-mono); font-size: 12px; background: rgba(192, 57, 43, 0.08); padding: 1px 5px; border-radius: 3px; }
 
 /* ----- フッター ----- */
@@ -252,8 +252,8 @@ a { color: inherit; text-decoration: none; }
 .section-title .icon { width: 22px; height: 22px; color: var(--primary); }
 
 /* ヘッダー内アイコン色制御 */
-.dash-title .icon { width: 24px; height: 24px; color: #fff; margin-right: 2px; }
-.dash-btn .icon { width: 14px; height: 14px; margin-right: 4px; }
+.dash-title .icon { width: 24px; height: 24px; color: #fff; }
+.dash-btn .icon { width: 14px; height: 14px; }
 
 /* 状態色ヘルパー(後フェーズで利用) */
 .icon-danger  { color: var(--danger); }
@@ -443,7 +443,7 @@ a { color: inherit; text-decoration: none; }
   <!-- エラーバナー -->
   <div class="error-banner" id="error-banner" role="alert">
     <div class="title">
-      <svg class="icon icon-danger" aria-hidden="true" style="margin-right:6px;"><use href="#icon-warning-triangle"/></svg>
+      <svg class="icon icon-danger" aria-hidden="true"><use href="#icon-warning-triangle"/></svg>
       データ読込エラー
     </div>
     <div id="error-message"></div>
