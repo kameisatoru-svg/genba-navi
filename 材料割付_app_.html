@@ -869,6 +869,7 @@ function switchRoom(idx){
   _renderRoomWorkspace(st);
   renderRoomTabs();
   refreshUtilIndicators();
+  autoSaveState(true);
 }
 
 function addRoomPrompt(){openRoomModal('add');}
@@ -1038,6 +1039,7 @@ function removeRoomPrompt(){
   _renderRoomWorkspace(st);
   renderRoomTabs();
   refreshUtilIndicators();
+  autoSaveState(true);
   showToast('🗑 削除しました');
 }
 
@@ -1413,6 +1415,7 @@ function setCat(cat,btn){
     _loadRoomStateToGlobals(_rooms[_curRoomIdx].state);
     _renderRoomWorkspace(_rooms[_curRoomIdx].state);
     setOrder([],null);
+    autoSaveState(true);
     return;
   }
   // フォールバック（部屋未初期化時のみ）
