@@ -836,18 +836,12 @@ function _renderRoomWorkspace(state){
       if(document.getElementById('wall-cv'))redrawWall();
       return;
     }
-    // 床/天井：L,W は必ず state.dims から（formInputs.L/W はカテゴリ間で意味が違うため使わない）
-    var dims=state.dims;
-    if(!dims&&state.formInputs&&state.formInputs.L){
-      // 旧形式フォールバック
-      dims={L:parseFloat(state.formInputs.L)||4000,W:parseFloat(state.formInputs.W)||3000,H:2400};
-    }
-    if(dims){
-      var fL=document.getElementById('f-L');if(fL)fL.value=dims.L;
-      var fW=document.getElementById('f-W');if(fW)fW.value=dims.W;
-    }
+    // 床/天井：L,W は必ず state.dims を唯一の真とする（formInputs から派生させない＝H混入防止）
+    var dims=state.dims||(_curRoomIdx>=0&&_rooms[_curRoomIdx]&&_rooms[_curRoomIdx].state&&_rooms[_curRoomIdx].state.dims);
+    if(!dims)dims={W:3000,L:4000,H:2400};  // 安全な既定値（formInputs.Wが壁のHで汚染されているケースを避ける）
+    var fL=document.getElementById('f-L');if(fL)fL.value=dims.L;
+    var fW=document.getElementById('f-W');if(fW)fW.value=dims.W;
     // 他フィールド（BL/BW/LOSS/PRICE 等）はレンダー時のカテゴリ別デフォルトをそのまま使用
-    // （カテゴリ間で同じキーが別の意味になり混入するため、自動注入はしない）
   },80);
 }
 
