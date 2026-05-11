@@ -1420,6 +1420,22 @@ a { color: inherit; text-decoration: none; }
 </header>
 
 <!-- ============================================================
+     Section 9: 横断検索バー(ヘッダー直下sticky)
+     ============================================================ -->
+<div class="search-bar" role="search">
+  <div class="search-bar-inner">
+    <div class="search-input-wrap">
+      <svg class="icon" aria-hidden="true"><use href="#icon-search"/></svg>
+      <input id="global-search" class="search-input" type="search"
+             placeholder="検索中..." disabled
+             aria-label="案件・取引先・備考を横断検索"
+             autocomplete="off">
+    </div>
+    <div class="search-results" id="search-results" role="listbox" aria-label="検索結果"></div>
+  </div>
+</div>
+
+<!-- ============================================================
      メインコンテンツ
      ============================================================ -->
 <main class="dash-main" id="dash-main">
@@ -1497,6 +1513,25 @@ a { color: inherit; text-decoration: none; }
   </section>
 
 </main>
+
+<!-- ============================================================
+     取引先詳細モーダル(Phase 4)
+     ============================================================ -->
+<div class="modal-overlay" id="partner-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
+  <div class="modal" id="modal-inner">
+    <div class="modal-head">
+      <span class="partner-id" id="modal-pid">T-XXX</span>
+      <div>
+        <div class="modal-title" id="modal-title">略称</div>
+        <div class="modal-sub" id="modal-fullname">正式名称</div>
+      </div>
+      <button class="modal-close" id="modal-close" aria-label="モーダルを閉じる" type="button">
+        <svg class="icon"><use href="#icon-x"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
 
 <!-- ============================================================
      フッター (Section 10)
