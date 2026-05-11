@@ -1900,8 +1900,10 @@ function renderSheetResult(tate,yoko,L,W){
   document.getElementById('result-area').innerHTML=h;
   var doDraw=function(){
     var cv0=document.getElementById('cv-tate');if(!cv0)return;
-    var CW=cv0.offsetWidth||200,CH=170,mL=8,mR=30,mT=8,mB=30,sc=Math.min((CW-mL-mR)/L,(CH-mT-mB)/W);
-    var rw=L*sc,rh=W*sc,ox=mL,oy=mT;
+    var CW=cv0.offsetWidth||200,CH=170,mL=8,mR=30,mT=8,mB=30;
+    // 幅W=横、長さL=縦 へ統一（タイル系と同じorientation）
+    var sc=Math.min((CW-mL-mR)/W,(CH-mT-mB)/L);
+    var rw=W*sc,rh=L*sc,ox=mL,oy=mT;
     drawSheetCanvas('cv-tate',tate,L,W,sc,ox,oy,rw,rh,CW,CH,'縦');
     drawSheetCanvas('cv-yoko',yoko,L,W,sc,ox,oy,rw,rh,CW,CH,'横');
     addZoomButtons();
