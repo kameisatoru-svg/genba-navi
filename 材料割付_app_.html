@@ -1950,9 +1950,11 @@ function showToast(msg){
 }
 
 // ── 初期化 ──
-_rooms=[{name:'部屋1',state:_newRoomState()}];
-_curRoomIdx=0;
-var _initSt=_rooms[0].state;
+if(!loadAutoSavedState()){
+  _rooms=[{name:'部屋1',state:_newRoomState()}];
+  _curRoomIdx=0;
+}
+var _initSt=_rooms[_curRoomIdx].state;
 _loadRoomStateToGlobals(_initSt);
 _renderRoomWorkspace(_initSt);
 renderRoomTabs();
