@@ -860,31 +860,88 @@ function switchRoom(idx){
   refreshUtilIndicators();
 }
 
-function addRoomPrompt(){
-  var name=prompt('部屋名を入力してください（例：101号室／廊下／受付）');
-  if(!name||!name.trim())return;
-  name=name.trim();
-  if(_rooms.some(function(r){return r.name===name;})){alert('同じ名前の部屋が既にあります。');return;}
-  if(_curRoomIdx>=0)_rooms[_curRoomIdx].state=_captureCurrentRoomState();
-  _rooms.push({name:name,state:_newRoomState()});
-  _curRoomIdx=_rooms.length-1;
-  var st=_rooms[_curRoomIdx].state;
-  _loadRoomStateToGlobals(st);
-  _renderRoomWorkspace(st);
-  renderRoomTabs();
-  refreshUtilIndicators();
-  showToast('🏠 「'+name+'」を追加しました');
+function addRoomPrompt(){openRoomModal('add');}
+function renameRoomPrompt(){if(_curRoomIdx<0)return;openRoomModal('edit');}
+
+// ── 部屋追加/編集モーダル ──
+var _roomEditMode='add';
+
+function openRoomModal(mode){
+  _roomEditMode=mode||'add';
+  document.getElementById('room-modal-title').textContent=(_roomEditMode==='edit')?'部屋を編集':'部屋を追加';
+  document.getElementById('room-send-btn').textContent=(_roomEditMode==='edit')?'更新する':'追加する';
+  var nameInp=document.getElementById('room-name');
+  var wInp=document.getElementById('room-W'),lInp=document.getElementById('room-L'),hInp=document.getElementById('room-H');
+  if(_roomEditMode==='edit'&&_curRoomIdx>=0){
+    var r=_rooms[_curRoomIdx];
+    nameInp.value=r.name;
+    var dims=(r.state&&r.state.dims)||{W:3000,L:4000,H:2400};
+    wInp.value=dims.W;lInp.value=dims.L;hInp.value=dims.H;
+  }else{
+    nameInp.value='';wInp.value=3000;lInp.value=4000;hInp.value=2400;
+  }
+  document.getElementById('room-modal').classList.remove('hidden');
+  setTimeout(function(){nameInp.focus();nameInp.select();},100);
 }
 
-function renameRoomPrompt(){
+function closeRoomModal(e){
+  if(e&&e.target!==document.getElementById('room-modal'))return;
+  document.getElementById('room-modal').classList.add('hidden');
+}
+
+function doSubmitRoom(){
+  var name=document.getElementById('room-name').value.trim();
+  if(!name){alert('部屋名を入力してください。');return;}
+  var W=parseFloat(document.getElementById('room-W').value)||0;
+  var L=parseFloat(document.getElementById('room-L').value)||0;
+  var H=parseFloat(document.getElementById('room-H').value)||0;
+  if(!(W>0&&L>0&&H>0)){alert('幅・長さ・天井高はすべて0より大きい値を入力してください。');return;}
+  var dims={W:W,L:L,H:H};
+  if(_roomEditMode==='edit'){
+    if(_rooms.some(function(r,i){return i!==_curRoomIdx&&r.name===name;})){alert('同じ名前の部屋が既にあります。');return;}
+    _rooms[_curRoomIdx].name=name;
+    _applyDimsToCurrentRoom(dims);
+    closeRoomModal(null);renderRoomTabs();refreshUtilIndicators();
+    showToast('✎ 部屋を更新しました');
+  }else{
+    if(_rooms.some(function(r){return r.name===name;})){alert('同じ名前の部屋が既にあります。');return;}
+    if(_curRoomIdx>=0)_rooms[_curRoomIdx].state=_captureCurrentRoomState();
+    var newSt=_newRoomState();
+    _applyDimsToState(newSt,dims);
+    _rooms.push({name:name,state:newSt});
+    _curRoomIdx=_rooms.length-1;
+    _loadRoomStateToGlobals(newSt);
+    _renderRoomWorkspace(newSt);
+    closeRoomModal(null);renderRoomTabs();refreshUtilIndicators();
+    showToast('🏠 「'+name+'」を追加しました');
+  }
+}
+
+// ── 寸法を部屋状態へ反映 ──
+function _applyDimsToState(state,dims){
+  state.dims={W:dims.W,L:dims.L,H:dims.H};
+  state.formInputs=state.formInputs||{};
+  state.formInputs.L=String(dims.L);
+  state.formInputs.W=String(dims.W);
+  // 壁A〜D（A=上辺=幅W×H、B=右辺=長さL×H、C=下辺=W×H、D=左辺=L×H）
+  var fdims=[[dims.W,dims.H],[dims.L,dims.H],[dims.W,dims.H],[dims.L,dims.H]];
+  state.wall=state.wall||{faceIdx:0,faceData:[null,null,null,null],faceInputs:[null,null,null,null],faceOpenings:[[],[],[],[]],faceSelId:[null,null,null,null],faceOidSeq:[0,0,0,0]};
+  state.wall.faceInputs=state.wall.faceInputs||[null,null,null,null];
+  for(var i=0;i<4;i++){
+    var ex=state.wall.faceInputs[i]||{};
+    var merged={};
+    Object.keys(ex).forEach(function(k){merged[k]=ex[k];});
+    merged.L=fdims[i][0];merged.W=fdims[i][1];
+    state.wall.faceInputs[i]=merged;
+  }
+}
+
+function _applyDimsToCurrentRoom(dims){
   if(_curRoomIdx<0)return;
-  var cur=_rooms[_curRoomIdx].name;
-  var name=prompt('部屋名を変更',cur);
-  if(!name||!name.trim()||name===cur)return;
-  name=name.trim();
-  if(_rooms.some(function(r,i){return i!==_curRoomIdx&&r.name===name;})){alert('同じ名前の部屋が既にあります。');return;}
-  _rooms[_curRoomIdx].name=name;
-  renderRoomTabs();
+  _rooms[_curRoomIdx].state=_captureCurrentRoomState();
+  _applyDimsToState(_rooms[_curRoomIdx].state,dims);
+  _loadRoomStateToGlobals(_rooms[_curRoomIdx].state);
+  _renderRoomWorkspace(_rooms[_curRoomIdx].state);
 }
 
 function removeRoomPrompt(){
@@ -1803,7 +1860,9 @@ function showToast(msg){
 // ── 初期化 ──
 _rooms=[{name:'部屋1',state:_newRoomState()}];
 _curRoomIdx=0;
-renderMats();
+var _initSt=_rooms[0].state;
+_loadRoomStateToGlobals(_initSt);
+_renderRoomWorkspace(_initSt);
 renderRoomTabs();
 refreshUtilIndicators();
 </script>
