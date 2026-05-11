@@ -1247,6 +1247,158 @@ function openTsvModal(){
   btn.classList.remove('copied');btn.textContent='クリップボードへコピー';
   document.getElementById('tsv-modal').classList.remove('hidden');
 }
+
+// ══════════ PDF出力（印刷ダイアログでPDF保存） ══════════
+function _captureVisibleCanvasImages(){
+  var imgs=[];
+  document.querySelectorAll('.scroll-area canvas').forEach(function(cv){
+    if(!cv.offsetWidth||!cv.offsetHeight)return;
+    try{
+      var label=(cv.closest('.vw2')&&cv.closest('.vw2').querySelector('.vl'))?cv.closest('.vw2').querySelector('.vl').textContent.trim():'';
+      imgs.push({title:label,src:cv.toDataURL('image/png')});
+    }catch(e){}
+  });
+  return imgs;
+}
+
+function buildReportHtml(){
+  // 現在の部屋を最新化
+  if(_curRoomIdx>=0&&_rooms[_curRoomIdx])_rooms[_curRoomIdx].state=_captureCurrentRoomState();
+  var curImgs=_captureVisibleCanvasImages();
+  var today=getDateStr();
+  var roomNames=_rooms.map(function(r){return r.name;}).join('・');
+  var L=[];
+  L.push('<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8">');
+  L.push('<meta name="viewport" content="width=device-width,initial-scale=1">');
+  L.push('<title>材料発注書 — '+_escHtml(roomNames)+' '+today+'</title>');
+  L.push('<style>');
+  L.push('@page{size:A4 portrait;margin:13mm}');
+  L.push('*{box-sizing:border-box}');
+  L.push('body{font-family:"Yu Gothic","Hiragino Sans","Meiryo",sans-serif;font-size:11px;color:#222;line-height:1.55;margin:0;padding:14px}');
+  L.push('h1{font-size:20px;margin:0 0 6px;padding-bottom:8px;border-bottom:2.5px solid #1e2d40;color:#1e2d40}');
+  L.push('h2{font-size:14px;margin:18px 0 8px;padding:7px 11px;background:#eeebe5;border-left:5px solid #c8a96e;color:#1e2d40}');
+  L.push('h3{font-size:12px;margin:10px 0 5px;color:#2a3f5a}');
+  L.push('.meta{font-size:10.5px;color:#666;margin:0 0 8px}');
+  L.push('.dims{font-size:11px;margin:4px 0 8px;color:#444}');
+  L.push('.dims b{color:#1e2d40}');
+  L.push('table{width:100%;border-collapse:collapse;margin:8px 0;font-size:10.5px}');
+  L.push('th,td{border:1px solid #c8c4ba;padding:5px 8px;text-align:left;vertical-align:top}');
+  L.push('th{background:#f4f1ea;font-weight:700;color:#1e2d40}');
+  L.push('td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}');
+  L.push('.total-row td{font-weight:700;background:#fff5e0}');
+  L.push('.grand-row td{font-weight:700;background:#e8efe5;border-top:2px solid #0d6e50}');
+  L.push('.viz-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}');
+  L.push('.viz-card{border:1px solid #ddd;border-radius:6px;padding:6px;background:#fff;page-break-inside:avoid}');
+  L.push('.viz-card .vt{font-size:10px;color:#666;margin-bottom:4px}');
+  L.push('.viz-card img{display:block;max-width:100%;height:auto}');
+  L.push('.no-data{color:#888;font-style:italic;font-size:10.5px;padding:4px 0}');
+  L.push('.bar{position:fixed;top:0;left:0;right:0;background:#1e2d40;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.15)}');
+  L.push('.bar .bt{font-size:13px;color:#fff;font-weight:700}');
+  L.push('.bar button{border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-left:8px}');
+  L.push('.bar .btn-print{background:#c8a96e;color:#1e2d40}');
+  L.push('.bar .btn-close{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.4)}');
+  L.push('.pad{padding-top:60px}');
+  L.push('.room-block{page-break-inside:avoid;margin-bottom:10px}');
+  L.push('@media print{.bar,.pad{display:none}body{padding:0}.pad{padding-top:0}}');
+  L.push('</style></head><body>');
+  L.push('<div class="bar"><div class="bt">📄 材料発注書プレビュー</div><div><button class="btn-close" onclick="window.close()">閉じる</button><button class="btn-print" onclick="window.print()">🖨 印刷 / PDF保存</button></div></div>');
+  L.push('<div class="pad"></div>');
+  L.push('<h1>材料発注書</h1>');
+  L.push('<div class="meta">作成日: '+today+' ／ 部屋数: '+_rooms.length+'部屋 ／ 対象: '+_escHtml(roomNames)+'</div>');
+
+  var grandTotal=0,grandMatAgg={},anyData=false;
+  _rooms.forEach(function(r,idx){
+    var s=r.state||{};
+    var lo=s.lastOrder;
+    L.push('<div class="room-block">');
+    L.push('<h2>'+_escHtml(r.name)+'</h2>');
+    if(s.dims){
+      L.push('<div class="dims"><b>寸法</b>　幅 '+s.dims.W+'mm ／ 長さ '+s.dims.L+'mm ／ 天井高 '+s.dims.H+'mm</div>');
+    }
+    if(lo&&lo.items&&lo.items.length){
+      anyData=true;
+      L.push('<h3>'+_escHtml(lo.title||'')+'</h3>');
+      // 現在の部屋のみ canvas 画像を含める
+      if(idx===_curRoomIdx&&curImgs.length){
+        L.push('<div class="viz-grid">');
+        curImgs.forEach(function(im){
+          L.push('<div class="viz-card">');
+          if(im.title)L.push('<div class="vt">'+_escHtml(im.title)+'</div>');
+          L.push('<img src="'+im.src+'" alt="割付図"/></div>');
+        });
+        L.push('</div>');
+      }
+      // 明細表
+      L.push('<table>');
+      L.push('<tr><th>カテゴリ</th><th>材料</th><th>規格</th><th>発注数</th><th>単位</th><th>単価</th><th>金額</th><th>備考</th></tr>');
+      var roomTotal=0;
+      lo.items.forEach(function(it){
+        var qs=(typeof it.qty==='number')?(it.qty%1===0?String(it.qty):it.qty.toFixed(1)):it.qty;
+        L.push('<tr>');
+        L.push('<td>'+_escHtml(it.cat||'')+'</td>');
+        L.push('<td>'+_escHtml(it.name||'')+'</td>');
+        L.push('<td>'+_escHtml(it.spec||'')+'</td>');
+        L.push('<td class="num">'+qs+'</td>');
+        L.push('<td>'+_escHtml(it.unit||'')+'</td>');
+        L.push('<td class="num">'+(it.price?'¥'+it.price.toLocaleString():'')+'</td>');
+        L.push('<td class="num">'+(it.cost?'¥'+it.cost.toLocaleString():'')+'</td>');
+        L.push('<td>'+_escHtml(it.note||'')+'</td>');
+        L.push('</tr>');
+        roomTotal+=(it.cost||0);
+        // grand集計
+        var key=(it.name||'')+'|'+(it.spec||'')+'|'+(it.unit||'');
+        if(!grandMatAgg[key])grandMatAgg[key]={name:it.name||'',spec:it.spec||'',unit:it.unit||'',qty:0,cost:0};
+        grandMatAgg[key].qty+=(typeof it.qty==='number'?it.qty:parseFloat(it.qty)||0);
+        grandMatAgg[key].cost+=(it.cost||0);
+        grandTotal+=(it.cost||0);
+      });
+      L.push('<tr class="total-row"><td colspan="6">部屋合計</td><td class="num">¥'+roomTotal.toLocaleString()+'</td><td></td></tr>');
+      L.push('</table>');
+    }else{
+      L.push('<div class="no-data">（計算済みのデータはありません）</div>');
+    }
+    L.push('</div>');
+  });
+
+  // 全室合算（複数部屋＆データありの場合のみ）
+  if(_rooms.length>1&&anyData&&Object.keys(grandMatAgg).length){
+    L.push('<h2>全室合計（材料別）</h2>');
+    L.push('<table>');
+    L.push('<tr><th>材料</th><th>規格</th><th>発注数</th><th>単位</th><th>金額</th></tr>');
+    Object.keys(grandMatAgg).forEach(function(k){
+      var m=grandMatAgg[k];
+      var qs=m.qty%1===0?String(m.qty):m.qty.toFixed(1);
+      L.push('<tr><td>'+_escHtml(m.name)+'</td><td>'+_escHtml(m.spec)+'</td><td class="num">'+qs+'</td><td>'+_escHtml(m.unit)+'</td><td class="num">¥'+m.cost.toLocaleString()+'</td></tr>');
+    });
+    L.push('<tr class="grand-row"><td colspan="4">総合計</td><td class="num">¥'+grandTotal.toLocaleString()+'</td></tr>');
+    L.push('</table>');
+  }
+  if(!anyData){
+    L.push('<div class="no-data" style="text-align:center;padding:30px 0">各部屋で計算を実行してからPDF出力してください。</div>');
+  }
+
+  L.push('</body></html>');
+  return L.join('');
+}
+
+function openPdfReport(){
+  var hasAny=_rooms.some(function(r,i){
+    var lo=(i===_curRoomIdx)?_lastOrder:(r.state&&r.state.lastOrder);
+    return lo&&lo.items&&lo.items.length;
+  });
+  if(!hasAny){alert('まず計算を実行してください。\n（少なくとも1部屋で計算結果が必要です）');return;}
+  var html=buildReportHtml();
+  var w=window.open('','genba_pdf_'+Date.now(),'width=820,height=1000');
+  if(!w){
+    alert('ポップアップがブロックされました。ブラウザの設定でこのページのポップアップを許可してから再度お試しください。');
+    return;
+  }
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+  // フォーカスを新ウィンドウへ
+  try{w.focus();}catch(e){}
+}
 function closeTsvModal(e){
   if(e&&e.target!==document.getElementById('tsv-modal'))return;
   document.getElementById('tsv-modal').classList.add('hidden');
