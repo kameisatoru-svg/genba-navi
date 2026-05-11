@@ -798,7 +798,7 @@ function _captureCurrentRoomState(){
     formInputs:formInputs,
     wall:{faceIdx:curFaceIdx,faceData:faceData,faceInputs:faceInputs,faceOpenings:faceOpenings,faceSelId:faceSelId,faceOidSeq:faceOidSeq},
     lastOrder:_lastOrder,
-    dims:prev.dims  // 部屋寸法はグローバルにないので前回値から引き継ぐ
+    dims:prev.dims||{W:3000,L:4000,H:2400}  // 部屋寸法はグローバルにないので前回値から引き継ぐ（無ければ既定）
   };
 }
 
@@ -992,7 +992,12 @@ function loadAutoSavedState(){
     if(!raw)return false;
     var data=JSON.parse(raw);
     if(!data||!data.rooms||!data.rooms.length)return false;
-    _rooms=data.rooms.map(function(r){return{name:r.name||'部屋',state:r.state||_newRoomState()};});
+    _rooms=data.rooms.map(function(r){
+      var st=r.state||_newRoomState();
+      // dims がない古いautosaveに対するガード（H値で幅が汚染されるのを防ぐ）
+      if(!st.dims)st.dims={W:3000,L:4000,H:2400};
+      return{name:r.name||'部屋',state:st};
+    });
     _curRoomIdx=Math.max(0,Math.min(data.curRoomIdx||0,_rooms.length-1));
     return true;
   }catch(e){return false;}
