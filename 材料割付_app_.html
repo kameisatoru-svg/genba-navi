@@ -955,8 +955,63 @@ function _applyDimsToCurrentRoom(dims){
   _loadRoomStateToGlobals(_rooms[_curRoomIdx].state);
   _renderRoomWorkspace(_rooms[_curRoomIdx].state);
   // 確実にDOMへ反映（setTimeoutレースを回避）
-  setTimeout(function(){_forceInjectDims(dims);},150);
+  setTimeout(function(){_forceInjectDims(dims);autoSaveState(true);},150);
 }
+
+// ══════════ 自動保存（戻る/再読込時の作業継続用） ══════════
+var _AUTOSAVE_KEY='genba_autosave';
+var _autosaveTimer=null;
+
+function autoSaveState(immediate){
+  function doSave(){
+    try{
+      if(_curRoomIdx>=0&&_rooms[_curRoomIdx])_rooms[_curRoomIdx].state=_captureCurrentRoomState();
+      var data={
+        version:1,
+        rooms:_rooms.map(function(r){return{name:r.name,state:r.state};}),
+        curRoomIdx:_curRoomIdx,
+        savedAt:new Date().toISOString()
+      };
+      localStorage.setItem(_AUTOSAVE_KEY,JSON.stringify(data));
+    }catch(e){/* quotaオーバー等は黙って失敗 */}
+  }
+  if(immediate){
+    if(_autosaveTimer){clearTimeout(_autosaveTimer);_autosaveTimer=null;}
+    doSave();
+  }else{
+    if(_autosaveTimer)clearTimeout(_autosaveTimer);
+    _autosaveTimer=setTimeout(doSave,800);
+  }
+}
+
+function loadAutoSavedState(){
+  try{
+    var raw=localStorage.getItem(_AUTOSAVE_KEY);
+    if(!raw)return false;
+    var data=JSON.parse(raw);
+    if(!data||!data.rooms||!data.rooms.length)return false;
+    _rooms=data.rooms.map(function(r){return{name:r.name||'部屋',state:r.state||_newRoomState()};});
+    _curRoomIdx=Math.max(0,Math.min(data.curRoomIdx||0,_rooms.length-1));
+    return true;
+  }catch(e){return false;}
+}
+
+function clearAutoSavedState(){try{localStorage.removeItem(_AUTOSAVE_KEY);}catch(e){}}
+
+// フォーム入力（f-*）の変化をデバウンスで自動保存
+document.addEventListener('input',function(e){
+  if(!e.target||!e.target.id)return;
+  if(e.target.id.indexOf('f-')===0)autoSaveState(false);
+});
+document.addEventListener('change',function(e){
+  if(!e.target||!e.target.id)return;
+  if(e.target.id.indexOf('f-')===0)autoSaveState(false);
+});
+
+// ページ離脱・バックグラウンド遷移時は即時保存
+window.addEventListener('beforeunload',function(){autoSaveState(true);});
+window.addEventListener('pagehide',function(){autoSaveState(true);});
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')autoSaveState(true);});
 
 function _forceInjectDims(dims){
   if(curCat==='floor'||curCat==='ceil'){
