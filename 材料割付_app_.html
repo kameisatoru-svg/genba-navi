@@ -739,6 +739,10 @@ canvas#wall-cv{touch-action:none;}
   </div>
 </div>
 
+<!-- 音声入力フローティングボタン＆フィードバック -->
+<button class="voice-btn hidden" id="voice-btn" onclick="toggleVoiceInput()" title="音声入力（タップで開始）" aria-label="音声入力">🎤</button>
+<div class="voice-feedback" id="voice-feedback"></div>
+
 <div class="scroll-area">
   <div class="cat-row">
     <button class="cat-btn ac-floor" onclick="setCat('floor',this)">床</button>
