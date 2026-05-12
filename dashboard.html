@@ -3677,9 +3677,10 @@ function bindEvents() {
     if (e.target.id === 'anken-modal') closeAnkenModal();
   });
 
-  // ESC: 案件モーダル → 取引先モーダル → 検索結果 の順に閉じる
+  // ESC: PATモーダル → 案件モーダル → 取引先モーダル → 検索結果 の順に閉じる
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
+    if ($('#pat-modal')?.classList.contains('show'))     { closePATModal();     return; }
     if ($('#anken-modal')?.classList.contains('show'))   { closeAnkenModal();   return; }
     if ($('#partner-modal')?.classList.contains('show')) { closePartnerModal(); return; }
     const sr = $('#search-results');
