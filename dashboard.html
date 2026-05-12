@@ -2106,6 +2106,213 @@ function gmailSearchUrl(q) {
   return `https://mail.google.com/mail/u/0/#search/${encodeURIComponent(q)}`;
 }
 
+/* ============================================================
+   GitHub API: data.json 書き戻し(案件台帳と localStorage 互換)
+   ============================================================ */
+const GH_REPO = 'kameisatoru-svg/genba-navi';
+const GH_FILE = 'data.json';
+const GH_API  = `https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`;
+const PAT_KEY = 'artrise_gh_pat'; // 案件台帳と同じキー(共用)
+
+// 案件編集で選べるステータス候補(案件台帳の運用候補 + data.json 実態をマージ)
+const STATUS_OPTIONS = [
+  '見積作成中', '見積提出済み', '受注済', '施工予定', '施工中',
+  '完了・請求書作成待ち', '完了(請求書作成済み)', '請求済み',
+  '入金済み', '完了', '保守管理(継続)', '中止'
+];
+
+function getPAT() { return localStorage.getItem(PAT_KEY) || ''; }
+function savePAT(t) { localStorage.setItem(PAT_KEY, t); }
+
+// PAT設定モーダルを表示
+function showPATModal(callback) {
+  let m = $('#pat-modal');
+  if (!m) {
+    m = document.createElement('div');
+    m.id = 'pat-modal';
+    m.className = 'pat-modal';
+    m.innerHTML = `
+      <div class="pat-modal-box">
+        <div class="pat-modal-title">
+          <svg class="icon"><use href="#icon-id"/></svg>GitHub Token を設定
+        </div>
+        <div class="pat-modal-desc">
+          data.jsonを編集するため、GitHub Personal Access Token が必要です。<br>
+          初回のみブラウザの <code>localStorage</code> に保存します(GitHubに送信されません)。
+          案件台帳で既に設定済みなら共用されます。
+        </div>
+        <input type="password" id="pat-input" class="pat-input" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
+        <div class="pat-modal-actions">
+          <button class="anken-edit-cancel" id="pat-cancel" type="button">キャンセル</button>
+          <button class="anken-edit-save" id="pat-confirm" type="button">
+            <svg class="icon"><use href="#icon-check-box"/></svg>保存して続ける
+          </button>
+        </div>
+      </div>`;
+    document.body.appendChild(m);
+    $('#pat-cancel').addEventListener('click', closePATModal);
+    $('#pat-confirm').addEventListener('click', confirmPAT);
+    m.addEventListener('click', (e) => { if (e.target === m) closePATModal(); });
+    $('#pat-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') confirmPAT();
+    });
+  }
+  m._callback = callback;
+  m.classList.add('show');
+  setTimeout(() => $('#pat-input')?.focus(), 80);
+}
+function closePATModal() {
+  $('#pat-modal')?.classList.remove('show');
+}
+function confirmPAT() {
+  const val = $('#pat-input')?.value.trim();
+  if (!val) { showToast('トークンを入力してください'); return; }
+  savePAT(val);
+  closePATModal();
+  const m = $('#pat-modal');
+  if (m?._callback) m._callback();
+}
+
+/* ----- 案件モーダル: クイック編集の保存処理 ----- */
+async function saveAnkenEdit(ankenKey) {
+  const pat = getPAT();
+  if (!pat) { showPATModal(() => saveAnkenEdit(ankenKey)); return; }
+
+  const statusEl = $('#anken-edit-status');
+  const newStatus  = $('#sel-anken-status')?.value;
+  const newKeiyaku = $('#sel-anken-keiyaku')?.value;
+  const nyukinSel  = $('#sel-anken-nyukin')?.value;
+  const saveBtn    = $('#anken-edit-save-btn');
+
+  statusEl.textContent = '保存中...';
+  statusEl.className   = 'anken-edit-status saving';
+  if (saveBtn) saveBtn.disabled = true;
+
+  try {
+    // 1. 現在の data.json と SHA を取得
+    const res = await fetch(GH_API, {
+      headers: { Authorization: `token ${pat}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (res.status === 401) {
+      localStorage.removeItem(PAT_KEY);
+      statusEl.textContent = '';
+      if (saveBtn) saveBtn.disabled = false;
+      showToast('トークンが無効です。再設定してください');
+      showPATModal(() => saveAnkenEdit(ankenKey));
+      return;
+    }
+    if (!res.ok) throw new Error('取得失敗 ' + res.status);
+    const fileData = await res.json();
+    const sha = fileData.sha;
+    // Base64 → UTF-8 デコード
+    const raw = atob(fileData.content.replace(/\n/g, ''));
+    const bytes = new Uint8Array(raw.length).map((_, i) => raw.charCodeAt(i));
+    const currentJson = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+
+    // 2. 案件 or 中止案件 のどちらに居るかを判定して更新
+    const findIn = (list) => list?.findIndex(p => p['案件キー'] === ankenKey) ?? -1;
+    let bucket = '案件';
+    let idx = findIn(currentJson['案件']);
+    if (idx === -1) {
+      idx = findIn(currentJson['中止案件']);
+      bucket = '中止案件';
+    }
+    if (idx === -1) throw new Error('案件が見つかりません: ' + ankenKey);
+    const target = currentJson[bucket][idx];
+
+    // ステータス更新(+中止↔案件の自動移動)
+    target['ステータス'] = newStatus;
+    if (newStatus === '中止' && bucket === '案件') {
+      currentJson['案件'].splice(idx, 1);
+      currentJson['中止案件'] = currentJson['中止案件'] || [];
+      currentJson['中止案件'].push(target);
+    } else if (newStatus !== '中止' && bucket === '中止案件') {
+      currentJson['中止案件'].splice(idx, 1);
+      currentJson['案件'] = currentJson['案件'] || [];
+      currentJson['案件'].push(target);
+    }
+
+    // 契約書ステータス
+    const kArr = Array.isArray(target['契約書']) ? target['契約書']
+      : (target['契約書'] ? [target['契約書']] : []);
+    if (kArr.length) {
+      kArr.forEach(k => { k['ステータス'] = newKeiyaku; });
+      target['契約書'] = kArr;
+    } else {
+      target['契約書'] = [{ 'ステータス': newKeiyaku }];
+    }
+
+    // 入金状況(請求配列の指定行)
+    if (nyukinSel && nyukinSel !== 'none') {
+      const match = nyukinSel.match(/^r(\d+)-(nyukin|minyukin)$/);
+      if (match) {
+        const ri = parseInt(match[1], 10);
+        const sArr = Array.isArray(target['請求']) ? target['請求']
+          : (target['請求'] ? [target['請求']] : []);
+        if (sArr[ri]) {
+          sArr[ri]['入金状況'] = match[2];
+          if (match[2] === 'nyukin' && !sArr[ri]['入金日']) {
+            sArr[ri]['入金日'] = new Date().toISOString().split('T')[0];
+          }
+          target['請求'] = sArr;
+        }
+      }
+    }
+
+    // 3. GitHub に PUT
+    const jsonStr = JSON.stringify(currentJson, null, 2);
+    const encBytes = new TextEncoder().encode(jsonStr);
+    const encChars = Array.from(encBytes).map(b => String.fromCharCode(b)).join('');
+    const newContent = btoa(encChars);
+    const putRes = await fetch(GH_API, {
+      method: 'PUT',
+      headers: { Authorization: `token ${pat}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+      body: JSON.stringify({
+        message: `dashboard更新: ${ankenKey} ステータス→${newStatus}`,
+        content: newContent,
+        sha
+      })
+    });
+    if (!putRes.ok) throw new Error('保存失敗 ' + putRes.status);
+
+    // 4. ローカル STATE を即時更新して全セクション再描画
+    STATE['案件']     = currentJson['案件']     || [];
+    STATE['中止案件'] = currentJson['中止案件'] || [];
+
+    statusEl.textContent = '✓ 保存しました(GitHub Pages反映には1〜2分かかる場合があります)';
+    statusEl.className   = 'anken-edit-status success';
+
+    renderKpi();
+    renderKanban();
+    renderTable();
+    renderReminders();
+    renderChart();
+    renderTimeline();
+    if (window.lunr) buildSearchIndex();
+
+    setTimeout(() => {
+      // モーダルが開いたままなら最新データで再描画
+      const updated = findAnken(ankenKey);
+      if (updated && $('#anken-modal')?.classList.contains('show')) {
+        showAnkenModal(updated);
+      }
+    }, 1400);
+
+  } catch (err) {
+    logError('saveAnkenEdit failed', err);
+    statusEl.textContent = 'エラー: ' + err.message;
+    statusEl.className = 'anken-edit-status error';
+  } finally {
+    if (saveBtn) saveBtn.disabled = false;
+  }
+}
+
+function toggleAnkenEditPanel() {
+  const panel = $('#anken-edit-panel');
+  if (!panel) return;
+  panel.classList.toggle('open');
+}
+
 // ステータスバッジHTML
 function statusBadge(status) {
   const m = STATUS_META[status] || { color: 'var(--text-mute)', icon: 'icon-document' };
