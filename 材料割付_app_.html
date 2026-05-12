@@ -1208,6 +1208,155 @@ function refreshPriceMasterFromServer(){
   showToast('🔄 単価マスタを再取得します...');
 }
 
+// ══════════ 音声入力（webkitSpeechRecognition） ══════════
+var _SR=null,_isListening=false,_voiceFbTimer=null;
+
+function initVoiceInput(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  var btn=document.getElementById('voice-btn');
+  if(!SR){if(btn)btn.classList.add('hidden');return;}
+  if(btn)btn.classList.remove('hidden');
+  _SR=new SR();
+  _SR.lang='ja-JP';
+  _SR.continuous=false;
+  _SR.interimResults=false;
+  _SR.maxAlternatives=1;
+  _SR.onstart=function(){
+    _isListening=true;
+    if(btn)btn.classList.add('listening');
+    showVoiceFeedback('🎤 認識中…「床/壁/天井」「幅5000」「長さ6000」「計算」など','heard',3500);
+  };
+  _SR.onend=function(){
+    _isListening=false;
+    if(btn)btn.classList.remove('listening');
+  };
+  _SR.onerror=function(e){
+    _isListening=false;
+    if(btn)btn.classList.remove('listening');
+    var msg=e.error==='not-allowed'?'マイク権限が必要です':(e.error==='no-speech'?'音声を検出できませんでした':('エラー: '+e.error));
+    showVoiceFeedback('❌ '+msg,'error',3500);
+  };
+  _SR.onresult=function(e){
+    if(e.results&&e.results[0]&&e.results[0][0]){
+      processVoiceCommand(e.results[0][0].transcript);
+    }
+  };
+}
+
+function toggleVoiceInput(){
+  if(!_SR){alert('このブラウザは音声入力に対応していません。\nAndroid Chrome 等でお試しください。');return;}
+  if(_isListening){try{_SR.stop();}catch(e){}return;}
+  try{_SR.start();}catch(e){showVoiceFeedback('❌ 起動失敗: '+e.message,'error',3000);}
+}
+
+function showVoiceFeedback(msg,type,dur){
+  var fb=document.getElementById('voice-feedback');if(!fb)return;
+  fb.textContent=msg;
+  fb.className='voice-feedback show '+(type||'');
+  if(_voiceFbTimer)clearTimeout(_voiceFbTimer);
+  _voiceFbTimer=setTimeout(function(){fb.className='voice-feedback '+(type||'');},dur||2500);
+}
+
+// 「五千」→5000などの簡易変換（音声認識が漢数字で返した場合の保険）
+function _normalizeKanjiNumbers(s){
+  // 数字記号→ASCII
+  s=s.replace(/[０-９]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);});
+  // 「千」「百」が含まれる単純パターン
+  var kanjiMap={'〇':0,'零':0,'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9};
+  // (例: 五千六百, 三千) ※簡易
+  return s.replace(/([〇零一二三四五六七八九])千([〇零一二三四五六七八九])?百?([〇零一二三四五六七八九])?十?([〇零一二三四五六七八九])?/g,function(m,a,b,c,d){
+    var n=kanjiMap[a]*1000+(b?kanjiMap[b]*100:0)+(c?kanjiMap[c]*10:0)+(d?kanjiMap[d]:0);
+    return String(n);
+  });
+}
+
+function processVoiceCommand(text){
+  var t=_normalizeKanjiNumbers((text||'').replace(/\s+/g,' ').trim());
+  showVoiceFeedback('🔊 「'+text+'」','heard',2200);
+  var applied=[];
+
+  // カテゴリ判定
+  var matchedCat=null;
+  if(/(床|ゆか|フロア)/.test(t))matchedCat='floor';
+  else if(/(壁|かべ|ウォール)/.test(t))matchedCat='wall';
+  else if(/(天井|てんじょう|シーリング)/.test(t))matchedCat='ceil';
+
+  if(matchedCat&&matchedCat!==curCat){
+    var btns=document.querySelectorAll('.cat-btn');
+    var idx={floor:0,wall:1,ceil:2}[matchedCat];
+    if(btns[idx]){setCat(matchedCat,btns[idx]);applied.push({floor:'床',wall:'壁',ceil:'天井'}[matchedCat]);}
+  }
+
+  // 数字抽出
+  function nums(s){var m=s.match(/\d+/g);return m?m.map(function(n){return parseInt(n,10);}):[];}
+
+  // 単独寸法コマンド
+  var dimDelta={};
+  var widthMatch=t.match(/(?:幅|はば|W)\s*(\d+)/);
+  if(widthMatch)dimDelta.W=parseInt(widthMatch[1],10);
+  var lengthMatch=t.match(/(?:長さ|ながさ|奥行|おくゆき|L)\s*(\d+)/);
+  if(lengthMatch)dimDelta.L=parseInt(lengthMatch[1],10);
+  var heightMatch=t.match(/(?:天井高|てんじょうだか|てんじょうこう|高さ|たかさ|H)\s*(\d+)/);
+  if(heightMatch)dimDelta.H=parseInt(heightMatch[1],10);
+
+  // 「天井 4500 6000」「5000 6000 2700」など：カテゴリ単独 or 寸法キーワード無しで2-3個の数字
+  var dimKeywordMatched=widthMatch||lengthMatch||heightMatch;
+  if(!dimKeywordMatched){
+    var allN=nums(t);
+    if(allN.length>=2){
+      dimDelta.L=allN[0];
+      dimDelta.W=allN[1];
+      if(allN.length>=3)dimDelta.H=allN[2];
+    }
+  }
+
+  // 寸法適用
+  if(Object.keys(dimDelta).length>0&&_curRoomIdx>=0&&_rooms[_curRoomIdx]){
+    var cur=_rooms[_curRoomIdx].state.dims||{W:3000,L:4000,H:2400};
+    var nd={W:dimDelta.W||cur.W,L:dimDelta.L||cur.L,H:dimDelta.H||cur.H};
+    _applyDimsToCurrentRoom(nd);
+    applied.push('寸法 W'+nd.W+'×L'+nd.L+'×H'+nd.H);
+  }
+
+  // 壁面 A/B/C/D
+  var faceMatch=t.match(/([ABCDＡ-Ｄ])\s*面/i)||t.match(/(エー|ビー|シー|ディー)\s*面/);
+  if(faceMatch){
+    var key=faceMatch[1].toUpperCase();
+    var faceMap={'A':0,'B':1,'C':2,'D':3,'Ａ':0,'Ｂ':1,'Ｃ':2,'Ｄ':3,'エー':0,'ビー':1,'シー':2,'ディー':3};
+    var fIdx=faceMap[key];
+    if(fIdx!=null){
+      if(curCat!=='wall'){
+        var wb=document.querySelectorAll('.cat-btn')[1];
+        if(wb)setCat('wall',wb);
+      }
+      setTimeout(function(){if(typeof switchFace==='function')switchFace(fIdx);},120);
+      applied.push(key+'面');
+    }
+  }
+
+  // 計算実行
+  if(/(計算|けいさん|測定|スタート)/.test(t)){
+    setTimeout(function(){
+      var sel;
+      if(curCat==='floor'){
+        sel=document.querySelector('button.calc-floor');
+      }else if(curCat==='wall'){
+        sel=document.querySelector('button.calc-wall');
+      }else{
+        sel=document.querySelector('button.calc-ceil');
+      }
+      if(sel)sel.click();
+    },300);
+    applied.push('計算');
+  }
+
+  if(applied.length){
+    showVoiceFeedback('✅ '+applied.join(' / '),'ok',2500);
+  }else{
+    showVoiceFeedback('❓ 認識できないコマンド: '+text,'error',3000);
+  }
+}
+
 function _forceInjectDims(dims){
   if(curCat==='floor'||curCat==='ceil'){
     var fL=document.getElementById('f-L');if(fL)fL.value=dims.L;
@@ -2355,6 +2504,8 @@ renderRoomTabs();
 refreshUtilIndicators();
 // 単価マスタを非同期取得（取得後に現在の部屋を自動再描画）
 if(typeof loadPriceMaster==='function')loadPriceMaster();
+// 音声入力初期化（非対応ブラウザでは自動非表示）
+if(typeof initVoiceInput==='function')initVoiceInput();
 </script>
 </body>
 </html>
