@@ -3236,6 +3236,20 @@ function showAnkenModal(a) {
     btn.addEventListener('click', () => copyToClipboard(btn.dataset.copy, '案件キーをコピーしました'));
   });
 
+  // 編集パネル: トグル / 保存 / キャンセル
+  $('#anken-edit-toggle-btn')?.addEventListener('click', () => {
+    const panel = $('#anken-edit-panel');
+    const opened = panel.classList.toggle('open');
+    $('#anken-edit-toggle-btn').setAttribute('aria-expanded', opened ? 'true' : 'false');
+  });
+  $('#anken-edit-cancel-btn')?.addEventListener('click', () => {
+    $('#anken-edit-panel')?.classList.remove('open');
+    $('#anken-edit-toggle-btn')?.setAttribute('aria-expanded', 'false');
+    const st = $('#anken-edit-status');
+    if (st) { st.textContent = ''; st.className = 'anken-edit-status'; }
+  });
+  $('#anken-edit-save-btn')?.addEventListener('click', () => saveAnkenEdit(a['案件キー']));
+
   $('#anken-modal').classList.add('show');
   $('#anken-modal').setAttribute('aria-hidden', 'false');
   lockBodyScroll(true);
