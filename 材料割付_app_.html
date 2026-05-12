@@ -1197,18 +1197,24 @@ function applyPriceMaster(master){
 function refreshPriceMasterIndicator(){
   var el=document.getElementById('price-master-badge');
   if(!el)return;
-  var txt='',cls='';
+  var ICN={
+    link:'<svg viewBox="0 0 24 24" width="11" height="11" style="vertical-align:-1px" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+    db:'<svg viewBox="0 0 24 24" width="11" height="11" style="vertical-align:-1px" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>',
+    spin:'<svg viewBox="0 0 24 24" width="11" height="11" style="vertical-align:-1px" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" stroke-opacity="0.3"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>',
+    warn:'<svg viewBox="0 0 24 24" width="11" height="11" style="vertical-align:-1px" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
+  };
+  var html='',cls='';
   switch(_priceMasterStatus){
-    case 'loading':txt='⏳ 単価マスタ取得中';cls='loading';break;
-    case 'loaded':txt='🔗 単価マスタ連携中';cls='ok';break;
-    case 'cached':txt='💾 単価マスタ（キャッシュ）';cls='ok';break;
-    case 'no-section':txt='⚠ data.jsonに単価マスタ未登録';cls='warn';break;
-    case 'error':txt='⚠ 単価マスタ取得失敗';cls='warn';break;
-    default:txt='';
+    case 'loading':html=ICN.spin+' 単価マスタ取得中';cls='loading';break;
+    case 'loaded':html=ICN.link+' 単価マスタ連携中';cls='ok';break;
+    case 'cached':html=ICN.db+' 単価マスタ（キャッシュ）';cls='ok';break;
+    case 'no-section':html=ICN.warn+' 単価マスタ未登録';cls='warn';break;
+    case 'error':html=ICN.warn+' 単価マスタ取得失敗';cls='warn';break;
+    default:html='';
   }
-  el.textContent=txt;
+  el.innerHTML=html;
   el.className='price-master-badge '+cls;
-  el.style.display=txt?'inline-block':'none';
+  el.style.display=html?'inline-block':'none';
 }
 
 function refreshPriceMasterFromServer(){
