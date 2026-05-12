@@ -486,6 +486,19 @@ canvas#wall-cv{touch-action:none;}
 .modal-copy-btn:active{background:#b0935f;}
 .modal-copy-btn.copied{background:#1a7a3a;color:#fff;}
 
+/* ══════════ 単価マスタ ステータスバッジ ══════════ */
+.price-master-badge{
+  display:inline-block;font-size:10px;padding:3px 8px;border-radius:10px;
+  font-weight:600;font-family:inherit;line-height:1.4;
+  background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.85);
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+  white-space:nowrap;
+}
+.price-master-badge.ok{background:rgba(13,110,80,0.22);color:#a5e2c8;}
+.price-master-badge.warn{background:rgba(200,120,0,0.22);color:#f0c896;}
+.price-master-badge.loading{opacity:0.7;}
+.price-master-badge:active{opacity:0.6;}
+
 /* ══════════ 部屋（ルーム）タブバー ══════════ */
 .room-bar{
   background:var(--bg);padding:8px 14px 0;flex-shrink:0;
@@ -556,7 +569,7 @@ canvas#wall-cv{touch-action:none;}
   <button class="btn-back" onclick="history.back()" title="戻る">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
   </button>
-  <div class="header-title">材料割付</div>
+  <div class="header-title">材料割付 <span class="price-master-badge" id="price-master-badge" onclick="refreshPriceMasterFromServer()" title="タップで再取得" style="display:none"></span></div>
   <div class="header-cat" id="header-cat">床</div>
   <button class="btn-zumen" onclick="openZumenModal()">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M2 4h20M6 4v16M18 4v16M6 12h12"/></svg>
@@ -1019,6 +1032,138 @@ document.addEventListener('change',function(e){
 window.addEventListener('beforeunload',function(){autoSaveState(true);});
 window.addEventListener('pagehide',function(){autoSaveState(true);});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')autoSaveState(true);});
+
+// ══════════ 単価マスタ連携（data.json） ══════════
+/* data.json に以下のセクションを追加してください：
+{
+  "単価マスタ": {
+    "天井": {
+      "プラスターボード": {"price": 900, "BL": 1820, "BW": 910, "loss": 10},
+      "ジプトーン": {"price": 600, "BL": 910, "BW": 455, "loss": 10},
+      "岩綿板": {"price": 300, "BL": 600, "BW": 600, "loss": 5}
+    },
+    "壁": {
+      "ビニールクロス": {"price": 300, "BL": 920, "loss": 10, "REPEAT": 0},
+      "塗装": {"price": 800, "COAT": 2, "loss": 10},
+      "硬質塩ビシート": {"price": 1800, "BL": 910, "BW": 2420, "loss": 5}
+    },
+    "床": {
+      "Pタイル": {"price": 500, "BL": 457, "BW": 457, "loss": 10},
+      "塩ビタイル": {"price": 400, "BL": 300, "BW": 300, "loss": 10},
+      "フロアタイル": {"price": 800, "BL": 600, "BW": 300, "loss": 10},
+      "カーペットタイル": {"price": 1200, "BL": 500, "BW": 500, "loss": 5},
+      "フローリング": {"price": 1200, "BL": 1818, "BW": 303, "loss": 10},
+      "無垢材": {"price": 2000, "BL": 1800, "BW": 120, "loss": 15}
+    }
+  }
+}
+*/
+var _DATA_JSON_URL='https://kameisatoru-svg.github.io/genba-navi/data.json';
+var _PRICE_CACHE_KEY='genba_price_master_cache';
+var _PRICE_CACHE_TTL=6*60*60*1000; // 6時間
+var _priceMaster=null;
+var _priceMasterStatus='idle'; // idle|loading|cached|loaded|no-section|error
+var _priceMasterFetchedAt=null;
+
+function loadPriceMaster(){
+  // キャッシュ参照
+  try{
+    var cached=JSON.parse(localStorage.getItem(_PRICE_CACHE_KEY)||'null');
+    if(cached&&cached.ts&&(Date.now()-cached.ts<_PRICE_CACHE_TTL)&&cached.master){
+      _priceMaster=cached.master;_priceMasterStatus='cached';_priceMasterFetchedAt=cached.ts;
+      applyPriceMaster(_priceMaster);
+      refreshPriceMasterIndicator();
+      // バックグラウンドで最新版もチェック（古いキャッシュを使いつつ非同期で更新）
+    }
+  }catch(e){}
+  // ネットワーク取得
+  _priceMasterStatus='loading';refreshPriceMasterIndicator();
+  fetch(_DATA_JSON_URL,{cache:'no-cache'}).then(function(r){
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return r.json();
+  }).then(function(data){
+    var master=data&&data['単価マスタ'];
+    if(master){
+      _priceMaster=master;_priceMasterFetchedAt=Date.now();
+      try{localStorage.setItem(_PRICE_CACHE_KEY,JSON.stringify({ts:_priceMasterFetchedAt,master:master}));}catch(e){}
+      applyPriceMaster(master);
+      _priceMasterStatus='loaded';
+    }else{
+      _priceMasterStatus='no-section';
+    }
+    refreshPriceMasterIndicator();
+  }).catch(function(err){
+    _priceMasterStatus=(_priceMaster?'cached':'error');
+    refreshPriceMasterIndicator();
+  });
+}
+
+function applyPriceMaster(master){
+  if(!master)return;
+  // 天井・壁: cats[catKey].mats[].fields[].def[i] を上書き
+  [['ceil','天井'],['wall','壁']].forEach(function(pair){
+    var catKey=pair[0],mapKey=pair[1],src=master[mapKey];
+    if(!src||!cats[catKey])return;
+    cats[catKey].mats.forEach(function(m){
+      var info=src[m.name];if(!info)return;
+      m.fields.forEach(function(f){
+        var keys=f.row||f.row3||[];
+        keys.forEach(function(r,i){
+          var v=null;
+          if(r.k==='PRICE'&&info.price!=null)v=info.price;
+          else if(r.k==='LOSS'&&info.loss!=null)v=info.loss;
+          else if(r.k==='BL'&&info.BL!=null)v=info.BL;
+          else if(r.k==='BW'&&info.BW!=null)v=info.BW;
+          else if(r.k==='COAT'&&info.COAT!=null)v=info.COAT;
+          else if(r.k==='REPEAT'&&info.REPEAT!=null)v=info.REPEAT;
+          if(v!=null)f.def[i]=v;
+        });
+      });
+    });
+  });
+  // 床タイル/フローリング: tileDefaults / floorDefaults を上書き
+  if(master.床){
+    Object.keys(master.床).forEach(function(name){
+      var info=master.床[name];
+      function applyTo(obj){
+        if(!obj)return;
+        if(info.price!=null)obj.PRICE=info.price;
+        if(info.BL!=null)obj.BL=info.BL;
+        if(info.BW!=null)obj.BW=info.BW;
+        if(info.loss!=null)obj.LOSS=info.loss;
+      }
+      if(typeof tileDefaults==='object'&&tileDefaults[name])applyTo(tileDefaults[name]);
+      if(typeof floorDefaults==='object'&&floorDefaults[name])applyTo(floorDefaults[name]);
+    });
+  }
+  // 現在の部屋を再描画して単価変更を反映
+  if(_curRoomIdx>=0&&_rooms[_curRoomIdx]&&typeof _renderRoomWorkspace==='function'){
+    setTimeout(function(){_renderRoomWorkspace(_rooms[_curRoomIdx].state);},10);
+  }
+}
+
+function refreshPriceMasterIndicator(){
+  var el=document.getElementById('price-master-badge');
+  if(!el)return;
+  var txt='',cls='';
+  switch(_priceMasterStatus){
+    case 'loading':txt='⏳ 単価マスタ取得中';cls='loading';break;
+    case 'loaded':txt='🔗 単価マスタ連携中';cls='ok';break;
+    case 'cached':txt='💾 単価マスタ（キャッシュ）';cls='ok';break;
+    case 'no-section':txt='⚠ data.jsonに単価マスタ未登録';cls='warn';break;
+    case 'error':txt='⚠ 単価マスタ取得失敗';cls='warn';break;
+    default:txt='';
+  }
+  el.textContent=txt;
+  el.className='price-master-badge '+cls;
+  el.style.display=txt?'inline-block':'none';
+}
+
+function refreshPriceMasterFromServer(){
+  try{localStorage.removeItem(_PRICE_CACHE_KEY);}catch(e){}
+  _priceMaster=null;loadPriceMaster();
+  showToast('🔄 単価マスタを再取得します...');
+}
 
 function _forceInjectDims(dims){
   if(curCat==='floor'||curCat==='ceil'){
@@ -2165,6 +2310,8 @@ _loadRoomStateToGlobals(_initSt);
 _renderRoomWorkspace(_initSt);
 renderRoomTabs();
 refreshUtilIndicators();
+// 単価マスタを非同期取得（取得後に現在の部屋を自動再描画）
+if(typeof loadPriceMaster==='function')loadPriceMaster();
 </script>
 </body>
 </html>
