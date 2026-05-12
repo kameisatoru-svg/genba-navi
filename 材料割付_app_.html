@@ -441,8 +441,17 @@ canvas#wall-cv{touch-action:none;}
   font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;
 }
 .util-btn:active{background:var(--bg);}
-.util-btn .util-ic{font-size:14px;line-height:1;}
+.util-btn .util-ic{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;line-height:1;}
+.util-btn .util-ic svg{display:block;width:100%;height:100%;}
 .util-btn.has-data{border-color:var(--accent);color:var(--navy);}
+.util-btn.has-data .util-ic{color:var(--accent);}
+
+/* SVG共通サイズ */
+.modal-head svg{display:block;flex-shrink:0;}
+.room-icon-btn svg{display:block;}
+.history-del svg{display:block;}
+.vw-zoom-btn svg{display:block;}
+.voice-btn svg{display:block;}
 
 /* ── TSV/履歴モーダル ── */
 .modal-box.modal-wide{max-width:480px;}
