@@ -1649,7 +1649,7 @@ function buildReportHtml(){
   L.push('.room-block{page-break-inside:avoid;margin-bottom:10px}');
   L.push('@media print{.bar,.pad{display:none}body{padding:0}.pad{padding-top:0}}');
   L.push('</style></head><body>');
-  L.push('<div class="bar"><div class="bt">📄 材料発注書プレビュー</div><div><button class="btn-close" onclick="window.close()">閉じる</button><button class="btn-print" onclick="window.print()">🖨 印刷 / PDF保存</button></div></div>');
+  L.push('<div class="bar"><div class="bt"><svg viewBox="0 0 24 24" width="16" height="16" style="vertical-align:-3px;margin-right:6px" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>材料発注書プレビュー</div><div><button class="btn-close" onclick="window.close()">閉じる</button><button class="btn-print" onclick="window.print()"><svg viewBox="0 0 24 24" width="14" height="14" style="vertical-align:-2px;margin-right:4px" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>印刷 / PDF保存</button></div></div>');
   L.push('<div class="pad"></div>');
   L.push('<h1>材料発注書</h1>');
   L.push('<div class="meta">作成日: '+today+' ／ 部屋数: '+_rooms.length+'部屋 ／ 対象: '+_escHtml(roomNames)+'</div>');
