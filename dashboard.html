@@ -3141,7 +3141,65 @@ function showAnkenModal(a) {
        </div>`
     : '';
 
-  $('#anken-modal-body').innerHTML = basicHtml + docsHtml + costHtml + memoHtml;
+  // クイック編集パネル
+  const currentStatus  = a['ステータス'] || '';
+  const kArr           = Array.isArray(a['契約書']) ? a['契約書'] : (a['契約書'] ? [a['契約書']] : []);
+  const currentKeiyaku = kArr[0]?.['ステータス'] || '未締結';
+  const sList          = Array.isArray(a['請求']) ? a['請求'] : (a['請求'] ? [a['請求']] : []);
+
+  // ステータス候補(現状の値が候補リストに無ければ追加)
+  const statusOpts = STATUS_OPTIONS.includes(currentStatus) || !currentStatus
+    ? STATUS_OPTIONS : [...STATUS_OPTIONS, currentStatus];
+
+  const editHtml = `
+    <div class="modal-section">
+      <button class="anken-edit-toggle" id="anken-edit-toggle-btn" type="button" aria-expanded="false">
+        <svg class="icon"><use href="#icon-document"/></svg>クイック編集
+      </button>
+      <div class="anken-edit-panel" id="anken-edit-panel">
+        <div class="anken-edit-panel-title">
+          <svg class="icon"><use href="#icon-document"/></svg>クイック編集
+        </div>
+        <div class="anken-edit-row">
+          <span class="anken-edit-label">案件ステータス</span>
+          <select class="anken-edit-select" id="sel-anken-status">
+            ${statusOpts.map(s => `<option value="${escapeHtml(s)}"${currentStatus === s ? ' selected' : ''}>${escapeHtml(s)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="anken-edit-row">
+          <span class="anken-edit-label">契約書</span>
+          <select class="anken-edit-select" id="sel-anken-keiyaku">
+            <option value="未締結"${currentKeiyaku === '未締結' ? ' selected' : ''}>未締結</option>
+            <option value="締結済み"${currentKeiyaku === '締結済み' ? ' selected' : ''}>締結済み</option>
+          </select>
+        </div>
+        <div class="anken-edit-row">
+          <span class="anken-edit-label">入金状況</span>
+          <select class="anken-edit-select" id="sel-anken-nyukin">
+            ${sList.length === 0
+              ? `<option value="none">請求書なし</option>`
+              : sList.map((r, i) => {
+                  const isNyu = r['入金状況'] === 'nyukin';
+                  const label = r['書類番号'] ? `${r['書類番号']}` : `請求${i + 1}`;
+                  return `
+                    <option value="r${i}-minyukin"${!isNyu ? ' selected' : ''}>${escapeHtml(label)}：未入金</option>
+                    <option value="r${i}-nyukin"${isNyu ? ' selected' : ''}>${escapeHtml(label)}：入金済み</option>
+                  `;
+                }).join('')}
+          </select>
+        </div>
+        <div class="anken-edit-actions">
+          <button class="anken-edit-save" id="anken-edit-save-btn" type="button">
+            <svg class="icon"><use href="#icon-check-circle"/></svg>GitHub に保存
+          </button>
+          <button class="anken-edit-cancel" id="anken-edit-cancel-btn" type="button">閉じる</button>
+        </div>
+        <div class="anken-edit-status" id="anken-edit-status"></div>
+      </div>
+    </div>
+  `;
+
+  $('#anken-modal-body').innerHTML = basicHtml + docsHtml + costHtml + memoHtml + editHtml;
 
   // アクションボタン
   const key = a['案件キー'];
