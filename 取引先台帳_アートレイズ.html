@@ -364,6 +364,7 @@ async function loadData(){
       type: v.type || [],
       basic: v.basic || {},
       contact: v.contact || {},
+      contacts: Array.isArray(v.contacts) ? v.contacts : [],
       memo: v.memo || '',
       search: v.search || '',
       cases: computeCases(v['略称'])
