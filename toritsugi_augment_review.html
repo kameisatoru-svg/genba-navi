@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>取引先補完候補レビュー - 2026/5/13</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Hiragino Sans", "Yu Gothic UI", sans-serif; margin: 0; padding: 20px; background: #f5f5f5; color: #222; }
+  h1 { font-size: 20px; margin: 0 0 10px; }
+  .lead { font-size: 13px; color: #666; margin-bottom: 20px; line-height: 1.6; }
+  .controls { background: #fff; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); position: sticky; top: 10px; z-index: 100; }
+  .controls button { background: #1a7a30; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-right: 8px; font-size: 13px; }
+  .controls button:hover { background: #155a23; }
+  .controls .secondary { background: #555; }
+  .controls .secondary:hover { background: #333; }
+  
+  .toritsugi-card { background: #fff; margin-bottom: 16px; border-radius: 8px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border-left: 4px solid #ccc; }
+  .toritsugi-card.has-match { border-left-color: #1a7a30; }
+  .toritsugi-card.no-match { border-left-color: #bbb; }
+  
+  .card-header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 12px; }
+  .card-title { font-size: 16px; font-weight: bold; }
+  .card-id { color: #888; font-size: 12px; margin-right: 8px; }
+  .match-count { font-size: 12px; color: #666; }
+  
+  .section-title { font-size: 12px; color: #555; font-weight: bold; margin: 10px 0 4px; border-bottom: 1px dotted #ccc; padding-bottom: 2px; }
+  
+  .current-table, .match-table { width: 100%; font-size: 12px; border-collapse: collapse; margin-bottom: 8px; }
+  .current-table td { padding: 3px 6px; border-bottom: 1px dotted #eee; }
+  .current-table td.label { width: 100px; color: #666; background: #f9f9f9; }
+  .current-table td.val { font-family: ui-monospace, Menlo, monospace; }
+  .current-table td.val.empty { color: #bbb; font-style: italic; }
+  
+  .match-card { background: #f8fbf3; border: 1px solid #cfe2c0; border-radius: 6px; padding: 10px; margin-bottom: 8px; font-size: 12px; }
+  .match-card .hit-by { font-size: 11px; color: #1a7a30; margin-bottom: 4px; font-weight: bold; }
+  .match-card .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; }
+  .match-card .meta-row { display: flex; }
+  .match-card .meta-label { color: #666; min-width: 60px; }
+  .match-card .meta-val { font-family: ui-monospace, Menlo, monospace; word-break: break-all; }
+  
+  .adopt-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding-top: 6px; border-top: 1px dashed #ccc; }
+  .adopt-row label { font-size: 12px; }
+  .adopt-row select { font-size: 12px; padding: 2px 4px; }
+  
+  .notes-area { margin-top: 8px; }
+  .notes-area textarea { width: 100%; min-height: 50px; font-size: 12px; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; }
+  
+  .no-match-msg { color: #999; font-style: italic; padding: 8px; }
+  
+  #output-area { background: #fff; padding: 16px; border-radius: 8px; margin-top: 20px; display: none; }
+  #output-area textarea { width: 100%; min-height: 400px; font-family: ui-monospace, Menlo, monospace; font-size: 11px; padding: 8px; border: 1px solid #ccc; }
+</style>
+</head>
+<body>
+
+<h1>取引先補完候補レビュー</h1>
+<div class="lead">
+  Eight CSV (2026/3/15 1391件) ↔ data.json 取引先マスター T-001〜T-020 のマッチング結果。<br>
+  各取引先カードで「採用区分」を選択 → 下部の「JSON出力」ボタンで反映用JSONを取得 → Claudeへアップで data.json 自動更新。<br>
+  <b>採用区分</b>: 
+  <span style="color:#1a7a30">contact更新</span>(既存空欄を埋める) / 
+  <span style="color:#f39c12">contacts追加</span>(別担当として追加) / 
+  <span style="color:#999">却下</span>(無視・ノイズ) / 
+  <span style="color:#1a6fc4">要確認</span>(後で個別判断)
+</div>
+
+<div class="controls">
+  <button onclick="exportJSON()">▼ JSON出力</button>
+  <button class="secondary" onclick="document.getElementById('output-area').style.display='block'">出力エリアを開く</button>
+  <span style="font-size:12px; color:#666; margin-left:16px;">作業日: 2026/5/13</span>
+</div>
+
+<div class="toritsugi-card has-match" data-toritsugi-id="T-001">
+  <div class="card-header">
+    <div><span class="card-id">T-001</span><span class="card-title">玉寿会 - 社会福祉法人 玉寿会(さくら苑)</span></div>
+    <div class="match-count">Eightヒット: 2件</div>
+  </div>
+  <div class="section-title">📋 現状 data.json</div>
+  <table class="current-table">
+    <tr><td class="label">basic.contact</td><td class="val">西 俊至 様(事務課長)</td>        <td class="label">basic.rep</td><td class="val">山田 勝徳 理事長</td></tr>
+    <tr><td class="label">tel</td><td class="val">096-875-1139</td>        <td class="label">mobile</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">fax</td><td class="val empty">(空)</td>        <td class="label">mail</td><td class="val">nishi@sakura-en.com</td></tr>
+    <tr><td class="label">address</td><td colspan="3" class="val">熊本県玉名市伊倉北方1533</td></tr>
+    <tr><td class="label">touroku</td><td class="val empty">(空)</td>        <td class="label">furikomi</td><td class="val empty">(空)</td></tr>
+  </table>
+  <div class="section-title">🎯 Eight CSV ヒット (2件)</div>
+  <div class="match-card" data-match-idx="0">
+    <div class="hit-by">▶ 会社名:玉寿会, 氏名:西俊至, mail:sakura-en.com</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">社会福祉法人玉寿会</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">西俊至</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val"> 事務課長</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">0968-75-1139</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">0968-72-1171</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">nishi@sakura-en.com</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8650041 熊本県玉名市伊倉北方1533</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2025/11/17</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-001-0">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="1">
+    <div class="hit-by">▶ 会社名:玉寿会, 氏名:西俊至, mail:sakura-en.com</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">社会福祉法人玉寿会</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">西俊至</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val"> 事務課長</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">0968-75-1139</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">0968-72-1171</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">nishi@sakura-en.com</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8650041 熊本県玉名市伊倉北方1533</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2025/11/25</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-001-1">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="notes-area">
+    <div class="section-title">📝 メモ・手動追加情報</div>
+    <textarea data-notes-id="T-001" placeholder="ここに気付いた点・手動追加したい情報・要確認事項などを記入"></textarea>
+  </div>
+</div>
+
+<div class="toritsugi-card no-match" data-toritsugi-id="T-002">
+  <div class="card-header">
+    <div><span class="card-id">T-002</span><span class="card-title">松村 - 松村整骨院(愛の治療院)</span></div>
+    <div class="match-count">Eightヒット: 0件</div>
+  </div>
+  <div class="section-title">📋 現状 data.json</div>
+  <table class="current-table">
+    <tr><td class="label">basic.contact</td><td class="val">松村 様</td>        <td class="label">basic.rep</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">tel</td><td class="val empty">(空)</td>        <td class="label">mobile</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">fax</td><td class="val empty">(空)</td>        <td class="label">mail</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">address</td><td colspan="3" class="val">大分県別府市(詳細未登録)</td></tr>
+    <tr><td class="label">touroku</td><td class="val empty">(空)</td>        <td class="label">furikomi</td><td class="val empty">(空)</td></tr>
+  </table>
+  <div class="no-match-msg">Eight CSV にマッチなし。今後の名刺取得を待つ or 個別に補完。</div>
+  <div class="notes-area">
+    <div class="section-title">📝 メモ・手動追加情報</div>
+    <textarea data-notes-id="T-002" placeholder="ここに気付いた点・手動追加したい情報・要確認事項などを記入"></textarea>
+  </div>
+</div>
+
+<div class="toritsugi-card has-match" data-toritsugi-id="T-003">
+  <div class="card-header">
+    <div><span class="card-id">T-003</span><span class="card-title">信和 - 株式会社 信和</span></div>
+    <div class="match-count">Eightヒット: 5件</div>
+  </div>
+  <div class="section-title">📋 現状 data.json</div>
+  <table class="current-table">
+    <tr><td class="label">basic.contact</td><td class="val">加藤 博和 様</td>        <td class="label">basic.rep</td><td class="val">清家 和子</td></tr>
+    <tr><td class="label">tel</td><td class="val">0977-21-9640</td>        <td class="label">mobile</td><td class="val">090-3607-5427</td></tr>
+    <tr><td class="label">fax</td><td class="val">0977-21-9669</td>        <td class="label">mail</td><td class="val">h-katou@ctb.ne.jp</td></tr>
+    <tr><td class="label">address</td><td colspan="3" class="val">〒874-0942 大分県別府市千代町6-3</td></tr>
+    <tr><td class="label">touroku</td><td class="val empty">(空)</td>        <td class="label">furikomi</td><td class="val empty">(空)</td></tr>
+  </table>
+  <div class="section-title">🎯 Eight CSV ヒット (5件)</div>
+  <div class="match-card" data-match-idx="0">
+    <div class="hit-by">▶ 会社名:株式会社信和, tel:0977-21-9640</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">株式会社信和冷暖房</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">内田和宏</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">工務課 </span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">0977-21-9640</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">0977-21-9669</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">shinwa@ctb.ne.jp</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8740945 大分県別府市浜町3-6</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2017/01/16</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-003-0">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="1">
+    <div class="hit-by">▶ 会社名:株式会社信和, tel:0977-21-9640</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">株式会社信和冷暖房</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">内田和宏</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">工務課 </span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">0977-21-9640</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">0977-21-9669</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">shinwa@ctb.ne.jp</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8740945 大分県別府市浜町3-6</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2018/04/15</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-003-1">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="2">
+    <div class="hit-by">▶ 会社名:株式会社信和, 氏名:加藤博和, tel:0977-21-9640</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">株式会社信和</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">加藤博和</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val"> 専務取締役</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">0977-21-9640</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">090-3607-5427</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">0977-21-9669</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">h-katou@ctb.ne.jp</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8740942 大分県別府市千代町6-3</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2019/01/17</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-003-2">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="3">
+    <div class="hit-by">▶ 会社名:株式会社信和, tel:0977-21-9640</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">株式会社信和</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">萱島英雄</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">工務課 </span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">0977-21-9640</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">090-8417-5084</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">0977-21-9669</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">shinwa@ctb.ne.jp</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8740942 大分県別府市千代町6-3</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2025/11/17</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-003-3">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="4">
+    <div class="hit-by">▶ 会社名:株式会社信和, tel:0977-21-9640</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">株式会社信和</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">萱島英雄</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">工務課 </span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">0977-21-9640</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">090-8417-5084</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">0977-21-9669</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">shinwa@ctb.ne.jp</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8740942 大分県別府市千代町6-3</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2026/02/27</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-003-4">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="notes-area">
+    <div class="section-title">📝 メモ・手動追加情報</div>
+    <textarea data-notes-id="T-003" placeholder="ここに気付いた点・手動追加したい情報・要確認事項などを記入"></textarea>
+  </div>
+</div>
+
+<div class="toritsugi-card no-match" data-toritsugi-id="T-004">
+  <div class="card-header">
+    <div><span class="card-id">T-004</span><span class="card-title">小田 - 小田工業</span></div>
+    <div class="match-count">Eightヒット: 0件</div>
+  </div>
+  <div class="section-title">📋 現状 data.json</div>
+  <table class="current-table">
+    <tr><td class="label">basic.contact</td><td class="val empty">(空)</td>        <td class="label">basic.rep</td><td class="val">小田 勝美</td></tr>
+    <tr><td class="label">tel</td><td class="val">0977-66-4198</td>        <td class="label">mobile</td><td class="val">090-3320-5931</td></tr>
+    <tr><td class="label">fax</td><td class="val empty">(空)</td>        <td class="label">mail</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">address</td><td colspan="3" class="val">別府市中須賀東町5-3組</td></tr>
+    <tr><td class="label">touroku</td><td class="val">T3-8103-2472-2011</td>        <td class="label">furikomi</td><td class="val">大分県信用組合 上人支店(普通)4034903</td></tr>
+  </table>
+  <div class="no-match-msg">Eight CSV にマッチなし。今後の名刺取得を待つ or 個別に補完。</div>
+  <div class="notes-area">
+    <div class="section-title">📝 メモ・手動追加情報</div>
+    <textarea data-notes-id="T-004" placeholder="ここに気付いた点・手動追加したい情報・要確認事項などを記入"></textarea>
+  </div>
+</div>
+
+<div class="toritsugi-card no-match" data-toritsugi-id="T-005">
+  <div class="card-header">
+    <div><span class="card-id">T-005</span><span class="card-title">塩出 - 塩出木工</span></div>
+    <div class="match-count">Eightヒット: 0件</div>
+  </div>
+  <div class="section-title">📋 現状 data.json</div>
+  <table class="current-table">
+    <tr><td class="label">basic.contact</td><td class="val empty">(空)</td>        <td class="label">basic.rep</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">tel</td><td class="val empty">(空)</td>        <td class="label">mobile</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">fax</td><td class="val empty">(空)</td>        <td class="label">mail</td><td class="val">y-siodew@ctb.ne.jp</td></tr>
+    <tr><td class="label">address</td><td colspan="3" class="val empty">(空)</td></tr>
+    <tr><td class="label">touroku</td><td class="val empty">(空)</td>        <td class="label">furikomi</td><td class="val empty">(空)</td></tr>
+  </table>
+  <div class="no-match-msg">Eight CSV にマッチなし。今後の名刺取得を待つ or 個別に補完。</div>
+  <div class="notes-area">
+    <div class="section-title">📝 メモ・手動追加情報</div>
+    <textarea data-notes-id="T-005" placeholder="ここに気付いた点・手動追加したい情報・要確認事項などを記入"></textarea>
+  </div>
+</div>
+
+<div class="toritsugi-card no-match" data-toritsugi-id="T-006">
+  <div class="card-header">
+    <div><span class="card-id">T-006</span><span class="card-title">中津屋 - 有限会社 インテリア中津屋</span></div>
+    <div class="match-count">Eightヒット: 0件</div>
+  </div>
+  <div class="section-title">📋 現状 data.json</div>
+  <table class="current-table">
+    <tr><td class="label">basic.contact</td><td class="val">佐藤</td>        <td class="label">basic.rep</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">tel</td><td class="val">0978-63-0081</td>        <td class="label">mobile</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">fax</td><td class="val">0978-63-1833</td>        <td class="label">mail</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">address</td><td colspan="3" class="val">〒873-0001 杵築市煙硝倉1306-1</td></tr>
+    <tr><td class="label">touroku</td><td class="val">T2320002015061</td>        <td class="label">furikomi</td><td class="val empty">(空)</td></tr>
+  </table>
+  <div class="no-match-msg">Eight CSV にマッチなし。今後の名刺取得を待つ or 個別に補完。</div>
+  <div class="notes-area">
+    <div class="section-title">📝 メモ・手動追加情報</div>
+    <textarea data-notes-id="T-006" placeholder="ここに気付いた点・手動追加したい情報・要確認事項などを記入"></textarea>
+  </div>
+</div>
+
+<div class="toritsugi-card no-match" data-toritsugi-id="T-007">
+  <div class="card-header">
+    <div><span class="card-id">T-007</span><span class="card-title">いわい - いわい装飾</span></div>
+    <div class="match-count">Eightヒット: 0件</div>
+  </div>
+  <div class="section-title">📋 現状 data.json</div>
+  <table class="current-table">
+    <tr><td class="label">basic.contact</td><td class="val">岩井 健一</td>        <td class="label">basic.rep</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">tel</td><td class="val empty">(空)</td>        <td class="label">mobile</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">fax</td><td class="val empty">(空)</td>        <td class="label">mail</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">address</td><td colspan="3" class="val">〒874-0912 別府市南須賀1組</td></tr>
+    <tr><td class="label">touroku</td><td class="val">T2810104242784</td>        <td class="label">furikomi</td><td class="val empty">(空)</td></tr>
+  </table>
+  <div class="no-match-msg">Eight CSV にマッチなし。今後の名刺取得を待つ or 個別に補完。</div>
+  <div class="notes-area">
+    <div class="section-title">📝 メモ・手動追加情報</div>
+    <textarea data-notes-id="T-007" placeholder="ここに気付いた点・手動追加したい情報・要確認事項などを記入"></textarea>
+  </div>
+</div>
+
+<div class="toritsugi-card has-match" data-toritsugi-id="T-008">
+  <div class="card-header">
+    <div><span class="card-id">T-008</span><span class="card-title">ウインズ - 有限会社ウインズコーポレーション</span></div>
+    <div class="match-count">Eightヒット: 1件</div>
+  </div>
+  <div class="section-title">📋 現状 data.json</div>
+  <table class="current-table">
+    <tr><td class="label">basic.contact</td><td class="val empty">(空)</td>        <td class="label">basic.rep</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">tel</td><td class="val empty">(空)</td>        <td class="label">mobile</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">fax</td><td class="val empty">(空)</td>        <td class="label">mail</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">address</td><td colspan="3" class="val empty">(空)</td></tr>
+    <tr><td class="label">touroku</td><td class="val">(補完待ち)</td>        <td class="label">furikomi</td><td class="val empty">(空)</td></tr>
+  </table>
+  <div class="section-title">🎯 Eight CSV ヒット (1件)</div>
+  <div class="match-card" data-match-idx="0">
+    <div class="hit-by">▶ 会社名:ウィンズ・コーポレーション, 会社名:ウィンズ</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">ウィンズ・コーポレーション</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">北城博己</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">大分店・企画管理部 </span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">0977-23-2367</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">0977-23-8786</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">winds.co@nifty.com</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8740909 大分県別府市田の湯町9-27</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2014/10/15</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-008-0">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="notes-area">
+    <div class="section-title">📝 メモ・手動追加情報</div>
+    <textarea data-notes-id="T-008" placeholder="ここに気付いた点・手動追加したい情報・要確認事項などを記入"></textarea>
+  </div>
+</div>
+
+<div class="toritsugi-card has-match" data-toritsugi-id="T-009">
+  <div class="card-header">
+    <div><span class="card-id">T-009</span><span class="card-title">信用産業 - 株式会社信用産業</span></div>
+    <div class="match-count">Eightヒット: 4件</div>
+  </div>
+  <div class="section-title">📋 現状 data.json</div>
+  <table class="current-table">
+    <tr><td class="label">basic.contact</td><td class="val empty">(空)</td>        <td class="label">basic.rep</td><td class="val">江田 至 様</td></tr>
+    <tr><td class="label">tel</td><td class="val empty">(空)</td>        <td class="label">mobile</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">fax</td><td class="val empty">(空)</td>        <td class="label">mail</td><td class="val">i.kohda@ssg.co.jp</td></tr>
+    <tr><td class="label">address</td><td colspan="3" class="val empty">(空)</td></tr>
+    <tr><td class="label">touroku</td><td class="val empty">(空)</td>        <td class="label">furikomi</td><td class="val empty">(空)</td></tr>
+  </table>
+  <div class="section-title">🎯 Eight CSV ヒット (4件)</div>
+  <div class="match-card" data-match-idx="0">
+    <div class="hit-by">▶ 会社名:信用産業, mail:ssg.co.jp</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">株式会社　信用産業</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">江田　至</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">本部 代表取締役</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">0977-26-5577</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">i.kohda@ssg.co.jp</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">874-0919 大分県別府市石垣東10-1-41</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val">http://www.ssg.co.jp/</span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2022/01/20</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-009-0">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="1">
+    <div class="hit-by">▶ 会社名:信用産業, mail:ssg.co.jp</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">株式会社信用産業</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">平松亘</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">大分駅前店 店長</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-513-5531</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-513-5532</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">hiramatu@ssg.co.jp</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8700035 大分県大分市中央町1-1-11</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val">http://www.ssg.co.jp/</span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2019/01/17</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-009-1">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="2">
+    <div class="hit-by">▶ 会社名:信用産業, mail:ssg.co.jp</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">株式会社信用産業</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">安藤裕一朗</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">営業支援部 </span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">0977-26-5577</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">0977-26-0780</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">andoh@ssg.co.jp</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8740919 大分県別府市石垣東10-1-41</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val">http://www.ssg.co.jp/</span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2022/01/13</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-009-2">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="3">
+    <div class="hit-by">▶ 会社名:信用産業, mail:ssg.co.jp</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">株式会社信用産業</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">安藤裕一朗</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">営業支援部 </span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">0977-26-5577</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">0977-26-0780</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">andoh@ssg.co.jp</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8740919 大分県別府市石垣東10-1-41</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val">http://www.ssg.co.jp/</span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2022/01/20</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-009-3">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="notes-area">
+    <div class="section-title">📝 メモ・手動追加情報</div>
+    <textarea data-notes-id="T-009" placeholder="ここに気付いた点・手動追加したい情報・要確認事項などを記入"></textarea>
+  </div>
+</div>
+
+<div class="toritsugi-card has-match" data-toritsugi-id="T-010">
+  <div class="card-header">
+    <div><span class="card-id">T-010</span><span class="card-title">バイオ - 株式会社バイオメディカル</span></div>
+    <div class="match-count">Eightヒット: 3件</div>
+  </div>
+  <div class="section-title">📋 現状 data.json</div>
+  <table class="current-table">
+    <tr><td class="label">basic.contact</td><td class="val">坂本 様</td>        <td class="label">basic.rep</td><td class="val">衛藤 和三</td></tr>
+    <tr><td class="label">tel</td><td class="val empty">(空)</td>        <td class="label">mobile</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">fax</td><td class="val empty">(空)</td>        <td class="label">mail</td><td class="val">biomedical.sakamoto@gmail.com</td></tr>
+    <tr><td class="label">address</td><td colspan="3" class="val empty">(空)</td></tr>
+    <tr><td class="label">touroku</td><td class="val empty">(空)</td>        <td class="label">furikomi</td><td class="val empty">(空)</td></tr>
+  </table>
+  <div class="section-title">🎯 Eight CSV ヒット (3件)</div>
+  <div class="match-card" data-match-idx="0">
+    <div class="hit-by">▶ 会社名:バイオメディカル</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">株式会社バイオメディカル</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">下田博久</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">営業第1課 課長</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-583-4824</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">080-1738-6241</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-583-4825</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">sales@biomedical.co.jp</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8795511 大分県由布市挾間町古野塚ノ久保1100-3</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2015/03/08</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-010-0">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="1">
+    <div class="hit-by">▶ 会社名:バイオメディカル</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">株式会社バイオメディカル</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">大久保隆</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">営業第1課 係長</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-583-4824</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">080-1759-5223</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-583-4825</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">bio-sales11@docomo.ne.jp</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8795400 大分県由布市狭間町古野塚ノ久保1100-3</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2016/09/08</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-010-1">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="2">
+    <div class="hit-by">▶ 会社名:バイオメディカル</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">株式会社バイオメディカル</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">大久保隆</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">営業第1課 係長</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-583-4824</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">080-1759-5223</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-583-4825</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">bio-sales11@docomo.ne.jp</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8795511 大分県由布市挾間町古野塚ノ久保1100-3</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2018/04/15</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-010-2">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="notes-area">
+    <div class="section-title">📝 メモ・手動追加情報</div>
+    <textarea data-notes-id="T-010" placeholder="ここに気付いた点・手動追加したい情報・要確認事項などを記入"></textarea>
+  </div>
+</div>
+
+<div class="toritsugi-card has-match" data-toritsugi-id="T-011">
+  <div class="card-header">
+    <div><span class="card-id">T-011</span><span class="card-title">ネクサス - 株式会社ネクサスプラザ</span></div>
+    <div class="match-count">Eightヒット: 1件</div>
+  </div>
+  <div class="section-title">📋 現状 data.json</div>
+  <table class="current-table">
+    <tr><td class="label">basic.contact</td><td class="val">力武 太郎 様(代表取締役)</td>        <td class="label">basic.rep</td><td class="val">力武 太郎</td></tr>
+    <tr><td class="label">tel</td><td class="val empty">(空)</td>        <td class="label">mobile</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">fax</td><td class="val empty">(空)</td>        <td class="label">mail</td><td class="val">t-rikitake@nexusplaza.com</td></tr>
+    <tr><td class="label">address</td><td colspan="3" class="val">大分県大分市府内町3丁目7番7号</td></tr>
+    <tr><td class="label">touroku</td><td class="val empty">(空)</td>        <td class="label">furikomi</td><td class="val empty">(空)</td></tr>
+  </table>
+  <div class="section-title">🎯 Eight CSV ヒット (1件)</div>
+  <div class="match-card" data-match-idx="0">
+    <div class="hit-by">▶ 会社名:ネクサスプラザ, 氏名:力武太郎, mail:nexusplaza.com</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">株式会社ネクサスプラザ</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">力武太郎</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val"> 代表取締役</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-537-1115</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-537-3452</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">t-rikitake@nexusplaza.com</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8700021 大分県大分市府内町3-7-7</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2014/10/15</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-011-0">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="notes-area">
+    <div class="section-title">📝 メモ・手動追加情報</div>
+    <textarea data-notes-id="T-011" placeholder="ここに気付いた点・手動追加したい情報・要確認事項などを記入"></textarea>
+  </div>
+</div>
+
+<div class="toritsugi-card has-match" data-toritsugi-id="T-012">
+  <div class="card-header">
+    <div><span class="card-id">T-012</span><span class="card-title">未来 - 未来システム熊本</span></div>
+    <div class="match-count">Eightヒット: 1件</div>
+  </div>
+  <div class="section-title">📋 現状 data.json</div>
+  <table class="current-table">
+    <tr><td class="label">basic.contact</td><td class="val">綾部 圭祐</td>        <td class="label">basic.rep</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">tel</td><td class="val">090-4358-0576</td>        <td class="label">mobile</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">fax</td><td class="val empty">(空)</td>        <td class="label">mail</td><td class="val">mirai_system@oregano.ocn.ne.jp</td></tr>
+    <tr><td class="label">address</td><td colspan="3" class="val">〒861-8035 熊本県熊本市東区御領5丁目3-13</td></tr>
+    <tr><td class="label">touroku</td><td class="val empty">(空)</td>        <td class="label">furikomi</td><td class="val empty">(空)</td></tr>
+  </table>
+  <div class="section-title">🎯 Eight CSV ヒット (1件)</div>
+  <div class="match-card" data-match-idx="0">
+    <div class="hit-by">▶ 会社名:未来システム, 氏名:綾部圭祐</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">株式会社未来システム</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">綾部圭祐</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">福岡営業所 代表取締役</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">092-408-2531</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">090-4358-0576</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">092-408-2532</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">mirai_system@oregano.ocn.ne.jp</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8180012 福岡県筑紫野市大字天山505-1</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2018/04/15</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-012-0">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="notes-area">
+    <div class="section-title">📝 メモ・手動追加情報</div>
+    <textarea data-notes-id="T-012" placeholder="ここに気付いた点・手動追加したい情報・要確認事項などを記入"></textarea>
+  </div>
+</div>
+
+<div class="toritsugi-card has-match" data-toritsugi-id="T-013">
+  <div class="card-header">
+    <div><span class="card-id">T-013</span><span class="card-title">島津 - 株式会社島津製作所</span></div>
+    <div class="match-count">Eightヒット: 6件</div>
+  </div>
+  <div class="section-title">📋 現状 data.json</div>
+  <table class="current-table">
+    <tr><td class="label">basic.contact</td><td class="val">竹村 勝利</td>        <td class="label">basic.rep</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">tel</td><td class="val empty">(空)</td>        <td class="label">mobile</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">fax</td><td class="val empty">(空)</td>        <td class="label">mail</td><td class="val">ktake@shimadzu.co.jp</td></tr>
+    <tr><td class="label">address</td><td colspan="3" class="val empty">(空)</td></tr>
+    <tr><td class="label">touroku</td><td class="val empty">(空)</td>        <td class="label">furikomi</td><td class="val empty">(空)</td></tr>
+  </table>
+  <div class="section-title">🎯 Eight CSV ヒット (6件)</div>
+  <div class="match-card" data-match-idx="0">
+    <div class="hit-by">▶ mail:shimadzu.co.jp</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">島津メディカルシステムズ株式会社</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">新垣貴三</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">九州支店 営業課 大分営業所 主任</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-500-8930</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">090-6655-8893</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-500-8921</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">tarakaki@ms.shimadzu.co.jp</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8700029 大分県大分市高砂町1-30S-FORT高砂町202号</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val">https://www.shimadzu.co.jp/ms/</span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2025/01/09</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-013-0">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="1">
+    <div class="hit-by">▶ mail:shimadzu.co.jp</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">島津メディカルシステムズ株式会社</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">井上大陽</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">九州支店 営業課 大分営業所 </span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-543-5930</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-543-5372</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">taiyo78@ms.shimadzu.co.jp</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8700855 大分県大分市大字豊饒176-1</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val">http://www.shimadzu.co.jp/ms/</span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2014/10/15</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-013-1">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="2">
+    <div class="hit-by">▶ 会社名:島津製作所, 氏名:竹村勝利, mail:shimadzu.co.jp</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">株式会社島津製作所</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">竹村勝利</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">医用機器営業部 所長</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-543-5370</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">090-1515-9291</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-543-5372</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">ktake@shimadzu.co.jp</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">870-0855 大分市大字豊饒176-1</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val">http://www.med.shimadzu.co.jp</span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2014/10/17</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-013-2">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="3">
+    <div class="hit-by">▶ mail:shimadzu.co.jp</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">島津メディカルシステムズ株式会社</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">竹下隆至</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">カスタマーサポートセンター 九州支店 支店長</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">092-686-8800</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">092-686-8801</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">ttake@ms.shimadzu.co.jp</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8120039 福岡県福岡市博多区冷泉町4-20島津博多ビル6F</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val">http://www.shimadzu.co.jp/ms/</span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2019/01/17</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-013-3">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="4">
+    <div class="hit-by">▶ 会社名:島津製作所, 氏名:竹村勝利, mail:shimadzu.co.jp</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">株式会社島津製作所</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">竹村勝利</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">医用機器営業部 大分医用営業所 所長</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-500-8920</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">090-1515-9291</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-500-8921</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">ktake@shimadzu.co.jp</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8700029 大分県大分市高砂町1-30S-FORT高砂町202号</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val">http://www.med.shimadzu.co.jp</span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2022/02/27</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-013-4">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="5">
+    <div class="hit-by">▶ mail:shimadzu.co.jp</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">島津メディカルシステムズ株式会社</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">岩﨑祐介</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">九州支店 大分営業所 主任</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-500-8930</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-500-8921</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">yuusuke@ms.shimadzu.co.jp</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8700029 大分県大分市高砂町1-30S-FORT高砂町202号</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2024/04/24</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-013-5">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="notes-area">
+    <div class="section-title">📝 メモ・手動追加情報</div>
+    <textarea data-notes-id="T-013" placeholder="ここに気付いた点・手動追加したい情報・要確認事項などを記入"></textarea>
+  </div>
+</div>
+
+<div class="toritsugi-card no-match" data-toritsugi-id="T-014">
+  <div class="card-header">
+    <div><span class="card-id">T-014</span><span class="card-title">平 - 平エンジニアリング</span></div>
+    <div class="match-count">Eightヒット: 0件</div>
+  </div>
+  <div class="section-title">📋 現状 data.json</div>
+  <table class="current-table">
+    <tr><td class="label">basic.contact</td><td class="val empty">(空)</td>        <td class="label">basic.rep</td><td class="val">平方 聡</td></tr>
+    <tr><td class="label">tel</td><td class="val">080-1787-4584</td>        <td class="label">mobile</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">fax</td><td class="val empty">(空)</td>        <td class="label">mail</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">address</td><td colspan="3" class="val">熊本県熊本市東区月出7-3-114-201</td></tr>
+    <tr><td class="label">touroku</td><td class="val empty">(空)</td>        <td class="label">furikomi</td><td class="val empty">(空)</td></tr>
+  </table>
+  <div class="no-match-msg">Eight CSV にマッチなし。今後の名刺取得を待つ or 個別に補完。</div>
+  <div class="notes-area">
+    <div class="section-title">📝 メモ・手動追加情報</div>
+    <textarea data-notes-id="T-014" placeholder="ここに気付いた点・手動追加したい情報・要確認事項などを記入"></textarea>
+  </div>
+</div>
+
+<div class="toritsugi-card no-match" data-toritsugi-id="T-015">
+  <div class="card-header">
+    <div><span class="card-id">T-015</span><span class="card-title">古長 - 古長</span></div>
+    <div class="match-count">Eightヒット: 0件</div>
+  </div>
+  <div class="section-title">📋 現状 data.json</div>
+  <table class="current-table">
+    <tr><td class="label">basic.contact</td><td class="val empty">(空)</td>        <td class="label">basic.rep</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">tel</td><td class="val empty">(空)</td>        <td class="label">mobile</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">fax</td><td class="val empty">(空)</td>        <td class="label">mail</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">address</td><td colspan="3" class="val empty">(空)</td></tr>
+    <tr><td class="label">touroku</td><td class="val empty">(空)</td>        <td class="label">furikomi</td><td class="val empty">(空)</td></tr>
+  </table>
+  <div class="no-match-msg">Eight CSV にマッチなし。今後の名刺取得を待つ or 個別に補完。</div>
+  <div class="notes-area">
+    <div class="section-title">📝 メモ・手動追加情報</div>
+    <textarea data-notes-id="T-015" placeholder="ここに気付いた点・手動追加したい情報・要確認事項などを記入"></textarea>
+  </div>
+</div>
+
+<div class="toritsugi-card has-match" data-toritsugi-id="T-016">
+  <div class="card-header">
+    <div><span class="card-id">T-016</span><span class="card-title">古賀 - 古賀美装</span></div>
+    <div class="match-count">Eightヒット: 1件</div>
+  </div>
+  <div class="section-title">📋 現状 data.json</div>
+  <table class="current-table">
+    <tr><td class="label">basic.contact</td><td class="val">古賀 様</td>        <td class="label">basic.rep</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">tel</td><td class="val empty">(空)</td>        <td class="label">mobile</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">fax</td><td class="val empty">(空)</td>        <td class="label">mail</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">address</td><td colspan="3" class="val empty">(空)</td></tr>
+    <tr><td class="label">touroku</td><td class="val empty">(空)</td>        <td class="label">furikomi</td><td class="val empty">(空)</td></tr>
+  </table>
+  <div class="section-title">🎯 Eight CSV ヒット (1件)</div>
+  <div class="match-card" data-match-idx="0">
+    <div class="hit-by">▶ 会社名:古賀美装</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">古賀美装</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">古賀雄治</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val"> 代表</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-599-6175</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">090-3078-5726</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-599-6175</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val"></span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8700115 大分県大分市大字関園932-10</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2014/10/15</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-016-0">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="notes-area">
+    <div class="section-title">📝 メモ・手動追加情報</div>
+    <textarea data-notes-id="T-016" placeholder="ここに気付いた点・手動追加したい情報・要確認事項などを記入"></textarea>
+  </div>
+</div>
+
+<div class="toritsugi-card has-match" data-toritsugi-id="T-017">
+  <div class="card-header">
+    <div><span class="card-id">T-017</span><span class="card-title">佐藤 - 佐藤株式会社</span></div>
+    <div class="match-count">Eightヒット: 16件</div>
+  </div>
+  <div class="section-title">📋 現状 data.json</div>
+  <table class="current-table">
+    <tr><td class="label">basic.contact</td><td class="val">與品 皓一郎 様</td>        <td class="label">basic.rep</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">tel</td><td class="val empty">(空)</td>        <td class="label">mobile</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">fax</td><td class="val empty">(空)</td>        <td class="label">mail</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">address</td><td colspan="3" class="val empty">(空)</td></tr>
+    <tr><td class="label">touroku</td><td class="val">T9290001022345</td>        <td class="label">furikomi</td><td class="val empty">(空)</td></tr>
+  </table>
+  <div class="section-title">🎯 Eight CSV ヒット (16件)</div>
+  <div class="match-card" data-match-idx="0">
+    <div class="hit-by">▶ 会社名:佐藤株式会社</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">佐藤株式会社</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">三代悠貴</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">営業 </span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-556-5160</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">080-3758-0644</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-551-7586</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">y-mishiro@comfortor-satoh.com</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">870-0156 大分市高城新町12-8</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val">http://www.comfortor-satoh.com</span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2014/10/07</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-017-0">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="1">
+    <div class="hit-by">▶ 会社名:佐藤株式会社</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">佐藤株式会社</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">中野修平</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val"> 営業主任</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-556-5160</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">080-3969-5111</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-551-7586</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">s-nakano@comfortor-satoh.com</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8700156 大分県大分市高城新町12-8</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val">http://www.comfortor-satoh.com</span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2015/06/30</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-017-1">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="2">
+    <div class="hit-by">▶ 会社名:佐藤株式会社</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">佐藤株式会社</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">江島健太郎</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">大分営業所 営業 </span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-556-5160</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">080-3969-5157</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-551-7586</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">k-eshima@comfortor-satoh.com</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8700156 大分県大分市高城新町12-8</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val">http://www.comfortor-satoh.com</span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2016/09/09</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-017-2">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="3">
+    <div class="hit-by">▶ 会社名:佐藤株式会社</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">佐藤株式会社</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">馬見塚将典</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">大分営業所 営業 </span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-556-5160</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-551-7586</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">m-mamizuka@comfortor-satoh.com</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8700915 大分県大分市花高松3-5-4</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val">http://www.comfortor-satoh.com</span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2018/04/15</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-017-3">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="4">
+    <div class="hit-by">▶ 会社名:佐藤株式会社</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">佐藤株式会社</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">波多江健太</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">営業 </span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">092-461-0141</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">080-3969-5142</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">092-461-0108</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">k-hatae@comfortor-satoh.com</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8120893 福岡県福岡市博多区那珂4-26-28</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val">http://www.comfortor-satoh.com</span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2018/04/15</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-017-4">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="5">
+    <div class="hit-by">▶ 会社名:佐藤株式会社</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">佐藤株式会社</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">江島健太郎</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">営業 </span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-556-5160</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">080-3969-5157</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-551-7586</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">k-eshima@comfortor-satoh.com</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8700156 大分県大分市高城新町12-8</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val">http://www.comfortor-satoh.com</span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2018/04/15</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-017-5">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="6">
+    <div class="hit-by">▶ 会社名:佐藤株式会社</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">佐藤株式会社</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">宮崎隆</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">開発課 係長</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">0942-33-1231</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">080-3969-5162</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">0942-31-0550</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">t-miyazaki@comfortor-satoh.com</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8300017 福岡県久留米市日吉町17-22</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val">http://www.comfortor-satoh.com</span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2014/10/15</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-017-6">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="7">
+    <div class="hit-by">▶ 会社名:佐藤株式会社</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">佐藤株式会社</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">野田雅人</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val"> 所長</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-556-5160</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">080-3969-5112</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-551-7586</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">m-noda@comfortor-satoh.info</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8700915 大分県大分市花高松3-5-4</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2022/01/11</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-017-7">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="8">
+    <div class="hit-by">▶ 会社名:佐藤株式会社</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">佐藤株式会社</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">諸永賢太</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">営業 係長</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-556-5160</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">080-3969-5149</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-551-7586</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">k-moronaga@comfortor-satoh.info</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8700915 大分県大分市花高松3-5-4</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2022/01/11</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-017-8">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="9">
+    <div class="hit-by">▶ 会社名:佐藤株式会社</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">佐藤株式会社</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">野田雅人</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val"> 所長</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-556-5160</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">080-3969-5112</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-551-7586</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">m-noda@comfortor-satoh.info</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8700915 大分県大分市花高松3-5-4</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2022/01/13</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-017-9">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="10">
+    <div class="hit-by">▶ 会社名:佐藤株式会社</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">佐藤株式会社</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">諸永賢太</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val"> 営業係長</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-556-5160</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">080-3969-5149</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-551-7586</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">k-moronaga@comfortor-satoh.info</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8700915 大分県大分市花高松3-5-4</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2022/01/13</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-017-10">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="11">
+    <div class="hit-by">▶ 会社名:佐藤株式会社</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">佐藤株式会社</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">野田雅人</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val"> 所長</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-556-5160</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">080-3969-5112</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-551-7586</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">m-noda@comfortor-satoh.info</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8700915 大分県大分市花高松3-5-4</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2022/01/18</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-017-11">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="12">
+    <div class="hit-by">▶ 会社名:佐藤株式会社</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">佐藤株式会社</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">牟田勇二</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">営業部 部長</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">092-461-0141</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">080-3969-5130</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">092-461-0108</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">y-muta@comfortor-satoh.info</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8120893 福岡県福岡市博多区那珂4-26-28</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2022/04/19</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-017-12">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="13">
+    <div class="hit-by">▶ 会社名:佐藤株式会社</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">佐藤株式会社</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">野田雅人</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val"> 所長</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-556-5160</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">080-3969-5112</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-551-7586</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">m-noda@comfortor-satoh.info</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8700915 大分県大分市花高松3-5-4</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2022/04/19</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-017-13">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="14">
+    <div class="hit-by">▶ 会社名:佐藤株式会社, 氏名:與品皓一郎</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">佐藤株式会社</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">與品皓一郎</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">営業 </span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-556-5160</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">080-3969-5132</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-551-7586</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">k-yoshina@comfortor-satoh.info</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8700915 大分県大分市花高松3-5-4</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2023/09/06</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-017-14">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="15">
+    <div class="hit-by">▶ 会社名:佐藤株式会社, 氏名:與品皓一郎</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">佐藤株式会社</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">與品皓一郎</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">営業 </span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-556-5160</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">080-3969-5132</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-551-7586</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">k-yoshina@comfortor-satoh.info</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8700915 大分県大分市花高松3-5-4</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2024/04/24</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-017-15">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="notes-area">
+    <div class="section-title">📝 メモ・手動追加情報</div>
+    <textarea data-notes-id="T-017" placeholder="ここに気付いた点・手動追加したい情報・要確認事項などを記入"></textarea>
+  </div>
+</div>
+
+<div class="toritsugi-card has-match" data-toritsugi-id="T-018">
+  <div class="card-header">
+    <div><span class="card-id">T-018</span><span class="card-title">エムエスビルダー - 株式会社エムエスビルダー</span></div>
+    <div class="match-count">Eightヒット: 2件</div>
+  </div>
+  <div class="section-title">📋 現状 data.json</div>
+  <table class="current-table">
+    <tr><td class="label">basic.contact</td><td class="val">古宮 純一 様</td>        <td class="label">basic.rep</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">tel</td><td class="val empty">(空)</td>        <td class="label">mobile</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">fax</td><td class="val empty">(空)</td>        <td class="label">mail</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">address</td><td colspan="3" class="val empty">(空)</td></tr>
+    <tr><td class="label">touroku</td><td class="val">T8320001015718</td>        <td class="label">furikomi</td><td class="val empty">(空)</td></tr>
+  </table>
+  <div class="section-title">🎯 Eight CSV ヒット (2件)</div>
+  <div class="match-card" data-match-idx="0">
+    <div class="hit-by">▶ 氏名:古宮純一</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">株式会社大分ビルダー</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">古宮純一</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val"> 代表取締役</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">0120-6655-89</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">090-3321-9326</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">0978-62-3499</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">info@oitabuilder.co.jp</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">873-0005 大分県杵築市大字猪尾702</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val">http://www.oitabuilder.co.jp</span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2014/10/07</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-018-0">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="match-card" data-match-idx="1">
+    <div class="hit-by">▶ 会社名:エムエスビルダー</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">株式会社エムエスビルダー</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">鴛海弘隆</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val">メンテナンス事業部 ドローン調査課 課長 日本ドローン協会公認ドローンインストラクター</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">097-535-8110</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">090-7535-6852</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">097-535-8120</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">oshinomi@msbuilder.co.jp</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8700029 大分県大分市高砂町3-5ビルダービル5F</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val">http://www.oitabuilder.co.jp</span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2019/01/17</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-018-1">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="notes-area">
+    <div class="section-title">📝 メモ・手動追加情報</div>
+    <textarea data-notes-id="T-018" placeholder="ここに気付いた点・手動追加したい情報・要確認事項などを記入"></textarea>
+  </div>
+</div>
+
+<div class="toritsugi-card has-match" data-toritsugi-id="T-019">
+  <div class="card-header">
+    <div><span class="card-id">T-019</span><span class="card-title">穴井 - 株式会社 穴井電機</span></div>
+    <div class="match-count">Eightヒット: 1件</div>
+  </div>
+  <div class="section-title">📋 現状 data.json</div>
+  <table class="current-table">
+    <tr><td class="label">basic.contact</td><td class="val empty">(空)</td>        <td class="label">basic.rep</td><td class="val">穴井 伸一</td></tr>
+    <tr><td class="label">tel</td><td class="val">0977-73-2313</td>        <td class="label">mobile</td><td class="val">090-1512-6109</td></tr>
+    <tr><td class="label">fax</td><td class="val">0977-72-2314</td>        <td class="label">mail</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">address</td><td colspan="3" class="val">〒879-1504 速見郡日出町大神1745-1</td></tr>
+    <tr><td class="label">touroku</td><td class="val">T4320001008691</td>        <td class="label">furikomi</td><td class="val">大分銀行 日出支店 普通 5344799</td></tr>
+  </table>
+  <div class="section-title">🎯 Eight CSV ヒット (1件)</div>
+  <div class="match-card" data-match-idx="0">
+    <div class="hit-by">▶ 会社名:穴井電機, 氏名:穴井伸一, tel:0977-73-2313</div>
+    <div class="meta">
+      <div class="meta-row"><span class="meta-label">会社名</span><span class="meta-val">株式会社 穴井電機</span></div>
+      <div class="meta-row"><span class="meta-label">氏名</span><span class="meta-val">穴井伸一</span></div>
+      <div class="meta-row"><span class="meta-label">役職</span><span class="meta-val"> 代表取締役</span></div>
+      <div class="meta-row"><span class="meta-label">TEL会社</span><span class="meta-val">0977-73-2313</span></div>
+      <div class="meta-row"><span class="meta-label">TEL直通</span><span class="meta-val"></span></div>
+      <div class="meta-row"><span class="meta-label">携帯</span><span class="meta-val">090-1512-6109</span></div>
+      <div class="meta-row"><span class="meta-label">FAX</span><span class="meta-val">0977-72-2314</span></div>
+      <div class="meta-row"><span class="meta-label">mail</span><span class="meta-val">shin@anaidenki.com</span></div>
+      <div class="meta-row" style="grid-column:1/-1;"><span class="meta-label">住所</span><span class="meta-val">8791504 大分県速見郡日出町大字大神1745-1</span></div>
+      <div class="meta-row"><span class="meta-label">URL</span><span class="meta-val">http://anaidenki.com</span></div>
+      <div class="meta-row"><span class="meta-label">交換日</span><span class="meta-val">2017/10/11</span></div>
+    </div>
+    <div class="adopt-row">
+      <label>採用区分:</label>
+      <select data-action-id="T-019-0">
+        <option value="reject" selected>却下(無視・ノイズ等)</option>
+        <option value="contact_update">contact更新(主担当・空欄を埋める)</option>
+        <option value="contacts_add">contacts追加(別担当として追加)</option>
+        <option value="review">要確認(後で個別判断)</option>
+      </select>
+    </div>
+  </div>
+  <div class="notes-area">
+    <div class="section-title">📝 メモ・手動追加情報</div>
+    <textarea data-notes-id="T-019" placeholder="ここに気付いた点・手動追加したい情報・要確認事項などを記入"></textarea>
+  </div>
+</div>
+
+<div class="toritsugi-card no-match" data-toritsugi-id="T-020">
+  <div class="card-header">
+    <div><span class="card-id">T-020</span><span class="card-title">Laugh - 有限会社Laugh</span></div>
+    <div class="match-count">Eightヒット: 0件</div>
+  </div>
+  <div class="section-title">📋 現状 data.json</div>
+  <table class="current-table">
+    <tr><td class="label">basic.contact</td><td class="val">工藤 麻美 様</td>        <td class="label">basic.rep</td><td class="val">工藤 麻美</td></tr>
+    <tr><td class="label">tel</td><td class="val">0977-21-5266</td>        <td class="label">mobile</td><td class="val empty">(空)</td></tr>
+    <tr><td class="label">fax</td><td class="val empty">(空)</td>        <td class="label">mail</td><td class="val">bow-momi@laughgarden.jp</td></tr>
+    <tr><td class="label">address</td><td colspan="3" class="val">〒874-0920 大分県別府市北浜2丁目6-6 2F</td></tr>
+    <tr><td class="label">touroku</td><td class="val empty">(空)</td>        <td class="label">furikomi</td><td class="val empty">(空)</td></tr>
+  </table>
+  <div class="no-match-msg">Eight CSV にマッチなし。今後の名刺取得を待つ or 個別に補完。</div>
+  <div class="notes-area">
+    <div class="section-title">📝 メモ・手動追加情報</div>
+    <textarea data-notes-id="T-020" placeholder="ここに気付いた点・手動追加したい情報・要確認事項などを記入"></textarea>
+  </div>
+</div>
+
+
+<div id="output-area">
+  <h3 style="margin-top:0;">JSON出力</h3>
+  <p style="font-size:12px; color:#666;">下記をコピーしてClaudeのチャットに貼り付ければdata.jsonに反映されます。</p>
+  <textarea id="output-json" readonly></textarea>
+</div>
+
+<script>
+function exportJSON() {
+  const result = {};
+  document.querySelectorAll('.toritsugi-card').forEach(card => {
+    const tId = card.getAttribute('data-toritsugi-id');
+    const actions = [];
+    card.querySelectorAll('select[data-action-id]').forEach(sel => {
+      const idx = sel.getAttribute('data-action-id').split('-').pop();
+      const val = sel.value;
+      if (val !== 'reject') {
+        const matchCard = card.querySelector(`.match-card[data-match-idx="${idx}"]`);
+        const meta = {};
+        matchCard.querySelectorAll('.meta-row').forEach(row => {
+          const label = row.querySelector('.meta-label').textContent.trim();
+          const value = row.querySelector('.meta-val').textContent.trim();
+          if (value) meta[label] = value;
+        });
+        actions.push({ action: val, match_idx: parseInt(idx), data: meta });
+      }
+    });
+    const notes = card.querySelector('textarea[data-notes-id]').value.trim();
+    if (actions.length > 0 || notes) {
+      result[tId] = { actions, notes };
+    }
+  });
+  
+  const json = JSON.stringify(result, null, 2);
+  document.getElementById('output-json').value = json;
+  document.getElementById('output-area').style.display = 'block';
+  document.getElementById('output-area').scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
