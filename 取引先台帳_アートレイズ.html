@@ -266,6 +266,13 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
       </svg>
       <span class="filter-dot"></span>
     </button>
+    <button class="filter-toggle-btn" id="vendor-meishi-btn" onclick="openMeishiRegister()" aria-label="名刺登録" title="名刺画像から自動登録">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="6" width="18" height="13" rx="2"/>
+        <circle cx="9" cy="12" r="2"/>
+        <path d="M13 11 L18 11 M13 14 L17 14"/>
+      </svg>
+    </button>
     <button class="filter-toggle-btn" id="vendor-new-btn" onclick="vendorEditor.openNew()" aria-label="新規取引先" title="新規取引先">
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
         <line x1="11" y1="5" x2="11" y2="17"/>
@@ -788,6 +795,12 @@ function openVendorMerge(id){
   const v = VENDORS.find(x => x.id === id);
   if(!v){ alert(id + ' が見つかりません'); return; }
   vendorEditor.openMerge(toCanonicalVendor(v));
+}
+
+/* 名刺登録モーダル起動（既存業者照合のためVENDORSを正規形で渡す） */
+function openMeishiRegister(){
+  const canonicalVendors = VENDORS.map(v => toCanonicalVendor(v));
+  vendorEditor.openMeishiRegister(canonicalVendors);
 }
 
 /* Eight CSV を読み込んで全業者の重複候補数を計算 → 再描画 */
