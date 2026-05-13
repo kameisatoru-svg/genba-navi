@@ -1270,17 +1270,73 @@
     });
   }
 
+  /* 画像をリサイズ・JPEG圧縮（Anthropic 5MB制限対策） */
+  async function resizeImageToBlob(file, maxLong, quality){
+    const url = URL.createObjectURL(file);
+    const img = await new Promise((resolve, reject) => {
+      const i = new Image();
+      i.onload = () => resolve(i);
+      i.onerror = reject;
+      i.src = url;
+    });
+    URL.revokeObjectURL(url);
+    let scale = 1;
+    const longSide = Math.max(img.naturalWidth, img.naturalHeight);
+    if(longSide > maxLong) scale = maxLong / longSide;
+    const w = Math.round(img.naturalWidth * scale);
+    const h = Math.round(img.naturalHeight * scale);
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, w, h);
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if(!blob) reject(new Error('画像のJPEG変換に失敗'));
+        else resolve(blob);
+      }, 'image/jpeg', quality);
+    });
+  }
+
+  /* OCR送信前に5MB以下になるまで段階的に圧縮 */
+  async function prepareImageForOcr(file){
+    const SIZE_LIMIT = 4_500_000;  // 5MB制限に対して余裕を持たせる
+    // 元から小さい JPEG はそのまま
+    if(file.size <= SIZE_LIMIT && file.type === 'image/jpeg'){
+      return { blob: file, mediaType: 'image/jpeg', resized: false };
+    }
+    // 段階的リサイズ
+    const steps = [
+      { maxLong: 1568, quality: 0.85 },
+      { maxLong: 1568, quality: 0.7 },
+      { maxLong: 1200, quality: 0.75 },
+      { maxLong: 1000, quality: 0.7 },
+      { maxLong:  800, quality: 0.65 },
+    ];
+    for(const s of steps){
+      const blob = await resizeImageToBlob(file, s.maxLong, s.quality);
+      if(blob.size <= SIZE_LIMIT){
+        return { blob, mediaType: 'image/jpeg', resized: true, info: s, finalSize: blob.size };
+      }
+    }
+    throw new Error('5MB以下に圧縮できませんでした');
+  }
+
   async function ocrBusinessCard(file){
     let apiKey = getAnthropicKey();
     if(!apiKey){
       apiKey = await promptAnthropicKey();
       if(!apiKey) throw new Error('APIキー未設定');
     }
-    const mediaType = file.type || 'image/jpeg';
-    if(!['image/jpeg','image/png','image/webp','image/gif'].includes(mediaType)){
-      throw new Error(`非対応の画像形式: ${mediaType}`);
+    if(!['image/jpeg','image/png','image/webp','image/gif'].includes(file.type)){
+      throw new Error(`非対応の画像形式: ${file.type}`);
     }
-    const b64 = await fileToBase64(file);
+
+    const prep = await prepareImageForOcr(file);
+    if(prep.resized){
+      console.log('[OCR] 画像を圧縮:', file.size, '→', prep.finalSize, prep.info);
+    }
+    const b64 = await fileToBase64(prep.blob);
 
     const body = {
       model: OCR_MODEL,
@@ -1288,7 +1344,7 @@
       messages: [{
         role: 'user',
         content: [
-          { type: 'image', source: { type: 'base64', media_type: mediaType, data: b64 } },
+          { type: 'image', source: { type: 'base64', media_type: prep.mediaType, data: b64 } },
           { type: 'text', text: OCR_PROMPT },
         ],
       }],
