@@ -1680,14 +1680,16 @@
       injectCss();
     },
     openEdit(vendor){ openEditModal(vendor, 'edit'); },
-    openNew(){
-      openEditModal({
+    openNew(prefilled){
+      // 任意の初期値を受け取れる（Eight CSV行 / OCR結果からの新規登録などに使う）
+      const base = {
         id:'', '略称':'', '正式名称':'',
         rel:[], type:[],
         basic:{contact:'',rep:''},
         contact:{tel:'',mobile:'',fax:'',mail:'',address:'',touroku:'',furikomi:''},
-        memo:'', search:'',
-      }, 'new');
+        contacts:[], memo:'', search:'',
+      };
+      openEditModal(Object.assign(base, prefilled || {}), 'new');
     },
     openMerge(vendor){ openMergeModal(vendor); },
     openMeishiRegister(vendors){ openMeishiRegister(vendors); },
