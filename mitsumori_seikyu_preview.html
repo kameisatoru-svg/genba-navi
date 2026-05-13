@@ -406,7 +406,7 @@ tr.dragging{opacity:0.4;}
         <div class="fgroup"><label id="label-docNo">見積番号</label><input id="mitsumoriNo" type="text" value="AR-26-XXX-M1" oninput="render()"></div>
         <div class="fgroup"><label>発行日</label><input id="hakkoDate" type="date" oninput="render()"></div>
       </div>
-      <div class="fgroup" id="shiharai-wrap" style="display:none;"><label>お支払期限</label><input id="shiharaiDate" type="date" oninput="render()"></div>
+      <div class="fgroup" id="shiharai-wrap"><label id="label-shiharai">有効期限</label><input id="shiharaiDate" type="date" oninput="render()"><div style="font-size:10px;color:var(--sub);margin-top:2px;" id="shiharai-hint">未入力時は発行日＋30日で自動計算されます</div></div>
       <div class="fgroup"><label>工事件名</label><input id="kojimei" type="text" value="" placeholder="例：〇〇邸 外壁塗装工事" oninput="render()"></div>
       <div class="fgroup"><label>施工場所</label><input id="seshubasho" type="text" value="" placeholder="例：大分県別府市〇〇" oninput="render()"></div>
       <div class="fgroup" id="koki-wrap" style="display:none;"><label>工事期間</label><input id="koki" type="text" value="" oninput="render()" placeholder="例：2026/4/22 または 2026/4/1〜2026/4/30"></div>
@@ -657,8 +657,12 @@ function switchDocType(type){
     }
   }
 
-  // 支払期限入力欄：請求書時のみ表示
-  document.getElementById('shiharai-wrap').style.display = (type==='seikyu') ? '' : 'none';
+  // 支払期限／有効期限入力欄：常時表示・ラベルだけ切り替え
+  document.getElementById('shiharai-wrap').style.display = '';
+  document.getElementById('label-shiharai').textContent = (type==='seikyu') ? 'お支払期限' : '有効期限';
+  document.getElementById('shiharai-hint').textContent = (type==='seikyu')
+    ? '未入力時は翌月末で自動計算されます'
+    : '未入力時は発行日＋30日で自動計算されます';
   // 工事期間入力欄：請求書時のみ表示
   document.getElementById('koki-wrap').style.display = (type==='seikyu') ? '' : 'none';
 
@@ -1156,12 +1160,17 @@ function render(){
   const hdate=document.getElementById('hakkoDate').value
     ?new Date(document.getElementById('hakkoDate').value).toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'})
     :today();
-  // 見積：有効期限（発行日＋30日）／ 請求：支払期限（ユーザー入力 or 未入力なら翌月末）
+  // 見積：有効期限（ユーザー入力 優先 / 空なら発行日＋30日）／ 請求：支払期限（ユーザー入力 or 未入力なら翌月末）
   let date2 = '';
   if(docType==='mitsumori'){
-    date2 = document.getElementById('hakkoDate').value
-      ?(()=>{const d=new Date(document.getElementById('hakkoDate').value);d.setDate(d.getDate()+30);return d.toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'});})()
-      :addDays(30);
+    const sv = document.getElementById('shiharaiDate').value;
+    if(sv){
+      date2 = new Date(sv).toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'});
+    } else {
+      date2 = document.getElementById('hakkoDate').value
+        ?(()=>{const d=new Date(document.getElementById('hakkoDate').value);d.setDate(d.getDate()+30);return d.toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'});})()
+        :addDays(30);
+    }
   } else {
     const sv = document.getElementById('shiharaiDate').value;
     date2 = sv ? new Date(sv).toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'}) : '';
