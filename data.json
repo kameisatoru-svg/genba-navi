@@ -325,7 +325,31 @@
         "furikomi": ""
       },
       "memo": "アクリル加工(¥38,500税込)。",
-      "search": "t-010 バイオメディカル アクリル加工 坂本 衛藤"
+      "search": "t-010 バイオメディカル アクリル加工 坂本 衛藤",
+      "contacts": [
+        {
+          "name": "下田博久",
+          "dept": "営業第1課",
+          "role": "課長",
+          "tel": "097-583-4824",
+          "mobile": "080-1738-6241",
+          "mail": "sales@biomedical.co.jp",
+          "fax": "097-583-4825",
+          "exchange_date": "2015/03/08",
+          "source": "Eight"
+        },
+        {
+          "name": "大久保隆",
+          "dept": "営業第1課",
+          "role": "係長",
+          "tel": "097-583-4824",
+          "mobile": "080-1759-5223",
+          "mail": "bio-sales11@docomo.ne.jp",
+          "fax": "097-583-4825",
+          "exchange_date": "2016/09/08",
+          "source": "Eight"
+        }
+      ]
     },
     {
       "id": "T-011",
