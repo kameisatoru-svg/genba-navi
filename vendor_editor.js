@@ -195,6 +195,79 @@
     if(v) localStorage.setItem(STORAGE_PAT, v);
     else localStorage.removeItem(STORAGE_PAT);
   }
+  /* Anthropic APIキー管理 */
+  function getAnthropicKey(){ return localStorage.getItem(STORAGE_API) || ''; }
+  function setAnthropicKey(v){
+    if(v) localStorage.setItem(STORAGE_API, v);
+    else localStorage.removeItem(STORAGE_API);
+  }
+  function promptAnthropicKey(){
+    return new Promise((resolve) => {
+      injectCss();
+      const cur = getAnthropicKey();
+      const modal = openModal(`
+        <div class="ve-modal">
+          <div class="ve-modal-header">
+            <h2>🤖 Anthropic API Key</h2>
+            <button class="ve-modal-close" data-action="close">×</button>
+          </div>
+          <div class="ve-modal-body">
+            <div class="ve-pat-warn">
+              名刺画像の自動読み取りに Anthropic API（Claudeモデル）を使用します。<br>
+              ① <a href="https://console.anthropic.com/settings/keys" target="_blank">Anthropic Console</a> でAPIキーを発行<br>
+              ② 「Create Key」で <code>sk-ant-...</code> をコピー<br>
+              ③ 下の欄に貼り付け<br>
+              ※ APIキーはこの端末の localStorage のみに保存（外部送信なし）<br>
+              ※ 名刺1枚あたり概ね $0.005〜$0.01（Sonnet 4.6使用）
+            </div>
+            <div class="ve-field">
+              <label>API Key</label>
+              <input type="text" id="ve-api-input" value="${esc(cur)}" placeholder="sk-ant-api03-xxxxxxxxxxxx" autocomplete="off">
+              <div class="ve-field-help">${cur ? '※ 設定済み。再入力で上書きされます。' : ''}</div>
+            </div>
+          </div>
+          <div class="ve-modal-footer">
+            ${cur ? '<button class="ve-btn ve-btn-danger" data-action="clear">削除</button>' : ''}
+            <button class="ve-btn" data-action="cancel">キャンセル</button>
+            <button class="ve-btn ve-btn-primary" data-action="save">保存</button>
+          </div>
+        </div>
+      `);
+      modal.addEventListener('click', (e) => {
+        const a = e.target.closest('[data-action]');
+        if(!a) return;
+        const action = a.dataset.action;
+        if(action === 'save'){
+          const v = document.getElementById('ve-api-input').value.trim();
+          if(!v){ toast('APIキーを入力してください', true); return; }
+          setAnthropicKey(v);
+          toast('APIキーを保存しました');
+          closeModal();
+          resolve(v);
+        }else if(action === 'clear'){
+          if(confirm('保存されているAPIキーを削除しますか？')){
+            setAnthropicKey('');
+            toast('APIキーを削除しました');
+            closeModal();
+            resolve('');
+          }
+        }else if(action === 'cancel' || action === 'close'){
+          closeModal();
+          resolve(cur);
+        }
+      });
+      const inp = document.getElementById('ve-api-input');
+      if(inp){
+        inp.focus();
+        inp.addEventListener('keydown', (e) => {
+          if(e.key === 'Enter'){
+            e.preventDefault();
+            modal.querySelector('[data-action="save"]').click();
+          }
+        });
+      }
+    });
+  }
   function promptPat(){
     return new Promise((resolve) => {
       injectCss();
