@@ -506,6 +506,28 @@ function buildVendorCard(v){
       ${!v.basic?.contact && !v.basic?.rep ? '<div style="color:#999;font-size:13px;">担当者・代表者情報なし</div>' : ''}
     </div>`;
 
+  // 追加担当者 (contacts[])
+  const contactsArr = Array.isArray(v.contacts) ? v.contacts : [];
+  const contactsHtml = contactsArr.length ? `
+    ${contactsArr.map((p, idx) => `
+      <div style="background:#fff;border:1px solid #e8e6e0;border-radius:8px;padding:10px 12px;margin-bottom:8px;">
+        <div style="font-weight:700;color:#1e2d40;margin-bottom:4px;">
+          ${p.name || '(氏名未登録)'}
+          ${p.role ? `<span style="font-weight:400;font-size:12px;color:#666;margin-left:6px;">${p.role}</span>` : ''}
+          ${p.dept ? `<div style="font-size:11px;color:#888;font-weight:400;margin-top:2px;">${p.dept}</div>` : ''}
+        </div>
+        <div style="font-size:12px;color:#333;display:grid;grid-template-columns:1fr 1fr;gap:3px 14px;">
+          ${p.tel ? `<div><b style="color:#666;font-weight:600;">TEL</b> <a href="tel:${p.tel}" style="color:#2563eb;text-decoration:none;">${p.tel}</a></div>` : ''}
+          ${p.mobile ? `<div><b style="color:#666;font-weight:600;">携帯</b> <a href="tel:${p.mobile}" style="color:#2563eb;text-decoration:none;">${p.mobile}</a></div>` : ''}
+          ${p.mail ? `<div style="grid-column:1/-1;"><b style="color:#666;font-weight:600;">mail</b> <a href="mailto:${p.mail}" style="color:#2563eb;text-decoration:none;">${p.mail}</a></div>` : ''}
+          ${p.fax ? `<div><b style="color:#666;font-weight:600;">FAX</b> ${p.fax}</div>` : ''}
+          ${p.exchange_date ? `<div><b style="color:#666;font-weight:600;">交換日</b> ${p.exchange_date}</div>` : ''}
+        </div>
+        ${p.source ? `<div style="font-size:11px;color:#888;margin-top:4px;">出典: ${p.source}</div>` : ''}
+      </div>
+    `).join('')}
+  ` : '<div style="color:#999;font-size:13px;">追加担当者なし</div>';
+
   // 連絡先（TEL/携帯/FAX/メール/住所/登録番号）
   const c = v.contact || {};
   const contactHtml = `
@@ -578,6 +600,23 @@ function buildVendorCard(v){
           <div class="nav-list-item__arrow">›</div>
         </button>
         <div class="nav-expand-body">${contactHtml}</div>
+
+        <!-- 追加担当者 (contacts[]) ※1名以上いるときだけ表示 -->
+        ${contactsArr.length ? `
+        <button class="nav-list-item nav-expand" onclick="toggleNavItem(this)">
+          <svg class="nav-list-item__icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="3.5"/><circle cx="21" cy="11" r="3.5"/>
+            <path d="M4 24 Q4 19 11 19 Q14 19 15.5 20 Q17 19 21 19 Q28 19 28 24"/>
+          </svg>
+          <div class="nav-list-item__body">
+            <div class="nav-list-item__title">追加担当者</div>
+            <div class="nav-list-item__desc">${contactsArr.map(p => p.name || '(無名)').slice(0,3).join('・')}${contactsArr.length>3?' 他':''}</div>
+          </div>
+          <div class="nav-list-item__value">${contactsArr.length}名</div>
+          <div class="nav-list-item__arrow">›</div>
+        </button>
+        <div class="nav-expand-body">${contactsHtml}</div>
+        ` : ''}
 
         <!-- 業種 -->
         ${(v.type||[]).length ? `
