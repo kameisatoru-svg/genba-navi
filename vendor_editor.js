@@ -80,9 +80,11 @@
       .ve-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
         background:#1e2d40;color:#fff;padding:10px 22px;border-radius:24px;
         font-size:13px;font-weight:700;opacity:0;transition:opacity 0.3s;
-        pointer-events:none;z-index:2000;font-family:Meiryo,'Yu Gothic',sans-serif;}
-      .ve-toast.show{opacity:1;}
+        pointer-events:none;z-index:2000;font-family:Meiryo,'Yu Gothic',sans-serif;
+        max-width:min(90vw, 700px);text-align:center;}
+      .ve-toast.show{opacity:1;pointer-events:auto;}
       .ve-toast.err{background:#dc2626;}
+      .ve-toast.err::after{content:' ✕ クリックで閉じる';font-weight:400;font-size:11px;opacity:0.85;}
 
       .ve-pat-warn{background:#fff8e1;border:1px solid #f6d36a;border-radius:6px;padding:10px 12px;font-size:12px;color:#7a5b00;margin-bottom:12px;}
       .ve-pat-warn code{background:#fff;padding:1px 5px;border-radius:3px;font-size:11px;}
@@ -172,13 +174,17 @@
       t = document.createElement('div');
       t.id = 've-toast';
       t.className = 've-toast';
+      t.addEventListener('click', () => { t.classList.remove('show'); });
       document.body.appendChild(t);
     }
     t.textContent = msg;
     t.classList.toggle('err', !!isError);
     t.classList.add('show');
     clearTimeout(t._timer);
-    t._timer = setTimeout(() => t.classList.remove('show'), 2200);
+    // エラーは長め＆クリックで消える / 通常は2.2秒
+    const duration = isError ? 15000 : 2200;
+    t._timer = setTimeout(() => t.classList.remove('show'), duration);
+    if(isError) console.error('[vendor_editor toast]', msg);
   }
 
   /* ──────────────────────────────────────────────────────────
