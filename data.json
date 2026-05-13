@@ -431,16 +431,62 @@
         "rep": ""
       },
       "contact": {
-        "tel": "",
-        "mobile": "",
-        "fax": "",
+        "tel": "097-543-5370",
+        "mobile": "090-1515-9291",
+        "fax": "097-543-5372",
         "mail": "ktake@shimadzu.co.jp",
-        "address": "",
+        "address": "〒870-0855 大分市大字豊饒176-1",
         "touroku": "",
         "furikomi": ""
       },
       "memo": "大分リハビリテーション病院関連。施工日程:7/18(土)-19(日)。5月連休明けに確定予定。",
-      "search": "t-013 島津製作所 竹村勝利 大分 リハビリ 撮影室"
+      "search": "t-013 島津製作所 竹村勝利 大分 リハビリ 撮影室",
+      "contacts": [
+        {
+          "name": "新垣貴三",
+          "dept": "九州支店 営業課 大分営業所",
+          "role": "主任",
+          "tel": "097-500-8930",
+          "mobile": "090-6655-8893",
+          "mail": "tarakaki@ms.shimadzu.co.jp",
+          "fax": "097-500-8921",
+          "exchange_date": "2025/01/09",
+          "source": "Eight"
+        },
+        {
+          "name": "井上大陽",
+          "dept": "九州支店 営業課 大分営業所",
+          "role": "",
+          "tel": "097-543-5930",
+          "mobile": "",
+          "mail": "taiyo78@ms.shimadzu.co.jp",
+          "fax": "097-543-5372",
+          "exchange_date": "2014/10/15",
+          "source": "Eight"
+        },
+        {
+          "name": "竹下隆至",
+          "dept": "カスタマーサポートセンター 九州支店",
+          "role": "支店長",
+          "tel": "092-686-8800",
+          "mobile": "",
+          "mail": "ttake@ms.shimadzu.co.jp",
+          "fax": "092-686-8801",
+          "exchange_date": "2019/01/17",
+          "source": "Eight"
+        },
+        {
+          "name": "岩﨑祐介",
+          "dept": "九州支店 大分営業所",
+          "role": "主任",
+          "tel": "097-500-8930",
+          "mobile": "",
+          "mail": "yuusuke@ms.shimadzu.co.jp",
+          "fax": "097-500-8921",
+          "exchange_date": "2024/04/24",
+          "source": "Eight"
+        }
+      ]
     },
     {
       "id": "T-014",
