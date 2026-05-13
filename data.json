@@ -365,7 +365,18 @@
       },
       "memo": "工事中止・参考事例として保管。営業所住所(2026/4/3登録)。",
       "search": "t-012 未来システム 熊本 綾部圭祐",
-      "contacts": []
+      "contacts": [
+        {
+          "name": "園田 雅輝",
+          "dept": "",
+          "role": "営業部長",
+          "exchange_date": "",
+          "tel": "096-285-1694",
+          "mobile": "080-8442-7517",
+          "mail": "mirai-sonoda@juno.ocn.ne.jp",
+          "source": "名刺OCR"
+        }
+      ]
     },
     {
       "id": "T-013",
