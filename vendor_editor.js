@@ -1229,6 +1229,392 @@
     toast(`「${r.company || r.name}」を空欄に取り込みました`);
   }
 
+  /* ══════════════════════════════════════════════════════════════════════
+     Phase 3: 名刺画像OCR（Anthropic API直接呼び出し）
+     ══════════════════════════════════════════════════════════════════════ */
+
+  const OCR_MODEL = 'claude-sonnet-4-6';
+  const OCR_PROMPT = `この名刺画像から取引先情報を抽出してください。
+読み取れない項目は空文字列 "" を入れる。推測しない。
+
+以下のJSONだけを返答してください（マークダウンコードブロック・前置きなど不要）:
+{
+  "company": "正式会社名（株式会社・有限会社などの法人格も含めて記載通り）",
+  "dept": "部署名",
+  "role": "役職",
+  "name": "氏名（姓と名の間は半角スペース）",
+  "name_kana": "氏名のフリガナ（あれば）",
+  "mail": "メールアドレス",
+  "tel": "代表電話番号",
+  "tel_direct": "直通電話番号",
+  "mobile": "携帯電話番号",
+  "fax": "FAX番号",
+  "zip": "郵便番号（ハイフン含む）",
+  "address": "住所（〒は含めない）",
+  "url": "ウェブサイトURL",
+  "touroku": "インボイス登録番号（T+13桁）",
+  "memo": "その他特記事項（事業内容・キャッチコピー等の重要情報のみ）"
+}`;
+
+  async function fileToBase64(file){
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        // data:image/jpeg;base64,xxxxx の xxxxx 部分だけ取り出す
+        const result = reader.result;
+        const comma = result.indexOf(',');
+        resolve(result.substring(comma + 1));
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function ocrBusinessCard(file){
+    let apiKey = getAnthropicKey();
+    if(!apiKey){
+      apiKey = await promptAnthropicKey();
+      if(!apiKey) throw new Error('APIキー未設定');
+    }
+    const mediaType = file.type || 'image/jpeg';
+    if(!['image/jpeg','image/png','image/webp','image/gif'].includes(mediaType)){
+      throw new Error(`非対応の画像形式: ${mediaType}`);
+    }
+    const b64 = await fileToBase64(file);
+
+    const body = {
+      model: OCR_MODEL,
+      max_tokens: 1024,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: mediaType, data: b64 } },
+          { type: 'text', text: OCR_PROMPT },
+        ],
+      }],
+    };
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify(body),
+    });
+    if(!res.ok){
+      let detail = '';
+      try{ detail = (await res.json()).error?.message || ''; }catch(_){}
+      throw new Error(`Anthropic API ${res.status}: ${detail || res.statusText}`);
+    }
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '';
+    // JSON抽出（モデルが念のため余計な文字を入れた場合に備えて）
+    const start = text.indexOf('{');
+    const end = text.lastIndexOf('}');
+    if(start < 0 || end < 0) throw new Error('OCR応答からJSONを取り出せませんでした');
+    const json = text.substring(start, end + 1);
+    let parsed;
+    try{ parsed = JSON.parse(json); }
+    catch(e){ throw new Error('OCR応答のJSONパース失敗: ' + e.message); }
+    return parsed;
+  }
+
+  /* 既存業者照合: OCR結果 ↔ data.json取引先マスター */
+  function findExistingVendorMatches(ocr, vendors){
+    const ocrTel = [ocr.tel, ocr.tel_direct, ocr.mobile, ocr.fax].map(normalizeTel).filter(t => t.length >= 7);
+    const ocrCompanyN = normalizeCompany(ocr.company || '');
+    const ocrMailDomain = (ocr.mail || '').split('@')[1] || '';
+    const ocrTouroku = (ocr.touroku || '').replace(/\s/g, '').toUpperCase();
+
+    const hits = [];
+    for(const v of (vendors || [])){
+      const c = v.contact || v.contacts && v.contact || {};
+      const vTel = [c.tel, c.mobile, c.fax].map(normalizeTel).filter(t => t.length >= 7);
+      const vName  = v['正式名称'] || v.name || '';
+      const vRyaku = v['略称']     || v.ryaku || '';
+      const vNameN  = normalizeCompany(vName);
+      const vRyakuN = normalizeCompany(vRyaku);
+      const vTouroku = (c.touroku || '').replace(/\s/g, '').toUpperCase();
+      const vMailDomain = (c.mail || '').split('@')[1] || '';
+      const reasons = [];
+      let score = 0;
+
+      if(ocrTouroku && vTouroku && ocrTouroku === vTouroku){
+        reasons.push('登録番号一致'); score += 20;
+      }
+      for(const t of ocrTel){
+        if(vTel.includes(t)){ reasons.push('TEL一致:' + t); score += 10; break; }
+      }
+      if(ocrCompanyN && vNameN){
+        if(ocrCompanyN === vNameN){ reasons.push('社名完全一致'); score += 8; }
+        else if(vNameN.includes(ocrCompanyN) || ocrCompanyN.includes(vNameN)){ reasons.push('社名部分一致'); score += 5; }
+        else if(vRyakuN && ocrCompanyN.includes(vRyakuN)){ reasons.push('略称含む'); score += 4; }
+      }
+      if(ocrMailDomain && vMailDomain && ocrMailDomain === vMailDomain){
+        reasons.push('mailドメイン一致'); score += 6;
+      }
+      if(score >= 4) hits.push({ vendor: v, reasons, score });
+    }
+    return hits.sort((a, b) => b.score - a.score);
+  }
+
+  /* ──────────────────────────────────────────────────────────
+     名刺登録モーダル
+     ────────────────────────────────────────────────────────── */
+  async function openMeishiRegister(vendors){
+    injectCss();
+    const modal = openModal(`
+      <div class="ve-modal">
+        <div class="ve-modal-header">
+          <h2>📇 名刺登録（画像から自動読み取り）</h2>
+          <button class="ve-modal-close" data-action="close">×</button>
+        </div>
+        <div class="ve-modal-body">
+          <div id="ve-meishi-step1">
+            <div class="ve-pat-warn" style="margin-bottom:12px;">
+              名刺画像を選択 → Anthropic API でテキスト抽出 → 既存業者照合 → 編集モーダルに自動入力<br>
+              ※ JPEG/PNG/WebP 対応・1枚ずつ処理
+            </div>
+            <div id="ve-drop" style="border:2px dashed #c8a96e;border-radius:10px;padding:30px;text-align:center;background:#fffbf0;cursor:pointer;">
+              <div style="font-size:36px;margin-bottom:6px;">📷</div>
+              <div style="font-weight:700;color:#1e2d40;">クリックして名刺画像を選択</div>
+              <div style="font-size:12px;color:#888;margin-top:4px;">またはこのエリアに画像をドロップ</div>
+              <input type="file" id="ve-meishi-file" accept="image/jpeg,image/png,image/webp" style="display:none;">
+            </div>
+            <div id="ve-meishi-preview" style="margin-top:12px;display:none;">
+              <img id="ve-meishi-img" style="max-width:100%;max-height:300px;border:1px solid #ccc;border-radius:8px;display:block;margin:0 auto;">
+              <div style="text-align:center;margin-top:10px;">
+                <button class="ve-btn" data-action="reselect" type="button">画像を選び直す</button>
+                <button class="ve-btn ve-btn-primary" data-action="ocr" type="button">✨ 名刺を読み取る</button>
+              </div>
+            </div>
+          </div>
+          <div id="ve-meishi-step2" style="display:none;">
+            <div style="text-align:center;padding:40px;color:#666;">
+              <div style="font-size:40px;margin-bottom:8px;">🔍</div>
+              <div style="font-weight:700;">名刺を読み取り中...</div>
+              <div style="font-size:12px;color:#888;margin-top:4px;">5〜15秒お待ちください</div>
+            </div>
+          </div>
+          <div id="ve-meishi-step3" style="display:none;">
+            <!-- OCR結果プレビューと照合結果が差し込まれる -->
+          </div>
+        </div>
+        <div class="ve-modal-footer" id="ve-meishi-footer">
+          <button class="ve-btn ve-btn-ghost" data-action="config-api" type="button">🤖 APIキー設定</button>
+          <div style="flex:1;"></div>
+          <button class="ve-btn" data-action="cancel" type="button">閉じる</button>
+        </div>
+      </div>
+    `);
+
+    let selectedFile = null;
+    let ocrResult = null;
+    let matches = [];
+
+    const drop = modal.querySelector('#ve-drop');
+    const fileInput = modal.querySelector('#ve-meishi-file');
+    const preview = modal.querySelector('#ve-meishi-preview');
+    const previewImg = modal.querySelector('#ve-meishi-img');
+
+    function handleFile(file){
+      if(!file) return;
+      selectedFile = file;
+      const url = URL.createObjectURL(file);
+      previewImg.src = url;
+      preview.style.display = 'block';
+      drop.style.display = 'none';
+    }
+    drop.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => handleFile(e.target.files?.[0]));
+    drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.style.background = '#fff3d4'; });
+    drop.addEventListener('dragleave', () => { drop.style.background = '#fffbf0'; });
+    drop.addEventListener('drop', (e) => {
+      e.preventDefault();
+      drop.style.background = '#fffbf0';
+      handleFile(e.dataTransfer.files?.[0]);
+    });
+
+    modal.addEventListener('click', async (e) => {
+      const a = e.target.closest('[data-action]');
+      if(!a) return;
+      const action = a.dataset.action;
+      if(action === 'cancel' || action === 'close'){
+        closeModal();
+      }else if(action === 'config-api'){
+        await promptAnthropicKey();
+      }else if(action === 'reselect'){
+        selectedFile = null;
+        preview.style.display = 'none';
+        drop.style.display = 'block';
+        fileInput.value = '';
+      }else if(action === 'ocr'){
+        if(!selectedFile){ toast('画像が選択されていません', true); return; }
+        modal.querySelector('#ve-meishi-step1').style.display = 'none';
+        modal.querySelector('#ve-meishi-step2').style.display = 'block';
+        try{
+          ocrResult = await ocrBusinessCard(selectedFile);
+          matches = findExistingVendorMatches(ocrResult, vendors || []);
+          renderOcrResult(modal, ocrResult, matches, selectedFile);
+        }catch(err){
+          modal.querySelector('#ve-meishi-step2').style.display = 'none';
+          modal.querySelector('#ve-meishi-step1').style.display = 'block';
+          toast('読み取り失敗: ' + err.message, true);
+          console.error(err);
+        }
+      }else if(action === 'open-existing'){
+        const id = a.dataset.vid;
+        const vendor = (vendors || []).find(v => v.id === id);
+        if(!vendor){ toast('業者が見つかりません', true); return; }
+        const merged = mergeOcrIntoVendor(vendor, ocrResult);
+        closeModal();
+        openEditModal(merged, 'edit');
+      }else if(action === 'open-new'){
+        closeModal();
+        const blank = ocrToBlankVendor(ocrResult);
+        openEditModal(blank, 'new');
+      }
+    });
+  }
+
+  function renderOcrResult(modal, ocr, matches, file){
+    modal.querySelector('#ve-meishi-step2').style.display = 'none';
+    const step3 = modal.querySelector('#ve-meishi-step3');
+    step3.style.display = 'block';
+
+    const previewUrl = URL.createObjectURL(file);
+    const ocrFields = [
+      ['会社名', ocr.company],
+      ['部署', ocr.dept],
+      ['役職', ocr.role],
+      ['氏名', ocr.name],
+      ['mail', ocr.mail],
+      ['TEL', ocr.tel],
+      ['直通', ocr.tel_direct],
+      ['携帯', ocr.mobile],
+      ['FAX', ocr.fax],
+      ['住所', `${ocr.zip ? '〒'+ocr.zip+' ' : ''}${ocr.address || ''}`.trim()],
+      ['URL', ocr.url],
+      ['登録番号', ocr.touroku],
+    ].filter(([_, v]) => v);
+
+    const ocrHtml = `
+      <div class="ve-section-title">📋 OCR結果</div>
+      <div style="display:grid;grid-template-columns:120px 1fr;gap:4px 12px;background:#f8f9fb;padding:12px;border-radius:8px;font-size:13px;margin-bottom:12px;">
+        ${ocrFields.map(([k,v]) => `<div style="color:#666;font-weight:600;">${k}</div><div>${esc(v)}</div>`).join('')}
+        ${ocr.memo ? `<div style="color:#666;font-weight:600;grid-column:1/-1;">メモ</div><div style="grid-column:1/-1;font-size:12px;color:#555;">${esc(ocr.memo)}</div>` : ''}
+      </div>
+    `;
+
+    let matchHtml = '';
+    if(matches.length){
+      matchHtml = `
+        <div class="ve-section-title">🎯 既存業者に類似 (${matches.length}件)</div>
+        ${matches.slice(0,5).map(m => `
+          <div class="ve-merge-card">
+            <div class="ve-merge-card-head">
+              <span class="ve-merge-tag">スコア ${m.score}</span>
+              <strong style="color:#1e2d40;">${esc(m.vendor.id)} ${esc(m.vendor['略称'] || m.vendor.ryaku || '')}</strong>
+              <span style="font-size:12px;color:#1a7a30;">${esc(m.reasons.join(' / '))}</span>
+            </div>
+            <div style="font-size:12px;color:#555;margin-bottom:6px;">${esc(m.vendor['正式名称'] || m.vendor.name || '')}</div>
+            <button class="ve-btn ve-btn-primary ve-btn-sm" data-action="open-existing" data-vid="${esc(m.vendor.id)}" type="button">この業者にOCR結果をマージして編集 →</button>
+          </div>
+        `).join('')}
+        <div style="text-align:center;margin-top:12px;color:#888;font-size:12px;">— または —</div>
+      `;
+    }
+
+    step3.innerHTML = `
+      <div style="display:grid;grid-template-columns:160px 1fr;gap:14px;margin-bottom:14px;align-items:start;">
+        <img src="${previewUrl}" style="width:100%;border:1px solid #ccc;border-radius:8px;">
+        <div>${ocrHtml}</div>
+      </div>
+      ${matchHtml}
+      <div style="text-align:center;margin-top:14px;">
+        <button class="ve-btn ve-btn-primary" data-action="open-new" type="button" style="font-size:14px;padding:12px 24px;">
+          ➕ 新規取引先として登録（採番）
+        </button>
+      </div>
+    `;
+  }
+
+  /* OCR結果を空のvendorに反映（新規登録用） */
+  function ocrToBlankVendor(ocr){
+    const fullAddr = `${ocr.zip ? '〒'+ocr.zip+' ' : ''}${ocr.address || ''}`.trim();
+    const roleSfx = ocr.role ? `(${ocr.role.trim()})` : '';
+    return {
+      id: '',
+      '略称': '', // ユーザーが編集モーダルで入力
+      '正式名称': ocr.company || '',
+      rel: [],
+      type: [],
+      basic: {
+        contact: ocr.name ? `${ocr.name} 様${roleSfx}` : '',
+        rep: '',
+      },
+      contact: {
+        tel:      ocr.tel || ocr.tel_direct || '',
+        mobile:   ocr.mobile || '',
+        fax:      ocr.fax || '',
+        mail:     ocr.mail || '',
+        address:  fullAddr,
+        touroku:  ocr.touroku || '',
+        furikomi: '',
+      },
+      contacts: [],
+      memo: ocr.memo || '',
+      search: '',
+    };
+  }
+
+  /* OCR結果を既存業者にマージ（空欄補完優先・contact既値は維持） */
+  function mergeOcrIntoVendor(vendor, ocr){
+    const out = JSON.parse(JSON.stringify({
+      id: vendor.id,
+      '略称': vendor['略称'] || vendor.ryaku || '',
+      '正式名称': vendor['正式名称'] || vendor.name || '',
+      rel: vendor.rel || [],
+      type: vendor.type || [],
+      basic: vendor.basic || { contact: '', rep: '' },
+      contact: vendor.contact || {tel:'',mobile:'',fax:'',mail:'',address:'',touroku:'',furikomi:''},
+      contacts: Array.isArray(vendor.contacts) ? vendor.contacts : [],
+      memo: vendor.memo || '',
+      search: vendor.search || '',
+    }));
+    // 空欄のみ埋める
+    const fill = (obj, k, v) => { if(v && !obj[k]) obj[k] = v; };
+    fill(out.contact, 'tel',      ocr.tel || ocr.tel_direct);
+    fill(out.contact, 'mobile',   ocr.mobile);
+    fill(out.contact, 'fax',      ocr.fax);
+    fill(out.contact, 'mail',     ocr.mail);
+    fill(out.contact, 'touroku',  ocr.touroku);
+    const fullAddr = `${ocr.zip ? '〒'+ocr.zip+' ' : ''}${ocr.address || ''}`.trim();
+    fill(out.contact, 'address',  fullAddr);
+
+    // basic.contact が空なら担当者氏名を入れる
+    if(!out.basic.contact && ocr.name){
+      const roleSfx = ocr.role ? `(${ocr.role.trim()})` : '';
+      out.basic.contact = `${ocr.name} 様${roleSfx}`;
+    }else if(out.basic.contact && ocr.name && !out.basic.contact.includes(ocr.name)){
+      // 別の担当者なら contacts に追加
+      out.contacts.push({
+        name: ocr.name || '',
+        dept: ocr.dept || '',
+        role: ocr.role || '',
+        tel:  ocr.tel_direct || ocr.tel || '',
+        mobile: ocr.mobile || '',
+        mail: ocr.mail || '',
+        fax: ocr.fax || '',
+        exchange_date: '',
+        source: '名刺OCR',
+      });
+    }
+    return out;
+  }
+
   /* ──────────────────────────────────────────────────────────
      公開API
      ────────────────────────────────────────────────────────── */
@@ -1248,13 +1634,19 @@
       }, 'new');
     },
     openMerge(vendor){ openMergeModal(vendor); },
+    openMeishiRegister(vendors){ openMeishiRegister(vendors); },
     configPat: promptPat,
+    configAnthropicKey: promptAnthropicKey,
     toast,
     // Eight CSV
     loadEight,
     findDuplicateCandidates,
+    // OCR
+    ocrBusinessCard,
+    findExistingVendorMatches,
     // Phase 2+ で外から再利用するため
     _internal: { fetchDataJson, commitDataJson, nextVendorId, getPat, setPat,
+      getAnthropicKey, setAnthropicKey,
       normalizeTel, normalizeCompany, parseEightCsv },
   };
 })();
