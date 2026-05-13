@@ -248,20 +248,44 @@
         "店舗・法人"
       ],
       "basic": {
-        "contact": "",
+        "contact": "江田　至 様(代表取締役)",
         "rep": "江田 至 様"
       },
       "contact": {
-        "tel": "",
+        "tel": "0977-26-5577",
         "mobile": "",
         "fax": "",
         "mail": "i.kohda@ssg.co.jp",
-        "address": "",
+        "address": "〒874-0919 大分県別府市石垣東10-1-41",
         "touroku": "",
         "furikomi": ""
       },
       "memo": "うた乃別府本店・うた乃総本店のオーナー企業。過去:製麺室塗装・スチコン設置付帯・エアコン取替等(¥671,000税込・2026/02/21)。厨房工事はタニコー大分営業所と連携。",
-      "search": "t-009 信用産業 江田至 別府 うた乃 厨房 飲食店"
+      "search": "t-009 信用産業 江田至 別府 うた乃 厨房 飲食店",
+      "contacts": [
+        {
+          "name": "平松亘",
+          "dept": "大分駅前店",
+          "role": "店長",
+          "tel": "097-513-5531",
+          "mobile": "",
+          "mail": "hiramatu@ssg.co.jp",
+          "fax": "097-513-5532",
+          "exchange_date": "2019/01/17",
+          "source": "Eight"
+        },
+        {
+          "name": "安藤裕一朗",
+          "dept": "営業支援部",
+          "role": "",
+          "tel": "0977-26-5577",
+          "mobile": "",
+          "mail": "andoh@ssg.co.jp",
+          "fax": "0977-26-0780",
+          "exchange_date": "2022/01/13",
+          "source": "Eight"
+        }
+      ]
     },
     {
       "id": "T-010",
