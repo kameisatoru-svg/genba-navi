@@ -1525,6 +1525,18 @@ function checkAndPaginateGroup(){
   let segStart=0;
   const allSegEnds=[...breakPoints, allRows.length];
 
+  // 見出し/小計判定ヘルパ（オーフン/ウィドウ補正用）
+  const isHeader=(idx)=>{
+    if(idx<0||idx>=allRows.length)return false;
+    const cl=allRows[idx].classList;
+    return cl.contains('group-section-header')||cl.contains('middle-section-header');
+  };
+  const isSubtotal=(idx)=>{
+    if(idx<0||idx>=allRows.length)return false;
+    const cl=allRows[idx].classList;
+    return cl.contains('middle-subtotal-row')||cl.contains('group-subtotal-row');
+  };
+
   allSegEnds.forEach(segEnd=>{
     let cumH=0;
     let i=segStart;
@@ -1533,7 +1545,18 @@ function checkAndPaginateGroup(){
       if(cumH>availH){
         // 現在の行 i がはみ出した → 行 i の手前で分割
         // ただし segStart からの最低1行は確保（segStart+1）
-        const bp=Math.max(segStart+1, i);
+        let bp=Math.max(segStart+1, i);
+        const origBp=bp;
+        // 境界補正：ページ末尾の見出し単独 / ページ先頭の小計単独 を回避
+        let guard=0;
+        while(guard<10 && bp>segStart+1 && (isHeader(bp-1)||isSubtotal(bp))){
+          bp--;
+          guard++;
+        }
+        // 補正しきれない（依然として見出し末尾 or 小計先頭 かつ最小セグメントに到達）場合は補正を諦める
+        if(bp<=segStart+1 && (isHeader(bp-1)||isSubtotal(bp))){
+          bp=origBp;
+        }
         autoBreakPoints.push(bp);
         // 新セグメント開始：i を bp に巻き戻し、cumH をリセット
         segStart=bp;
