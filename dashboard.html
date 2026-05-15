@@ -40,6 +40,9 @@
   --status-kanryo:    #8b9095;  /* 完了 */
   --status-hoshu:     #8e7cc3;  /* 保守管理(継続) */
   --status-chushi:    #95a5a6;  /* 中止 */
+  --status-sodan:          #a8c5da;  /* 相談(薄い青) */
+  --status-mitsumori-prep: #c8b9d9;  /* 見積準備(薄い紫) */
+  --status-shomet:         #c0c0c0;  /* 消滅(グレー) */
 
   /* アラート色 */
   --danger:  #c0392b;
@@ -1963,7 +1966,10 @@ const STATUS_META = {
   '入金済み':           { color: 'var(--status-nyukin)',    icon: 'icon-check-circle' },
   '完了(請求書作成済み)': { color: 'var(--status-kanryo)',    icon: 'icon-check-box' },
   '保守管理(継続)':     { color: 'var(--status-hoshu)',     icon: 'icon-refresh' },
-  '中止':               { color: 'var(--status-chushi)',    icon: 'icon-warning-triangle' }
+  '中止':               { color: 'var(--status-chushi)',    icon: 'icon-warning-triangle' },
+  '相談':               { color: 'var(--status-sodan)',          icon: 'icon-calendar' },
+  '見積準備':           { color: 'var(--status-mitsumori-prep)', icon: 'icon-document' },
+  '消滅':               { color: 'var(--status-shomet)',         icon: 'icon-warning-triangle' }
 };
 
 // --- カンバン6列定義 ---
@@ -2482,8 +2488,11 @@ function kanbanCard(a) {
 // テーブル状態
 const TABLE = {
   sort: { col: 'key', dir: 'asc' },
-  filter: { 顧客: '', ステータス: '', q: '' }
+  filter: { 顧客: '', ステータス: '', q: '', showAll: false }
 };
+
+// 一覧でデフォルト非表示にするステータス(showAll=false のとき)
+const HIDDEN_STATUSES = ['完了', '完了(請求書作成済み)', '消滅', '入金済み'];
 
 // テーブル行データ生成(中止案件を含めるかは filter で判定)
 function getTableRows() {
@@ -2517,6 +2526,11 @@ function renderTable() {
         <svg class="icon"><use href="#icon-search"/></svg>
         <input id="f-q" type="search" placeholder="案件キー・工事名・備考で検索">
       </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="f-show-all"> 完了・消滅も表示
+        </label>
+      </div>
       <button class="btn-clear" id="f-clear" type="button">クリア</button>
       <div class="table-count" id="table-count"></div>
     </div>
@@ -2545,16 +2559,19 @@ function renderTable() {
   $('#f-customer').value = TABLE.filter.顧客;
   $('#f-status').value   = TABLE.filter.ステータス;
   $('#f-q').value        = TABLE.filter.q;
+  $('#f-show-all').checked = TABLE.filter.showAll;
 
   // イベント
   $('#f-customer').addEventListener('change', e => { TABLE.filter.顧客 = e.target.value; redrawTableBody(); });
   $('#f-status').addEventListener('change',   e => { TABLE.filter.ステータス = e.target.value; redrawTableBody(); });
   $('#f-q').addEventListener('input',         e => { TABLE.filter.q = e.target.value; redrawTableBody(); });
+  $('#f-show-all').addEventListener('change', e => { TABLE.filter.showAll = e.target.checked; redrawTableBody(); });
   $('#f-clear').addEventListener('click', () => {
-    TABLE.filter = { 顧客: '', ステータス: '', q: '' };
+    TABLE.filter = { 顧客: '', ステータス: '', q: '', showAll: false };
     $('#f-customer').value = '';
     $('#f-status').value = '';
     $('#f-q').value = '';
+    $('#f-show-all').checked = false;
     redrawTableBody();
   });
   $$('#dash-table thead th[data-col]').forEach(th => {
@@ -2576,6 +2593,9 @@ function renderTable() {
 function redrawTableBody() {
   const all = getTableRows();
   let rows = all.filter(a => {
+    // showAll が false のとき「完了」「消滅」「入金済み」を非表示
+    // (ステータスフィルタで明示的に選択されている場合はそちらを優先)
+    if (!TABLE.filter.showAll && !TABLE.filter.ステータス && HIDDEN_STATUSES.includes(a['ステータス'])) return false;
     if (TABLE.filter.顧客 && a['顧客略'] !== TABLE.filter.顧客) return false;
     if (TABLE.filter.ステータス && a['ステータス'] !== TABLE.filter.ステータス) return false;
     if (TABLE.filter.q) {
