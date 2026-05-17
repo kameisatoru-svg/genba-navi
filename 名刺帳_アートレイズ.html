@@ -185,6 +185,19 @@
         <line x1="9" y1="15" x2="13" y2="15"/>
       </svg>
     </button>
+    <button class="filter-toggle-btn" id="meishiBtn" onclick="openMeishiRegister()" title="名刺画像から自動登録" aria-label="名刺登録">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="6" width="18" height="13" rx="2"/>
+        <circle cx="9" cy="12" r="2"/>
+        <path d="M13 11 L18 11 M13 14 L17 14"/>
+      </svg>
+    </button>
+    <button class="filter-toggle-btn" id="patBtn" onclick="vendorEditor.configPat()" title="GitHub PAT設定" aria-label="GitHub PAT設定">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="9" cy="13" r="4"/>
+        <path d="M12 11 L21 11 L21 14 L18 14 L18 17 L15 17 L15 14 L12 14"/>
+      </svg>
+    </button>
     <button class="filter-toggle-btn" onclick="document.getElementById('csvDropArea').style.display='block'" title="手動CSV読み込み" aria-label="手動CSV読み込み">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 4 L12 16 M7 11 L12 16 L17 11"/>
@@ -530,6 +543,11 @@ function editFromRow(vendorId){
   const v = VENDORS.find(x => x.id === vendorId);
   if(!v){ alert(vendorId + ' が見つかりません'); return; }
   vendorEditor.openEdit(v);
+}
+
+/* 名刺画像から自動登録モーダルを起動（既存業者照合のためVENDORSを渡す） */
+function openMeishiRegister(){
+  vendorEditor.openMeishiRegister(VENDORS);
 }
 
 function showError(msg){
