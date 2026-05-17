@@ -1531,8 +1531,61 @@
         closeModal();
         const blank = ocrToBlankVendor(ocrResult);
         openEditModal(blank, 'new');
+      }else if(action === 'save-meishi'){
+        if(!ocrResult){ toast('OCR結果がありません', true); return; }
+        const btn = a;
+        btn.disabled = true;
+        const orig = btn.textContent;
+        btn.textContent = '保存中...';
+        try{
+          const saved = await saveMeishiCard(ocrResult);
+          toast(`名刺帳に保存しました: ${saved.company || saved.name || '(無名)'}`);
+          closeModal();
+          if(typeof CONF.onSaved === 'function'){
+            try{ CONF.onSaved({ type:'meishi', card: saved }); }catch(_){}
+          }
+        }catch(err){
+          btn.disabled = false;
+          btn.textContent = orig;
+          toast('保存失敗: ' + err.message, true);
+          console.error(err);
+        }
       }
     });
+  }
+
+  /* OCR結果を data.json["名刺"] 配列に追記コミット
+     スキーマ：CSV record と同形（company/dept/role/name/mail/zip/address/tel/telDirect/fax/mobile/url/exchangeDate）
+     + touroku / memo / source / createdAt を持つ */
+  async function saveMeishiCard(ocr){
+    const { sha, data } = await fetchDataJson();
+    if(!Array.isArray(data['名刺'])) data['名刺'] = [];
+    const fullAddr = `${ocr.zip ? '〒'+ocr.zip+' ' : ''}${ocr.address || ''}`.trim();
+    const today = todayYmd();
+    const card = {
+      company:      ocr.company || '',
+      dept:         ocr.dept || '',
+      role:         ocr.role || '',
+      name:         ocr.name || '',
+      mail:         ocr.mail || '',
+      zip:          ocr.zip || '',
+      address:      ocr.address || fullAddr,
+      tel:          ocr.tel || '',
+      telDirect:    ocr.tel_direct || '',
+      fax:          ocr.fax || '',
+      mobile:       ocr.mobile || '',
+      url:          ocr.url || '',
+      exchangeDate: today,
+      touroku:      ocr.touroku || '',
+      memo:         ocr.memo || '',
+      source:       '名刺OCR',
+      createdAt:    today,
+    };
+    data['名刺'].push(card);
+    data['最終更新'] = today;
+    const msg = `名刺追加: ${card.company || '(社名なし)'} / ${card.name || '(氏名なし)'}`;
+    await commitDataJson(data, msg, sha);
+    return card;
   }
 
   function renderOcrResult(modal, ocr, matches, file){
