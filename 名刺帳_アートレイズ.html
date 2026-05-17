@@ -482,8 +482,8 @@ function renderTable(){
   const page = data.slice(start, start + PAGE_SIZE);
 
   tbody.innerHTML = page.map(({index, rec, matches}) => `
-    <tr>
-      <td><strong>${esc(rec.company)}</strong></td>
+    <tr class="${rec._source ? 'is-meishi' : ''}">
+      <td>${rec._source ? '<span class="badge-ocr" title="OCRで名刺帳に直接保存">OCR</span>' : ''}<strong>${esc(rec.company)}</strong></td>
       <td style="font-size:12px;color:#666;">${esc(rec.dept || '')}${rec.role ? '　' + esc(rec.role) : ''}</td>
       <td>${esc(rec.name)}</td>
       <td>
@@ -620,6 +620,18 @@ function loadManualCsv(file){
   };
   reader.readAsText(file, 'UTF-8');
 }
+
+/* テーブルヘッダ sticky の top をページヘッダ実高に合わせる */
+function syncHeaderHeight(){
+  const hdr = document.querySelector('.page-header');
+  if(!hdr) return;
+  const h = hdr.getBoundingClientRect().height;
+  document.documentElement.style.setProperty('--header-h', Math.round(h) + 'px');
+}
+window.addEventListener('resize', syncHeaderHeight);
+window.addEventListener('orientationchange', syncHeaderHeight);
+window.addEventListener('load', syncHeaderHeight);
+syncHeaderHeight();
 
 /* 初期化 */
 loadAll();
