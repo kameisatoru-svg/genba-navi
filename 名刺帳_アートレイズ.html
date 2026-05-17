@@ -248,7 +248,9 @@
 
 <script>
 const PAGE_SIZE = 50;
-let ALL_RECORDS = [];   // Eight CSV record list（{company, dept, role, name, mail, zip, address, tel, telDept, telDirect, fax, mobile, url, exchangeDate}）
+let CSV_RECORDS = [];   // Eight CSV から
+let MEISHI_EXTRAS = []; // data.json["名刺"] から（OCR保存分）
+let ALL_RECORDS = [];   // CSV_RECORDS + MEISHI_EXTRAS（描画対象）
 let VENDORS = [];       // data.json 取引先マスター
 let RECORD_MATCHES = [];// 各 record に対する一致 vendor リスト（同じ配列順）
 let FILTERED = [];      // 検索＋フィルタ適用後
