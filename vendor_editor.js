@@ -1589,8 +1589,11 @@
         <div>${ocrHtml}</div>
       </div>
       ${matchHtml}
-      <div style="text-align:center;margin-top:14px;">
-        <button class="ve-btn ve-btn-primary" data-action="open-new" type="button" style="font-size:14px;padding:12px 24px;">
+      <div style="text-align:center;margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <button class="ve-btn" data-action="save-meishi" type="button" style="font-size:14px;padding:12px 20px;background:#1a7a30;color:#fff;border-color:#155a23;">
+          📇 名刺として保存（マスター登録なし）
+        </button>
+        <button class="ve-btn ve-btn-primary" data-action="open-new" type="button" style="font-size:14px;padding:12px 20px;">
           ➕ 新規取引先として登録（採番）
         </button>
       </div>
