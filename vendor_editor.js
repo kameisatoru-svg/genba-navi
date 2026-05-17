@@ -352,13 +352,23 @@
       'X-GitHub-Api-Version': '2022-11-28',
     };
   }
-  async function fetchDataJson(){
+  async function fetchDataJson(retry){
     const headers = await ghHeaders();
     const url = `https://api.github.com/repos/${CONF.repo}/contents/${CONF.filePath}?ref=${CONF.branch}`;
     const res = await fetch(url, { headers });
     if(!res.ok){
       const txt = await res.text();
-      throw new Error(`GitHub取得失敗 ${res.status}: ${txt.slice(0,200)}`);
+      // PATが無効/期限切れ → クリアして1回だけ再入力プロンプト→リトライ
+      if((res.status === 401 || res.status === 403) && !retry){
+        setPat('');
+        const newPat = await promptPat();
+        if(!newPat) throw new Error('GitHub PATが必要です（PAT設定ボタンから登録してください）');
+        return fetchDataJson(true);
+      }
+      const hint = (res.status === 401 || res.status === 403)
+        ? '\nPATが無効か権限不足です。鍵アイコンから再設定してください。'
+        : '';
+      throw new Error(`GitHub取得失敗 ${res.status}: ${txt.slice(0,200)}${hint}`);
     }
     const meta = await res.json();
     // contentはbase64 (改行入り)
@@ -366,7 +376,7 @@
     const utf8 = decodeURIComponent(escape(raw));
     return { sha: meta.sha, data: JSON.parse(utf8) };
   }
-  async function commitDataJson(newData, message, sha){
+  async function commitDataJson(newData, message, sha, retry){
     const headers = { ...(await ghHeaders()), 'Content-Type':'application/json' };
     const json = JSON.stringify(newData, null, 2);
     const b64 = btoa(unescape(encodeURIComponent(json)));
@@ -380,7 +390,16 @@
     const res = await fetch(url, { method:'PUT', headers, body: JSON.stringify(body) });
     if(!res.ok){
       const txt = await res.text();
-      throw new Error(`コミット失敗 ${res.status}: ${txt.slice(0,200)}`);
+      if((res.status === 401 || res.status === 403) && !retry){
+        setPat('');
+        const newPat = await promptPat();
+        if(!newPat) throw new Error('GitHub PATが必要です（PAT設定ボタンから登録してください）');
+        return commitDataJson(newData, message, sha, true);
+      }
+      const hint = (res.status === 401 || res.status === 403)
+        ? '\nPATが無効か権限不足です。鍵アイコンから再設定してください。'
+        : '';
+      throw new Error(`コミット失敗 ${res.status}: ${txt.slice(0,200)}${hint}`);
     }
     return await res.json();
   }
