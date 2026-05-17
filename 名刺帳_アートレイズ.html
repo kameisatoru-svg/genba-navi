@@ -111,6 +111,14 @@
     border-radius: 10px; cursor: pointer; font-family: inherit;
   }
   .btn-register:hover { background: #b8996a; }
+  .badge-ocr {
+    display: inline-block; background: #1e2d40; color: #fff;
+    font-size: 10px; font-weight: 700; padding: 2px 7px;
+    border-radius: 10px; margin-right: 4px; vertical-align: middle;
+  }
+  tbody tr.is-meishi { background: #f4fbf5; }
+  tbody tr.is-meishi:nth-child(even) { background: #eef8ef; }
+  tbody tr.is-meishi:hover { background: #e2f3e4; }
 
   .pagination {
     display: none; justify-content: center; align-items: center;
@@ -603,11 +611,12 @@ csvFileInput.addEventListener('change', e => {
 function loadManualCsv(file){
   const reader = new FileReader();
   reader.onload = (ev) => {
-    ALL_RECORDS = parseCsv(ev.target.result);
+    CSV_RECORDS = parseCsv(ev.target.result);
+    mergeRecords();
     computeMatches();
     currentPage = 1;
     renderTable();
-    vendorEditor.toast(`${file.name} を読み込みました (${ALL_RECORDS.length}件)`);
+    vendorEditor.toast(`${file.name} を読み込みました (${CSV_RECORDS.length}件)`);
   };
   reader.readAsText(file, 'UTF-8');
 }
