@@ -271,8 +271,9 @@ vendorEditor.init({
   branch: 'main',
   filePath: 'data.json',
   onSaved: () => {
-    // 保存後は data.json を再フェッチして再マッチ
+    // 保存後は data.json を再フェッチして再マッチ（取引先/名刺の両方を更新）
     loadVendors().then(() => {
+      mergeRecords();
       computeMatches();
       renderTable();
     });
@@ -282,6 +283,7 @@ vendorEditor.init({
 async function loadAll(){
   try{
     await Promise.all([loadVendors(), loadEightCsv()]);
+    mergeRecords();
     computeMatches();
     renderTable();
   }catch(err){
@@ -313,6 +315,28 @@ async function loadVendors(){
     memo: v.memo || '',
     search: v.search || '',
   }));
+  // data.json["名刺"] = OCRで直接保存した名刺カード
+  MEISHI_EXTRAS = (Array.isArray(data['名刺']) ? data['名刺'] : []).map(c => ({
+    company:      c.company || '',
+    dept:         c.dept || '',
+    role:         c.role || '',
+    name:         c.name || '',
+    mail:         c.mail || '',
+    zip:          c.zip || '',
+    address:      c.address || '',
+    tel:          c.tel || '',
+    telDirect:    c.telDirect || '',
+    fax:          c.fax || '',
+    mobile:       c.mobile || '',
+    url:          c.url || '',
+    exchangeDate: c.exchangeDate || c.createdAt || '',
+    _source:      c.source || '名刺OCR',
+  }));
+}
+
+/* CSV_RECORDS と MEISHI_EXTRAS を統合（OCR保存分を先頭に表示） */
+function mergeRecords(){
+  ALL_RECORDS = MEISHI_EXTRAS.concat(CSV_RECORDS);
 }
 
 async function loadEightCsv(){
@@ -327,7 +351,7 @@ async function loadEightCsv(){
     }catch(e){ lastErr = e; }
   }
   if(!text) throw new Error('Eight CSV 取得失敗: ' + (lastErr && lastErr.message));
-  ALL_RECORDS = parseCsv(text);
+  CSV_RECORDS = parseCsv(text);
 }
 
 /* CSVをパース（vendor_editor.js と同じヘッダー仕様） */
