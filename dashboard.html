@@ -2765,9 +2765,10 @@ function renderReminders() {
     });
 
     // 🔴 完工後 請求未確定
-    // ステータス∉{完了, 施工中, 施工予定, 中止, 見積提出済み, 保守管理(継続)} かつ請求なし
-    const exempt = ['完了(請求書作成済み)', '施工中', '施工予定', '中止', '見積提出済み', '保守管理(継続)'];
-    if (!exempt.includes(a['ステータス']) && (!a['請求'] || a['請求'].length === 0)) {
+    // 「完了」「完了・請求書作成待ち」かつ請求なしの場合のみ警告
+    // (相談・見積準備・進行中など完工前のステータスは対象外)
+    const completedNeedsInvoice = ['完了', '完了・請求書作成待ち'];
+    if (completedNeedsInvoice.includes(a['ステータス']) && (!a['請求'] || a['請求'].length === 0)) {
       const est = latestEstimate(a);
       const days = est?.['発行日'] ? daysSince(est['発行日']) : null;
       reminders.push({
