@@ -1790,6 +1790,11 @@
         "合計": 0,
         "件数": 0,
         "最終集計日": "2026-05-18"
+      },
+      "チェック": {
+        "contact.first": "wip",
+        "contact.kokyaku": "wip",
+        "contact.reg": "wip"
       }
     },
     {
