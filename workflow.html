@@ -699,7 +699,9 @@ function render() {
     }).join('');
   }
 
-  const actionsHtml = (tpl && tpl.stages.length > 0) ? `
+  // 現テンプレに項目がある or 持ち越しがある場合に保存ボタンを出す
+  const hasInteractive = (tpl && tpl.stages.length > 0) || carryOver.length > 0;
+  const actionsHtml = hasInteractive ? `
     <div class="actions">
       <button class="btn btn-primary" id="btn-save" ${STATE.dirty ? '' : 'disabled'}>
         ${STATE.dirty ? '変更を保存' : '保存済み'}
