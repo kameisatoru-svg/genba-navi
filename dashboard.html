@@ -3695,7 +3695,7 @@ function renderModalCheckSection(a) {
       const stateLabel = state === 'done' ? '完了' : state === 'wip' ? '着手' : '未';
       return `
         <div class="modal-check-item ${state}" data-check-key="${escapeHtml(key)}">
-          <div class="modal-check-mark"><svg class="icon"><use href="#icon-check"/></svg></div>
+          <div class="modal-check-mark"><svg class="icon"><use href="#icon-check-circle"/></svg></div>
           <div class="modal-check-body"><div class="modal-check-label">${escapeHtml(item.label)}</div></div>
           <div class="modal-check-state-tag">${stateLabel}</div>
         </div>
