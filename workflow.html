@@ -193,7 +193,14 @@ body {
   border-style: dashed;
 }
 .item-check svg { width: 14px; height: 14px; color: #fff; }
-.item.todo .item-check svg, .item.na .item-check svg { display: none; }
+.item.todo .item-check svg, .item.wip .item-check svg, .item.na .item-check svg { display: none; }
+.item.wip .item-check::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border-radius: 50%;
+}
 .item.na .item-check::after {
   content: '—';
   color: var(--na);
