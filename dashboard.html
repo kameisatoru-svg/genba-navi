@@ -2088,8 +2088,81 @@ const CHECK_TEMPLATE = {
       { id: 'register',  label: 'data.json に反映' },
       { id: 'followup',  label: 'フォロー連絡' }
     ]}
+  ],
+  '見積提出済み': [
+    { id: 'followup', label: 'フォロー', items: [
+      { id: 'arrive',          label: '提出後の到達確認' },
+      { id: 'react',           label: '顧客の反応・質疑対応' },
+      { id: 'decision',        label: '受注見込みの感触確認' }
+    ]},
+    { id: 'contract', label: '契約準備', items: [
+      { id: 'draft',           label: '工事請負契約書ドラフト' },
+      { id: 'jucho',           label: '注文書受領（元請あり）' },
+      { id: 'uketori',         label: '注文請書発行' }
+    ]}
+  ],
+  '施工予定': [
+    { id: 'doc_k', label: '顧客向け書類', items: [
+      { id: 'mitsumori_final', label: '見積採用案の確定' },
+      { id: 'keiyaku',         label: '工事請負契約書' },
+      { id: 'chumonsho',       label: '注文請書（元請あり）' }
+    ]},
+    { id: 'doc_g', label: '業者向け書類', items: [
+      { id: 'order',           label: '業者向け注文書' },
+      { id: 'order_recv',      label: '注文請書受領' }
+    ]},
+    { id: 'dandori', label: '段取り', items: [
+      { id: 'koteihyo_make',   label: '業者用工程表作成' },
+      { id: 'koteihyo_send',   label: '業者用工程表送付' },
+      { id: 'heimen',          label: '平面図（マーキング版）' },
+      { id: 'hannyuro',        label: '搬入路確認' },
+      { id: 'zairyou',         label: '材料発注' }
+    ]},
+    { id: 'shisetsu', label: '施設調整', items: [
+      { id: 'kagu',            label: '家具移動依頼' },
+      { id: 'doseni',          label: '動線確保依頼' },
+      { id: 'shuchi',          label: '入居者・利用者への周知' }
+    ]},
+    { id: 'taisei', label: '施工体制', items: [
+      { id: 'renraku',         label: '業者連絡先確定' },
+      { id: 'shukuhaku',       label: '宿泊予約（遠方時）' },
+      { id: 'cal_shiko',       label: 'カレンダー登録（施工）' },
+      { id: 'cal_shuku',       label: 'カレンダー登録（宿泊）' }
+    ]}
+  ],
+  '施工中': [
+    { id: 'shinkou', label: '進行', items: [
+      { id: 'photo_before',    label: '着工前写真' },
+      { id: 'daily',           label: '日次進捗の記録' },
+      { id: 'chosei',          label: '現場調整・変更対応' }
+    ]},
+    { id: 'kanryou', label: '完工対応', items: [
+      { id: 'photo_after',     label: '完工写真撮影' },
+      { id: 'tachiai',         label: '顧客立会い確認' }
+    ]}
+  ],
+  '請求済み': [
+    { id: 'invoice', label: '請求', items: [
+      { id: 'seikyu_pdf',      label: '請求書PDF発行' },
+      { id: 'seikyu_send',     label: '請求書送付' },
+      { id: 'seikyu_register', label: 'data.json に反映' }
+    ]},
+    { id: 'docs', label: '完了書類', items: [
+      { id: 'kanryousho',      label: '完了書発行（元請あり）' },
+      { id: 'nouhinsho',       label: '納品書発行' }
+    ]}
+  ],
+  '入金済み': [
+    { id: 'nyukin', label: '入金確認', items: [
+      { id: 'kakunin',         label: '入金確認' },
+      { id: 'register',        label: 'data.json 入金日記録' }
+    ]},
+    { id: 'genka', label: '原価締め', items: [
+      { id: 'amex',            label: 'AMEX明細の振り分け' },
+      { id: 'aggregate',       label: '原価集計' },
+      { id: 'archive',         label: 'フォルダアーカイブ' }
+    ]}
   ]
-  // 施工以降のステータスは Phase 2 で追加予定
 };
 
 // 案件のチェック進捗を集計（テンプレート未対応のステータスは null）
