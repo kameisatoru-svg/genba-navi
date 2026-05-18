@@ -3661,6 +3661,214 @@ function closeAnkenModal(silent) {
 }
 
 /* ============================================================
+   案件モーダル: チェックセクション
+   ============================================================ */
+// 現在編集中のモーダルチェック状態(案件キー → checks dict)
+const MODAL_CHECK_STATE = { key: '', original: {}, current: {} };
+
+function renderModalCheckSection(a) {
+  const tpl = CHECK_TEMPLATE[a['ステータス']];
+  if (!tpl) {
+    return `
+      <div class="modal-section">
+        <div class="modal-section-title">チェック</div>
+        <div class="modal-check-unsupported">
+          ステータス「${escapeHtml(a['ステータス'] || '-')}」のチェック項目は未対応です。
+        </div>
+      </div>
+    `;
+  }
+
+  // 状態初期化(モーダルを開いた直後のスナップショット)
+  MODAL_CHECK_STATE.key      = a['案件キー'];
+  MODAL_CHECK_STATE.original = Object.assign({}, a['チェック'] || {});
+  MODAL_CHECK_STATE.current  = Object.assign({}, a['チェック'] || {});
+
+  const checks = MODAL_CHECK_STATE.current;
+  let total = 0, done = 0;
+  const stagesHtml = tpl.map(stage => {
+    const itemsHtml = stage.items.map(item => {
+      const key = `${stage.id}.${item.id}`;
+      const state = checks[key] || 'todo';
+      total++;
+      if (state === 'done') done++;
+      const stateLabel = state === 'done' ? '完了' : state === 'wip' ? '着手' : '未';
+      return `
+        <div class="modal-check-item ${state}" data-check-key="${escapeHtml(key)}">
+          <div class="modal-check-mark"><svg class="icon"><use href="#icon-check"/></svg></div>
+          <div class="modal-check-body"><div class="modal-check-label">${escapeHtml(item.label)}</div></div>
+          <div class="modal-check-state-tag">${stateLabel}</div>
+        </div>
+      `;
+    }).join('');
+    const stageDone = stage.items.filter(i => checks[`${stage.id}.${i.id}`] === 'done').length;
+    return `
+      <div class="modal-check-stage">
+        <div class="modal-check-stage-head">
+          <span>${escapeHtml(stage.label)}</span>
+          <span class="modal-check-stage-count">${stageDone} / ${stage.items.length}</span>
+        </div>
+        ${itemsHtml}
+      </div>
+    `;
+  }).join('');
+  const pct = total ? Math.round(done / total * 100) : 0;
+
+  return `
+    <div class="modal-section">
+      <div class="modal-section-title">チェック</div>
+      <div class="modal-check-progress">
+        <div class="modal-check-progress-bar"><div class="modal-check-progress-fill" id="modal-check-bar" style="width:${pct}%;"></div></div>
+        <div class="modal-check-progress-label" id="modal-check-count">${done} / ${total}</div>
+      </div>
+      <div id="modal-check-stages">${stagesHtml}</div>
+      <div class="modal-check-actions">
+        <button class="modal-check-save-btn" id="modal-check-save-btn" type="button" disabled>変更を保存</button>
+        <span class="modal-check-msg" id="modal-check-msg">項目をタップで 未 → 着手 → 完了 を循環</span>
+      </div>
+    </div>
+  `;
+}
+
+function bindModalCheckHandlers(a) {
+  const tpl = CHECK_TEMPLATE[a['ステータス']];
+  if (!tpl) return;
+
+  $$('#anken-modal-body .modal-check-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const k = el.dataset.checkKey;
+      const cur = MODAL_CHECK_STATE.current[k] || 'todo';
+      const next = cur === 'todo' ? 'wip' : cur === 'wip' ? 'done' : 'todo';
+      if (next === 'todo') {
+        delete MODAL_CHECK_STATE.current[k];
+      } else {
+        MODAL_CHECK_STATE.current[k] = next;
+      }
+      refreshModalCheckUi();
+    });
+  });
+
+  $('#modal-check-save-btn')?.addEventListener('click', () => saveAnkenChecks(a['案件キー']));
+}
+
+function refreshModalCheckUi() {
+  const tpl = CHECK_TEMPLATE[STATE.案件.find(a => a['案件キー'] === MODAL_CHECK_STATE.key)?.['ステータス']]
+            || CHECK_TEMPLATE[STATE.中止案件?.find(a => a['案件キー'] === MODAL_CHECK_STATE.key)?.['ステータス']];
+  if (!tpl) return;
+  const checks = MODAL_CHECK_STATE.current;
+  let total = 0, done = 0;
+
+  $$('#anken-modal-body .modal-check-item').forEach(el => {
+    const k = el.dataset.checkKey;
+    const state = checks[k] || 'todo';
+    el.classList.remove('todo', 'wip', 'done');
+    el.classList.add(state);
+    const tag = el.querySelector('.modal-check-state-tag');
+    if (tag) tag.textContent = state === 'done' ? '完了' : state === 'wip' ? '着手' : '未';
+    total++;
+    if (state === 'done') done++;
+  });
+
+  // ステージごとのカウント更新
+  let cur = 0;
+  tpl.forEach((stage, si) => {
+    const stageDone = stage.items.filter(i => checks[`${stage.id}.${i.id}`] === 'done').length;
+    const head = $$('#anken-modal-body .modal-check-stage-count')[si];
+    if (head) head.textContent = `${stageDone} / ${stage.items.length}`;
+  });
+
+  // プログレスバー更新
+  const pct = total ? Math.round(done / total * 100) : 0;
+  const bar = $('#modal-check-bar');
+  const count = $('#modal-check-count');
+  if (bar) bar.style.width = pct + '%';
+  if (count) count.textContent = `${done} / ${total}`;
+
+  // dirty判定
+  const dirty = JSON.stringify(MODAL_CHECK_STATE.current) !== JSON.stringify(MODAL_CHECK_STATE.original);
+  const btn = $('#modal-check-save-btn');
+  if (btn) btn.disabled = !dirty;
+  const msg = $('#modal-check-msg');
+  if (msg) {
+    msg.className = 'modal-check-msg';
+    msg.textContent = dirty ? '未保存の変更があります' : '項目をタップで 未 → 着手 → 完了 を循環';
+  }
+}
+
+async function saveAnkenChecks(ankenKey) {
+  const pat = getPAT();
+  if (!pat) { showPATModal(() => saveAnkenChecks(ankenKey)); return; }
+
+  const btn = $('#modal-check-save-btn');
+  const msg = $('#modal-check-msg');
+  if (btn) btn.disabled = true;
+  if (msg) { msg.className = 'modal-check-msg'; msg.textContent = '保存中...'; }
+
+  try {
+    const res = await fetch(GH_API, {
+      headers: { Authorization: `token ${pat}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (res.status === 401) {
+      localStorage.removeItem(PAT_KEY);
+      if (msg) { msg.className = 'modal-check-msg error'; msg.textContent = 'トークン無効'; }
+      showPATModal(() => saveAnkenChecks(ankenKey));
+      return;
+    }
+    if (!res.ok) throw new Error('取得失敗 ' + res.status);
+    const fileData = await res.json();
+    const sha = fileData.sha;
+    const raw = atob(fileData.content.replace(/\n/g, ''));
+    const bytes = new Uint8Array(raw.length).map((_, i) => raw.charCodeAt(i));
+    const currentJson = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+
+    // 該当案件を探して更新
+    let target = null;
+    for (const b of ['案件', '中止案件']) {
+      const arr = currentJson[b] || [];
+      const idx = arr.findIndex(x => x['案件キー'] === ankenKey);
+      if (idx !== -1) { target = arr[idx]; break; }
+    }
+    if (!target) throw new Error('案件が見つかりません: ' + ankenKey);
+
+    if (Object.keys(MODAL_CHECK_STATE.current).length === 0) {
+      delete target['チェック'];
+    } else {
+      target['チェック'] = Object.assign({}, MODAL_CHECK_STATE.current);
+    }
+
+    // PUT
+    const jsonStr = JSON.stringify(currentJson, null, 2);
+    const encBytes = new TextEncoder().encode(jsonStr);
+    const encChars = Array.from(encBytes).map(b => String.fromCharCode(b)).join('');
+    const newContent = btoa(encChars);
+    const putRes = await fetch(GH_API, {
+      method: 'PUT',
+      headers: { Authorization: `token ${pat}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+      body: JSON.stringify({
+        message: `dashboard更新: ${ankenKey} チェック更新`,
+        content: newContent,
+        sha
+      })
+    });
+    if (!putRes.ok) throw new Error('保存失敗 ' + putRes.status);
+
+    // ローカル STATE 更新
+    STATE['案件']     = currentJson['案件']     || [];
+    STATE['中止案件'] = currentJson['中止案件'] || [];
+    MODAL_CHECK_STATE.original = Object.assign({}, MODAL_CHECK_STATE.current);
+    refreshModalCheckUi();
+    renderKanban();
+    renderTable();
+
+    if (msg) { msg.className = 'modal-check-msg success'; msg.textContent = '✓ 保存しました'; }
+  } catch (err) {
+    logError('saveAnkenChecks failed', err);
+    if (msg) { msg.className = 'modal-check-msg error'; msg.textContent = 'エラー: ' + err.message; }
+    if (btn) btn.disabled = false;
+  }
+}
+
+/* ============================================================
    Section 8: 取引先パネル + モーダル
    ============================================================ */
 // 取引先の連絡先補完状態を判定
