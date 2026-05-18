@@ -2227,7 +2227,7 @@ function calcCheckProgress(anken) {
   if (!tpl) return null;
   const checks = anken['チェック'] || {};
   let raw = 0, done = 0, na = 0, nextLabel = '';
-  for (const stage of tpl) {
+  for (const stage of tpl.stages) {
     for (const item of stage.items) {
       raw++;
       const state = checks[`${stage.id}.${item.id}`];
@@ -3611,7 +3611,7 @@ function renderModalCheckSection(a) {
 
   const checks = MODAL_CHECK_STATE.current;
   let raw = 0, done = 0, na = 0;
-  const stagesHtml = tpl.map(stage => {
+  const stagesHtml = tpl.stages.map(stage => {
     const itemsHtml = stage.items.map(item => {
       const key = `${stage.id}.${item.id}`;
       const state = checks[key] || 'todo';
@@ -3704,7 +3704,7 @@ function refreshModalCheckUi() {
   });
 
   // ステージごとのカウント更新（該当なしは分母から除外）
-  tpl.forEach((stage, si) => {
+  tpl.stages.forEach((stage, si) => {
     const stageDone = stage.items.filter(i => checks[`${stage.id}.${i.id}`] === 'done').length;
     const stageNa   = stage.items.filter(i => checks[`${stage.id}.${i.id}`] === 'na').length;
     const stageDenom = stage.items.length - stageNa;
