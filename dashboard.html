@@ -310,9 +310,18 @@ a { color: inherit; text-decoration: none; }
 .kpi-success { --kpi-color: var(--status-yotei); }
 
 /* ----- Section 3: カンバン ----- */
+.kanban-zone + .kanban-zone { margin-top: 16px; }
+.kanban-zone-head {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-sub);
+  letter-spacing: 0.06em;
+  padding: 0 4px 6px;
+  text-transform: none;
+}
 .kanban-board {
   display: grid;
-  grid-template-columns: repeat(6, minmax(220px, 1fr));
+  grid-template-columns: repeat(var(--cols, 4), minmax(220px, 1fr));
   gap: 12px;
   overflow-x: auto;
   padding-bottom: 4px;
@@ -2485,7 +2494,7 @@ function renderKpi() {
 function renderKanban() {
   const all = STATE.案件 || [];
 
-  // 6列でグルーピング(中止・保守管理はカンバンに出さない)
+  // ステータス別にグルーピング(非表示ステータスは除外)
   const grouped = {};
   KANBAN_COLS.forEach(k => grouped[k] = []);
   all.forEach(a => {
@@ -2493,8 +2502,8 @@ function renderKanban() {
     if (grouped[a['ステータス']]) grouped[a['ステータス']].push(a);
   });
 
-  const cols = KANBAN_COLS.map(key => {
-    const m = STATUS_META[key];
+  const renderCol = (key) => {
+    const m = STATUS_META[key] || { color: 'var(--text-mute)', icon: 'icon-document' };
     const label = key === '完了(請求書作成済み)' ? '完了' : key;
     const items = grouped[key];
     const body = items.length === 0
@@ -2510,13 +2519,25 @@ function renderKanban() {
         <div class="kanban-col-body">${body}</div>
       </div>
     `;
+  };
+
+  const zonesHtml = KANBAN_ZONES.map(zone => {
+    const colsHtml = zone.cols.map(renderCol).join('');
+    return `
+      <div class="kanban-zone">
+        <div class="kanban-zone-head">${escapeHtml(zone.label)}</div>
+        <div class="kanban-board" style="--cols:${zone.cols.length};">${colsHtml}</div>
+      </div>
+    `;
   }).join('');
 
-  replaceSectionBody('#sec-kanban', `<div class="kanban-board">${cols}</div>`);
+  replaceSectionBody('#sec-kanban', zonesHtml);
 
   // カンバンカードクリック → 案件モーダル
   $$('#sec-kanban .kanban-card').forEach(card => {
-    card.addEventListener('click', () => {
+    card.addEventListener('click', (e) => {
+      // ワークフローリンクのクリックはカード遷移をスキップ
+      if (e.target.closest('.kanban-wf-link')) return;
       const a = findAnken(card.dataset.key);
       if (a) showAnkenModal(a);
     });
@@ -2533,15 +2554,26 @@ function renderKanban() {
 function kanbanCard(a) {
   const amt = latestAmount(a);
   const memoFull = a['備考'] || '';
-  const memo = memoFull.length > 32 ? memoFull.substring(0, 32) + '…' : memoFull;
+  const memo = memoFull.length > 28 ? memoFull.substring(0, 28) + '…' : memoFull;
   const motoke = a['元請フラグ'] ? ` <span class="motoke-tag">元請</span>` : '';
+  const prog = calcCheckProgress(a);
+  const wfUrl = workflowUrl(a['案件キー']);
+  const progressHtml = prog ? `
+    <div class="kanban-progress">
+      <div class="kanban-progress-bar"><div class="kanban-progress-fill" style="width:${prog.pct}%;"></div></div>
+      <div class="kanban-progress-label">${prog.done}/${prog.total}${prog.pct === 100 ? ' 完了' : ''}</div>
+    </div>
+    ${prog.nextLabel ? `<div class="kanban-next" title="${escapeHtml(prog.nextLabel)}">次：${escapeHtml(prog.nextLabel)}</div>` : ''}
+  ` : '';
   return `
     <div class="kanban-card" role="button" tabindex="0" data-key="${escapeHtml(a['案件キー'])}" aria-label="${escapeHtml(a['案件キー'])} の詳細を開く" title="クリックで案件詳細を表示">
       <div class="kanban-key">${escapeHtml(a['案件キー'])}</div>
       <div class="kanban-title">${escapeHtml(a['正式工事名'] || '')}</div>
       <div class="kanban-cust">${escapeHtml(a['顧客略'] || '')}${motoke}</div>
       ${amt > 0 ? `<div class="kanban-amt">${formatYen(amt)}</div>` : ''}
+      ${progressHtml}
       ${memo ? `<div class="kanban-memo">${escapeHtml(memo)}</div>` : ''}
+      ${prog ? `<a class="kanban-wf-link" href="${wfUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation();">ワークフローを開く →</a>` : ''}
     </div>
   `;
 }
