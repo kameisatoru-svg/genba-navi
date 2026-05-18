@@ -620,6 +620,36 @@ function render() {
     </div>
   `;
 
+  // 持ち越しセクション
+  let carryHtml = '';
+  if (carryOver.length > 0) {
+    const itemsHtml = carryOver.map(c => {
+      const stateLabel = c.state === 'wip' ? '着手中' : '未着手';
+      return `
+        <div class="carryover-item item ${c.state}" data-key="${escapeHtml(c.key)}">
+          <div class="item-check"><svg><use href="#check"/></svg></div>
+          <div class="item-body">
+            <div class="carryover-source">${escapeHtml(c.status)} / ${escapeHtml(c.stageLabel)}</div>
+            <div class="item-label">${escapeHtml(c.label)}</div>
+            ${c.detail ? `<div class="item-detail">${escapeHtml(c.detail)}</div>` : ''}
+          </div>
+          <div class="item-state">${stateLabel}</div>
+        </div>
+      `;
+    }).join('');
+    carryHtml = `
+      <div class="carryover">
+        <div class="carryover-head">
+          <svg class="carryover-head-icon"><use href="#check"/></svg>
+          <span class="carryover-title">前ステージから持ち越し</span>
+          <span class="carryover-count">${carryOver.length}</span>
+        </div>
+        <div class="carryover-desc">先行施工パターン等で、まだ実施が残っている前ステージの項目です。タップで状態を循環し、見積発行・契約締結など終わったら完了にして解消できます。</div>
+        ${itemsHtml}
+      </div>
+    `;
+  }
+
   let bodyHtml = '';
   if (!tpl) {
     bodyHtml = `
@@ -679,9 +709,9 @@ function render() {
     <div id="msg"></div>
   ` : '';
 
-  $('#content').innerHTML = headHtml + bodyHtml + actionsHtml;
+  $('#content').innerHTML = headHtml + carryHtml + bodyHtml + actionsHtml;
 
-  // イベント
+  // イベント（持ち越し項目も `.item` クラスを持つので同じハンドラで処理可能）
   document.querySelectorAll('.item').forEach(el => {
     el.addEventListener('click', () => toggleItem(el.dataset.key));
   });
