@@ -431,10 +431,10 @@ const STATUS_META = {
 };
 
 /* ----------------------------------------------------------
-   チェック項目テンプレート
-   Phase 1 では 相談・見積準備 を完全実装。それ以外は雛形のみ。
+   チェック項目テンプレート（check_template.js から読み込み）
+   ※ 互換性のための inline fallback（check_template.js が読まれなかった場合）
 ---------------------------------------------------------- */
-const CHECK_TEMPLATE = {
+const CHECK_TEMPLATE_FALLBACK = {
   '相談': {
     description: '問合せ受領から現地調査・見積方針確定まで',
     stages: [
