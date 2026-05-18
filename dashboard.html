@@ -3788,11 +3788,21 @@ function bindModalCheckHandlers(a) {
 function refreshModalCheckUi() {
   const tpl = CHECK_TEMPLATE[STATE.案件.find(a => a['案件キー'] === MODAL_CHECK_STATE.key)?.['ステータス']]
             || CHECK_TEMPLATE[STATE.中止案件?.find(a => a['案件キー'] === MODAL_CHECK_STATE.key)?.['ステータス']];
-  if (!tpl) return;
   const checks = MODAL_CHECK_STATE.current;
-  let raw = 0, done = 0, na = 0;
 
-  $$('#anken-modal-body .modal-check-item').forEach(el => {
+  // 持ち越し項目の見た目だけ更新（進捗集計には含めない）
+  $$('#anken-modal-body .modal-carryover-item').forEach(el => {
+    const k = el.dataset.checkKey;
+    const state = checks[k] || 'todo';
+    el.classList.remove('todo', 'wip', 'done', 'na');
+    el.classList.add(state);
+    const tag = el.querySelector('.modal-check-state-tag');
+    if (tag) tag.textContent = state === 'done' ? '完了' : state === 'wip' ? '着手' : state === 'na' ? '該当なし' : '未';
+  });
+
+  // 通常テンプレートのチェックは #modal-check-stages 配下のみ集計
+  let raw = 0, done = 0, na = 0;
+  $$('#modal-check-stages .modal-check-item').forEach(el => {
     const k = el.dataset.checkKey;
     const state = checks[k] || 'todo';
     el.classList.remove('todo', 'wip', 'done', 'na');
@@ -3804,22 +3814,24 @@ function refreshModalCheckUi() {
     else if (state === 'na')  na++;
   });
 
-  // ステージごとのカウント更新（該当なしは分母から除外）
-  tpl.stages.forEach((stage, si) => {
-    const stageDone = stage.items.filter(i => checks[`${stage.id}.${i.id}`] === 'done').length;
-    const stageNa   = stage.items.filter(i => checks[`${stage.id}.${i.id}`] === 'na').length;
-    const stageDenom = stage.items.length - stageNa;
-    const head = $$('#anken-modal-body .modal-check-stage-count')[si];
-    if (head) head.textContent = `${stageDone} / ${stageDenom}${stageNa > 0 ? ` (該当なし${stageNa})` : ''}`;
-  });
+  if (tpl) {
+    // ステージごとのカウント更新（該当なしは分母から除外）
+    tpl.stages.forEach((stage, si) => {
+      const stageDone = stage.items.filter(i => checks[`${stage.id}.${i.id}`] === 'done').length;
+      const stageNa   = stage.items.filter(i => checks[`${stage.id}.${i.id}`] === 'na').length;
+      const stageDenom = stage.items.length - stageNa;
+      const head = $$('#modal-check-stages .modal-check-stage-count')[si];
+      if (head) head.textContent = `${stageDone} / ${stageDenom}${stageNa > 0 ? ` (該当なし${stageNa})` : ''}`;
+    });
 
-  // プログレスバー更新（該当なしは分母から除外）
-  const total = raw - na;
-  const pct = total ? Math.round(done / total * 100) : 0;
-  const bar = $('#modal-check-bar');
-  const count = $('#modal-check-count');
-  if (bar) bar.style.width = pct + '%';
-  if (count) count.textContent = `${done} / ${total}${na > 0 ? ` (該当なし${na})` : ''}`;
+    // プログレスバー更新
+    const total = raw - na;
+    const pct = total ? Math.round(done / total * 100) : 0;
+    const bar = $('#modal-check-bar');
+    const count = $('#modal-check-count');
+    if (bar) bar.style.width = pct + '%';
+    if (count) count.textContent = `${done} / ${total}${na > 0 ? ` (該当なし${na})` : ''}`;
+  }
 
   // dirty判定
   const dirty = JSON.stringify(MODAL_CHECK_STATE.current) !== JSON.stringify(MODAL_CHECK_STATE.original);
