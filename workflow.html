@@ -594,6 +594,9 @@ function render() {
   const total = allItems.length - naCount;
   const pct = total === 0 ? 0 : Math.round((doneCount / total) * 100);
 
+  // 持ち越し算出（現在の checks 状態で再計算）
+  const carryOver = getCarryOverItems({ ...a, 'チェック': STATE.checks });
+
   const headHtml = `
     <div class="head">
       <div class="head-row1">
