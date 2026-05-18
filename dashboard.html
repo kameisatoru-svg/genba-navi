@@ -3766,11 +3766,15 @@ function bindModalCheckHandlers(a) {
   const tpl = CHECK_TEMPLATE[a['ステータス']];
   if (!tpl) return;
 
+  // 4状態循環: todo → wip → done → na → todo
   $$('#anken-modal-body .modal-check-item').forEach(el => {
     el.addEventListener('click', () => {
       const k = el.dataset.checkKey;
       const cur = MODAL_CHECK_STATE.current[k] || 'todo';
-      const next = cur === 'todo' ? 'wip' : cur === 'wip' ? 'done' : 'todo';
+      const next = cur === 'todo' ? 'wip'
+                 : cur === 'wip'  ? 'done'
+                 : cur === 'done' ? 'na'
+                 : 'todo';
       if (next === 'todo') {
         delete MODAL_CHECK_STATE.current[k];
       } else {
