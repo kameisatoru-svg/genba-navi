@@ -745,11 +745,12 @@ function render() {
   const status = a['ステータス'] || '';
   const sm = STATUS_META[status] || { color: 'var(--text-mute)' };
 
-  // 進捗計算
+  // 進捗計算（該当なし=naは分母から除外）
   const allItems = (tpl?.stages || []).flatMap(s => s.items.map(i => `${s.id}.${i.id}`));
   const doneCount = allItems.filter(k => STATE.checks[k] === 'done').length;
   const wipCount  = allItems.filter(k => STATE.checks[k] === 'wip').length;
-  const total = allItems.length;
+  const naCount   = allItems.filter(k => STATE.checks[k] === 'na').length;
+  const total = allItems.length - naCount;
   const pct = total === 0 ? 0 : Math.round((doneCount / total) * 100);
 
   const headHtml = `
@@ -765,11 +766,11 @@ function render() {
         </div>
         <div class="status-badge" style="background:${sm.color};">${escapeHtml(status)}</div>
       </div>
-      ${total > 0 ? `
+      ${(total + naCount) > 0 ? `
         <div class="progress-bar"><div class="progress-bar-fill" style="width:${pct}%;"></div></div>
         <div class="progress-label">
           <span>${tpl.description || ''}</span>
-          <span>${doneCount} / ${total} 完了${wipCount > 0 ? `（着手中 ${wipCount}）` : ''}</span>
+          <span>${doneCount} / ${total} 完了${wipCount > 0 ? `（着手中 ${wipCount}）` : ''}${naCount > 0 ? `（該当なし ${naCount}）` : ''}</span>
         </div>
       ` : ''}
     </div>
