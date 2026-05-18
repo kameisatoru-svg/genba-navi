@@ -2746,20 +2746,32 @@ function renderKpi() {
 /* ============================================================
    Section 3: ステータスカンバン
    ============================================================ */
-function renderKanban() {
-  const all = STATE.案件 || [];
+function kanbanMatchesFilter(a) {
+  if (KANBAN_FILTER.顧客 && a['顧客略'] !== KANBAN_FILTER.顧客) return false;
+  if (KANBAN_FILTER.q) {
+    const q = KANBAN_FILTER.q.toLowerCase();
+    const hay = [a['案件キー'], a['正式工事名'], a['顧客略'], a['施工場所'], a['備考'], a['旧案件番号']]
+      .filter(Boolean).join(' ').toLowerCase();
+    if (!hay.includes(q)) return false;
+  }
+  return true;
+}
 
-  // ステータス別にグルーピング(非表示ステータスは除外)
+function renderKanban() {
+  const all = [...(STATE.案件 || []), ...(STATE.中止案件 || [])];
+
+  // ステータス別にグルーピング（フィルタを適用）
   const grouped = {};
   KANBAN_COLS.forEach(k => grouped[k] = []);
   all.forEach(a => {
-    if (KANBAN_HIDE.includes(a['ステータス'])) return;
-    if (grouped[a['ステータス']]) grouped[a['ステータス']].push(a);
+    if (!grouped[a['ステータス']]) return;
+    if (!kanbanMatchesFilter(a)) return;
+    grouped[a['ステータス']].push(a);
   });
 
   const renderCol = (key) => {
     const m = STATUS_META[key] || { color: 'var(--text-mute)', icon: 'icon-document' };
-    const label = key === '完了(請求書作成済み)' ? '完了' : key;
+    const label = key === '完了(請求書作成済み)' ? '完了(請求済)' : key;
     const items = grouped[key];
     const body = items.length === 0
       ? `<div class="kanban-empty">案件なし</div>`
@@ -2776,7 +2788,34 @@ function renderKanban() {
     `;
   };
 
-  const zonesHtml = KANBAN_ZONES.map(zone => {
+  // 顧客リスト（フィルタプルダウン用）
+  const customers = uniq(all.map(a => a['顧客略']).filter(Boolean)).sort();
+
+  // 統計：表示中の案件数
+  const visibleCount = Object.values(grouped).reduce((s, arr) => s + arr.length, 0);
+  const totalCount = all.filter(a => grouped[a['ステータス']]).length;
+
+  const filterHtml = `
+    <div class="kanban-filters">
+      <div class="kanban-q-wrap">
+        <svg class="icon"><use href="#icon-search"/></svg>
+        <input type="search" id="kanban-q" placeholder="案件キー・工事名・顧客・備考で検索" value="${escapeHtml(KANBAN_FILTER.q)}">
+      </div>
+      <select id="kanban-customer" class="kanban-select">
+        <option value="">顧客すべて</option>
+        ${customers.map(c => `<option value="${escapeHtml(c)}"${c === KANBAN_FILTER.顧客 ? ' selected' : ''}>${escapeHtml(c)}</option>`).join('')}
+      </select>
+      <label class="kanban-toggle">
+        <input type="checkbox" id="kanban-show-closed"${KANBAN_FILTER.showClosed ? ' checked' : ''}>
+        クローズ案件も表示
+      </label>
+      <button class="kanban-clear" id="kanban-filter-clear" type="button">クリア</button>
+      <div class="kanban-filter-count">${visibleCount} / ${totalCount} 件</div>
+    </div>
+  `;
+
+  const activeZones = KANBAN_FILTER.showClosed ? [...KANBAN_ZONES, KANBAN_CLOSED_ZONE] : KANBAN_ZONES;
+  const zonesHtml = activeZones.map(zone => {
     const colsHtml = zone.cols.map(renderCol).join('');
     return `
       <div class="kanban-zone">
@@ -2786,12 +2825,32 @@ function renderKanban() {
     `;
   }).join('');
 
-  replaceSectionBody('#sec-kanban', zonesHtml);
+  replaceSectionBody('#sec-kanban', filterHtml + zonesHtml);
+
+  // フィルタイベント
+  $('#kanban-q')?.addEventListener('input', (e) => {
+    KANBAN_FILTER.q = e.target.value;
+    renderKanban();
+    setTimeout(() => $('#kanban-q')?.focus(), 0);
+  });
+  $('#kanban-customer')?.addEventListener('change', (e) => {
+    KANBAN_FILTER.顧客 = e.target.value;
+    renderKanban();
+  });
+  $('#kanban-show-closed')?.addEventListener('change', (e) => {
+    KANBAN_FILTER.showClosed = e.target.checked;
+    renderKanban();
+  });
+  $('#kanban-filter-clear')?.addEventListener('click', () => {
+    KANBAN_FILTER.q = '';
+    KANBAN_FILTER.顧客 = '';
+    KANBAN_FILTER.showClosed = false;
+    renderKanban();
+  });
 
   // カンバンカードクリック → 案件モーダル
   $$('#sec-kanban .kanban-card').forEach(card => {
     card.addEventListener('click', (e) => {
-      // ワークフローリンクのクリックはカード遷移をスキップ
       if (e.target.closest('.kanban-wf-link')) return;
       const a = findAnken(card.dataset.key);
       if (a) showAnkenModal(a);
