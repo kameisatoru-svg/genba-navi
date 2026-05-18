@@ -1373,6 +1373,61 @@ a { color: inherit; text-decoration: none; }
   text-align: center;
 }
 
+/* ----- モーダル: 持ち越しセクション ----- */
+.modal-carryover {
+  background: #fff7ec;
+  border: 1px solid #f0c785;
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.modal-carryover-head {
+  padding: 8px 12px;
+  background: #ffe7c5;
+  border-left: 4px solid #d4791f;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #7c4a13;
+}
+.modal-carryover-count {
+  background: #d4791f;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+}
+.modal-carryover-desc {
+  padding: 6px 12px 8px;
+  font-size: 11px;
+  color: #7c4a13;
+}
+.modal-carryover-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-top: 1px solid #f0c785;
+  cursor: pointer;
+  transition: background 0.15s;
+  background: #fff;
+}
+.modal-carryover-item:hover { background: rgba(212, 121, 31, 0.05); }
+.modal-carryover-source {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  color: #d4791f;
+  background: #fff7ec;
+  border: 1px solid #f0c785;
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-bottom: 3px;
+}
+
 /* ----- 案件モーダル(案E) ----- */
 .anken-modal-key {
   font-family: var(--font-mono);
