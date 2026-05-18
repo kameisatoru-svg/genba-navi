@@ -851,9 +851,13 @@ function renderError(title, msg) {
    チェック状態の操作
    クリック: todo → wip → done → todo の循環
 ---------------------------------------------------------- */
+// 4状態循環: todo → wip → done → na → todo
 function toggleItem(key) {
   const cur = STATE.checks[key] || 'todo';
-  const next = cur === 'todo' ? 'wip' : cur === 'wip' ? 'done' : 'todo';
+  const next = cur === 'todo' ? 'wip'
+             : cur === 'wip'  ? 'done'
+             : cur === 'done' ? 'na'
+             : 'todo';
   if (next === 'todo') {
     delete STATE.checks[key];   // 既定値に戻すなら削除
   } else {
