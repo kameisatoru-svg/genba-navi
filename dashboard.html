@@ -3761,9 +3761,7 @@ function renderModalCheckSection(a) {
 }
 
 function bindModalCheckHandlers(a) {
-  const tpl = CHECK_TEMPLATE[a['ステータス']];
-  if (!tpl) return;
-
+  // テンプレ無しでも持ち越し項目があるケースに備え、ハンドラ自体は常に付ける
   // 4状態循環: todo → wip → done → na → todo
   $$('#anken-modal-body .modal-check-item').forEach(el => {
     el.addEventListener('click', () => {
