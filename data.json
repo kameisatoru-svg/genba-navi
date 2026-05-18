@@ -1879,6 +1879,33 @@
         "合計": 0,
         "件数": 0,
         "最終集計日": "2026-05-18"
+      },
+      "チェック": {
+        "doc_k.mitsumori_final": "wip",
+        "contact.first": "done",
+        "contact.kokyaku": "done",
+        "contact.reg": "done",
+        "contact.apo": "done",
+        "survey.schedule": "done",
+        "survey.photo": "done",
+        "survey.sumpo": "done",
+        "survey.memo": "done",
+        "prep.spec": "done",
+        "prep.mat": "done",
+        "prep.tanka": "done",
+        "prep.gyousha": "done",
+        "doc_k.keiyaku": "na",
+        "doc_k.chumonsho": "na",
+        "doc_g.order": "na",
+        "doc_g.order_recv": "na",
+        "dandori.koteihyo_make": "done",
+        "dandori.koteihyo_send": "done",
+        "dandori.heimen": "done",
+        "dandori.hannyuro": "done",
+        "dandori.zairyou": "done",
+        "shisetsu.kagu": "na",
+        "shisetsu.doseni": "na",
+        "shisetsu.shuchi": "na"
       }
     },
     {
