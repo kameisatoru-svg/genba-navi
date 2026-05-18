@@ -187,8 +187,20 @@ body {
   background: var(--wip);
   border-color: var(--wip);
 }
+.item.na .item-check {
+  background: transparent;
+  border-color: var(--na);
+  border-style: dashed;
+}
 .item-check svg { width: 14px; height: 14px; color: #fff; }
-.item.todo .item-check svg { display: none; }
+.item.todo .item-check svg, .item.na .item-check svg { display: none; }
+.item.na .item-check::after {
+  content: '—';
+  color: var(--na);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+}
 
 .item-body { flex: 1; min-width: 0; }
 .item-label { font-weight: 600; font-size: 14px; }
@@ -203,6 +215,7 @@ body {
 .item.done .item-state { background: var(--done); color: #fff; }
 .item.wip  .item-state { background: var(--wip);  color: #fff; }
 .item.todo .item-state { background: var(--border); color: var(--text-sub); }
+.item.na   .item-state { background: transparent; color: var(--text-mute); border: 1px dashed var(--na); }
 
 /* ボタンバー */
 .actions {
