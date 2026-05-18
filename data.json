@@ -1663,6 +1663,13 @@
         "合計": 0,
         "件数": 0,
         "最終集計日": "2026-05-14"
+      },
+      "チェック": {
+        "shinkou.photo_before": "done",
+        "shinkou.daily": "done",
+        "shinkou.chosei": "done",
+        "kanryou.photo_after": "done",
+        "kanryou.tachiai": "done"
       }
     },
     {
