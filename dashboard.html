@@ -1302,6 +1302,18 @@ a { color: inherit; text-decoration: none; }
   background: #fff;
   border-radius: 50%;
 }
+.modal-check-item.na .modal-check-mark {
+  background: transparent;
+  border-color: var(--text-mute);
+  border-style: dashed;
+}
+.modal-check-item.na .modal-check-mark::after {
+  content: '—';
+  color: var(--text-mute);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+}
 .modal-check-body { flex: 1; min-width: 0; }
 .modal-check-label { font-size: 13px; font-weight: 600; color: var(--text); }
 .modal-check-state-tag {
@@ -1314,6 +1326,7 @@ a { color: inherit; text-decoration: none; }
 .modal-check-item.todo .modal-check-state-tag { background: var(--border); color: var(--text-sub); }
 .modal-check-item.wip  .modal-check-state-tag { background: var(--accent); color: #fff; }
 .modal-check-item.done .modal-check-state-tag { background: var(--success); color: #fff; }
+.modal-check-item.na   .modal-check-state-tag { background: transparent; color: var(--text-mute); border: 1px dashed var(--text-mute); }
 
 .modal-check-actions {
   display: flex;
