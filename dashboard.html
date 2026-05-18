@@ -37,7 +37,9 @@
   --status-shiko:     #b97843;  /* 施工中 */
   --status-seikyu:    #7a9d6f;  /* 請求済み */
   --status-nyukin:    #4a7c4e;  /* 入金済み */
-  --status-kanryo:    #8b9095;  /* 完了 */
+  --status-kanryo-machi:  #d4a373;  /* 完了・請求書作成待ち(暖系) */
+  --status-kanryo:        #8b9095;  /* 完了(請求書作成済み) */
+  --status-kanryo-final:  #6c757d;  /* 完了(最終クローズ) */
   --status-hoshu:     #8e7cc3;  /* 保守管理(継続) */
   --status-chushi:    #95a5a6;  /* 中止 */
   --status-sodan:          #a8c5da;  /* 相談(薄い青) */
@@ -2174,7 +2176,9 @@ const STATUS_META = {
   '施工中':             { color: 'var(--status-shiko)',     icon: 'icon-hammer' },
   '請求済み':           { color: 'var(--status-seikyu)',    icon: 'icon-invoice' },
   '入金済み':           { color: 'var(--status-nyukin)',    icon: 'icon-check-circle' },
+  '完了・請求書作成待ち': { color: 'var(--status-kanryo-machi)', icon: 'icon-document' },
   '完了(請求書作成済み)': { color: 'var(--status-kanryo)',    icon: 'icon-check-box' },
+  '完了':               { color: 'var(--status-kanryo-final)', icon: 'icon-check-box' },
   '保守管理(継続)':     { color: 'var(--status-hoshu)',     icon: 'icon-refresh' },
   '中止':               { color: 'var(--status-chushi)',    icon: 'icon-warning-triangle' },
   '相談':               { color: 'var(--status-sodan)',          icon: 'icon-calendar' },
@@ -2188,7 +2192,7 @@ const KANBAN_ZONES = [
   { id: 'shiko', label: '施工〜入金ゾーン', cols: ['施工予定', '施工中', '請求済み', '入金済み'] }
 ];
 const KANBAN_CLOSED_ZONE = {
-  id: 'closed', label: 'クローズゾーン', cols: ['完了', '完了(請求書作成済み)', '保守管理(継続)', '中止', '消滅']
+  id: 'closed', label: 'クローズゾーン', cols: ['完了・請求書作成待ち', '完了(請求書作成済み)', '完了', '保守管理(継続)', '中止', '消滅']
 };
 const KANBAN_COLS = [...KANBAN_ZONES.flatMap(z => z.cols), ...KANBAN_CLOSED_ZONE.cols];
 
@@ -2689,7 +2693,10 @@ function renderKanban() {
 
   const renderCol = (key) => {
     const m = STATUS_META[key] || { color: 'var(--text-mute)', icon: 'icon-document' };
-    const label = key === '完了(請求書作成済み)' ? '完了(請求済)' : key;
+    const label =
+      key === '完了(請求書作成済み)' ? '完了(請求済)' :
+      key === '完了・請求書作成待ち' ? '完了(請求待)' :
+      key;
     const items = grouped[key];
     const body = items.length === 0
       ? `<div class="kanban-empty">案件なし</div>`
