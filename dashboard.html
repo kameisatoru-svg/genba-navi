@@ -3713,14 +3713,15 @@ function renderModalCheckSection(a) {
   MODAL_CHECK_STATE.current  = Object.assign({}, a['チェック'] || {});
 
   const checks = MODAL_CHECK_STATE.current;
-  let total = 0, done = 0;
+  let raw = 0, done = 0, na = 0;
   const stagesHtml = tpl.map(stage => {
     const itemsHtml = stage.items.map(item => {
       const key = `${stage.id}.${item.id}`;
       const state = checks[key] || 'todo';
-      total++;
+      raw++;
       if (state === 'done') done++;
-      const stateLabel = state === 'done' ? '完了' : state === 'wip' ? '着手' : '未';
+      else if (state === 'na') na++;
+      const stateLabel = state === 'done' ? '完了' : state === 'wip' ? '着手' : state === 'na' ? '該当なし' : '未';
       return `
         <div class="modal-check-item ${state}" data-check-key="${escapeHtml(key)}">
           <div class="modal-check-mark"><svg class="icon"><use href="#icon-check-circle"/></svg></div>
@@ -3730,16 +3731,19 @@ function renderModalCheckSection(a) {
       `;
     }).join('');
     const stageDone = stage.items.filter(i => checks[`${stage.id}.${i.id}`] === 'done').length;
+    const stageNa   = stage.items.filter(i => checks[`${stage.id}.${i.id}`] === 'na').length;
+    const stageDenom = stage.items.length - stageNa;
     return `
       <div class="modal-check-stage">
         <div class="modal-check-stage-head">
           <span>${escapeHtml(stage.label)}</span>
-          <span class="modal-check-stage-count">${stageDone} / ${stage.items.length}</span>
+          <span class="modal-check-stage-count">${stageDone} / ${stageDenom}${stageNa > 0 ? ` (該当なし${stageNa})` : ''}</span>
         </div>
         ${itemsHtml}
       </div>
     `;
   }).join('');
+  const total = raw - na;
   const pct = total ? Math.round(done / total * 100) : 0;
 
   return `
@@ -3747,12 +3751,12 @@ function renderModalCheckSection(a) {
       <div class="modal-section-title">チェック</div>
       <div class="modal-check-progress">
         <div class="modal-check-progress-bar"><div class="modal-check-progress-fill" id="modal-check-bar" style="width:${pct}%;"></div></div>
-        <div class="modal-check-progress-label" id="modal-check-count">${done} / ${total}</div>
+        <div class="modal-check-progress-label" id="modal-check-count">${done} / ${total}${na > 0 ? ` (該当なし${na})` : ''}</div>
       </div>
       <div id="modal-check-stages">${stagesHtml}</div>
       <div class="modal-check-actions">
         <button class="modal-check-save-btn" id="modal-check-save-btn" type="button" disabled>変更を保存</button>
-        <span class="modal-check-msg" id="modal-check-msg">項目をタップで 未 → 着手 → 完了 を循環</span>
+        <span class="modal-check-msg" id="modal-check-msg">項目をタップで 未 → 着手 → 完了 → 該当なし を循環</span>
       </div>
     </div>
   `;
