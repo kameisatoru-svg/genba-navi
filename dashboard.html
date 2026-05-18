@@ -310,6 +310,79 @@ a { color: inherit; text-decoration: none; }
 .kpi-success { --kpi-color: var(--status-yotei); }
 
 /* ----- Section 3: カンバン ----- */
+.kanban-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border-radius: var(--radius);
+}
+.kanban-q-wrap {
+  position: relative;
+  flex: 1 1 280px;
+  min-width: 180px;
+  display: flex;
+  align-items: center;
+}
+.kanban-q-wrap .icon {
+  position: absolute;
+  left: 8px;
+  width: 14px;
+  height: 14px;
+  color: var(--text-mute);
+  pointer-events: none;
+}
+.kanban-q-wrap input {
+  width: 100%;
+  padding: 6px 8px 6px 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--card);
+  color: var(--text);
+}
+.kanban-q-wrap input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.kanban-select {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+}
+.kanban-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text-sub);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.kanban-toggle input { cursor: pointer; }
+.kanban-clear {
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-sub);
+  font-size: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.kanban-clear:hover { background: var(--bg); border-color: var(--accent); color: var(--accent); }
+.kanban-filter-count {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-sub);
+  margin-left: auto;
+}
+
 .kanban-zone + .kanban-zone { margin-top: 16px; }
 .kanban-zone-head {
   font-size: 11px;
