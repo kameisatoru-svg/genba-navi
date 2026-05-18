@@ -794,7 +794,10 @@ function render() {
       const itemsHtml = stage.items.map(item => {
         const key = `${stage.id}.${item.id}`;
         const state = STATE.checks[key] || 'todo';
-        const stateLabel = state === 'done' ? '完了' : state === 'wip' ? '着手中' : '未着手';
+        const stateLabel = state === 'done' ? '完了'
+                         : state === 'wip'  ? '着手中'
+                         : state === 'na'   ? '該当なし'
+                         : '未着手';
         return `
           <div class="item ${state}" data-key="${escapeHtml(key)}">
             <div class="item-check"><svg><use href="#check"/></svg></div>
@@ -807,12 +810,14 @@ function render() {
         `;
       }).join('');
       const stageDone = stage.items.filter(i => STATE.checks[`${stage.id}.${i.id}`] === 'done').length;
+      const stageNa   = stage.items.filter(i => STATE.checks[`${stage.id}.${i.id}`] === 'na').length;
+      const stageDenom = stage.items.length - stageNa;
       return `
         <div class="stage" style="--stage-color:${stage.color};">
           <div class="stage-head">
             <svg class="stage-icon"><use href="#${stage.icon}"/></svg>
             <span class="stage-title">${escapeHtml(stage.label)}</span>
-            <span class="stage-count">${stageDone} / ${stage.items.length}</span>
+            <span class="stage-count">${stageDone} / ${stageDenom}${stageNa > 0 ? ` (該当なし${stageNa})` : ''}</span>
           </div>
           <div class="stage-body">${itemsHtml}</div>
         </div>
