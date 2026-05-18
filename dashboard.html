@@ -462,6 +462,16 @@ a { color: inherit; text-decoration: none; }
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.kanban-carryover {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  background: #d4791f;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin: 3px 0;
+}
 .kanban-wf-link {
   display: block;
   font-size: 11px;
@@ -2750,12 +2760,14 @@ function kanbanCard(a) {
   const memo = memoFull.length > 28 ? memoFull.substring(0, 28) + '…' : memoFull;
   const motoke = a['元請フラグ'] ? ` <span class="motoke-tag">元請</span>` : '';
   const prog = calcCheckProgress(a);
+  const carryCount = getCarryOverItems(a).length;
   const wfUrl = workflowUrl(a['案件キー']);
   const progressHtml = prog ? `
     <div class="kanban-progress">
       <div class="kanban-progress-bar"><div class="kanban-progress-fill" style="width:${prog.pct}%;"></div></div>
       <div class="kanban-progress-label">${prog.done}/${prog.total}${prog.pct === 100 ? ' 完了' : ''}</div>
     </div>
+    ${carryCount > 0 ? `<div class="kanban-carryover" title="前ステージで未完了の項目があります">持ち越し ${carryCount}件</div>` : ''}
     ${prog.nextLabel ? `<div class="kanban-next" title="${escapeHtml(prog.nextLabel)}">次：${escapeHtml(prog.nextLabel)}</div>` : ''}
   ` : '';
   return `
