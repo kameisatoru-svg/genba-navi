@@ -19,6 +19,7 @@
   --done: #7a9d6f;
   --wip:  #d4a574;
   --todo: #c0c0c0;
+  --na:   #b0b0b0;
 
   --status-sodan:          #a8c5da;
   --status-mitsumori-prep: #c8b9d9;
@@ -162,6 +163,9 @@ body {
 .item:hover { background: rgba(90, 141, 199, 0.04); }
 .item.done { opacity: 0.65; }
 .item.done .item-label { text-decoration: line-through; color: var(--text-sub); }
+.item.na { opacity: 0.5; background: rgba(0,0,0,0.02); }
+.item.na .item-label { text-decoration: line-through; color: var(--text-mute); font-weight: 500; }
+.item.na .item-detail { color: var(--text-mute); }
 
 .item-check {
   width: 22px;
