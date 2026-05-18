@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>案件ワークフロー</title>
+<style>
+:root {
+  --bg: #f7f8fa;
+  --card: #ffffff;
+  --text: #2c3e50;
+  --text-sub: #6b7785;
+  --text-mute: #9aa3ad;
+  --border: #e4e7eb;
+  --primary: #5a8dc7;
+  --success: #4a7c4e;
+  --warn: #d4a574;
+  --danger: #c0392b;
+  --done: #7a9d6f;
+  --wip:  #d4a574;
+  --todo: #c0c0c0;
+
+  --status-sodan:          #a8c5da;
+  --status-mitsumori-prep: #c8b9d9;
+  --status-mitsumori:      #6c8eb5;
+  --status-yotei:          #d4a574;
+  --status-shiko:          #b97843;
+  --status-seikyu:         #7a9d6f;
+  --status-nyukin:         #4a7c4e;
+  --status-kanryo:         #8b9095;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* ヘッダー */
+.head {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  position: sticky;
+  top: 8px;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.head-row1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.head-key {
+  font-family: 'SF Mono', Consolas, monospace;
+  font-size: 12px;
+  color: var(--text-sub);
+  word-break: break-all;
+}
+.head-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 4px 0 6px;
+  word-break: break-word;
+}
+.head-meta {
+  font-size: 12px;
+  color: var(--text-sub);
+}
+.head-meta span + span { margin-left: 8px; }
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+}
+.progress-bar {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 12px;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--done);
+  transition: width 0.3s ease;
+}
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-sub);
+  margin-top: 4px;
+}
+
+/* ステージ */
+.stage {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.stage-head {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-left: 4px solid var(--stage-color, var(--primary));
+  background: linear-gradient(to right, rgba(0,0,0,0.02), transparent);
+}
+.stage-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  color: var(--stage-color, var(--primary));
+}
+.stage-title {
+  font-weight: 700;
+  font-size: 15px;
+  flex: 1;
+}
+.stage-count {
+  font-size: 12px;
+  color: var(--text-sub);
+  font-variant-numeric: tabular-nums;
+}
+.stage-body {
+  padding: 8px 0;
+}
+
+/* チェック項目 */
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.item:first-child { border-top: none; }
+.item:hover { background: rgba(90, 141, 199, 0.04); }
+.item.done { opacity: 0.65; }
+.item.done .item-label { text-decoration: line-through; color: var(--text-sub); }
+
+.item-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--todo);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  margin-top: 1px;
+}
+.item.done .item-check {
+  background: var(--done);
+  border-color: var(--done);
+}
+.item.wip .item-check {
+  background: var(--wip);
+  border-color: var(--wip);
+}
+.item-check svg { width: 14px; height: 14px; color: #fff; }
+.item.todo .item-check svg { display: none; }
+
+.item-body { flex: 1; min-width: 0; }
+.item-label { font-weight: 600; font-size: 14px; }
+.item-detail { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
+.item-state {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.item.done .item-state { background: var(--done); color: #fff; }
+.item.wip  .item-state { background: var(--wip);  color: #fff; }
+.item.todo .item-state { background: var(--border); color: var(--text-sub); }
+
+/* ボタンバー */
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+.btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn:hover { background: #f0f3f7; }
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+.btn-primary:hover { background: #4a7db7; }
+.btn-success {
+  background: var(--success);
+  color: #fff;
+  border-color: var(--success);
+}
+.btn-success:hover { background: #3a6c3e; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* 状態メッセージ */
+.msg {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+.msg.info    { background: #eaf2fa; color: #2c5e89; }
+.msg.success { background: #ebf5ec; color: #2a5d2e; }
+.msg.error   { background: #fbeaea; color: #8b2c25; }
+.msg.warn    { background: #fcf3e3; color: #7c5a1f; }
+
+/* ローダー */
+.loader {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-sub);
+}
+
+/* PATモーダル */
+.pat-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+.pat-overlay.show { display: flex; }
+.pat-box {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 420px;
+  width: 100%;
+}
+.pat-box h3 { margin: 0 0 8px; font-size: 16px; }
+.pat-box p { margin: 0 0 12px; font-size: 13px; color: var(--text-sub); }
+.pat-box input {
+  width: 100%;
+  padding: 10px;
+  font-family: monospace;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+.pat-box .pat-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* トースト */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(120%);
+  background: rgba(44, 62, 80, 0.95);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: transform 0.3s ease;
+  z-index: 200;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* 未対応ステータス案内 */
+.unsupported {
+  background: var(--card);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  color: var(--text-sub);
+}
+
+footer {
+  margin-top: 24px;
+  padding: 16px 0;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-mute);
+}
+footer a { color: var(--text-sub); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<!-- SVGアイコンスプライト -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="customer-icon" viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M4 21c0-4 4-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="survey-icon" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+      <line x1="16" y1="16" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="estimate-icon" viewBox="0 0 24 24">
+      <rect x="4" y="3" width="16" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+      <line x1="8" y1="8" x2="16" y2="8" stroke="currentColor" stroke-width="2"/>
+      <line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="2"/>
+      <line x1="8" y1="16" x2="13" y2="16" stroke="currentColor" stroke-width="2"/>
+    </symbol>
+    <symbol id="order-icon" viewBox="0 0 24 24">
+      <path d="M3 7l9 5 9-5M3 7v10l9 5 9-5V7M3 7l9-4 9 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="check" viewBox="0 0 24 24">
+      <polyline points="5,13 10,18 19,7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="dot" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="4" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <div id="content">
+    <div class="loader">読込中...</div>
+  </div>
+
+  <footer>
+    <a href="dashboard.html">ダッシュボードへ戻る</a>
+  </footer>
+</div>
+
+<!-- PATモーダル -->
+<div class="pat-overlay" id="pat-overlay">
+  <div class="pat-box">
+    <h3>GitHub Token を設定</h3>
+    <p>data.jsonを編集するため、GitHub Personal Access Token が必要です（取引先台帳・ダッシュボードと共用）。</p>
+    <input type="password" id="pat-input" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
+    <div class="pat-actions">
+      <button class="btn" id="pat-cancel">キャンセル</button>
+      <button class="btn btn-primary" id="pat-confirm">保存して続ける</button>
+    </div>
+  </div>
+</div>
+
+<!-- トースト -->
+<div class="toast" id="toast">保存しました</div>
+
+<script>
+/* ============================================================
+   workflow.html - 案件ワークフロー（Phase 1: 相談・見積準備）
+   URL: workflow.html?key=<案件キー>
+   ============================================================ */
+
+const DATA_URL = 'https://kameisatoru-svg.github.io/genba-navi/data.json';
+const GH_REPO  = 'kameisatoru-svg/genba-navi';
+const GH_FILE  = 'data.json';
+const GH_API   = `https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`;
+const PAT_KEY  = 'artrise_gh_pat';
+
+const STATUS_META = {
+  '相談':                 { color: 'var(--status-sodan)' },
+  '見積準備':             { color: 'var(--status-mitsumori-prep)' },
+  '見積提出済み':         { color: 'var(--status-mitsumori)' },
+  '施工予定':             { color: 'var(--status-yotei)' },
+  '施工中':               { color: 'var(--status-shiko)' },
+  '請求済み':             { color: 'var(--status-seikyu)' },
+  '入金済み':             { color: 'var(--status-nyukin)' },
+  '完了(請求書作成済み)': { color: 'var(--status-kanryo)' },
+  '完了':                 { color: 'var(--status-kanryo)' },
+  '保守管理(継続)':       { color: 'var(--status-nyukin)' },
+  '中止':                 { color: 'var(--text-mute)' }
+};
+
+/* ----------------------------------------------------------
+   チェック項目テンプレート
+   Phase 1 では 相談・見積準備 を完全実装。それ以外は雛形のみ。
+---------------------------------------------------------- */
+const CHECK_TEMPLATE = {
+  '相談': {
+    description: '問合せ受領から現地調査・見積方針確定まで',
+    stages: [
+      {
+        id: 'contact',
+        label: 'コンタクト',
+        icon: 'customer-icon',
+        color: '#3498db',
+        items: [
+          { id: 'first',    label: '初回問合せの記録',        detail: '通話・メール・LINE等の経路を備考に残す' },
+          { id: 'kokyaku',  label: '顧客マスター登録',        detail: '新規顧客の場合 T-XXX を採番（meishi-to-data-json）' },
+          { id: 'reg',      label: '案件登録（data.json）',    detail: '案件キー採番・案件配列に追加' },
+          { id: 'apo',      label: '初回面談アポ',            detail: '電話・現場訪問・オンラインのいずれかを段取り' }
+        ]
+      },
+      {
+        id: 'survey',
+        label: '現地調査',
+        icon: 'survey-icon',
+        color: '#e67e22',
+        items: [
+          { id: 'schedule', label: '現調日時の調整',          detail: '顧客と現調日時を確定・カレンダー登録' },
+          { id: 'photo',    label: '現場写真の撮影',          detail: '全景・問題箇所・周辺状況を案件フォルダに保存' },
+          { id: 'sumpo',    label: '寸法計測・スケッチ',      detail: '主要寸法とラフスケッチを記録' },
+          { id: 'memo',     label: '現場メモ作成',            detail: '所見・特記事項を 00_履歴_案件キー.md に追記' }
+        ]
+      },
+      {
+        id: 'prep',
+        label: '見積方針',
+        icon: 'estimate-icon',
+        color: '#9b59b6',
+        items: [
+          { id: 'spec',     label: '仕様・商品の擦り合わせ',  detail: 'グレード・色・数量レンジを顧客と確認' },
+          { id: 'mat',      label: '材料割付',                detail: '使用部材と数量を確定（材料割付_app）' },
+          { id: 'tanka',    label: '単価決定',                detail: '単価マスタを参照・必要なら更新' },
+          { id: 'gyousha',  label: '協力業者への打診',        detail: '外注が必要なら業者向け概算依頼' }
+        ]
+      }
+    ]
+  },
+  '見積準備': {
+    description: '見積書を作成して顧客に提出するまで',
+    stages: [
+      {
+        id: 'compose',
+        label: '見積作成',
+        icon: 'estimate-icon',
+        color: '#3498db',
+        items: [
+          { id: 'breakdown', label: '内訳作成',                detail: '材料・労務・諸経費を積算（みつも朗 or mitsumori-seikyu-create）' },
+          { id: 'amount',    label: '金額確定',                detail: '合計・消費税・端数処理を確認' },
+          { id: 'review',    label: '体裁チェック',            detail: '宛名・件名・有効期限・備考を確認' },
+          { id: 'pdf',       label: '見積書PDF発行',           detail: 'PDF化して案件フォルダに保存' }
+        ]
+      },
+      {
+        id: 'submit',
+        label: '提出',
+        icon: 'order-icon',
+        color: '#27ae60',
+        items: [
+          { id: 'send',      label: '顧客送付',                detail: 'メール・郵送・対面のいずれか' },
+          { id: 'register',  label: 'data.json に反映',        detail: '案件の見積[]配列に追加' },
+          { id: 'followup',  label: 'フォロー連絡',            detail: '提出から1週間以内に確認連絡' }
+        ]
+      }
+    ]
+  },
+  // === 以下のステータスは Step 3 で詳細化 ===
+  '見積提出済み':         { description: '受注待ち・契約準備',         stages: [] },
+  '施工予定':             { description: '受注後の着工準備',           stages: [] },
+  '施工中':               { description: '施工本番',                   stages: [] },
+  '請求済み':             { description: '完工後の請求・入金待ち',     stages: [] },
+  '入金済み':             { description: '入金確認・原価確定',         stages: [] },
+  '完了(請求書作成済み)': { description: 'クローズ済み案件',           stages: [] }
+};
+
+/* ----------------------------------------------------------
+   ユーティリティ
+---------------------------------------------------------- */
+const $ = (s, root = document) => root.querySelector(s);
+function escapeHtml(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function getQueryKey() {
+  const p = new URLSearchParams(location.search);
+  return p.get('key') || p.get('案件キー') || '';
+}
+function showToast(msg) {
+  const el = $('#toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 1800);
+}
+
+/* ----------------------------------------------------------
+   グローバル状態
+---------------------------------------------------------- */
+const STATE = {
+  ankenKey: '',
+  anken: null,         // 案件オブジェクト
+  template: null,      // 現ステータスのテンプレート
+  checks: {},          // { "stageId.itemId": "done"|"wip"|"todo" }
+  dirty: false         // 未保存変更あり
+};
+
+/* ----------------------------------------------------------
+   起動：data.json取得→案件特定→描画
+---------------------------------------------------------- */
+async function init() {
+  const key = getQueryKey();
+  if (!key) {
+    renderError('案件キーが指定されていません', 'URL末尾に <code>?key=案件キー</code> を付けてください。');
+    return;
+  }
+  STATE.ankenKey = key;
+
+  try {
+    const res = await fetch(DATA_URL + '?t=' + Date.now());
+    if (!res.ok) throw new Error('data.json 取得失敗: ' + res.status);
+    const data = await res.json();
+    const all  = [...(data['案件'] || []), ...(data['中止案件'] || [])];
+    const a    = all.find(x => x['案件キー'] === key);
+    if (!a) {
+      renderError('案件が見つかりません', `案件キー: <code>${escapeHtml(key)}</code>`);
+      return;
+    }
+    STATE.anken = a;
+    STATE.checks = Object.assign({}, a['チェック'] || {});
+    STATE.template = CHECK_TEMPLATE[a['ステータス']] || null;
+    render();
+  } catch (err) {
+    renderError('読込エラー', err.message);
+  }
+}
+
+/* ----------------------------------------------------------
+   レンダリング
+---------------------------------------------------------- */
+function render() {
+  const a = STATE.anken;
+  const tpl = STATE.template;
+  const status = a['ステータス'] || '';
+  const sm = STATUS_META[status] || { color: 'var(--text-mute)' };
+
+  // 進捗計算
+  const allItems = (tpl?.stages || []).flatMap(s => s.items.map(i => `${s.id}.${i.id}`));
+  const doneCount = allItems.filter(k => STATE.checks[k] === 'done').length;
+  const wipCount  = allItems.filter(k => STATE.checks[k] === 'wip').length;
+  const total = allItems.length;
+  const pct = total === 0 ? 0 : Math.round((doneCount / total) * 100);
+
+  const headHtml = `
+    <div class="head">
+      <div class="head-row1">
+        <div style="flex:1; min-width:0;">
+          <div class="head-key">${escapeHtml(a['案件キー'])}</div>
+          <div class="head-title">${escapeHtml(a['正式工事名'] || a['現場+工事'] || '(工事名未設定)')}</div>
+          <div class="head-meta">
+            <span>${escapeHtml(a['顧客略'] || '')}</span>
+            <span>${escapeHtml(a['施工場所'] || '')}</span>
+          </div>
+        </div>
+        <div class="status-badge" style="background:${sm.color};">${escapeHtml(status)}</div>
+      </div>
+      ${total > 0 ? `
+        <div class="progress-bar"><div class="progress-bar-fill" style="width:${pct}%;"></div></div>
+        <div class="progress-label">
+          <span>${tpl.description || ''}</span>
+          <span>${doneCount} / ${total} 完了${wipCount > 0 ? `（着手中 ${wipCount}）` : ''}</span>
+        </div>
+      ` : ''}
+    </div>
+  `;
+
+  let bodyHtml = '';
+  if (!tpl) {
+    bodyHtml = `
+      <div class="unsupported">
+        <div style="font-size:15px; font-weight:600; margin-bottom:6px;">テンプレート未対応</div>
+        <div>ステータス「${escapeHtml(status)}」のワークフローはまだ用意されていません。</div>
+      </div>`;
+  } else if (tpl.stages.length === 0) {
+    bodyHtml = `
+      <div class="unsupported">
+        <div style="font-size:15px; font-weight:600; margin-bottom:6px;">Phase 2 で実装予定</div>
+        <div>「${escapeHtml(status)}」のチェック項目は次のフェーズで追加されます。</div>
+      </div>`;
+  } else {
+    bodyHtml = tpl.stages.map(stage => {
+      const itemsHtml = stage.items.map(item => {
+        const key = `${stage.id}.${item.id}`;
+        const state = STATE.checks[key] || 'todo';
+        const stateLabel = state === 'done' ? '完了' : state === 'wip' ? '着手中' : '未着手';
+        return `
+          <div class="item ${state}" data-key="${escapeHtml(key)}">
+            <div class="item-check"><svg><use href="#check"/></svg></div>
+            <div class="item-body">
+              <div class="item-label">${escapeHtml(item.label)}</div>
+              ${item.detail ? `<div class="item-detail">${escapeHtml(item.detail)}</div>` : ''}
+            </div>
+            <div class="item-state">${stateLabel}</div>
+          </div>
+        `;
+      }).join('');
+      const stageDone = stage.items.filter(i => STATE.checks[`${stage.id}.${i.id}`] === 'done').length;
+      return `
+        <div class="stage" style="--stage-color:${stage.color};">
+          <div class="stage-head">
+            <svg class="stage-icon"><use href="#${stage.icon}"/></svg>
+            <span class="stage-title">${escapeHtml(stage.label)}</span>
+            <span class="stage-count">${stageDone} / ${stage.items.length}</span>
+          </div>
+          <div class="stage-body">${itemsHtml}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  const actionsHtml = (tpl && tpl.stages.length > 0) ? `
+    <div class="actions">
+      <button class="btn btn-primary" id="btn-save" ${STATE.dirty ? '' : 'disabled'}>
+        ${STATE.dirty ? '変更を保存' : '保存済み'}
+      </button>
+      <button class="btn" id="btn-reset">変更を破棄</button>
+    </div>
+    <div id="msg"></div>
+  ` : '';
+
+  $('#content').innerHTML = headHtml + bodyHtml + actionsHtml;
+
+  // イベント
+  document.querySelectorAll('.item').forEach(el => {
+    el.addEventListener('click', () => toggleItem(el.dataset.key));
+  });
+  $('#btn-save')?.addEventListener('click', saveChecks);
+  $('#btn-reset')?.addEventListener('click', resetChecks);
+}
+
+function renderError(title, msg) {
+  $('#content').innerHTML = `
+    <div class="unsupported">
+      <div style="font-size:16px; font-weight:700; margin-bottom:8px;">${escapeHtml(title)}</div>
+      <div>${msg}</div>
+    </div>`;
+}
+
+/* ----------------------------------------------------------
+   チェック状態の操作
+   クリック: todo → wip → done → todo の循環
+---------------------------------------------------------- */
+function toggleItem(key) {
+  const cur = STATE.checks[key] || 'todo';
+  const next = cur === 'todo' ? 'wip' : cur === 'wip' ? 'done' : 'todo';
+  if (next === 'todo') {
+    delete STATE.checks[key];   // 既定値に戻すなら削除
+  } else {
+    STATE.checks[key] = next;
+  }
+  STATE.dirty = true;
+  render();
+}
+
+function resetChecks() {
+  STATE.checks = Object.assign({}, STATE.anken['チェック'] || {});
+  STATE.dirty = false;
+  render();
+  showToast('変更を破棄しました');
+}
+
+/* ----------------------------------------------------------
+   GitHub PUT 保存
+   PATの取り扱いは dashboard.html と共通（artrise_gh_pat）
+---------------------------------------------------------- */
+function getPAT()  { return localStorage.getItem(PAT_KEY) || ''; }
+function savePAT(t){ localStorage.setItem(PAT_KEY, t); }
+
+function showPATModal(callback) {
+  const m = $('#pat-overlay');
+  m.classList.add('show');
+  $('#pat-input').value = '';
+  setTimeout(() => $('#pat-input').focus(), 80);
+  $('#pat-cancel').onclick = () => m.classList.remove('show');
+  $('#pat-confirm').onclick = () => {
+    const v = $('#pat-input').value.trim();
+    if (!v) { showToast('トークンを入力してください'); return; }
+    savePAT(v);
+    m.classList.remove('show');
+    callback();
+  };
+  $('#pat-input').onkeydown = (e) => { if (e.key === 'Enter') $('#pat-confirm').click(); };
+}
+
+async function saveChecks() {
+  const pat = getPAT();
+  if (!pat) { showPATModal(saveChecks); return; }
+
+  const msgEl = $('#msg');
+  const btn = $('#btn-save');
+  if (btn) btn.disabled = true;
+  if (msgEl) msgEl.innerHTML = '<div class="msg info">保存中...</div>';
+
+  try {
+    // 1. 現在の data.json を取得
+    const res = await fetch(GH_API, {
+      headers: { Authorization: `token ${pat}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (res.status === 401) {
+      localStorage.removeItem(PAT_KEY);
+      if (msgEl) msgEl.innerHTML = '<div class="msg error">トークンが無効です</div>';
+      if (btn) btn.disabled = false;
+      showPATModal(saveChecks);
+      return;
+    }
+    if (!res.ok) throw new Error('取得失敗 ' + res.status);
+    const fileData = await res.json();
+    const sha = fileData.sha;
+    const raw = atob(fileData.content.replace(/\n/g, ''));
+    const bytes = new Uint8Array(raw.length).map((_, i) => raw.charCodeAt(i));
+    const currentJson = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+
+    // 2. 該当案件を見つけて チェック フィールドを更新
+    const buckets = ['案件', '中止案件'];
+    let target = null;
+    for (const b of buckets) {
+      const arr = currentJson[b] || [];
+      const idx = arr.findIndex(x => x['案件キー'] === STATE.ankenKey);
+      if (idx !== -1) { target = arr[idx]; break; }
+    }
+    if (!target) throw new Error('案件が見つかりません: ' + STATE.ankenKey);
+
+    // 空オブジェクトなら省略
+    if (Object.keys(STATE.checks).length === 0) {
+      delete target['チェック'];
+    } else {
+      target['チェック'] = Object.assign({}, STATE.checks);
+    }
+
+    // 3. PUT
+    const jsonStr = JSON.stringify(currentJson, null, 2);
+    const encBytes = new TextEncoder().encode(jsonStr);
+    const encChars = Array.from(encBytes).map(b => String.fromCharCode(b)).join('');
+    const newContent = btoa(encChars);
+    const putRes = await fetch(GH_API, {
+      method: 'PUT',
+      headers: { Authorization: `token ${pat}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+      body: JSON.stringify({
+        message: `workflow更新: ${STATE.ankenKey} チェック更新`,
+        content: newContent,
+        sha
+      })
+    });
+    if (!putRes.ok) throw new Error('保存失敗 ' + putRes.status);
+
+    // 4. ローカル STATE を最新で更新
+    STATE.anken['チェック'] = Object.assign({}, STATE.checks);
+    STATE.dirty = false;
+    render();
+    if (msgEl) msgEl.innerHTML = '<div class="msg success">✓ 保存しました（GitHub Pages反映には1〜2分かかる場合があります）</div>';
+    showToast('保存しました');
+  } catch (err) {
+    console.error(err);
+    if (msgEl) msgEl.innerHTML = `<div class="msg error">エラー: ${escapeHtml(err.message)}</div>`;
+    if (btn) btn.disabled = false;
+  }
+}
+
+/* 起動 */
+init();
+</script>
+</body>
+</html>
