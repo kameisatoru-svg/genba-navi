@@ -2325,21 +2325,23 @@ const CHECK_TEMPLATE = {
   ]
 };
 
-// 案件のチェック進捗を集計（テンプレート未対応のステータスは null）
+// 案件のチェック進捗を集計（該当なし=naは分母から除外・テンプレート未対応はnull）
 function calcCheckProgress(anken) {
   const tpl = CHECK_TEMPLATE[anken['ステータス']];
   if (!tpl) return null;
   const checks = anken['チェック'] || {};
-  let total = 0, done = 0, nextLabel = '';
+  let raw = 0, done = 0, na = 0, nextLabel = '';
   for (const stage of tpl) {
     for (const item of stage.items) {
-      total++;
+      raw++;
       const state = checks[`${stage.id}.${item.id}`];
-      if (state === 'done') done++;
-      else if (!nextLabel && state !== 'done') nextLabel = item.label;
+      if (state === 'done')      done++;
+      else if (state === 'na')   na++;
+      else if (!nextLabel)       nextLabel = item.label;  // 未着手・着手中の最初の項目
     }
   }
-  return { total, done, pct: total ? Math.round(done / total * 100) : 0, nextLabel };
+  const total = raw - na;
+  return { total, done, na, pct: total ? Math.round(done / total * 100) : 0, nextLabel };
 }
 
 // ワークフローURL組み立て
