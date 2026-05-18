@@ -1588,10 +1588,13 @@ a { color: inherit; text-decoration: none; }
   .kpi-card .icon { width: 18px; height: 18px; }
   .kpi-value { font-size: 1.1em; }
 
-  /* カンバンは6列固定で印刷 */
-  .kanban-board { grid-template-columns: repeat(6, 1fr); overflow: visible; gap: 4px; }
+  /* カンバンはゾーンごとに列固定で印刷 */
+  .kanban-zone { page-break-inside: avoid; }
+  .kanban-zone-head { color: #333; }
+  .kanban-board { grid-template-columns: repeat(var(--cols, 4), 1fr); overflow: visible; gap: 4px; }
   .kanban-col { min-width: 0; page-break-inside: avoid; }
   .kanban-card { page-break-inside: avoid; }
+  .kanban-wf-link { display: none; }
 
   /* テーブルは全行表示 */
   .table-wrap { overflow: visible; border: none; }
