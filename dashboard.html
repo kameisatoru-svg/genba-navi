@@ -3586,12 +3586,18 @@ function showAnkenModal(a) {
     </div>
   `;
 
-  $('#anken-modal-body').innerHTML = basicHtml + docsHtml + costHtml + memoHtml + editHtml;
+  $('#anken-modal-body').innerHTML = basicHtml + docsHtml + checkHtml + costHtml + memoHtml + editHtml;
 
   // アクションボタン
   const key = a['案件キー'];
+  const wfBtn = CHECK_TEMPLATE[a['ステータス']]
+    ? `<a class="modal-action-btn primary" href="${workflowUrl(key)}" target="_blank" rel="noopener">
+         <svg class="icon"><use href="#icon-clipboard"/></svg>ワークフローを開く
+       </a>`
+    : '';
   $('#anken-modal-actions').innerHTML = `
-    <a class="modal-action-btn primary" href="${driveSearchUrl(key)}" target="_blank" rel="noopener">
+    ${wfBtn}
+    <a class="modal-action-btn" href="${driveSearchUrl(key)}" target="_blank" rel="noopener">
       <svg class="icon"><use href="#icon-folder"/></svg>Driveで案件を検索
     </a>
     <button class="modal-action-btn" data-copy="${escapeHtml(key)}" type="button">
@@ -3601,6 +3607,9 @@ function showAnkenModal(a) {
       <svg class="icon"><use href="#icon-mail"/></svg>Gmailで検索
     </a>
   `;
+
+  // チェックセクションのイベント
+  bindModalCheckHandlers(a);
 
   // 顧客リンク → 取引先モーダル
   $$('#anken-modal-body .anken-partner-link').forEach(el => {
