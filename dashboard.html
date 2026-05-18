@@ -2263,14 +2263,18 @@ const STATUS_META = {
   '消滅':               { color: 'var(--status-shomet)',         icon: 'icon-warning-triangle' }
 };
 
-// --- カンバン列定義(2ゾーン7列) ---
+// --- カンバン列定義(2ゾーン7列 + 任意のクローズゾーン) ---
 const KANBAN_ZONES = [
-  { id: 'eigyo', label: '営業ゾーン', cols: ['相談', '見積準備', '見積提出済み'] },
+  { id: 'eigyo', label: '営業ゾーン',       cols: ['相談', '見積準備', '見積提出済み'] },
   { id: 'shiko', label: '施工〜入金ゾーン', cols: ['施工予定', '施工中', '請求済み', '入金済み'] }
 ];
-const KANBAN_COLS = KANBAN_ZONES.flatMap(z => z.cols);
-// カンバンに表示しないステータス
-const KANBAN_HIDE = ['中止', '保守管理(継続)', '完了', '完了(請求書作成済み)', '消滅'];
+const KANBAN_CLOSED_ZONE = {
+  id: 'closed', label: 'クローズゾーン', cols: ['完了', '完了(請求書作成済み)', '保守管理(継続)', '中止', '消滅']
+};
+const KANBAN_COLS = [...KANBAN_ZONES.flatMap(z => z.cols), ...KANBAN_CLOSED_ZONE.cols];
+
+// --- カンバン用フィルタ状態 ---
+const KANBAN_FILTER = { q: '', 顧客: '', showClosed: false };
 
 /* ============================================================
    チェック項目テンプレート CHECK_TEMPLATE は check_template.js
