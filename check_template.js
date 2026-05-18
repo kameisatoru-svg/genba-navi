@@ -322,6 +322,10 @@ function getCarryOverItems(anken) {
   if (currentIdx <= 0) return [];  // 相談より前 or 順序対象外
 
   const checks = anken['チェック'] || {};
+  // チェック未開始の案件には持ち越しを出さない
+  // （checks空 = まだ運用に乗っていない、レガシー案件と同じ扱い）
+  if (Object.keys(checks).length === 0) return [];
+
   const result = [];
 
   for (let i = 0; i < currentIdx; i++) {
