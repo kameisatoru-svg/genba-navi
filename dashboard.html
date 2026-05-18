@@ -3525,6 +3525,9 @@ function showAnkenModal(a) {
        </div>`
     : '';
 
+  // チェックセクション(看板のチェック状態を編集)
+  const checkHtml = renderModalCheckSection(a);
+
   // クイック編集パネル
   const currentStatus  = a['ステータス'] || '';
   const kArr           = Array.isArray(a['契約書']) ? a['契約書'] : (a['契約書'] ? [a['契約書']] : []);
