@@ -289,3 +289,63 @@ const CHECK_TEMPLATE = {
     stages: []
   }
 };
+
+/* ============================================================
+   ステータス順序（持ち越し算出用）
+   ============================================================ */
+const STATUS_ORDER = [
+  '相談',
+  '見積準備',
+  '見積提出済み',
+  '施工予定',
+  '施工中',
+  '請求済み',
+  '入金済み'
+];
+
+/* ============================================================
+   持ち越し項目の抽出
+   ----------------------------------------------------------
+   先行施工パターン対応：見積を後回しで施工に進んだケースで、
+   前ステータスの「未完了かつ該当ありの項目」を取りこぼさない仕組み。
+
+   現ステータスより前のステータステンプレートを巡回し、
+   チェック状態が done / na **以外** の項目を「持ち越し」として返す。
+
+   返り値:
+     [{ key, status, stageId, stageLabel, itemId, label, detail, state }]
+   ============================================================ */
+function getCarryOverItems(anken) {
+  if (!anken) return [];
+  const currentStatus = anken['ステータス'];
+  const currentIdx = STATUS_ORDER.indexOf(currentStatus);
+  if (currentIdx <= 0) return [];  // 相談より前 or 順序対象外
+
+  const checks = anken['チェック'] || {};
+  const result = [];
+
+  for (let i = 0; i < currentIdx; i++) {
+    const prevStatus = STATUS_ORDER[i];
+    const tpl = CHECK_TEMPLATE[prevStatus];
+    if (!tpl || !tpl.stages) continue;
+    for (const stage of tpl.stages) {
+      for (const item of stage.items) {
+        const key = `${stage.id}.${item.id}`;
+        const state = checks[key];
+        if (state !== 'done' && state !== 'na') {
+          result.push({
+            key,
+            status: prevStatus,
+            stageId: stage.id,
+            stageLabel: stage.label,
+            itemId: item.id,
+            label: item.label,
+            detail: item.detail,
+            state: state || 'todo'
+          });
+        }
+      }
+    }
+  }
+  return result;
+}
