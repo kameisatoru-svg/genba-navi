@@ -1972,13 +1972,77 @@ const STATUS_META = {
   '消滅':               { color: 'var(--status-shomet)',         icon: 'icon-warning-triangle' }
 };
 
-// --- カンバン6列定義 ---
-const KANBAN_COLS = [
-  '見積提出済み', '施工予定', '施工中',
-  '請求済み', '入金済み', '完了(請求書作成済み)'
+// --- カンバン列定義(2ゾーン7列) ---
+const KANBAN_ZONES = [
+  { id: 'eigyo', label: '営業ゾーン', cols: ['相談', '見積準備', '見積提出済み'] },
+  { id: 'shiko', label: '施工〜入金ゾーン', cols: ['施工予定', '施工中', '請求済み', '入金済み'] }
 ];
+const KANBAN_COLS = KANBAN_ZONES.flatMap(z => z.cols);
 // カンバンに表示しないステータス
-const KANBAN_HIDE = ['中止', '保守管理(継続)'];
+const KANBAN_HIDE = ['中止', '保守管理(継続)', '完了', '完了(請求書作成済み)', '消滅'];
+
+/* ============================================================
+   チェック項目テンプレート（看板の進捗バッジ・次のTODO算出用）
+   ※ workflow.html の CHECK_TEMPLATE と同期させること
+   ============================================================ */
+const CHECK_TEMPLATE = {
+  '相談': [
+    { id: 'contact', label: 'コンタクト', items: [
+      { id: 'first',    label: '初回問合せの記録' },
+      { id: 'kokyaku',  label: '顧客マスター登録' },
+      { id: 'reg',      label: '案件登録（data.json）' },
+      { id: 'apo',      label: '初回面談アポ' }
+    ]},
+    { id: 'survey', label: '現地調査', items: [
+      { id: 'schedule', label: '現調日時の調整' },
+      { id: 'photo',    label: '現場写真の撮影' },
+      { id: 'sumpo',    label: '寸法計測・スケッチ' },
+      { id: 'memo',     label: '現場メモ作成' }
+    ]},
+    { id: 'prep', label: '見積方針', items: [
+      { id: 'spec',     label: '仕様・商品の擦り合わせ' },
+      { id: 'mat',      label: '材料割付' },
+      { id: 'tanka',    label: '単価決定' },
+      { id: 'gyousha',  label: '協力業者への打診' }
+    ]}
+  ],
+  '見積準備': [
+    { id: 'compose', label: '見積作成', items: [
+      { id: 'breakdown', label: '内訳作成' },
+      { id: 'amount',    label: '金額確定' },
+      { id: 'review',    label: '体裁チェック' },
+      { id: 'pdf',       label: '見積書PDF発行' }
+    ]},
+    { id: 'submit', label: '提出', items: [
+      { id: 'send',      label: '顧客送付' },
+      { id: 'register',  label: 'data.json に反映' },
+      { id: 'followup',  label: 'フォロー連絡' }
+    ]}
+  ]
+  // 施工以降のステータスは Phase 2 で追加予定
+};
+
+// 案件のチェック進捗を集計（テンプレート未対応のステータスは null）
+function calcCheckProgress(anken) {
+  const tpl = CHECK_TEMPLATE[anken['ステータス']];
+  if (!tpl) return null;
+  const checks = anken['チェック'] || {};
+  let total = 0, done = 0, nextLabel = '';
+  for (const stage of tpl) {
+    for (const item of stage.items) {
+      total++;
+      const state = checks[`${stage.id}.${item.id}`];
+      if (state === 'done') done++;
+      else if (!nextLabel && state !== 'done') nextLabel = item.label;
+    }
+  }
+  return { total, done, pct: total ? Math.round(done / total * 100) : 0, nextLabel };
+}
+
+// ワークフローURL組み立て
+function workflowUrl(ankenKey) {
+  return `workflow.html?key=${encodeURIComponent(ankenKey)}`;
+}
 
 // --- ユーティリティ ---
 function $(sel) { return document.querySelector(sel); }
