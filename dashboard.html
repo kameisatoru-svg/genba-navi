@@ -3660,21 +3660,54 @@ const MODAL_CHECK_STATE = { key: '', original: {}, current: {} };
 
 function renderModalCheckSection(a) {
   const tpl = CHECK_TEMPLATE[a['ステータス']];
-  if (!tpl) {
-    return `
-      <div class="modal-section">
-        <div class="modal-section-title">チェック</div>
-        <div class="modal-check-unsupported">
-          ステータス「${escapeHtml(a['ステータス'] || '-')}」のチェック項目は未対応です。
-        </div>
-      </div>
-    `;
-  }
 
   // 状態初期化(モーダルを開いた直後のスナップショット)
   MODAL_CHECK_STATE.key      = a['案件キー'];
   MODAL_CHECK_STATE.original = Object.assign({}, a['チェック'] || {});
   MODAL_CHECK_STATE.current  = Object.assign({}, a['チェック'] || {});
+
+  // 持ち越し
+  const carryOver = getCarryOverItems({ ...a, 'チェック': MODAL_CHECK_STATE.current });
+  const carryHtml = carryOver.length > 0 ? `
+    <div class="modal-carryover">
+      <div class="modal-carryover-head">
+        <span>前ステージから持ち越し</span>
+        <span class="modal-carryover-count">${carryOver.length}件</span>
+      </div>
+      <div class="modal-carryover-desc">先行施工パターン等、前ステージで未完了の項目。タップで状態を循環し、終わったら完了/該当なしにして解消。</div>
+      ${carryOver.map(c => {
+        const stateLabel = c.state === 'wip' ? '着手' : '未';
+        return `
+          <div class="modal-carryover-item modal-check-item ${c.state}" data-check-key="${escapeHtml(c.key)}">
+            <div class="modal-check-mark"><svg class="icon"><use href="#icon-check-circle"/></svg></div>
+            <div class="modal-check-body">
+              <div class="modal-carryover-source">${escapeHtml(c.status)} / ${escapeHtml(c.stageLabel)}</div>
+              <div class="modal-check-label">${escapeHtml(c.label)}</div>
+            </div>
+            <div class="modal-check-state-tag">${stateLabel}</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  ` : '';
+
+  if (!tpl) {
+    return `
+      <div class="modal-section">
+        <div class="modal-section-title">チェック</div>
+        ${carryHtml}
+        <div class="modal-check-unsupported">
+          ステータス「${escapeHtml(a['ステータス'] || '-')}」のチェック項目は未対応です。
+        </div>
+        ${carryOver.length > 0 ? `
+          <div class="modal-check-actions">
+            <button class="modal-check-save-btn" id="modal-check-save-btn" type="button" disabled>変更を保存</button>
+            <span class="modal-check-msg" id="modal-check-msg">持ち越し項目をタップで 未 → 着手 → 完了 → 該当なし を循環</span>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
 
   const checks = MODAL_CHECK_STATE.current;
   let raw = 0, done = 0, na = 0;
