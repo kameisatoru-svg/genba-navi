@@ -3746,6 +3746,7 @@ function renderModalCheckSection(a) {
   return `
     <div class="modal-section">
       <div class="modal-section-title">チェック</div>
+      ${carryHtml}
       <div class="modal-check-progress">
         <div class="modal-check-progress-bar"><div class="modal-check-progress-fill" id="modal-check-bar" style="width:${pct}%;"></div></div>
         <div class="modal-check-progress-label" id="modal-check-count">${done} / ${total}${na > 0 ? ` (該当なし${na})` : ''}</div>
