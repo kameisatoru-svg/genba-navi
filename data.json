@@ -1949,7 +1949,13 @@
         "invoice.seikyu_send": "todo",
         "invoice.seikyu_register": "todo",
         "docs.kanryousho": "done",
-        "docs.nouhinsho": "na"
+        "docs.nouhinsho": "na",
+        "contract.uketori": "na",
+        "contract.jucho": "na",
+        "contract.draft": "na",
+        "followup.decision": "na",
+        "followup.react": "na",
+        "submit.followup": "na"
       }
     },
     {
