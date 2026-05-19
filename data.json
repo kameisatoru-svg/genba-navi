@@ -1327,7 +1327,8 @@
         "compose.review": "done",
         "compose.pdf": "done",
         "submit.send": "done",
-        "submit.register": "done"
+        "submit.register": "done",
+        "taisei.shukuhaku": "wip"
       }
     },
     {
