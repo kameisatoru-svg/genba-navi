@@ -2750,28 +2750,45 @@ function renderKanban() {
     `;
   }).join('');
 
-  replaceSectionBody('#sec-kanban', filterHtml + zonesHtml);
+  // 入力中に input 要素を作り直すと IME 変換状態が壊れて文字が逆順になるため、
+  // フィルタUIは初回のみ構築し、以後はゾーン部分と件数表示だけ差し替える。
+  const existingFilters = document.querySelector('#sec-kanban .kanban-filters');
+  if (existingFilters) {
+    const zonesContainer = document.querySelector('#sec-kanban .kanban-zones-container');
+    if (zonesContainer) zonesContainer.innerHTML = zonesHtml;
+    const countEl = document.querySelector('#sec-kanban .kanban-filter-count');
+    if (countEl) countEl.textContent = `${visibleCount} / ${totalCount} 件`;
+  } else {
+    replaceSectionBody('#sec-kanban', filterHtml + `<div class="kanban-zones-container">${zonesHtml}</div>`);
 
-  // フィルタイベント
-  $('#kanban-q')?.addEventListener('input', (e) => {
-    KANBAN_FILTER.q = e.target.value;
-    renderKanban();
-    setTimeout(() => $('#kanban-q')?.focus(), 0);
-  });
-  $('#kanban-customer')?.addEventListener('change', (e) => {
-    KANBAN_FILTER.顧客 = e.target.value;
-    renderKanban();
-  });
-  $('#kanban-show-closed')?.addEventListener('change', (e) => {
-    KANBAN_FILTER.showClosed = e.target.checked;
-    renderKanban();
-  });
-  $('#kanban-filter-clear')?.addEventListener('click', () => {
-    KANBAN_FILTER.q = '';
-    KANBAN_FILTER.顧客 = '';
-    KANBAN_FILTER.showClosed = false;
-    renderKanban();
-  });
+    // フィルタイベント（初回のみアタッチ）
+    $('#kanban-q')?.addEventListener('input', (e) => {
+      if (e.isComposing) return; // IME変換中は反映しない
+      KANBAN_FILTER.q = e.target.value;
+      renderKanban();
+    });
+    $('#kanban-q')?.addEventListener('compositionend', (e) => {
+      KANBAN_FILTER.q = e.target.value;
+      renderKanban();
+    });
+    $('#kanban-customer')?.addEventListener('change', (e) => {
+      KANBAN_FILTER.顧客 = e.target.value;
+      renderKanban();
+    });
+    $('#kanban-show-closed')?.addEventListener('change', (e) => {
+      KANBAN_FILTER.showClosed = e.target.checked;
+      renderKanban();
+    });
+    $('#kanban-filter-clear')?.addEventListener('click', () => {
+      KANBAN_FILTER.q = '';
+      KANBAN_FILTER.顧客 = '';
+      KANBAN_FILTER.showClosed = false;
+      const inp = $('#kanban-q'); if (inp) inp.value = '';
+      const sel = $('#kanban-customer'); if (sel) sel.value = '';
+      const cb  = $('#kanban-show-closed'); if (cb) cb.checked = false;
+      renderKanban();
+    });
+  }
 
   // カンバンカードクリック → 案件モーダル
   $$('#sec-kanban .kanban-card').forEach(card => {
