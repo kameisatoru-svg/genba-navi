@@ -1911,7 +1911,7 @@
         "最終集計日": "2026-05-18"
       },
       "チェック": {
-        "doc_k.mitsumori_final": "wip",
+        "doc_k.mitsumori_final": "done",
         "contact.first": "done",
         "contact.kokyaku": "done",
         "contact.reg": "done",
@@ -1939,7 +1939,17 @@
         "taisei.renraku": "na",
         "taisei.shukuhaku": "na",
         "taisei.cal_shiko": "done",
-        "taisei.cal_shuku": "na"
+        "taisei.cal_shuku": "na",
+        "shinkou.photo_before": "done",
+        "shinkou.daily": "done",
+        "shinkou.chosei": "done",
+        "kanryou.photo_after": "wip",
+        "kanryou.tachiai": "done",
+        "invoice.seikyu_pdf": "wip",
+        "invoice.seikyu_send": "todo",
+        "invoice.seikyu_register": "todo",
+        "docs.kanryousho": "done",
+        "docs.nouhinsho": "na"
       }
     },
     {
