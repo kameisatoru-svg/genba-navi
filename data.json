@@ -1316,7 +1316,18 @@
       },
       "チェック": {
         "doc_k.mitsumori_final": "wip",
-        "doc_g.order": "na"
+        "doc_g.order": "na",
+        "survey.schedule": "done",
+        "contact.apo": "done",
+        "contact.kokyaku": "done",
+        "contact.first": "done",
+        "contact.reg": "done",
+        "compose.amount": "done",
+        "compose.breakdown": "done",
+        "compose.review": "done",
+        "compose.pdf": "done",
+        "submit.send": "done",
+        "submit.register": "done"
       }
     },
     {
