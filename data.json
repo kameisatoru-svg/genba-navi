@@ -1328,7 +1328,8 @@
         "compose.pdf": "done",
         "submit.send": "done",
         "submit.register": "done",
-        "taisei.shukuhaku": "wip"
+        "taisei.shukuhaku": "wip",
+        "taisei.cal_shuku": "wip"
       }
     },
     {
