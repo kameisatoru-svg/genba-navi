@@ -788,10 +788,12 @@ const driveTag=url=>url?`<a class="drive-tag" href="${url}" target="_blank" rel=
 // ─ 案件ビュー ─
 function renderAnken(){
   const q=document.getElementById('anken-search').value.toLowerCase();
+  // 検索クエリが入っているときは完了/入金済みフィルタを一時的に解除（検索ヒット漏れ防止）
+  const searchOverride=q.length>0;
   const data=ALL_DATA.filter(p=>{
     const txt=[ankenKey(p),oldAnken(p),kojiName(p),customerName(p),customerRep(p),p.施工場所,p.ステータス,p.備考].filter(Boolean).join(' ').toLowerCase();
     const statusOk=ankenStatusFilter==='all'||p.ステータス===ankenStatusFilter;
-    const doneOk=!ankenHideDone||!ANKEN_DONE_STATUS.includes(p.ステータス);
+    const doneOk=!ankenHideDone||searchOverride||!ANKEN_DONE_STATUS.includes(p.ステータス);
     return(!q||txt.includes(q))&&statusOk&&doneOk;
   });
   data.sort((a,b)=>{
@@ -805,9 +807,17 @@ function renderAnken(){
   // フィルタボタンの状態表示
   const btn=document.getElementById('anken-filter-btn');
   if(btn)btn.classList.toggle('has-filter',ankenStatusFilter!=='all'||!ankenHideDone);
-  // 完了除外トグルボタンの表示更新
+  // 完了除外トグルボタンの表示更新（検索オーバーライド中は注記を付ける）
   const doneBtn=document.getElementById('anken-done-toggle');
-  if(doneBtn){doneBtn.textContent=ankenHideDone?'完了済みも表示':'完了済みを隠す';doneBtn.classList.toggle('active',!ankenHideDone);}
+  if(doneBtn){
+    if(ankenHideDone&&searchOverride){
+      doneBtn.textContent='完了済みも表示中（検索）';
+      doneBtn.classList.add('active');
+    }else{
+      doneBtn.textContent=ankenHideDone?'完了済みも表示':'完了済みを隠す';
+      doneBtn.classList.toggle('active',!ankenHideDone);
+    }
+  }
   const area=document.getElementById('anken-area');
   if(!data.length){area.innerHTML='<div class="empty">該当する案件がありません</div>';return;}
   area.innerHTML=data.map(p=>buildAnkenCard(p)).join('');
