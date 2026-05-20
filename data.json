@@ -1709,6 +1709,13 @@
         "合計": 69300,
         "件数": 2,
         "最終集計日": "2026-05-14"
+      },
+      "チェック": {
+        "shinkou.photo_before": "na",
+        "shinkou.daily": "na",
+        "shinkou.chosei": "done",
+        "kanryou.photo_after": "na",
+        "kanryou.tachiai": "done"
       }
     },
     {
