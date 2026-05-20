@@ -15,8 +15,7 @@
 #META: docType=mitsumori
 #META: docNumber=ARM-T008-260519-01
 #META: customerName=有限会社ウインズコーポレーション
-#META: kojimei=大村邸 建具補修・ロールスクリーン取替工事
-#META: shisetsu=大分県別府市（大村邸）
+#META: kojimei=建具補修・ロールスクリーン取替工事
 #META: issueDate=2026-05-19
 #META: shiharaiDate=2026-06-18
 #META: fileSuffix=合算
@@ -30,11 +29,9 @@
 #META: docType=seikyu
 #META: docNumber=ARS-T008-260519-01
 #META: customerName=有限会社ウインズコーポレーション
-#META: kojimei=大村邸 建具補修・ロールスクリーン取替工事
-#META: shisetsu=大分県別府市（大村邸）
+#META: kojimei=建具補修・ロールスクリーン取替工事
 #META: issueDate=2026-05-19
 #META: shiharaiDate=2026-06-30
-#META: koki=2026年5月19日 完了
 #META: fileSuffix=合算
 品名,数量,単位,単価,備考
 玄関建具補修工事 一式,1,式,92000,メラミン化粧合板張替・表側2面
