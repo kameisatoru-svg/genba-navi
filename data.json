@@ -1383,7 +1383,11 @@
         "submit.send": "done",
         "submit.register": "done",
         "taisei.shukuhaku": "wip",
-        "taisei.cal_shuku": "wip"
+        "taisei.cal_shuku": "wip",
+        "survey.photo": "done",
+        "survey.sumpo": "done",
+        "survey.memo": "done",
+        "prep.spec": "done"
       }
     },
     {
