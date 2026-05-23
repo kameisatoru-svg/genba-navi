@@ -1500,6 +1500,7 @@
 
     const drop = modal.querySelector('#ve-drop');
     const fileInput = modal.querySelector('#ve-meishi-file');
+    const cameraInput = modal.querySelector('#ve-meishi-camera');
     const preview = modal.querySelector('#ve-meishi-preview');
     const previewImg = modal.querySelector('#ve-meishi-img');
 
@@ -1511,8 +1512,9 @@
       preview.style.display = 'block';
       drop.style.display = 'none';
     }
-    drop.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', (e) => handleFile(e.target.files?.[0]));
+    cameraInput.addEventListener('change', (e) => handleFile(e.target.files?.[0]));
+    // ドラッグ＆ドロップ（PCブラウザ）
     drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.style.background = '#fff3d4'; });
     drop.addEventListener('dragleave', () => { drop.style.background = '#fffbf0'; });
     drop.addEventListener('drop', (e) => {
@@ -1529,11 +1531,16 @@
         closeModal();
       }else if(action === 'config-api'){
         await promptAnthropicKey();
+      }else if(action === 'open-camera'){
+        cameraInput.click();
+      }else if(action === 'open-file'){
+        fileInput.click();
       }else if(action === 'reselect'){
         selectedFile = null;
         preview.style.display = 'none';
         drop.style.display = 'block';
         fileInput.value = '';
+        cameraInput.value = '';
       }else if(action === 'ocr'){
         if(!selectedFile){ toast('画像が選択されていません', true); return; }
         modal.querySelector('#ve-meishi-step1').style.display = 'none';
