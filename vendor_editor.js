@@ -1453,14 +1453,25 @@
               ※ JPEG/PNG/WebP 対応・1枚ずつ処理
             </div>
             <div id="ve-drop" style="border:2px dashed #c8a96e;border-radius:10px;padding:24px 20px;text-align:center;background:#fffbf0;">
-              <div style="font-size:32px;margin-bottom:4px;">📇</div>
+              <svg width="36" height="36" viewBox="0 0 32 32" fill="none" stroke="#1e2d40" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 6px;">
+                <rect x="4" y="8" width="24" height="17" rx="2"/>
+                <circle cx="11" cy="16" r="2.5"/>
+                <path d="M16 14 L25 14 M16 18 L23 18"/>
+              </svg>
               <div style="font-weight:700;color:#1e2d40;margin-bottom:14px;">名刺を取り込む</div>
               <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-                <button class="ve-btn ve-btn-primary" data-action="open-camera" type="button" style="font-size:14px;padding:12px 20px;background:#1a7a30;color:#fff;border-color:#155a23;">
-                  📷 カメラで撮影
+                <button class="ve-btn ve-btn-primary" data-action="open-camera" type="button" style="font-size:14px;padding:12px 20px;background:#1a7a30;color:#fff;border-color:#155a23;display:inline-flex;align-items:center;gap:8px;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 8 L8 8 L9.5 5.5 L14.5 5.5 L16 8 L20 8 Q21 8 21 9 L21 18 Q21 19 20 19 L4 19 Q3 19 3 18 L3 9 Q3 8 4 8 Z"/>
+                    <circle cx="12" cy="13" r="3.8"/>
+                  </svg>
+                  カメラで撮影
                 </button>
-                <button class="ve-btn ve-btn-primary" data-action="open-file" type="button" style="font-size:14px;padding:12px 20px;">
-                  📁 ファイルを選択
+                <button class="ve-btn ve-btn-primary" data-action="open-file" type="button" style="font-size:14px;padding:12px 20px;display:inline-flex;align-items:center;gap:8px;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 7 Q4 5 6 5 L10 5 L12 7 L18 7 Q20 7 20 9 L20 17 Q20 19 18 19 L6 19 Q4 19 4 17 Z"/>
+                  </svg>
+                  ファイルを選択
                 </button>
               </div>
               <div style="font-size:11px;color:#888;margin-top:12px;">またはこのエリアに画像をドラッグ＆ドロップ</div>
