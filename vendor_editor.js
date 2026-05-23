@@ -1452,10 +1452,19 @@
               名刺画像を選択 → Anthropic API でテキスト抽出 → 既存業者照合 → 編集モーダルに自動入力<br>
               ※ JPEG/PNG/WebP 対応・1枚ずつ処理
             </div>
-            <div id="ve-drop" style="border:2px dashed #c8a96e;border-radius:10px;padding:30px;text-align:center;background:#fffbf0;cursor:pointer;">
-              <div style="font-size:36px;margin-bottom:6px;">📷</div>
-              <div style="font-weight:700;color:#1e2d40;">クリックして名刺画像を選択</div>
-              <div style="font-size:12px;color:#888;margin-top:4px;">またはこのエリアに画像をドロップ</div>
+            <div id="ve-drop" style="border:2px dashed #c8a96e;border-radius:10px;padding:24px 20px;text-align:center;background:#fffbf0;">
+              <div style="font-size:32px;margin-bottom:4px;">📇</div>
+              <div style="font-weight:700;color:#1e2d40;margin-bottom:14px;">名刺を取り込む</div>
+              <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+                <button class="ve-btn ve-btn-primary" data-action="open-camera" type="button" style="font-size:14px;padding:12px 20px;background:#1a7a30;color:#fff;border-color:#155a23;">
+                  📷 カメラで撮影
+                </button>
+                <button class="ve-btn ve-btn-primary" data-action="open-file" type="button" style="font-size:14px;padding:12px 20px;">
+                  📁 ファイルを選択
+                </button>
+              </div>
+              <div style="font-size:11px;color:#888;margin-top:12px;">またはこのエリアに画像をドラッグ＆ドロップ</div>
+              <input type="file" id="ve-meishi-camera" accept="image/*" capture="environment" style="display:none;">
               <input type="file" id="ve-meishi-file" accept="image/jpeg,image/png,image/webp" style="display:none;">
             </div>
             <div id="ve-meishi-preview" style="margin-top:12px;display:none;">
