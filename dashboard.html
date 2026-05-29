@@ -2642,21 +2642,23 @@ function renderKpi() {
   // 進行中: 中止・入金済み以外(要件定義書ベース)
   const ongoing = all.filter(a => !['中止', '入金済み'].includes(a['ステータス'])).length;
 
-  // 今月の見積総額: 発行日が当月の見積金額合計
+  // 今月の見積総額: 発行日が当月の見積金額合計（件数も集計）
+  let monthlyEstimateCount = 0;
   const monthlyEstimate = all.reduce((sum, a) => {
-    return sum + (a['見積'] || [])
-      .filter(e => (e['発行日'] || '').startsWith(ym))
-      .reduce((s, e) => s + (e['金額'] || 0), 0);
+    const ms = (a['見積'] || []).filter(e => (e['発行日'] || '').startsWith(ym));
+    monthlyEstimateCount += ms.length;
+    return sum + ms.reduce((s, e) => s + (e['金額'] || 0), 0);
   }, 0);
 
-  // 未入金合計: 入金状況=minyukinの請求金額合計
+  // 未入金合計: 入金状況=minyukinの請求金額合計（件数も集計）
+  let unpaidCount = 0;
   const unpaid = all.reduce((sum, a) => {
-    return sum + (a['請求'] || [])
-      .filter(inv => inv['入金状況'] === 'minyukin')
-      .reduce((s, inv) => s + (inv['金額'] || 0), 0);
+    const us = (a['請求'] || []).filter(inv => inv['入金状況'] === 'minyukin');
+    unpaidCount += us.length;
+    return sum + us.reduce((s, inv) => s + (inv['金額'] || 0), 0);
   }, 0);
 
-  // 当月施工予定: 暫定でステータス=施工予定の件数
+  // 施工予定: ステータス=施工予定の件数（月に依らない全件）
   const planned = all.filter(a => a['ステータス'] === '施工予定').length;
 
   // タップで関連セクションへジャンプするための共通属性 + 矢印
@@ -2676,8 +2678,8 @@ function renderKpi() {
   const html = `
     <div class="kpi-grid">
       ${card('kpi-primary', 'icon-clipboard',      `${ongoing}<small>件</small>`, '進行中案件',     '中止・入金済み を除く',  '#sec-kanban',    'カンバン')}
-      ${card('kpi-info',    'icon-yen-circle',      formatYen(monthlyEstimate),    '今月の見積総額', `${ym} 発行分`,          '#sec-chart',     '売上推移グラフ')}
-      ${card('kpi-warn',    'icon-warning-triangle', formatYen(unpaid),            '未入金合計',     '入金状況=未入金 の請求', '#sec-reminders', 'リマインド')}
+      ${card('kpi-info',    'icon-yen-circle',      formatYen(monthlyEstimate),    '今月の見積総額', `${ym} 発行分 ・ ${monthlyEstimateCount}件`, '#sec-chart',     '売上推移グラフ')}
+      ${card('kpi-warn',    'icon-warning-triangle', formatYen(unpaid),            '未入金合計',     `未入金 ${unpaidCount}件`, '#sec-reminders', 'リマインド')}
       ${card('kpi-success', 'icon-calendar',        `${planned}<small>件</small>`, '施工予定案件',   'ステータス=施工予定',    '#sec-timeline',  'タイムライン')}
     </div>
   `;
