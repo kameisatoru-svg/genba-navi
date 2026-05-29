@@ -2659,43 +2659,49 @@ function renderKpi() {
   // 当月施工予定: 暫定でステータス=施工予定の件数
   const planned = all.filter(a => a['ステータス'] === '施工予定').length;
 
+  // タップで関連セクションへジャンプするための共通属性 + 矢印
+  const jumpChevron = `<svg class="kpi-jump" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>`;
+  const card = (cls, icon, value, label, sub, jumpSel, jumpName) => `
+      <div class="kpi-card ${cls}" role="button" tabindex="0" data-jump="${jumpSel}"
+           aria-label="${label} ${sub} — タップで${jumpName}へ移動">
+        <svg class="icon"><use href="#${icon}"/></svg>
+        <div class="kpi-body">
+          <div class="kpi-value">${value}</div>
+          <div class="kpi-label">${label}</div>
+          <div class="kpi-sub">${sub}</div>
+        </div>
+        ${jumpChevron}
+      </div>`;
+
   const html = `
     <div class="kpi-grid">
-      <div class="kpi-card kpi-primary">
-        <svg class="icon"><use href="#icon-clipboard"/></svg>
-        <div class="kpi-body">
-          <div class="kpi-value">${ongoing}<small>件</small></div>
-          <div class="kpi-label">進行中案件</div>
-          <div class="kpi-sub">中止・入金済み を除く</div>
-        </div>
-      </div>
-      <div class="kpi-card kpi-info">
-        <svg class="icon"><use href="#icon-yen-circle"/></svg>
-        <div class="kpi-body">
-          <div class="kpi-value">${formatYen(monthlyEstimate)}</div>
-          <div class="kpi-label">今月の見積総額</div>
-          <div class="kpi-sub">${ym} 発行分</div>
-        </div>
-      </div>
-      <div class="kpi-card kpi-warn">
-        <svg class="icon"><use href="#icon-warning-triangle"/></svg>
-        <div class="kpi-body">
-          <div class="kpi-value">${formatYen(unpaid)}</div>
-          <div class="kpi-label">未入金合計</div>
-          <div class="kpi-sub">入金状況=未入金 の請求</div>
-        </div>
-      </div>
-      <div class="kpi-card kpi-success">
-        <svg class="icon"><use href="#icon-calendar"/></svg>
-        <div class="kpi-body">
-          <div class="kpi-value">${planned}<small>件</small></div>
-          <div class="kpi-label">当月施工予定</div>
-          <div class="kpi-sub">ステータス=施工予定</div>
-        </div>
-      </div>
+      ${card('kpi-primary', 'icon-clipboard',      `${ongoing}<small>件</small>`, '進行中案件',     '中止・入金済み を除く',  '#sec-kanban',    'カンバン')}
+      ${card('kpi-info',    'icon-yen-circle',      formatYen(monthlyEstimate),    '今月の見積総額', `${ym} 発行分`,          '#sec-chart',     '売上推移グラフ')}
+      ${card('kpi-warn',    'icon-warning-triangle', formatYen(unpaid),            '未入金合計',     '入金状況=未入金 の請求', '#sec-reminders', 'リマインド')}
+      ${card('kpi-success', 'icon-calendar',        `${planned}<small>件</small>`, '施工予定案件',   'ステータス=施工予定',    '#sec-timeline',  'タイムライン')}
     </div>
   `;
   replaceSectionBody('#sec-kpi', html);
+
+  // KPIカード → 関連セクションへスムーズスクロール + 一時ハイライト
+  $$('#sec-kpi .kpi-card[data-jump]').forEach(el => {
+    const go = () => jumpToSection(el.dataset.jump);
+    el.addEventListener('click', go);
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
+    });
+  });
+}
+
+// 指定セクションへスムーズスクロールし、一瞬ハイライトして視線を誘導
+function jumpToSection(sel) {
+  const el = document.querySelector(sel);
+  if (!el) return;
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  el.classList.remove('flash');
+  void el.offsetWidth; // reflow でアニメーションを確実に再生
+  el.classList.add('flash');
+  setTimeout(() => el.classList.remove('flash'), 1400);
 }
 
 /* ============================================================
