@@ -3013,6 +3013,7 @@ function renderReminders() {
       const days = est?.['発行日'] ? daysSince(est['発行日']) : null;
       reminders.push({
         level: 'danger',
+        type:  'no_invoice',
         icon:  'icon-warning-triangle',
         title: '完工後 請求未確定',
         anken: a,
@@ -3032,6 +3033,7 @@ function renderReminders() {
             (r.end > r.start ? `-${r.end.getMonth() + 1}/${r.end.getDate()}` : '');
           reminders.push({
             level: 'success',
+            type:  'this_week',
             icon:  'icon-calendar',
             title: '今週の施工予定',
             anken: a,
