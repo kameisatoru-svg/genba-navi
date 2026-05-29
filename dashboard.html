@@ -276,9 +276,30 @@ a { color: inherit; text-decoration: none; }
 /* ----- Section 2: KPIカード ----- */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: var(--gap);
 }
+/* 進行中案件の内訳バッジ */
+.kpi-breakdown {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  margin-top: 5px;
+}
+.kpi-breakdown .bd {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-sub);
+  white-space: nowrap;
+}
+.kpi-breakdown .bd b { color: var(--primary); font-family: var(--font-mono); }
 .kpi-card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -745,10 +766,23 @@ a { color: inherit; text-decoration: none; }
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 10px;
   background: var(--bg);
   border: 1px solid var(--border);
+  font-size: inherit;
+  font-family: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.reminders-summary .chip:hover { border-color: var(--text-mute); }
+.reminders-summary .chip:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.reminders-summary .chip.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  font-weight: 700;
 }
 .reminders-summary .chip .dot {
   width: 8px; height: 8px; border-radius: 50%;
