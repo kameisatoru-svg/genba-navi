@@ -3054,22 +3054,54 @@ function renderReminders() {
   const cnt = { danger: 0, warn: 0, success: 0 };
   reminders.forEach(r => cnt[r.level]++);
 
+  // フィルタ適用（チップ or KPIタップで設定された REMINDER_FILTER.key）
+  const FILTER_MATCH = {
+    all:        () => true,
+    danger:     r => r.level === 'danger',
+    warn:       r => r.level === 'warn',
+    success:    r => r.level === 'success',
+    unpaid:     r => r.type === 'unpaid',
+    no_invoice: r => r.type === 'no_invoice',
+  };
+  const match = FILTER_MATCH[REMINDER_FILTER.key] || FILTER_MATCH.all;
+  const visible = reminders.filter(match);
+
+  // チップ（クリックで絞り込みトグル）
+  const chip = (key, cls, label) =>
+    `<button type="button" class="chip ${cls}${REMINDER_FILTER.key === key ? ' active' : ''}" data-rfilter="${key}"><span class="dot"></span>${label}</button>`;
+  // KPIから来る特殊フィルタは専用の解除チップを出す
+  const SPECIAL = { unpaid: '未入金のみ', no_invoice: '請求未確定のみ' };
+  const specialChip = SPECIAL[REMINDER_FILTER.key]
+    ? `<button type="button" class="chip danger active" data-rfilter="all" title="フィルタ解除">${SPECIAL[REMINDER_FILTER.key]} ✕</button>`
+    : '';
+
   const summaryHtml = `
     <div class="reminders-summary">
-      <span class="chip danger"><span class="dot"></span>緊急 ${cnt.danger}件</span>
-      <span class="chip warn"><span class="dot"></span>注意 ${cnt.warn}件</span>
-      <span class="chip success"><span class="dot"></span>今週予定 ${cnt.success}件</span>
+      ${chip('all', 'all', `すべて ${reminders.length}件`)}
+      ${chip('danger', 'danger', `緊急 ${cnt.danger}件`)}
+      ${chip('warn', 'warn', `注意 ${cnt.warn}件`)}
+      ${chip('success', 'success', `今週予定 ${cnt.success}件`)}
+      ${specialChip}
     </div>
   `;
 
-  const body = reminders.length === 0
+  const body = visible.length === 0
     ? `<div class="reminders-empty">
          <svg class="icon"><use href="#icon-check-circle"/></svg>
-         該当するリマインドはありません
+         ${reminders.length === 0 ? '該当するリマインドはありません' : 'この条件のリマインドはありません'}
        </div>`
-    : `<div class="reminders-grid">${reminders.map(reminderCard).join('')}</div>`;
+    : `<div class="reminders-grid">${visible.map(reminderCard).join('')}</div>`;
 
   replaceSectionBody('#sec-reminders', summaryHtml + body);
+
+  // チップクリック → フィルタ切替
+  $$('#sec-reminders .chip[data-rfilter]').forEach(c => {
+    c.addEventListener('click', () => {
+      REMINDER_FILTER.key = c.dataset.rfilter;
+      renderReminders();
+      document.querySelector('#sec-reminders')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
 
   // リマインドカードクリック → 案件モーダル
   $$('#sec-reminders .reminder-card').forEach(card => {
