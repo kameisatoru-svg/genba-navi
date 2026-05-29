@@ -2371,12 +2371,11 @@ const GH_API  = `https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`;
 const PAT_KEY = 'artrise_gh_pat'; // 案件台帳と同じキー(共用)
 
 // 案件編集で選べるステータス候補(案件台帳の運用候補 + data.json 実態をマージ)
-const STATUS_OPTIONS = [
-  '相談', '見積準備',
-  '見積作成中', '見積提出済み', '受注済', '施工予定', '施工中',
-  '完了・請求書作成待ち', '完了(請求書作成済み)', '請求済み',
-  '入金済み', '完了', '保守管理(継続)', '中止'
-];
+// 選択可能なステータスは看板列(KANBAN_COLS)と完全一致させる。
+// ここに看板列に無いステータス(旧: 見積作成中・受注済 など)を混ぜると、
+// 選んだ瞬間その案件が renderKanban のグルーピングから漏れて看板から消える。
+// 語彙を一本化するため KANBAN_COLS から導出する。
+const STATUS_OPTIONS = [...KANBAN_COLS];
 
 function getPAT() { return localStorage.getItem(PAT_KEY) || ''; }
 function savePAT(t) { localStorage.setItem(PAT_KEY, t); }
@@ -2685,11 +2684,21 @@ function renderKanban() {
   // ステータス別にグルーピング（フィルタを適用）
   const grouped = {};
   KANBAN_COLS.forEach(k => grouped[k] = []);
+  const orphanStatuses = new Set();
   all.forEach(a => {
-    if (!grouped[a['ステータス']]) return;
+    if (!grouped[a['ステータス']]) {
+      // 看板列に無いステータス=どの列にも出ない(=看板から消える)。
+      // 黙って捨てず警告し、ステータス語彙のズレを検知できるようにする。
+      orphanStatuses.add(a['ステータス'] || '(空)');
+      return;
+    }
     if (!kanbanMatchesFilter(a)) return;
     grouped[a['ステータス']].push(a);
   });
+  if (orphanStatuses.size) {
+    logError('看板列に無いステータスの案件が非表示です:', [...orphanStatuses].join(' / '),
+      '— check_template.js / KANBAN_ZONES に列を追加するか、正規ステータスに統一してください');
+  }
 
   const renderCol = (key) => {
     const m = STATUS_META[key] || { color: 'var(--text-mute)', icon: 'icon-document' };
