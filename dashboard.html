@@ -2699,33 +2699,70 @@ function renderKpi() {
   // 施工予定: ステータス=施工予定の件数（月に依らない全件）
   const planned = all.filter(a => a['ステータス'] === '施工予定').length;
 
+  // 進行中案件の内訳（営業 / 施工 / 完了系）— ongoing と合計が一致する
+  const ZONE_OF = {};
+  ['相談', '見積準備', '見積提出済み'].forEach(s => ZONE_OF[s] = '営業');
+  ['施工予定', '施工中', '請求済み'].forEach(s => ZONE_OF[s] = '施工');
+  const bd = { 営業: 0, 施工: 0, 完了系: 0 };
+  all.filter(a => !['中止', '入金済み'].includes(a['ステータス']))
+     .forEach(a => { bd[ZONE_OF[a['ステータス']] || '完了系']++; });
+
+  // 今週の施工予定: ステータス=施工予定 かつ 備考の予定日が本日±7日内の件数
+  const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+  const thisWeekPlanned = all.filter(a => {
+    if (a['ステータス'] !== '施工予定') return false;
+    return extractDateRanges(a['備考'] || '', t0.getFullYear())
+      .some(r => { const d = Math.floor((r.start - t0) / 86400000); return d >= -2 && d <= 7; });
+  }).length;
+
+  // 未請求: 完工済み(完了/完了・請求書作成待ち)なのに請求書ゼロの件数
+  const uninvoiced = all.filter(a =>
+    ['完了', '完了・請求書作成待ち'].includes(a['ステータス']) &&
+    (!a['請求'] || a['請求'].length === 0)
+  ).length;
+
   // タップで関連セクションへジャンプするための共通属性 + 矢印
   const jumpChevron = `<svg class="kpi-jump" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>`;
-  const card = (cls, icon, value, label, sub, jumpSel, jumpName) => `
-      <div class="kpi-card ${cls}" role="button" tabindex="0" data-jump="${jumpSel}"
-           aria-label="${label} ${sub} — タップで${jumpName}へ移動">
-        <svg class="icon"><use href="#${icon}"/></svg>
+  const card = (o) => `
+      <div class="kpi-card ${o.cls}" role="button" tabindex="0" data-jump="${o.jump}"${o.attr || ''}
+           aria-label="${o.label} ${o.sub} — タップで${o.jumpName}へ移動">
+        <svg class="icon"><use href="#${o.icon}"/></svg>
         <div class="kpi-body">
-          <div class="kpi-value">${value}</div>
-          <div class="kpi-label">${label}</div>
-          <div class="kpi-sub">${sub}</div>
+          <div class="kpi-value">${o.value}</div>
+          <div class="kpi-label">${o.label}</div>
+          <div class="kpi-sub">${o.sub}</div>
+          ${o.extraBody || ''}
         </div>
         ${jumpChevron}
       </div>`;
 
+  const breakdownHtml = `
+    <div class="kpi-breakdown">
+      <span class="bd">営業 <b>${bd.営業}</b></span>
+      <span class="bd">施工 <b>${bd.施工}</b></span>
+      ${bd.完了系 ? `<span class="bd">完了系 <b>${bd.完了系}</b></span>` : ''}
+    </div>`;
+
   const html = `
     <div class="kpi-grid">
-      ${card('kpi-primary', 'icon-clipboard',      `${ongoing}<small>件</small>`, '進行中案件',     '中止・入金済み を除く',  '#sec-kanban',    'カンバン')}
-      ${card('kpi-info',    'icon-yen-circle',      formatYen(monthlyEstimate),    '今月の見積総額', `${ym} 発行分 ・ ${monthlyEstimateCount}件`, '#sec-chart',     '売上推移グラフ')}
-      ${card('kpi-warn',    'icon-warning-triangle', formatYen(unpaid),            '未入金合計',     `未入金 ${unpaidCount}件`, '#sec-reminders', 'リマインド')}
-      ${card('kpi-success', 'icon-calendar',        `${planned}<small>件</small>`, '施工予定案件',   'ステータス=施工予定',    '#sec-timeline',  'タイムライン')}
+      ${card({ cls: 'kpi-primary', icon: 'icon-clipboard',       value: `${ongoing}<small>件</small>`,   label: '進行中案件',     sub: '中止・入金済み を除く',          jump: '#sec-kanban',    jumpName: 'カンバン', extraBody: breakdownHtml })}
+      ${card({ cls: 'kpi-info',    icon: 'icon-yen-circle',       value: formatYen(monthlyEstimate),       label: '今月の見積総額', sub: `${ym} 発行分 ・ ${monthlyEstimateCount}件`, jump: '#sec-chart',  jumpName: '売上推移グラフ' })}
+      ${card({ cls: 'kpi-warn',    icon: 'icon-invoice',          value: formatYen(unpaid),                label: '未入金合計',     sub: `未入金 ${unpaidCount}件`,        jump: '#sec-reminders', jumpName: 'リマインド(未入金)',     attr: ' data-reminder-filter="unpaid"' })}
+      ${card({ cls: 'kpi-warn',    icon: 'icon-warning-triangle', value: `${uninvoiced}<small>件</small>`,  label: '未請求',         sub: '完工済・請求書未発行',           jump: '#sec-reminders', jumpName: 'リマインド(請求未確定)', attr: ' data-reminder-filter="no_invoice"' })}
+      ${card({ cls: 'kpi-success', icon: 'icon-calendar',         value: `${planned}<small>件</small>`,    label: '施工予定案件',   sub: 'ステータス=施工予定',            jump: '#sec-timeline',  jumpName: 'タイムライン' })}
+      ${card({ cls: 'kpi-success', icon: 'icon-hammer',           value: `${thisWeekPlanned}<small>件</small>`, label: '今週の施工予定', sub: '本日±7日に予定',            jump: '#sec-timeline',  jumpName: 'タイムライン' })}
     </div>
   `;
   replaceSectionBody('#sec-kpi', html);
 
   // KPIカード → 関連セクションへスムーズスクロール + 一時ハイライト
+  // data-reminder-filter があればリマインドを該当種別に絞ってからジャンプ
   $$('#sec-kpi .kpi-card[data-jump]').forEach(el => {
-    const go = () => jumpToSection(el.dataset.jump);
+    const go = () => {
+      const rf = el.dataset.reminderFilter;
+      if (rf) { REMINDER_FILTER.key = rf; renderReminders(); }
+      jumpToSection(el.dataset.jump);
+    };
     el.addEventListener('click', go);
     el.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
