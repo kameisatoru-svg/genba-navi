@@ -2267,6 +2267,10 @@ const KANBAN_COLS = [...KANBAN_ZONES.flatMap(z => z.cols), ...KANBAN_CLOSED_ZONE
 // --- カンバン用フィルタ状態 ---
 const KANBAN_FILTER = { q: '', 顧客: '', showClosed: false };
 
+// --- リマインド用フィルタ状態（チップ or KPIタップから設定）---
+// all | danger | warn | success | unpaid | no_invoice
+const REMINDER_FILTER = { key: 'all' };
+
 /* ============================================================
    チェック項目テンプレート CHECK_TEMPLATE は check_template.js
    から読み込む（HTML 末尾の script src で先に読み込む）
@@ -2969,6 +2973,7 @@ function renderReminders() {
         if (days != null && days >= 30) {
           reminders.push({
             level: 'warn',
+            type:  'estimate_stale',
             icon:  'icon-document',
             title: '見積提出後 進展なし',
             anken: a,
@@ -2987,6 +2992,7 @@ function renderReminders() {
         if (days != null && days >= 60) {
           reminders.push({
             level: 'danger',
+            type:  'unpaid',
             icon:  'icon-invoice',
             title: '請求書発行後60日経過・未入金',
             anken: a,
