@@ -311,6 +311,40 @@ a { color: inherit; text-decoration: none; }
 .kpi-warn    { --kpi-color: var(--danger); }
 .kpi-success { --kpi-color: var(--status-yotei); }
 
+/* ----- KPIカード: タップで関連セクションへジャンプ ----- */
+.kpi-card[role="button"] { cursor: pointer; }
+.kpi-card[role="button"]:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+.kpi-card[role="button"]:active { transform: translateY(0); box-shadow: none; }
+.kpi-card[role="button"]:focus-visible {
+  outline: 2px solid var(--kpi-color, var(--accent));
+  outline-offset: 2px;
+}
+.kpi-jump {
+  flex: none;
+  align-self: flex-start;
+  width: 16px; height: 16px;
+  color: var(--text-mute);
+  opacity: .45;
+  transition: var(--transition);
+}
+.kpi-card[role="button"]:hover .kpi-jump {
+  opacity: 1;
+  transform: translateX(2px);
+  color: var(--kpi-color, var(--accent));
+}
+
+/* ジャンプ先セクションの一時ハイライト */
+@keyframes section-flash {
+  0%   { box-shadow: 0 0 0 3px var(--kpi-color, var(--accent)); }
+  100% { box-shadow: var(--shadow); }
+}
+.dash-section.flash { animation: section-flash 1.3s ease-out; }
+/* sticky ヘッダーの下に隠れないようスクロール余白を確保 */
+.dash-section { scroll-margin-top: 88px; }
+@media (prefers-reduced-motion: reduce) {
+  .dash-section.flash { animation: none; }
+}
+
 /* ----- Section 3: カンバン ----- */
 .kanban-filters {
   display: flex;
