@@ -208,6 +208,25 @@ body{display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
 .pat-box .acts .btn{flex:1;height:48px;}
 .modal.center{align-items:center;}
 
+/* 原価取込 */
+.imp-help{font-size:12px;color:var(--text2);line-height:1.7;background:#f3f0ea;border-radius:10px;padding:11px 12px;margin-bottom:12px;}
+.imp-help code{font-size:11px;background:rgba(30,45,64,.08);padding:1px 5px;border-radius:4px;word-break:break-all;}
+.imp-textarea{width:100%;height:150px;padding:11px 12px;border:1px solid rgba(30,45,64,.2);border-radius:10px;
+  font-family:'Consolas','Menlo',monospace;font-size:12px;line-height:1.5;resize:vertical;color:var(--text);background:#fafafa;outline:none;}
+.imp-textarea:focus{border-color:var(--accent);}
+.imp-summary{font-size:12px;font-weight:700;color:var(--navy);background:rgba(200,169,110,.16);border-radius:10px;padding:10px 12px;margin-bottom:12px;line-height:1.6;}
+.imp-row{display:flex;gap:10px;padding:10px 4px;border-bottom:1px solid rgba(30,45,64,.07);align-items:flex-start;}
+.imp-row.off{opacity:.45;}
+.imp-row input[type=checkbox]{width:20px;height:20px;margin-top:2px;flex-shrink:0;accent-color:var(--navy);}
+.imp-row__body{flex:1;min-width:0;}
+.imp-row__name{font-size:13px;font-weight:700;color:var(--text);line-height:1.35;}
+.imp-row__meta{font-size:11px;color:var(--text2);margin-top:2px;line-height:1.45;}
+.imp-row__warn{color:var(--red);font-weight:700;}
+.imp-row__ctl{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;align-items:center;}
+.imp-row__ctl select{font-size:11px;padding:4px 6px;border:1px solid rgba(30,45,64,.2);border-radius:7px;background:#fff;color:var(--text);max-width:130px;}
+.imp-row__amt{font-size:12px;font-weight:800;color:var(--navy);white-space:nowrap;flex-shrink:0;align-self:center;}
+.imp-sec{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.05em;margin:14px 2px 4px;}
+
 /* バナー（読み込み失敗等） */
 .banner{background:rgba(176,106,0,.12);border:1px solid rgba(176,106,0,.3);color:var(--orange);
   font-size:12px;font-weight:600;border-radius:10px;padding:10px 12px;margin-bottom:14px;line-height:1.6;}
@@ -222,6 +241,9 @@ body{display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
   </button>
   <div class="app-header-title">部材・商品台帳</div>
   <span class="sync-dot" id="syncDot" title="同期状態"></span>
+  <button class="btn-back" id="importBtn" title="原価台帳から取込" onclick="openImport()">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+  </button>
   <button class="btn-back" id="refreshBtn" title="再読み込み">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
   </button>
@@ -366,6 +388,41 @@ body{display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
   </div>
 </div>
 
+<!-- 原価取込モーダル -->
+<div class="modal" id="importModal">
+  <div class="modal-box" style="max-height:94dvh;">
+    <div class="modal-head">
+      <div class="t">原価台帳から取込</div>
+      <button class="x" onclick="closeImport()">×</button>
+    </div>
+    <div class="modal-body" id="importBody">
+      <!-- ステップ1: 貼り付け -->
+      <div id="importStep1">
+        <div class="imp-help">
+          「原価管理」スプレッドシートの行を<b>そのままコピーして貼り付け</b>てください（タブ区切り／CSV可）。<br>
+          列の順番：<code>ID / 案件番号 / 現場名 / 日付 / 店舗名・業者名 / 品目・内容 / 金額 / 勘定科目 / 原価区分 …</code><br>
+          材料費・消耗品費の行を部材として自動抽出します（交通費・飲食・既に取込済みの行は自動で除外）。
+        </div>
+        <textarea id="importText" class="imp-textarea" placeholder="RC-26-001	AR-26-004	さくら苑 床工事	2026-03-22	GooDay 玉名店	アースシール即効1kg×1, アースタック1KG×2	2521	材料費	…"></textarea>
+        <div class="fld" style="margin-top:10px;">
+          <label>取込先の案件（案件番号が空欄の行に適用・自動判定できた行は優先）</label>
+          <select id="importAnken"></select>
+        </div>
+      </div>
+      <!-- ステップ2: プレビュー -->
+      <div id="importStep2" class="hidden">
+        <div class="imp-summary" id="importSummary"></div>
+        <div id="importList"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="impBackBtn" onclick="importBack()" style="display:none;flex:0 0 auto;width:auto;padding:0 16px;">戻る</button>
+      <button class="btn btn-primary" id="impParseBtn" onclick="importParse()">解析する</button>
+      <button class="btn btn-accent" id="impDoBtn" onclick="importDo()" style="display:none;">取込む</button>
+    </div>
+  </div>
+</div>
+
 <!-- ライトボックス -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <button class="x" onclick="closeLightbox()">×</button>
@@ -395,6 +452,7 @@ const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':
 
 let STATE = { 案件:[], 中止案件:[], 部材:[] };
 let ankenByKey = {};            // 案件キー -> 案件オブジェクト
+let ankenByOld = {};            // 旧案件番号(AR-26-xxx) -> 案件キー
 let currentTab = 'anken';
 let searchQ = '';
 // 今セッションでアップした写真の即時プレビュー用キャッシュ（path -> dataURL）
@@ -896,6 +954,207 @@ $('#searchInput').addEventListener('input', (e)=>{
   searchTimer = setTimeout(()=>{ searchQ = e.target.value.trim(); renderAll(); }, 200);
 });
 
+/* ============================================================
+   原価台帳からの取込
+   「原価管理」スプレッドシートの行を貼り付け→部材を自動抽出
+   ============================================================ */
+function buildAnkenMaps(){
+  ankenByKey = {}; ankenByOld = {};
+  [...STATE['案件'], ...STATE['中止案件']].forEach(a=>{
+    ankenByKey[a['案件キー']] = a;
+    const old = (a['旧案件番号']||'').trim();
+    if(old) ankenByOld[old] = a['案件キー'];
+  });
+}
+
+// 原価ID（RC-26-xxx 等）の集合。既存部材の備考から抽出して重複取込を防ぐ。
+function existingCostIds(){
+  const set = new Set();
+  STATE['部材'].forEach(p=>{
+    const m = String(p['備考']||'').match(/RC-\d{2,4}-\d{3,}/g);
+    if(m) m.forEach(x=>set.add(x));
+  });
+  return set;
+}
+
+// 勘定科目→部材として扱うか（材料費・消耗品費を既定ON）
+function isMaterialAccount(acc){
+  return /材料費|消耗品費/.test(acc||'');
+}
+// 明らかに部材でない科目（既定OFF・選択肢からも除外したい）
+function isNonMaterialAccount(acc){
+  return /旅費交通費|交際費|会議費|諸会費|管理諸費|車両費|事務消耗品費|雑費/.test(acc||'');
+}
+
+// 品目・科目からカテゴリを推定
+function guessCategory(item, acc){
+  const s = (item||'');
+  if(/(フロアタイル|床タイル|長尺|タキストロン|塩ビタイル|Pタイル|フローリング|床シート|床材|ウッドタイル|WD-|PM-)/.test(s)) return '床材';
+  if(/(クロス|壁紙|壁材|TH-|ソフト巾木|巾木)/.test(s)) return '壁材';
+  if(/(天井|岩綿|ロックウール|吸音板)/.test(s)) return '天井材';
+  if(/(見切り|アングル|金具|ジョイナー|アシスト|ブラケット|L字|金物)/.test(s)) return '金物';
+  if(/(リレー|スイッチ|電線|ケーブル|配線|端子|ブレーカ|コンセント|電材)/.test(s)) return '電材';
+  if(/(塗料|ウレタン|サビ止め|プライマー|塗装|エポキシ)/.test(s)) return '塗料';
+  if(/(接着|ボンド|シール|モルタル|パテ|下地|アースタック|アースシール|アースコート|タキボンド|副資材)/.test(s)) return '接着剤・副資材';
+  if(/(ロールスクリーン|ブラインド|プリーツ|カーテン|建具|メラミン|点検口|扉|ドア)/.test(s)) return '建具';
+  if(/(エアコン|空調|給湯|ポンプ|換気|設備)/.test(s)) return '設備';
+  return /材料費/.test(acc||'') ? '接着剤・副資材' : 'その他';
+}
+
+const CAT_OPTS = ['床材','壁材','天井材','建具','金物','塗料','接着剤・副資材','設備','電材','その他'];
+
+let importRows = []; // 解析結果
+
+function openImport(){
+  $('#importStep1').classList.remove('hidden');
+  $('#importStep2').classList.add('hidden');
+  $('#impParseBtn').style.display = '';
+  $('#impDoBtn').style.display = 'none';
+  $('#impBackBtn').style.display = 'none';
+  $('#importText').value = '';
+  // 案件セレクト（未判定行のフォールバック用）
+  const opts = STATE['案件'].map(a=>`<option value="${esc(a['案件キー'])}">${esc(a['正式工事名']||a['案件キー'])}</option>`).join('');
+  $('#importAnken').innerHTML = `<option value="">（貼付データの案件番号で自動判定）</option>` + opts;
+  $('#importModal').classList.add('show');
+  setTimeout(()=>$('#importText').focus(), 100);
+}
+function closeImport(){ $('#importModal').classList.remove('show'); }
+function importBack(){
+  $('#importStep2').classList.add('hidden');
+  $('#importStep1').classList.remove('hidden');
+  $('#impParseBtn').style.display = ''; $('#impDoBtn').style.display = 'none'; $('#impBackBtn').style.display = 'none';
+}
+
+// 1行をフィールド分割（タブ優先、無ければカンマ）。前後の引用符・空白を除去。
+function splitCells(line){
+  let cells = line.includes('\t') ? line.split('\t') : line.split(',');
+  return cells.map(c=>c.replace(/^\s*"?|"?\s*$/g,'').trim());
+}
+
+function importParse(){
+  const text = $('#importText').value.trim();
+  if(!text){ toast('原価台帳の行を貼り付けてください'); return; }
+  const fallbackKey = $('#importAnken').value;
+  const costIds = existingCostIds();
+  const seen = new Set();          // 同一貼付内の重複検知
+  importRows = [];
+
+  text.split(/\r?\n/).forEach(line=>{
+    if(!line.trim()) return;
+    const c = splitCells(line);
+    // ヘッダー行・区切り行はスキップ
+    if(/案件番号/.test(line) && /品目/.test(line)) return;
+    if(/^[\s|:\-]+$/.test(line)) return;
+    // 列割当（標準: ID,案件番号,現場名,日付,店舗,品目,金額,勘定科目,...）
+    let id='', ankenNo='', genba='', date='', vendor='', item='', amount='', acc='';
+    if(/^RC-/.test(c[0]||'')){
+      [id,ankenNo,genba,date,vendor,item,amount,acc] = [c[0],c[1],c[2],c[3],c[4],c[5],c[6],c[7]];
+    } else {
+      // 先頭IDが無いケースもゆるく対応（案件番号始まり）
+      [ankenNo,genba,date,vendor,item,amount,acc] = [c[0],c[1],c[2],c[3],c[4],c[5],c[6]];
+    }
+    if(!item) return;
+    // 案件キー解決：案件番号→旧番号マップ→そのままキー→フォールバック
+    let key = ankenByOld[(ankenNo||'').trim()] || (ankenByKey[(ankenNo||'').trim()] ? ankenNo.trim() : '') || fallbackKey || '';
+    const amtNum = parseInt(String(amount).replace(/[^\d]/g,''),10) || 0;
+    // 重複判定
+    let dup = '';
+    if(id && costIds.has(id)) dup = '取込済み';
+    const sig = (id||(ankenNo+'|'+item+'|'+amtNum));
+    if(seen.has(sig)) dup = dup || '貼付内で重複';
+    seen.add(sig);
+
+    const nonMat = isNonMaterialAccount(acc);
+    const cat = guessCategory(item, acc);
+    importRows.push({
+      id, ankenNo, key, genba, date, vendor, item, amount:amtNum, acc,
+      category: cat,
+      dup,
+      // 既定ON：材料費/消耗品費 かつ 未取込 かつ 案件解決済み。非部材科目・重複はOFF。
+      on: !dup && !!key && (isMaterialAccount(acc) || (!nonMat && !!key && acc==='')) && !nonMat,
+      unmapped: !key
+    });
+  });
+
+  if(importRows.length === 0){ toast('取り込める行が見つかりませんでした'); return; }
+  renderImportPreview();
+  $('#importStep1').classList.add('hidden');
+  $('#importStep2').classList.remove('hidden');
+  $('#impParseBtn').style.display = 'none';
+  $('#impDoBtn').style.display = ''; $('#impBackBtn').style.display = '';
+}
+
+function renderImportPreview(){
+  const onCount = importRows.filter(r=>r.on).length;
+  const dupCount = importRows.filter(r=>r.dup).length;
+  const unmapCount = importRows.filter(r=>r.unmapped).length;
+  $('#importSummary').innerHTML =
+    `解析 ${importRows.length} 行 ／ 取込対象 <b>${onCount}</b> 件`
+    + (dupCount?` ／ 取込済み・重複 ${dupCount}`:'')
+    + (unmapCount?` ／ <span class="imp-row__warn">案件未判定 ${unmapCount}</span>`:'')
+    + `<br><span style="font-weight:400">チェックを付け外しして調整できます。カテゴリは自動推定です。</span>`;
+
+  const rowsHtml = importRows.map((r,i)=>{
+    const a = ankenByKey[r.key];
+    const ankenLabel = r.key ? esc(a?(a['正式工事名']||r.key):r.key)
+      : `<span class="imp-row__warn">案件未判定（${esc(r.ankenNo||'番号なし')}）</span>`;
+    const catSel = `<select onchange="importRows[${i}].category=this.value">`
+      + CAT_OPTS.map(c=>`<option ${c===r.category?'selected':''}>${c}</option>`).join('') + `</select>`;
+    const note = [r.dup?`<span class="imp-row__warn">${esc(r.dup)}</span>`:'', r.acc, r.vendor].filter(Boolean);
+    return `<div class="imp-row ${r.on?'':'off'}" id="imp-row-${i}">
+      <input type="checkbox" ${r.on?'checked':''} onchange="importToggle(${i},this.checked)">
+      <div class="imp-row__body">
+        <div class="imp-row__name">${esc(r.item)}</div>
+        <div class="imp-row__meta">${ankenLabel}${r.genba?' ・ '+esc(r.genba):''}</div>
+        <div class="imp-row__meta">${note.join(' ・ ')}</div>
+        <div class="imp-row__ctl">${catSel}</div>
+      </div>
+      <div class="imp-row__amt">${r.amount?('¥'+r.amount.toLocaleString()):''}</div>
+    </div>`;
+  }).join('');
+  $('#importList').innerHTML = rowsHtml;
+}
+function importToggle(i, on){
+  importRows[i].on = on;
+  $('#imp-row-'+i)?.classList.toggle('off', !on);
+}
+
+async function importDo(){
+  const picks = importRows.filter(r=>r.on && r.key);
+  if(picks.length === 0){ toast('取り込む行にチェックを付けてください'); return; }
+  if(!getPAT()){ showPat(()=>importDo()); return; }
+  const btn = $('#impDoBtn'); btn.disabled = true; btn.textContent = '取込中…'; setSync('busy');
+  try{
+    const stamp = Date.now().toString(36);
+    const newRecs = picks.map((r,i)=>({
+      id: 'P-imp-' + stamp + '-' + i,
+      '案件キー': r.key,
+      '商品名': r.item,
+      'メーカー': '',
+      '品番': '',
+      'カテゴリ': r.category,
+      '使用場所': r.genba || '',
+      '数量': '', '単位': '',
+      '備考': [r.id?`原価${r.id}`:'', r.vendor?('仕入:'+r.vendor):'', r.amount?('¥'+r.amount.toLocaleString()):'', r.acc, r.date].filter(Boolean).join(' / '),
+      '写真': [],
+      '登録日': today(), '更新日': today(),
+      'ソース': '原価台帳取込'
+    }));
+    await ghSaveData((data)=>{
+      data['部材'] = data['部材'].concat(newRecs);
+    }, `原価台帳から部材取込: ${picks.length}件`);
+    setSync('ok'); closeImport(); renderAll();
+    toast(`${picks.length}件を取り込みました`);
+  }catch(err){
+    setSync('err');
+    if(String(err.message).includes('TOKEN_INVALID')){ toast('トークンが無効です。再設定してください'); showPat(()=>importDo()); }
+    else toast('取込に失敗: ' + err.message);
+    console.error(err);
+  }finally{
+    btn.disabled = false; btn.textContent = '取込む';
+  }
+}
+
 /* ---------- 初期ロード ---------- */
 async function init(){
   setSync('busy');
@@ -905,8 +1164,7 @@ async function init(){
     STATE['案件'] = data['案件'] || [];
     STATE['中止案件'] = data['中止案件'] || [];
     STATE['部材'] = Array.isArray(data['部材']) ? data['部材'] : [];
-    ankenByKey = {};
-    [...STATE['案件'], ...STATE['中止案件']].forEach(a=>{ ankenByKey[a['案件キー']] = a; });
+    buildAnkenMaps();
     // idが無い旧データに採番（表示用、保存時に確定）
     STATE['部材'].forEach((p,i)=>{ if(!p.id) p.id = 'P-legacy-'+i; });
     setSync(getPAT()?'ok':'');
@@ -917,7 +1175,7 @@ async function init(){
       $('#banner').innerHTML = 'トークンが無効です。保存時に再設定できます。読み取りは公開データで続行します。';
       try{ const res = await fetch('./data.json',{cache:'no-store'}); const data = await res.json();
         STATE['案件']=data['案件']||[]; STATE['中止案件']=data['中止案件']||[]; STATE['部材']=data['部材']||[];
-        ankenByKey={}; [...STATE['案件'],...STATE['中止案件']].forEach(a=>ankenByKey[a['案件キー']]=a);
+        buildAnkenMaps();
         STATE['部材'].forEach((p,i)=>{ if(!p.id) p.id='P-legacy-'+i; });
         renderAll();
       }catch(_){}
@@ -930,9 +1188,12 @@ async function init(){
 $('#refreshBtn').addEventListener('click', init);
 $('#patInput').addEventListener('keydown', e=>{ if(e.key==='Enter') confirmPat(); });
 // モーダル背景タップで閉じる
-['editModal','detailModal','patModal'].forEach(id=>{
+['editModal','detailModal','patModal','importModal'].forEach(id=>{
   $('#'+id).addEventListener('click', e=>{ if(e.target.id===id){
-    if(id==='patModal') closePat(); else if(id==='editModal') closeEdit(); else closeDetail();
+    if(id==='patModal') closePat();
+    else if(id==='editModal') closeEdit();
+    else if(id==='importModal') closeImport();
+    else closeDetail();
   }});
 });
 
