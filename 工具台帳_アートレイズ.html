@@ -179,6 +179,11 @@ body{display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
 .ai-fill-btn:active{background:#b8996a;}
 .ai-fill-btn svg{width:22px;height:22px;}
 .ai-fill-btn:disabled{opacity:.6;}
+.ai-label-btn{width:100%;height:44px;margin-top:8px;border:1px solid rgba(255,255,255,.35);border-radius:11px;background:transparent;color:#fff;
+  font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;}
+.ai-label-btn:active{background:rgba(255,255,255,.1);}
+.ai-label-btn:disabled{opacity:.5;}
+.ai-label-btn svg{width:18px;height:18px;color:var(--accent);}
 .ai-hint{font-size:11px;color:rgba(255,255,255,.7);line-height:1.6;margin-top:9px;}
 .ai-status{font-size:12px;font-weight:700;color:#fff;margin-top:8px;min-height:0;}
 .ai-status.busy{color:var(--accent);}
@@ -249,9 +254,14 @@ body{display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="3.2"/><path d="M18 6.5l.6 1.4 1.4.6-1.4.6L18 10.5l-.6-1.4L16 8.5l1.4-.6z" fill="currentColor" stroke="none"/></svg>
           <span>写真からAIで自動入力</span>
         </button>
-        <div class="ai-hint">工具の写真を撮影/選択すると、メーカー・型番・カテゴリ・使い方・注意点をAIが推定して下の欄を埋めます（写真も登録されます）。内容は必ずご確認ください。</div>
+        <button type="button" class="ai-label-btn" onclick="$('#aiLabelInput').click()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 11 3.8V3H4v7h.8l9.6 9.6a2 2 0 0 0 2.8 0l3.4-3.4a2 2 0 0 0 0-2.8z"/><circle cx="7.5" cy="6.5" r="1.3" fill="currentColor" stroke="none"/></svg>
+          <span>銘板・型番ラベルで精度UP</span>
+        </button>
+        <div class="ai-hint">全体写真でおおまかに判定 → さらに<b>銘板/型番ラベルを接写</b>すると、型番・メーカー・定格を読み取って精度が上がります（複数枚まとめて解析・写真も登録）。内容は必ずご確認ください。</div>
         <div class="ai-status" id="aiStatus"></div>
-        <input type="file" id="aiPhotoInput" accept="image/*" capture="environment" class="hidden">
+        <input type="file" id="aiPhotoInput" accept="image/*" multiple capture="environment" class="hidden">
+        <input type="file" id="aiLabelInput" accept="image/*" capture="environment" class="hidden">
       </div>
       <div class="fld"><label>名称 <span class="req">*</span></label><input type="text" id="f_name" placeholder="例：マキタ 充電式丸ノコ"></div>
       <div class="fld-row">
@@ -425,42 +435,73 @@ function confirmAiKey(){ const v=$('#aiKeyInput').value.trim(); if(!v){toast('AP
 const AI_CATS=['電動工具','手工具','測定器','機械・発電機','車両','収納・運搬','撮影・IT','消耗品・付属','その他'];
 function aiStatus(msg, cls){ const el=$('#aiStatus'); el.className='ai-status'+(cls?' '+cls:''); el.innerHTML=msg||''; }
 
-$('#aiPhotoInput').addEventListener('change', async e=>{
-  const file=(e.target.files||[])[0]; e.target.value='';
-  if(!file||!file.type.startsWith('image/')) return;
-  if(!getAiKey()){ showAiKey(()=>aiAnalyze(file)); return; }
-  aiAnalyze(file);
-});
+$('#aiPhotoInput').addEventListener('change', e=>handleAiPhotos(e,false));
+$('#aiLabelInput').addEventListener('change', e=>handleAiPhotos(e,true));
 
-async function aiAnalyze(file){
-  const btn=$('.ai-fill-btn'); btn.disabled=true;
+// 写真（全体 or 銘板ラベル）を取り込み→登録→AI解析
+async function handleAiPhotos(e, isLabel){
+  const files=Array.from(e.target.files||[]); e.target.value='';
+  const imgs=files.filter(f=>f.type.startsWith('image/'));
+  if(!imgs.length) return;
+  aiStatus('<span class="spin"></span>画像を準備中…','busy');
+  for(const f of imgs){
+    try{ const d=await compressImage(f,1500,0.85); editPhotos.push({dataURL:d,uploaded:false,label:isLabel}); }catch(_){}
+  }
+  renderPhotoGrid();
+  if(!getAiKey()){ showAiKey(()=>runAiAnalyze()); return; }
+  runAiAnalyze();
+}
+
+// 画像URL→dataURL（既存のコミット済み写真も解析に使えるよう変換）
+async function urlToDataURL(src){
+  if(!src) return null;
+  if(src.startsWith('data:')) return src;
+  try{ const r=await fetch(src); const b=await r.blob();
+    return await new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=rej; fr.readAsDataURL(b); }); }
+  catch(_){ return null; }
+}
+
+async function runAiAnalyze(){
+  if(!getAiKey()){ showAiKey(()=>runAiAnalyze()); return; }
+  const fillBtn=$('.ai-fill-btn'), labBtn=$('.ai-label-btn');
+  fillBtn.disabled=true; labBtn.disabled=true;
   aiStatus('<span class="spin"></span>画像を準備中…','busy');
   try{
-    // 圧縮（解析用に少し大きめ・高画質）＋ 写真として登録
-    const dataURL=await compressImage(file, 1400, 0.82);
-    editPhotos.push({dataURL,uploaded:false}); renderPhotoGrid();
-    const b64=dataURL.split(',')[1];
+    // 解析対象: 直近の最大5枚（全体＋銘板ラベル）
+    const pics=editPhotos.slice(-5);
+    const imgs=[];
+    for(const p of pics){ const d=await urlToDataURL(p.dataURL); if(d) imgs.push({data:d.split(',')[1], label:!!p.label}); }
+    if(!imgs.length){ aiStatus('解析できる画像がありません','err'); return; }
+    const hasLabel=imgs.some(x=>x.label);
 
-    aiStatus('<span class="spin"></span>AIが工具を解析中…（10〜20秒）','busy');
+    aiStatus('<span class="spin"></span>AIが解析中…（10〜20秒）'+(hasLabel?' 銘板を読取中':''),'busy');
     const sys='あなたは日本の建設・内装リフォーム業の工具・機材・車両に精通したベテラン職人です。'
-      +'与えられた写真の道具を同定し、現場ナビの工具台帳に登録するための情報を日本語で返します。'
+      +'与えられた複数枚の写真（全体写真と、銘板/型番ラベルの接写が含まれることがある）から道具を同定し、'
+      +'現場ナビの工具台帳に登録する情報を日本語で返します。'
+      +'銘板/型番ラベルの画像がある場合は、そこに印字・刻印された メーカー名・型番(品番)・定格(電圧/容量/W数等) を最優先で正確に読み取って反映すること。'
+      +'ラベルから読み取れた型番・定格は確実な情報として扱い、外観だけの推測より優先する。'
+      +'読み取れない項目は空文字にし、不確かな推測で埋めない（外観から確度高く判断できる定番品は記載可、その旨を備考に書く）。'
       +'必ず指定のJSONのみを返し、説明文やコードフェンスは付けないこと。'
-      +'型番やメーカーが写真から読み取れない場合は空文字にし、推測で埋めない（ただし外観から確度高く判断できる定番品は記載可、その旨を備考に書く）。'
       +'カテゴリは次のいずれか:'+AI_CATS.join('/')+'。';
-    const ask='この道具を同定し、次のJSON形式で返答してください。\n'
+    const ask='これらの写真の道具を同定し、次のJSON形式で返答してください。\n'
       +'{"名称":"一般名（メーカー/型番が分かれば含める）","メーカー":"","型番":"","カテゴリ":"上記のいずれか",'
-      +'"使用方法":"基本の使い方・段取りを3〜5行で","応用":"現場で役立つ応用・コツ・相性の良い部材を2〜4行で",'
-      +'"注意事項":"安全上の注意・保護具・禁止事項を2〜4行で","確信度":"高/中/低","備考":"判別の根拠や不明点・候補"}';
+      +'"定格":"電圧/容量/出力など銘板の主要スペック（あれば）","使用方法":"基本の使い方・段取りを3〜5行で",'
+      +'"応用":"現場で役立つ応用・コツ・相性の良い部材を2〜4行で",'
+      +'"注意事項":"安全上の注意・保護具・禁止事項を2〜4行で","確信度":"高/中/低","備考":"判別の根拠（銘板から読取/外観推定 等）や不明点・候補"}';
+
+    const content=[];
+    imgs.forEach((x,i)=>{
+      content.push({type:'text', text:`画像${i+1}${x.label?'：銘板/型番ラベルの接写（ここの文字を正確に読む）':'：全体写真'}`});
+      content.push({type:'image', source:{type:'base64', media_type:'image/jpeg', data:x.data}});
+    });
+    content.push({type:'text', text:ask});
+
     const res=await fetch(ANTHROPIC_URL,{
       method:'POST',
       headers:{'content-type':'application/json','x-api-key':getAiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({ model:AI_MODEL, max_tokens:1500, system:sys,
-        messages:[{role:'user',content:[
-          {type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},
-          {type:'text',text:ask}
-        ]}] })
+      body:JSON.stringify({ model:AI_MODEL, max_tokens:1800, system:sys, messages:[{role:'user',content}] })
     });
-    if(res.status===401){ localStorage.removeItem(AI_KEY); aiStatus('APIキーが無効です。再設定してください','err'); btn.disabled=false; showAiKey(()=>aiAnalyze(file)); return; }
+    if(res.status===401){ localStorage.removeItem(AI_KEY); aiStatus('APIキーが無効です。再設定してください','err'); showAiKey(()=>runAiAnalyze()); return; }
     if(!res.ok){ let m=''; try{const ej=await res.json(); m=ej.error?ej.error.message:JSON.stringify(ej);}catch(_){ m=await res.text(); } throw new Error('APIエラー('+res.status+') '+m.slice(0,140)); }
     const json=await res.json();
     let text=''; if(json.content&&Array.isArray(json.content)) text=json.content.filter(c=>c.type==='text').map(c=>c.text).join('\n');
@@ -468,13 +509,13 @@ async function aiAnalyze(file){
     if(!obj){ throw new Error('AI応答を解釈できませんでした'); }
     applyAiResult(obj);
     const conf=obj['確信度']||'';
-    aiStatus('✓ 反映しました'+(conf?'（確信度:'+esc(conf)+'）':'')+'。内容を確認・修正して保存してください。', conf==='低'?'err':'');
+    aiStatus('✓ 反映しました'+(conf?'（確信度:'+esc(conf)+'）':'')+(hasLabel?' ／ 銘板を参照':'')+'。内容を確認・修正して保存してください。', conf==='低'?'err':'');
   }catch(err){
     console.error(err);
     aiStatus('解析に失敗: '+esc(err.message),'err');
     toast('AI解析に失敗しました');
   }finally{
-    btn.disabled=false;
+    fillBtn.disabled=false; labBtn.disabled=false;
   }
 }
 
@@ -491,9 +532,13 @@ function applyAiResult(o){
   set('f_name', o['名称']); set('f_maker', o['メーカー']); set('f_model', o['型番']);
   if(o['カテゴリ'] && AI_CATS.includes(String(o['カテゴリ']).trim())) $('#f_cat').value=String(o['カテゴリ']).trim();
   set('f_usage', o['使用方法']); set('f_tips', o['応用']); set('f_caution', o['注意事項']);
-  // 備考にはAIの根拠を追記（既存があれば残す）
+  // 備考にはAIの根拠・定格を追記（既存があれば残す）
   const note=$('#f_note');
-  const aiNote=(o['備考']?('AI判別メモ: '+String(o['備考']).trim()):'') + (o['確信度']?('（確信度:'+o['確信度']+'）'):'');
+  const parts=[];
+  if(o['定格'] && String(o['定格']).trim()) parts.push('定格: '+String(o['定格']).trim());
+  if(o['備考'] && String(o['備考']).trim()) parts.push('AI判別メモ: '+String(o['備考']).trim());
+  if(o['確信度']) parts.push('確信度:'+o['確信度']);
+  const aiNote=parts.join(' ／ ');
   if(aiNote){ note.value = note.value.trim() ? (note.value.trim()+'\n'+aiNote) : aiNote; }
 }
 
