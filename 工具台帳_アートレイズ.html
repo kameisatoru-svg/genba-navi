@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>工具・機材台帳｜現場ナビ</title>
+<meta name="theme-color" content="#1e2d40">
+<link rel="stylesheet" href="common.css">
+<style>
+body{display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
+.app-header{padding-top:env(safe-area-inset-top,0);height:calc(var(--header-height) + env(safe-area-inset-top,0));}
+.app-header .sync-dot{width:8px;height:8px;border-radius:50%;background:#5a6a7a;flex-shrink:0;margin-right:4px;transition:background .3s;}
+.app-header .sync-dot.ok{background:var(--accent);}
+.app-header .sync-dot.busy{background:var(--blue);animation:pulse 1s infinite;}
+.app-header .sync-dot.err{background:var(--red);}
+@keyframes pulse{50%{opacity:.3;}}
+
+.tabbar{display:flex;background:var(--navy2);flex-shrink:0;}
+.tabbar button{flex:1;background:transparent;border:none;color:rgba(255,255,255,.55);
+  font-family:inherit;font-size:12px;font-weight:700;padding:11px 4px 9px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:3px;border-bottom:2.5px solid transparent;}
+.tabbar button svg{width:20px;height:20px;}
+.tabbar button.active{color:var(--white);border-bottom-color:var(--accent);}
+
+.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px max(84px,calc(env(safe-area-inset-bottom) + 84px));}
+
+.searchbar{position:relative;margin-bottom:14px;}
+.searchbar input{width:100%;height:46px;padding:0 14px 0 40px;border:1px solid rgba(30,45,64,.18);
+  border-radius:12px;background:var(--white);font-size:15px;color:var(--text);outline:none;}
+.searchbar input:focus{border-color:var(--accent);}
+.searchbar svg{position:absolute;left:12px;top:13px;width:20px;height:20px;color:var(--text2);}
+
+.stat-row{display:flex;gap:10px;margin-bottom:14px;}
+.stat-box{flex:1;background:var(--white);border-radius:12px;padding:11px 8px;text-align:center;box-shadow:var(--shadow-card);}
+.stat-box .n{font-size:20px;font-weight:900;color:var(--navy);line-height:1.1;}
+.stat-box .l{font-size:10px;color:var(--text2);margin-top:2px;}
+
+.sec-h{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.06em;margin:16px 2px 8px;display:flex;align-items:center;gap:6px;}
+.sec-h:first-child{margin-top:0;}
+.sec-h .cnt{background:rgba(30,45,64,.1);color:var(--navy);font-size:10px;border-radius:10px;padding:1px 7px;}
+
+.card-list{background:var(--white);border-radius:14px;box-shadow:var(--shadow-card);overflow:hidden;margin-bottom:8px;}
+.tool-item{display:flex;gap:11px;padding:12px 14px;border-bottom:1px solid rgba(30,45,64,.06);cursor:pointer;align-items:center;}
+.tool-item:last-child{border-bottom:none;}
+.tool-item:active{background:rgba(30,45,64,.03);}
+.tool-item__thumb{width:50px;height:50px;border-radius:9px;flex-shrink:0;background:#e9e5dd;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--text2);}
+.tool-item__thumb img{width:100%;height:100%;object-fit:cover;}
+.tool-item__body{flex:1;min-width:0;}
+.tool-item__name{font-size:14px;font-weight:700;color:var(--text);line-height:1.3;}
+.tool-item__meta{font-size:11px;color:var(--text2);margin-top:2px;line-height:1.4;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tool-item__arrow{color:var(--text2);font-size:16px;opacity:.4;flex-shrink:0;}
+
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;line-height:1.5;margin-left:4px;}
+.badge.ok{background:rgba(26,122,48,.12);color:var(--green);}
+.badge.fix{background:rgba(192,57,43,.12);color:var(--red);}
+.badge.spare{background:rgba(90,106,122,.14);color:var(--text2);}
+.badge.scrap{background:rgba(90,106,122,.14);color:var(--text2);text-decoration:line-through;}
+.badge.out{background:rgba(176,106,0,.14);color:var(--orange);}
+.badge.due{background:rgba(192,57,43,.12);color:var(--red);}
+
+/* 現場持込 */
+.bring-head{background:var(--white);border-radius:14px;box-shadow:var(--shadow-card);padding:14px;margin-bottom:12px;}
+.bring-head label{font-size:12px;font-weight:700;color:var(--text);display:block;margin-bottom:6px;}
+.bring-head select{width:100%;padding:11px 12px;border:1px solid rgba(30,45,64,.2);border-radius:10px;font-size:15px;background:#fff;color:var(--text);}
+.bring-row{display:flex;gap:10px;padding:11px 14px;border-bottom:1px solid rgba(30,45,64,.06);align-items:center;}
+.bring-row:last-child{border-bottom:none;}
+.bring-row__body{flex:1;min-width:0;}
+.bring-row__name{font-size:14px;font-weight:700;color:var(--text);line-height:1.3;}
+.bring-row__meta{font-size:11px;color:var(--text2);margin-top:1px;}
+.chk{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:9px;color:var(--text2);font-weight:700;cursor:pointer;flex-shrink:0;width:42px;}
+.chk input{width:22px;height:22px;accent-color:var(--navy);}
+.chk.ret input{accent-color:var(--green);}
+.bring-row__del{width:30px;height:30px;border:none;background:transparent;color:var(--red);font-size:18px;cursor:pointer;flex-shrink:0;opacity:.6;}
+.bring-actions{display:flex;gap:10px;margin-top:12px;}
+.bring-actions .btn{flex:1;height:48px;}
+.warn-card{background:rgba(176,106,0,.1);border:1px solid rgba(176,106,0,.28);border-radius:12px;padding:11px 13px;margin-bottom:12px;font-size:12px;color:var(--orange);line-height:1.7;}
+.warn-card b{color:#8a5400;}
+
+/* メンテ */
+.mt-item{background:var(--white);border-radius:12px;box-shadow:var(--shadow-card);padding:12px 14px;margin-bottom:8px;cursor:pointer;}
+.mt-item:active{background:#faf8f4;}
+.mt-item__top{display:flex;justify-content:space-between;gap:8px;align-items:center;}
+.mt-item__tool{font-size:13px;font-weight:800;color:var(--text);}
+.mt-item__date{font-size:11px;color:var(--text2);white-space:nowrap;}
+.mt-item__body{font-size:12px;color:var(--text2);margin-top:3px;line-height:1.5;}
+.mt-kind{display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:6px;background:rgba(30,45,64,.08);color:var(--navy);margin-right:6px;}
+
+.empty{text-align:center;color:var(--text2);padding:42px 20px;}
+.empty svg{width:52px;height:52px;opacity:.3;margin-bottom:12px;}
+.empty .t{font-size:14px;font-weight:700;margin-bottom:4px;}
+.empty .d{font-size:12px;line-height:1.6;}
+
+.fab{position:fixed;right:18px;bottom:max(20px,calc(env(safe-area-inset-bottom) + 16px));
+  width:58px;height:58px;border-radius:50%;background:var(--accent);color:var(--navy);border:none;
+  box-shadow:0 6px 18px rgba(30,45,64,.32);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:40;}
+.fab:active{transform:scale(.94);}
+.fab svg{width:28px;height:28px;}
+
+.modal{position:fixed;inset:0;background:rgba(20,30,44,.55);z-index:100;display:none;align-items:flex-end;justify-content:center;}
+.modal.show{display:flex;}
+.modal.center{align-items:center;}
+.modal-box{background:var(--bg);width:100%;max-width:560px;max-height:92dvh;border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden;animation:slideup .22s ease;}
+@keyframes slideup{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.modal-head{display:flex;align-items:center;gap:10px;padding:15px 16px;background:var(--navy);flex-shrink:0;}
+.modal-head .t{flex:1;color:#fff;font-size:16px;font-weight:800;}
+.modal-head .x{width:34px;height:34px;border:none;background:rgba(255,255,255,.12);color:#fff;border-radius:9px;font-size:20px;cursor:pointer;}
+.modal-body{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch;}
+.modal-foot{flex-shrink:0;padding:12px 16px max(12px,env(safe-area-inset-bottom));background:var(--white);border-top:1px solid rgba(30,45,64,.08);display:flex;gap:10px;}
+.modal-foot .btn{flex:1;height:50px;}
+
+.fld{margin-bottom:14px;}
+.fld label{display:block;font-size:12px;font-weight:700;color:var(--text);margin-bottom:5px;}
+.fld label .req{color:var(--red);}
+.fld input,.fld select,.fld textarea{width:100%;padding:11px 12px;border:1px solid rgba(30,45,64,.2);border-radius:10px;background:var(--white);font-size:15px;color:var(--text);outline:none;font-family:inherit;}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--accent);}
+.fld textarea{resize:vertical;min-height:64px;}
+.fld-row{display:flex;gap:10px;}
+.fld-row>.fld{flex:1;}
+.fld-hint{font-size:11px;color:var(--text2);margin-top:4px;line-height:1.5;}
+
+.photo-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.photo-thumb{width:74px;height:74px;border-radius:10px;overflow:hidden;position:relative;background:#e9e5dd;}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;}
+.photo-thumb .del{position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:rgba(192,57,43,.92);color:#fff;border:none;font-size:13px;line-height:1;cursor:pointer;}
+.photo-thumb .badge-up{position:absolute;left:0;right:0;bottom:0;font-size:8px;text-align:center;background:rgba(30,45,64,.7);color:#fff;padding:1px;}
+.photo-add{width:74px;height:74px;border-radius:10px;border:2px dashed rgba(30,45,64,.25);background:var(--white);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--text2);cursor:pointer;font-size:10px;font-weight:700;}
+.photo-add svg{width:24px;height:24px;}
+
+.detail-photos{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;}
+.detail-photos.single{grid-template-columns:1fr;}
+.detail-photos img{width:100%;border-radius:12px;background:#e9e5dd;display:block;cursor:pointer;}
+.detail-table{background:var(--white);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-card);margin-bottom:14px;}
+.detail-table .r{display:flex;padding:11px 14px;border-bottom:1px solid rgba(30,45,64,.06);font-size:14px;}
+.detail-table .r:last-child{border-bottom:none;}
+.detail-table .r .k{width:80px;flex-shrink:0;color:var(--text2);font-size:12px;font-weight:700;align-self:center;}
+.detail-table .r .v{flex:1;color:var(--text);font-weight:600;word-break:break-word;}
+.detail-sec{margin-bottom:14px;}
+.detail-sec__h{font-size:12px;font-weight:800;color:var(--navy);margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.detail-sec__h svg{width:15px;height:15px;}
+.detail-sec__body{background:var(--white);border-radius:12px;box-shadow:var(--shadow-card);padding:12px 14px;font-size:14px;line-height:1.7;color:var(--text);white-space:pre-wrap;word-break:break-word;}
+.detail-sec__body.empty-note{color:var(--text2);font-style:normal;font-size:12px;}
+.mt-log{background:var(--white);border-radius:12px;box-shadow:var(--shadow-card);overflow:hidden;}
+.mt-log__row{padding:10px 14px;border-bottom:1px solid rgba(30,45,64,.06);}
+.mt-log__row:last-child{border-bottom:none;}
+.mt-log__top{display:flex;justify-content:space-between;gap:8px;}
+.mt-log__date{font-size:11px;color:var(--text2);}
+.mt-log__txt{font-size:13px;color:var(--text);margin-top:2px;line-height:1.5;}
+.mt-log__cost{font-size:11px;color:var(--text2);margin-top:2px;}
+
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:200;display:none;align-items:center;justify-content:center;flex-direction:column;}
+.lightbox.show{display:flex;}
+.lightbox img{max-width:96vw;max-height:84vh;object-fit:contain;}
+.lightbox .x{position:absolute;top:max(14px,env(safe-area-inset-top));right:16px;width:42px;height:42px;border:none;background:rgba(255,255,255,.15);color:#fff;border-radius:50%;font-size:24px;cursor:pointer;}
+
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--navy);color:#fff;font-size:13px;font-weight:600;padding:11px 20px;border-radius:24px;box-shadow:var(--shadow-modal);z-index:300;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90vw;text-align:center;}
+.toast.show{opacity:1;}
+
+.pat-box{background:var(--white);border-radius:16px;padding:22px;max-width:420px;width:calc(100% - 36px);margin:auto;}
+.pat-box .t{font-size:17px;font-weight:800;margin-bottom:8px;}
+.pat-box .d{font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:14px;}
+.pat-box input{width:100%;padding:12px;border:1px solid rgba(30,45,64,.2);border-radius:10px;font-size:15px;margin-bottom:14px;}
+.pat-box .acts{display:flex;gap:10px;}
+.pat-box .acts .btn{flex:1;height:48px;}
+
+.pick-row{display:flex;gap:10px;padding:11px 4px;border-bottom:1px solid rgba(30,45,64,.07);align-items:center;cursor:pointer;}
+.pick-row:last-child{border-bottom:none;}
+.pick-row input{width:21px;height:21px;accent-color:var(--navy);flex-shrink:0;}
+.pick-row__body{flex:1;min-width:0;}
+.pick-row__name{font-size:13px;font-weight:700;color:var(--text);}
+.pick-row__meta{font-size:11px;color:var(--text2);}
+.banner{background:rgba(176,106,0,.12);border:1px solid rgba(176,106,0,.3);color:var(--orange);font-size:12px;font-weight:600;border-radius:10px;padding:10px 12px;margin-bottom:14px;line-height:1.6;}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <button class="btn-back" onclick="location.href='index.html'" title="ホーム">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <div class="app-header-title">工具・機材台帳</div>
+  <span class="sync-dot" id="syncDot" title="同期状態"></span>
+  <button class="btn-back" id="refreshBtn" title="再読み込み">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+  </button>
+</div>
+
+<div class="tabbar">
+  <button data-tab="list" class="active" onclick="switchTab('list')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.7 2.7-2-2 2.7-2.7z"/></svg>
+    工具一覧
+  </button>
+  <button data-tab="bring" onclick="switchTab('bring')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    現場持込
+  </button>
+  <button data-tab="maint" onclick="switchTab('maint')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.7 2.7-2-2 2.7-2.7z"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>
+    メンテ
+  </button>
+</div>
+
+<div class="scroll-area" id="scrollArea">
+  <div id="banner"></div>
+
+  <!-- 工具一覧タブ -->
+  <div id="tab-list">
+    <div class="searchbar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="search" id="searchInput" placeholder="工具名・メーカー・型番・保管場所で検索" autocomplete="off">
+    </div>
+    <div class="stat-row" id="statRow"></div>
+    <div id="listBody"></div>
+  </div>
+
+  <!-- 現場持込タブ -->
+  <div id="tab-bring" class="hidden"></div>
+
+  <!-- メンテタブ -->
+  <div id="tab-maint" class="hidden"></div>
+</div>
+
+<button class="fab" id="fab" onclick="openEdit()" title="工具を登録">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
+
+<!-- 工具編集モーダル -->
+<div class="modal" id="editModal">
+  <div class="modal-box">
+    <div class="modal-head"><div class="t" id="editTitle">工具を登録</div><button class="x" onclick="closeEdit()">×</button></div>
+    <div class="modal-body">
+      <div class="fld"><label>名称 <span class="req">*</span></label><input type="text" id="f_name" placeholder="例：マキタ 充電式丸ノコ"></div>
+      <div class="fld-row">
+        <div class="fld"><label>カテゴリ</label>
+          <select id="f_cat">
+            <option>電動工具</option><option>手工具</option><option>測定器</option>
+            <option>機械・発電機</option><option>車両</option><option>収納・運搬</option>
+            <option>撮影・IT</option><option>消耗品・付属</option><option>その他</option>
+          </select>
+        </div>
+        <div class="fld"><label>状態</label>
+          <select id="f_status"><option>稼働中</option><option>修理中</option><option>予備</option><option>廃棄</option></select>
+        </div>
+      </div>
+      <div class="fld-row">
+        <div class="fld"><label>メーカー</label><input type="text" id="f_maker" placeholder="例：マキタ"></div>
+        <div class="fld"><label>型番</label><input type="text" id="f_model" placeholder="例：HS301DZ"></div>
+      </div>
+      <div class="fld-row">
+        <div class="fld"><label>保有数</label><input type="text" id="f_qty" inputmode="numeric" placeholder="1"></div>
+        <div class="fld"><label>保管場所</label><input type="text" id="f_place" placeholder="例：事務所倉庫 / 1号車"></div>
+      </div>
+      <div class="fld-row">
+        <div class="fld"><label>取得日</label><input type="date" id="f_date"></div>
+        <div class="fld"><label>取得価格(円)</label><input type="text" id="f_price" inputmode="numeric" placeholder="例：17168"></div>
+      </div>
+      <div class="fld"><label>仕入先</label><input type="text" id="f_vendor" placeholder="例：Bildy / アマゾン"></div>
+      <div class="fld"><label>使用方法</label><textarea id="f_usage" placeholder="基本の使い方・段取り・設定など"></textarea></div>
+      <div class="fld"><label>応用編・コツ</label><textarea id="f_tips" placeholder="現場で役立つ応用・裏ワザ・相性の良い部材など"></textarea></div>
+      <div class="fld"><label>注意事項・安全</label><textarea id="f_caution" placeholder="使用上の注意・保護具・禁止事項など"></textarea></div>
+      <div class="fld"><label>次回点検・車検予定</label><input type="date" id="f_next"></div>
+      <div class="fld"><label>備考</label><textarea id="f_note"></textarea></div>
+      <div class="fld"><label>写真（複数可・撮影/選択）</label>
+        <div class="photo-grid" id="photoGrid"></div>
+        <input type="file" id="photoInput" accept="image/*" multiple capture="environment" class="hidden">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="deleteBtn" onclick="deleteCurrent()" style="display:none;flex:0 0 auto;width:auto;padding:0 16px;color:var(--red);border-color:rgba(192,57,43,.4);">削除</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveEdit()">保存する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 工具詳細モーダル -->
+<div class="modal" id="detailModal">
+  <div class="modal-box">
+    <div class="modal-head"><div class="t" id="detailTitle">工具詳細</div><button class="x" onclick="closeDetail()">×</button></div>
+    <div class="modal-body" id="detailBody"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="detailMtBtn" style="flex:0 0 auto;width:auto;padding:0 16px;">メンテ記録</button>
+      <button class="btn btn-primary" id="detailEditBtn">編集</button>
+    </div>
+  </div>
+</div>
+
+<!-- メンテ記録追加モーダル -->
+<div class="modal" id="mtModal">
+  <div class="modal-box">
+    <div class="modal-head"><div class="t">メンテ記録を追加</div><button class="x" onclick="closeMt()">×</button></div>
+    <div class="modal-body">
+      <div class="fld" id="mtToolName" style="font-weight:800;color:var(--navy);"></div>
+      <div class="fld-row">
+        <div class="fld"><label>日付</label><input type="date" id="mt_date"></div>
+        <div class="fld"><label>種別</label>
+          <select id="mt_kind"><option>点検</option><option>修理</option><option>消耗品交換</option><option>校正</option><option>車検</option><option>保険</option><option>清掃・整備</option><option>その他</option></select>
+        </div>
+      </div>
+      <div class="fld"><label>内容</label><textarea id="mt_text" placeholder="例：カーボンブラシ交換 / オイル補充 / 不具合内容と対応"></textarea></div>
+      <div class="fld-row">
+        <div class="fld"><label>費用(円)</label><input type="text" id="mt_cost" inputmode="numeric" placeholder="任意"></div>
+        <div class="fld"><label>業者</label><input type="text" id="mt_vendor" placeholder="任意"></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-primary" id="mtSaveBtn" onclick="saveMt()">記録する</button></div>
+  </div>
+</div>
+
+<!-- 持込：工具追加モーダル -->
+<div class="modal" id="pickModal">
+  <div class="modal-box">
+    <div class="modal-head"><div class="t">持ち込む工具を選択</div><button class="x" onclick="closePick()">×</button></div>
+    <div class="modal-body">
+      <div class="searchbar" style="margin-bottom:10px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" id="pickSearch" placeholder="工具を検索" autocomplete="off" oninput="renderPick()">
+      </div>
+      <div id="pickList"></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-primary" id="pickAddBtn" onclick="pickConfirm()">追加する</button></div>
+  </div>
+</div>
+
+<!-- PATモーダル -->
+<div class="modal center" id="patModal">
+  <div class="pat-box">
+    <div class="t">GitHub トークンを設定</div>
+    <div class="d">台帳を保存するには GitHub Personal Access Token が必要です。初回のみブラウザに保存します（GitHubには送信されません）。ダッシュボード・各台帳と共用されます。</div>
+    <input type="password" id="patInput" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
+    <div class="acts"><button class="btn btn-ghost" onclick="closePat()">キャンセル</button><button class="btn btn-primary" onclick="confirmPat()">保存して続ける</button></div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="x" onclick="closeLightbox()">×</button>
+  <img id="lightboxImg" src="" alt="">
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   工具・機材台帳  現場ナビ
+   data.json の "工具"(配列) と "持込リスト"(配列) を GitHub Contents API で読み書き
+   写真は tool_photos/ に個別コミットしパス参照。PATはダッシュボード等と共用。
+   ============================================================ */
+const GH_REPO = 'kameisatoru-svg/genba-navi';
+const GH_API_DATA = `https://api.github.com/repos/${GH_REPO}/contents/data.json`;
+const PAT_KEY = 'artrise_gh_pat';
+const PHOTO_DIR = 'tool_photos';
+
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const yen = n => { const v=parseInt(String(n).replace(/[^\d]/g,''),10); return v?('¥'+v.toLocaleString()):''; };
+const today = () => new Date().toISOString().split('T')[0];
+
+let STATE = { 案件:[], 中止案件:[], 工具:[], 持込リスト:[] };
+let ankenByKey = {};
+let currentTab = 'list';
+let searchQ = '';
+const photoCache = {};
+let editPhotos = [];
+let editingId = null;
+let mtToolId = null;
+let bringKey = '';      // 現在編集中の案件キー
+let bringWork = null;   // {案件キー, items:[...]} のローカル作業コピー
+let pickSelected = new Set();
+
+function setSync(s){ $('#syncDot').className = 'sync-dot' + (s?' '+s:''); }
+let toastTimer;
+function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2600); }
+
+/* ---- PAT ---- */
+function getPAT(){ return localStorage.getItem(PAT_KEY)||''; }
+let patCallback=null;
+function showPat(cb){ patCallback=cb; $('#patModal').classList.add('show'); setTimeout(()=>$('#patInput').focus(),100); }
+function closePat(){ $('#patModal').classList.remove('show'); }
+function confirmPat(){ const v=$('#patInput').value.trim(); if(!v){toast('トークンを入力してください');return;} localStorage.setItem(PAT_KEY,v); closePat(); const cb=patCallback; patCallback=null; if(cb)cb(); }
+
+/* ---- 画像圧縮 ---- */
+function compressImage(file, maxDim=1280, q=0.72){
+  return new Promise((res,rej)=>{
+    const img=new Image(); const url=URL.createObjectURL(file);
+    img.onload=()=>{ URL.revokeObjectURL(url); let w=img.width,h=img.height;
+      if(w>=h&&w>maxDim){h=Math.round(h*maxDim/w);w=maxDim;} else if(h>w&&h>maxDim){w=Math.round(w*maxDim/h);h=maxDim;}
+      const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
+      res(c.toDataURL('image/jpeg',q)); };
+    img.onerror=rej; img.src=url;
+  });
+}
+
+/* ---- GitHub I/O ---- */
+async function ghFetchData(){
+  const pat=getPAT(); const headers={'Accept':'application/vnd.github.v3+json'};
+  if(pat){
+    const r=await fetch(GH_API_DATA,{headers:{...headers,Authorization:`token ${pat}`}});
+    if(r.status===401){ localStorage.removeItem(PAT_KEY); throw new Error('TOKEN_INVALID'); }
+    if(!r.ok) throw new Error('data.json取得失敗 '+r.status);
+    const j=await r.json(); const raw=atob(j.content.replace(/\n/g,''));
+    const bytes=Uint8Array.from(raw,c=>c.charCodeAt(0));
+    return JSON.parse(new TextDecoder('utf-8').decode(bytes));
+  } else {
+    const r=await fetch('./data.json',{cache:'no-store'}); if(!r.ok) throw new Error('data.json取得失敗 '+r.status); return r.json();
+  }
+}
+async function ghPutPhoto(path, base64, message){
+  const pat=getPAT(); const api=`https://api.github.com/repos/${GH_REPO}/contents/${path}`;
+  const r=await fetch(api,{method:'PUT',headers:{Authorization:`token ${pat}`,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify({message,content:base64})});
+  if(!r.ok){ const t=await r.text(); throw new Error('写真保存失敗 '+r.status+' '+t.slice(0,120)); }
+}
+async function ghSaveData(mutator, message){
+  const pat=getPAT();
+  const r=await fetch(GH_API_DATA,{headers:{Authorization:`token ${pat}`,'Accept':'application/vnd.github.v3+json'}});
+  if(r.status===401){ localStorage.removeItem(PAT_KEY); throw new Error('TOKEN_INVALID'); }
+  if(!r.ok) throw new Error('data.json取得失敗 '+r.status);
+  const j=await r.json(); const sha=j.sha; const raw=atob(j.content.replace(/\n/g,''));
+  const bytes=Uint8Array.from(raw,c=>c.charCodeAt(0));
+  const data=JSON.parse(new TextDecoder('utf-8').decode(bytes));
+  if(!Array.isArray(data['工具'])) data['工具']=[];
+  if(!Array.isArray(data['持込リスト'])) data['持込リスト']=[];
+  mutator(data);
+  data['最終更新']=today();
+  const jsonStr=JSON.stringify(data,null,2);
+  const enc=new TextEncoder().encode(jsonStr);
+  const b64=btoa(Array.from(enc,b=>String.fromCharCode(b)).join(''));
+  const put=await fetch(GH_API_DATA,{method:'PUT',headers:{Authorization:`token ${pat}`,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify({message,content:b64,sha})});
+  if(!put.ok){ const t=await put.text(); throw new Error('保存失敗 '+put.status+' '+t.slice(0,120)); }
+  STATE['工具']=data['工具']; STATE['持込リスト']=data['持込リスト'];
+  return data;
+}
+
+function photoSrc(path){ if(!path) return ''; if(path.startsWith('data:')) return path; if(photoCache[path]) return photoCache[path]; return './'+path; }
+function toolById(id){ return STATE['工具'].find(t=>t.id===id); }
+
+function statusBadge(st){
+  const m={'稼働中':'ok','修理中':'fix','予備':'spare','廃棄':'scrap'};
+  return `<span class="badge ${m[st]||'spare'}">${esc(st||'稼働中')}</span>`;
+}
+
+/* どの工具が今どの現場に持出中か（未返却） */
+function outMap(){
+  const m={}; // toolId -> [案件キー]
+  STATE['持込リスト'].forEach(l=>{
+    (l.items||[]).forEach(it=>{ if(it['持出'] && !it['返却']){ (m[it.id]=m[it.id]||[]).push(l['案件キー']); } });
+  });
+  return m;
+}
+
+/* ============================================================ 工具一覧 ============================================================ */
+function matchTool(t){
+  if(!searchQ) return true;
+  const hay=[t['名称'],t['メーカー'],t['型番'],t['カテゴリ'],t['保管場所'],t['備考']].join(' ').toLowerCase();
+  return searchQ.toLowerCase().split(/\s+/).every(w=>hay.includes(w));
+}
+const CAT_ORDER=['電動工具','手工具','測定器','機械・発電機','車両','収納・運搬','撮影・IT','消耗品・付属','その他'];
+
+function renderStats(){
+  const ts=STATE['工具'];
+  const fix=ts.filter(t=>t['状態']==='修理中').length;
+  const total=ts.reduce((s,t)=>s+(parseInt(String(t['取得価格']).replace(/[^\d]/g,''),10)||0),0);
+  const out=Object.keys(outMap()).length;
+  $('#statRow').innerHTML=`
+    <div class="stat-box"><div class="n">${ts.length}</div><div class="l">工具数</div></div>
+    <div class="stat-box"><div class="n">${out}</div><div class="l">持出中</div></div>
+    <div class="stat-box"><div class="n">${fix}</div><div class="l">修理中</div></div>
+    <div class="stat-box"><div class="n">${total?('¥'+Math.round(total/10000)+'万'):'¥0'}</div><div class="l">取得額</div></div>`;
+}
+
+function toolRow(t, om){
+  const ph=(t['写真']&&t['写真'][0])||'';
+  const thumb=ph?`<div class="tool-item__thumb"><img src="${esc(photoSrc(ph))}" loading="lazy" onerror="this.style.display='none'"></div>`
+    :`<div class="tool-item__thumb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.7 2.7-2-2 2.7-2.7z"/></svg></div>`;
+  const meta=[t['メーカー'],t['型番'],t['保管場所']].filter(Boolean).join(' / ');
+  const outSites=om[t.id]||[];
+  const dueSoon=isDueSoon(t['次回点検']);
+  return `<div class="tool-item" onclick="openDetail('${t.id}')">
+    ${thumb}
+    <div class="tool-item__body">
+      <div class="tool-item__name">${esc(t['名称'])}${t['状態']&&t['状態']!=='稼働中'?statusBadge(t['状態']):''}${outSites.length?`<span class="badge out">持出中</span>`:''}${dueSoon?`<span class="badge due">点検${dueSoon}</span>`:''}</div>
+      <div class="tool-item__meta">${esc(meta||t['カテゴリ']||'')}</div>
+    </div>
+    <span class="tool-item__arrow">›</span>
+  </div>`;
+}
+
+function renderList(){
+  renderStats();
+  const ts=STATE['工具'].filter(matchTool);
+  const el=$('#listBody');
+  if(ts.length===0){ el.innerHTML=emptyHTML(searchQ?'該当する工具がありません':'まだ工具が登録されていません','右下の＋から工具・機材・車両を登録できます'); return; }
+  const om=outMap();
+  const byCat={}; ts.forEach(t=>{ (byCat[t['カテゴリ']||'その他']=byCat[t['カテゴリ']||'その他']||[]).push(t); });
+  const cats=Object.keys(byCat).sort((a,b)=>{const ia=CAT_ORDER.indexOf(a),ib=CAT_ORDER.indexOf(b);return (ia<0?99:ia)-(ib<0?99:ib);});
+  el.innerHTML=cats.map(c=>`<div class="sec-h">${esc(c)}<span class="cnt">${byCat[c].length}</span></div>
+    <div class="card-list">${byCat[c].map(t=>toolRow(t,om)).join('')}</div>`).join('');
+}
+
+function emptyHTML(t,d){
+  return `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.7 2.7-2-2 2.7-2.7z"/></svg><div class="t">${esc(t)}</div><div class="d">${esc(d)}</div></div>`;
+}
+
+/* ============================================================ 詳細 ============================================================ */
+function openDetail(id){
+  const t=toolById(id); if(!t) return;
+  const photos=t['写真']||[];
+  const ph=photos.length?`<div class="detail-photos ${photos.length===1?'single':''}">${photos.map(x=>`<img src="${esc(photoSrc(x))}" onclick="openLightbox('${esc(photoSrc(x))}')" onerror="this.style.display='none'">`).join('')}</div>`:'';
+  const om=outMap(); const outSites=(om[id]||[]).map(k=>ankenByKey[k]?(ankenByKey[k]['正式工事名']||k):k);
+  const rows=[
+    ['カテゴリ',t['カテゴリ']],['メーカー',t['メーカー']],['型番',t['型番']],
+    ['状態',(t['状態']||'')+(outSites.length?'（持出中）':'')],['保有数',t['保有数']],['保管場所',t['保管場所']],
+    ['取得日',t['取得日']],['取得価格',yen(t['取得価格'])],['仕入先',t['仕入先']],
+    ['次回点検',t['次回点検']],['持出先',outSites.join('、')],
+  ].filter(r=>r[1]!=null&&r[1]!=='');
+  const sec=(title,icon,body)=>`<div class="detail-sec"><div class="detail-sec__h">${icon}${title}</div><div class="detail-sec__body ${body?'':'empty-note'}">${body?esc(body):'（未記入）'}</div></div>`;
+  const iUse='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6m0 0l3-3m-3 3L9 5"/><rect x="4" y="8" width="16" height="13" rx="2"/></svg>';
+  const iTip='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 21h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>';
+  const iCau='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17"/></svg>';
+  const log=(t['メンテ履歴']||[]).slice().sort((a,b)=>(b['日付']||'').localeCompare(a['日付']||''));
+  const logHtml=log.length?`<div class="mt-log">${log.map(m=>`<div class="mt-log__row"><div class="mt-log__top"><span><span class="mt-kind">${esc(m['種別']||'')}</span>${esc(m['内容']||'')}</span><span class="mt-log__date">${esc(m['日付']||'')}</span></div>${(m['費用']||m['業者'])?`<div class="mt-log__cost">${[yen(m['費用']),m['業者']].filter(Boolean).join(' / ')}</div>`:''}</div>`).join('')}</div>`:'<div class="detail-sec__body empty-note">まだ記録がありません。「メンテ記録」から追加できます。</div>';
+
+  $('#detailTitle').textContent=t['名称'];
+  $('#detailBody').innerHTML = ph
+    + `<div class="detail-table">${rows.map(r=>`<div class="r"><div class="k">${esc(r[0])}</div><div class="v">${esc(r[1])}</div></div>`).join('')}</div>`
+    + sec('使用方法',iUse,t['使用方法'])
+    + sec('応用編・コツ',iTip,t['応用'])
+    + sec('注意事項・安全',iCau,t['注意事項'])
+    + (t['備考']?sec('備考','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v12H7l-3 3z"/></svg>',t['備考']):'')
+    + `<div class="detail-sec"><div class="detail-sec__h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.7 2.7-2-2 2.7-2.7z"/></svg>メンテ・修理履歴</div>${logHtml}</div>`;
+  $('#detailEditBtn').onclick=()=>{ closeDetail(); openEdit(id); };
+  $('#detailMtBtn').onclick=()=>{ closeDetail(); openMt(id); };
+  $('#detailModal').classList.add('show');
+}
+function closeDetail(){ $('#detailModal').classList.remove('show'); }
+
+/* ============================================================ 編集フォーム ============================================================ */
+function openEdit(id){
+  editingId=id||null; editPhotos=[];
+  const g=(k)=>$('#'+k);
+  if(id){
+    const t=toolById(id); $('#editTitle').textContent='工具を編集';
+    g('f_name').value=t['名称']||''; g('f_cat').value=t['カテゴリ']||'電動工具'; g('f_status').value=t['状態']||'稼働中';
+    g('f_maker').value=t['メーカー']||''; g('f_model').value=t['型番']||''; g('f_qty').value=t['保有数']||'';
+    g('f_place').value=t['保管場所']||''; g('f_date').value=t['取得日']||''; g('f_price').value=t['取得価格']||'';
+    g('f_vendor').value=t['仕入先']||''; g('f_usage').value=t['使用方法']||''; g('f_tips').value=t['応用']||'';
+    g('f_caution').value=t['注意事項']||''; g('f_next').value=t['次回点検']||''; g('f_note').value=t['備考']||'';
+    editPhotos=(t['写真']||[]).map(p=>({path:p,dataURL:photoSrc(p),uploaded:true}));
+    $('#deleteBtn').style.display='';
+  } else {
+    $('#editTitle').textContent='工具を登録';
+    ['f_name','f_maker','f_model','f_qty','f_place','f_date','f_price','f_vendor','f_usage','f_tips','f_caution','f_next','f_note'].forEach(k=>g(k).value='');
+    g('f_cat').value='電動工具'; g('f_status').value='稼働中';
+    $('#deleteBtn').style.display='none';
+  }
+  renderPhotoGrid();
+  $('#editModal').classList.add('show');
+}
+function closeEdit(){ $('#editModal').classList.remove('show'); }
+
+function renderPhotoGrid(){
+  const grid=$('#photoGrid');
+  grid.innerHTML=editPhotos.map((ph,i)=>`<div class="photo-thumb"><img src="${esc(ph.dataURL)}"><button class="del" onclick="removePhoto(${i})">×</button>${ph.uploaded?'':'<span class="badge-up">未保存</span>'}</div>`).join('')
+    + `<div class="photo-add" onclick="$('#photoInput').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>写真追加</div>`;
+}
+function removePhoto(i){ editPhotos.splice(i,1); renderPhotoGrid(); }
+$('#photoInput').addEventListener('change', async e=>{
+  const files=Array.from(e.target.files||[]); e.target.value='';
+  for(const f of files){ if(!f.type.startsWith('image/')) continue; try{ const d=await compressImage(f); editPhotos.push({dataURL:d,uploaded:false}); renderPhotoGrid(); }catch(_){ toast('画像読込に失敗'); } }
+});
+
+async function saveEdit(){
+  const name=$('#f_name').value.trim();
+  if(!name){ toast('名称を入力してください'); $('#f_name').focus(); return; }
+  if(!getPAT()){ showPat(()=>saveEdit()); return; }
+  const btn=$('#saveBtn'); btn.disabled=true; btn.textContent='保存中…'; setSync('busy');
+  try{
+    const id=editingId||('T-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6));
+    const photoPaths=[];
+    for(let i=0;i<editPhotos.length;i++){
+      const ph=editPhotos[i];
+      if(ph.uploaded&&ph.path){ photoPaths.push(ph.path); continue; }
+      const base64=ph.dataURL.split(',')[1];
+      const path=`${PHOTO_DIR}/${id}_${Date.now().toString(36)}${i}.jpg`;
+      btn.textContent=`写真保存中… ${i+1}/${editPhotos.length}`;
+      await ghPutPhoto(path, base64, `工具写真追加: ${name}`);
+      photoCache[path]=ph.dataURL; photoPaths.push(path);
+    }
+    btn.textContent='データ保存中…';
+    const prev=editingId?toolById(editingId):null;
+    const rec={
+      id,'名称':name,'カテゴリ':$('#f_cat').value,'メーカー':$('#f_maker').value.trim(),'型番':$('#f_model').value.trim(),
+      '保有数':$('#f_qty').value.trim(),'状態':$('#f_status').value,'保管場所':$('#f_place').value.trim(),
+      '取得日':$('#f_date').value,'取得価格':$('#f_price').value.trim(),'仕入先':$('#f_vendor').value.trim(),
+      '使用方法':$('#f_usage').value.trim(),'応用':$('#f_tips').value.trim(),'注意事項':$('#f_caution').value.trim(),
+      'メンテ履歴':prev?(prev['メンテ履歴']||[]):[],'次回点検':$('#f_next').value,'写真':photoPaths,
+      '備考':$('#f_note').value.trim(),'原価ID':prev?(prev['原価ID']||''):'',
+      '登録日':prev?(prev['登録日']||today()):today(),'更新日':today()
+    };
+    await ghSaveData(d=>{ const a=d['工具']; const i=a.findIndex(x=>x.id===id); if(i>=0)a[i]={...a[i],...rec}; else a.push(rec); }, `工具${editingId?'更新':'登録'}: ${name}`);
+    setSync('ok'); closeEdit(); renderAll(); toast('保存しました');
+  }catch(err){ setSync('err'); if(String(err.message).includes('TOKEN_INVALID')){toast('トークン無効');showPat(()=>saveEdit());} else toast('保存失敗: '+err.message); console.error(err); }
+  finally{ btn.disabled=false; btn.textContent='保存する'; }
+}
+
+async function deleteCurrent(){
+  if(!editingId) return;
+  const t=toolById(editingId);
+  if(!confirm(`「${t?.['名称']||'この工具'}」を削除しますか？`)) return;
+  if(!getPAT()){ showPat(()=>deleteCurrent()); return; }
+  const btn=$('#saveBtn'); btn.disabled=true; setSync('busy');
+  try{
+    await ghSaveData(d=>{
+      d['工具']=d['工具'].filter(x=>x.id!==editingId);
+      (d['持込リスト']||[]).forEach(l=>{ l.items=(l.items||[]).filter(it=>it.id!==editingId); });
+    }, `工具削除: ${t?.['名称']||''}`);
+    setSync('ok'); closeEdit(); renderAll(); toast('削除しました');
+  }catch(err){ setSync('err'); toast('削除失敗: '+err.message); }
+  finally{ btn.disabled=false; }
+}
+
+/* ============================================================ メンテ記録 ============================================================ */
+function openMt(id){
+  mtToolId=id; const t=toolById(id);
+  $('#mtToolName').textContent=t?t['名称']:'';
+  $('#mt_date').value=today(); $('#mt_kind').value='点検'; $('#mt_text').value=''; $('#mt_cost').value=''; $('#mt_vendor').value='';
+  $('#mtModal').classList.add('show');
+}
+function closeMt(){ $('#mtModal').classList.remove('show'); }
+async function saveMt(){
+  const txt=$('#mt_text').value.trim();
+  if(!txt){ toast('内容を入力してください'); return; }
+  if(!getPAT()){ showPat(()=>saveMt()); return; }
+  const btn=$('#mtSaveBtn'); btn.disabled=true; btn.textContent='記録中…'; setSync('busy');
+  const entry={'日付':$('#mt_date').value||today(),'種別':$('#mt_kind').value,'内容':txt,'費用':$('#mt_cost').value.trim(),'業者':$('#mt_vendor').value.trim()};
+  try{
+    await ghSaveData(d=>{ const t=d['工具'].find(x=>x.id===mtToolId); if(t){ t['メンテ履歴']=t['メンテ履歴']||[]; t['メンテ履歴'].push(entry); t['更新日']=today();
+      if($('#mt_kind').value==='修理') t['状態']='稼働中'; } }, `メンテ記録: ${toolById(mtToolId)?.['名称']||''} / ${entry['種別']}`);
+    setSync('ok'); closeMt(); renderAll(); toast('記録しました');
+  }catch(err){ setSync('err'); if(String(err.message).includes('TOKEN_INVALID')){toast('トークン無効');showPat(()=>saveMt());} else toast('記録失敗: '+err.message); }
+  finally{ btn.disabled=false; btn.textContent='記録する'; }
+}
+
+/* ============================================================ メンテタブ ============================================================ */
+function isDueSoon(dateStr){ // 返り値: '近' / '超過' / ''
+  if(!dateStr) return '';
+  const d=new Date(dateStr+'T00:00:00'); if(isNaN(d)) return '';
+  const diff=(d - new Date(today()+'T00:00:00'))/86400000;
+  if(diff<0) return '超過'; if(diff<=30) return '近'; return '';
+}
+function renderMaint(){
+  const el=$('#tab-maint');
+  // 点検・車検予定
+  const due=STATE['工具'].filter(t=>t['次回点検']).map(t=>({t,flag:isDueSoon(t['次回点検'])})).filter(x=>x.flag)
+    .sort((a,b)=>(a.t['次回点検']||'').localeCompare(b.t['次回点検']||''));
+  const fixing=STATE['工具'].filter(t=>t['状態']==='修理中');
+  // 履歴横断
+  const logs=[];
+  STATE['工具'].forEach(t=>(t['メンテ履歴']||[]).forEach(m=>logs.push({t,m})));
+  logs.sort((a,b)=>(b.m['日付']||'').localeCompare(a.m['日付']||''));
+
+  let html='';
+  if(fixing.length){
+    html+=`<div class="sec-h">修理中<span class="cnt">${fixing.length}</span></div><div class="card-list">`
+      + fixing.map(t=>`<div class="tool-item" onclick="openDetail('${t.id}')"><div class="tool-item__body"><div class="tool-item__name">${esc(t['名称'])} ${statusBadge('修理中')}</div><div class="tool-item__meta">${esc([t['メーカー'],t['型番']].filter(Boolean).join(' / '))}</div></div><span class="tool-item__arrow">›</span></div>`).join('')+`</div>`;
+  }
+  html+=`<div class="sec-h">点検・車検 予定<span class="cnt">${due.length}</span></div>`;
+  html+= due.length?`<div class="card-list">`+due.map(({t,flag})=>`<div class="tool-item" onclick="openDetail('${t.id}')"><div class="tool-item__body"><div class="tool-item__name">${esc(t['名称'])} <span class="badge ${flag==='超過'?'due':'out'}">${t['次回点検']}${flag==='超過'?' 超過':' 予定'}</span></div><div class="tool-item__meta">${esc(t['カテゴリ']||'')}</div></div><span class="tool-item__arrow">›</span></div>`).join('')+`</div>`
+    :`<div class="empty" style="padding:24px"><div class="d">次回点検が近い工具はありません。<br>各工具の「次回点検・車検予定」を設定すると、ここに通知されます。</div></div>`;
+
+  html+=`<div class="sec-h">メンテ・修理履歴<span class="cnt">${logs.length}</span></div>`;
+  html+= logs.length?logs.map(({t,m})=>`<div class="mt-item" onclick="openDetail('${t.id}')"><div class="mt-item__top"><span class="mt-item__tool">${esc(t['名称'])}</span><span class="mt-item__date">${esc(m['日付']||'')}</span></div><div class="mt-item__body"><span class="mt-kind">${esc(m['種別']||'')}</span>${esc(m['内容']||'')}${(m['費用']||m['業者'])?'　'+[yen(m['費用']),m['業者']].filter(Boolean).join(' / '):''}</div></div>`).join('')
+    :`<div class="empty" style="padding:24px"><div class="d">まだ履歴がありません。各工具の「メンテ記録」から点検・修理・消耗品交換を記録できます。</div></div>`;
+  el.innerHTML=html;
+}
+
+/* ============================================================ 現場持込タブ ============================================================ */
+function getList(key){ return STATE['持込リスト'].find(l=>l['案件キー']===key); }
+
+function renderBring(){
+  const el=$('#tab-bring');
+  // 未返却サマリー
+  const om=outMap();
+  let warn='';
+  const outEntries=Object.entries(om);
+  if(outEntries.length){
+    const lines=outEntries.map(([tid,keys])=>{ const t=toolById(tid); const sites=[...new Set(keys)].map(k=>ankenByKey[k]?(ankenByKey[k]['現場+工事']||ankenByKey[k]['正式工事名']||k):k); return `${esc(t?t['名称']:tid)}（${esc(sites.join('、'))}）`; });
+    warn=`<div class="warn-card"><b>未返却の工具 ${outEntries.length}点</b><br>${lines.join('<br>')}</div>`;
+  }
+  const opts=STATE['案件'].map(a=>`<option value="${esc(a['案件キー'])}" ${a['案件キー']===bringKey?'selected':''}>${esc(a['正式工事名']||a['案件キー'])}</option>`).join('');
+  let html=warn+`<div class="bring-head"><label>現場（案件）を選択</label><select id="bringAnken" onchange="selectBring(this.value)"><option value="">案件を選択…</option>${opts}</select></div>`;
+
+  if(bringKey && bringWork){
+    const items=bringWork.items||[];
+    const a=ankenByKey[bringKey];
+    html+=`<div class="sec-h">${esc(a?(a['正式工事名']||bringKey):bringKey)} の持込工具<span class="cnt">${items.length}</span></div>`;
+    if(items.length){
+      html+=`<div class="card-list">`+items.map((it,i)=>{ const t=toolById(it.id); if(!t) return '';
+        return `<div class="bring-row">
+          <div class="bring-row__body"><div class="bring-row__name">${esc(t['名称'])}</div><div class="bring-row__meta">${esc([t['メーカー'],t['型番']].filter(Boolean).join(' / ')||t['カテゴリ']||'')}</div></div>
+          <label class="chk"><input type="checkbox" ${it['持出']?'checked':''} onchange="toggleBring(${i},'持出',this.checked)">持出</label>
+          <label class="chk ret"><input type="checkbox" ${it['返却']?'checked':''} onchange="toggleBring(${i},'返却',this.checked)">返却</label>
+          <button class="bring-row__del" onclick="removeBring(${i})">×</button>
+        </div>`; }).join('')+`</div>`;
+    } else {
+      html+=`<div class="empty" style="padding:22px"><div class="d">まだ工具がありません。下のボタンから追加してください。</div></div>`;
+    }
+    html+=`<div class="bring-actions">
+      <button class="btn btn-ghost" onclick="openPick()">＋ 工具を追加</button>
+      <button class="btn btn-primary" onclick="saveBring()">保存</button>
+    </div>`;
+  }
+  el.innerHTML=html;
+}
+function selectBring(key){
+  bringKey=key;
+  if(!key){ bringWork=null; renderBring(); return; }
+  const existing=getList(key);
+  bringWork = existing ? JSON.parse(JSON.stringify(existing)) : {'案件キー':key, items:[], '更新日':today()};
+  renderBring();
+}
+function toggleBring(i,field,val){ if(bringWork&&bringWork.items[i]){ bringWork.items[i][field]=val; if(field==='返却'&&val){bringWork.items[i]['返却日']=today();} } }
+function removeBring(i){ if(bringWork){ bringWork.items.splice(i,1); renderBring(); } }
+async function saveBring(){
+  if(!bringWork){ return; }
+  if(!getPAT()){ showPat(()=>saveBring()); return; }
+  setSync('busy');
+  try{
+    bringWork['更新日']=today();
+    const snapshot=JSON.parse(JSON.stringify(bringWork));
+    await ghSaveData(d=>{
+      d['持込リスト']=d['持込リスト']||[];
+      const i=d['持込リスト'].findIndex(l=>l['案件キー']===snapshot['案件キー']);
+      if(snapshot.items.length===0){ if(i>=0) d['持込リスト'].splice(i,1); }
+      else if(i>=0) d['持込リスト'][i]=snapshot; else d['持込リスト'].push(snapshot);
+    }, `現場持込リスト更新: ${snapshot['案件キー']}（${snapshot.items.length}点）`);
+    setSync('ok'); selectBring(bringKey); renderStats(); toast('保存しました');
+  }catch(err){ setSync('err'); if(String(err.message).includes('TOKEN_INVALID')){toast('トークン無効');showPat(()=>saveBring());} else toast('保存失敗: '+err.message); }
+}
+
+/* 持込：工具選択モーダル */
+function openPick(){
+  pickSelected=new Set((bringWork.items||[]).map(it=>it.id));
+  $('#pickSearch').value=''; renderPick();
+  $('#pickModal').classList.add('show');
+}
+function closePick(){ $('#pickModal').classList.remove('show'); }
+function renderPick(){
+  const q=($('#pickSearch').value||'').toLowerCase().trim();
+  const list=STATE['工具'].filter(t=>t['状態']!=='廃棄').filter(t=>{ if(!q) return true; return [t['名称'],t['メーカー'],t['型番'],t['カテゴリ']].join(' ').toLowerCase().includes(q); });
+  $('#pickList').innerHTML=list.map(t=>`<label class="pick-row"><input type="checkbox" ${pickSelected.has(t.id)?'checked':''} onchange="togglePick('${t.id}',this.checked)"><div class="pick-row__body"><div class="pick-row__name">${esc(t['名称'])}</div><div class="pick-row__meta">${esc([t['カテゴリ'],t['メーカー'],t['型番']].filter(Boolean).join(' / '))}</div></div></label>`).join('')
+    || `<div class="empty" style="padding:20px"><div class="d">該当する工具がありません</div></div>`;
+}
+function togglePick(id,on){ if(on)pickSelected.add(id); else pickSelected.delete(id); }
+function pickConfirm(){
+  const cur=new Set((bringWork.items||[]).map(it=>it.id));
+  // 追加
+  pickSelected.forEach(id=>{ if(!cur.has(id)) bringWork.items.push({id, '持出':false, '返却':false}); });
+  // 解除されたもの（チェックを外した既存）→ 削除
+  bringWork.items=bringWork.items.filter(it=>pickSelected.has(it.id));
+  closePick(); renderBring();
+}
+
+/* ============================================================ 共通 ============================================================ */
+function renderAll(){ renderList(); renderBring(); renderMaint(); }
+function switchTab(tab){
+  currentTab=tab;
+  $$('.tabbar button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  ['list','bring','maint'].forEach(t=>$('#tab-'+t).classList.toggle('hidden',t!==tab));
+  $('#fab').style.display = tab==='list' ? '' : 'none';
+}
+function openLightbox(src){ $('#lightboxImg').src=src; $('#lightbox').classList.add('show'); }
+function closeLightbox(){ $('#lightbox').classList.remove('show'); $('#lightboxImg').src=''; }
+
+let searchTimer;
+$('#searchInput').addEventListener('input', e=>{ clearTimeout(searchTimer); searchTimer=setTimeout(()=>{ searchQ=e.target.value.trim(); renderList(); },200); });
+
+function buildAnkenMaps(){ ankenByKey={}; [...STATE['案件'],...STATE['中止案件']].forEach(a=>{ ankenByKey[a['案件キー']]=a; }); }
+
+async function init(){
+  setSync('busy'); $('#banner').innerHTML='';
+  try{
+    const data=await ghFetchData();
+    STATE['案件']=data['案件']||[]; STATE['中止案件']=data['中止案件']||[];
+    STATE['工具']=Array.isArray(data['工具'])?data['工具']:[];
+    STATE['持込リスト']=Array.isArray(data['持込リスト'])?data['持込リスト']:[];
+    buildAnkenMaps();
+    STATE['工具'].forEach((t,i)=>{ if(!t.id)t.id='T-legacy-'+i; });
+    setSync(getPAT()?'ok':''); renderAll();
+  }catch(err){
+    setSync('err');
+    if(String(err.message).includes('TOKEN_INVALID')){
+      $('#banner').innerHTML='トークンが無効です。保存時に再設定できます。読み取りは公開データで続行します。';
+      try{ const r=await fetch('./data.json',{cache:'no-store'}); const data=await r.json();
+        STATE['案件']=data['案件']||[]; STATE['中止案件']=data['中止案件']||[]; STATE['工具']=data['工具']||[]; STATE['持込リスト']=data['持込リスト']||[];
+        buildAnkenMaps(); renderAll();
+      }catch(_){}
+    } else { $('#banner').innerHTML='データ読込に失敗しました：'+esc(err.message); }
+    console.error(err);
+  }
+}
+$('#refreshBtn').addEventListener('click', init);
+$('#patInput').addEventListener('keydown', e=>{ if(e.key==='Enter') confirmPat(); });
+['editModal','detailModal','mtModal','pickModal','patModal'].forEach(id=>{
+  $('#'+id).addEventListener('click', e=>{ if(e.target.id===id){
+    ({editModal:closeEdit,detailModal:closeDetail,mtModal:closeMt,pickModal:closePick,patModal:closePat})[id]();
+  }});
+});
+init();
+</script>
+</body>
+</html>
