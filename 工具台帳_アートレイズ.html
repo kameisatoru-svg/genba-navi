@@ -172,6 +172,19 @@ body{display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
 .pick-row__meta{font-size:11px;color:var(--text2);}
 .banner{background:rgba(176,106,0,.12);border:1px solid rgba(176,106,0,.3);color:var(--orange);font-size:12px;font-weight:600;border-radius:10px;padding:10px 12px;margin-bottom:14px;line-height:1.6;}
 
+/* 一括棚卸し */
+.help-box{font-size:12px;color:var(--text2);line-height:1.7;background:#f3f0ea;border-radius:10px;padding:11px 12px;margin-bottom:12px;}
+.help-box b{color:var(--navy);}
+.bulk-row{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid rgba(30,45,64,.07);align-items:flex-start;}
+.bulk-row.off{opacity:.42;}
+.bulk-row input[type=checkbox]{width:20px;height:20px;margin-top:2px;flex-shrink:0;accent-color:var(--navy);}
+.bulk-row img{width:54px;height:54px;border-radius:8px;object-fit:cover;flex-shrink:0;background:#e9e5dd;}
+.bulk-row__body{flex:1;min-width:0;}
+.bulk-row__body input.bn{width:100%;font-size:13px;font-weight:700;padding:6px 8px;border:1px solid rgba(30,45,64,.2);border-radius:7px;margin-bottom:5px;color:var(--text);}
+.bulk-row__ctl{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.bulk-row__ctl select{font-size:11px;padding:4px 6px;border:1px solid rgba(30,45,64,.2);border-radius:7px;background:#fff;max-width:120px;}
+.bulk-row__meta{font-size:11px;color:var(--text2);margin-top:3px;}
+
 /* AI自動入力パネル */
 .ai-panel{background:linear-gradient(135deg,#1e2d40,#2a3f5a);border-radius:14px;padding:14px;margin-bottom:16px;}
 .ai-fill-btn{width:100%;height:50px;border:none;border-radius:11px;background:var(--accent);color:var(--navy);
@@ -200,6 +213,9 @@ body{display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
   </button>
   <div class="app-header-title">工具・機材台帳</div>
   <span class="sync-dot" id="syncDot" title="同期状態"></span>
+  <button class="btn-back" id="bulkBtn" title="一括棚卸し（写真でまとめて登録）" onclick="openBulk()">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M17.5 14v7M14 17.5h7"/></svg>
+  </button>
   <button class="btn-back" id="refreshBtn" title="再読み込み">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
   </button>
@@ -298,6 +314,11 @@ body{display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
         <div class="photo-grid" id="photoGrid"></div>
         <input type="file" id="photoInput" accept="image/*" multiple capture="environment" class="hidden">
       </div>
+      <div class="fld"><label>型番証跡（銘板・型番ラベルの写真）</label>
+        <div class="photo-grid" id="plateGrid"></div>
+        <input type="file" id="plateInput" accept="image/*" multiple capture="environment" class="hidden">
+        <div class="fld-hint">銘板/型番シールの写真を「証跡」として別保存します。上の「銘板・型番ラベルで精度UP」で追加するとAI解析にも使われます。</div>
+      </div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" id="deleteBtn" onclick="deleteCurrent()" style="display:none;flex:0 0 auto;width:auto;padding:0 16px;color:var(--red);border-color:rgba(192,57,43,.4);">削除</button>
@@ -375,6 +396,28 @@ body{display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
   </div>
 </div>
 
+<!-- 一括棚卸しモーダル -->
+<div class="modal" id="bulkModal">
+  <div class="modal-box" style="max-height:94dvh;">
+    <div class="modal-head"><div class="t">一括棚卸し（写真でまとめて登録）</div><button class="x" onclick="closeBulk()">×</button></div>
+    <div class="modal-body">
+      <div id="bulkStep1">
+        <div class="help-box">工具を <b>1点ずつ撮影/選択</b> して追加 → まとめてAIが判定し、一覧で確認して一括登録します。（写真1枚＝工具1点）</div>
+        <button class="btn btn-ghost" style="width:100%;height:48px" onclick="$('#bulkInput').click()">＋ 写真を追加（連続撮影/選択）</button>
+        <input type="file" id="bulkInput" accept="image/*" multiple capture="environment" class="hidden">
+        <div class="photo-grid" id="bulkThumbs" style="margin-top:12px"></div>
+        <div class="ai-status" id="bulkStatus" style="color:var(--navy)"></div>
+      </div>
+      <div id="bulkStep2" class="hidden"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="bulkBackBtn" onclick="bulkBack()" style="display:none;flex:0 0 auto;width:auto;padding:0 16px;">戻る</button>
+      <button class="btn btn-primary" id="bulkAnalyzeBtn" onclick="bulkAnalyze()">解析する</button>
+      <button class="btn btn-accent" id="bulkSaveBtn" onclick="bulkSave()" style="display:none;">登録する</button>
+    </div>
+  </div>
+</div>
+
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <button class="x" onclick="closeLightbox()">×</button>
   <img id="lightboxImg" src="" alt="">
@@ -404,6 +447,7 @@ let currentTab = 'list';
 let searchQ = '';
 const photoCache = {};
 let editPhotos = [];
+let editNamePlates = [];   // 型番証跡（銘板写真）
 let editingId = null;
 let mtToolId = null;
 let bringKey = '';      // 現在編集中の案件キー
@@ -445,7 +489,7 @@ async function handleAiPhotos(e, isLabel){
   if(!imgs.length) return;
   aiStatus('<span class="spin"></span>画像を準備中…','busy');
   for(const f of imgs){
-    try{ const d=await compressImage(f,1500,0.85); editPhotos.push({dataURL:d,uploaded:false,label:isLabel}); }catch(_){}
+    try{ const d=await compressImage(f,1500,0.85); (isLabel?editNamePlates:editPhotos).push({dataURL:d,uploaded:false,label:isLabel}); }catch(_){}
   }
   renderPhotoGrid();
   if(!getAiKey()){ showAiKey(()=>runAiAnalyze()); return; }
@@ -467,10 +511,10 @@ async function runAiAnalyze(){
   fillBtn.disabled=true; labBtn.disabled=true;
   aiStatus('<span class="spin"></span>画像を準備中…','busy');
   try{
-    // 解析対象: 直近の最大5枚（全体＋銘板ラベル）
-    const pics=editPhotos.slice(-5);
+    // 解析対象: 全体写真＋型番証跡（銘板）をまとめて最大6枚
+    const picks=[...editPhotos.map(p=>({p,label:false})), ...editNamePlates.map(p=>({p,label:true}))].slice(-6);
     const imgs=[];
-    for(const p of pics){ const d=await urlToDataURL(p.dataURL); if(d) imgs.push({data:d.split(',')[1], label:!!p.label}); }
+    for(const it of picks){ const d=await urlToDataURL(it.p.dataURL); if(d) imgs.push({data:d.split(',')[1], label:it.label}); }
     if(!imgs.length){ aiStatus('解析できる画像がありません','err'); return; }
     const hasLabel=imgs.some(x=>x.label);
 
@@ -683,9 +727,13 @@ function openDetail(id){
   const log=(t['メンテ履歴']||[]).slice().sort((a,b)=>(b['日付']||'').localeCompare(a['日付']||''));
   const logHtml=log.length?`<div class="mt-log">${log.map(m=>`<div class="mt-log__row"><div class="mt-log__top"><span><span class="mt-kind">${esc(m['種別']||'')}</span>${esc(m['内容']||'')}</span><span class="mt-log__date">${esc(m['日付']||'')}</span></div>${(m['費用']||m['業者'])?`<div class="mt-log__cost">${[yen(m['費用']),m['業者']].filter(Boolean).join(' / ')}</div>`:''}</div>`).join('')}</div>`:'<div class="detail-sec__body empty-note">まだ記録がありません。「メンテ記録」から追加できます。</div>';
 
+  const plates=t['銘板写真']||[];
+  const iPlate='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.6 13.4 11 3.8V3H4v7h.8l9.6 9.6a2 2 0 0 0 2.8 0l3.4-3.4a2 2 0 0 0 0-2.8z"/><circle cx="7.5" cy="6.5" r="1.3" fill="currentColor" stroke="none"/></svg>';
+  const plateHtml=plates.length?`<div class="detail-sec"><div class="detail-sec__h">${iPlate}型番証跡（銘板）</div><div class="detail-photos ${plates.length===1?'single':''}">${plates.map(x=>`<img src="${esc(photoSrc(x))}" onclick="openLightbox('${esc(photoSrc(x))}')" onerror="this.style.display='none'">`).join('')}</div></div>`:'';
   $('#detailTitle').textContent=t['名称'];
   $('#detailBody').innerHTML = ph
     + `<div class="detail-table">${rows.map(r=>`<div class="r"><div class="k">${esc(r[0])}</div><div class="v">${esc(r[1])}</div></div>`).join('')}</div>`
+    + plateHtml
     + sec('使用方法',iUse,t['使用方法'])
     + sec('応用編・コツ',iTip,t['応用'])
     + sec('注意事項・安全',iCau,t['注意事項'])
@@ -699,7 +747,7 @@ function closeDetail(){ $('#detailModal').classList.remove('show'); }
 
 /* ============================================================ 編集フォーム ============================================================ */
 function openEdit(id){
-  editingId=id||null; editPhotos=[];
+  editingId=id||null; editPhotos=[]; editNamePlates=[];
   const g=(k)=>$('#'+k);
   if(id){
     const t=toolById(id); $('#editTitle').textContent='工具を編集';
@@ -709,6 +757,7 @@ function openEdit(id){
     g('f_vendor').value=t['仕入先']||''; g('f_usage').value=t['使用方法']||''; g('f_tips').value=t['応用']||'';
     g('f_caution').value=t['注意事項']||''; g('f_next').value=t['次回点検']||''; g('f_note').value=t['備考']||'';
     editPhotos=(t['写真']||[]).map(p=>({path:p,dataURL:photoSrc(p),uploaded:true}));
+    editNamePlates=(t['銘板写真']||[]).map(p=>({path:p,dataURL:photoSrc(p),uploaded:true,label:true}));
     $('#deleteBtn').style.display='';
   } else {
     $('#editTitle').textContent='工具を登録';
@@ -722,15 +771,21 @@ function openEdit(id){
 }
 function closeEdit(){ $('#editModal').classList.remove('show'); }
 
+function photoTile(ph,i,fn){ return `<div class="photo-thumb"><img src="${esc(ph.dataURL)}"><button class="del" onclick="${fn}(${i})">×</button>${ph.uploaded?'':'<span class="badge-up">未保存</span>'}</div>`; }
+function addTile(onclick,label){ return `<div class="photo-add" onclick="${onclick}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>${label}</div>`; }
 function renderPhotoGrid(){
-  const grid=$('#photoGrid');
-  grid.innerHTML=editPhotos.map((ph,i)=>`<div class="photo-thumb"><img src="${esc(ph.dataURL)}"><button class="del" onclick="removePhoto(${i})">×</button>${ph.uploaded?'':'<span class="badge-up">未保存</span>'}</div>`).join('')
-    + `<div class="photo-add" onclick="$('#photoInput').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>写真追加</div>`;
+  $('#photoGrid').innerHTML = editPhotos.map((p,i)=>photoTile(p,i,'removePhoto')).join('') + addTile("$('#photoInput').click()","写真追加");
+  $('#plateGrid').innerHTML = editNamePlates.map((p,i)=>photoTile(p,i,'removePlate')).join('') + addTile("$('#plateInput').click()","銘板追加");
 }
 function removePhoto(i){ editPhotos.splice(i,1); renderPhotoGrid(); }
+function removePlate(i){ editNamePlates.splice(i,1); renderPhotoGrid(); }
 $('#photoInput').addEventListener('change', async e=>{
   const files=Array.from(e.target.files||[]); e.target.value='';
   for(const f of files){ if(!f.type.startsWith('image/')) continue; try{ const d=await compressImage(f); editPhotos.push({dataURL:d,uploaded:false}); renderPhotoGrid(); }catch(_){ toast('画像読込に失敗'); } }
+});
+$('#plateInput').addEventListener('change', async e=>{
+  const files=Array.from(e.target.files||[]); e.target.value='';
+  for(const f of files){ if(!f.type.startsWith('image/')) continue; try{ const d=await compressImage(f,1500,0.85); editNamePlates.push({dataURL:d,uploaded:false,label:true}); renderPhotoGrid(); }catch(_){ toast('画像読込に失敗'); } }
 });
 
 async function saveEdit(){
@@ -750,6 +805,16 @@ async function saveEdit(){
       await ghPutPhoto(path, base64, `工具写真追加: ${name}`);
       photoCache[path]=ph.dataURL; photoPaths.push(path);
     }
+    const platePaths=[];
+    for(let i=0;i<editNamePlates.length;i++){
+      const ph=editNamePlates[i];
+      if(ph.uploaded&&ph.path){ platePaths.push(ph.path); continue; }
+      const base64=ph.dataURL.split(',')[1];
+      const path=`${PHOTO_DIR}/${id}_plate_${Date.now().toString(36)}${i}.jpg`;
+      btn.textContent=`型番証跡 保存中… ${i+1}/${editNamePlates.length}`;
+      await ghPutPhoto(path, base64, `工具 型番証跡: ${name}`);
+      photoCache[path]=ph.dataURL; platePaths.push(path);
+    }
     btn.textContent='データ保存中…';
     const prev=editingId?toolById(editingId):null;
     const rec={
@@ -757,7 +822,7 @@ async function saveEdit(){
       '保有数':$('#f_qty').value.trim(),'状態':$('#f_status').value,'保管場所':$('#f_place').value.trim(),
       '取得日':$('#f_date').value,'取得価格':$('#f_price').value.trim(),'仕入先':$('#f_vendor').value.trim(),
       '使用方法':$('#f_usage').value.trim(),'応用':$('#f_tips').value.trim(),'注意事項':$('#f_caution').value.trim(),
-      'メンテ履歴':prev?(prev['メンテ履歴']||[]):[],'次回点検':$('#f_next').value,'写真':photoPaths,
+      'メンテ履歴':prev?(prev['メンテ履歴']||[]):[],'次回点検':$('#f_next').value,'写真':photoPaths,'銘板写真':platePaths,
       '備考':$('#f_note').value.trim(),'原価ID':prev?(prev['原価ID']||''):'',
       '登録日':prev?(prev['登録日']||today()):today(),'更新日':today()
     };
@@ -941,6 +1006,105 @@ $('#searchInput').addEventListener('input', e=>{ clearTimeout(searchTimer); sear
 
 function buildAnkenMaps(){ ankenByKey={}; [...STATE['案件'],...STATE['中止案件']].forEach(a=>{ ankenByKey[a['案件キー']]=a; }); }
 
+/* ============================================================ 一括棚卸し ============================================================ */
+let bulkDrafts=[]; // {dataURL,名称,メーカー,型番,カテゴリ,確信度,include,analyzed,err}
+function openBulk(){
+  bulkDrafts=[];
+  $('#bulkStep1').classList.remove('hidden'); $('#bulkStep2').classList.add('hidden');
+  $('#bulkAnalyzeBtn').style.display=''; $('#bulkSaveBtn').style.display='none'; $('#bulkBackBtn').style.display='none';
+  $('#bulkStatus').textContent=''; renderBulkThumbs();
+  $('#bulkModal').classList.add('show');
+}
+function closeBulk(){ $('#bulkModal').classList.remove('show'); }
+function bulkBack(){
+  $('#bulkStep2').classList.add('hidden'); $('#bulkStep1').classList.remove('hidden');
+  $('#bulkAnalyzeBtn').style.display=''; $('#bulkSaveBtn').style.display='none'; $('#bulkBackBtn').style.display='none';
+}
+$('#bulkInput').addEventListener('change', async e=>{
+  const files=Array.from(e.target.files||[]); e.target.value='';
+  for(const f of files){ if(!f.type.startsWith('image/'))continue; try{ const d=await compressImage(f,1400,0.82); bulkDrafts.push({dataURL:d}); }catch(_){}}
+  renderBulkThumbs();
+});
+function renderBulkThumbs(){
+  $('#bulkThumbs').innerHTML = bulkDrafts.map((d,i)=>`<div class="photo-thumb"><img src="${esc(d.dataURL)}"><button class="del" onclick="bulkRemove(${i})">×</button></div>`).join('');
+  $('#bulkAnalyzeBtn').textContent = '解析する'+(bulkDrafts.length?`（${bulkDrafts.length}枚）`:'');
+}
+function bulkRemove(i){ bulkDrafts.splice(i,1); renderBulkThumbs(); }
+
+async function bulkAnalyze(){
+  if(!bulkDrafts.length){ toast('写真を追加してください'); return; }
+  if(!getAiKey()){ showAiKey(()=>bulkAnalyze()); return; }
+  const btn=$('#bulkAnalyzeBtn'); btn.disabled=true;
+  const sys='あなたは日本の建設・内装業の工具・機材の専門家です。写真1枚に写った主要な道具1点を同定し、指定JSONのみ返す。'
+    +'型番/メーカーが読み取れなければ空文字（推測で埋めない）。カテゴリは次のいずれか:'+AI_CATS.join('/')+'。';
+  const ask='写真の道具を同定し {"名称":"一般名（分かればメーカー/型番含む）","メーカー":"","型番":"","カテゴリ":"上記のいずれか","確信度":"高/中/低"} のJSONのみで返答。';
+  try{
+    for(let i=0;i<bulkDrafts.length;i++){
+      const d=bulkDrafts[i]; if(d.analyzed) continue;
+      $('#bulkStatus').className='ai-status busy'; $('#bulkStatus').innerHTML=`<span class="spin"></span>AIが解析中… ${i+1}/${bulkDrafts.length}`;
+      try{
+        const res=await fetch(ANTHROPIC_URL,{method:'POST',headers:{'content-type':'application/json','x-api-key':getAiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+          body:JSON.stringify({model:AI_MODEL,max_tokens:400,system:sys,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:d.dataURL.split(',')[1]}},{type:'text',text:ask}]}]})});
+        if(res.status===401){ localStorage.removeItem(AI_KEY); $('#bulkStatus').className='ai-status err'; $('#bulkStatus').textContent='APIキーが無効です'; btn.disabled=false; showAiKey(()=>bulkAnalyze()); return; }
+        if(!res.ok) throw new Error('API '+res.status);
+        const j=await res.json(); let text=''; if(j.content&&Array.isArray(j.content)) text=j.content.filter(c=>c.type==='text').map(c=>c.text).join('\n');
+        const o=parseAiJson(text)||{};
+        d.名称=o['名称']||''; d.メーカー=o['メーカー']||''; d.型番=o['型番']||'';
+        d.カテゴリ=AI_CATS.includes(String(o['カテゴリ']||'').trim())?String(o['カテゴリ']).trim():'その他';
+        d.確信度=o['確信度']||''; d.include=true; d.analyzed=true; d.err=false;
+      }catch(_){ d.名称=d.名称||''; d.カテゴリ=d.カテゴリ||'その他'; d.include=true; d.analyzed=true; d.err=true; }
+    }
+    $('#bulkStatus').textContent='';
+    renderBulkReview();
+    $('#bulkStep1').classList.add('hidden'); $('#bulkStep2').classList.remove('hidden');
+    $('#bulkAnalyzeBtn').style.display='none'; $('#bulkSaveBtn').style.display=''; $('#bulkBackBtn').style.display='';
+  }finally{ btn.disabled=false; }
+}
+
+function renderBulkReview(){
+  const n=bulkDrafts.filter(d=>d.include).length;
+  $('#bulkSaveBtn').textContent=`登録する（${n}件）`;
+  $('#bulkStep2').innerHTML=`<div class="help-box">AIの判定結果です。<b>名称・カテゴリを修正</b>し、不要な行はチェックを外して登録してください。撮った写真も各工具に登録されます。</div>`
+    + bulkDrafts.map((d,i)=>`<div class="bulk-row ${d.include?'':'off'}" id="bulk-row-${i}">
+        <input type="checkbox" ${d.include?'checked':''} onchange="bulkToggle(${i},this.checked)">
+        <img src="${esc(d.dataURL)}">
+        <div class="bulk-row__body">
+          <input class="bn" value="${esc(d.名称||'')}" placeholder="名称（必須）" oninput="bulkDrafts[${i}].名称=this.value">
+          <div class="bulk-row__ctl">
+            <select onchange="bulkDrafts[${i}].カテゴリ=this.value">${AI_CATS.map(c=>`<option ${c===d.カテゴリ?'selected':''}>${c}</option>`).join('')}</select>
+            ${d.確信度?`<span class="bulk-row__meta">確信度:${esc(d.確信度)}</span>`:''}${d.err?'<span class="bulk-row__meta" style="color:var(--red)">解析失敗・手入力可</span>':''}
+          </div>
+          ${(d.メーカー||d.型番)?`<div class="bulk-row__meta">${esc([d.メーカー,d.型番].filter(Boolean).join(' / '))}</div>`:''}
+        </div>
+      </div>`).join('');
+}
+function bulkToggle(i,on){ bulkDrafts[i].include=on; $('#bulk-row-'+i)?.classList.toggle('off',!on); const n=bulkDrafts.filter(d=>d.include).length; $('#bulkSaveBtn').textContent=`登録する（${n}件）`; }
+
+async function bulkSave(){
+  const picks=bulkDrafts.filter(d=>d.include && (d.名称||'').trim());
+  if(!picks.length){ toast('登録する工具がありません（名称が必要）'); return; }
+  if(!getPAT()){ showPat(()=>bulkSave()); return; }
+  const btn=$('#bulkSaveBtn'); btn.disabled=true; setSync('busy');
+  try{
+    const stamp=Date.now().toString(36); const recs=[];
+    for(let i=0;i<picks.length;i++){
+      const d=picks[i]; const id='T-bulk-'+stamp+'-'+i;
+      btn.textContent=`写真保存中… ${i+1}/${picks.length}`;
+      const path=`${PHOTO_DIR}/${id}.jpg`;
+      await ghPutPhoto(path, d.dataURL.split(',')[1], `工具一括棚卸し: ${d.名称.trim()}`);
+      photoCache[path]=d.dataURL;
+      recs.push({ id,'名称':d.名称.trim(),'カテゴリ':d.カテゴリ||'その他','メーカー':(d.メーカー||'').trim(),'型番':(d.型番||'').trim(),
+        '保有数':'1','単位':'台','状態':'稼働中','保管場所':'','取得日':'','取得価格':'','仕入先':'',
+        '使用方法':'','応用':'','注意事項':'','メンテ履歴':[],'次回点検':'','写真':[path],'銘板写真':[],
+        '備考':d.確信度?('AI一括棚卸し（確信度:'+d.確信度+'）'):'AI一括棚卸し','原価ID':'','ソース':'一括棚卸し','登録日':today(),'更新日':today() });
+    }
+    btn.textContent='データ保存中…';
+    await ghSaveData(dd=>{ dd['工具']=dd['工具'].concat(recs); }, `工具一括棚卸し: ${recs.length}件登録`);
+    setSync('ok'); closeBulk(); renderAll(); toast(`${recs.length}件を登録しました`);
+  }catch(err){ setSync('err'); if(String(err.message).includes('TOKEN_INVALID')){toast('トークン無効');showPat(()=>bulkSave());} else toast('登録失敗: '+err.message); console.error(err); }
+  finally{ btn.disabled=false; btn.textContent=`登録する（${bulkDrafts.filter(d=>d.include).length}件）`; }
+}
+
 async function init(){
   setSync('busy'); $('#banner').innerHTML='';
   try{
@@ -966,9 +1130,9 @@ async function init(){
 $('#refreshBtn').addEventListener('click', init);
 $('#patInput').addEventListener('keydown', e=>{ if(e.key==='Enter') confirmPat(); });
 $('#aiKeyInput').addEventListener('keydown', e=>{ if(e.key==='Enter') confirmAiKey(); });
-['editModal','detailModal','mtModal','pickModal','patModal','aiKeyModal'].forEach(id=>{
+['editModal','detailModal','mtModal','pickModal','patModal','aiKeyModal','bulkModal'].forEach(id=>{
   $('#'+id).addEventListener('click', e=>{ if(e.target.id===id){
-    ({editModal:closeEdit,detailModal:closeDetail,mtModal:closeMt,pickModal:closePick,patModal:closePat,aiKeyModal:closeAiKey})[id]();
+    ({editModal:closeEdit,detailModal:closeDetail,mtModal:closeMt,pickModal:closePick,patModal:closePat,aiKeyModal:closeAiKey,bulkModal:closeBulk})[id]();
   }});
 });
 init();
