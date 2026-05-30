@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>部材・商品台帳｜現場ナビ</title>
+<meta name="theme-color" content="#1e2d40">
+<link rel="stylesheet" href="common.css">
+<style>
+/* ===== ページ基盤 ===== */
+body{display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
+
+/* ヘッダー */
+.app-header{padding-top:env(safe-area-inset-top,0);height:calc(var(--header-height) + env(safe-area-inset-top,0));}
+.app-header .sync-dot{width:8px;height:8px;border-radius:50%;background:#5a6a7a;flex-shrink:0;margin-right:4px;transition:background .3s;}
+.app-header .sync-dot.ok{background:var(--accent);}
+.app-header .sync-dot.busy{background:var(--blue);animation:pulse 1s infinite;}
+.app-header .sync-dot.err{background:var(--red);}
+@keyframes pulse{50%{opacity:.3;}}
+
+/* タブバー */
+.tabbar{display:flex;background:var(--navy2);flex-shrink:0;}
+.tabbar button{flex:1;background:transparent;border:none;color:rgba(255,255,255,.55);
+  font-family:inherit;font-size:12px;font-weight:700;padding:11px 4px 9px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:3px;border-bottom:2.5px solid transparent;}
+.tabbar button svg{width:20px;height:20px;}
+.tabbar button.active{color:var(--white);border-bottom-color:var(--accent);}
+
+/* スクロールエリア */
+.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px max(80px,calc(env(safe-area-inset-bottom) + 80px));}
+
+/* 検索バー */
+.searchbar{position:relative;margin-bottom:14px;}
+.searchbar input{width:100%;height:46px;padding:0 14px 0 40px;border:1px solid rgba(30,45,64,.18);
+  border-radius:12px;background:var(--white);font-size:15px;color:var(--text);outline:none;}
+.searchbar input:focus{border-color:var(--accent);}
+.searchbar svg{position:absolute;left:12px;top:13px;width:20px;height:20px;color:var(--text2);}
+
+/* 統計バー */
+.stat-row{display:flex;gap:10px;margin-bottom:14px;}
+.stat-box{flex:1;background:var(--white);border-radius:12px;padding:11px 8px;text-align:center;box-shadow:var(--shadow-card);}
+.stat-box .n{font-size:21px;font-weight:900;color:var(--navy);line-height:1.1;}
+.stat-box .l{font-size:10px;color:var(--text2);margin-top:2px;}
+
+/* セクション見出し */
+.sec-h{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.06em;margin:18px 2px 8px;}
+.sec-h:first-child{margin-top:0;}
+
+/* 案件カード（案件別タブ） */
+.anken-card{background:var(--white);border-radius:14px;box-shadow:var(--shadow-card);margin-bottom:10px;overflow:hidden;}
+.anken-card__head{display:flex;align-items:center;gap:12px;padding:13px 14px;cursor:pointer;}
+.anken-card__head:active{background:rgba(30,45,64,.03);}
+.anken-card__thumb{width:48px;height:48px;border-radius:10px;flex-shrink:0;background:#e9e5dd;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--text2);}
+.anken-card__thumb img{width:100%;height:100%;object-fit:cover;}
+.anken-card__body{flex:1;min-width:0;}
+.anken-card__title{font-size:14px;font-weight:800;color:var(--text);line-height:1.3;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.anken-card__sub{font-size:11px;color:var(--text2);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.anken-card__count{display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
+.anken-card__count .n{font-size:18px;font-weight:900;color:var(--accent);line-height:1;}
+.anken-card__count .l{font-size:9px;color:var(--text2);}
+.anken-card__arrow{color:var(--text2);font-size:18px;opacity:.4;flex-shrink:0;transition:transform .2s;}
+.anken-card.open .anken-card__arrow{transform:rotate(90deg);}
+.anken-card__parts{display:none;border-top:1px solid rgba(30,45,64,.07);padding:6px 14px 12px;}
+.anken-card.open .anken-card__parts{display:block;}
+
+/* ステータスバッジ */
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;line-height:1.5;}
+.badge.done{background:rgba(26,122,48,.12);color:var(--green);}
+.badge.prog{background:rgba(26,111,196,.12);color:var(--blue);}
+.badge.bill{background:rgba(176,106,0,.12);color:var(--orange);}
+.badge.plan{background:rgba(90,106,122,.14);color:var(--text2);}
+
+/* 部材アイテム（行） */
+.part-item{display:flex;gap:11px;padding:10px 0;border-bottom:1px solid rgba(30,45,64,.06);cursor:pointer;}
+.part-item:last-child{border-bottom:none;}
+.part-item:active{opacity:.6;}
+.part-item__thumb{width:54px;height:54px;border-radius:9px;flex-shrink:0;background:#e9e5dd;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--text2);position:relative;}
+.part-item__thumb img{width:100%;height:100%;object-fit:cover;}
+.part-item__thumb .more{position:absolute;right:2px;bottom:2px;background:rgba(30,45,64,.78);color:#fff;
+  font-size:9px;font-weight:700;padding:0 4px;border-radius:6px;line-height:14px;}
+.part-item__body{flex:1;min-width:0;}
+.part-item__name{font-size:14px;font-weight:700;color:var(--text);line-height:1.3;}
+.part-item__meta{font-size:11px;color:var(--text2);margin-top:2px;line-height:1.45;}
+.part-item__where{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--navy);
+  background:rgba(200,169,110,.16);padding:1px 7px;border-radius:6px;margin-top:4px;}
+.part-item__where svg{width:11px;height:11px;}
+.part-item__qty{font-size:12px;font-weight:800;color:var(--navy);white-space:nowrap;flex-shrink:0;align-self:center;}
+
+/* 商品グループカード（商品から探すタブ） */
+.prod-card{background:var(--white);border-radius:14px;box-shadow:var(--shadow-card);margin-bottom:10px;overflow:hidden;}
+.prod-card__head{display:flex;align-items:center;gap:12px;padding:13px 14px;cursor:pointer;}
+.prod-card__head:active{background:rgba(30,45,64,.03);}
+.prod-card__title{font-size:15px;font-weight:800;color:var(--text);}
+.prod-card__sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.prod-card__badge{background:var(--navy);color:#fff;font-size:11px;font-weight:800;border-radius:20px;
+  padding:3px 10px;flex-shrink:0;}
+.prod-card.open .anken-card__arrow{transform:rotate(90deg);}
+.prod-card__uses{display:none;border-top:1px solid rgba(30,45,64,.07);padding:4px 14px 10px;}
+.prod-card.open .prod-card__uses{display:block;}
+.use-row{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid rgba(30,45,64,.06);cursor:pointer;align-items:center;}
+.use-row:last-child{border-bottom:none;}
+.use-row:active{opacity:.6;}
+.use-row__thumb{width:46px;height:46px;border-radius:8px;background:#e9e5dd;flex-shrink:0;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;color:var(--text2);}
+.use-row__thumb img{width:100%;height:100%;object-fit:cover;}
+.use-row__body{flex:1;min-width:0;}
+.use-row__anken{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.use-row__place{font-size:11px;color:var(--navy);font-weight:700;margin-top:1px;}
+.use-row__qty{font-size:12px;font-weight:800;color:var(--text2);white-space:nowrap;}
+
+/* 写真ギャラリー */
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.gallery .cell{aspect-ratio:1;border-radius:9px;overflow:hidden;background:#e9e5dd;cursor:pointer;position:relative;}
+.gallery .cell img{width:100%;height:100%;object-fit:cover;}
+.gallery .cell .cap{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(transparent,rgba(30,45,64,.82));
+  color:#fff;font-size:9px;font-weight:700;padding:12px 5px 4px;line-height:1.25;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* 空状態 */
+.empty{text-align:center;color:var(--text2);padding:46px 20px;}
+.empty svg{width:54px;height:54px;opacity:.3;margin-bottom:12px;}
+.empty .t{font-size:14px;font-weight:700;margin-bottom:4px;}
+.empty .d{font-size:12px;line-height:1.6;}
+
+/* FAB 追加ボタン */
+.fab{position:fixed;right:18px;bottom:max(20px,calc(env(safe-area-inset-bottom) + 16px));
+  width:58px;height:58px;border-radius:50%;background:var(--accent);color:var(--navy);border:none;
+  box-shadow:0 6px 18px rgba(30,45,64,.32);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:40;}
+.fab:active{transform:scale(.94);}
+.fab svg{width:28px;height:28px;}
+
+/* ===== モーダル共通 ===== */
+.modal{position:fixed;inset:0;background:rgba(20,30,44,.55);z-index:100;display:none;
+  align-items:flex-end;justify-content:center;}
+.modal.show{display:flex;}
+.modal-box{background:var(--bg);width:100%;max-width:560px;max-height:92dvh;border-radius:20px 20px 0 0;
+  display:flex;flex-direction:column;overflow:hidden;animation:slideup .22s ease;}
+@keyframes slideup{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.modal-head{display:flex;align-items:center;gap:10px;padding:15px 16px;background:var(--navy);flex-shrink:0;}
+.modal-head .t{flex:1;color:#fff;font-size:16px;font-weight:800;}
+.modal-head .x{width:34px;height:34px;border:none;background:rgba(255,255,255,.12);color:#fff;border-radius:9px;
+  font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.modal-body{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch;}
+.modal-foot{flex-shrink:0;padding:12px 16px max(12px,env(safe-area-inset-bottom));background:var(--white);
+  border-top:1px solid rgba(30,45,64,.08);display:flex;gap:10px;}
+.modal-foot .btn{flex:1;height:50px;}
+
+/* フォーム */
+.fld{margin-bottom:14px;}
+.fld label{display:block;font-size:12px;font-weight:700;color:var(--text);margin-bottom:5px;}
+.fld label .req{color:var(--red);}
+.fld input,.fld select,.fld textarea{width:100%;padding:11px 12px;border:1px solid rgba(30,45,64,.2);
+  border-radius:10px;background:var(--white);font-size:15px;color:var(--text);outline:none;font-family:inherit;}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--accent);}
+.fld textarea{resize:vertical;min-height:64px;}
+.fld-row{display:flex;gap:10px;}
+.fld-row>.fld{flex:1;}
+
+/* 写真アップロード */
+.photo-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.photo-thumb{width:74px;height:74px;border-radius:10px;overflow:hidden;position:relative;background:#e9e5dd;}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;}
+.photo-thumb .del{position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;
+  background:rgba(192,57,43,.92);color:#fff;border:none;font-size:13px;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;}
+.photo-thumb .badge-up{position:absolute;left:0;right:0;bottom:0;font-size:8px;text-align:center;
+  background:rgba(30,45,64,.7);color:#fff;padding:1px;}
+.photo-add{width:74px;height:74px;border-radius:10px;border:2px dashed rgba(30,45,64,.25);
+  background:var(--white);display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;color:var(--text2);cursor:pointer;font-size:10px;font-weight:700;}
+.photo-add svg{width:24px;height:24px;}
+
+/* 詳細表示 */
+.detail-photos{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px;}
+.detail-photos.single{grid-template-columns:1fr;}
+.detail-photos img{width:100%;border-radius:12px;background:#e9e5dd;display:block;cursor:pointer;}
+.detail-table{background:var(--white);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-card);}
+.detail-table .r{display:flex;padding:11px 14px;border-bottom:1px solid rgba(30,45,64,.06);font-size:14px;}
+.detail-table .r:last-child{border-bottom:none;}
+.detail-table .r .k{width:88px;flex-shrink:0;color:var(--text2);font-size:12px;font-weight:700;align-self:center;}
+.detail-table .r .v{flex:1;color:var(--text);font-weight:600;word-break:break-word;}
+
+/* ライトボックス */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:200;display:none;
+  align-items:center;justify-content:center;flex-direction:column;}
+.lightbox.show{display:flex;}
+.lightbox img{max-width:96vw;max-height:82vh;object-fit:contain;}
+.lightbox .cap{color:#fff;font-size:13px;margin-top:14px;padding:0 20px;text-align:center;line-height:1.5;}
+.lightbox .x{position:absolute;top:max(14px,env(safe-area-inset-top));right:16px;width:42px;height:42px;
+  border:none;background:rgba(255,255,255,.15);color:#fff;border-radius:50%;font-size:24px;cursor:pointer;}
+
+/* トースト */
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--navy);color:#fff;
+  font-size:13px;font-weight:600;padding:11px 20px;border-radius:24px;box-shadow:var(--shadow-modal);
+  z-index:300;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;max-width:90vw;text-align:center;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* PAT モーダル */
+.pat-box{background:var(--white);border-radius:16px;padding:22px;max-width:420px;width:calc(100% - 36px);margin:auto;}
+.pat-box .t{font-size:17px;font-weight:800;margin-bottom:8px;}
+.pat-box .d{font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:14px;}
+.pat-box input{width:100%;padding:12px;border:1px solid rgba(30,45,64,.2);border-radius:10px;font-size:15px;margin-bottom:14px;}
+.pat-box .acts{display:flex;gap:10px;}
+.pat-box .acts .btn{flex:1;height:48px;}
+.modal.center{align-items:center;}
+
+/* バナー（読み込み失敗等） */
+.banner{background:rgba(176,106,0,.12);border:1px solid rgba(176,106,0,.3);color:var(--orange);
+  font-size:12px;font-weight:600;border-radius:10px;padding:10px 12px;margin-bottom:14px;line-height:1.6;}
+</style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<div class="app-header">
+  <button class="btn-back" onclick="location.href='index.html'" title="ホーム">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <div class="app-header-title">部材・商品台帳</div>
+  <span class="sync-dot" id="syncDot" title="同期状態"></span>
+  <button class="btn-back" id="refreshBtn" title="再読み込み">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+  </button>
+</div>
+
+<!-- タブバー -->
+<div class="tabbar">
+  <button data-tab="anken" class="active" onclick="switchTab('anken')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>
+    案件別
+  </button>
+  <button data-tab="product" onclick="switchTab('product')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><line x1="12" y1="11" x2="12" y2="21"/></svg>
+    商品から探す
+  </button>
+  <button data-tab="gallery" onclick="switchTab('gallery')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+    写真
+  </button>
+</div>
+
+<!-- スクロールエリア -->
+<div class="scroll-area" id="scrollArea">
+  <div id="banner"></div>
+
+  <!-- 検索 -->
+  <div class="searchbar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="search" id="searchInput" placeholder="商品名・メーカー・案件・使用場所で検索" autocomplete="off">
+  </div>
+
+  <!-- 統計 -->
+  <div class="stat-row" id="statRow"></div>
+
+  <!-- タブコンテンツ -->
+  <div id="tab-anken"></div>
+  <div id="tab-product" class="hidden"></div>
+  <div id="tab-gallery" class="hidden"></div>
+</div>
+
+<!-- FAB -->
+<button class="fab" onclick="openEdit()" title="部材を登録">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
+
+<!-- 編集モーダル -->
+<div class="modal" id="editModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="t" id="editTitle">部材を登録</div>
+      <button class="x" onclick="closeEdit()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="fld">
+        <label>使用した案件 <span class="req">*</span></label>
+        <select id="f_anken"></select>
+      </div>
+      <div class="fld">
+        <label>商品名 <span class="req">*</span></label>
+        <input type="text" id="f_name" list="dl_names" placeholder="例：ウッドタイル / ロールスクリーン">
+        <datalist id="dl_names"></datalist>
+      </div>
+      <div class="fld-row">
+        <div class="fld">
+          <label>メーカー</label>
+          <input type="text" id="f_maker" list="dl_makers" placeholder="例：サンゲツ">
+          <datalist id="dl_makers"></datalist>
+        </div>
+        <div class="fld">
+          <label>品番・型番</label>
+          <input type="text" id="f_code" placeholder="例：WD-1234">
+        </div>
+      </div>
+      <div class="fld-row">
+        <div class="fld">
+          <label>カテゴリ</label>
+          <select id="f_cat">
+            <option value="">（未分類）</option>
+            <option>床材</option><option>壁材</option><option>天井材</option>
+            <option>建具</option><option>金物</option><option>塗料</option>
+            <option>接着剤・副資材</option><option>設備</option><option>電材</option><option>その他</option>
+          </select>
+        </div>
+        <div class="fld">
+          <label>使用場所</label>
+          <input type="text" id="f_place" placeholder="例：1階廊下 / 医務室">
+        </div>
+      </div>
+      <div class="fld-row">
+        <div class="fld">
+          <label>数量</label>
+          <input type="number" id="f_qty" inputmode="decimal" placeholder="例：10">
+        </div>
+        <div class="fld">
+          <label>単位</label>
+          <input type="text" id="f_unit" list="dl_units" placeholder="ケース / 本 / ㎡">
+          <datalist id="dl_units"><option>ケース</option><option>箱</option><option>本</option><option>枚</option><option>㎡</option><option>m</option><option>個</option><option>セット</option><option>缶</option></datalist>
+        </div>
+      </div>
+      <div class="fld">
+        <label>備考</label>
+        <textarea id="f_note" placeholder="色番・ロット・残材の有無など"></textarea>
+      </div>
+      <div class="fld">
+        <label>写真（複数可・撮影/選択）</label>
+        <div class="photo-grid" id="photoGrid"></div>
+        <input type="file" id="photoInput" accept="image/*" multiple capture="environment" class="hidden">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="deleteBtn" onclick="deleteCurrent()" style="display:none;flex:0 0 auto;width:auto;padding:0 16px;color:var(--red);border-color:rgba(192,57,43,.4);">削除</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveEdit()">保存する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 詳細モーダル -->
+<div class="modal" id="detailModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="t" id="detailTitle">部材詳細</div>
+      <button class="x" onclick="closeDetail()">×</button>
+    </div>
+    <div class="modal-body" id="detailBody"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="detailEditBtn">この内容を編集</button>
+    </div>
+  </div>
+</div>
+
+<!-- PATモーダル -->
+<div class="modal center" id="patModal">
+  <div class="pat-box">
+    <div class="t">GitHub トークンを設定</div>
+    <div class="d">部材データと写真を保存するには GitHub Personal Access Token が必要です。
+      初回のみブラウザに保存します（GitHubには送信されません）。ダッシュボード・案件台帳と共用されます。</div>
+    <input type="password" id="patInput" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
+    <div class="acts">
+      <button class="btn btn-ghost" onclick="closePat()">キャンセル</button>
+      <button class="btn btn-primary" onclick="confirmPat()">保存して続ける</button>
+    </div>
+  </div>
+</div>
+
+<!-- ライトボックス -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="x" onclick="closeLightbox()">×</button>
+  <img id="lightboxImg" src="" alt="">
+  <div class="cap" id="lightboxCap"></div>
+</div>
+
+<!-- トースト -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   部材・商品台帳  現場ナビ
+   - data.json の "部材" 配列を GitHub Contents API で読み書き
+   - 写真は parts_photos/ に個別ファイルとしてコミットしパス参照
+   - PAT は localStorage('artrise_gh_pat') をダッシュボード等と共用
+   ============================================================ */
+const GH_REPO = 'kameisatoru-svg/genba-navi';
+const GH_OWNER = 'kameisatoru-svg', GH_NAME = 'genba-navi';
+const GH_API_DATA = `https://api.github.com/repos/${GH_REPO}/contents/data.json`;
+const PAT_KEY = 'artrise_gh_pat';
+const PHOTO_DIR = 'parts_photos';
+
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+let STATE = { 案件:[], 中止案件:[], 部材:[] };
+let ankenByKey = {};            // 案件キー -> 案件オブジェクト
+let currentTab = 'anken';
+let searchQ = '';
+// 今セッションでアップした写真の即時プレビュー用キャッシュ（path -> dataURL）
+const photoCache = {};
+// 編集中の写真ワーク領域 [{path?, dataURL, uploaded:bool}]
+let editPhotos = [];
+let editingId = null;
+
+/* ---------- 同期ドット ---------- */
+function setSync(state){ // '', 'ok', 'busy', 'err'
+  const d = $('#syncDot');
+  d.className = 'sync-dot' + (state ? ' ' + state : '');
+}
+
+/* ---------- トースト ---------- */
+let toastTimer;
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+/* ---------- PAT ---------- */
+function getPAT(){ return localStorage.getItem(PAT_KEY) || ''; }
+let patCallback = null;
+function showPat(cb){ patCallback = cb; $('#patModal').classList.add('show'); setTimeout(()=>$('#patInput').focus(),100); }
+function closePat(){ $('#patModal').classList.remove('show'); }
+function confirmPat(){
+  const v = $('#patInput').value.trim();
+  if(!v){ toast('トークンを入力してください'); return; }
+  localStorage.setItem(PAT_KEY, v); closePat();
+  const cb = patCallback; patCallback = null; if(cb) cb();
+}
+
+/* ---------- 画像圧縮 ---------- */
+function compressImage(file, maxDim=1280, quality=0.72){
+  return new Promise((resolve, reject)=>{
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = ()=>{
+      URL.revokeObjectURL(url);
+      let w = img.width, h = img.height;
+      if(w >= h && w > maxDim){ h = Math.round(h*maxDim/w); w = maxDim; }
+      else if(h > w && h > maxDim){ w = Math.round(w*maxDim/h); h = maxDim; }
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(c.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
+/* ---------- GitHub I/O ---------- */
+async function ghFetchData(){
+  const pat = getPAT();
+  const headers = { 'Accept':'application/vnd.github.v3+json' };
+  // PATがあればAPI経由（最新・キャッシュ無し）、無ければ公開rawを読む
+  if(pat){
+    const res = await fetch(GH_API_DATA, { headers:{...headers, Authorization:`token ${pat}`} });
+    if(res.status === 401){ localStorage.removeItem(PAT_KEY); throw new Error('TOKEN_INVALID'); }
+    if(!res.ok) throw new Error('data.json取得失敗 '+res.status);
+    const j = await res.json();
+    const raw = atob(j.content.replace(/\n/g,''));
+    const bytes = Uint8Array.from(raw, c=>c.charCodeAt(0));
+    return JSON.parse(new TextDecoder('utf-8').decode(bytes));
+  } else {
+    const res = await fetch('./data.json', { cache:'no-store' });
+    if(!res.ok) throw new Error('data.json取得失敗 '+res.status);
+    return res.json();
+  }
+}
+
+// 画像ファイルを新規コミット
+async function ghPutPhoto(path, base64, message){
+  const pat = getPAT();
+  const api = `https://api.github.com/repos/${GH_REPO}/contents/${path}`;
+  const res = await fetch(api, {
+    method:'PUT',
+    headers:{ Authorization:`token ${pat}`, 'Accept':'application/vnd.github.v3+json', 'Content-Type':'application/json' },
+    body: JSON.stringify({ message, content: base64 })
+  });
+  if(!res.ok){ const t = await res.text(); throw new Error('写真保存失敗 '+res.status+' '+t.slice(0,120)); }
+}
+
+// data.json の 部材 を書き戻し（最新SHAを取り直して安全に更新）
+async function ghSaveData(mutator, message){
+  const pat = getPAT();
+  const res = await fetch(GH_API_DATA, { headers:{ Authorization:`token ${pat}`, 'Accept':'application/vnd.github.v3+json' } });
+  if(res.status === 401){ localStorage.removeItem(PAT_KEY); throw new Error('TOKEN_INVALID'); }
+  if(!res.ok) throw new Error('data.json取得失敗 '+res.status);
+  const j = await res.json();
+  const sha = j.sha;
+  const raw = atob(j.content.replace(/\n/g,''));
+  const bytes = Uint8Array.from(raw, c=>c.charCodeAt(0));
+  const data = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+  if(!Array.isArray(data['部材'])) data['部材'] = [];
+  mutator(data);
+  data['最終更新'] = new Date().toISOString().split('T')[0];
+
+  const jsonStr = JSON.stringify(data, null, 2);
+  const enc = new TextEncoder().encode(jsonStr);
+  const b64 = btoa(Array.from(enc, b=>String.fromCharCode(b)).join(''));
+  const put = await fetch(GH_API_DATA, {
+    method:'PUT',
+    headers:{ Authorization:`token ${pat}`, 'Accept':'application/vnd.github.v3+json', 'Content-Type':'application/json' },
+    body: JSON.stringify({ message, content:b64, sha })
+  });
+  if(!put.ok){ const t = await put.text(); throw new Error('保存失敗 '+put.status+' '+t.slice(0,120)); }
+  STATE['部材'] = data['部材'];
+  return data;
+}
+
+/* ---------- 写真URL解決（即時プレビュー対応） ---------- */
+function photoSrc(path){
+  if(!path) return '';
+  if(path.startsWith('data:')) return path;
+  if(photoCache[path]) return photoCache[path]; // 同セッションでアップした分は即表示
+  return './' + path; // GitHub Pages相対パス
+}
+
+/* ---------- ステータスバッジ ---------- */
+function statusBadge(st){
+  st = st || '';
+  let cls = 'plan';
+  if(/完了/.test(st)) cls='done';
+  else if(/請求/.test(st)) cls='bill';
+  else if(/施工|着工|進行/.test(st)) cls='prog';
+  return `<span class="badge ${cls}">${esc(st||'未設定')}</span>`;
+}
+
+/* ============================================================
+   描画
+   ============================================================ */
+function matchesSearch(p){
+  if(!searchQ) return true;
+  const a = ankenByKey[p['案件キー']];
+  const hay = [p['商品名'],p['メーカー'],p['品番'],p['カテゴリ'],p['使用場所'],p['備考'],
+    p['案件キー'], a&&a['正式工事名'], a&&a['顧客略'], a&&a['施工場所']].join(' ').toLowerCase();
+  return searchQ.toLowerCase().split(/\s+/).every(w => hay.includes(w));
+}
+
+function firstPhoto(p){ return (p['写真']&&p['写真'][0]) ? p['写真'][0] : ''; }
+
+function renderStats(){
+  const parts = STATE['部材'];
+  const ankenSet = new Set(parts.map(p=>p['案件キー']));
+  const prodSet = new Set(parts.map(p=>(p['商品名']||'').trim()).filter(Boolean));
+  const photoCount = parts.reduce((s,p)=>s+((p['写真']||[]).length),0);
+  $('#statRow').innerHTML = `
+    <div class="stat-box"><div class="n">${parts.length}</div><div class="l">登録部材</div></div>
+    <div class="stat-box"><div class="n">${prodSet.size}</div><div class="l">商品種類</div></div>
+    <div class="stat-box"><div class="n">${ankenSet.size}</div><div class="l">案件数</div></div>
+    <div class="stat-box"><div class="n">${photoCount}</div><div class="l">写真</div></div>`;
+}
+
+function partItemHTML(p){
+  const ph = firstPhoto(p);
+  const n = (p['写真']||[]).length;
+  const thumb = ph
+    ? `<div class="part-item__thumb"><img src="${esc(photoSrc(ph))}" loading="lazy" onerror="this.style.display='none'">${n>1?`<span class="more">+${n-1}</span>`:''}</div>`
+    : `<div class="part-item__thumb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>`;
+  const meta = [p['メーカー'],p['品番'],p['カテゴリ']].filter(Boolean).join(' / ');
+  const qty = p['数量'] ? `${esc(p['数量'])}${esc(p['単位']||'')}` : '';
+  const where = p['使用場所'] ? `<div><span class="part-item__where"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.7-7-11a7 7 0 0 1 14 0c0 4.3-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>${esc(p['使用場所'])}</span></div>` : '';
+  return `<div class="part-item" onclick="openDetail('${p.id}')">
+    ${thumb}
+    <div class="part-item__body">
+      <div class="part-item__name">${esc(p['商品名']||'(名称未設定)')}</div>
+      ${meta?`<div class="part-item__meta">${esc(meta)}</div>`:''}
+      ${where}
+    </div>
+    ${qty?`<div class="part-item__qty">${qty}</div>`:''}
+  </div>`;
+}
+
+/* ----- 案件別タブ ----- */
+function renderAnken(){
+  const parts = STATE['部材'].filter(matchesSearch);
+  const byAnken = {};
+  parts.forEach(p=>{ (byAnken[p['案件キー']] = byAnken[p['案件キー']]||[]).push(p); });
+  // 案件の並び順：data.jsonの案件順 → その他
+  const order = STATE['案件'].map(a=>a['案件キー']);
+  const keys = Object.keys(byAnken).sort((a,b)=>{
+    const ia = order.indexOf(a), ib = order.indexOf(b);
+    return (ia<0?999:ia) - (ib<0?999:ib);
+  });
+  const el = $('#tab-anken');
+  if(keys.length === 0){ el.innerHTML = emptyHTML(searchQ?'該当する部材がありません':'まだ部材が登録されていません','右下の＋ボタンから、案件で使った商品を登録できます'); return; }
+
+  el.innerHTML = keys.map(k=>{
+    const a = ankenByKey[k];
+    const list = byAnken[k];
+    const cover = (list.find(firstPhoto)||{});
+    const ph = firstPhoto(cover);
+    const thumb = ph
+      ? `<div class="anken-card__thumb"><img src="${esc(photoSrc(ph))}" loading="lazy" onerror="this.parentNode.innerHTML='📦'"></div>`
+      : `<div class="anken-card__thumb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/></svg></div>`;
+    const title = a ? (a['正式工事名']||k) : k;
+    const sub = a ? [a['顧客略'],a['施工場所']].filter(Boolean).join(' ・ ') : '案件台帳に未登録';
+    return `<div class="anken-card" id="ac-${cssId(k)}">
+      <div class="anken-card__head" onclick="toggleAnken('${cssId(k)}')">
+        ${thumb}
+        <div class="anken-card__body">
+          <div class="anken-card__title">${esc(title)} ${a?statusBadge(a['ステータス']):''}</div>
+          <div class="anken-card__sub">${esc(sub)}</div>
+        </div>
+        <div class="anken-card__count"><span class="n">${list.length}</span><span class="l">部材</span></div>
+        <span class="anken-card__arrow">›</span>
+      </div>
+      <div class="anken-card__parts">${list.map(partItemHTML).join('')}</div>
+    </div>`;
+  }).join('');
+}
+function cssId(s){ return encodeURIComponent(s).replace(/[^a-zA-Z0-9]/g,'_'); }
+function toggleAnken(id){ $('#ac-'+id)?.classList.toggle('open'); }
+
+/* ----- 商品から探すタブ（逆引き） ----- */
+function renderProduct(){
+  const parts = STATE['部材'].filter(matchesSearch);
+  const byProd = {};
+  parts.forEach(p=>{
+    const key = (p['商品名']||'(名称未設定)').trim() + '\u0001' + (p['メーカー']||'').trim();
+    (byProd[key] = byProd[key]||[]).push(p);
+  });
+  const keys = Object.keys(byProd).sort((a,b)=>byProd[b].length - byProd[a].length);
+  const el = $('#tab-product');
+  if(keys.length === 0){ el.innerHTML = emptyHTML(searchQ?'該当する商品がありません':'まだ商品が登録されていません','商品を登録すると「どの案件のどこで使ったか」を一覧できます'); return; }
+
+  el.innerHTML = `<div class="sec-h">商品ごとに、使った案件・場所をまとめて確認できます</div>` + keys.map(key=>{
+    const [name, maker] = key.split('\u0001');
+    const list = byProd[key];
+    const ankenCnt = new Set(list.map(p=>p['案件キー'])).size;
+    const id = cssId(key);
+    const uses = list.map(p=>{
+      const a = ankenByKey[p['案件キー']];
+      const ph = firstPhoto(p);
+      const thumb = ph
+        ? `<div class="use-row__thumb"><img src="${esc(photoSrc(ph))}" loading="lazy" onerror="this.style.display='none'"></div>`
+        : `<div class="use-row__thumb"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-6.7-7-11a7 7 0 0 1 14 0c0 4.3-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></div>`;
+      const qty = p['数量'] ? `${esc(p['数量'])}${esc(p['単位']||'')}` : '';
+      return `<div class="use-row" onclick="openDetail('${p.id}')">
+        ${thumb}
+        <div class="use-row__body">
+          <div class="use-row__anken">${esc(a?(a['正式工事名']||p['案件キー']):p['案件キー'])}</div>
+          <div class="use-row__place">${p['使用場所']?'📍 '+esc(p['使用場所']):'<span style="color:var(--text2);font-weight:400">場所未記入</span>'}</div>
+        </div>
+        ${qty?`<div class="use-row__qty">${qty}</div>`:''}
+      </div>`;
+    }).join('');
+    return `<div class="prod-card open" id="pc-${id}">
+      <div class="prod-card__head" onclick="$('#pc-${id}').classList.toggle('open')">
+        <div style="flex:1;min-width:0">
+          <div class="prod-card__title">${esc(name)}</div>
+          <div class="prod-card__sub">${maker?esc(maker)+' ・ ':''}${ankenCnt}案件 / ${list.length}件で使用</div>
+        </div>
+        <span class="prod-card__badge">${list.length}</span>
+        <span class="anken-card__arrow" style="margin-left:8px">›</span>
+      </div>
+      <div class="prod-card__uses">${uses}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ----- 写真ギャラリータブ ----- */
+function renderGallery(){
+  const parts = STATE['部材'].filter(matchesSearch);
+  const cells = [];
+  parts.forEach(p=>{
+    (p['写真']||[]).forEach((ph, i)=>{
+      const a = ankenByKey[p['案件キー']];
+      const cap = [p['商品名'], p['使用場所']||(a&&a['正式工事名'])].filter(Boolean).join(' / ');
+      cells.push(`<div class="cell" onclick="openLightbox('${esc(photoSrc(ph))}','${esc((p['商品名']||'')+(p['使用場所']?' ／ '+p['使用場所']:'')+(a?' ／ '+(a['正式工事名']||''):''))}')">
+        <img src="${esc(photoSrc(ph))}" loading="lazy" onerror="this.parentNode.style.display='none'">
+        <div class="cap">${esc(cap)}</div>
+      </div>`);
+    });
+  });
+  const el = $('#tab-gallery');
+  el.innerHTML = cells.length ? `<div class="gallery">${cells.join('')}</div>`
+    : emptyHTML(searchQ?'該当する写真がありません':'まだ写真がありません','部材を登録するとき写真を添付すると、ここに一覧表示されます');
+}
+
+function emptyHTML(t,d){
+  return `<div class="empty">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+    <div class="t">${esc(t)}</div><div class="d">${esc(d)}</div></div>`;
+}
+
+function renderAll(){
+  renderStats();
+  renderAnken();
+  renderProduct();
+  renderGallery();
+}
+
+/* ---------- タブ切替 ---------- */
+function switchTab(tab){
+  currentTab = tab;
+  $$('.tabbar button').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  ['anken','product','gallery'].forEach(t=>$('#tab-'+t).classList.toggle('hidden', t!==tab));
+}
+
+/* ============================================================
+   詳細表示
+   ============================================================ */
+function findPart(id){ return STATE['部材'].find(p=>p.id===id); }
+
+function openDetail(id){
+  const p = findPart(id); if(!p) return;
+  const a = ankenByKey[p['案件キー']];
+  const photos = p['写真']||[];
+  const ph = photos.length
+    ? `<div class="detail-photos ${photos.length===1?'single':''}">${photos.map(x=>`<img src="${esc(photoSrc(x))}" onclick="openLightbox('${esc(photoSrc(x))}','${esc(p['商品名']||'')}')" onerror="this.style.display='none'">`).join('')}</div>`
+    : '';
+  const rows = [
+    ['商品名', p['商品名']],
+    ['メーカー', p['メーカー']],
+    ['品番・型番', p['品番']],
+    ['カテゴリ', p['カテゴリ']],
+    ['数量', p['数量']?`${esc(p['数量'])} ${esc(p['単位']||'')}`:''],
+    ['使用場所', p['使用場所']],
+    ['案件', a?`${esc(a['正式工事名']||p['案件キー'])}`:esc(p['案件キー'])],
+    ['施工場所', a&&a['施工場所']],
+    ['顧客', a&&a['顧客略']],
+    ['備考', p['備考']],
+    ['登録日', p['登録日']],
+  ].filter(r=>r[1]!=null && r[1]!=='');
+  $('#detailTitle').textContent = p['商品名'] || '部材詳細';
+  $('#detailBody').innerHTML = ph + `<div class="detail-table">${rows.map(r=>`<div class="r"><div class="k">${esc(r[0])}</div><div class="v">${r[1]}</div></div>`).join('')}</div>`;
+  $('#detailEditBtn').onclick = ()=>{ closeDetail(); openEdit(id); };
+  $('#detailModal').classList.add('show');
+}
+function closeDetail(){ $('#detailModal').classList.remove('show'); }
+
+/* ============================================================
+   編集フォーム
+   ============================================================ */
+function fillAnkenSelect(selected){
+  const opts = STATE['案件'].map(a=>`<option value="${esc(a['案件キー'])}" ${a['案件キー']===selected?'selected':''}>${esc(a['正式工事名']||a['案件キー'])}${a['顧客略']?'（'+esc(a['顧客略'])+'）':''}</option>`).join('');
+  $('#f_anken').innerHTML = `<option value="">案件を選択…</option>` + opts;
+}
+function fillDatalists(){
+  const names = [...new Set(STATE['部材'].map(p=>(p['商品名']||'').trim()).filter(Boolean))].sort();
+  const makers = [...new Set(STATE['部材'].map(p=>(p['メーカー']||'').trim()).filter(Boolean))].sort();
+  $('#dl_names').innerHTML = names.map(n=>`<option value="${esc(n)}">`).join('');
+  $('#dl_makers').innerHTML = makers.map(n=>`<option value="${esc(n)}">`).join('');
+}
+
+function openEdit(id){
+  editingId = id || null;
+  fillAnkenSelect();
+  fillDatalists();
+  editPhotos = [];
+  if(id){
+    const p = findPart(id);
+    $('#editTitle').textContent = '部材を編集';
+    $('#f_anken').value = p['案件キー']||'';
+    $('#f_name').value = p['商品名']||'';
+    $('#f_maker').value = p['メーカー']||'';
+    $('#f_code').value = p['品番']||'';
+    $('#f_cat').value = p['カテゴリ']||'';
+    $('#f_place').value = p['使用場所']||'';
+    $('#f_qty').value = p['数量']||'';
+    $('#f_unit').value = p['単位']||'';
+    $('#f_note').value = p['備考']||'';
+    editPhotos = (p['写真']||[]).map(path=>({ path, dataURL: photoSrc(path), uploaded:true }));
+    $('#deleteBtn').style.display = '';
+  } else {
+    $('#editTitle').textContent = '部材を登録';
+    ['f_name','f_maker','f_code','f_place','f_qty','f_unit','f_note'].forEach(k=>$('#'+k).value='');
+    $('#f_anken').value = ''; $('#f_cat').value = '';
+    $('#deleteBtn').style.display = 'none';
+  }
+  renderPhotoGrid();
+  $('#editModal').classList.add('show');
+}
+function closeEdit(){ $('#editModal').classList.remove('show'); }
+
+function renderPhotoGrid(){
+  const grid = $('#photoGrid');
+  const thumbs = editPhotos.map((ph,i)=>`<div class="photo-thumb">
+    <img src="${esc(ph.dataURL)}">
+    <button class="del" onclick="removePhoto(${i})">×</button>
+    ${ph.uploaded?'':'<span class="badge-up">未保存</span>'}
+  </div>`).join('');
+  grid.innerHTML = thumbs + `<div class="photo-add" onclick="$('#photoInput').click()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    写真追加</div>`;
+}
+function removePhoto(i){ editPhotos.splice(i,1); renderPhotoGrid(); }
+
+$('#photoInput').addEventListener('change', async (e)=>{
+  const files = Array.from(e.target.files||[]);
+  e.target.value = '';
+  for(const f of files){
+    if(!f.type.startsWith('image/')) continue;
+    try{
+      const dataURL = await compressImage(f);
+      editPhotos.push({ dataURL, uploaded:false });
+      renderPhotoGrid();
+    }catch(err){ toast('画像の読み込みに失敗しました'); }
+  }
+});
+
+/* ---------- 保存 ---------- */
+async function saveEdit(){
+  const ankenKey = $('#f_anken').value;
+  const name = $('#f_name').value.trim();
+  if(!ankenKey){ toast('案件を選択してください'); return; }
+  if(!name){ toast('商品名を入力してください'); $('#f_name').focus(); return; }
+  if(!getPAT()){ showPat(()=>saveEdit()); return; }
+
+  const saveBtn = $('#saveBtn');
+  saveBtn.disabled = true; saveBtn.textContent = '保存中…'; setSync('busy');
+
+  try{
+    const id = editingId || ('P-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,6));
+
+    // 1) 未アップロードの写真をコミット
+    const photoPaths = [];
+    for(let i=0;i<editPhotos.length;i++){
+      const ph = editPhotos[i];
+      if(ph.uploaded && ph.path){ photoPaths.push(ph.path); continue; }
+      const base64 = ph.dataURL.split(',')[1];
+      const path = `${PHOTO_DIR}/${id}_${Date.now().toString(36)}${i}.jpg`;
+      saveBtn.textContent = `写真保存中… ${i+1}/${editPhotos.length}`;
+      await ghPutPhoto(path, base64, `部材写真追加: ${name}`);
+      photoCache[path] = ph.dataURL; // 即時プレビュー
+      photoPaths.push(path);
+    }
+
+    // 2) data.json 更新
+    saveBtn.textContent = 'データ保存中…';
+    const record = {
+      id,
+      '案件キー': ankenKey,
+      '商品名': name,
+      'メーカー': $('#f_maker').value.trim(),
+      '品番': $('#f_code').value.trim(),
+      'カテゴリ': $('#f_cat').value,
+      '使用場所': $('#f_place').value.trim(),
+      '数量': $('#f_qty').value.trim(),
+      '単位': $('#f_unit').value.trim(),
+      '備考': $('#f_note').value.trim(),
+      '写真': photoPaths,
+      '登録日': editingId ? (findPart(editingId)?.['登録日']||today()) : today(),
+      '更新日': today()
+    };
+    await ghSaveData((data)=>{
+      const arr = data['部材'];
+      const idx = arr.findIndex(x=>x.id===id);
+      if(idx>=0) arr[idx] = {...arr[idx], ...record};
+      else arr.push(record);
+    }, `部材${editingId?'更新':'登録'}: ${ankenKey} / ${name}`);
+
+    setSync('ok');
+    closeEdit();
+    renderAll();
+    toast('保存しました（GitHub Pages反映に1〜2分かかる場合があります）');
+  }catch(err){
+    setSync('err');
+    if(String(err.message).includes('TOKEN_INVALID')){ toast('トークンが無効です。再設定してください'); showPat(()=>saveEdit()); }
+    else toast('保存に失敗: ' + err.message);
+    console.error(err);
+  }finally{
+    saveBtn.disabled = false; saveBtn.textContent = '保存する';
+  }
+}
+
+async function deleteCurrent(){
+  if(!editingId) return;
+  const p = findPart(editingId);
+  if(!confirm(`「${p?.['商品名']||'この部材'}」を削除しますか？\n（写真ファイルはリポジトリに残ります）`)) return;
+  if(!getPAT()){ showPat(()=>deleteCurrent()); return; }
+  const saveBtn = $('#saveBtn'); saveBtn.disabled = true; setSync('busy');
+  try{
+    await ghSaveData((data)=>{
+      data['部材'] = data['部材'].filter(x=>x.id!==editingId);
+    }, `部材削除: ${p?.['案件キー']||''} / ${p?.['商品名']||''}`);
+    setSync('ok'); closeEdit(); renderAll(); toast('削除しました');
+  }catch(err){ setSync('err'); toast('削除に失敗: '+err.message); }
+  finally{ saveBtn.disabled = false; }
+}
+
+function today(){ return new Date().toISOString().split('T')[0]; }
+
+/* ---------- ライトボックス ---------- */
+function openLightbox(src, cap){
+  $('#lightboxImg').src = src;
+  $('#lightboxCap').textContent = cap||'';
+  $('#lightbox').classList.add('show');
+}
+function closeLightbox(){ $('#lightbox').classList.remove('show'); $('#lightboxImg').src=''; }
+
+/* ---------- 検索 ---------- */
+let searchTimer;
+$('#searchInput').addEventListener('input', (e)=>{
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(()=>{ searchQ = e.target.value.trim(); renderAll(); }, 200);
+});
+
+/* ---------- 初期ロード ---------- */
+async function init(){
+  setSync('busy');
+  $('#banner').innerHTML = '';
+  try{
+    const data = await ghFetchData();
+    STATE['案件'] = data['案件'] || [];
+    STATE['中止案件'] = data['中止案件'] || [];
+    STATE['部材'] = Array.isArray(data['部材']) ? data['部材'] : [];
+    ankenByKey = {};
+    [...STATE['案件'], ...STATE['中止案件']].forEach(a=>{ ankenByKey[a['案件キー']] = a; });
+    // idが無い旧データに採番（表示用、保存時に確定）
+    STATE['部材'].forEach((p,i)=>{ if(!p.id) p.id = 'P-legacy-'+i; });
+    setSync(getPAT()?'ok':'');
+    renderAll();
+  }catch(err){
+    setSync('err');
+    if(String(err.message).includes('TOKEN_INVALID')){
+      $('#banner').innerHTML = 'トークンが無効です。保存時に再設定できます。読み取りは公開データで続行します。';
+      try{ const res = await fetch('./data.json',{cache:'no-store'}); const data = await res.json();
+        STATE['案件']=data['案件']||[]; STATE['中止案件']=data['中止案件']||[]; STATE['部材']=data['部材']||[];
+        ankenByKey={}; [...STATE['案件'],...STATE['中止案件']].forEach(a=>ankenByKey[a['案件キー']]=a);
+        STATE['部材'].forEach((p,i)=>{ if(!p.id) p.id='P-legacy-'+i; });
+        renderAll();
+      }catch(_){}
+    } else {
+      $('#banner').innerHTML = 'データ読込に失敗しました：' + esc(err.message);
+    }
+    console.error(err);
+  }
+}
+$('#refreshBtn').addEventListener('click', init);
+$('#patInput').addEventListener('keydown', e=>{ if(e.key==='Enter') confirmPat(); });
+// モーダル背景タップで閉じる
+['editModal','detailModal','patModal'].forEach(id=>{
+  $('#'+id).addEventListener('click', e=>{ if(e.target.id===id){
+    if(id==='patModal') closePat(); else if(id==='editModal') closeEdit(); else closeDetail();
+  }});
+});
+
+init();
+</script>
+</body>
+</html>
