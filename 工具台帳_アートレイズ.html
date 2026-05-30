@@ -171,6 +171,20 @@ body{display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
 .pick-row__name{font-size:13px;font-weight:700;color:var(--text);}
 .pick-row__meta{font-size:11px;color:var(--text2);}
 .banner{background:rgba(176,106,0,.12);border:1px solid rgba(176,106,0,.3);color:var(--orange);font-size:12px;font-weight:600;border-radius:10px;padding:10px 12px;margin-bottom:14px;line-height:1.6;}
+
+/* AI自動入力パネル */
+.ai-panel{background:linear-gradient(135deg,#1e2d40,#2a3f5a);border-radius:14px;padding:14px;margin-bottom:16px;}
+.ai-fill-btn{width:100%;height:50px;border:none;border-radius:11px;background:var(--accent);color:var(--navy);
+  font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+.ai-fill-btn:active{background:#b8996a;}
+.ai-fill-btn svg{width:22px;height:22px;}
+.ai-fill-btn:disabled{opacity:.6;}
+.ai-hint{font-size:11px;color:rgba(255,255,255,.7);line-height:1.6;margin-top:9px;}
+.ai-status{font-size:12px;font-weight:700;color:#fff;margin-top:8px;min-height:0;}
+.ai-status.busy{color:var(--accent);}
+.ai-status.err{color:#ffb4ab;}
+.ai-status .spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.35);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
@@ -230,6 +244,15 @@ body{display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
   <div class="modal-box">
     <div class="modal-head"><div class="t" id="editTitle">工具を登録</div><button class="x" onclick="closeEdit()">×</button></div>
     <div class="modal-body">
+      <div class="ai-panel">
+        <button type="button" class="ai-fill-btn" onclick="$('#aiPhotoInput').click()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="3.2"/><path d="M18 6.5l.6 1.4 1.4.6-1.4.6L18 10.5l-.6-1.4L16 8.5l1.4-.6z" fill="currentColor" stroke="none"/></svg>
+          <span>写真からAIで自動入力</span>
+        </button>
+        <div class="ai-hint">工具の写真を撮影/選択すると、メーカー・型番・カテゴリ・使い方・注意点をAIが推定して下の欄を埋めます（写真も登録されます）。内容は必ずご確認ください。</div>
+        <div class="ai-status" id="aiStatus"></div>
+        <input type="file" id="aiPhotoInput" accept="image/*" capture="environment" class="hidden">
+      </div>
       <div class="fld"><label>名称 <span class="req">*</span></label><input type="text" id="f_name" placeholder="例：マキタ 充電式丸ノコ"></div>
       <div class="fld-row">
         <div class="fld"><label>カテゴリ</label>
@@ -332,6 +355,16 @@ body{display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
   </div>
 </div>
 
+<!-- AI APIキーモーダル -->
+<div class="modal center" id="aiKeyModal">
+  <div class="pat-box">
+    <div class="t">AI（Claude）APIキーを設定</div>
+    <div class="d">写真からの自動入力には Anthropic の API キーが必要です。初回のみブラウザに保存します（GitHubには送信されません）。Claudeアシスト（ai_assist）と共用されます。</div>
+    <input type="password" id="aiKeyInput" placeholder="sk-ant-..." autocomplete="off">
+    <div class="acts"><button class="btn btn-ghost" onclick="closeAiKey()">キャンセル</button><button class="btn btn-primary" onclick="confirmAiKey()">保存して続ける</button></div>
+  </div>
+</div>
+
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <button class="x" onclick="closeLightbox()">×</button>
   <img id="lightboxImg" src="" alt="">
@@ -377,6 +410,92 @@ let patCallback=null;
 function showPat(cb){ patCallback=cb; $('#patModal').classList.add('show'); setTimeout(()=>$('#patInput').focus(),100); }
 function closePat(){ $('#patModal').classList.remove('show'); }
 function confirmPat(){ const v=$('#patInput').value.trim(); if(!v){toast('トークンを入力してください');return;} localStorage.setItem(PAT_KEY,v); closePat(); const cb=patCallback; patCallback=null; if(cb)cb(); }
+
+/* ---- AI（Claude）APIキー：ai_assist.html と共用 ---- */
+const ANTHROPIC_URL='https://api.anthropic.com/v1/messages';
+const AI_MODEL='claude-sonnet-4-20250514';
+const AI_KEY='ANTHROPIC_API_KEY';
+let aiKeyCallback=null;
+function getAiKey(){ return (localStorage.getItem(AI_KEY)||'').trim(); }
+function showAiKey(cb){ aiKeyCallback=cb; $('#aiKeyModal').classList.add('show'); setTimeout(()=>$('#aiKeyInput').focus(),100); }
+function closeAiKey(){ $('#aiKeyModal').classList.remove('show'); }
+function confirmAiKey(){ const v=$('#aiKeyInput').value.trim(); if(!v){toast('APIキーを入力してください');return;} localStorage.setItem(AI_KEY,v); closeAiKey(); const cb=aiKeyCallback; aiKeyCallback=null; if(cb)cb(); }
+
+/* ---- 写真からAIで工具情報を推定して編集フォームへ反映 ---- */
+const AI_CATS=['電動工具','手工具','測定器','機械・発電機','車両','収納・運搬','撮影・IT','消耗品・付属','その他'];
+function aiStatus(msg, cls){ const el=$('#aiStatus'); el.className='ai-status'+(cls?' '+cls:''); el.innerHTML=msg||''; }
+
+$('#aiPhotoInput').addEventListener('change', async e=>{
+  const file=(e.target.files||[])[0]; e.target.value='';
+  if(!file||!file.type.startsWith('image/')) return;
+  if(!getAiKey()){ showAiKey(()=>aiAnalyze(file)); return; }
+  aiAnalyze(file);
+});
+
+async function aiAnalyze(file){
+  const btn=$('.ai-fill-btn'); btn.disabled=true;
+  aiStatus('<span class="spin"></span>画像を準備中…','busy');
+  try{
+    // 圧縮（解析用に少し大きめ・高画質）＋ 写真として登録
+    const dataURL=await compressImage(file, 1400, 0.82);
+    editPhotos.push({dataURL,uploaded:false}); renderPhotoGrid();
+    const b64=dataURL.split(',')[1];
+
+    aiStatus('<span class="spin"></span>AIが工具を解析中…（10〜20秒）','busy');
+    const sys='あなたは日本の建設・内装リフォーム業の工具・機材・車両に精通したベテラン職人です。'
+      +'与えられた写真の道具を同定し、現場ナビの工具台帳に登録するための情報を日本語で返します。'
+      +'必ず指定のJSONのみを返し、説明文やコードフェンスは付けないこと。'
+      +'型番やメーカーが写真から読み取れない場合は空文字にし、推測で埋めない（ただし外観から確度高く判断できる定番品は記載可、その旨を備考に書く）。'
+      +'カテゴリは次のいずれか:'+AI_CATS.join('/')+'。';
+    const ask='この道具を同定し、次のJSON形式で返答してください。\n'
+      +'{"名称":"一般名（メーカー/型番が分かれば含める）","メーカー":"","型番":"","カテゴリ":"上記のいずれか",'
+      +'"使用方法":"基本の使い方・段取りを3〜5行で","応用":"現場で役立つ応用・コツ・相性の良い部材を2〜4行で",'
+      +'"注意事項":"安全上の注意・保護具・禁止事項を2〜4行で","確信度":"高/中/低","備考":"判別の根拠や不明点・候補"}';
+    const res=await fetch(ANTHROPIC_URL,{
+      method:'POST',
+      headers:{'content-type':'application/json','x-api-key':getAiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({ model:AI_MODEL, max_tokens:1500, system:sys,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},
+          {type:'text',text:ask}
+        ]}] })
+    });
+    if(res.status===401){ localStorage.removeItem(AI_KEY); aiStatus('APIキーが無効です。再設定してください','err'); btn.disabled=false; showAiKey(()=>aiAnalyze(file)); return; }
+    if(!res.ok){ let m=''; try{const ej=await res.json(); m=ej.error?ej.error.message:JSON.stringify(ej);}catch(_){ m=await res.text(); } throw new Error('APIエラー('+res.status+') '+m.slice(0,140)); }
+    const json=await res.json();
+    let text=''; if(json.content&&Array.isArray(json.content)) text=json.content.filter(c=>c.type==='text').map(c=>c.text).join('\n');
+    const obj=parseAiJson(text);
+    if(!obj){ throw new Error('AI応答を解釈できませんでした'); }
+    applyAiResult(obj);
+    const conf=obj['確信度']||'';
+    aiStatus('✓ 反映しました'+(conf?'（確信度:'+esc(conf)+'）':'')+'。内容を確認・修正して保存してください。', conf==='低'?'err':'');
+  }catch(err){
+    console.error(err);
+    aiStatus('解析に失敗: '+esc(err.message),'err');
+    toast('AI解析に失敗しました');
+  }finally{
+    btn.disabled=false;
+  }
+}
+
+function parseAiJson(text){
+  if(!text) return null;
+  let s=text.trim().replace(/^```(?:json)?/i,'').replace(/```$/,'').trim();
+  const a=s.indexOf('{'), b=s.lastIndexOf('}');
+  if(a>=0&&b>a) s=s.slice(a,b+1);
+  try{ return JSON.parse(s); }catch(_){ return null; }
+}
+
+function applyAiResult(o){
+  const set=(id,val)=>{ if(val!=null&&String(val).trim()!=='') $('#'+id).value=String(val).trim(); };
+  set('f_name', o['名称']); set('f_maker', o['メーカー']); set('f_model', o['型番']);
+  if(o['カテゴリ'] && AI_CATS.includes(String(o['カテゴリ']).trim())) $('#f_cat').value=String(o['カテゴリ']).trim();
+  set('f_usage', o['使用方法']); set('f_tips', o['応用']); set('f_caution', o['注意事項']);
+  // 備考にはAIの根拠を追記（既存があれば残す）
+  const note=$('#f_note');
+  const aiNote=(o['備考']?('AI判別メモ: '+String(o['備考']).trim()):'') + (o['確信度']?('（確信度:'+o['確信度']+'）'):'');
+  if(aiNote){ note.value = note.value.trim() ? (note.value.trim()+'\n'+aiNote) : aiNote; }
+}
 
 /* ---- 画像圧縮 ---- */
 function compressImage(file, maxDim=1280, q=0.72){
@@ -553,6 +672,7 @@ function openEdit(id){
     $('#deleteBtn').style.display='none';
   }
   renderPhotoGrid();
+  aiStatus('');
   $('#editModal').classList.add('show');
 }
 function closeEdit(){ $('#editModal').classList.remove('show'); }
@@ -800,9 +920,10 @@ async function init(){
 }
 $('#refreshBtn').addEventListener('click', init);
 $('#patInput').addEventListener('keydown', e=>{ if(e.key==='Enter') confirmPat(); });
-['editModal','detailModal','mtModal','pickModal','patModal'].forEach(id=>{
+$('#aiKeyInput').addEventListener('keydown', e=>{ if(e.key==='Enter') confirmAiKey(); });
+['editModal','detailModal','mtModal','pickModal','patModal','aiKeyModal'].forEach(id=>{
   $('#'+id).addEventListener('click', e=>{ if(e.target.id===id){
-    ({editModal:closeEdit,detailModal:closeDetail,mtModal:closeMt,pickModal:closePick,patModal:closePat})[id]();
+    ({editModal:closeEdit,detailModal:closeDetail,mtModal:closeMt,pickModal:closePick,patModal:closePat,aiKeyModal:closeAiKey})[id]();
   }});
 });
 init();
