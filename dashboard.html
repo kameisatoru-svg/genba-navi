@@ -3774,7 +3774,8 @@ function renderModalCheckSection(a) {
 function bindModalCheckHandlers(a) {
   // テンプレ無しでも持ち越し項目があるケースに備え、ハンドラ自体は常に付ける
   // 4状態循環: todo → wip → done → na → todo
-  $$('#anken-modal-body .modal-check-item').forEach(el => {
+  // 自動完了項目（.auto）はロックするのでハンドラを付けない
+  $$('#anken-modal-body .modal-check-item:not(.auto)').forEach(el => {
     el.addEventListener('click', () => {
       const k = el.dataset.checkKey;
       const cur = MODAL_CHECK_STATE.current[k] || 'todo';
@@ -3795,9 +3796,12 @@ function bindModalCheckHandlers(a) {
 }
 
 function refreshModalCheckUi() {
-  const tpl = CHECK_TEMPLATE[STATE.案件.find(a => a['案件キー'] === MODAL_CHECK_STATE.key)?.['ステータス']]
-            || CHECK_TEMPLATE[STATE.中止案件?.find(a => a['案件キー'] === MODAL_CHECK_STATE.key)?.['ステータス']];
+  const anken = STATE.案件.find(a => a['案件キー'] === MODAL_CHECK_STATE.key)
+             || STATE.中止案件?.find(a => a['案件キー'] === MODAL_CHECK_STATE.key);
+  const tpl = CHECK_TEMPLATE[anken?.['ステータス']];
+  const ctx = { masters: STATE.取引先マスター };
   const checks = MODAL_CHECK_STATE.current;
+  const eff = anken ? getEffectiveChecks(anken, checks, ctx) : checks;
 
   // 持ち越し項目の見た目だけ更新（進捗集計には含めない）
   $$('#anken-modal-body .modal-carryover-item').forEach(el => {
