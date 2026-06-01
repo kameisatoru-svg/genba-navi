@@ -270,7 +270,16 @@ tr.dragging{opacity:0.4;}
 
   /* スマホ時：エディター/プレビューの表示切替 */
   .main.sp-show-preview .editor{display:none;}
-  .main.sp-show-preview .preview{display:block!important;}
+  .main.sp-show-preview .preview{
+    display:block!important;
+    flex:1 1 auto!important;
+    min-height:0!important;
+    height:100%!important;
+    box-sizing:border-box;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch;
+    padding:12px 12px 96px!important;
+  }
   .main:not(.sp-show-preview) .preview{display:none!important;}
   .main:not(.sp-show-preview) .editor{display:flex;}
 }
@@ -1803,6 +1812,7 @@ function scalePreview(){
   if(!page)return;
   const PAD=20;
   const available=area.clientWidth-PAD*2;
+  if(available<=0)return;            // 非表示時(幅0)はスケールしない（負スケール防止）
   const scale=Math.min(1,available/794);
   inner.style.transform=`scale(${scale})`;
   inner.style.width=(794*scale)+'px';
@@ -2027,7 +2037,16 @@ function buildDocHTML(){
 
   /* スマホ時：エディター/プレビューの表示切替 */
   .main.sp-show-preview .editor{display:none;}
-  .main.sp-show-preview .preview{display:block!important;}
+  .main.sp-show-preview .preview{
+    display:block!important;
+    flex:1 1 auto!important;
+    min-height:0!important;
+    height:100%!important;
+    box-sizing:border-box;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch;
+    padding:12px 12px 96px!important;
+  }
   .main:not(.sp-show-preview) .preview{display:none!important;}
   .main:not(.sp-show-preview) .editor{display:flex;}
 }
@@ -2335,14 +2354,16 @@ function spGoTab(tab){
   const navNext=document.getElementById('sp-nav-next');
   const navPrint=document.getElementById('sp-nav-print');
   if(tab==='preview'){
-    // 確認タブ：render()してからプレビュー表示
-    render();
+    // 確認タブ：先にプレビューを表示してから render()（幅0での負スケールを防止）
     main.classList.add('sp-show-preview');
+    render();
     tabEdit.classList.remove('active');
     tabPv.classList.add('active');
     navBack.style.display='';
     navNext.style.display='none';
     navPrint.style.display='';
+    // レイアウト確定後に再スケール＆プレビュー先頭へスクロール
+    requestAnimationFrame(()=>{ scalePreview(); const a=document.getElementById('preview-area'); if(a) a.scrollTop=0; });
   } else {
     main.classList.remove('sp-show-preview');
     tabEdit.classList.add('active');
