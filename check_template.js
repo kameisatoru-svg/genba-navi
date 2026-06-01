@@ -144,9 +144,7 @@ const CHECK_TEMPLATE = {
         icon: 'order-icon',
         color: '#9b59b6',
         items: [
-          { id: 'draft',    label: '工事請負契約書ドラフト',   detail: '雛形をベースに案件情報を流し込む' },
-          { id: 'jucho',    label: '注文書受領（元請あり）',   detail: '元請からの注文書を受領' },
-          { id: 'uketori',  label: '注文請書発行',             detail: '元請への注文請書PDFを発行' }
+          { id: 'draft',    label: '工事請負契約書ドラフト',   detail: '雛形をベースに案件情報を流し込む（締結・注文請書は施工予定で実施）' }
         ]
       }
     ]
@@ -224,7 +222,7 @@ const CHECK_TEMPLATE = {
         icon: 'order-icon',
         color: '#b97843',
         items: [
-          { id: 'photo_before',    label: '着工前写真',                 detail: '全景・施工対象範囲・周辺状況' },
+          { id: 'photo_before',    label: '着工前写真の撮影',           detail: '全景・施工対象範囲・周辺状況' },
           { id: 'daily',           label: '日次進捗の記録',             detail: '通話記録・写真・所見を 00_履歴_案件キー.md に追記' },
           { id: 'chosei',          label: '現場調整・変更対応',         detail: '仕様変更・追加要望・トラブル対応' }
         ]
@@ -235,7 +233,7 @@ const CHECK_TEMPLATE = {
         icon: 'estimate-icon',
         color: '#27ae60',
         items: [
-          { id: 'photo_after',     label: '完工写真撮影',               detail: '同じアングルで Before/After を揃える' },
+          { id: 'photo_after',     label: '完工写真の撮影',             detail: '同じアングルで Before/After を揃える' },
           { id: 'tachiai',         label: '顧客立会い確認',             detail: '仕上がり・残材・清掃状況を顧客と確認' }
         ]
       }
