@@ -3817,21 +3817,22 @@ function refreshModalCheckUi() {
   let raw = 0, done = 0, na = 0;
   $$('#modal-check-stages .modal-check-item').forEach(el => {
     const k = el.dataset.checkKey;
-    const state = checks[k] || 'todo';
+    const isAuto = el.dataset.auto === '1';
+    const state = isAuto ? 'done' : (checks[k] || 'todo');
     el.classList.remove('todo', 'wip', 'done', 'na');
     el.classList.add(state);
     const tag = el.querySelector('.modal-check-state-tag');
-    if (tag) tag.textContent = state === 'done' ? '完了' : state === 'wip' ? '着手' : state === 'na' ? '該当なし' : '未';
+    if (tag) tag.textContent = isAuto ? '自動' : state === 'done' ? '完了' : state === 'wip' ? '着手' : state === 'na' ? '該当なし' : '未';
     raw++;
     if (state === 'done')     done++;
     else if (state === 'na')  na++;
   });
 
   if (tpl) {
-    // ステージごとのカウント更新（該当なしは分母から除外）
+    // ステージごとのカウント更新（該当なしは分母から除外・自動完了を含む）
     tpl.stages.forEach((stage, si) => {
-      const stageDone = stage.items.filter(i => checks[`${stage.id}.${i.id}`] === 'done').length;
-      const stageNa   = stage.items.filter(i => checks[`${stage.id}.${i.id}`] === 'na').length;
+      const stageDone = stage.items.filter(i => eff[`${stage.id}.${i.id}`] === 'done').length;
+      const stageNa   = stage.items.filter(i => eff[`${stage.id}.${i.id}`] === 'na').length;
       const stageDenom = stage.items.length - stageNa;
       const head = $$('#modal-check-stages .modal-check-stage-count')[si];
       if (head) head.textContent = `${stageDone} / ${stageDenom}${stageNa > 0 ? ` (該当なし${stageNa})` : ''}`;
