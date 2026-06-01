@@ -302,6 +302,14 @@ body{
     </svg>
     <span>見積ドラフト</span>
   </button>
+  <button class="ai-skill" onclick="aiPresetFill('kanryo')">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+      <rect x="9" y="3" width="6" height="4" rx="1"/>
+      <path d="m9 13 2 2 4-4"/>
+    </svg>
+    <span>完了報告書</span>
+  </button>
   <button class="ai-skill" onclick="aiPresetFill('callmemo')">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
@@ -368,6 +376,7 @@ function goBack(){
   var PRESETS = {
     checklist: '現在の案件一覧から、施工準備が不足していそうな案件を洗い出して、不足書類・TODO一覧をマークダウンで出してください。',
     mitsumori: '[案件名]の見積書の品目ドラフトを作ってください。工事種別と概算金額も提案してください。',
+    kanryo:    '[案件名]の工事完了報告書のドラフトを作ってください。案件情報・備考・完了書履歴を参照し、(1)宛名（会社名＋御中/様）、(2)工事名、(3)工事場所、(4)工事期間（分かる範囲で）、(5)工事内容（番号付き箇条書き）、(6)担当者 をまとめてください。出力は工事完了報告書アプリ（kanryo_houkoku_preview.html）にそのまま転記できる形でお願いします。',
     callmemo:  '以下の通話メモを整理して、決定事項・TODO・確認事項に分けてください：\n\n[ここに貼り付け]',
     torihiki:  '[業者名または顧客名]の連絡先・担当者・関係性を教えてください。',
     genbamemo: '以下の現場メモから、工事仕様・寸法・材料のポイントをまとめてください：\n\n[ここに貼り付け]'
