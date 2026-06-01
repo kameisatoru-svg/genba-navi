@@ -206,8 +206,8 @@ const CHECK_TEMPLATE = {
         items: [
           { id: 'renraku',         label: '業者連絡先確定',             detail: 'data.json 取引先マスターに電話・住所あり' },
           { id: 'shukuhaku',       label: '宿泊予約(遠方時)',           detail: '熊本・福岡など県外時のみ必須' },
-          { id: 'cal_shiko',       label: 'カレンダー登録(施工)',       detail: '【施工】Basil 緑(colorId:10)' },
-          { id: 'cal_shuku',       label: 'カレンダー登録(宿泊)',       detail: '【宿泊】Blueberry 青(colorId:9)' }
+          { id: 'cal_shiko',       label: 'カレンダー登録（施工）',     detail: '【施工】Basil 緑(colorId:10)' },
+          { id: 'cal_shuku',       label: 'カレンダー登録（宿泊）',     detail: '【宿泊】Blueberry 青(colorId:9)' }
         ]
       }
     ]
@@ -249,9 +249,9 @@ const CHECK_TEMPLATE = {
         icon: 'estimate-icon',
         color: '#7a9d6f',
         items: [
-          { id: 'seikyu_pdf',      label: '請求書PDF発行',              detail: 'mitsumori-seikyu-create で生成' },
-          { id: 'seikyu_send',     label: '請求書送付',                 detail: 'メール・郵送・対面' },
-          { id: 'seikyu_register', label: 'data.json に反映',           detail: '案件の請求[]配列に追加' }
+          { id: 'pdf',      label: '請求書PDF発行',              detail: 'mitsumori-seikyu-create で生成' },
+          { id: 'send',     label: '請求書送付',                 detail: 'メール・郵送・対面のいずれか' },
+          { id: 'register', label: 'data.json に反映',           detail: '案件の請求[]配列に追加' }
         ]
       },
       {
@@ -277,7 +277,7 @@ const CHECK_TEMPLATE = {
         color: '#4a7c4e',
         items: [
           { id: 'kakunin',         label: '入金確認',                   detail: '通帳・銀行明細で入金額を照合' },
-          { id: 'register',        label: 'data.json 入金日記録',       detail: '請求[].入金状況=nyukin・入金日 を更新' }
+          { id: 'register',        label: 'data.json に反映',           detail: '請求[].入金状況=nyukin・入金日 を更新' }
         ]
       },
       {
