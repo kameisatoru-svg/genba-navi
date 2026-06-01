@@ -3838,10 +3838,14 @@ function refreshModalCheckUi() {
 
   if (tpl) {
     // ステージごとのカウント更新（該当なしは分母から除外・自動完了を含む）
-    tpl.stages.forEach((stage, si) => {
-      const stageDone = stage.items.filter(i => eff[`${stage.id}.${i.id}`] === 'done').length;
-      const stageNa   = stage.items.filter(i => eff[`${stage.id}.${i.id}`] === 'na').length;
-      const stageDenom = stage.items.length - stageNa;
+    // DOM には表示中ステージのみ存在するので、表示中だけに絞って index を合わせる
+    const visibleStages = tpl.stages.filter(stage =>
+      stage.items.some(item => shouldShowItem(stage.id, item.id, anken)));
+    visibleStages.forEach((stage, si) => {
+      const vis = stage.items.filter(i => shouldShowItem(stage.id, i.id, anken));
+      const stageDone = vis.filter(i => eff[`${stage.id}.${i.id}`] === 'done').length;
+      const stageNa   = vis.filter(i => eff[`${stage.id}.${i.id}`] === 'na').length;
+      const stageDenom = vis.length - stageNa;
       const head = $$('#modal-check-stages .modal-check-stage-count')[si];
       if (head) head.textContent = `${stageDone} / ${stageDenom}${stageNa > 0 ? ` (該当なし${stageNa})` : ''}`;
     });
