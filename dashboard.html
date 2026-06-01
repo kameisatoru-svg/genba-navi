@@ -1334,6 +1334,11 @@ a { color: inherit; text-decoration: none; }
 .modal-check-item.done .modal-check-state-tag { background: var(--success); color: #fff; }
 .modal-check-item.na   .modal-check-state-tag { background: transparent; color: var(--text-mute); border: 1px dashed var(--text-mute); }
 
+/* 自動完了（案件データから確定）: ロック表示＋青「自動」バッジ */
+.modal-check-item.auto { cursor: default; }
+.modal-check-item.auto:hover { background: transparent; }
+.modal-check-item.auto .modal-check-state-tag { background: var(--info); color: #fff; border: none; }
+
 .modal-check-actions {
   display: flex;
   gap: 8px;
