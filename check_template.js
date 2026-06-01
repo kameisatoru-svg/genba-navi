@@ -419,3 +419,49 @@ function getEffectiveChecks(anken, checks, ctx) {
   }
   return eff;
 }
+
+/* ============================================================
+   工事規模による項目の出し分け（過剰チェックの抑制）
+   ----------------------------------------------------------
+   案件オブジェクトの `規模` フィールド（'簡易' | '標準'）で、
+   施工予定などの重い項目を表示するか切り替える。
+   ・既定（規模 未設定）は '簡易'＝最小セット
+   ・'標準' にすると大型・施設工事向けのフル項目を表示
+   ・元請が無い案件では元請向け書類（注文請書・完了書）を非表示
+
+   どの項目を「標準のみ」にするかは下の ITEM_SCALE / ITEM_REQUIRES_MOTOKE
+   を編集するだけ（"stageId.itemId" をキーに足す／消す）。
+   ============================================================ */
+// 「標準」規模のときだけ表示する重い項目（簡易では非表示）
+const ITEM_SCALE = {
+  // 施工予定：大型・施設工事でのみ必要
+  'doc_k.keiyaku':       '標準',  // 書面の工事請負契約書
+  'doc_g.order':         '標準',  // 業者向け注文書
+  'doc_g.order_recv':    '標準',  // 注文請書受領
+  'dandori.koteihyo_make': '標準',
+  'dandori.koteihyo_send': '標準',
+  'dandori.heimen':      '標準',
+  'dandori.hannyuro':    '標準',
+  'shisetsu.kagu':       '標準',
+  'shisetsu.doseni':     '標準',
+  'shisetsu.shuchi':     '標準',
+  'taisei.renraku':      '標準',
+  'taisei.shukuhaku':    '標準',
+  'taisei.cal_shuku':    '標準',
+  // 見積提出済み：書面契約のドラフトは標準工事のみ
+  'contract.draft':      '標準'
+};
+// 元請がある案件でのみ表示する項目
+const ITEM_REQUIRES_MOTOKE = ['doc_k.chumonsho', 'docs.kanryousho'];
+
+function ankenScale(anken) {
+  return (anken && anken['規模'] === '標準') ? '標準' : '簡易';  // 既定=簡易
+}
+
+// この項目を案件に表示すべきか（規模・元請で判定）
+function shouldShowItem(stageId, itemId, anken) {
+  const key = `${stageId}.${itemId}`;
+  if (ITEM_SCALE[key] === '標準' && ankenScale(anken) !== '標準') return false;
+  if (ITEM_REQUIRES_MOTOKE.indexOf(key) !== -1 && !(anken && anken['元請フラグ'])) return false;
+  return true;
+}
