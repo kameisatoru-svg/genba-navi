@@ -325,7 +325,7 @@ const STATUS_ORDER = [
    返り値:
      [{ key, status, stageId, stageLabel, itemId, label, detail, state }]
    ============================================================ */
-function getCarryOverItems(anken) {
+function getCarryOverItems(anken, ctx) {
   if (!anken) return [];
   const currentStatus = anken['ステータス'];
   const currentIdx = STATUS_ORDER.indexOf(currentStatus);
@@ -345,7 +345,8 @@ function getCarryOverItems(anken) {
     for (const stage of tpl.stages) {
       for (const item of stage.items) {
         const key = `${stage.id}.${item.id}`;
-        const state = checks[key];
+        // 自動完了（案件存在・データ有無から明らかに完了）の項目は持ち越さない
+        const state = isAutoChecked(anken, key, ctx) ? 'done' : checks[key];
         if (state !== 'done' && state !== 'na') {
           result.push({
             key,
