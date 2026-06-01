@@ -3674,8 +3674,9 @@ function renderModalCheckSection(a) {
   MODAL_CHECK_STATE.original = Object.assign({}, a['チェック'] || {});
   MODAL_CHECK_STATE.current  = Object.assign({}, a['チェック'] || {});
 
-  // 持ち越し
-  const carryOver = getCarryOverItems({ ...a, 'チェック': MODAL_CHECK_STATE.current });
+  // 持ち越し（自動完了は除外）
+  const ctx = { masters: STATE.取引先マスター };
+  const carryOver = getCarryOverItems({ ...a, 'チェック': MODAL_CHECK_STATE.current }, ctx);
   const carryHtml = carryOver.length > 0 ? `
     <div class="modal-carryover">
       <div class="modal-carryover-head">
