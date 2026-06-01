@@ -3536,6 +3536,7 @@ function showAnkenModal(a) {
 
   // クイック編集パネル
   const currentStatus  = a['ステータス'] || '';
+  const currentScale   = a['規模'] === '標準' ? '標準' : '簡易';  // 既定=簡易
   const kArr           = Array.isArray(a['契約書']) ? a['契約書'] : (a['契約書'] ? [a['契約書']] : []);
   const currentKeiyaku = kArr[0]?.['ステータス'] || '未締結';
   const sList          = Array.isArray(a['請求']) ? a['請求'] : (a['請求'] ? [a['請求']] : []);
@@ -3557,6 +3558,13 @@ function showAnkenModal(a) {
           <span class="anken-edit-label">案件ステータス</span>
           <select class="anken-edit-select" id="sel-anken-status">
             ${statusOpts.map(s => `<option value="${escapeHtml(s)}"${currentStatus === s ? ' selected' : ''}>${escapeHtml(s)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="anken-edit-row">
+          <span class="anken-edit-label">工事規模</span>
+          <select class="anken-edit-select" id="sel-anken-scale">
+            <option value="簡易"${currentScale === '簡易' ? ' selected' : ''}>簡易（修理・小工事）</option>
+            <option value="標準"${currentScale === '標準' ? ' selected' : ''}>標準（大型・施設工事）</option>
           </select>
         </div>
         <div class="anken-edit-row">
