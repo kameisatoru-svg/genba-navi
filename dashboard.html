@@ -3728,7 +3728,9 @@ function renderModalCheckSection(a) {
   const eff = getEffectiveChecks(a, checks, ctx);
   let raw = 0, done = 0, na = 0;
   const stagesHtml = tpl.stages.map(stage => {
-    const itemsHtml = stage.items.map(item => {
+    const visItems = stage.items.filter(item => shouldShowItem(stage.id, item.id, a));
+    if (visItems.length === 0) return '';  // 全項目が規模/元請で非表示ならステージごと省略
+    const itemsHtml = visItems.map(item => {
       const key = `${stage.id}.${item.id}`;
       const auto = isAutoChecked(a, key, ctx);
       const state = auto ? 'done' : (checks[key] || 'todo');
@@ -3744,9 +3746,9 @@ function renderModalCheckSection(a) {
         </div>
       `;
     }).join('');
-    const stageDone = stage.items.filter(i => eff[`${stage.id}.${i.id}`] === 'done').length;
-    const stageNa   = stage.items.filter(i => eff[`${stage.id}.${i.id}`] === 'na').length;
-    const stageDenom = stage.items.length - stageNa;
+    const stageDone = visItems.filter(i => eff[`${stage.id}.${i.id}`] === 'done').length;
+    const stageNa   = visItems.filter(i => eff[`${stage.id}.${i.id}`] === 'na').length;
+    const stageDenom = visItems.length - stageNa;
     return `
       <div class="modal-check-stage">
         <div class="modal-check-stage-head">
