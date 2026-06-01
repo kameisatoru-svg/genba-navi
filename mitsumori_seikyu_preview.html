@@ -2288,6 +2288,11 @@ function printHTML(){
   const previewInner=document.getElementById('preview-inner');
   if(!previewInner){alert('プレビューが見つかりません'); return;}
 
+  // PDF保存時の既定ファイル名はこのHTMLの<title>から決まるため、
+  // document.title（updateDocTitleで生成した「請_案件キー」等）を引き継ぐ
+  if(typeof updateDocTitle === 'function') updateDocTitle();
+  const docTitle=(document.title || '印刷プレビュー').replace(/[\\\/:*?"<>|]/g, '_');
+
   // ページ内の style タグをすべて収集（プレビューと同じ見た目を保つ）
   const styles=Array.from(document.querySelectorAll('style')).map(s=>s.outerHTML).join('\n');
 
@@ -2296,7 +2301,7 @@ function printHTML(){
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>印刷プレビュー</title>
+<title>${docTitle}</title>
 ${styles}
 <style>
   /* 印刷用追加CSS：transform解除・余白整理 */
