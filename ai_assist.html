@@ -770,6 +770,17 @@ function goBack(){
         window.aiSend();
       }
     });
+    // ESCで履歴モーダルを閉じる
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape'){
+        var m = document.getElementById('ai-hist-modal');
+        if(m && m.classList.contains('open')) window.aiCloseHistory();
+      }
+    });
+
+    // 前回の会話を復元（あれば）
+    restoreCurrent();
+
     // APIキー未設定なら起動時に促す
     if(!getKey()){
       setTimeout(function(){
