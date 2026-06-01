@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>工事完了報告書プレビュー</title>
+<style>
+:root{--navy:#1e2d40;--gold:#c8a96e;--beige:#eeebe5;--border:#ddd;--bg:#f5f4f0;--white:#fff;--text:#111;--sub:#666;--red:#c0392b;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"Meiryo","Yu Gothic",sans-serif;background:var(--bg);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{background:var(--navy);color:#fff;padding:0 16px;height:48px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-title{font-size:14px;font-weight:500;letter-spacing:0.05em;}
+.topbar-actions{display:flex;gap:8px;align-items:center;}
+.tb-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;height:36px;border-radius:6px;border:1px solid transparent;font-size:12px;font-family:inherit;cursor:pointer;background:transparent;color:#fff;transition:background 0.15s;}
+.tb-btn svg{width:18px;height:18px;flex-shrink:0;}
+.tb-btn:hover{background:rgba(255,255,255,0.08);}
+.tb-btn:active{background:rgba(255,255,255,0.16);}
+.tb-btn-gold{background:var(--gold);color:var(--navy);font-weight:700;}
+.tb-btn-gold:hover{background:#d4b97e;}
+.tb-btn-pdf{background:#c0392b;color:#fff;font-weight:700;}
+.tb-btn-pdf:hover{background:#d8463a;}
+.tb-btn-pdf:disabled{background:#888;cursor:wait;opacity:0.7;}
+.tb-btn-menu{padding:6px 8px;background:transparent;border-color:rgba(255,255,255,0.18);}
+.tb-btn-menu:hover{background:rgba(255,255,255,0.10);}
+.tm-item{display:flex;align-items:center;gap:12px;width:100%;padding:12px 16px;background:none;border:none;cursor:pointer;font-size:13px;font-family:inherit;text-align:left;color:var(--text);transition:background 0.12s;}
+.tm-item:hover{background:#f0f2f4;}
+.tm-item:active{background:#e8ecf0;}
+.tm-icon{width:20px;height:20px;color:var(--navy);flex-shrink:0;}
+.tm-sep{height:1px;background:#eee;margin:2px 0;}
+.tm-danger{color:#a04040;}
+.tm-danger .tm-icon{color:#a04040;}
+.main{display:flex;flex:1;overflow:hidden;}
+.resizer{width:5px;background:var(--border);cursor:col-resize;flex-shrink:0;transition:background 0.15s;}
+.resizer:hover,.resizer.dragging{background:var(--navy);}
+.editor{width:520px;min-width:320px;max-width:70vw;background:var(--white);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;}
+.editor-head{padding:10px 14px;border-bottom:1px solid var(--border);background:var(--beige);display:flex;align-items:center;justify-content:space-between;}
+.editor-head h2{font-size:12px;color:var(--navy);font-weight:700;letter-spacing:0.06em;}
+.editor-body{flex:1;overflow-y:auto;padding:12px 14px;}
+.fgroup{margin-bottom:10px;}
+.fgroup label{display:block;font-size:11px;color:var(--sub);margin-bottom:3px;font-weight:500;}
+.fgroup input,.fgroup select,.fgroup textarea{width:100%;border:1px solid var(--border);border-radius:3px;padding:5px 8px;font-size:12px;font-family:inherit;color:var(--text);background:#fff;}
+.fgroup input:focus,.fgroup select:focus,.fgroup textarea:focus{outline:none;border-color:var(--navy);}
+.fgroup textarea{resize:vertical;min-height:48px;}
+.fgroup-row{display:flex;gap:8px;}
+.fgroup-row .fgroup{flex:1;}
+.section-sep{border:none;border-top:1px solid var(--border);margin:12px 0 8px;}
+.section-label{font-size:11px;font-weight:700;color:var(--navy);letter-spacing:0.06em;margin-bottom:6px;}
+/* 工事内容リスト */
+.work-row{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.work-row .wnum{font-size:11px;color:var(--sub);width:18px;text-align:right;flex-shrink:0;}
+.work-row input{flex:1;border:1px solid var(--border);border-radius:3px;padding:5px 8px;font-size:12px;font-family:inherit;color:var(--text);}
+.work-row input:focus{outline:none;border-color:var(--navy);}
+.add-row-btn{margin-top:6px;width:100%;padding:5px;border:1px dashed var(--border);border-radius:3px;background:transparent;font-size:11px;color:var(--sub);cursor:pointer;font-family:inherit;}
+.add-row-btn:hover{border-color:var(--navy);color:var(--navy);}
+.del-btn{background:none;border:none;cursor:pointer;color:#ccc;font-size:14px;padding:2px 5px;border-radius:2px;flex-shrink:0;}
+.del-btn:hover{color:var(--red);background:#fff0f0;}
+/* 写真ブロック編集 */
+.photo-edit{border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:8px;background:#fafafa;}
+.photo-edit-head{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+.photo-edit-head input{flex:1;border:1px solid var(--border);border-radius:3px;padding:4px 8px;font-size:12px;font-family:inherit;font-weight:600;color:var(--navy);}
+.photo-drop{border:2px dashed var(--border);border-radius:5px;min-height:90px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;color:var(--sub);text-align:center;background:#fff;overflow:hidden;position:relative;}
+.photo-drop:hover{border-color:var(--navy);color:var(--navy);}
+.photo-drop img{width:100%;height:120px;object-fit:cover;display:block;}
+.photo-clear{position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:13px;cursor:pointer;line-height:1;}
+.total-box{background:var(--beige);border-radius:4px;padding:8px 12px;margin-top:10px;font-size:11px;color:var(--sub);line-height:1.6;}
+.preview{flex:1;overflow:auto;padding:20px;background:#ccc;}
+.preview-inner{transform-origin:top left;}
+
+/* ── 工事完了報告書 ひな形CSS（doc-pageにスコープ） ── */
+.doc-page{width:210mm;min-height:297mm;margin:0 auto;background:#fff;padding:18mm 16mm 12mm 16mm;font-family:"Meiryo","Yu Gothic",sans-serif;color:#000;box-shadow:0 2px 16px rgba(0,0,0,.18);display:flex;flex-direction:column;gap:8px;}
+.doc-page .kh-header{display:flex;align-items:flex-end;justify-content:center;position:relative;flex-shrink:0;}
+.doc-page h1{font-size:18pt;font-weight:700;color:#000;letter-spacing:.10em;line-height:1.0;}
+.doc-page .kh-date{position:absolute;right:0;bottom:1px;font-size:8.5pt;color:#000;}
+.doc-page .kh-divider{height:2px;background:#000;flex-shrink:0;}
+.doc-page .kh-addressee-block{flex-shrink:0;padding-top:2px;}
+.doc-page .kh-addressee{font-size:12pt;font-weight:700;color:#000;margin-bottom:4px;}
+.doc-page .kh-greeting{font-size:9pt;line-height:1.7;color:#000;}
+.doc-page table.kh-overview{width:100%;border-collapse:collapse;font-size:9pt;flex-shrink:0;}
+.doc-page table.kh-overview td{border:1px solid #999;padding:5px 8px;vertical-align:middle;line-height:1.5;color:#000;}
+.doc-page table.kh-overview td.lbl{width:16%;background:#e0e0e0;font-weight:700;text-align:center;}
+.doc-page table.kh-overview tr:nth-child(even) td:not(.lbl){background:#f5f5f5;}
+.doc-page .kh-sec{background:#555;color:#fff;font-size:9.5pt;font-weight:700;padding:5px 10px;flex-shrink:0;}
+.doc-page .kh-work-list{list-style:none;font-size:9pt;line-height:1.8;flex-shrink:0;padding-left:4px;}
+.doc-page .kh-work-list li::before{content:attr(data-n) ". ";font-weight:700;}
+.doc-page .kh-photo-sec{flex-shrink:0;}
+.doc-page .kh-photos{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.doc-page .kh-photo-block{display:flex;flex-direction:column;align-items:center;gap:5px;}
+.doc-page .kh-photo-lbl{font-size:9.5pt;font-weight:700;color:#000;}
+.doc-page .kh-photo-frame{width:100%;border:2px solid #000;line-height:0;font-size:0;aspect-ratio:4/3;background:#f5f5f5;display:flex;align-items:center;justify-content:center;}
+.doc-page .kh-photo-frame img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;}
+.doc-page .kh-photo-frame .kh-ph-empty{font-family:"Meiryo",sans-serif;font-size:9pt;color:#aaa;line-height:1.4;}
+.doc-page .kh-footer{border-top:1px solid #999;padding-top:7px;display:flex;align-items:center;gap:12px;flex-shrink:0;margin-top:auto;}
+.doc-page .kh-footer img{height:22px;width:auto;}
+.doc-page .kh-footer-info{font-size:8pt;color:#000;line-height:1.5;}
+
+/* ━━━ スマホ対応（768px以下） ━━━ */
+@media (max-width:768px){
+  .topbar{padding:0 8px;}
+  .topbar-title{display:none;}
+  .tb-btn .tb-label{display:none;}
+  .tb-btn{padding:8px;width:40px;justify-content:center;gap:0;}
+  .tb-btn-pdf{width:auto;padding:8px 12px;}
+  .tb-btn-pdf .tb-label{display:inline;font-weight:700;font-size:11px;}
+  .tb-btn svg{width:20px;height:20px;}
+  .topbar-actions{gap:6px;}
+  #top-menu{right:6px;top:50px;}
+  .sp-tabbar{display:flex!important;background:var(--white);border-bottom:2px solid var(--border);flex-shrink:0;}
+  .sp-tab{flex:1;height:48px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--sub);border-bottom:3px solid transparent;cursor:pointer;gap:4px;}
+  .sp-tab.active{color:var(--navy);border-bottom-color:var(--gold);}
+  .sp-tab-num{width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;background:#e0e0e0;color:#888;}
+  .sp-tab.active .sp-tab-num{background:var(--gold);color:var(--navy);}
+  .main{flex-direction:column;}
+  .resizer{display:none;}
+  .editor{width:100%!important;min-width:0!important;max-width:100%!important;flex-shrink:1;}
+  .editor-body{padding-bottom:72px;}
+  .fgroup input,.fgroup select,.fgroup textarea,.work-row input{font-size:16px!important;padding:8px 10px!important;min-height:44px;}
+  .fgroup textarea{min-height:72px;}
+  .preview{flex:none!important;padding:12px;}
+  .sp-hidden-sm{display:none!important;}
+  .sp-bottom-nav{display:flex!important;position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--border);padding:8px 10px;gap:8px;z-index:200;}
+  .sp-nav-btn{flex:1;height:52px;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit;}
+  .sp-nav-back{background:#f0f2f4;color:var(--navy);}
+  .sp-nav-next{background:var(--gold);color:var(--navy);}
+  .sp-nav-print{background:var(--navy);color:#fff;}
+  .main.sp-show-preview .editor{display:none;}
+  .main.sp-show-preview .preview{display:block!important;flex:1 1 auto!important;min-height:0!important;height:100%!important;box-sizing:border-box;overflow-y:auto!important;-webkit-overflow-scrolling:touch;padding:12px 12px 96px!important;}
+  .main:not(.sp-show-preview) .preview{display:none!important;}
+  .main:not(.sp-show-preview) .editor{display:flex;}
+}
+@media (min-width:769px){
+  .sp-tabbar{display:none;}
+  .sp-bottom-nav{display:none;}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <span class="topbar-title" id="topbar-title">工事完了報告書プレビュー</span>
+  <div class="topbar-actions">
+    <button class="tb-btn tb-btn-gold" onclick="printHTML()" title="印刷・PDF保存">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="6" y="3" width="12" height="6" rx="1"/>
+        <path d="M6 18 L4 18 Q3 18 3 17 L3 11 Q3 9 5 9 L19 9 Q21 9 21 11 L21 17 Q21 18 20 18 L18 18"/>
+        <rect x="6" y="14" width="12" height="7" rx="1"/>
+      </svg>
+      <span class="tb-label">印刷</span>
+    </button>
+    <button class="tb-btn tb-btn-pdf" id="tb-savepdf-btn" onclick="savePDF()" title="PDFファイルとして保存（スマホ推奨）">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 3 L7 3 Q5 3 5 5 L5 19 Q5 21 7 21 L17 21 Q19 21 19 19 L19 11"/>
+        <path d="M14 3 L14 8 L19 8 L19 11"/>
+        <text x="12" y="18" font-size="6" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none" font-family="sans-serif">PDF</text>
+      </svg>
+      <span class="tb-label">PDF</span>
+    </button>
+    <button class="tb-btn tb-btn-menu" onclick="toggleTopMenu(event)" title="その他のメニュー" id="tb-menu-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <circle cx="12" cy="5" r="1.4" fill="currentColor"/>
+        <circle cx="12" cy="12" r="1.4" fill="currentColor"/>
+        <circle cx="12" cy="19" r="1.4" fill="currentColor"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- ⋮トップメニュー -->
+<div id="top-menu" style="display:none;position:fixed;top:54px;right:8px;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,0.18);z-index:9000;min-width:220px;overflow:hidden;">
+  <button class="tm-item" onclick="closeTopMenu();clearAllData()">
+    <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 12 L9 8 L9 11 Q15 11 17 14 Q19 17 18 20"/><path d="M5 12 L9 16"/>
+    </svg>
+    <span>入力内容をクリア</span>
+  </button>
+</div>
+
+<!-- スマホ用タブバー -->
+<div class="sp-tabbar" style="display:none">
+  <div class="sp-tab active" id="sp-tab-edit" onclick="spGoTab('edit')"><span class="sp-tab-num">1</span>入力</div>
+  <div class="sp-tab" id="sp-tab-preview" onclick="spGoTab('preview')"><span class="sp-tab-num">2</span>確認</div>
+</div>
+<!-- スマホ用底部ナビ -->
+<div class="sp-bottom-nav" style="display:none" id="sp-bottom-nav">
+  <button class="sp-nav-btn sp-nav-back" id="sp-nav-back" style="display:none" onclick="spGoTab('edit')">◀ 入力</button>
+  <button class="sp-nav-btn sp-nav-next" id="sp-nav-next" onclick="spGoTab('preview')">確認へ ▶</button>
+  <button class="sp-nav-btn sp-nav-print" id="sp-nav-print" style="display:none" onclick="printHTML()">印刷・PDF保存</button>
+</div>
+
+<div class="main" id="main-area">
+  <div class="editor">
+    <div class="editor-head"><h2>完了報告書 編集</h2></div>
+    <div class="editor-body">
+      <div class="fgroup-row">
+        <div class="fgroup"><label>案件キー（PDFファイル名用）<button type="button" id="ankenSelectBtn" onclick="openAnkenSelector()" style="margin-left:8px;padding:2px 8px;background:#4a6090;color:#fff;border:1px solid #6a80b0;border-radius:3px;font-size:10px;cursor:pointer;font-family:inherit;display:none;" title="data.jsonから案件を選んで表書を自動入力">📋 案件選択</button></label><input id="ankenKey" type="text" value="" placeholder="例：信用産業-うた乃階段-26" oninput="updateDocTitle()"></div>
+        <div class="fgroup" style="flex:0 0 110px;"><label>サフィックス（任意）</label><input id="fileSuffix" type="text" value="" placeholder="例：第1期" oninput="updateDocTitle()"></div>
+      </div>
+      <div class="fgroup"><label>宛名（会社名・御中は自動付与せず手入力）</label><input id="atena" type="text" value="" placeholder="例：株式会社〇〇 御中" oninput="render()"></div>
+      <div class="fgroup"><label>発行日</label><input id="hakkoDate" type="date" oninput="render()"></div>
+      <hr class="section-sep">
+      <div class="fgroup"><label>工事名</label><input id="kojimei" type="text" value="" placeholder="例：〇〇ビル 階段閉鎖工事 他" oninput="render()"></div>
+      <div class="fgroup"><label>工事場所</label><input id="kojiloc" type="text" value="" placeholder="例：大分県別府市〇〇" oninput="render()"></div>
+      <div class="fgroup"><label>工事期間</label><input id="kojiperiod" type="text" value="" placeholder="例：2026年4月15日 〜 2026年4月28日" oninput="render()"></div>
+      <hr class="section-sep">
+      <div class="fgroup"><label>あいさつ文</label><textarea id="greeting" rows="2" oninput="render()">下記の工事が完了いたしましたのでご報告申し上げます。</textarea></div>
+      <hr class="section-sep">
+      <div class="section-label">■ 工事内容</div>
+      <div id="work-editor"></div>
+      <button class="add-row-btn" onclick="addWorkRow()">＋ 工事内容を追加</button>
+      <hr class="section-sep">
+      <div class="section-label">■ 施工写真</div>
+      <div id="photo-editor"></div>
+      <button class="add-row-btn" onclick="addPhotoBlock()">＋ 写真枠を追加</button>
+      <hr class="section-sep">
+      <div class="fgroup"><label>担当者</label><input id="tantou" type="text" value="" placeholder="例：亀井" oninput="render()"></div>
+      <div class="total-box">PDFファイル名は「完_案件キー」形式（完了書の命名ルール準拠）。写真は端末内で自動圧縮され、PDF/印刷に埋め込まれます。</div>
+    </div>
+  </div>
+  <div class="resizer" id="resizer"></div>
+  <div class="preview" id="preview-area">
+    <div class="preview-inner" id="preview-inner">
+      <div class="doc-page" id="doc-page"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━ 案件選択モーダル ━━━ -->
+<div id="anken-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;font-family:inherit;">
+  <div style="background:#fff;width:min(720px,92vw);max-height:85vh;border-radius:8px;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,0.3);">
+    <div style="padding:14px 18px;border-bottom:1px solid #ddd;display:flex;align-items:center;justify-content:space-between;background:#3a5070;color:#fff;border-radius:8px 8px 0 0;">
+      <div style="font-size:14px;font-weight:600;">📋 案件を選択</div>
+      <button onclick="closeAnkenSelector()" style="background:transparent;border:none;color:#fff;font-size:18px;cursor:pointer;padding:0 4px;">✕</button>
+    </div>
+    <div style="padding:12px 18px;border-bottom:1px solid #eee;">
+      <input id="anken-search" type="text" placeholder="案件キー・工事名・顧客名・施工場所で検索" style="width:100%;padding:8px 12px;border:1px solid #ccc;border-radius:4px;font-size:13px;font-family:inherit;" oninput="filterAnkenList()" autocomplete="off">
+      <div id="anken-status" style="font-size:11px;color:#888;margin-top:4px;">案件データを読み込み中…</div>
+    </div>
+    <div id="anken-list" style="overflow-y:auto;flex:1;"></div>
+  </div>
+</div>
+
+<input type="file" id="photo-file-input" accept="image/*" style="display:none" onchange="handlePhotoPick(event)">
+
+<script>
+const LOGO_B64 = '{{LOGO_B64}}';
+const DATA_JSON_URL = 'https://kameisatoru-svg.github.io/genba-navi/data.json';
+
+// ── 状態 ──
+let workItems = ['', '', ''];
+let photos = [
+  {label:'【施工前】', data:''},
+  {label:'【施工後】', data:''}
+];
+let pickTargetIdx = -1;
+let ankenData = null;
+let ankenDataLoaded = false;
+
+function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function escAttr(s){return String(s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');}
+
+function fmtDateJP(iso){
+  if(!iso) return '';
+  const d = new Date(iso+'T00:00:00');
+  if(isNaN(d)) return iso;
+  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+}
+
+// ── タイトル（PDFファイル名）更新 ──
+function updateDocTitle(){
+  const ankenKey = (document.getElementById('ankenKey').value||'').trim();
+  const suffix = (document.getElementById('fileSuffix').value||'').trim();
+  let fname;
+  if(ankenKey){
+    fname = suffix ? `完_${suffix}_${ankenKey}` : `完_${ankenKey}`;
+  } else {
+    fname = '工事完了報告書';
+  }
+  document.title = fname;
+}
+
+// ── 工事内容エディタ描画 ──
+function renderWorkEditor(){
+  const el = document.getElementById('work-editor');
+  el.innerHTML = workItems.map((w,i)=>`
+    <div class="work-row">
+      <span class="wnum">${i+1}.</span>
+      <input type="text" value="${escH(w)}" placeholder="工事内容を入力" oninput="workItems[${i}]=this.value;render()">
+      <button class="del-btn" onclick="removeWorkRow(${i})" title="削除">✕</button>
+    </div>`).join('');
+}
+function addWorkRow(){ workItems.push(''); renderWorkEditor(); render(); }
+function removeWorkRow(i){ workItems.splice(i,1); if(workItems.length===0) workItems.push(''); renderWorkEditor(); render(); }
+
+// ── 写真エディタ描画 ──
+function renderPhotoEditor(){
+  const el = document.getElementById('photo-editor');
+  el.innerHTML = photos.map((p,i)=>`
+    <div class="photo-edit">
+      <div class="photo-edit-head">
+        <input type="text" value="${escH(p.label)}" placeholder="ラベル（例：【施工前】）" oninput="photos[${i}].label=this.value;render()">
+        <button class="del-btn" onclick="removePhotoBlock(${i})" title="この写真枠を削除">✕</button>
+      </div>
+      <div class="photo-drop" onclick="pickPhoto(${i})">
+        ${p.data
+          ? `<img src="${p.data}" alt=""><button class="photo-clear" onclick="event.stopPropagation();clearPhoto(${i})" title="写真を消す">✕</button>`
+          : '📷 タップして写真を選択<br>（撮影・ライブラリ）'}
+      </div>
+    </div>`).join('');
+}
+function addPhotoBlock(){ photos.push({label:'【施工写真】', data:''}); renderPhotoEditor(); render(); }
+function removePhotoBlock(i){ photos.splice(i,1); renderPhotoEditor(); render(); }
+function clearPhoto(i){ photos[i].data=''; renderPhotoEditor(); render(); }
+function pickPhoto(i){ pickTargetIdx=i; document.getElementById('photo-file-input').click(); }
+
+function handlePhotoPick(event){
+  const file = event.target.files[0];
+  event.target.value = '';
+  if(!file || pickTargetIdx<0) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const MAX = 1400;
+      let w = img.width, h = img.height;
+      if(w>MAX || h>MAX){ const s=Math.min(MAX/w, MAX/h); w=Math.round(w*s); h=Math.round(h*s); }
+      const canvas = document.createElement('canvas');
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      photos[pickTargetIdx].data = canvas.toDataURL('image/jpeg', 0.85);
+      renderPhotoEditor();
+      render();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── プレビュー描画 ──
+function render(){
+  const atena = document.getElementById('atena').value;
+  const dateStr = fmtDateJP(document.getElementById('hakkoDate').value);
+  const kojimei = document.getElementById('kojimei').value;
+  const kojiloc = document.getElementById('kojiloc').value;
+  const kojiperiod = document.getElementById('kojiperiod').value;
+  const greeting = document.getElementById('greeting').value;
+  const tantou = (document.getElementById('tantou').value||'').trim();
+
+  const workHTML = workItems
+    .map(w=>w.trim()).filter(Boolean)
+    .map((w,i)=>`<li data-n="${i+1}">${escH(w)}</li>`).join('') || '<li data-n="1" style="color:#aaa;">（工事内容を入力してください）</li>';
+
+  const photoHTML = photos.map(p=>{
+    const inner = p.data
+      ? `<img src="${p.data}" alt="">`
+      : '<span class="kh-ph-empty">写真未選択</span>';
+    return `<div class="kh-photo-block">
+      <div class="kh-photo-lbl">${escH(p.label)}</div>
+      <div class="kh-photo-frame">${inner}</div>
+    </div>`;
+  }).join('');
+
+  const footerInfo = `株式会社アート・レイズ　〒874-0829　大分県別府市上原町13番25号${tantou?`　担当：${escH(tantou)}`:''}`;
+
+  document.getElementById('doc-page').innerHTML = `
+    <div class="kh-header">
+      <h1>工事完了報告書</h1>
+      <span class="kh-date">${escH(dateStr)}</span>
+    </div>
+    <div class="kh-divider"></div>
+    <div class="kh-addressee-block">
+      <div class="kh-addressee">${escH(atena)||'&nbsp;'}</div>
+      <p class="kh-greeting">${escH(greeting).replace(/\n/g,'<br>')}</p>
+    </div>
+    <table class="kh-overview">
+      <tr><td class="lbl">工 事 名</td><td>${escH(kojimei)}</td></tr>
+      <tr><td class="lbl">工事場所</td><td>${escH(kojiloc)}</td></tr>
+      <tr><td class="lbl">工事期間</td><td>${escH(kojiperiod)}</td></tr>
+    </table>
+    <div class="kh-sec">■ 工事内容</div>
+    <ul class="kh-work-list">${workHTML}</ul>
+    <div class="kh-photo-sec">
+      <div class="kh-sec">■ 施工写真</div>
+      <div style="height:8px"></div>
+      <div class="kh-photos">${photoHTML}</div>
+    </div>
+    <div class="kh-footer">
+      <img src="${LOGO_B64}" alt="Art-rays">
+      <div class="kh-footer-info">${footerInfo}</div>
+    </div>`;
+  scalePreview();
+}
+
+function clearAllData(){
+  if(!confirm('入力内容をすべてクリアしますか？')) return;
+  document.getElementById('ankenKey').value='';
+  document.getElementById('fileSuffix').value='';
+  document.getElementById('atena').value='';
+  document.getElementById('kojimei').value='';
+  document.getElementById('kojiloc').value='';
+  document.getElementById('kojiperiod').value='';
+  document.getElementById('greeting').value='下記の工事が完了いたしましたのでご報告申し上げます。';
+  document.getElementById('tantou').value='';
+  workItems = ['', '', ''];
+  photos = [{label:'【施工前】',data:''},{label:'【施工後】',data:''}];
+  renderWorkEditor(); renderPhotoEditor(); updateDocTitle(); render();
+}
+
+// ── プレビュー スケーリング ──
+function scalePreview(){
+  const area=document.getElementById('preview-area');
+  const inner=document.getElementById('preview-inner');
+  const page=document.getElementById('doc-page');
+  if(!page)return;
+  const PAD=20;
+  const available=area.clientWidth-PAD*2;
+  if(available<=0)return;
+  const scale=Math.min(1,available/794);
+  inner.style.transform=`scale(${scale})`;
+  inner.style.width=(794*scale)+'px';
+  inner.style.marginBottom=`-${(1-scale)*page.offsetHeight}px`;
+}
+
+// ── ⋮メニュー ──
+function toggleTopMenu(e){
+  e.stopPropagation();
+  const m=document.getElementById('top-menu');
+  m.style.display = m.style.display==='none' ? 'block' : 'none';
+}
+function closeTopMenu(){ document.getElementById('top-menu').style.display='none'; }
+document.addEventListener('click', e=>{
+  const m=document.getElementById('top-menu'), b=document.getElementById('tb-menu-btn');
+  if(m.style.display==='block' && !m.contains(e.target) && !b.contains(e.target)) closeTopMenu();
+});
+
+// ── PDF保存 ──
+function loadHtml2Pdf(){
+  return new Promise((resolve,reject)=>{
+    if(window.html2pdf){ resolve(window.html2pdf); return; }
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js';
+    s.onload=()=>resolve(window.html2pdf);
+    s.onerror=()=>reject(new Error('html2pdf.js の読み込みに失敗しました'));
+    document.head.appendChild(s);
+  });
+}
+async function savePDF(){
+  const btn=document.getElementById('tb-savepdf-btn');
+  const label=btn?btn.querySelector('.tb-label'):null;
+  const labelText=label?label.textContent:'';
+  if(label) label.textContent='生成中…';
+  if(btn) btn.disabled=true;
+  try{
+    const html2pdfFn=await loadHtml2Pdf();
+    const previewInner=document.getElementById('preview-inner');
+    const clone=previewInner.cloneNode(true);
+    clone.style.transform='none';
+    clone.style.width='auto';
+    clone.style.marginBottom='0';
+    clone.querySelectorAll('.doc-page').forEach(pg=>{
+      pg.style.boxShadow='none';
+      pg.style.margin='0 auto';
+    });
+    const fileBase=(document.title||'工事完了報告書').replace(/[\\\/:*?"<>|]/g,'_');
+    const opt={
+      margin:0,
+      filename:fileBase+'.pdf',
+      image:{type:'jpeg',quality:0.95},
+      html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false},
+      jsPDF:{unit:'mm',format:'a4',orientation:'portrait',compress:true},
+      pagebreak:{mode:['css','legacy']}
+    };
+    await html2pdfFn().set(opt).from(clone).save();
+  }catch(err){
+    console.error(err);
+    alert('PDF保存に失敗しました：'+(err.message||err));
+  }finally{
+    if(label) label.textContent=labelText;
+    if(btn) btn.disabled=false;
+  }
+}
+
+function printHTML(){
+  const previewInner=document.getElementById('preview-inner');
+  const styles=Array.from(document.querySelectorAll('style')).map(s=>s.outerHTML).join('\n');
+  const html=`<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>印刷プレビュー</title>${styles}
+<style>
+  body{background:#fff!important;margin:0;padding:0;}
+  #preview-inner{transform:none!important;width:auto!important;margin:0!important;}
+  .doc-page{box-shadow:none!important;margin:0 auto!important;}
+  @page{margin:0;size:A4;}
+</style></head><body>${previewInner.outerHTML}
+<scr`+`ipt>window.addEventListener('load',()=>{setTimeout(()=>window.print(),400);});<\/scr`+`ipt>
+</body></html>`;
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.target='_blank'; a.rel='noopener'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+}
+
+// ── リサイザー ──
+const resizer=document.getElementById('resizer');
+const editorEl=document.querySelector('.editor');
+let isResizing=false,startX=0,startW=0;
+resizer.addEventListener('mousedown',e=>{isResizing=true;startX=e.clientX;startW=editorEl.offsetWidth;resizer.classList.add('dragging');document.body.style.cursor='col-resize';document.body.style.userSelect='none';});
+document.addEventListener('mousemove',e=>{if(!isResizing)return;const w=Math.max(320,Math.min(window.innerWidth*0.7,startW+(e.clientX-startX)));editorEl.style.width=w+'px';scalePreview();});
+document.addEventListener('mouseup',()=>{if(!isResizing)return;isResizing=false;resizer.classList.remove('dragging');document.body.style.cursor='';document.body.style.userSelect='';});
+
+// ── スマホタブ切替 ──
+function spGoTab(tab){
+  const main=document.getElementById('main-area');
+  const tabEdit=document.getElementById('sp-tab-edit');
+  const tabPv=document.getElementById('sp-tab-preview');
+  const navBack=document.getElementById('sp-nav-back');
+  const navNext=document.getElementById('sp-nav-next');
+  const navPrint=document.getElementById('sp-nav-print');
+  if(tab==='preview'){
+    main.classList.add('sp-show-preview');
+    render();
+    tabEdit.classList.remove('active'); tabPv.classList.add('active');
+    navBack.style.display=''; navNext.style.display='none'; navPrint.style.display='';
+    requestAnimationFrame(()=>{ scalePreview(); const a=document.getElementById('preview-area'); if(a) a.scrollTop=0; });
+  }else{
+    main.classList.remove('sp-show-preview');
+    tabEdit.classList.add('active'); tabPv.classList.remove('active');
+    navBack.style.display='none'; navNext.style.display=''; navPrint.style.display='none';
+  }
+}
+
+// ━━━ 案件選択 ━━━
+async function loadAnkenData(){
+  try{
+    const res=await fetch('./data.json',{cache:'no-cache'});
+    if(res.ok){ ankenData=await res.json(); ankenDataLoaded=true; enableAnkenBtn(); return; }
+  }catch(e){}
+  try{
+    const res=await fetch(DATA_JSON_URL,{cache:'no-cache'});
+    if(res.ok){ ankenData=await res.json(); ankenDataLoaded=true; enableAnkenBtn(); return; }
+  }catch(e){}
+  ankenDataLoaded=false;
+  const b=document.getElementById('ankenSelectBtn');
+  if(b){ b.style.display='inline-block'; b.title='data.json取得失敗（手入力で運用）'; }
+}
+function enableAnkenBtn(){ const b=document.getElementById('ankenSelectBtn'); if(b) b.style.display='inline-block'; }
+function openAnkenSelector(){
+  const modal=document.getElementById('anken-modal');
+  modal.style.display='flex';
+  const search=document.getElementById('anken-search'); search.value='';
+  if(!ankenDataLoaded){
+    document.getElementById('anken-list').innerHTML='<div style="padding:32px 20px;text-align:center;color:#666;font-size:13px;line-height:1.6;">案件データ（data.json）を取得できませんでした。<br>GitHub Pages 経由で開くか、手入力で作成してください。</div>';
+    document.getElementById('anken-status').textContent='案件データ未取得';
+    return;
+  }
+  search.focus();
+  renderAnkenList(ankenData.案件||[]);
+  document.getElementById('anken-status').textContent=`案件 ${(ankenData.案件||[]).length} 件・キーワードで絞り込み可能`;
+}
+function closeAnkenSelector(){ document.getElementById('anken-modal').style.display='none'; }
+document.addEventListener('click',e=>{ const m=document.getElementById('anken-modal'); if(m && e.target===m) closeAnkenSelector(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ const m=document.getElementById('anken-modal'); if(m && m.style.display==='flex') closeAnkenSelector(); }});
+function filterAnkenList(){
+  const q=document.getElementById('anken-search').value.trim().toLowerCase();
+  const all=ankenData.案件||[];
+  if(!q){ renderAnkenList(all); document.getElementById('anken-status').textContent=`案件 ${all.length} 件`; return; }
+  const filtered=all.filter(a=>[a.案件キー,a.正式工事名,a.顧客略,a.施工場所,a.備考,a.旧案件番号].filter(Boolean).join(' ').toLowerCase().includes(q));
+  renderAnkenList(filtered);
+  document.getElementById('anken-status').textContent=`${filtered.length} / ${all.length} 件`;
+}
+function renderAnkenList(list){
+  const wrap=document.getElementById('anken-list');
+  if(!list.length){ wrap.innerHTML='<div style="padding:40px 20px;text-align:center;color:#888;font-size:12px;">該当する案件がありません</div>'; return; }
+  wrap.innerHTML=list.map(a=>{
+    const key=a.案件キー||'', name=a.正式工事名||'', place=a.施工場所||'', status=a.ステータス||'';
+    const oldNo=a.旧案件番号?`<span style="font-size:10px;color:#888;margin-left:6px;">(${escH(a.旧案件番号)})</span>`:'';
+    return `<div onclick="selectAnken('${escAttr(key)}')" style="padding:10px 18px;border-bottom:1px solid #eee;cursor:pointer;" onmouseover="this.style.background='#f0f4f8'" onmouseout="this.style.background='transparent'">
+      <div style="font-size:13px;font-weight:600;color:#333;">${escH(name)}${oldNo}</div>
+      <div style="font-size:11px;color:#666;margin-top:2px;">${escH(key)}</div>
+      <div style="font-size:10px;color:#888;margin-top:2px;">${escH(place)}　<span style="color:#aaa;">${escH(status)}</span></div>
+    </div>`;
+  }).join('');
+}
+function selectAnken(ankenKey){
+  const a=(ankenData.案件||[]).find(x=>x.案件キー===ankenKey);
+  if(!a){ alert('案件が見つかりません'); return; }
+  const customer=(ankenData.取引先マスター||[]).find(t=>t.略称===a.顧客略);
+  document.getElementById('ankenKey').value=a.案件キー||'';
+  if(customer){
+    const fullname=customer.正式名称||'';
+    const isCompany=/株式会社|有限会社|合同会社|合資会社|社会福祉法人|医療法人|学校法人|宗教法人|NPO|協同組合/.test(fullname);
+    document.getElementById('atena').value = fullname ? (isCompany?`${fullname} 御中`:`${fullname} 様`) : '';
+  }
+  document.getElementById('kojimei').value=a.正式工事名||'';
+  document.getElementById('kojiloc').value=a.施工場所||'';
+  // 発行日＝今日
+  const t=new Date();
+  document.getElementById('hakkoDate').value=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+  updateDocTitle();
+  render();
+  closeAnkenSelector();
+}
+
+// ── 初期化 ──
+document.getElementById('hakkoDate').value=new Date().toISOString().slice(0,10);
+renderWorkEditor();
+renderPhotoEditor();
+updateDocTitle();
+render();
+window.addEventListener('resize',scalePreview);
+window.addEventListener('DOMContentLoaded',loadAnkenData);
+</script>
+</body>
+</html>
