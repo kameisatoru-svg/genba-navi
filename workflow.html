@@ -224,6 +224,11 @@ body {
 .item.todo .item-state { background: var(--border); color: var(--text-sub); }
 .item.na   .item-state { background: transparent; color: var(--text-mute); border: 1px dashed var(--na); }
 
+/* 自動完了（案件データから確定）: ロック表示＋青「自動」バッジ */
+.item.auto { cursor: default; }
+.item.auto:hover { background: transparent; }
+.item.auto .item-state { background: #5b8fc9; color: #fff; border: none; }
+
 /* ボタンバー */
 .actions {
   display: flex;
@@ -721,7 +726,8 @@ function render() {
   $('#content').innerHTML = headHtml + carryHtml + bodyHtml + actionsHtml;
 
   // イベント（持ち越し項目も `.item` クラスを持つので同じハンドラで処理可能）
-  document.querySelectorAll('.item').forEach(el => {
+  // 自動完了項目（.auto）はロックするのでハンドラを付けない
+  document.querySelectorAll('.item:not(.auto)').forEach(el => {
     el.addEventListener('click', () => toggleItem(el.dataset.key));
   });
   $('#btn-save')?.addEventListener('click', saveChecks);
@@ -742,6 +748,8 @@ function renderError(title, msg) {
 ---------------------------------------------------------- */
 // 4状態循環: todo → wip → done → na → todo
 function toggleItem(key) {
+  // 自動完了項目はロック（クリック無効）
+  if (isAutoChecked(STATE.anken, key, { masters: STATE.masters || [] })) return;
   const cur = STATE.checks[key] || 'todo';
   const next = cur === 'todo' ? 'wip'
              : cur === 'wip'  ? 'done'
