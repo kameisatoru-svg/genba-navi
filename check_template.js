@@ -38,6 +38,18 @@
    - スキーマ変更時は dashboard.html / workflow.html / anken-checklist SKILL.md
      の3つを同時に確認すること
    - 単純なテキストエディタでも開けるよう、シンプルなJS定数として保つ
+
+   命名規約（2026/6/1 統一・重複整理）:
+   - 書類フローは必ず「PDF発行 → 送付 → data.json に反映」の3点をこの順で並べる
+       * id は pdf / send / register（ステージidで一意になるので接頭辞は付けない）
+       * label は「○○書PDF発行」「○○書送付」「data.json に反映」で統一
+       * 「data.json に反映」の detail に、どの配列・項目を更新するかを書く
+   - 写真項目は「○○写真の撮影」で統一（着工前・完工 など）
+   - カレンダー項目は「カレンダー登録（用途）」で統一（全角カッコ）
+   - 同じ書類実務を複数ステータスに重複して置かない。
+     例）契約書締結・注文請書は「施工予定」に集約。「見積提出済み」は
+         受注見込みの確認とドラフト準備までに留める（取りこぼしは
+         getCarryOverItems の持ち越し機構が拾う）
    ============================================================ */
 
 const CHECK_TEMPLATE = {
@@ -104,7 +116,7 @@ const CHECK_TEMPLATE = {
         icon: 'order-icon',
         color: '#27ae60',
         items: [
-          { id: 'send',      label: '顧客送付',                detail: 'メール・郵送・対面のいずれか' },
+          { id: 'send',      label: '見積書送付',              detail: 'メール・郵送・対面のいずれか' },
           { id: 'register',  label: 'data.json に反映',        detail: '案件の見積[]配列に追加' },
           { id: 'followup',  label: 'フォロー連絡',            detail: '提出から1週間以内に確認連絡' }
         ]
