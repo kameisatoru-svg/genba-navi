@@ -2053,6 +2053,18 @@
         "合計": 0,
         "件数": 0,
         "最終集計日": "2026-05-29"
+      },
+      "チェック": {
+        "contact.first": "done",
+        "contact.apo": "done",
+        "survey.schedule": "done",
+        "survey.photo": "done",
+        "survey.sumpo": "done",
+        "survey.memo": "done",
+        "prep.spec": "done",
+        "prep.mat": "done",
+        "prep.tanka": "done",
+        "prep.gyousha": "done"
       }
     },
     {
