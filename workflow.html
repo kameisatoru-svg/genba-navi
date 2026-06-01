@@ -571,6 +571,7 @@ async function init() {
     STATE.anken = a;
     STATE.checks = Object.assign({}, a['チェック'] || {});
     STATE.template = CHECK_TEMPLATE[a['ステータス']] || null;
+    STATE.masters = data['取引先マスター'] || [];
     render();
   } catch (err) {
     renderError('読込エラー', err.message);
