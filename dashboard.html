@@ -71,7 +71,7 @@
 html, body { margin: 0; padding: 0; }
 body {
   font-family: var(--font-base);
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.6;
   color: var(--text);
   background: var(--bg);
@@ -112,7 +112,7 @@ a { color: inherit; text-decoration: none; }
   display: flex;
   align-items: center;
   gap: 14px;
-  font-size: 12px;
+  font-size: 14px;
   color: rgba(255, 255, 255, 0.75);
   flex-wrap: wrap;
 }
@@ -125,7 +125,7 @@ a { color: inherit; text-decoration: none; }
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: var(--radius);
   padding: 6px 12px;
-  font-size: 12px;
+  font-size: 14px;
   transition: var(--transition);
   display: inline-flex;
   align-items: center;
@@ -172,7 +172,7 @@ a { color: inherit; text-decoration: none; }
 /* Phase 1 のプレースホルダ表示 */
 .placeholder {
   color: var(--text-mute);
-  font-size: 13px;
+  font-size: 15px;
   padding: 24px 16px;
   text-align: center;
   border: 1px dashed var(--border);
@@ -189,7 +189,7 @@ a { color: inherit; text-decoration: none; }
   align-items: center;
   justify-content: center;
   z-index: 200;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--primary);
 }
 .loader-overlay.hidden { display: none; }
@@ -212,19 +212,19 @@ a { color: inherit; text-decoration: none; }
   border-radius: var(--radius);
   padding: 14px 18px;
   margin-bottom: var(--gap);
-  font-size: 13px;
+  font-size: 15px;
   display: none;
 }
 .error-banner.show { display: block; }
 .error-banner .title { font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
-.error-banner code { font-family: var(--font-mono); font-size: 12px; background: rgba(192, 57, 43, 0.08); padding: 1px 5px; border-radius: 3px; }
+.error-banner code { font-family: var(--font-mono); font-size: 14px; background: rgba(192, 57, 43, 0.08); padding: 1px 5px; border-radius: 3px; }
 
 /* ----- フッター ----- */
 .dash-footer {
   max-width: 1400px;
   margin: 0 auto;
   padding: 16px 24px 40px;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-sub);
   text-align: center;
   border-top: 1px solid var(--border);
@@ -324,7 +324,7 @@ a { color: inherit; text-decoration: none; }
   word-break: break-all;
 }
 .kpi-value small { font-size: 0.5em; font-weight: 600; margin-left: 2px; color: var(--text-sub); }
-.kpi-label { font-size: 13px; color: var(--text-sub); margin-top: 4px; font-weight: 600; }
+.kpi-label { font-size: 15px; color: var(--text-sub); margin-top: 4px; font-weight: 600; }
 .kpi-sub { font-size: 11px; color: var(--text-mute); margin-top: 2px; }
 
 .kpi-primary { --kpi-color: var(--primary); }
@@ -397,7 +397,7 @@ a { color: inherit; text-decoration: none; }
   padding: 6px 8px 6px 28px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  font-size: 13px;
+  font-size: 15px;
   font-family: inherit;
   background: var(--card);
   color: var(--text);
@@ -407,7 +407,7 @@ a { color: inherit; text-decoration: none; }
   padding: 6px 10px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  font-size: 13px;
+  font-size: 15px;
   background: var(--card);
   color: var(--text);
   cursor: pointer;
@@ -416,7 +416,7 @@ a { color: inherit; text-decoration: none; }
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-sub);
   cursor: pointer;
   white-space: nowrap;
@@ -428,14 +428,14 @@ a { color: inherit; text-decoration: none; }
   border: 1px solid var(--border);
   border-radius: var(--radius);
   color: var(--text-sub);
-  font-size: 12px;
+  font-size: 14px;
   cursor: pointer;
   transition: var(--transition);
 }
 .kanban-clear:hover { background: var(--bg); border-color: var(--accent); color: var(--accent); }
 .kanban-filter-count {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-sub);
   margin-left: auto;
 }
@@ -472,7 +472,7 @@ a { color: inherit; text-decoration: none; }
   gap: 6px;
   padding: 4px 4px 8px;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 15px;
   color: var(--col-color, var(--primary));
   border-bottom: 1px solid var(--border);
   margin-bottom: 8px;
@@ -521,7 +521,7 @@ a { color: inherit; text-decoration: none; }
   line-height: 1.3;
 }
 .kanban-title {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text);
   margin-bottom: 3px;
@@ -544,7 +544,7 @@ a { color: inherit; text-decoration: none; }
 }
 .kanban-amt {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--col-color, var(--primary));
   margin-bottom: 2px;
@@ -663,7 +663,7 @@ a { color: inherit; text-decoration: none; }
   align-items: center;
   gap: 3px;
   font-weight: 700;
-  font-size: 12px;
+  font-size: 14px;
   white-space: nowrap;
 }
 .nyukin-mark.ok { color: var(--status-nyukin); }
@@ -711,7 +711,7 @@ a { color: inherit; text-decoration: none; }
 .reminder-icon .icon { width: 24px; height: 24px; }
 .reminder-body { flex: 1; min-width: 0; }
 .reminder-title {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--reminder-color);
   margin-bottom: 2px;
@@ -719,7 +719,7 @@ a { color: inherit; text-decoration: none; }
 }
 .reminder-anken {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--primary);
   word-break: break-all;
@@ -751,7 +751,7 @@ a { color: inherit; text-decoration: none; }
   gap: 8px;
   padding: 24px;
   color: var(--success);
-  font-size: 13px;
+  font-size: 15px;
 }
 .reminders-empty .icon { color: var(--success); width: 22px; height: 22px; }
 .reminders-summary {
@@ -803,7 +803,7 @@ a { color: inherit; text-decoration: none; }
   justify-content: center;
   height: 200px;
   color: var(--text-mute);
-  font-size: 13px;
+  font-size: 15px;
   font-style: italic;
 }
 
@@ -875,7 +875,7 @@ a { color: inherit; text-decoration: none; }
 .search-input {
   width: 100%;
   font-family: var(--font-base);
-  font-size: 13px;
+  font-size: 15px;
   padding: 7px 12px 7px 34px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -939,7 +939,7 @@ a { color: inherit; text-decoration: none; }
   border-bottom: 1px solid var(--border);
   text-decoration: none;
   color: var(--text);
-  font-size: 13px;
+  font-size: 15px;
   cursor: pointer;
   transition: background 0.15s;
 }
@@ -968,7 +968,7 @@ a { color: inherit; text-decoration: none; }
 .search-empty {
   padding: 14px;
   text-align: center;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-mute);
   font-style: italic;
 }
@@ -1031,7 +1031,7 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: 0.02em;
 }
 .partner-ryaku {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 800;
   color: var(--primary);
   line-height: 1.3;
@@ -1147,7 +1147,7 @@ a { color: inherit; text-decoration: none; }
   display: grid;
   grid-template-columns: minmax(0, auto) 1fr;
   gap: 6px 12px;
-  font-size: 13px;
+  font-size: 15px;
 }
 .modal-contact-grid dt {
   color: var(--text-sub);
@@ -1170,7 +1170,7 @@ a { color: inherit; text-decoration: none; }
   background: var(--bg);
   border-radius: var(--radius);
   padding: 10px 12px;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.6;
   color: var(--text);
   white-space: pre-wrap;
@@ -1189,7 +1189,7 @@ a { color: inherit; text-decoration: none; }
   border-radius: var(--radius);
   text-decoration: none;
   color: var(--text);
-  font-size: 12px;
+  font-size: 14px;
   cursor: pointer;
   transition: var(--transition);
 }
@@ -1206,7 +1206,7 @@ a { color: inherit; text-decoration: none; }
 .modal-empty {
   color: var(--text-mute);
   font-style: italic;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 /* ----- 案件モーダル: チェックセクション ----- */
@@ -1233,7 +1233,7 @@ a { color: inherit; text-decoration: none; }
 }
 .modal-check-progress-label {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text-sub);
   white-space: nowrap;
@@ -1247,7 +1247,7 @@ a { color: inherit; text-decoration: none; }
 .modal-check-stage-head {
   padding: 8px 12px;
   background: var(--bg);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text-sub);
   display: flex;
@@ -1316,12 +1316,12 @@ a { color: inherit; text-decoration: none; }
 .modal-check-item.na .modal-check-mark::after {
   content: '—';
   color: var(--text-mute);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   line-height: 1;
 }
 .modal-check-body { flex: 1; min-width: 0; }
-.modal-check-label { font-size: 13px; font-weight: 600; color: var(--text); }
+.modal-check-label { font-size: 15px; font-weight: 600; color: var(--text); }
 .modal-check-state-tag {
   font-size: 10px;
   font-weight: 700;
@@ -1346,7 +1346,7 @@ a { color: inherit; text-decoration: none; }
   color: #fff;
   border: none;
   border-radius: var(--radius);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   transition: var(--transition);
@@ -1364,7 +1364,7 @@ a { color: inherit; text-decoration: none; }
   padding: 12px;
   background: var(--bg);
   border-radius: var(--radius);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-mute);
   text-align: center;
 }
@@ -1385,7 +1385,7 @@ a { color: inherit; text-decoration: none; }
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   color: #7c4a13;
 }
@@ -1454,7 +1454,7 @@ a { color: inherit; text-decoration: none; }
   border: 1px solid var(--accent);
   color: var(--accent);
   border-radius: var(--radius);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   transition: var(--transition);
@@ -1491,7 +1491,7 @@ a { color: inherit; text-decoration: none; }
 }
 .anken-edit-row:last-of-type { margin-bottom: 0; }
 .anken-edit-label {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-sub);
   flex-shrink: 0;
   min-width: 88px;
@@ -1499,7 +1499,7 @@ a { color: inherit; text-decoration: none; }
 .anken-edit-select {
   flex: 1;
   font-family: var(--font-base);
-  font-size: 13px;
+  font-size: 15px;
   padding: 5px 8px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -1528,7 +1528,7 @@ a { color: inherit; text-decoration: none; }
   color: #fff;
   border: none;
   border-radius: var(--radius);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   transition: var(--transition);
@@ -1542,13 +1542,13 @@ a { color: inherit; text-decoration: none; }
   border: 1px solid var(--border);
   color: var(--text-sub);
   border-radius: var(--radius);
-  font-size: 12px;
+  font-size: 14px;
   cursor: pointer;
   transition: var(--transition);
 }
 .anken-edit-cancel:hover { border-color: var(--danger); color: var(--danger); }
 .anken-edit-status {
-  font-size: 12px;
+  font-size: 14px;
   margin-top: 8px;
   min-height: 18px;
 }
@@ -1587,7 +1587,7 @@ a { color: inherit; text-decoration: none; }
 }
 .pat-modal-title .icon { width: 20px; height: 20px; color: var(--accent); }
 .pat-modal-desc {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-sub);
   line-height: 1.6;
   margin-bottom: 14px;
@@ -1602,7 +1602,7 @@ a { color: inherit; text-decoration: none; }
 .pat-input {
   width: 100%;
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 15px;
   padding: 8px 10px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -1629,7 +1629,7 @@ a { color: inherit; text-decoration: none; }
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--primary);
   font-weight: 600;
   cursor: pointer;
@@ -1673,7 +1673,7 @@ a { color: inherit; text-decoration: none; }
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4px 14px;
-  font-size: 13px;
+  font-size: 15px;
 }
 .modal-cost-grid .cost-label {
   font-size: 11px;
@@ -1704,7 +1704,7 @@ a { color: inherit; text-decoration: none; }
   border: none;
   padding: 0;
   font-weight: 700;
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 0.02em;
 }
 .anken-key-btn:hover { text-decoration: underline; }
@@ -1727,7 +1727,7 @@ a { color: inherit; text-decoration: none; }
   padding: 8px 16px;
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
-  font-size: 13px;
+  font-size: 15px;
   z-index: 300;
   opacity: 0;
   pointer-events: none;
@@ -1776,7 +1776,7 @@ a { color: inherit; text-decoration: none; }
 }
 @media (max-width: 400px) {
   /* Galaxy Z Fold5 縦持ち */
-  body { font-size: 12px; }
+  body { font-size: 14px; }
   .dash-title { font-size: 0.95em; }
   .dash-meta .label { display: none; }
   .dash-btn { padding: 4px 8px; font-size: 11px; }
@@ -1842,7 +1842,7 @@ a { color: inherit; text-decoration: none; }
   .dash-section { padding: 16px; }
 }
 @media (max-width: 400px) {
-  body { font-size: 13px; }
+  body { font-size: 15px; }
   .dash-meta { font-size: 11px; gap: 8px; }
 }
 </style>
