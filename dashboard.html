@@ -2239,6 +2239,13 @@ a { color: inherit; text-decoration: none; }
 </div>
 
 <!-- ============================================================
+     トップへ戻るボタン
+     ============================================================ -->
+<button class="to-top" id="btn-to-top" type="button" aria-label="ページの先頭に戻る">
+  <svg class="icon" aria-hidden="true"><use href="#icon-arrow-up"/></svg>
+</button>
+
+<!-- ============================================================
      フッター (Section 10)
      ============================================================ -->
 <footer class="dash-footer">
@@ -4313,6 +4320,21 @@ function bindEvents() {
     log('print requested');
     window.print();
   });
+
+  // トップへ戻る: 一定量スクロールしたら表示、クリックで先頭へスムーズスクロール
+  const toTop = $('#btn-to-top');
+  if (toTop) {
+    const onScroll = () => {
+      const y = window.scrollY || document.documentElement.scrollTop || 0;
+      toTop.classList.toggle('show', y > 300);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    toTop.addEventListener('click', () => {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+    });
+  }
 
   // 取引先モーダル閉じる: ✕ボタン / 背景クリック
   $('#modal-close')?.addEventListener('click', () => closePartnerModal());
