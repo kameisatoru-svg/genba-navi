@@ -2333,11 +2333,13 @@ function calcCheckProgress(anken) {
   const tpl = CHECK_TEMPLATE[anken['ステータス']];
   if (!tpl) return null;
   const checks = anken['チェック'] || {};
+  // 自動完了（案件データから確定）を重ねた実効状態で集計
+  const eff = getEffectiveChecks(anken, checks, { masters: STATE.取引先マスター });
   let raw = 0, done = 0, na = 0, nextLabel = '';
   for (const stage of tpl.stages) {
     for (const item of stage.items) {
       raw++;
-      const state = checks[`${stage.id}.${item.id}`];
+      const state = eff[`${stage.id}.${item.id}`];
       if (state === 'done')      done++;
       else if (state === 'na')   na++;
       else if (!nextLabel)       nextLabel = item.label;  // 未着手・着手中の最初の項目
