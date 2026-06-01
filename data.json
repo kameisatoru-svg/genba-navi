@@ -2057,8 +2057,8 @@
       "チェック": {
         "contact.first": "done",
         "contact.apo": "done",
-        "survey.schedule": "done",
         "survey.photo": "done",
+        "survey.schedule": "done",
         "survey.sumpo": "done",
         "survey.memo": "done",
         "prep.spec": "done",
