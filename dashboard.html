@@ -3719,25 +3719,27 @@ function renderModalCheckSection(a) {
   }
 
   const checks = MODAL_CHECK_STATE.current;
+  const eff = getEffectiveChecks(a, checks, ctx);
   let raw = 0, done = 0, na = 0;
   const stagesHtml = tpl.stages.map(stage => {
     const itemsHtml = stage.items.map(item => {
       const key = `${stage.id}.${item.id}`;
-      const state = checks[key] || 'todo';
+      const auto = isAutoChecked(a, key, ctx);
+      const state = auto ? 'done' : (checks[key] || 'todo');
       raw++;
       if (state === 'done') done++;
       else if (state === 'na') na++;
-      const stateLabel = state === 'done' ? '完了' : state === 'wip' ? '着手' : state === 'na' ? '該当なし' : '未';
+      const stateLabel = auto ? '自動' : state === 'done' ? '完了' : state === 'wip' ? '着手' : state === 'na' ? '該当なし' : '未';
       return `
-        <div class="modal-check-item ${state}" data-check-key="${escapeHtml(key)}">
+        <div class="modal-check-item ${state}${auto ? ' auto' : ''}" data-check-key="${escapeHtml(key)}"${auto ? ' data-auto="1" title="案件データから自動で完了と判定"' : ''}>
           <div class="modal-check-mark"><svg class="icon"><use href="#icon-check-circle"/></svg></div>
           <div class="modal-check-body"><div class="modal-check-label">${escapeHtml(item.label)}</div></div>
           <div class="modal-check-state-tag">${stateLabel}</div>
         </div>
       `;
     }).join('');
-    const stageDone = stage.items.filter(i => checks[`${stage.id}.${i.id}`] === 'done').length;
-    const stageNa   = stage.items.filter(i => checks[`${stage.id}.${i.id}`] === 'na').length;
+    const stageDone = stage.items.filter(i => eff[`${stage.id}.${i.id}`] === 'done').length;
+    const stageNa   = stage.items.filter(i => eff[`${stage.id}.${i.id}`] === 'na').length;
     const stageDenom = stage.items.length - stageNa;
     return `
       <div class="modal-check-stage">
