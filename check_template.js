@@ -344,6 +344,8 @@ function getCarryOverItems(anken, ctx) {
     if (!tpl || !tpl.stages) continue;
     for (const stage of tpl.stages) {
       for (const item of stage.items) {
+        // 規模・元請で非表示の項目は持ち越し対象にしない
+        if (!shouldShowItem(stage.id, item.id, anken)) continue;
         const key = `${stage.id}.${item.id}`;
         // 自動完了（案件存在・データ有無から明らかに完了）の項目は持ち越さない
         const state = isAutoChecked(anken, key, ctx) ? 'done' : checks[key];

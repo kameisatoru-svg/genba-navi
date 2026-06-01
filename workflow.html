@@ -596,8 +596,8 @@ function render() {
   const ctx = { masters: STATE.masters || [] };
   const eff = getEffectiveChecks(a, STATE.checks, ctx);
 
-  // 進捗計算（該当なし=naは分母から除外）
-  const allItems = (tpl?.stages || []).flatMap(s => s.items.map(i => `${s.id}.${i.id}`));
+  // 進捗計算（該当なし=naは分母から除外・規模/元請で非表示の項目は除外）
+  const allItems = (tpl?.stages || []).flatMap(s => s.items.filter(i => shouldShowItem(s.id, i.id, a)).map(i => `${s.id}.${i.id}`));
   const doneCount = allItems.filter(k => eff[k] === 'done').length;
   const wipCount  = allItems.filter(k => eff[k] === 'wip').length;
   const naCount   = allItems.filter(k => eff[k] === 'na').length;
