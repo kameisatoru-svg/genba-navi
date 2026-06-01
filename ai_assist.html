@@ -693,11 +693,13 @@ function goBack(){
     ta.value = '';
     ta.style.height='auto';
     aiHistory.push({role:'user', content:text});
+    persistCurrent();   // ユーザー発言の時点で保存（API失敗でも残せる）
 
     var data = await loadData(false);
     if(!data){
       appendMsg('error', 'data.jsonを読み込めませんでした。GitHub Pages配下から開いていますか？');
       aiHistory.pop();
+      persistCurrent();
       return;
     }
 
@@ -733,6 +735,7 @@ function goBack(){
         }
         replaceMsg(thinkingId, 'APIエラー ('+res.status+')\n'+errText, 'error');
         aiHistory.pop();
+        persistCurrent();
         return;
       }
       var json = await res.json();
@@ -743,9 +746,11 @@ function goBack(){
       if(!reply) reply = '(返答が空でした)';
       replaceMsg(thinkingId, reply);
       aiHistory.push({role:'assistant', content:reply});
+      persistCurrent();   // AI返答を含めて再保存
     }catch(e){
       replaceMsg(thinkingId, '通信エラー: '+(e && e.message ? e.message : String(e)), 'error');
       aiHistory.pop();
+      persistCurrent();
     }finally{
       sendBtn.disabled = false;
       sendBtn.textContent = '送信';
