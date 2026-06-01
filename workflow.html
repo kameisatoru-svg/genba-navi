@@ -587,16 +587,20 @@ function render() {
   const status = a['ステータス'] || '';
   const sm = STATUS_META[status] || { color: 'var(--text-mute)' };
 
+  // 自動完了を重ねた実効状態（自動チェック項目は done 扱い）
+  const ctx = { masters: STATE.masters || [] };
+  const eff = getEffectiveChecks(a, STATE.checks, ctx);
+
   // 進捗計算（該当なし=naは分母から除外）
   const allItems = (tpl?.stages || []).flatMap(s => s.items.map(i => `${s.id}.${i.id}`));
-  const doneCount = allItems.filter(k => STATE.checks[k] === 'done').length;
-  const wipCount  = allItems.filter(k => STATE.checks[k] === 'wip').length;
-  const naCount   = allItems.filter(k => STATE.checks[k] === 'na').length;
+  const doneCount = allItems.filter(k => eff[k] === 'done').length;
+  const wipCount  = allItems.filter(k => eff[k] === 'wip').length;
+  const naCount   = allItems.filter(k => eff[k] === 'na').length;
   const total = allItems.length - naCount;
   const pct = total === 0 ? 0 : Math.round((doneCount / total) * 100);
 
-  // 持ち越し算出（現在の checks 状態で再計算）
-  const carryOver = getCarryOverItems({ ...a, 'チェック': STATE.checks });
+  // 持ち越し算出（現在の checks 状態で再計算・自動完了は除外）
+  const carryOver = getCarryOverItems({ ...a, 'チェック': STATE.checks }, ctx);
 
   const headHtml = `
     <div class="head">
@@ -668,13 +672,15 @@ function render() {
     bodyHtml = tpl.stages.map(stage => {
       const itemsHtml = stage.items.map(item => {
         const key = `${stage.id}.${item.id}`;
-        const state = STATE.checks[key] || 'todo';
-        const stateLabel = state === 'done' ? '完了'
+        const auto = isAutoChecked(a, key, ctx);
+        const state = auto ? 'done' : (STATE.checks[key] || 'todo');
+        const stateLabel = auto ? '自動'
+                         : state === 'done' ? '完了'
                          : state === 'wip'  ? '着手中'
                          : state === 'na'   ? '該当なし'
                          : '未着手';
         return `
-          <div class="item ${state}" data-key="${escapeHtml(key)}">
+          <div class="item ${state}${auto ? ' auto' : ''}" data-key="${escapeHtml(key)}"${auto ? ' title="案件データから自動で完了と判定"' : ''}>
             <div class="item-check"><svg><use href="#check"/></svg></div>
             <div class="item-body">
               <div class="item-label">${escapeHtml(item.label)}</div>
@@ -684,8 +690,8 @@ function render() {
           </div>
         `;
       }).join('');
-      const stageDone = stage.items.filter(i => STATE.checks[`${stage.id}.${i.id}`] === 'done').length;
-      const stageNa   = stage.items.filter(i => STATE.checks[`${stage.id}.${i.id}`] === 'na').length;
+      const stageDone = stage.items.filter(i => eff[`${stage.id}.${i.id}`] === 'done').length;
+      const stageNa   = stage.items.filter(i => eff[`${stage.id}.${i.id}`] === 'na').length;
       const stageDenom = stage.items.length - stageNa;
       return `
         <div class="stage" style="--stage-color:${stage.color};">
