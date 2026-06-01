@@ -1934,7 +1934,8 @@
       "チェック": {
         "invoice.pdf": "wip",
         "invoice.send": "wip",
-        "invoice.register": "wip"
+        "invoice.register": "wip",
+        "docs.kanryousho": "wip"
       }
     },
     {
