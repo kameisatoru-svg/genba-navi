@@ -2568,6 +2568,7 @@ async function saveAnkenEdit(ankenKey) {
   const newStatus  = $('#sel-anken-status')?.value;
   const newKeiyaku = $('#sel-anken-keiyaku')?.value;
   const nyukinSel  = $('#sel-anken-nyukin')?.value;
+  const newScale   = $('#sel-anken-scale')?.value;
   const saveBtn    = $('#anken-edit-save-btn');
 
   statusEl.textContent = '保存中...';
@@ -2605,6 +2606,9 @@ async function saveAnkenEdit(ankenKey) {
     }
     if (idx === -1) throw new Error('案件が見つかりません: ' + ankenKey);
     const target = currentJson[bucket][idx];
+
+    // 工事規模（簡易/標準）
+    if (newScale) target['規模'] = newScale;
 
     // ステータス更新(+中止↔案件の自動移動)
     target['ステータス'] = newStatus;
