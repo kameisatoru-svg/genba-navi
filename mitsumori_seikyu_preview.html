@@ -364,6 +364,22 @@ tr.dragging{opacity:0.4;}
     <span>BCS.CSV出力</span>
   </button>
   <div class="tm-sep"></div>
+  <button class="tm-item" id="tm-save-ledger" onclick="closeTopMenu();saveToAnkenLedger()">
+    <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 4 L16 4 L20 8 L20 20 Q20 21 19 21 L5 21 Q4 21 4 20 L4 5 Q4 4 5 4 Z"/>
+      <path d="M8 4 L8 9 L15 9 L15 4"/>
+      <rect x="8" y="13" width="8" height="6" rx="0.5"/>
+    </svg>
+    <span>案件台帳へ保存（data.json）</span>
+  </button>
+  <button class="tm-item" id="tm-load-ledger" onclick="closeTopMenu();loadFromAnkenLedger()">
+    <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 7 Q3 5 5 5 L9 5 L11 7 L19 7 Q21 7 21 9 L21 18 Q21 20 19 20 L5 20 Q3 20 3 18 Z"/>
+      <path d="M12 17 L12 11 M9 14 L12 11 L15 14" opacity="0.85"/>
+    </svg>
+    <span>案件台帳から読み込み（data.json）</span>
+  </button>
+  <div class="tm-sep"></div>
   <button class="tm-item" id="tm-discount" onclick="closeTopMenu();applyDiscount()">
     <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
       <line x1="6" y1="18" x2="18" y2="6"/>
@@ -4117,6 +4133,291 @@ function showAnkenToast(msg){
   toast.style.opacity = '1';
   clearTimeout(toast._timer);
   toast._timer = setTimeout(()=>{ toast.style.opacity = '0'; }, 2400);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 案件台帳へ保存（data.json 書き戻し）
+// ダッシュボード/案件台帳と同じ GitHub Contents API 方式。
+// 現在の見積書/請求書の内容を、該当案件の「見積」または「請求」配列に
+// 追記（同じ書類番号があれば上書き更新）して保存する。
+// PATは localStorage 'artrise_gh_pat'（案件台帳・ダッシュボードと共用）。
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const LEDGER_GH_REPO = 'kameisatoru-svg/genba-navi';
+const LEDGER_GH_API  = `https://api.github.com/repos/${LEDGER_GH_REPO}/contents/data.json`;
+const LEDGER_PAT_KEY = 'artrise_gh_pat';
+const SNAPSHOT_KEY = '_genbaDoc'; // 明細ごと完全復元用の内部スナップショット格納キー（ダッシュボードは無視）
+
+async function saveToAnkenLedger(){
+  // ── 入力値の収集 ──
+  if(typeof updateDocTitle === 'function') updateDocTitle();
+  const v = id => (document.getElementById(id)?.value || '').trim();
+  const ankenKey = v('ankenKey');
+  if(!ankenKey){
+    alert('「案件キー」が未入力です。\n保存先の案件を特定できないため、案件キーを入力してください（例：ネクサス-大丸引戸修理-26）。');
+    return;
+  }
+  const isSeikyu = (docType === 'seikyu');
+  const bucketKey = isSeikyu ? '請求' : '見積';
+  const t = calcTotals();
+  const shoruiNo = document.title;                 // 書類番号 = 短縮_(サフィックス_)案件キー
+  const entry = {
+    '書類番号': shoruiNo,
+    '発行日': v('hakkoDate'),
+    '金額': t.total,                                // 税込合計
+    '備考': v('kojimei'),
+    'ファイル': shoruiNo + '.pdf'
+  };
+  const okyakuNo = v('mitsumoriNo');               // お客様向け番号（ARM/ARS-…）
+  if(okyakuNo) entry['お客様向け番号'] = okyakuNo;
+  if(isSeikyu){
+    entry['支払期限'] = v('shiharaiDate');
+    entry['入金状況'] = 'minyukin';                 // 既定: 未入金
+    entry['入金日'] = '';
+  }
+  // 明細ごと完全復元できるよう、内部スナップショットを同梱（ダッシュボード/案件台帳は無視）
+  entry[SNAPSHOT_KEY] = captureDocSnapshot();
+
+  // ── 確認ダイアログ ──
+  const confirmMsg =
+    `以下の内容を案件台帳（data.json）に保存します。\n\n`+
+    `案件キー：${ankenKey}\n`+
+    `区分：${bucketKey}書\n`+
+    `書類番号：${shoruiNo}\n`+
+    (okyakuNo ? `お客様向け番号：${okyakuNo}\n` : '')+
+    `発行日：${entry['発行日'] || '(未入力)'}\n`+
+    `金額（税込）：¥${t.total.toLocaleString()}\n\n`+
+    `※ ダッシュボード/案件台帳の案件内容に反映されます。`;
+  if(!confirm(confirmMsg)) return;
+
+  // ── PAT 取得（無ければ入力を促す）──
+  let pat = localStorage.getItem(LEDGER_PAT_KEY) || '';
+  if(!pat){
+    pat = (prompt('GitHub Personal Access Token を入力してください。\n（data.json を更新するために必要。案件台帳・ダッシュボードと共用、localStorageに保存されます）') || '').trim();
+    if(!pat){ showAnkenToast('保存をキャンセルしました'); return; }
+    localStorage.setItem(LEDGER_PAT_KEY, pat);
+  }
+
+  showAnkenToast('💾 保存中…');
+  try{
+    // 1. 現在の data.json と SHA を取得
+    const res = await fetch(LEDGER_GH_API, {
+      headers: { Authorization: `token ${pat}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if(res.status === 401){
+      localStorage.removeItem(LEDGER_PAT_KEY);
+      alert('GitHub Token が無効です。再度実行して設定し直してください。');
+      return;
+    }
+    if(!res.ok) throw new Error('data.json取得失敗 ' + res.status);
+    const fileData = await res.json();
+    const sha = fileData.sha;
+    const raw = atob(fileData.content.replace(/\n/g, ''));
+    const bytes = new Uint8Array(raw.length).map((_, i) => raw.charCodeAt(i));
+    const currentJson = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+
+    // 2. 案件（中止案件含む）を特定
+    const findIn = (list) => Array.isArray(list) ? list.findIndex(p => p['案件キー'] === ankenKey) : -1;
+    let bucket = '案件';
+    let idx = findIn(currentJson['案件']);
+    if(idx === -1){ idx = findIn(currentJson['中止案件']); bucket = '中止案件'; }
+    if(idx === -1) throw new Error('案件が見つかりません: ' + ankenKey + '\n案件台帳に登録済みの案件キーを入力してください。');
+    const target = currentJson[bucket][idx];
+
+    // 3. 見積/請求 配列へ追記（同一 書類番号 は上書き更新）
+    if(!Array.isArray(target[bucketKey])) target[bucketKey] = [];
+    const arr = target[bucketKey];
+    const exist = arr.findIndex(d => d && d['書類番号'] === shoruiNo);
+    let actionLabel;
+    if(exist !== -1){
+      const merged = Object.assign({}, arr[exist], entry);
+      // 既存の入金状況・入金日は保持（ダッシュボードでの手動更新を壊さない）
+      if(isSeikyu){
+        if(arr[exist]['入金状況']) merged['入金状況'] = arr[exist]['入金状況'];
+        if(arr[exist]['入金日'])   merged['入金日']   = arr[exist]['入金日'];
+      }
+      arr[exist] = merged;
+      actionLabel = '更新';
+    } else {
+      arr.push(entry);
+      actionLabel = '追加';
+    }
+
+    // 4. GitHub へ PUT
+    const jsonStr = JSON.stringify(currentJson, null, 2);
+    const encBytes = new TextEncoder().encode(jsonStr);
+    const encChars = Array.from(encBytes).map(b => String.fromCharCode(b)).join('');
+    const putRes = await fetch(LEDGER_GH_API, {
+      method: 'PUT',
+      headers: { Authorization: `token ${pat}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+      body: JSON.stringify({
+        message: `${bucketKey}書を案件台帳へ${actionLabel}: ${shoruiNo}`,
+        content: btoa(encChars),
+        sha
+      })
+    });
+    if(!putRes.ok){
+      const errTxt = await putRes.text().catch(()=> '');
+      throw new Error('保存失敗 ' + putRes.status + (errTxt ? '\n' + errTxt.slice(0,200) : ''));
+    }
+    showAnkenToast(`✅ ${bucketKey}書を案件台帳へ${actionLabel}しました（反映に1〜2分）`);
+  }catch(err){
+    console.error(err);
+    alert('案件台帳への保存に失敗しました：\n' + (err.message || err));
+    showAnkenToast('保存に失敗しました');
+  }
+}
+
+// ── 現在の書類状態を丸ごとスナップショット（明細・モード・率・表書き）──
+function captureDocSnapshot(){
+  const g = id => (document.getElementById(id)?.value || '');
+  const dc = x => JSON.parse(JSON.stringify(x || []));
+  return {
+    v: 1,
+    savedAt: new Date().toISOString(),
+    docType, mode, shokeihiRate, nebiki, hasuChousei,
+    header: {
+      atena:       g('atena'),
+      mitsumoriNo: g('mitsumoriNo'),
+      hakkoDate:   g('hakkoDate'),
+      shiharaiDate:g('shiharaiDate'),
+      kojimei:     g('kojimei'),
+      seshubasho:  g('seshubasho'),
+      koki:        g('koki'),
+      ankenKey:    g('ankenKey'),
+      fileSuffix:  g('fileSuffix')
+    },
+    flatItems:         dc(flatItems),
+    groupItems:        dc(groupItems),
+    groupSummaryItems: dc(groupSummaryItems)
+  };
+}
+
+// ── スナップショットから書類状態を復元（明細ごと完全復元）──
+function restoreDocSnapshot(snap){
+  if(!snap || typeof snap !== 'object') return false;
+  const setVal = (id, val) => { const el = document.getElementById(id); if(el && val != null) el.value = val; };
+  const dc = x => JSON.parse(JSON.stringify(x || []));
+  // 書類種別（ラベル・表示切替を伴う）→ 先に切替
+  if(snap.docType) switchDocType(snap.docType);
+  // モード
+  if(snap.mode){
+    mode = snap.mode;
+    const ms = document.getElementById('mode-select');
+    if(ms) ms.value = mode;
+  }
+  // 率・調整値
+  if(typeof snap.shokeihiRate === 'number'){ shokeihiRate = snap.shokeihiRate; setVal('shokeihiRateInput', shokeihiRate); }
+  nebiki = snap.nebiki || 0;           setVal('nebikiInput', nebiki);
+  hasuChousei = snap.hasuChousei || 0; setVal('hasuChouseiInput', hasuChousei);
+  // 表書き
+  const h = snap.header || {};
+  ['atena','mitsumoriNo','hakkoDate','shiharaiDate','kojimei','seshubasho','koki','ankenKey','fileSuffix']
+    .forEach(k => setVal(k, h[k]));
+  // 明細（const配列はin-place置換、letもspliceで統一）
+  flatItems.splice(0, flatItems.length, ...dc(snap.flatItems));
+  groupItems.splice(0, groupItems.length, ...dc(snap.groupItems));
+  groupSummaryItems.splice(0, groupSummaryItems.length, ...dc(snap.groupSummaryItems));
+  // 再描画
+  if(typeof updateDocTitle === 'function') updateDocTitle();
+  if(typeof renderEditor === 'function') renderEditor();
+  if(typeof render === 'function') render();
+  return true;
+}
+
+// ── data.json を最新取得（相対→GitHub Pages絶対 の多段フォールバック）──
+async function fetchDataJsonFresh(){
+  try{
+    const r = await fetch('./data.json', {cache:'no-cache'});
+    if(r.ok) return await r.json();
+  }catch(e){ /* file:// 等 */ }
+  const r2 = await fetch(DATA_JSON_URL, {cache:'no-cache'});
+  if(r2.ok) return await r2.json();
+  throw new Error('data.json を取得できませんでした');
+}
+
+// ── 案件台帳から保存済み書類を読み込み（明細ごと完全復元）──
+async function loadFromAnkenLedger(){
+  const ankenKey = (document.getElementById('ankenKey')?.value || '').trim();
+  let data;
+  showAnkenToast('📂 読み込み中…');
+  try{
+    data = await fetchDataJsonFresh();
+  }catch(e){
+    alert('data.jsonの取得に失敗しました：\n' + e.message + '\n\nGitHub Pages等のhttp(s)経由で開いてください（file://直開きは不可）。');
+    return;
+  }
+  const all = [].concat(data['案件'] || [], data['中止案件'] || []);
+  const candidates = [];
+  const pushDocs = (anken) => {
+    ['見積','請求'].forEach(bk => {
+      (anken[bk] || []).forEach(d => {
+        if(d && d[SNAPSHOT_KEY]) candidates.push({ankenKey: anken['案件キー'], bucket: bk, doc: d});
+      });
+    });
+  };
+  if(ankenKey){
+    const a = all.find(p => p['案件キー'] === ankenKey);
+    if(!a){ alert('案件が見つかりません: ' + ankenKey); return; }
+    pushDocs(a);
+    if(candidates.length === 0){
+      alert('この案件には復元可能な保存データ（明細付き）がありません。\n「案件台帳へ保存」で保存した書類が対象です。');
+      return;
+    }
+  } else {
+    all.forEach(pushDocs);
+    if(candidates.length === 0){
+      alert('復元可能な保存データ（明細付き）が見つかりません。\n先に「案件台帳へ保存」で保存してください。');
+      return;
+    }
+  }
+  // 新しい保存が上に来るよう並べ替え（savedAt降順）
+  candidates.sort((a,b)=>{
+    const sa = a.doc[SNAPSHOT_KEY]?.savedAt || '';
+    const sb = b.doc[SNAPSHOT_KEY]?.savedAt || '';
+    return sb.localeCompare(sa);
+  });
+  openLoadChooser(candidates);
+}
+
+// ── 読み込み対象選択モーダル ──
+function openLoadChooser(candidates){
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  document.getElementById('load-chooser-modal')?.remove();
+  const modal = document.createElement('div');
+  modal.id = 'load-chooser-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:10001;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:16px;';
+  const rows = candidates.map((c, i) => {
+    const d = c.doc;
+    const amt = (typeof d['金額'] === 'number') ? ('¥' + d['金額'].toLocaleString()) : '';
+    return `<button class="load-pick" data-i="${i}" style="display:block;width:100%;text-align:left;padding:11px 14px;border:none;border-bottom:1px solid #eee;background:#fff;cursor:pointer;font-family:inherit;">
+      <div style="font-weight:600;color:#23364f;font-size:13px;">${esc(d['書類番号'] || '(書類番号なし)')}</div>
+      <div style="font-size:11px;color:#777;margin-top:3px;">${esc(c.bucket)}書 ・ ${esc(d['発行日'] || '日付なし')} ・ ${esc(amt)}${ankenKeyHintNeeded(candidates) ? ' ・ 案件:' + esc(c.ankenKey) : ''}</div>
+    </button>`;
+  }).join('');
+  modal.innerHTML = `<div style="background:#fff;width:min(560px,94vw);max-height:82vh;border-radius:8px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.3);">
+    <div style="padding:13px 16px;background:#3a5070;color:#fff;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:14px;font-weight:600;">📂 保存データを読み込み</span>
+      <button id="load-chooser-close" style="background:transparent;border:none;color:#fff;font-size:18px;cursor:pointer;padding:0 4px;">✕</button>
+    </div>
+    <div style="font-size:11px;color:#666;padding:8px 16px;border-bottom:1px solid #eee;background:#f7f7f5;">復元する書類を選んでください（明細・表書きをそのまま再現します）</div>
+    <div style="overflow-y:auto;">${rows}</div>
+  </div>`;
+  document.body.appendChild(modal);
+  const close = () => modal.remove();
+  modal.addEventListener('click', e => { if(e.target === modal) close(); });
+  modal.querySelector('#load-chooser-close').addEventListener('click', close);
+  modal.querySelectorAll('.load-pick').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const c = candidates[parseInt(btn.dataset.i, 10)];
+      const ok = restoreDocSnapshot(c.doc[SNAPSHOT_KEY]);
+      close();
+      showAnkenToast(ok ? `✅ ${c.doc['書類番号']} を読み込みました` : '読み込みに失敗しました');
+    });
+  });
+}
+// 複数案件混在時のみ案件キーを併記
+function ankenKeyHintNeeded(candidates){
+  return new Set(candidates.map(c => c.ankenKey)).size > 1;
 }
 
 // 起動時に案件データを取得
