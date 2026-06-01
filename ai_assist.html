@@ -358,6 +358,9 @@ function goBack(){
   var ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
   var AI_MODEL = 'claude-sonnet-4-20250514';
   var STORAGE_KEY = 'ANTHROPIC_API_KEY';
+  var CURRENT_KEY = 'ai_assist_current_chat';   // 自動保存中の会話
+  var SAVED_KEY   = 'ai_assist_saved_chats';    // ユーザーが名前を付けて保存した会話リスト
+  var MAX_SAVED   = 50;                          // 保存リスト最大件数
 
   var aiHistory = [];       // {role, content}
   var aiDataCache = null;
@@ -373,6 +376,74 @@ function goBack(){
   function getKey(){ return (localStorage.getItem(STORAGE_KEY)||'').trim(); }
   function setKey(k){ localStorage.setItem(STORAGE_KEY, (k||'').trim()); }
 
+  // ─── 永続化（現在の会話） ───
+  function persistCurrent(){
+    try{
+      if(aiHistory.length === 0){
+        localStorage.removeItem(CURRENT_KEY);
+      }else{
+        localStorage.setItem(CURRENT_KEY, JSON.stringify({
+          messages: aiHistory,
+          updatedAt: new Date().toISOString()
+        }));
+      }
+    }catch(e){
+      console.warn('永続化失敗:', e);
+    }
+  }
+
+  function restoreCurrent(){
+    try{
+      var raw = localStorage.getItem(CURRENT_KEY);
+      if(!raw) return false;
+      var data = JSON.parse(raw);
+      if(!data || !Array.isArray(data.messages) || data.messages.length === 0) return false;
+      aiHistory = data.messages;
+      var box = document.getElementById('ai-messages');
+      box.innerHTML = '';
+      aiHistory.forEach(function(m){
+        appendMsg(m.role === 'user' ? 'user' : 'ai', m.content);
+      });
+      var when = data.updatedAt ? fmtDateTime(data.updatedAt) : '';
+      appendMsg('system', '前回の会話を復元しました（' + aiHistory.length + '件 ' + when + '）');
+      return true;
+    }catch(e){
+      console.warn('復元失敗:', e);
+      return false;
+    }
+  }
+
+  // ─── 保存済み会話の管理 ───
+  function getSavedList(){
+    try{
+      var raw = localStorage.getItem(SAVED_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }catch(e){
+      return [];
+    }
+  }
+  function setSavedList(list){
+    try{
+      localStorage.setItem(SAVED_KEY, JSON.stringify(list));
+    }catch(e){
+      alert('保存に失敗しました。localStorage容量超過の可能性があります。\n古い会話を削除してください。');
+    }
+  }
+
+  function fmtDateTime(iso){
+    try{
+      var d = new Date(iso);
+      return (d.getMonth()+1) + '/' + d.getDate() + ' ' +
+             ('0'+d.getHours()).slice(-2) + ':' + ('0'+d.getMinutes()).slice(-2);
+    }catch(e){ return ''; }
+  }
+
+  function escapeHtml(s){
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
   window.aiPromptKey = function(){
     var cur = getKey();
     var masked = cur ? cur.slice(0,8)+'…'+cur.slice(-4) : '(未設定)';
@@ -386,10 +457,99 @@ function goBack(){
 
   window.aiClearChat = function(){
     if(aiHistory.length===0) return;
-    if(!confirm('会話履歴をクリアしますか？')) return;
+    if(!confirm('現在の会話をクリアしますか？\n（保存していない場合は失われます。先に💾保存できます）')) return;
     aiHistory = [];
     var box = document.getElementById('ai-messages');
-    box.innerHTML = '<div class="ai-msg ai-msg-system">会話をクリアしました。</div>';
+    box.innerHTML = '<div class="ai-msg ai-msg-system">新規会話を開始しました。</div>';
+    persistCurrent();
+  };
+
+  // ─── この会話を保存 ───
+  window.aiSaveCurrent = function(){
+    if(aiHistory.length === 0){
+      alert('保存する会話がありません。');
+      return;
+    }
+    var firstUser = null;
+    for(var i=0; i<aiHistory.length; i++){
+      if(aiHistory[i].role === 'user'){ firstUser = aiHistory[i]; break; }
+    }
+    var defTitle = firstUser ? firstUser.content.replace(/\s+/g,' ').trim().slice(0,40) : '会話';
+    var title = prompt('保存するタイトル', defTitle);
+    if(title === null) return;
+    title = (title || defTitle).trim() || defTitle;
+
+    var list = getSavedList();
+    list.unshift({
+      id: 'c'+Date.now()+Math.random().toString(36).slice(2,6),
+      title: title,
+      savedAt: new Date().toISOString(),
+      messages: aiHistory.slice()
+    });
+    if(list.length > MAX_SAVED) list = list.slice(0, MAX_SAVED);
+    setSavedList(list);
+    appendMsg('system', '💾 「' + title + '」を保存しました（合計 ' + list.length + ' 件）');
+  };
+
+  // ─── 履歴モーダル ───
+  window.aiOpenHistory = function(){
+    var list = getSavedList();
+    var box = document.getElementById('ai-hist-list');
+    if(list.length === 0){
+      box.innerHTML = '<div class="ai-hist-empty">保存された会話はまだありません。<br>会話の途中で 💾 ボタンを押すと、タイトルを付けて保存できます。</div>';
+    }else{
+      box.innerHTML = list.map(function(c){
+        return '<div class="ai-hist-item">' +
+          '<button class="ai-hist-body" onclick="aiLoadChat(\''+ escapeHtml(c.id) +'\')">' +
+            '<div class="ai-hist-title">'+ escapeHtml(c.title) +'</div>' +
+            '<div class="ai-hist-meta">'+ fmtDateTime(c.savedAt) +' ・ '+ c.messages.length +'件</div>' +
+          '</button>' +
+          '<button class="ai-hist-del" onclick="aiDeleteChat(\''+ escapeHtml(c.id) +'\')" title="削除" aria-label="削除">×</button>' +
+        '</div>';
+      }).join('');
+    }
+    document.getElementById('ai-hist-modal').classList.add('open');
+  };
+  window.aiCloseHistory = function(){
+    document.getElementById('ai-hist-modal').classList.remove('open');
+  };
+  window.aiCloseHistoryOnBg = function(e){
+    if(e.target && e.target.id === 'ai-hist-modal') window.aiCloseHistory();
+  };
+
+  window.aiLoadChat = function(id){
+    var list = getSavedList();
+    var c = null;
+    for(var i=0; i<list.length; i++){ if(list[i].id === id){ c = list[i]; break; } }
+    if(!c) return;
+    if(aiHistory.length > 0 && !confirm('現在の会話を置き換えて読み込みますか？\n（未保存の場合は失われます）')) return;
+    aiHistory = (c.messages || []).slice();
+    var box = document.getElementById('ai-messages');
+    box.innerHTML = '';
+    aiHistory.forEach(function(m){
+      appendMsg(m.role === 'user' ? 'user' : 'ai', m.content);
+    });
+    appendMsg('system', '読み込みました：' + c.title);
+    persistCurrent();
+    window.aiCloseHistory();
+  };
+
+  window.aiDeleteChat = function(id){
+    if(!confirm('この会話を削除しますか？')) return;
+    var list = getSavedList().filter(function(c){ return c.id !== id; });
+    setSavedList(list);
+    window.aiOpenHistory(); // 再描画
+  };
+
+  window.aiNewChat = function(){
+    if(aiHistory.length > 0){
+      if(!confirm('現在の会話を置き換えて新規開始しますか？\n（未保存の場合は失われます）')) return;
+    }
+    aiHistory = [];
+    var box = document.getElementById('ai-messages');
+    box.innerHTML = '<div class="ai-msg ai-msg-system">新規会話を開始しました。</div>';
+    persistCurrent();
+    window.aiCloseHistory();
   };
 
   window.aiPresetFill = function(name){
