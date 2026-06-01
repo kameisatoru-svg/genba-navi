@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>AIアシスト｜アート・レイズ</title>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -11,9 +11,14 @@
 <meta name="theme-color" content="#1e2d40">
 <link rel="stylesheet" href="common.css">
 <style>
+/* html/bodyを画面に固定（iOS Safariのアドレスバー出入りでも下段が見切れない） */
+html{height:100%;}
 body{
+  position:fixed;inset:0;
   display:flex;flex-direction:column;
-  height:100dvh;overflow:hidden;
+  height:100%;          /* fallback */
+  height:100svh;         /* small viewport（ブラウザchrome展開時でも安定）*/
+  overflow:hidden;
   background:var(--bg);
 }
 
