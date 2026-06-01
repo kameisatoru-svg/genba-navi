@@ -2068,7 +2068,13 @@
         "prep.spec": "done",
         "prep.mat": "done",
         "prep.tanka": "done",
-        "prep.gyousha": "done"
+        "prep.gyousha": "done",
+        "compose.review": "done",
+        "compose.breakdown": "done",
+        "compose.amount": "done",
+        "compose.pdf": "done",
+        "submit.send": "na",
+        "submit.register": "na"
       }
     },
     {
