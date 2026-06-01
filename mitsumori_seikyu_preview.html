@@ -364,6 +364,15 @@ tr.dragging{opacity:0.4;}
     <span>BCS.CSV出力</span>
   </button>
   <div class="tm-sep"></div>
+  <button class="tm-item" id="tm-save-ledger" onclick="closeTopMenu();saveToAnkenLedger()">
+    <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 4 L16 4 L20 8 L20 20 Q20 21 19 21 L5 21 Q4 21 4 20 L4 5 Q4 4 5 4 Z"/>
+      <path d="M8 4 L8 9 L15 9 L15 4"/>
+      <rect x="8" y="13" width="8" height="6" rx="0.5"/>
+    </svg>
+    <span>案件台帳へ保存（data.json）</span>
+  </button>
+  <div class="tm-sep"></div>
   <button class="tm-item" id="tm-discount" onclick="closeTopMenu();applyDiscount()">
     <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
       <line x1="6" y1="18" x2="18" y2="6"/>
@@ -4117,6 +4126,135 @@ function showAnkenToast(msg){
   toast.style.opacity = '1';
   clearTimeout(toast._timer);
   toast._timer = setTimeout(()=>{ toast.style.opacity = '0'; }, 2400);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 案件台帳へ保存（data.json 書き戻し）
+// ダッシュボード/案件台帳と同じ GitHub Contents API 方式。
+// 現在の見積書/請求書の内容を、該当案件の「見積」または「請求」配列に
+// 追記（同じ書類番号があれば上書き更新）して保存する。
+// PATは localStorage 'artrise_gh_pat'（案件台帳・ダッシュボードと共用）。
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const LEDGER_GH_REPO = 'kameisatoru-svg/genba-navi';
+const LEDGER_GH_API  = `https://api.github.com/repos/${LEDGER_GH_REPO}/contents/data.json`;
+const LEDGER_PAT_KEY = 'artrise_gh_pat';
+
+async function saveToAnkenLedger(){
+  // ── 入力値の収集 ──
+  if(typeof updateDocTitle === 'function') updateDocTitle();
+  const v = id => (document.getElementById(id)?.value || '').trim();
+  const ankenKey = v('ankenKey');
+  if(!ankenKey){
+    alert('「案件キー」が未入力です。\n保存先の案件を特定できないため、案件キーを入力してください（例：ネクサス-大丸引戸修理-26）。');
+    return;
+  }
+  const isSeikyu = (docType === 'seikyu');
+  const bucketKey = isSeikyu ? '請求' : '見積';
+  const t = calcTotals();
+  const shoruiNo = document.title;                 // 書類番号 = 短縮_(サフィックス_)案件キー
+  const entry = {
+    '書類番号': shoruiNo,
+    '発行日': v('hakkoDate'),
+    '金額': t.total,                                // 税込合計
+    '備考': v('kojimei'),
+    'ファイル': shoruiNo + '.pdf'
+  };
+  const okyakuNo = v('mitsumoriNo');               // お客様向け番号（ARM/ARS-…）
+  if(okyakuNo) entry['お客様向け番号'] = okyakuNo;
+  if(isSeikyu){
+    entry['支払期限'] = v('shiharaiDate');
+    entry['入金状況'] = 'minyukin';                 // 既定: 未入金
+    entry['入金日'] = '';
+  }
+
+  // ── 確認ダイアログ ──
+  const confirmMsg =
+    `以下の内容を案件台帳（data.json）に保存します。\n\n`+
+    `案件キー：${ankenKey}\n`+
+    `区分：${bucketKey}書\n`+
+    `書類番号：${shoruiNo}\n`+
+    (okyakuNo ? `お客様向け番号：${okyakuNo}\n` : '')+
+    `発行日：${entry['発行日'] || '(未入力)'}\n`+
+    `金額（税込）：¥${t.total.toLocaleString()}\n\n`+
+    `※ ダッシュボード/案件台帳の案件内容に反映されます。`;
+  if(!confirm(confirmMsg)) return;
+
+  // ── PAT 取得（無ければ入力を促す）──
+  let pat = localStorage.getItem(LEDGER_PAT_KEY) || '';
+  if(!pat){
+    pat = (prompt('GitHub Personal Access Token を入力してください。\n（data.json を更新するために必要。案件台帳・ダッシュボードと共用、localStorageに保存されます）') || '').trim();
+    if(!pat){ showAnkenToast('保存をキャンセルしました'); return; }
+    localStorage.setItem(LEDGER_PAT_KEY, pat);
+  }
+
+  showAnkenToast('💾 保存中…');
+  try{
+    // 1. 現在の data.json と SHA を取得
+    const res = await fetch(LEDGER_GH_API, {
+      headers: { Authorization: `token ${pat}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if(res.status === 401){
+      localStorage.removeItem(LEDGER_PAT_KEY);
+      alert('GitHub Token が無効です。再度実行して設定し直してください。');
+      return;
+    }
+    if(!res.ok) throw new Error('data.json取得失敗 ' + res.status);
+    const fileData = await res.json();
+    const sha = fileData.sha;
+    const raw = atob(fileData.content.replace(/\n/g, ''));
+    const bytes = new Uint8Array(raw.length).map((_, i) => raw.charCodeAt(i));
+    const currentJson = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+
+    // 2. 案件（中止案件含む）を特定
+    const findIn = (list) => Array.isArray(list) ? list.findIndex(p => p['案件キー'] === ankenKey) : -1;
+    let bucket = '案件';
+    let idx = findIn(currentJson['案件']);
+    if(idx === -1){ idx = findIn(currentJson['中止案件']); bucket = '中止案件'; }
+    if(idx === -1) throw new Error('案件が見つかりません: ' + ankenKey + '\n案件台帳に登録済みの案件キーを入力してください。');
+    const target = currentJson[bucket][idx];
+
+    // 3. 見積/請求 配列へ追記（同一 書類番号 は上書き更新）
+    if(!Array.isArray(target[bucketKey])) target[bucketKey] = [];
+    const arr = target[bucketKey];
+    const exist = arr.findIndex(d => d && d['書類番号'] === shoruiNo);
+    let actionLabel;
+    if(exist !== -1){
+      const merged = Object.assign({}, arr[exist], entry);
+      // 既存の入金状況・入金日は保持（ダッシュボードでの手動更新を壊さない）
+      if(isSeikyu){
+        if(arr[exist]['入金状況']) merged['入金状況'] = arr[exist]['入金状況'];
+        if(arr[exist]['入金日'])   merged['入金日']   = arr[exist]['入金日'];
+      }
+      arr[exist] = merged;
+      actionLabel = '更新';
+    } else {
+      arr.push(entry);
+      actionLabel = '追加';
+    }
+
+    // 4. GitHub へ PUT
+    const jsonStr = JSON.stringify(currentJson, null, 2);
+    const encBytes = new TextEncoder().encode(jsonStr);
+    const encChars = Array.from(encBytes).map(b => String.fromCharCode(b)).join('');
+    const putRes = await fetch(LEDGER_GH_API, {
+      method: 'PUT',
+      headers: { Authorization: `token ${pat}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+      body: JSON.stringify({
+        message: `${bucketKey}書を案件台帳へ${actionLabel}: ${shoruiNo}`,
+        content: btoa(encChars),
+        sha
+      })
+    });
+    if(!putRes.ok){
+      const errTxt = await putRes.text().catch(()=> '');
+      throw new Error('保存失敗 ' + putRes.status + (errTxt ? '\n' + errTxt.slice(0,200) : ''));
+    }
+    showAnkenToast(`✅ ${bucketKey}書を案件台帳へ${actionLabel}しました（反映に1〜2分）`);
+  }catch(err){
+    console.error(err);
+    alert('案件台帳への保存に失敗しました：\n' + (err.message || err));
+    showAnkenToast('保存に失敗しました');
+  }
 }
 
 // 起動時に案件データを取得
