@@ -2343,6 +2343,7 @@ function calcCheckProgress(anken) {
   let raw = 0, done = 0, na = 0, nextLabel = '';
   for (const stage of tpl.stages) {
     for (const item of stage.items) {
+      if (!shouldShowItem(stage.id, item.id, anken)) continue;  // 規模/元請で非表示は集計外
       raw++;
       const state = eff[`${stage.id}.${item.id}`];
       if (state === 'done')      done++;
