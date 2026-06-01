@@ -364,3 +364,58 @@ function getCarryOverItems(anken, ctx) {
   }
   return result;
 }
+
+/* ============================================================
+   自動チェック（明らかに完了している項目の自動判定）
+   ----------------------------------------------------------
+   「data.json に案件が在る」「配列にデータが在る」等の客観的事実から
+   完了が確定する項目を、保存状態に関係なく done 扱いにする仕組み。
+
+   ・data.json の チェック には書き込まない＝常に最新の実データから再判定
+   ・UI ではロック（クリック不可）＋「自動」バッジで区別
+   ・rule は (anken, ctx) を受け取り true なら自動完了
+       ctx.masters … 取引先マスター配列（顧客マスター登録の判定に使用）
+
+   増減はこの AUTO_CHECK にキー（"stageId.itemId"）を足す／消すだけ。
+   現在のルールは「誤検出がまず起きない」ものに限定している。
+   ============================================================ */
+function _ckArr(x) { return Array.isArray(x) ? x : (x ? [x] : []); }
+function _ckHasPdf(list) {
+  return _ckArr(list).some(x => String((x && x['ファイル']) || '').toLowerCase().endsWith('.pdf'));
+}
+function _ckHasNyukin(list) {
+  return _ckArr(list).some(x => x && x['入金状況'] === 'nyukin');
+}
+
+const AUTO_CHECK = {
+  // 相談：案件が data.json に在る時点で「登録」は完了
+  'contact.reg':      (a)      => true,
+  'contact.kokyaku':  (a, ctx) => (ctx && ctx.masters || []).some(m => m && m['略称'] === a['顧客略']),
+  // 見積：配列・PDF の有無で判定
+  'compose.pdf':      (a)      => _ckHasPdf(a['見積']),
+  'submit.register':  (a)      => _ckArr(a['見積']).length > 0,
+  // 請求：配列・PDF の有無で判定
+  'invoice.pdf':      (a)      => _ckHasPdf(a['請求']),
+  'invoice.register': (a)      => _ckArr(a['請求']).length > 0,
+  // 入金：入金状況=nyukin の請求が在る
+  'nyukin.kakunin':   (a)      => _ckHasNyukin(a['請求']),
+  'nyukin.register':  (a)      => _ckHasNyukin(a['請求']),
+  // 契約：締結済みの契約書が在る
+  'doc_k.keiyaku':    (a)      => _ckArr(a['契約書']).some(k => k && k['ステータス'] === '締結済み')
+};
+
+// 単一キーが自動完了かどうか
+function isAutoChecked(anken, key, ctx) {
+  const r = AUTO_CHECK[key];
+  if (!r || !anken) return false;
+  try { return !!r(anken, ctx || {}); } catch (e) { return false; }
+}
+
+// 保存状態に自動完了を重ねた「実効状態」マップを返す（自動は done で上書き＝優先）
+function getEffectiveChecks(anken, checks, ctx) {
+  const eff = Object.assign({}, checks || {});
+  for (const key in AUTO_CHECK) {
+    if (isAutoChecked(anken, key, ctx)) eff[key] = 'done';
+  }
+  return eff;
+}
