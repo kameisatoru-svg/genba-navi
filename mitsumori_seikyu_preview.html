@@ -4030,12 +4030,25 @@ function escAttr(s){
 }
 
 // 案件を選択 → 表書を自動充填
+// 顧客略から取引先マスターを解決：完全一致 → 前方一致が1件だけならそれを採用。
+// 個人宅は案件キーが名字の短縮（例「村上」）、マスターはフルネーム登録（例「村上信子」）に
+// なりがちで完全一致しないため、一意に定まる前方一致だけ救済する（案件台帳と同じ規則）。
+function resolveCustomerMaster(ryaku){
+  const masters = ankenData.取引先マスター || [];
+  if(!ryaku) return null;
+  const exact = masters.find(t => t.略称 === ryaku);
+  if(exact) return exact;
+  const hits = masters.filter(t =>
+    (t.略称||'').startsWith(ryaku) || (t.正式名称||'').startsWith(ryaku));
+  return hits.length === 1 ? hits[0] : null;
+}
+
 function selectAnken(ankenKey){
   const a = (ankenData.案件 || []).find(x => x.案件キー === ankenKey);
   if(!a){ alert('案件が見つかりません'); return; }
 
-  // 取引先マスターから顧客情報を取得
-  const customer = (ankenData.取引先マスター || []).find(t => t.略称 === a.顧客略);
+  // 取引先マスターから顧客情報を取得（完全一致 → 一意な前方一致で救済）
+  const customer = resolveCustomerMaster(a.顧客略);
 
   // 1. 案件キー
   const ankenInput = document.getElementById('ankenKey');
