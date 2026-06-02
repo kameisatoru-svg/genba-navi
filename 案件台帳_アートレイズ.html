@@ -176,6 +176,8 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 @keyframes navExpandFade{from{opacity:0;}to{opacity:1;}}
 /* 展開が空な時の案内 */
 .empty-hint{font-size:13px;color:#999;padding:8px 0;}
+.mitsumori-create-btn{display:inline-flex;align-items:center;gap:6px;margin:2px 0 12px;padding:8px 14px;background:#4a6090;color:#fff;border:1px solid #3a5070;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;line-height:1;transition:background 0.12s;}
+.mitsumori-create-btn:hover{background:#3a5070;}
 .badge{
   padding:5px 0;border-radius:12px;font-size:11px;font-weight:700;
   white-space:nowrap;flex-shrink:0;letter-spacing:0.02em;
@@ -1004,7 +1006,7 @@ function buildAnkenCard(p){
           <div class="nav-list-item__value">${mAmt}</div>
           <div class="nav-list-item__arrow">›</div>
         </button>
-        <div class="nav-expand-body">${detailMitsumori}</div>
+        <div class="nav-expand-body">${p.案件キー?`<a href="mitsumori_seikyu_preview.html?anken=${encodeURIComponent(p.案件キー)}" target="_blank" rel="noopener" class="mitsumori-create-btn" title="見積エディタを開き、この案件の宛先・工事件名・施工場所などを自動入力します"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M4 3 L13 3 L16 6 L16 17 L4 17 Z"/><path d="M8 10 L12 10 M8 13 L12 13"/></svg>見積エディタで作成（案件情報を自動入力）</a>`:''}${detailMitsumori}</div>
 
         <!-- 請求 -->
         <button class="nav-list-item nav-expand" onclick="toggleNavItem(this)">

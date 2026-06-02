@@ -4553,8 +4553,36 @@ function insertUnitMasterItem(bui, name, price){
   showAnkenToast(`＋ ${name}（¥${Number(price).toLocaleString()}/㎡）を追加`);
 }
 
-// 起動時に案件データを取得
-window.addEventListener('DOMContentLoaded', loadAnkenData);
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 案件台帳 → 見積エディタ ディープリンク
+// 案件台帳の「見積を作成」ボタンから ?anken=<案件キー> 付きで開かれると、
+// データ読込後に該当案件の表書（宛先・工事件名・施工場所・書類番号等）を自動入力する。
+// 既存の selectAnken() を再利用（読み取りのみ・data.jsonは書き換えない）。
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function maybeAutoLoadAnkenFromURL(){
+  let key = '';
+  try{
+    const params = new URLSearchParams(window.location.search);
+    key = (params.get('anken') || params.get('ankenKey') || '').trim();
+  }catch(e){ return; }
+  if(!key) return;
+  if(!ankenDataLoaded || !ankenData || !Array.isArray(ankenData.案件)){
+    showAnkenToast('⚠ 案件データ未取得のため自動入力できませんでした');
+    return;
+  }
+  const a = ankenData.案件.find(x => x.案件キー === key);
+  if(!a){
+    showAnkenToast(`⚠ 案件「${key}」が見つかりませんでした`);
+    return;
+  }
+  // selectAnken は宛先・工事件名・施工場所・書類番号などを充填し完了トーストを出す
+  selectAnken(a.案件キー);
+}
+
+// 起動時：案件データ取得 → URLパラメータがあれば自動入力
+window.addEventListener('DOMContentLoaded', () => {
+  Promise.resolve(loadAnkenData()).then(maybeAutoLoadAnkenFromURL);
+});
 
 </script>
 <!-- ━━━ 案件選択モーダル（見積書専用） ━━━ -->
