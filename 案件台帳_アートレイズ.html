@@ -637,9 +637,19 @@ let mitsumoriHideActive=true;
 const ankenKey = p => p.案件キー || p.案件番号 || '-';
 const oldAnken = p => p.旧案件番号 || (p.案件番号 && p.案件キー ? p.案件番号 : '');
 const kojiName = p => p.正式工事名 || p.工事名 || '-';
-const customerName = p => (CUSTOMERS[p.顧客略]?.正式名称) || p.法人名 || p.代表者 || '-';
-const customerRep = p => (CUSTOMERS[p.顧客略]?.代表者) || p.代表者 || '-';
-const customerContact = p => (CUSTOMERS[p.顧客略]?.担当者) || p.担当者 || '';
+// 顧客略でマスターを解決：完全一致 → 前方一致が1件だけならそれを採用。
+// 個人宅は案件キーが名字の短縮（例「村上」）、マスターはフルネーム登録（例「村上信子」）に
+// なりがちで完全一致しないため、一意に定まる前方一致だけ救済する（曖昧な複数一致は不採用）。
+function resolveCustomer(ryaku){
+  if(!ryaku) return null;
+  if(CUSTOMERS[ryaku]) return CUSTOMERS[ryaku];
+  const hits = Object.values(CUSTOMERS).filter(c =>
+    (c.顧客略||'').startsWith(ryaku) || (c.正式名称||'').startsWith(ryaku));
+  return hits.length === 1 ? hits[0] : null;
+}
+const customerName = p => (resolveCustomer(p.顧客略)?.正式名称) || p.法人名 || p.代表者 || '-';
+const customerRep = p => (resolveCustomer(p.顧客略)?.代表者) || p.代表者 || '-';
+const customerContact = p => (resolveCustomer(p.顧客略)?.担当者) || p.担当者 || '';
 const vendorName = c => (VENDORS[c.業者略]?.正式名称) || c.業者名 || '-';
 // 配列保証（旧構造の単一オブジェクトもラップ）
 const asArray = v => Array.isArray(v) ? v : (v && typeof v === 'object' && Object.keys(v).length ? [v] : []);
