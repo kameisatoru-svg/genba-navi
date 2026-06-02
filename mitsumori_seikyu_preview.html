@@ -364,6 +364,15 @@ tr.dragging{opacity:0.4;}
     <span>BCS.CSV出力</span>
   </button>
   <div class="tm-sep"></div>
+  <button class="tm-item" id="tm-tanka-master" onclick="closeTopMenu();openUnitMasterPicker()">
+    <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="4" width="16" height="16" rx="2"/>
+      <path d="M4 9 L20 9 M9 9 L9 20" opacity="0.85"/>
+      <path d="M12.5 13 L17 13 M12.5 16 L17 16" opacity="0.85"/>
+    </svg>
+    <span>単価マスタから明細追加</span>
+  </button>
+  <div class="tm-sep"></div>
   <button class="tm-item" id="tm-save-ledger" onclick="closeTopMenu();saveToAnkenLedger()">
     <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
       <path d="M5 4 L16 4 L20 8 L20 20 Q20 21 19 21 L5 21 Q4 21 4 20 L4 5 Q4 4 5 4 Z"/>
@@ -4458,6 +4467,90 @@ function openLoadChooser(candidates){
 // 複数案件混在時のみ案件キーを併記
 function ankenKeyHintNeeded(candidates){
   return new Set(candidates.map(c => c.ankenKey)).size > 1;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 単価マスタ → 見積へ明細追加（読み取りのみ・data.jsonは書き換えない）
+// data.json の「単価マスタ」= { 部位(天井/壁/床): { 材料名: {price, BL, BW, loss,...} } }
+// 選んだ材料を 単価=price / 単位=㎡ / 数量=1 の明細として現在のモードに追加する。
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function openUnitMasterPicker(){
+  // 単価マスタを取得（起動時に読み込んだ ankenData を優先、無ければ最新を取得）
+  let master = (ankenData && ankenData['単価マスタ']) ? ankenData['単価マスタ'] : null;
+  if(!master){
+    showAnkenToast('📦 単価マスタ取得中…');
+    try{
+      const data = await fetchDataJsonFresh();
+      if(data && !ankenData){ ankenData = data; ankenDataLoaded = true; }
+      master = data ? data['単価マスタ'] : null;
+    }catch(e){
+      alert('単価マスタの取得に失敗しました：\n' + e.message + '\n\nGitHub Pages等のhttp(s)経由で開いてください。');
+      return;
+    }
+  }
+  if(!master || typeof master !== 'object' || Object.keys(master).length === 0){
+    alert('単価マスタが見つかりませんでした（data.json の「単価マスタ」）。');
+    return;
+  }
+
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  document.getElementById('tanka-master-modal')?.remove();
+  const modal = document.createElement('div');
+  modal.id = 'tanka-master-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:10001;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:16px;';
+
+  // 部位ごとに材料ボタンを並べる
+  const sections = Object.keys(master).map(bui => {
+    const mats = master[bui] || {};
+    const btns = Object.keys(mats).map(name => {
+      const price = Number(mats[name] && mats[name].price) || 0;
+      return `<button class="tanka-pick" data-bui="${esc(bui)}" data-name="${esc(name)}" data-price="${price}"
+        style="display:inline-flex;flex-direction:column;align-items:flex-start;gap:2px;margin:4px;padding:8px 12px;border:1px solid #cdd6e4;border-radius:6px;background:#fff;cursor:pointer;font-family:inherit;min-width:120px;">
+        <span style="font-size:13px;font-weight:600;color:#23364f;">${esc(name)}</span>
+        <span style="font-size:11px;color:#777;">¥${price.toLocaleString()} / ㎡</span>
+      </button>`;
+    }).join('');
+    return `<div style="padding:6px 14px 12px;">
+      <div style="font-size:12px;font-weight:700;color:#3a5070;border-bottom:1px solid #eee;padding:6px 0;margin-bottom:4px;">${esc(bui)}</div>
+      <div style="display:flex;flex-wrap:wrap;">${btns || '<span style="font-size:11px;color:#999;">（材料なし）</span>'}</div>
+    </div>`;
+  }).join('');
+
+  modal.innerHTML = `<div style="background:#fff;width:min(620px,94vw);max-height:84vh;border-radius:8px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.3);">
+    <div style="padding:13px 16px;background:#3a5070;color:#fff;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:14px;font-weight:600;">📐 単価マスタから明細追加</span>
+      <button id="tanka-master-close" style="background:transparent;border:none;color:#fff;font-size:18px;cursor:pointer;padding:0 4px;">✕</button>
+    </div>
+    <div style="font-size:11px;color:#666;padding:8px 16px;border-bottom:1px solid #eee;background:#f7f7f5;">材料をタップすると、現在のモードの明細に「単価・単位㎡・数量1」で追加します（数量＝面積はあとで入力）。続けて複数追加できます。</div>
+    <div style="overflow-y:auto;">${sections}</div>
+  </div>`;
+  document.body.appendChild(modal);
+  const close = () => modal.remove();
+  modal.addEventListener('click', e => { if(e.target === modal) close(); });
+  modal.querySelector('#tanka-master-close').addEventListener('click', close);
+  modal.querySelectorAll('.tanka-pick').forEach(btn => {
+    btn.addEventListener('click', () => {
+      insertUnitMasterItem(btn.dataset.bui, btn.dataset.name, Number(btn.dataset.price) || 0);
+    });
+  });
+}
+
+// 単価マスタの材料を現在のモードの明細へ1行追加
+function insertUnitMasterItem(bui, name, price){
+  const item = { name: name, qty: 1, unit: '㎡', price: price, note: `${bui}・単価マスタ` };
+  if(mode === 'lump'){
+    groupSummaryItems.push(item);
+  } else if(mode === 'group'){
+    if(groupItems.length === 0){
+      groupItems.push({ name: '明細', pageBreak: false, middleItems: [], items: [] });
+    }
+    groupItems[groupItems.length - 1].items.push(item);
+  } else {
+    flatItems.push(item);
+  }
+  if(typeof renderEditor === 'function') renderEditor();
+  if(typeof render === 'function') render();
+  showAnkenToast(`＋ ${name}（¥${Number(price).toLocaleString()}/㎡）を追加`);
 }
 
 // 起動時に案件データを取得
