@@ -715,6 +715,13 @@ function loadMasters(json){
   try { localStorage.setItem(LS_KEY_MASTERS, JSON.stringify({CUSTOMERS, VENDORS})); } catch(e){}
 }
 
+// 顧客情報（取引先マスター）＋案件の顧客リンクのシグネチャ。
+// これが変われば「顧客情報が修正された」とみなして再反映する。
+function customerSig(json){
+  return JSON.stringify(json.取引先マスター||json.顧客マスター||[])
+       + '|' + JSON.stringify((json.案件||[]).map(a=>a.顧客略||''));
+}
+let _customerSig='';
 async function loadData(){
   try{
     const res=await fetch(DATA_URL+'?v='+Date.now());
@@ -722,6 +729,7 @@ async function loadData(){
     const json=await res.json();
     ALL_DATA=json.案件||[];
     loadMasters(json);
+    _customerSig=customerSig(json);
     localStorage.setItem(LS_KEY,JSON.stringify(ALL_DATA));
   }catch(e){
     try{
@@ -1567,6 +1575,32 @@ function toggleMeisai(id,btn){
 }
 
 loadData();
+
+// ── 顧客情報の修正を案件の基本情報へ自動反映 ──
+// 取引先台帳などで顧客（正式名称・代表者・担当者…）を修正したあと、この画面に
+// 戻ってくると最新の取引先マスターを取り直し、変化があったときだけ再描画する。
+// ・案件は顧客情報を「持たず」顧客略でマスターを参照するため、ここでマスターを
+//   更新すれば全カードの基本情報が最新になる。
+// ・変化が無ければ画面はそのまま（開いているカードや操作を邪魔しない）。
+// ・クイック編集パネルを開いている最中は入力保護のため見送る。
+async function refreshCustomersIfChanged(){
+  if(document.querySelector('.edit-panel.open')) return;   // 編集中は触らない
+  try{
+    const res=await fetch(DATA_URL+'?v='+Date.now());
+    if(!res.ok) return;                                    // 取得失敗時は古い表示で上書きしない
+    const json=await res.json();
+    const sig=customerSig(json);
+    if(sig===_customerSig) return;                         // 顧客情報に変化なし → 何もしない
+    ALL_DATA=json.案件||ALL_DATA;
+    loadMasters(json);
+    _customerSig=sig;
+    localStorage.setItem(LS_KEY,JSON.stringify(ALL_DATA));
+    renderAll();
+  }catch(e){ /* オフライン等は無視（古い表示を維持） */ }
+}
+// タブが再表示された / ウィンドウにフォーカスが戻った時に最新化
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) refreshCustomersIfChanged(); });
+window.addEventListener('focus',refreshCustomersIfChanged);
 </script>
 </body>
 </html>
