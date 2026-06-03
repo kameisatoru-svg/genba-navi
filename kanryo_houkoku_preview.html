@@ -499,7 +499,7 @@ async function savePDF(){
 function buildExportHTML(forPrint){
   const previewInner=document.getElementById('preview-inner');
   const styles=Array.from(document.querySelectorAll('style')).map(s=>s.outerHTML).join('\n');
-  // 埋め込みJSON：'<' をエスケープして </script> 混入を防止（JSONとして有効なまま）
+  // 埋め込みJSON：'<' をエスケープして閉じタグ混入を防止（JSONとして有効なまま）
   const stateJSON=JSON.stringify(collectState()).replace(/</g,'\\u003c');
   const SOPEN='<scr'+'ipt', SCLOSE='</scr'+'ipt>';
   const stateTag=SOPEN+' id="artrays-doc-state" type="application/json">'+stateJSON+SCLOSE;
