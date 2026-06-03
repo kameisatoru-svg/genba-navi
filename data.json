@@ -1865,7 +1865,16 @@
       "チェック": {
         "followup.arrive": "done",
         "followup.react": "done",
-        "followup.decision": "done"
+        "followup.decision": "done",
+        "contact.first": "done",
+        "contact.apo": "done",
+        "survey.schedule": "done",
+        "survey.photo": "done",
+        "survey.sumpo": "done",
+        "survey.memo": "done",
+        "prep.tanka": "done",
+        "compose.breakdown": "done",
+        "submit.send": "done"
       }
     },
     {
