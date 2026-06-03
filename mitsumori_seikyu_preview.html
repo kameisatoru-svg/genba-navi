@@ -2999,6 +2999,9 @@ function analyzeSection2Csv(dataLines, meta){
     setMeta('docNumber',    headerMap['見積番号']);
     setMeta('customerName', headerMap['取引先会社名']);
     setMeta('kojimei',      headerMap['工事件名']);
+    // 施工場所・工事期間（任意列・後方互換：無い旧CSVではheaderMapに存在せずスキップ）
+    setMeta('shisetsu',     headerMap['施工場所']);
+    setMeta('koki',         headerMap['工事期間']);
   }
 
   // ── 明細セクション解析 ──
