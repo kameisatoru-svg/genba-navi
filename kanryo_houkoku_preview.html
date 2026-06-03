@@ -501,7 +501,9 @@ function buildExportHTML(forPrint){
   const styles=Array.from(document.querySelectorAll('style')).map(s=>s.outerHTML).join('\n');
   // 埋め込みJSON：'<' をエスケープして </script> 混入を防止（JSONとして有効なまま）
   const stateJSON=JSON.stringify(collectState()).replace(/</g,'\\u003c');
-  const printScript=forPrint?`<scr`+`ipt>window.addEventListener('load',()=>{setTimeout(()=>window.print(),400);});<\/scr`+`ipt>`:'';
+  const SOPEN='<scr'+'ipt', SCLOSE='</scr'+'ipt>';
+  const stateTag=SOPEN+' id="artrays-doc-state" type="application/json">'+stateJSON+SCLOSE;
+  const printScript=forPrint?(SOPEN+'>window.addEventListener("load",function(){setTimeout(function(){window.print();},400);});'+SCLOSE):'';
   return `<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>${escH(document.title||'工事完了報告書')}</title>${styles}
 <style>
   body{background:#fff!important;margin:0;padding:0;}
@@ -509,7 +511,7 @@ function buildExportHTML(forPrint){
   .doc-page{box-shadow:none!important;margin:0 auto!important;}
   @page{margin:0;size:A4;}
 </style></head><body>${previewInner.outerHTML}
-<script id="artrays-doc-state" type="application/json">${stateJSON}<\/scr`+`ipt>
+${stateTag}
 ${printScript}</body></html>`;
 }
 
