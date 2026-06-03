@@ -495,23 +495,106 @@ async function savePDF(){
   }
 }
 
-function printHTML(){
+// 標準出力HTML（プレビューDOM＋スタイル＋再編集用の埋め込みデータ）を生成
+function buildExportHTML(forPrint){
   const previewInner=document.getElementById('preview-inner');
   const styles=Array.from(document.querySelectorAll('style')).map(s=>s.outerHTML).join('\n');
-  const html=`<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>印刷プレビュー</title>${styles}
+  // 埋め込みJSON：'<' をエスケープして </script> 混入を防止（JSONとして有効なまま）
+  const stateJSON=JSON.stringify(collectState()).replace(/</g,'\\u003c');
+  const printScript=forPrint?`<scr`+`ipt>window.addEventListener('load',()=>{setTimeout(()=>window.print(),400);});<\/scr`+`ipt>`:'';
+  return `<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>${escH(document.title||'工事完了報告書')}</title>${styles}
 <style>
   body{background:#fff!important;margin:0;padding:0;}
   #preview-inner{transform:none!important;width:auto!important;margin:0!important;}
   .doc-page{box-shadow:none!important;margin:0 auto!important;}
   @page{margin:0;size:A4;}
 </style></head><body>${previewInner.outerHTML}
-<scr`+`ipt>window.addEventListener('load',()=>{setTimeout(()=>window.print(),400);});<\/scr`+`ipt>
-</body></html>`;
+<script id="artrays-doc-state" type="application/json">${stateJSON}<\/scr`+`ipt>
+${printScript}</body></html>`;
+}
+
+function printHTML(){
+  const html=buildExportHTML(true);
   const blob=new Blob([html],{type:'text/html;charset=utf-8'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url; a.target='_blank'; a.rel='noopener'; a.click();
   setTimeout(()=>URL.revokeObjectURL(url),5000);
+}
+
+// 再編集用HTMLを保存（ダウンロード）
+function saveHTML(){
+  const html=buildExportHTML(false);
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=(document.title||'工事完了報告書')+'.html'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+  showToast('💾 再編集用HTMLを保存しました');
+}
+
+// ── 編集状態の収集／復元 ──
+function _v(id){const e=document.getElementById(id);return e?e.value:'';}
+function _setV(id,v){const e=document.getElementById(id);if(e)e.value=(v==null?'':v);}
+function collectState(){
+  return {
+    _type:'kanryo_houkoku', _v:1, savedAt:new Date().toISOString(),
+    ankenKey:_v('ankenKey'), fileSuffix:_v('fileSuffix'),
+    atena:_v('atena'), hakkoDate:_v('hakkoDate'),
+    kojimei:_v('kojimei'), kojiloc:_v('kojiloc'), kojiperiod:_v('kojiperiod'),
+    greeting:_v('greeting'), tantou:_v('tantou'),
+    workItems:workItems.slice(),
+    photos:photos.map(p=>({label:p.label,data:p.data}))
+  };
+}
+function applyState(s){
+  _setV('ankenKey',s.ankenKey); _setV('fileSuffix',s.fileSuffix);
+  _setV('atena',s.atena); _setV('hakkoDate',s.hakkoDate);
+  _setV('kojimei',s.kojimei); _setV('kojiloc',s.kojiloc); _setV('kojiperiod',s.kojiperiod);
+  _setV('greeting',s.greeting); _setV('tantou',s.tantou);
+  workItems=(Array.isArray(s.workItems)&&s.workItems.length)?s.workItems.slice():[''];
+  photos=(Array.isArray(s.photos)&&s.photos.length)
+    ?s.photos.map(p=>({label:p.label||'',data:p.data||''}))
+    :[{label:'【施工前】',data:''},{label:'【施工後】',data:''}];
+  renderWorkEditor(); renderPhotoEditor(); updateDocTitle(); render();
+}
+
+// 保存済みHTML（またはJSON）を読み込んで再編集
+async function loadDocFile(event){
+  const file=event.target.files[0]; event.target.value='';
+  if(!file) return;
+  if(/\.pdf$/i.test(file.name)){
+    alert('PDFには再編集用データが含まれません。\n「再編集用に保存（HTML）」で保存したHTMLファイルを読み込んでください。');
+    return;
+  }
+  let state=null;
+  try{
+    const text=await file.text();
+    if(/^\s*[\{\[]/.test(text)){
+      state=JSON.parse(text);
+    }else{
+      const doc=new DOMParser().parseFromString(text,'text/html');
+      const el=doc.getElementById('artrays-doc-state');
+      if(el) state=JSON.parse(el.textContent);
+    }
+  }catch(e){ alert('読み込みに失敗しました：'+(e.message||e)); return; }
+  if(!state || state._type!=='kanryo_houkoku'){
+    alert('このファイルには工事完了報告書の編集データが見つかりませんでした。\nこのアプリの「再編集用に保存（HTML）」で出力したファイルを選んでください。');
+    return;
+  }
+  applyState(state);
+  showToast('✅ 「'+(state.kojimei||state.ankenKey||'報告書')+'」を読み込みました');
+}
+
+function showToast(msg){
+  let t=document.getElementById('kh-toast');
+  if(!t){
+    t=document.createElement('div'); t.id='kh-toast';
+    t.style.cssText='position:fixed;bottom:20px;right:20px;background:#3a5070;color:#fff;padding:10px 16px;border-radius:6px;font-size:12px;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,0.2);z-index:10000;opacity:0;transition:opacity 0.2s;';
+    document.body.appendChild(t);
+  }
+  t.textContent=msg; t.style.opacity='1';
+  clearTimeout(t._timer); t._timer=setTimeout(()=>{t.style.opacity='0';},2600);
 }
 
 // ── リサイザー ──
