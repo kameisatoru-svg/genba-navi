@@ -2325,22 +2325,61 @@ async function savePDF(){
   }
 }
 
-function printHTML(){
-  // プレビューDOMをそのまま使う方式（2026/5/9）
-  // buildDocHTMLでの独自再構築はやめ、#preview-inner の現状DOMをそのまま新タブへ
-  const previewInner=document.getElementById('preview-inner');
-  if(!previewInner){alert('プレビューが見つかりません'); return;}
+// ━━━ 再編集用：編集状態の収集／復元 ━━━
+function _gv(id){const e=document.getElementById(id);return e?e.value:'';}
+function _sv(id,v){const e=document.getElementById(id);if(e)e.value=(v==null?'':v);}
+function collectReeditState(){
+  return {
+    _type:'mitsumori_seikyu', _v:1, savedAt:new Date().toISOString(),
+    docType:docType, mode:mode,
+    shokeihiRate:shokeihiRate, nebiki:nebiki, hasuChousei:hasuChousei,
+    fields:{
+      atena:_gv('atena'), mitsumoriNo:_gv('mitsumoriNo'), hakkoDate:_gv('hakkoDate'),
+      shiharaiDate:_gv('shiharaiDate'), kojimei:_gv('kojimei'), seshubasho:_gv('seshubasho'),
+      koki:_gv('koki'), ankenKey:_gv('ankenKey'), fileSuffix:_gv('fileSuffix'), bikou:_gv('bikou')
+    },
+    flatItems: JSON.parse(JSON.stringify(flatItems)),
+    groupItems: JSON.parse(JSON.stringify(groupItems)),
+    groupSummaryItems: JSON.parse(JSON.stringify(groupSummaryItems))
+  };
+}
+function applyReeditState(s){
+  // 1) 書類種別／モードを先に確定（switchDocTypeはラベル・表示の副作用あり）
+  docType = (s.docType==='seikyu') ? 'seikyu' : 'mitsumori';
+  switchDocType(docType);
+  mode = s.mode || 'flat';
+  const ms=document.getElementById('mode-select'); if(ms) ms.value=mode;
+  // 2) 明細配列を中身ごと差し替え（flatItems/groupItemsはconst配列なのでin-place）
+  flatItems.length=0; (s.flatItems||[]).forEach(x=>flatItems.push(x));
+  groupItems.length=0; (s.groupItems||[]).forEach(x=>groupItems.push(x));
+  groupSummaryItems = Array.isArray(s.groupSummaryItems) ? s.groupSummaryItems.slice() : [];
+  // 3) スカラー
+  shokeihiRate = (s.shokeihiRate!=null) ? s.shokeihiRate : 15;
+  nebiki = s.nebiki || 0; hasuChousei = s.hasuChousei || 0;
+  // 4) 入力欄（switchDocTypeの上書きを後勝ちで戻す）
+  const f = s.fields || {};
+  _sv('atena',f.atena); _sv('mitsumoriNo',f.mitsumoriNo); _sv('hakkoDate',f.hakkoDate);
+  _sv('shiharaiDate',f.shiharaiDate); _sv('kojimei',f.kojimei); _sv('seshubasho',f.seshubasho);
+  _sv('koki',f.koki); _sv('ankenKey',f.ankenKey); _sv('fileSuffix',f.fileSuffix); _sv('bikou',f.bikou);
+  _sv('shokeihiRateInput',shokeihiRate); _sv('nebikiInput',nebiki); _sv('hasuChouseiInput',hasuChousei);
+  const b=document.getElementById('bikou'); if(b && f.bikou) b.dataset.auto='';
+  // 5) 再描画
+  renderEditor(); updateDocTitle(); render();
+}
 
-  // PDF保存時の既定ファイル名はこのHTMLの<title>から決まるため、
-  // document.title（updateDocTitleで生成した「請_案件キー」等）を引き継ぐ
+// 標準出力HTML（プレビューDOM＋スタイル＋再編集用の埋め込みデータ）を生成
+function buildReeditHTML(forPrint){
+  const previewInner=document.getElementById('preview-inner');
+  if(!previewInner) return null;
   if(typeof updateDocTitle === 'function') updateDocTitle();
   const docTitle=(document.title || '印刷プレビュー').replace(/[\\\/:*?"<>|]/g, '_');
-
-  // ページ内の style タグをすべて収集（プレビューと同じ見た目を保つ）
   const styles=Array.from(document.querySelectorAll('style')).map(s=>s.outerHTML).join('\n');
-
-  // 印刷用に transform 解除したHTMLを生成
-  const html=`<!DOCTYPE html>
+  // 埋め込みJSON：'<' をエスケープして閉じタグ混入を防止（JSONとして有効なまま）
+  const stateJSON=JSON.stringify(collectReeditState()).replace(/</g,'\\u003c');
+  const SOPEN='<scr'+'ipt', SCLOSE='</scr'+'ipt>';
+  const stateTag=SOPEN+' id="artrays-doc-state" type="application/json">'+stateJSON+SCLOSE;
+  const printScript=forPrint?(SOPEN+'>window.addEventListener("load",function(){setTimeout(function(){window.print();},400);});'+SCLOSE):'';
+  return `<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -2351,28 +2390,68 @@ ${styles}
   body{background:#fff!important;margin:0;padding:0;}
   #preview-inner{transform:none!important;width:auto!important;margin:0!important;}
   .doc-page,.page{box-shadow:none!important;margin:0 auto!important;}
-  /* 印刷プレビューでの複数ページを保証 */
   .group-overflow-page,.overflow-page,.page-break{page-break-before:always;break-before:page;}
   @page{margin:0;size:A4;}
 </style>
 </head>
 <body>
 ${previewInner.outerHTML}
-<scr`+`ipt>
-  // 読み込み完了後、少し間を置いて印刷ダイアログ
-  window.addEventListener('load', () => { setTimeout(() => window.print(), 400); });
-<\/scr`+`ipt>
+${stateTag}
+${printScript}
 </body>
 </html>`;
+}
 
+function printHTML(){
+  const html=buildReeditHTML(true);
+  if(!html){alert('プレビューが見つかりません'); return;}
   const blob=new Blob([html],{type:'text/html;charset=utf-8'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
-  a.href=url;
-  a.target='_blank';
-  a.rel='noopener';
-  a.click();
+  a.href=url; a.target='_blank'; a.rel='noopener'; a.click();
   setTimeout(()=>URL.revokeObjectURL(url),5000);
+}
+
+// 再編集用HTMLを保存（ダウンロード）
+function saveReeditHTML(){
+  const html=buildReeditHTML(false);
+  if(!html){alert('プレビューが見つかりません'); return;}
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=(document.title||'document')+'.html'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+  if(typeof showAnkenToast==='function') showAnkenToast('💾 再編集用HTMLを保存しました');
+}
+
+// 保存済みHTML（またはJSON）を読み込んで再編集
+async function loadReeditFile(event){
+  const file=event.target.files[0]; event.target.value='';
+  if(!file) return;
+  if(/\.pdf$/i.test(file.name)){
+    alert('PDFには再編集用データが含まれません。\n「再編集用に保存（HTML）」で保存したHTMLファイルを読み込んでください。');
+    return;
+  }
+  let state=null;
+  try{
+    const text=await file.text();
+    if(/^\s*[\{\[]/.test(text)){
+      state=JSON.parse(text);
+    }else{
+      const doc=new DOMParser().parseFromString(text,'text/html');
+      const el=doc.getElementById('artrays-doc-state');
+      if(el) state=JSON.parse(el.textContent);
+    }
+  }catch(e){ alert('読み込みに失敗しました：'+(e.message||e)); return; }
+  if(!state || state._type!=='mitsumori_seikyu'){
+    alert('このファイルには見積書・請求書の編集データが見つかりませんでした。\nこのアプリの「再編集用に保存（HTML）」で出力したファイルを選んでください。');
+    return;
+  }
+  applyReeditState(state);
+  if(typeof showAnkenToast==='function'){
+    const lbl=(state.fields&&(state.fields.kojimei||state.fields.ankenKey))||'書類';
+    showAnkenToast('✅ 「'+lbl+'」を読み込みました');
+  }
 }
 
 // ── リサイザー ──
