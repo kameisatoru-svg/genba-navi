@@ -2271,7 +2271,21 @@
         "compose.amount": "done",
         "compose.pdf": "done",
         "submit.send": "na",
-        "submit.register": "na"
+        "submit.register": "na",
+        "submit.followup": "done",
+        "followup.arrive": "done",
+        "followup.react": "done",
+        "followup.decision": "done",
+        "dandori.zairyou": "done",
+        "doc_k.mitsumori_final": "done",
+        "taisei.cal_shiko": "done",
+        "shinkou.photo_before": "done",
+        "shinkou.daily": "done",
+        "shinkou.chosei": "done",
+        "kanryou.photo_after": "done",
+        "kanryou.tachiai": "done",
+        "invoice.send": "done",
+        "docs.nouhinsho": "done"
       }
     },
     {
