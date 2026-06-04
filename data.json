@@ -1981,7 +1981,9 @@
         "survey.memo": "done",
         "prep.tanka": "done",
         "compose.breakdown": "done",
-        "submit.send": "done"
+        "submit.send": "done",
+        "compose.amount": "done",
+        "submit.followup": "done"
       }
     },
     {
