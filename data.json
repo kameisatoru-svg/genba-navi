@@ -1356,6 +1356,11 @@
         "合計": 0,
         "件数": 0,
         "最終集計日": "2026-05-14"
+      },
+      "チェック": {
+        "followup.arrive": "done",
+        "followup.react": "done",
+        "followup.decision": "done"
       }
     },
     {
