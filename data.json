@@ -2455,7 +2455,17 @@
       "請求": [],
       "注文書": [],
       "契約書": [],
-      "原価": {}
+      "原価": {},
+      "チェック": {
+        "contact.first": "done",
+        "contact.apo": "done",
+        "survey.schedule": "done",
+        "survey.photo": "done",
+        "survey.sumpo": "done",
+        "survey.memo": "done",
+        "prep.tanka": "done",
+        "prep.mat": "done"
+      }
     },
     {
       "案件キー": "菊家-別府港IC-26",
