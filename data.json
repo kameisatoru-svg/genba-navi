@@ -2333,7 +2333,16 @@
       "請求": [],
       "注文書": [],
       "契約書": [],
-      "原価": {}
+      "原価": {},
+      "チェック": {
+        "contact.first": "done",
+        "contact.kokyaku": "done",
+        "contact.apo": "done",
+        "survey.schedule": "done",
+        "survey.photo": "done",
+        "survey.sumpo": "done",
+        "survey.memo": "done"
+      }
     },
     {
       "案件キー": "村上-諸修繕相談-26",
