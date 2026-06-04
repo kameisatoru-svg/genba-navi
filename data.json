@@ -1488,7 +1488,13 @@
         "最終集計日": "2026-05-14"
       },
       "チェック": {
-        "doc_k.mitsumori_final": "done"
+        "doc_k.mitsumori_final": "done",
+        "contact.first": "done",
+        "contact.apo": "done",
+        "survey.schedule": "done",
+        "survey.photo": "done",
+        "survey.sumpo": "done",
+        "survey.memo": "done"
       }
     },
     {
