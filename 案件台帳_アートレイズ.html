@@ -804,6 +804,11 @@ const pdfTag=(pdf,label)=>{
   return `<a class="pdf-tag on" href="${url}" target="_blank" rel="noopener">${ICON_PDF}<span>${label}</span></a>`;
 };
 const driveTag=url=>url?`<a class="drive-tag" href="${url}" target="_blank" rel="noopener">${ICON_FOLDER}<span>Drive</span></a>`:`<span class="drive-tag off">${ICON_FOLDER}<span>Drive</span></span>`;
+// 検索クエリのマッチ判定：空白（半角/全角）区切りの複数キーワードをAND検索。txt・qともに小文字化済み前提。
+function matchQuery(txt,q){
+  if(!q)return true;
+  return q.split(/[\s　]+/).filter(Boolean).every(t=>txt.includes(t));
+}
 
 // ─ 案件ビュー ─
 function renderAnken(){
@@ -814,7 +819,7 @@ function renderAnken(){
     const txt=[ankenKey(p),oldAnken(p),kojiName(p),customerName(p),customerRep(p),p.施工場所,p.ステータス,p.備考].filter(Boolean).join(' ').toLowerCase();
     const statusOk=ankenStatusFilter==='all'||p.ステータス===ankenStatusFilter;
     const doneOk=!ankenHideDone||searchOverride||!ANKEN_DONE_STATUS.includes(p.ステータス);
-    return(!q||txt.includes(q))&&statusOk&&doneOk;
+    return(matchQuery(txt,q))&&statusOk&&doneOk;
   });
   data.sort((a,b)=>{
     const ai=STATUS_ORDER.indexOf(a.ステータス);const bi=STATUS_ORDER.indexOf(b.ステータス);
@@ -1138,7 +1143,7 @@ function renderMitsumori(){
     mList.forEach((m,mi)=>{
       const txt=[ankenKey(p),oldAnken(p),kojiName(p),customerName(p),customerRep(p),docNo(m)].filter(Boolean).join(' ').toLowerCase();
       const hideOk=!mitsumoriHideActive||!MITSUMORI_HIDE_STATUS.includes(p.ステータス);
-      if((!q||txt.includes(q))&&inRange(docDate(m),from,to)&&hideOk){
+      if((matchQuery(txt,q))&&inRange(docDate(m),from,to)&&hideOk){
         items.push({p,m,mi});
       }
     });
@@ -1200,7 +1205,7 @@ function renderSeikyu(){
   ALL_DATA.forEach(p=>getSeikyuList(p).forEach((r,ri)=>{
     const txt=[ankenKey(p),oldAnken(p),kojiName(p),customerName(p),customerRep(p),docNo(r)].filter(Boolean).join(' ').toLowerCase();
     const sStat=seikyuStatus(r);
-    if((!q||txt.includes(q))&&inRange(docDate(r),from,to)&&(seikyuFilter==='all'||sStat===seikyuFilter))items.push({p,r,ri});
+    if((matchQuery(txt,q))&&inRange(docDate(r),from,to)&&(seikyuFilter==='all'||sStat===seikyuFilter))items.push({p,r,ri});
   }));
   const minyukin=items.filter(x=>seikyuStatus(x.r)!=='nyukin');
   document.getElementById('r-total').textContent=items.length;
@@ -1257,7 +1262,7 @@ function renderChumon(){
   const items=[];
   ALL_DATA.forEach(p=>getChumonList(p).forEach(c=>{
     const txt=[ankenKey(p),oldAnken(p),kojiName(p),customerName(p),vendorName(c),docNo(c)].filter(Boolean).join(' ').toLowerCase();
-    if((!q||txt.includes(q))&&inRange(docDate(c),from,to))items.push({p,c});
+    if((matchQuery(txt,q))&&inRange(docDate(c),from,to))items.push({p,c});
   }));
   document.getElementById('c-total').textContent=items.length;
   document.getElementById('c-total-amt').textContent=fmtYen(items.reduce((s,x)=>s+docAmt(x.c),0)||null);
@@ -1309,7 +1314,7 @@ function renderKeiyaku(){
     kList.forEach((k,ki)=>{
       const txt=[ankenKey(p),oldAnken(p),kojiName(p),customerName(p),customerRep(p),docNo(k)].filter(Boolean).join(' ').toLowerCase();
       const isSigned=keiyakuStatusOf(k)==='締結済み';
-      if((!q||txt.includes(q))&&inRange(docDate(k),from,to)&&(keiyakuFilter==='all'||(keiyakuFilter==='signed'&&isSigned)||(keiyakuFilter==='pending'&&!isSigned))){
+      if((matchQuery(txt,q))&&inRange(docDate(k),from,to)&&(keiyakuFilter==='all'||(keiyakuFilter==='signed'&&isSigned)||(keiyakuFilter==='pending'&&!isSigned))){
         items.push({p,k,ki});
       }
     });
@@ -1353,7 +1358,7 @@ function renderGenka(){
   const q=document.getElementById('g-search').value.toLowerCase();
   const items=ALL_DATA.filter(p=>{
     const txt=[ankenKey(p),oldAnken(p),kojiName(p),customerName(p),customerRep(p)].filter(Boolean).join(' ').toLowerCase();
-    return!q||txt.includes(q);
+    returnmatchQuery(txt,q);
   });
   let tg=0,tu=0;
   items.forEach(p=>{
