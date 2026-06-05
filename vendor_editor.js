@@ -1395,7 +1395,6 @@
   function findExistingVendorMatches(ocr, vendors){
     const ocrTel = [ocr.tel, ocr.tel_direct, ocr.mobile, ocr.fax].map(normalizeTel).filter(t => t.length >= 7);
     const ocrCompanyN = normalizeCompany(ocr.company || '');
-    const ocrMailDomain = (ocr.mail || '').split('@')[1] || '';
     const ocrTouroku = (ocr.touroku || '').replace(/\s/g, '').toUpperCase();
 
     const hits = [];
@@ -1407,7 +1406,6 @@
       const vNameN  = normalizeCompany(vName);
       const vRyakuN = normalizeCompany(vRyaku);
       const vTouroku = (c.touroku || '').replace(/\s/g, '').toUpperCase();
-      const vMailDomain = (c.mail || '').split('@')[1] || '';
       const reasons = [];
       let score = 0;
 
@@ -1422,9 +1420,7 @@
         else if(vNameN.includes(ocrCompanyN) || ocrCompanyN.includes(vNameN)){ reasons.push('社名部分一致'); score += 5; }
         else if(vRyakuN && ocrCompanyN.includes(vRyakuN)){ reasons.push('略称含む'); score += 4; }
       }
-      if(ocrMailDomain && vMailDomain && ocrMailDomain === vMailDomain){
-        reasons.push('mailドメイン一致'); score += 6;
-      }
+      // メールドメイン一致は判定に使わない（Gmail等の共有ドメインで誤検出が多いため廃止）
       if(score >= 4) hits.push({ vendor: v, reasons, score });
     }
     return hits.sort((a, b) => b.score - a.score);
