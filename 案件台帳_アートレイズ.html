@@ -502,7 +502,7 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 <!-- フィルタシート（下からスライドアップ） -->
 <div class="filter-sheet-backdrop" id="filterBackdrop" onclick="closeFilterSheet()"></div>
 <div class="filter-sheet" id="filterSheet">
-  <div class="filter-sheet-title">ステータスで絞り込み</div>
+  <div class="filter-sheet-title">ステータスで絞り込み（複数選択可）</div>
   <div class="filter-sheet-chips" id="filter-sheet-chips"></div>
   <button class="filter-sheet-close" onclick="closeFilterSheet()">閉じる</button>
 </div>
@@ -832,7 +832,7 @@ function renderAnken(){
   updateHeaderSummary(data.length,amt);
   // フィルタボタンの状態表示
   const btn=document.getElementById('anken-filter-btn');
-  if(btn)btn.classList.toggle('has-filter',ankenStatusFilter!=='all'||!ankenHideDone);
+  if(btn)btn.classList.toggle('has-filter',ankenStatusSel.size>0||!ankenHideDone);
   // 完了除外トグルボタンの表示更新（検索オーバーライド中は注記を付ける）
   const doneBtn=document.getElementById('anken-done-toggle');
   if(doneBtn){
@@ -848,7 +848,13 @@ function renderAnken(){
   if(!data.length){area.innerHTML='<div class="empty">該当する案件がありません</div>';return;}
   area.innerHTML=data.map(p=>buildAnkenCard(p)).join('');
 }
-function setAnkenStatus(s){ankenStatusFilter=s;renderAnken();closeFilterSheet();}
+function setAnkenStatus(s){
+  if(s==='all'){ankenStatusSel.clear();}
+  else if(ankenStatusSel.has(s)){ankenStatusSel.delete(s);}
+  else{ankenStatusSel.add(s);}
+  renderFilterSheetChips();// 複数選択を続けられるようシートは閉じず再描画
+  renderAnken();
+}
 function toggleAnkenDone(){ankenHideDone=!ankenHideDone;renderAnken();}
 function toggleCard(h){h.closest('.card').classList.toggle('open');}
 // ★ C-4: nav-list-item の個別展開
