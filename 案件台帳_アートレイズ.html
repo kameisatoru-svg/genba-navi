@@ -622,7 +622,7 @@ let VENDORS={};    // 業者マスター（業者略 → 詳細）
 let currentTab='anken';
 let seikyuFilter='minyukin'; // デフォルト：未入金のみ
 let keiyakuFilter='all';
-let ankenStatusFilter='all';
+let ankenStatusSel=new Set();// 選択中ステータス（空=すべて表示）。複数選択可
 // 完了除外フラグ（デフォルトON = 完了を隠す）
 const ANKEN_DONE_STATUS=['入金済み','完了'];
 const MITSUMORI_HIDE_STATUS=['施工中','受注済','請求済み','入金済み','完了','完了・請求書作成待ち'];
@@ -769,9 +769,10 @@ function closeFilterSheet(){
 }
 function renderFilterSheetChips(){
   const statuses=['all',...new Set(ALL_DATA.map(p=>p.ステータス).filter(Boolean))];
-  document.getElementById('filter-sheet-chips').innerHTML=statuses.map(s=>
-    `<button class="filter-sheet-chip ${s===ankenStatusFilter?'active':''}" onclick="setAnkenStatus('${s}')">${s==='all'?'すべて':s}</button>`
-  ).join('');
+  document.getElementById('filter-sheet-chips').innerHTML=statuses.map(s=>{
+    const active=s==='all'?ankenStatusSel.size===0:ankenStatusSel.has(s);
+    return `<button class="filter-sheet-chip ${active?'active':''}" onclick="setAnkenStatus('${s}')">${s==='all'?'すべて':s}</button>`;
+  }).join('');
 }
 function switchTab(tab){
   currentTab=tab;
@@ -817,7 +818,7 @@ function renderAnken(){
   const searchOverride=q.length>0;
   const data=ALL_DATA.filter(p=>{
     const txt=[ankenKey(p),oldAnken(p),kojiName(p),customerName(p),customerRep(p),p.施工場所,p.ステータス,p.備考].filter(Boolean).join(' ').toLowerCase();
-    const statusOk=ankenStatusFilter==='all'||p.ステータス===ankenStatusFilter;
+    const statusOk=ankenStatusSel.size===0||ankenStatusSel.has(p.ステータス);
     const doneOk=!ankenHideDone||searchOverride||!ANKEN_DONE_STATUS.includes(p.ステータス);
     return(matchQuery(txt,q))&&statusOk&&doneOk;
   });
