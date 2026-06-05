@@ -930,7 +930,6 @@
     const vRyaku = vendor['略称']     || vendor.ryaku || '';
     const vNameN  = normalizeCompany(vName);
     const vRyakuN = normalizeCompany(vRyaku);
-    const cMailDomain = (c.mail || '').split('@')[1] || '';
 
     const candidates = [];
     for(const r of eightRecords){
@@ -953,11 +952,7 @@
         else if(vRyakuN && eNameN.includes(vRyakuN)){ reasons.push('略称含む'); score += 4; }
       }
 
-      // メールドメイン一致
-      if(cMailDomain && r.mail){
-        const ed = r.mail.split('@')[1];
-        if(ed && ed === cMailDomain){ reasons.push('mailドメイン一致'); score += 6; }
-      }
+      // メールドメイン一致は判定に使わない（Gmail等の共有ドメインで誤検出が多いため廃止）
 
       if(score >= 4) candidates.push({ record: r, reasons, score });
     }
