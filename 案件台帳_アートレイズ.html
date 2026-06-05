@@ -814,12 +814,13 @@ function matchQuery(txt,q){
 // ─ 案件ビュー ─
 function renderAnken(){
   const q=document.getElementById('anken-search').value.toLowerCase();
-  // 検索クエリが入っているときは完了/入金済みフィルタを一時的に解除（検索ヒット漏れ防止）
+  // 検索クエリ入力時・ステータス明示選択時は完了/入金済みフィルタを一時的に解除（ヒット漏れ防止）
   const searchOverride=q.length>0;
+  const statusOverride=ankenStatusSel.size>0;
   const data=ALL_DATA.filter(p=>{
     const txt=[ankenKey(p),oldAnken(p),kojiName(p),customerName(p),customerRep(p),p.施工場所,p.ステータス,p.備考].filter(Boolean).join(' ').toLowerCase();
     const statusOk=ankenStatusSel.size===0||ankenStatusSel.has(p.ステータス);
-    const doneOk=!ankenHideDone||searchOverride||!ANKEN_DONE_STATUS.includes(p.ステータス);
+    const doneOk=!ankenHideDone||searchOverride||statusOverride||!ANKEN_DONE_STATUS.includes(p.ステータス);
     return(matchQuery(txt,q))&&statusOk&&doneOk;
   });
   data.sort((a,b)=>{
