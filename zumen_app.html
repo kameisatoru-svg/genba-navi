@@ -1088,6 +1088,7 @@ function onDrwDimChange(key,val){
   else if(key==='D') roomData.D=v;
   else if(key==='H') roomData.H=v;
   redrawPlan();
+  projAutoSave(); // 寸法変更も即保存（履歴は積まない）
 }
 
 // 開口部タブ
@@ -5684,6 +5685,13 @@ _updateUndoBtn();
   }catch(e){}
 })();
 window.addEventListener('resize',function(){ setTimeout(redraw,50); });
+
+// ── 離脱時の保存：インデックスへ戻る・ブラウザ戻る・タブ/アプリ切替でも作図を失わない ──
+function _saveOnLeave(){ try{ projAutoSave(); }catch(e){} }
+window.addEventListener('pagehide', _saveOnLeave);
+window.addEventListener('beforeunload', _saveOnLeave);
+document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='hidden') _saveOnLeave(); });
+
 var _bleDevice    = null;
 var _bleChars     = []; // 購読中のCharacteristic一覧
 var _bleConnected = false;
