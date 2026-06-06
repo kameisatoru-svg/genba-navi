@@ -5141,7 +5141,7 @@ function _loadAnkenList(onReady){
     .then(function(res){ if(!res.ok) throw new Error('HTTP '+res.status); return res.json(); })
     .then(function(d){
       var arr=(d&&d['案件'])||[];
-      // 中止案件は除外。表示用に整形
+      // 識別名を持つ案件のみ（中止案件は data.json では別配列なので元々含まれない）
       _ankenList=arr.filter(function(a){ return a&&(a['案件キー']||a['正式工事名']||a['現場+工事']); });
       _ankenLoading=false;
       if(onReady) onReady();
