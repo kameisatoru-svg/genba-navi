@@ -3213,9 +3213,9 @@ function redrawPlan(){
   });
 
   // ── 余白・スケール・中央寄せ ──
-  // 基本余白：寸法線用に最低限確保（30pxはFold5で約15mm相当）
-  var PAD=30;
-  var mL=Math.max(PAD,56), mR=PAD, mT=PAD, mB=PAD;
+  // 基本余白：寸法線を外壁面から離して配置する分を確保（外壁＋引き出し＋数値）
+  var PAD=44;
+  var mL=Math.max(PAD,60), mR=PAD, mT=PAD, mB=PAD;
 
   // 幅・高さ両方に合わせたスケール
   var scW=(CW-mL-mR)/W;
