@@ -4217,6 +4217,7 @@ function removeOpByIdFi(opId, fi){
   _renderDrawerContent(); redrawPlan();
 }
 function setHinge(v){
+  pushHistory();
   // 平面図での選択中開口部
   if(curView==='plan'&&_planSelType==='opening'){
     var planOp=null;
@@ -4230,6 +4231,7 @@ function setHinge(v){
   op.hinge=v; _renderDrawerContent(); redraw();
 }
 function setSwing(v){
+  pushHistory();
   // 平面図での選択中開口部
   if(curView==='plan'&&_planSelType==='opening'){
     var planOp=null;
