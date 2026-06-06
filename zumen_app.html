@@ -4877,18 +4877,23 @@ function drawOpening(ctx,op,ox,oy,W,H,sc){
   ctx.strokeStyle=col; ctx.fillStyle=col;
   var t=op.type;
   var sw=op.swing||'in';   // 窓の倒し方向（in=内倒し,out=外倒し）
+  var hn=op.hinge||'left'; // 建具の吊り元（left/right）
 
   if(t==='ドア'){
     ctx.strokeRect(rx,ry2,rw3,rh2);
-    ctx.lineWidth=lw*1.2; ctx.beginPath();ctx.moveTo(rx+3*sc,ry2);ctx.lineTo(rx+3*sc,ry2+rh2);ctx.stroke();
+    var hingeXel=(hn==='right')?rx+rw3-3*sc:rx+3*sc;
+    ctx.lineWidth=lw*1.2; ctx.beginPath();ctx.moveTo(hingeXel,ry2);ctx.lineTo(hingeXel,ry2+rh2);ctx.stroke();
     ctx.lineWidth=lw; ctx.beginPath();ctx.moveTo(rx,ry2+rh2);ctx.lineTo(rx+rw3,ry2+rh2);ctx.stroke();
   } else if(t==='親子ドア'){
     ctx.strokeRect(rx,ry2,rw3,rh2);
-    ctx.lineWidth=lw*1.2; ctx.beginPath();ctx.moveTo(rx+3*sc,ry2);ctx.lineTo(rx+3*sc,ry2+rh2);ctx.stroke();
-    ctx.lineWidth=lw; ctx.beginPath();ctx.moveTo(rx+rw3*0.67,ry2);ctx.lineTo(rx+rw3*0.67,ry2+rh2);ctx.stroke();
+    var pHingeX=(hn==='right')?rx+rw3-3*sc:rx+3*sc;        // 親扉の吊り元
+    var divX=(hn==='right')?rx+rw3*0.33:rx+rw3*0.67;        // 親子の境界
+    var childCx=(hn==='right')?rx+rw3*0.17:rx+rw3*0.83;     // 子扉ラベル位置
+    ctx.lineWidth=lw*1.2; ctx.beginPath();ctx.moveTo(pHingeX,ry2);ctx.lineTo(pHingeX,ry2+rh2);ctx.stroke();
+    ctx.lineWidth=lw; ctx.beginPath();ctx.moveTo(divX,ry2);ctx.lineTo(divX,ry2+rh2);ctx.stroke();
     ctx.beginPath();ctx.moveTo(rx,ry2+rh2);ctx.lineTo(rx+rw3,ry2+rh2);ctx.stroke();
     ctx.font='bold '+Math.max(7,rw3*0.06)+'px Meiryo,sans-serif';
-    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('子',rx+rw3*0.83,rcy);
+    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('子',childCx,rcy);
   } else if(t==='両開きドア'){
     ctx.strokeRect(rx,ry2,rw3,rh2);
     ctx.lineWidth=lw*1.2;
