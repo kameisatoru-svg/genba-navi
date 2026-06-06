@@ -1154,6 +1154,13 @@ function _drawerOpening(){
     }
     var customOn=(moveStep!==10&&moveStep!==100&&moveStep!==300);
     h='<div class="drawer-op" style="padding:8px 14px;">';
+    // 種別名＋吊り元・開き勝手・倒し方向（最上部に配置して見やすく）
+    var _dir=_opDirControls(selOp2);
+    if(_dir){
+      h+='<div style="font-size:12px;font-weight:700;color:#b06a00;text-align:center;margin-bottom:2px;">'+selOp2.type+'</div>';
+      h+=_dir;
+      h+='<div style="border-top:1px solid rgba(30,45,64,0.1);margin:4px 0 8px;"></div>';
+    }
     // 十字（左）＋右カラム（ステップ／タイトル+幅高さ+削除／位置情報）
     h+='<div style="display:flex;align-items:flex-start;gap:10px;">';
     // 十字
