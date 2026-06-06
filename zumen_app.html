@@ -4926,12 +4926,18 @@ function drawOpening(ctx,op,ox,oy,W,H,sc){
     ctx.strokeRect(rx,ry2,rw3,rh2);
     var gi2=Math.max(2,2*sc);
     ctx.strokeRect(rx+gi2,ry2+gi2,rw3-gi2*2,rh2-gi2*2);
-    ctx.lineWidth=lw*0.7; ctx.setLineDash([3,2]);
-    ctx.beginPath();ctx.moveTo(rx+gi2,ry2+gi2);ctx.lineTo(rcx,ry2+rh2-gi2);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(rx+rw3-gi2,ry2+gi2);ctx.lineTo(rcx,ry2+rh2-gi2);ctx.stroke();
+    // 倒し方向：外倒し=ヒンジ上(∧・破線)／内倒し=ヒンジ下(∨・実線)
+    ctx.lineWidth=lw*0.7; ctx.setLineDash(sw==='out'?[3,2]:[]);
+    if(sw==='out'){
+      ctx.beginPath();ctx.moveTo(rx+gi2,ry2+rh2-gi2);ctx.lineTo(rcx,ry2+gi2);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(rx+rw3-gi2,ry2+rh2-gi2);ctx.lineTo(rcx,ry2+gi2);ctx.stroke();
+    } else {
+      ctx.beginPath();ctx.moveTo(rx+gi2,ry2+gi2);ctx.lineTo(rcx,ry2+rh2-gi2);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(rx+rw3-gi2,ry2+gi2);ctx.lineTo(rcx,ry2+rh2-gi2);ctx.stroke();
+    }
     ctx.setLineDash([]); ctx.lineWidth=lw;
     ctx.font='bold '+Math.max(8,rw3*0.1)+'px Meiryo,sans-serif';
-    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('EX',rcx,rcy);
+    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('EX',rcx, sw==='out'?ry2+rh2*0.7:ry2+rh2*0.3);
   } else if(t==='縦滑り窓'){
     ctx.strokeRect(rx,ry2,rw3,rh2);
     var gi3=Math.max(2,2*sc);
@@ -4944,9 +4950,15 @@ function drawOpening(ctx,op,ox,oy,W,H,sc){
     ctx.strokeRect(rx,ry2,rw3,rh2);
     var gi4=Math.max(2,2*sc);
     ctx.strokeRect(rx+gi4,ry2+gi4,rw3-gi4*2,rh2-gi4*2);
-    ctx.lineWidth=lw*0.7; ctx.setLineDash([3,2]);
-    ctx.beginPath();ctx.moveTo(rx+gi4,ry2+gi4);ctx.lineTo(rcx,ry2+rh2-gi4);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(rx+rw3-gi4,ry2+gi4);ctx.lineTo(rcx,ry2+rh2-gi4);ctx.stroke();
+    // 倒し方向：外倒し=ヒンジ上(∧・破線)／内倒し=ヒンジ下(∨・実線)
+    ctx.lineWidth=lw*0.7; ctx.setLineDash(sw==='out'?[3,2]:[]);
+    if(sw==='out'){
+      ctx.beginPath();ctx.moveTo(rx+gi4,ry2+rh2-gi4);ctx.lineTo(rcx,ry2+gi4);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(rx+rw3-gi4,ry2+rh2-gi4);ctx.lineTo(rcx,ry2+gi4);ctx.stroke();
+    } else {
+      ctx.beginPath();ctx.moveTo(rx+gi4,ry2+gi4);ctx.lineTo(rcx,ry2+rh2-gi4);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(rx+rw3-gi4,ry2+gi4);ctx.lineTo(rcx,ry2+rh2-gi4);ctx.stroke();
+    }
     ctx.setLineDash([]); ctx.lineWidth=lw;
   } else if(t==='出窓'){
     ctx.strokeRect(rx,ry2,rw3,rh2);
