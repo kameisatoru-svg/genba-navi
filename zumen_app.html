@@ -4876,6 +4876,7 @@ function drawOpening(ctx,op,ox,oy,W,H,sc){
   ctx.fillStyle='#f9f8f6'; ctx.fillRect(rx,ry2,rw3,rh2);
   ctx.strokeStyle=col; ctx.fillStyle=col;
   var t=op.type;
+  var sw=op.swing||'in';   // 窓の倒し方向（in=内倒し,out=外倒し）
 
   if(t==='ドア'){
     ctx.strokeRect(rx,ry2,rw3,rh2);
