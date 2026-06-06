@@ -715,19 +715,17 @@ function switchView(v){
 
 
 function doPrint(){
-  setMode('print');
-  // 印刷用に高解像度で再描画（dpr=6相当）
-  var _origSetup=setupCanvas;
+  // ドロワー等を閉じてから印刷用に高解像度（dpr=6相当）で再描画 → 印刷 → 通常解像度に戻す
+  _closeDrawer();
   window._printDpr=6;
   setTimeout(function(){
-    // setupCanvasを高解像度版に差し替えて再描画
     window._printMode=true;
     redrawForPrint();
     setTimeout(function(){
       window.print();
       setTimeout(function(){
         window._printMode=false;
-        setMode('edit');
+        redrawForPrint(); // 通常解像度に戻す
       },500);
     },200);
   },150);
