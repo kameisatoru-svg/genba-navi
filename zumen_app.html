@@ -739,20 +739,22 @@ function redrawForPrint(){
 }
 
 // ══════════════════════════════════════════
-//  案件に保存（data.json へ反映）
-//  ・案件台帳と同じ GitHub PUT 機構（PATは共通キー）を利用
-//  ・図面データを 案件.図面[部屋名] に格納（真実の源泉/他端末共有/バックアップ）
+//  図面をファイルに保存（案件フォルダ / 端末ローカルへ）
+//  ・data.json を肥大化させないため、図面データは個別JSONファイルとして保存
+//  ・showSaveFilePicker 対応環境（PC版Chrome等）では保存先フォルダを選択可能
+//    → Googleドライブ デスクトップでマウントした案件フォルダに直接保存できる
+//  ・非対応環境（多くのAndroid）では端末のダウンロードフォルダへ保存
 // ══════════════════════════════════════════
-var ZUMEN_GH_REPO='kameisatoru-svg/genba-navi';
-var ZUMEN_GH_FILE='data.json';
-var ZUMEN_GH_API='https://api.github.com/repos/'+ZUMEN_GH_REPO+'/contents/'+ZUMEN_GH_FILE;
-var ZUMEN_PAT_KEY='artrise_gh_pat'; // 案件台帳と共通（トークンは1回入れれば全アプリで使える）
 
-function _zumenGetPat(){ try{ return localStorage.getItem(ZUMEN_PAT_KEY)||''; }catch(e){ return ''; } }
-
-// 現在の作図データ一式を収集（projAutoSaveと同じ構造）
+// 現在の作図データ一式を収集（projAutoSaveと同じ構造＋メタ情報）
 function _collectDrawingData(){
   return {
+    _meta:{
+      案件キー:(roomData&&roomData._ankenKey)||'',
+      案件名:(roomData&&roomData._ankenName)||'',
+      現場名:_projGenba, 部屋名:_projRoom,
+      アプリ:'zumen_app', 保存日時:new Date().toISOString()
+    },
     roomData:roomData,
     faceOpenings:faceOpenings, faceOidSeq:faceOidSeq,
     faceEquips:faceEquips,     faceEqSeq:faceEqSeq,
@@ -767,80 +769,51 @@ function _collectDrawingData(){
   };
 }
 
-async function saveToDataJson(){
+// ファイル名に使えない文字を除去
+function _sanitizeFilename(s){
+  return String(s||'').replace(/[\\/:*?"<>|]/g,'_').replace(/\s+/g,'_').replace(/_+/g,'_').slice(0,60);
+}
+
+// 保存ファイル名（案件キー優先・なければ現場名）
+function _drawingFileName(){
+  var base=(roomData&&roomData._ankenKey)?roomData._ankenKey:_projGenba;
+  return '図面_'+_sanitizeFilename(base)+'_'+_sanitizeFilename(_projRoom)+'.json';
+}
+
+async function saveDrawingFile(){
   if(!_projGenba||!_projRoom){ showWaToast('⚠ 先に案件・部屋を設定してください'); return; }
-  var ankenKey=(roomData&&roomData._ankenKey)||'';
-  if(!ankenKey){ showWaToast('⚠ この図面は案件台帳に紐付いていません（案件選択から作成すると保存できます）'); return; }
-  var pat=_zumenGetPat();
-  if(!pat){ _zumenShowPatModal(saveToDataJson); return; }
-  projAutoSave(); // ローカルにも保存
-  showWaToast('☁ data.jsonに保存中…');
+  projAutoSave(); // 端末内（localStorage）にも保存
+  var fname=_drawingFileName();
+  var json=JSON.stringify(_collectDrawingData(), null, 2);
+  var blob=new Blob([json], {type:'application/json'});
+
+  // 1. File System Access API：保存先フォルダを選べる（PC＋Driveマウント等）
+  if(window.showSaveFilePicker){
+    try{
+      var handle=await window.showSaveFilePicker({
+        suggestedName:fname,
+        types:[{description:'図面データ(JSON)', accept:{'application/json':['.json']}}]
+      });
+      var w=await handle.createWritable();
+      await w.write(blob); await w.close();
+      showWaToast('✓ 保存しました：'+fname);
+      return;
+    }catch(e){
+      if(e&&e.name==='AbortError'){ showWaToast('保存をキャンセルしました'); return; }
+      // それ以外（未対応・権限等）は通常ダウンロードへフォールバック
+    }
+  }
+  // 2. 通常ダウンロード（Android等：ダウンロードフォルダへ）
   try{
-    // 1. 現在のdata.json+SHAを取得
-    var res=await fetch(ZUMEN_GH_API,{headers:{Authorization:'token '+pat,'Accept':'application/vnd.github.v3+json'}});
-    if(res.status===401){ localStorage.removeItem(ZUMEN_PAT_KEY); showWaToast('⚠ トークンが無効です。再設定してください'); _zumenShowPatModal(saveToDataJson); return; }
-    if(!res.ok) throw new Error('取得失敗 '+res.status);
-    var fileData=await res.json();
-    var sha=fileData.sha;
-    // Base64→UTF-8（日本語キー対応）
-    var binc=atob(String(fileData.content||'').replace(/\n/g,''));
-    var bytes=new Uint8Array(binc.length);
-    for(var i=0;i<binc.length;i++) bytes[i]=binc.charCodeAt(i);
-    var data=JSON.parse(new TextDecoder('utf-8').decode(bytes));
-    // 2. 該当案件の 図面[部屋名] に反映
-    var ankenList=data['案件']||[];
-    var idx=-1;
-    for(var k=0;k<ankenList.length;k++){ if((ankenList[k]['案件キー']||'')===ankenKey){ idx=k; break; } }
-    if(idx===-1) throw new Error('案件が見つかりません: '+ankenKey);
-    if(!ankenList[idx]['図面']||typeof ankenList[idx]['図面']!=='object') ankenList[idx]['図面']={};
-    ankenList[idx]['図面'][_projRoom]=_collectDrawingData();
-    // 3. UTF-8→Base64 でPUT
-    var jsonStr=JSON.stringify(data,null,2);
-    var enc=new TextEncoder().encode(jsonStr);
-    var encChars=''; for(var j=0;j<enc.length;j++) encChars+=String.fromCharCode(enc[j]);
-    var newContent=btoa(encChars);
-    var putRes=await fetch(ZUMEN_GH_API,{
-      method:'PUT',
-      headers:{Authorization:'token '+pat,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
-      body:JSON.stringify({message:'図面保存: '+ankenKey+' / '+_projRoom, content:newContent, sha:sha})
-    });
-    if(!putRes.ok) throw new Error('保存失敗 '+putRes.status);
-    showWaToast('✓ 案件「'+ankenKey+'」に図面を保存しました');
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url; a.download=fname;
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ if(a.parentNode) document.body.removeChild(a); URL.revokeObjectURL(url); }, 1500);
+    showWaToast('✓ 保存しました：'+fname);
   }catch(e){
     showWaToast('⚠ 保存失敗: '+(e&&e.message?e.message:e));
   }
-}
-
-// PAT入力モーダル
-function _zumenShowPatModal(cb){
-  var m=document.getElementById('zumen-pat-modal');
-  if(!m){
-    m=document.createElement('div');
-    m.id='zumen-pat-modal';
-    m.style.cssText='position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(10,20,35,0.55);';
-    m.innerHTML='<div style="background:#fff;border-radius:14px;padding:20px;width:88%;max-width:340px;box-shadow:0 10px 40px rgba(0,0,0,0.3);">'
-      +'<div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px;">GitHub Token を設定</div>'
-      +'<div style="font-size:12px;color:var(--text2);margin-bottom:12px;">初回のみ必要です。端末内(localStorage)に保存され、GitHub以外には送信されません。案件台帳と共通のトークンです。</div>'
-      +'<input type="password" id="zumen-pat-input" placeholder="ghp_xxxxxxxx" style="width:100%;height:44px;border:1px solid var(--line,#dfe3ea);border-radius:10px;padding:0 12px;font-size:14px;font-family:inherit;box-sizing:border-box;margin-bottom:12px;outline:none;">'
-      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
-      +'<button onclick="_zumenClosePatModal()" style="height:44px;border:1px solid var(--line,#dfe3ea);border-radius:10px;background:transparent;color:var(--text2);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">キャンセル</button>'
-      +'<button onclick="_zumenConfirmPat()" style="height:44px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">保存して続ける</button>'
-      +'</div></div>';
-    document.body.appendChild(m);
-  }
-  m._cb=cb;
-  m.style.display='flex';
-  setTimeout(function(){ var el=document.getElementById('zumen-pat-input'); if(el) el.focus(); },100);
-}
-function _zumenClosePatModal(){ var m=document.getElementById('zumen-pat-modal'); if(m) m.style.display='none'; }
-function _zumenConfirmPat(){
-  var el=document.getElementById('zumen-pat-input');
-  var v=(el?el.value:'').trim();
-  if(!v){ showWaToast('トークンを入力してください'); return; }
-  try{ localStorage.setItem(ZUMEN_PAT_KEY, v); }catch(e){}
-  _zumenClosePatModal();
-  var m=document.getElementById('zumen-pat-modal');
-  if(m&&m._cb){ var cb=m._cb; m._cb=null; cb(); }
 }
 
 // ══════════════════════════════════════════
