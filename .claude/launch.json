@@ -2,10 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "genba-navi-static",
+      "name": "genba-navi-fresh",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8753"],
-      "port": 8753
+      "runtimeArgs": ["-m", "http.server", "8771"],
+      "port": 8771
     }
   ]
 }
