@@ -1099,7 +1099,8 @@ function _drawerOpening(){
   ];
   var windows=[
     {label:'窓（中連）',w:1600,h:1100,disp:'中連窓'},{label:'窓（掃出）',w:1600,h:2100,disp:'掃出し窓'},
-    {label:'排煙窓',w:1200,h:600,disp:'排煙窓'},{label:'縦滑り窓',w:600,h:1100,disp:'縦滑り'},{label:'嵌め殺し',w:900,h:1100,disp:'嵌め殺し'}
+    {label:'排煙窓',w:1200,h:600,disp:'排煙窓'},{label:'横滑り窓',w:1200,h:600,disp:'横滑り'},
+    {label:'縦滑り窓',w:600,h:1100,disp:'縦滑り'},{label:'嵌め殺し',w:900,h:1100,disp:'嵌め殺し'}
   ];
   var h='<div class="drawer-op">';
 
@@ -1155,6 +1156,8 @@ function _drawerOpening(){
     h+='<div style="display:flex;align-items:center;justify-content:center;padding:2px 0;">';
     h+='<span style="font-size:12px;font-weight:700;color:#b06a00;">'+selOp2.type+'</span>';
     h+='</div>';
+    // 吊り元・開き勝手・倒し方向（種別に応じて表示）
+    h+=_opDirControls(selOp2);
     h+='<div style="border-top:1px solid rgba(30,45,64,0.1);margin-bottom:0;"></div>';
   }
 
