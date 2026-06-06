@@ -4062,23 +4062,39 @@ function redrawCeil(){
     ctx.restore();
   });
 
-  // 寸法線（内寸表示）
+  // 寸法線（内寸表示・引き出し線つき・外壁面から離して配置）
+  //  ・端＝内法面（ox/ox+rw・oy/oy+rd）に合わせ、引き出し線で内寸を明示
+  //  ・寸法線は外壁面からDIM_GAP離す（通常の図面のように壁から離して表記）
   var dispWc=(roomData._innerW!=null)?roomData._innerW:W;
   var dispDc=(roomData._innerD!=null)?roomData._innerD:D;
-  var dimY=oy+rd+30;
-  ctx.strokeStyle='rgba(30,45,64,0.45)'; ctx.lineWidth=1;
-  ctx.beginPath();ctx.moveTo(ox,dimY);ctx.lineTo(ox+rw,dimY);ctx.stroke();
-  [ox,ox+rw].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx,dimY-4);ctx.lineTo(tx,dimY+4);ctx.stroke();});
-  ctx.fillStyle='rgba(30,45,64,0.6)'; ctx.font='bold 11px Meiryo,sans-serif';
-  ctx.textAlign='center'; ctx.textBaseline='top';
-  ctx.fillText(dispWc.toLocaleString()+'mm',ox+rw/2,dimY+5);
+  var DIM_GAP=22;   // 外壁面から寸法線までの距離(px)
+  var EXT_GAP=3;    // 外壁面と引き出し線開始の微小ギャップ(px)
+  var EXT_OVER=6;   // 引き出し線が寸法線を越える量(px)
+  ctx.strokeStyle='rgba(30,45,64,0.5)'; ctx.lineWidth=1;
+  ctx.fillStyle='rgba(30,45,64,0.7)'; ctx.font='bold 11px Meiryo,sans-serif';
 
-  var dimX=ox-22;
+  // ── 下：横方向の寸法（内寸 W）──
+  var outerBottomY=oy+rd+Tpx;
+  var dimY=outerBottomY+DIM_GAP;
+  // 引き出し線（左右の内法面位置から）
+  ctx.beginPath();ctx.moveTo(ox,    outerBottomY+EXT_GAP);ctx.lineTo(ox,    dimY+EXT_OVER);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(ox+rw, outerBottomY+EXT_GAP);ctx.lineTo(ox+rw, dimY+EXT_OVER);ctx.stroke();
+  // 寸法線本体
+  ctx.beginPath();ctx.moveTo(ox,dimY);ctx.lineTo(ox+rw,dimY);ctx.stroke();
+  // 端部の斜めティック（45°）
+  [ox,ox+rw].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx-3,dimY+3);ctx.lineTo(tx+3,dimY-3);ctx.stroke();});
+  ctx.textAlign='center'; ctx.textBaseline='top';
+  ctx.fillText(dispWc.toLocaleString()+'mm',ox+rw/2,dimY+4);
+
+  // ── 左：縦方向の寸法（内寸 D）──
+  var outerLeftX=ox-Tpx;
+  var dimX=outerLeftX-DIM_GAP;
+  ctx.beginPath();ctx.moveTo(outerLeftX-EXT_GAP,oy);    ctx.lineTo(dimX-EXT_OVER,oy);    ctx.stroke();
+  ctx.beginPath();ctx.moveTo(outerLeftX-EXT_GAP,oy+rd); ctx.lineTo(dimX-EXT_OVER,oy+rd); ctx.stroke();
   ctx.beginPath();ctx.moveTo(dimX,oy);ctx.lineTo(dimX,oy+rd);ctx.stroke();
-  [oy,oy+rd].forEach(function(ty){ctx.beginPath();ctx.moveTo(dimX-4,ty);ctx.lineTo(dimX+4,ty);ctx.stroke();});
-  ctx.save(); ctx.translate(dimX-13,oy+rd/2); ctx.rotate(-Math.PI/2);
-  ctx.textAlign='center'; ctx.fillStyle='rgba(30,45,64,0.6)';
-  ctx.font='bold 11px Meiryo,sans-serif';
+  [oy,oy+rd].forEach(function(ty){ctx.beginPath();ctx.moveTo(dimX-3,ty+3);ctx.lineTo(dimX+3,ty-3);ctx.stroke();});
+  ctx.save(); ctx.translate(dimX-6,oy+rd/2); ctx.rotate(-Math.PI/2);
+  ctx.textAlign='center'; ctx.textBaseline='bottom';
   ctx.fillText(dispDc.toLocaleString()+'mm',0,0); ctx.restore();
 
 }
