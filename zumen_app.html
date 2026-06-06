@@ -5321,6 +5321,16 @@ function closeProjPanel(){
   if(arrow) arrow.textContent='▼';
 }
 
+// パネル外（現場名ボタン以外）をタップしたら閉じる
+document.addEventListener('click', function(e){
+  var panel=document.getElementById('proj-panel');
+  if(!panel||panel.classList.contains('hidden')) return;
+  var btn=document.getElementById('proj-btn');
+  if(panel.contains(e.target)) return;          // パネル内の操作は維持
+  if(btn&&btn.contains(e.target)) return;        // ボタンはトグルに任せる
+  closeProjPanel();
+});
+
 // ── ビュー切替 ──
 function projShowMain(){
   document.getElementById('proj-view-main').classList.remove('hidden');
