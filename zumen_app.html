@@ -3392,48 +3392,43 @@ function redrawPlan(){
   });
 
   // ══════════════════════════════════════════
-  //  寸法線：外周の外・固定余白内に配置（表示値は内寸）
+  //  寸法線：内法面に端を合わせ、外壁面から離して配置（表示値は内寸）
+  //   ・ox/ox+rw・oy/oy+rd は内法面（白い室内の端＝壁の内側）
+  //   ・引き出し線を内法面位置に出し、寸法線は外壁面からDIM_GAP離す
   // ══════════════════════════════════════════
-  var innerL=ox+Tpx, innerR=ox+rw-Tpx;
-  var innerT=oy+Tpx, innerB=oy+rd-Tpx;
+  var innL=ox, innR=ox+rw, innT=oy, innB=oy+rd;   // 内法面
+  var outB=oy+rd+Tpx, outL=ox-Tpx;                 // 外壁面
   var dispW=(roomData._innerW!=null)?roomData._innerW:W;
   var dispD=(roomData._innerD!=null)?roomData._innerD:D;
+  var DIM_GAP=18, EXT_GAP=3, EXT_OVER=6;
 
-  ctx.strokeStyle='rgba(30,45,64,0.5)';
+  ctx.font='bold 11px Meiryo,sans-serif';
+
+  // 下：横方向（内寸 W）
+  var dY=outB+DIM_GAP;
+  ctx.strokeStyle='rgba(30,45,64,0.3)'; ctx.lineWidth=0.8;
+  ctx.beginPath();ctx.moveTo(innL,outB+EXT_GAP);ctx.lineTo(innL,dY+EXT_OVER);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(innR,outB+EXT_GAP);ctx.lineTo(innR,dY+EXT_OVER);ctx.stroke();
+  ctx.strokeStyle='rgba(30,45,64,0.55)'; ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(innL,dY);ctx.lineTo(innR,dY);ctx.stroke();
+  [innL,innR].forEach(function(tx){ctx.beginPath();ctx.moveTo(tx-3,dY+3);ctx.lineTo(tx+3,dY-3);ctx.stroke();});
   ctx.fillStyle='rgba(30,45,64,0.75)';
-  ctx.lineWidth=1;
-
-  // 下：内壁面→内壁面
-  var dY=oy+rd+16;
-  ctx.beginPath();ctx.moveTo(innerL,dY);ctx.lineTo(innerR,dY);ctx.stroke();
-  [innerL,innerR].forEach(function(tx){
-    ctx.beginPath();ctx.moveTo(tx,dY-4);ctx.lineTo(tx,dY+4);ctx.stroke();
-  });
-  ctx.strokeStyle='rgba(30,45,64,0.25)'; ctx.lineWidth=0.7; ctx.setLineDash([2,3]);
-  ctx.beginPath();ctx.moveTo(innerL,innerB+2);ctx.lineTo(innerL,dY+6);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(innerR,innerB+2);ctx.lineTo(innerR,dY+6);ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.strokeStyle='rgba(30,45,64,0.5)'; ctx.lineWidth=1;
-  ctx.font='bold 11px Meiryo,sans-serif';
   ctx.textAlign='center'; ctx.textBaseline='top';
-  ctx.fillText(dispW.toLocaleString()+'mm', (innerL+innerR)/2, dY+5);
+  ctx.fillText(dispW.toLocaleString()+'mm', (innL+innR)/2, dY+4);
 
-  // 左：内壁面→内壁面
-  var dX=ox-16;
-  ctx.beginPath();ctx.moveTo(dX,innerT);ctx.lineTo(dX,innerB);ctx.stroke();
-  [innerT,innerB].forEach(function(ty){
-    ctx.beginPath();ctx.moveTo(dX-4,ty);ctx.lineTo(dX+4,ty);ctx.stroke();
-  });
-  ctx.strokeStyle='rgba(30,45,64,0.25)'; ctx.lineWidth=0.7; ctx.setLineDash([2,3]);
-  ctx.beginPath();ctx.moveTo(innerL-2,innerT);ctx.lineTo(dX-6,innerT);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(innerL-2,innerB);ctx.lineTo(dX-6,innerB);ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.strokeStyle='rgba(30,45,64,0.5)'; ctx.lineWidth=1;
+  // 左：縦方向（内寸 D）
+  var dX=outL-DIM_GAP;
+  ctx.strokeStyle='rgba(30,45,64,0.3)'; ctx.lineWidth=0.8;
+  ctx.beginPath();ctx.moveTo(outL-EXT_GAP,innT);ctx.lineTo(dX-EXT_OVER,innT);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(outL-EXT_GAP,innB);ctx.lineTo(dX-EXT_OVER,innB);ctx.stroke();
+  ctx.strokeStyle='rgba(30,45,64,0.55)'; ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(dX,innT);ctx.lineTo(dX,innB);ctx.stroke();
+  [innT,innB].forEach(function(ty){ctx.beginPath();ctx.moveTo(dX-3,ty+3);ctx.lineTo(dX+3,ty-3);ctx.stroke();});
   ctx.save();
-  ctx.translate(dX-13, (innerT+innerB)/2);
+  ctx.translate(dX-6, (innT+innB)/2);
   ctx.rotate(-Math.PI/2);
-  ctx.font='bold 11px Meiryo,sans-serif';
-  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle='rgba(30,45,64,0.75)';
+  ctx.textAlign='center'; ctx.textBaseline='bottom';
   ctx.fillText(dispD.toLocaleString()+'mm', 0, 0);
   ctx.restore();
 
