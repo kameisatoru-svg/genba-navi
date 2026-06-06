@@ -3862,7 +3862,7 @@ function redrawCeil(){
   var wrap=document.getElementById('cv-main-wrap');
   var CW=wrap?wrap.offsetWidth:(cv.offsetWidth||340);
   var CH_avail=wrap?wrap.offsetHeight:500;
-  var PAD=30;
+  var PAD=44;
   // 壁厚分の余白を確保（平面図と同じロジック）
   var scW=(CW-PAD*2)/W, scH=(CH_avail-PAD*2)/D;
   var sc=Math.min(scW,scH);
@@ -4062,7 +4062,7 @@ function redrawCeil(){
   //  ・寸法線は外壁面からDIM_GAP離す（通常の図面のように壁から離して表記）
   var dispWc=(roomData._innerW!=null)?roomData._innerW:W;
   var dispDc=(roomData._innerD!=null)?roomData._innerD:D;
-  var DIM_GAP=22;   // 外壁面から寸法線までの距離(px)
+  var DIM_GAP=18;   // 外壁面から寸法線までの距離(px)
   var EXT_GAP=3;    // 外壁面と引き出し線開始の微小ギャップ(px)
   var EXT_OVER=6;   // 引き出し線が寸法線を越える量(px)
   ctx.strokeStyle='rgba(30,45,64,0.5)'; ctx.lineWidth=1;
