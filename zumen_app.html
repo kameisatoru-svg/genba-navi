@@ -1510,28 +1510,193 @@ function goBackToTop(){
   window.location.href='index.html';
 }
 
-// ── 初回登録：選択画面の「既存案件」をタップ→読込 ──
-function setupLoadByIndex(i){
+// ══════════════════════════════════════════
+//  初回案件登録：セットアップ画面
+// ══════════════════════════════════════════
+
+function _esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// セットアップ画面の描画（step に応じて分岐）
+function _renderSetupScreen(area){
+  if(_setupStep==='room' && _setupSelAnken){ _renderSetupRoom(area); return; }
+  if(_setupStep==='manual'){ _renderSetupManual(area); return; }
+  _renderSetupChoose(area);
+}
+
+// ── step: choose（data.json 案件一覧） ──
+function _renderSetupChoose(area){
+  _setFormMode(true);
+  // 未取得なら取得開始（完了後に再描画）
+  if(!_ankenList && !_ankenError){
+    _loadAnkenList(function(){ if(_setupStep==='choose'&&(!_projGenba||!_projRoom)) renderPlan(); });
+  }
+  var html='<div style="padding:20px 16px;">';
+  html+='<div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px;">案件を選択してください</div>';
+  html+='<div style="font-size:12px;color:var(--text2);margin-bottom:14px;">案件台帳から選ぶか、リストにない場合は手入力します</div>';
+
+  if(_ankenLoading){
+    html+='<div style="font-size:13px;color:var(--text2);padding:20px 4px;">案件台帳を読み込み中…</div>';
+  } else if(_ankenError){
+    html+='<div style="font-size:13px;color:#b4541f;padding:14px 4px;">案件台帳を取得できませんでした。手入力で登録してください。</div>';
+  } else {
+    var list=_ankenList||[];
+    var kw=(_setupKeyword||'').trim();
+    if(kw){
+      list=list.filter(function(a){
+        var s=[a['案件キー'],a['顧客略'],a['現場+工事'],a['正式工事名'],a['施工場所'],a['ステータス']].join(' ');
+        return s.indexOf(kw)>=0;
+      });
+    }
+    // 検索窓
+    html+='<input type="text" id="setup-anken-search" value="'+_esc(_setupKeyword)+'" oninput="setupAnkenSearch(this.value)" placeholder="現場名・顧客・工事名で検索" style="width:100%;height:42px;border:1px solid var(--line,#dfe3ea);border-radius:10px;padding:0 12px;font-size:14px;font-family:inherit;box-sizing:border-box;margin-bottom:12px;outline:none;">';
+    html+='<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;max-height:46vh;overflow-y:auto;">';
+    if(list.length===0){
+      html+='<div style="font-size:13px;color:var(--text2);padding:14px 4px;">該当する案件がありません</div>';
+    } else {
+      list.forEach(function(a){
+        var key=a['案件キー']||'';
+        var name=_ankenGenba(a);
+        var sub=[a['顧客略'],a['施工場所']].filter(Boolean).join('・');
+        var st=a['ステータス']||'';
+        html+='<button onclick="setupPickAnken(\''+_esc(key).replace(/'/g,"\\'")+'\')" style="display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;border:1px solid var(--line,#dfe3ea);border-radius:12px;background:#fff;cursor:pointer;font-family:inherit;text-align:left;">';
+        html+='<span style="color:var(--navy);flex-shrink:0;">'+_SVG_GENBA+'</span>';
+        html+='<span style="flex:1;min-width:0;">';
+        html+='<span style="display:block;font-size:14px;font-weight:700;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+_esc(name)+'</span>';
+        if(sub) html+='<span style="display:block;font-size:11px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+_esc(sub)+'</span>';
+        html+='</span>';
+        if(st) html+='<span style="font-size:10px;color:var(--text2);background:var(--bg,#f3f1ec);border-radius:10px;padding:3px 8px;flex-shrink:0;white-space:nowrap;">'+_esc(st)+'</span>';
+        html+='</button>';
+      });
+    }
+    html+='</div>';
+  }
+
+  html+='<button onclick="setupShowManual()" style="width:100%;height:48px;border:1px solid var(--navy);border-radius:12px;background:transparent;color:var(--navy);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">リストにない案件を手入力</button>';
+  html+='</div>';
+  if(area) area.innerHTML=html;
+}
+
+// ── step: room（選択した案件の部屋名入力） ──
+function _renderSetupRoom(area){
+  _setFormMode(true);
+  var a=_setupSelAnken;
+  var genba=_ankenGenba(a);
+  var savedRooms=_getSavedProjects().filter(function(p){ return p.g===genba; });
+  _setupProjCache=savedRooms;
+
+  var html='<div style="padding:20px 16px;">';
+  html+='<button onclick="setupBackToChoose()" style="background:none;border:none;color:var(--text2);font-size:13px;cursor:pointer;font-family:inherit;padding:0;margin-bottom:14px;">← 案件の選択に戻る</button>';
+  html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span style="color:var(--navy);">'+_SVG_GENBA+'</span><span style="font-size:16px;font-weight:700;color:var(--navy);">'+_esc(genba)+'</span></div>';
+  if(a['施工場所']) html+='<div style="font-size:12px;color:var(--text2);margin-bottom:16px;">'+_esc(a['施工場所'])+'</div>';
+  else html+='<div style="margin-bottom:16px;"></div>';
+
+  // この現場の保存済み図面（部屋）があれば再開リスト
+  if(savedRooms.length>0){
+    html+='<div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;">保存済みの図面を開く</div>';
+    html+='<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px;max-height:32vh;overflow-y:auto;">';
+    savedRooms.forEach(function(p,i){
+      var dt=_setupFmtDate(p.savedAt);
+      html+='<button onclick="setupResumeRoom('+i+')" style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 14px;border:1px solid var(--line,#dfe3ea);border-radius:12px;background:#fff;cursor:pointer;font-family:inherit;text-align:left;">';
+      html+='<span style="color:var(--navy);flex-shrink:0;">'+_SVG_ROOM+'</span>';
+      html+='<span style="flex:1;min-width:0;font-size:14px;font-weight:700;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+_esc(p.r||'(部屋名なし)')+'</span>';
+      if(dt) html+='<span style="font-size:11px;color:var(--text2);flex-shrink:0;">'+dt+'</span>';
+      html+='</button>';
+    });
+    html+='</div>';
+  }
+
+  html+='<div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;">'+(savedRooms.length>0?'新しい部屋を追加':'部屋名を入力')+'</div>';
+  html+='<div class="iw" style="margin-bottom:16px;"><span>部屋名</span><input type="text" id="setup-room" value="" placeholder="例：北側居室" style="font-size:16px;height:48px;"></div>';
+  html+='<button onclick="setupStartRoom()" style="width:100%;height:48px;border:none;border-radius:12px;background:var(--navy);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">この部屋で開始 →</button>';
+  html+='</div>';
+  if(area) area.innerHTML=html;
+  setTimeout(function(){ var el=document.getElementById('setup-room'); if(el) el.focus(); },100);
+}
+
+// ── step: manual（手入力フォーム） ──
+function _renderSetupManual(area){
+  _setFormMode(true);
+  var html='<div style="padding:20px 16px;">';
+  html+='<button onclick="setupBackToChoose()" style="background:none;border:none;color:var(--text2);font-size:13px;cursor:pointer;font-family:inherit;padding:0;margin-bottom:14px;">← 案件の選択に戻る</button>';
+  html+='<div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px;">現場名・部屋名を入力してください</div>';
+  html+='<div style="font-size:12px;color:var(--text2);margin-bottom:20px;">作図データの保存先として使用します</div>';
+  html+='<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">';
+  html+='<div class="iw"><span>現場名</span><input type="text" id="setup-genba" value="'+_esc(_projGenba||'')+'" placeholder="例：さくら苑" style="font-size:16px;height:48px;"></div>';
+  html+='<div class="iw"><span>部屋名</span><input type="text" id="setup-room" value="'+_esc(_projRoom||'')+'" placeholder="例：北側居室" style="font-size:16px;height:48px;"></div>';
+  html+='</div>';
+  html+='<button onclick="setupProjAndStart()" style="width:100%;height:48px;border:none;border-radius:12px;background:var(--navy);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">次へ →</button>';
+  html+='</div>';
+  if(area) area.innerHTML=html;
+  setTimeout(function(){ var el=document.getElementById('setup-genba'); if(el) el.focus(); },100);
+}
+
+// ── 案件一覧の検索 ──
+function setupAnkenSearch(v){
+  _setupKeyword=v;
+  // 入力フォーカスを保ちたいので一覧部分のみ再描画
+  renderPlan();
+  setTimeout(function(){
+    var el=document.getElementById('setup-anken-search');
+    if(el){ el.focus(); el.setSelectionRange(el.value.length,el.value.length); }
+  },0);
+}
+
+// ── 案件をタップ→部屋名入力へ ──
+function setupPickAnken(key){
+  var a=(_ankenList||[]).filter(function(x){ return (x['案件キー']||'')===key; })[0];
+  if(!a){ showWaToast('案件が見つかりません'); return; }
+  _setupSelAnken=a;
+  _setupStep='room';
+  renderPlan();
+}
+
+// ── 手入力へ ──
+function setupShowManual(){
+  _setupStep='manual';
+  renderPlan();
+}
+
+// ── 選択画面に戻る ──
+function setupBackToChoose(){
+  _setupStep='choose';
+  _setupSelAnken=null;
+  renderPlan();
+}
+
+// ── 選択した案件の保存済み部屋を再開 ──
+function setupResumeRoom(i){
   var p=_setupProjCache[i];
   if(!p){ showWaToast('案件が見つかりません'); return; }
   var raw=localStorage.getItem(_projKey(p.g,p.r));
   if(!raw){ showWaToast('データが見つかりません'); return; }
-  _setupNewMode=false;
   _loadData(p.g,p.r,raw); // 内部で renderMain() まで実行
 }
 
-// ── 初回登録：選択画面の「＋ 新規作成」→入力フォームへ ──
-function setupShowNew(){
-  _setupNewMode=true;
+// ── 案件＋部屋名で新規開始 ──
+function setupStartRoom(){
+  var a=_setupSelAnken;
+  if(!a){ setupBackToChoose(); return; }
+  var gv=_ankenGenba(a);
+  var r=document.getElementById('setup-room');
+  var rv=(r?r.value.trim():'');
+  if(!gv){ showWaToast('⚠ 案件を選び直してください'); return; }
+  if(!rv){ showWaToast('⚠ 部屋名を入力してください'); return; }
+  var raw=localStorage.getItem(_projKey(gv,rv));
+  if(raw){
+    _loadData(gv,rv,raw);
+  } else {
+    _projGenba=gv; _projRoom=rv;
+    // 案件キー等を作図データに紐付け（自動保存で永続化）
+    roomData._ankenKey  = a['案件キー']||'';
+    roomData._ankenName = a['正式工事名']||'';
+    _updateProjLabel();
+    try{ localStorage.setItem('zumen_lastRoom', JSON.stringify({g:gv,r:rv})); }catch(e){}
+    projAutoSave();
+  }
   renderPlan();
 }
 
-// ── 初回登録：新規フォームの「← 選択に戻る」→選択画面へ ──
-function setupBackToChoose(){
-  _setupNewMode=false;
-  renderPlan();
-}
-
+// ── 手入力フォームから開始 ──
 function setupProjAndStart(){
   var g=document.getElementById('setup-genba');
   var r=document.getElementById('setup-room');
@@ -1539,13 +1704,13 @@ function setupProjAndStart(){
   var rv=(r?r.value.trim():'');
   if(!gv){ showWaToast('⚠ 現場名を入力してください'); return; }
   if(!rv){ showWaToast('⚠ 部屋名を入力してください'); return; }
-  _setupNewMode=false;
   // 既存データがあれば読込
   var raw=localStorage.getItem(_projKey(gv,rv));
   if(raw){
     _loadData(gv,rv,raw);
   } else {
     _projGenba=gv; _projRoom=rv;
+    try{ localStorage.setItem('zumen_lastRoom', JSON.stringify({g:gv,r:rv})); }catch(e){}
     _updateProjLabel();
     projAutoSave();
   }
@@ -4962,6 +5127,7 @@ var _projRoom  = '';
 var _setupStep     = 'choose';
 var _setupSelAnken = null;   // step='room' で選択中の案件オブジェクト
 var _setupKeyword  = '';     // 案件一覧の検索キーワード
+var _setupProjCache = [];    // step='room' で表示中の保存済み部屋（インデックス参照用）
 var _ankenList     = null;   // data.json から取得した案件配列（null=未取得）
 var _ankenLoading  = false;  // 取得中フラグ
 var _ankenError    = false;  // 取得失敗フラグ
