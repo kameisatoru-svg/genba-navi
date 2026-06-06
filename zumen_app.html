@@ -1263,13 +1263,10 @@ function _drawerCeilAdd(){
 }
 // 出力タブ（保存＋印刷）
 function _drawerOutput(){
-  var linked=!!(roomData&&roomData._ankenKey);
-  var saveLabel=linked?'💾 案件に保存（data.json）':'💾 案件に保存（案件未紐付け）';
-  var note=linked
-    ? '<div style="font-size:11px;color:var(--text2);text-align:center;">案件「'+(roomData._ankenName||roomData._ankenKey)+'」｜'+(_projRoom||'')+' に反映します</div>'
-    : '<div style="font-size:11px;color:#b4541f;text-align:center;">手入力の図面は端末内のみ保存。案件選択から作り直すとdata.jsonに保存できます</div>';
+  var note='<div style="font-size:11px;color:var(--text2);text-align:center;line-height:1.5;">'
+    +'「'+_esc(_drawingFileName())+'」として保存します。<br>対応端末では保存先フォルダ（Driveの案件フォルダ等）を選べます。</div>';
   return '<div class="drawer-op" style="display:flex;flex-direction:column;gap:8px;">'+
-    '<button onclick="saveToDataJson();" style="height:52px;border:none;border-radius:10px;background:var(--accent);color:var(--navy);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">'+saveLabel+'</button>'+
+    '<button onclick="saveDrawingFile();" style="height:52px;border:none;border-radius:10px;background:var(--accent);color:var(--navy);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">💾 図面を保存（ファイル）</button>'+
     note+
     '<button onclick="doPrint();" style="height:52px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px;">🖨 印刷・出力（PDF）</button>'+
     '</div>';
