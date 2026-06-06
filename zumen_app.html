@@ -1554,6 +1554,28 @@ function goBackToTop(){
   window.location.href='index.html';
 }
 
+// ── 初回登録：選択画面の「既存案件」をタップ→読込 ──
+function setupLoadByIndex(i){
+  var p=_setupProjCache[i];
+  if(!p){ showWaToast('案件が見つかりません'); return; }
+  var raw=localStorage.getItem(_projKey(p.g,p.r));
+  if(!raw){ showWaToast('データが見つかりません'); return; }
+  _setupNewMode=false;
+  _loadData(p.g,p.r,raw); // 内部で renderMain() まで実行
+}
+
+// ── 初回登録：選択画面の「＋ 新規作成」→入力フォームへ ──
+function setupShowNew(){
+  _setupNewMode=true;
+  renderPlan();
+}
+
+// ── 初回登録：新規フォームの「← 選択に戻る」→選択画面へ ──
+function setupBackToChoose(){
+  _setupNewMode=false;
+  renderPlan();
+}
+
 function setupProjAndStart(){
   var g=document.getElementById('setup-genba');
   var r=document.getElementById('setup-room');
@@ -1561,6 +1583,7 @@ function setupProjAndStart(){
   var rv=(r?r.value.trim():'');
   if(!gv){ showWaToast('⚠ 現場名を入力してください'); return; }
   if(!rv){ showWaToast('⚠ 部屋名を入力してください'); return; }
+  _setupNewMode=false;
   // 既存データがあれば読込
   var raw=localStorage.getItem(_projKey(gv,rv));
   if(raw){
