@@ -1091,6 +1091,42 @@ function onDrwDimChange(key,val){
   projAutoSave(); // 寸法変更も即保存（履歴は積まない）
 }
 
+// 吊り元・開き勝手・倒し方向のセレクタ（選択中開口部の種別に応じて）
+//  ・建具(片開き/親子)：吊り元(左吊/右吊)＋開き勝手(内開/外開)
+//  ・両開き：開き勝手(内開/外開)のみ
+//  ・横すべり/排煙窓：倒し方向(内倒し/外倒し)　※swingを流用(in=内倒し,out=外倒し)
+function _opDirControls(op){
+  if(!op) return '';
+  var t=op.type;
+  var hn=op.hinge||'left', sw=op.swing||'in';
+  function seg(label,active,onclick){
+    return '<button onclick="'+onclick+'" style="flex:1;height:42px;border-radius:9px;border:1.5px solid '
+      +(active?'#b06a00':'rgba(30,45,64,0.18)')+';background:'+(active?'#b06a00':'#fff')+';color:'+(active?'#fff':'#1e2d40')
+      +';font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">'+label+'</button>';
+  }
+  var lbl='font-size:10px;font-weight:700;color:#5a6a7a;margin:6px 0 4px;';
+  var row='display:flex;gap:5px;';
+  var isHinged=(t==='ドア'||t==='親子ドア');
+  var isDbl=(t==='両開きドア');
+  var isTilt=(t==='排煙窓'||t==='横滑り窓');
+  if(!isHinged&&!isDbl&&!isTilt) return '';
+  var h='<div style="padding:2px 0 6px;">';
+  if(isHinged){
+    h+='<div style="'+lbl+'">吊り元'+(t==='親子ドア'?'（親扉基準）':'')+'</div>';
+    h+='<div style="'+row+'">'+seg('左吊',hn==='left',"setHinge('left')")+seg('右吊',hn==='right',"setHinge('right')")+'</div>';
+    h+='<div style="'+lbl+'">開き勝手</div>';
+    h+='<div style="'+row+'">'+seg('内開き',sw==='in',"setSwing('in')")+seg('外開き',sw==='out',"setSwing('out')")+'</div>';
+  } else if(isDbl){
+    h+='<div style="'+lbl+'">開き勝手</div>';
+    h+='<div style="'+row+'">'+seg('内開き',sw==='in',"setSwing('in')")+seg('外開き',sw==='out',"setSwing('out')")+'</div>';
+  } else if(isTilt){
+    h+='<div style="'+lbl+'">倒し方向</div>';
+    h+='<div style="'+row+'">'+seg('内倒し',sw==='in',"setSwing('in')")+seg('外倒し',sw==='out',"setSwing('out')")+'</div>';
+  }
+  h+='</div>';
+  return h;
+}
+
 // 開口部タブ
 function _drawerOpening(){
   var doors=[
