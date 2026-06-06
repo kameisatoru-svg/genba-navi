@@ -430,8 +430,8 @@ canvas{display:block;width:100%;}
     <div class="col-dialog-head" id="col-dialog-head">柱を配置</div>
     <div class="col-dialog-body">
       <div class="r2">
-        <div class="iw"><span>幅 mm</span><input type="number" id="col-dlg-w" value="120" inputmode="numeric"></div>
-        <div class="iw"><span>奥行 mm</span><input type="number" id="col-dlg-d" value="120" inputmode="numeric"></div>
+        <div class="iw"><span>幅 mm</span><input type="text" id="col-dlg-w" value="120" inputmode="numeric"></div>
+        <div class="iw"><span>奥行 mm</span><input type="text" id="col-dlg-d" value="120" inputmode="numeric"></div>
       </div>
     </div>
     <div class="col-dialog-footer">
@@ -987,7 +987,7 @@ function _drawerDim(){
     var v=k==='W'?W:k==='D'?D:H;
     h+='<div style="background:#fff;border-radius:9px;border:1.5px solid rgba(30,45,64,0.15);padding:8px;text-align:center;">'
       +'<div style="font-size:10px;color:#5a6a7a;margin-bottom:2px;">'+k+' mm</div>'
-      +'<input data-dim="'+k+'" type="number" value="'+(v||'')+'" placeholder="0" inputmode="numeric" '
+      +'<input data-dim="'+k+'" type="text" value="'+(v||'')+'" placeholder="0" inputmode="numeric" '
       +'style="width:100%;border:none;outline:none;font-size:20px;font-weight:700;color:#1e2d40;text-align:center;background:transparent;font-family:inherit;" '
       +'oninput="onDrwDimChange(this.dataset.dim,this.value)"></div>';
   });
@@ -1056,14 +1056,14 @@ function _drawerOpening(){
       var on=moveStep===s;
       h+='<button onclick="setMvStep('+s+')" style="flex:1;height:44px;border-radius:10px;border:1.5px solid rgba(30,45,64,0.15);background:'+(on?'#1e2d40':'#fff')+';color:'+(on?'#fff':'#5a6a7a')+';font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">'+s+'</button>';
     });
-    h+='<input id="op-step-custom" type="number" value="'+(customOn?moveStep:'')+'" placeholder="自由" inputmode="numeric" '
+    h+='<input id="op-step-custom" type="text" value="'+(customOn?moveStep:'')+'" placeholder="自由" inputmode="numeric" '
       +'style="flex:1;height:44px;border-radius:10px;border:1.5px solid rgba(30,45,64,0.15);background:'+(customOn?'#1e2d40':'#fff')+';color:'+(customOn?'#fff':'#1e2d40')+';font-size:12px;font-weight:700;text-align:center;font-family:inherit;min-width:0;" '
       +'oninput="var v=parseInt(this.value)||0;if(v>0)setMvStep(v);">';
     h+='</div>';
     // 行2：幅＋高さ＋削除
     h+='<div style="display:flex;gap:4px;align-items:stretch;">';
-    h+='<div style="flex:1;background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:3px 4px;text-align:center;"><div style="font-size:8px;color:#5a6a7a;">幅 mm</div><input type="number" value="'+selOp2.w+'" inputmode="numeric" style="width:100%;border:none;outline:none;font-size:13px;font-weight:700;color:#1e2d40;text-align:center;background:transparent;font-family:inherit;" oninput="resizeOp(\'w\',parseInt(this.value)||0)"></div>';
-    h+='<div style="flex:1;background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:3px 4px;text-align:center;"><div style="font-size:8px;color:#5a6a7a;">高さ mm</div><input type="number" value="'+selOp2.h+'" inputmode="numeric" style="width:100%;border:none;outline:none;font-size:13px;font-weight:700;color:#1e2d40;text-align:center;background:transparent;font-family:inherit;" oninput="resizeOp(\'h\',parseInt(this.value)||0)"></div>';
+    h+='<div style="flex:1;background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:3px 4px;text-align:center;"><div style="font-size:8px;color:#5a6a7a;">幅 mm</div><input type="text" value="'+selOp2.w+'" inputmode="numeric" style="width:100%;border:none;outline:none;font-size:13px;font-weight:700;color:#1e2d40;text-align:center;background:transparent;font-family:inherit;" oninput="resizeOp(\'w\',parseInt(this.value)||0)"></div>';
+    h+='<div style="flex:1;background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:3px 4px;text-align:center;"><div style="font-size:8px;color:#5a6a7a;">高さ mm</div><input type="text" value="'+selOp2.h+'" inputmode="numeric" style="width:100%;border:none;outline:none;font-size:13px;font-weight:700;color:#1e2d40;text-align:center;background:transparent;font-family:inherit;" oninput="resizeOp(\'h\',parseInt(this.value)||0)"></div>';
     h+='<button onclick="removeOp('+selId+')" style="height:44px;padding:0 10px;border:1.5px solid rgba(229,53,53,0.5);border-radius:10px;background:transparent;color:#e53535;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">削除</button>';
     h+='</div>';
     // 行3：位置情報
@@ -1137,14 +1137,14 @@ function _drawerEquip(){
       var on=moveStep===s;
       h+='<button onclick="setMvStep('+s+')" style="flex:1;height:44px;border-radius:10px;border:1.5px solid rgba(30,45,64,0.15);background:'+(on?'#1e2d40':'#fff')+';color:'+(on?'#fff':'#5a6a7a')+';font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">'+s+'</button>';
     });
-    h+='<input id="eq-step-custom" type="number" value="'+(customOn?moveStep:'')+'" placeholder="自由" inputmode="numeric" '
+    h+='<input id="eq-step-custom" type="text" value="'+(customOn?moveStep:'')+'" placeholder="自由" inputmode="numeric" '
       +'style="flex:1;height:44px;border-radius:10px;border:1.5px solid rgba(30,45,64,0.15);background:'+(customOn?'#1e2d40':'#fff')+';color:'+(customOn?'#fff':'#1e2d40')+';font-size:12px;font-weight:700;text-align:center;font-family:inherit;min-width:0;" '
       +'oninput="var v=parseInt(this.value)||0;if(v>0)setMvStep(v);">';
     h+='</div>';
     // 行2：幅＋高さ＋削除
     h+='<div style="display:flex;gap:4px;align-items:stretch;">';
-    h+='<div style="flex:1;background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:3px 4px;text-align:center;"><div style="font-size:8px;color:#5a6a7a;">幅 mm</div><input type="number" value="'+selEq2.w+'" inputmode="numeric" style="width:100%;border:none;outline:none;font-size:13px;font-weight:700;color:#1e2d40;text-align:center;background:transparent;font-family:inherit;" oninput="resizeEq(\'w\',parseInt(this.value)||0)"></div>';
-    h+='<div style="flex:1;background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:3px 4px;text-align:center;"><div style="font-size:8px;color:#5a6a7a;">高さ mm</div><input type="number" value="'+selEq2.h+'" inputmode="numeric" style="width:100%;border:none;outline:none;font-size:13px;font-weight:700;color:#1e2d40;text-align:center;background:transparent;font-family:inherit;" oninput="resizeEq(\'h\',parseInt(this.value)||0)"></div>';
+    h+='<div style="flex:1;background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:3px 4px;text-align:center;"><div style="font-size:8px;color:#5a6a7a;">幅 mm</div><input type="text" value="'+selEq2.w+'" inputmode="numeric" style="width:100%;border:none;outline:none;font-size:13px;font-weight:700;color:#1e2d40;text-align:center;background:transparent;font-family:inherit;" oninput="resizeEq(\'w\',parseInt(this.value)||0)"></div>';
+    h+='<div style="flex:1;background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:3px 4px;text-align:center;"><div style="font-size:8px;color:#5a6a7a;">高さ mm</div><input type="text" value="'+selEq2.h+'" inputmode="numeric" style="width:100%;border:none;outline:none;font-size:13px;font-weight:700;color:#1e2d40;text-align:center;background:transparent;font-family:inherit;" oninput="resizeEq(\'h\',parseInt(this.value)||0)"></div>';
     h+='<button onclick="removeEq('+selId+')" style="height:44px;padding:0 10px;border:1.5px solid rgba(229,53,53,0.5);border-radius:10px;background:transparent;color:#e53535;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">削除</button>';
     h+='</div>';
     // 行3：位置情報
@@ -1816,7 +1816,7 @@ function _renderOutlineScreen(area, T, H){
         html+='<button class="wt-btn'+(T===t?' active':'')+'" onclick="setWallT('+t+')" style="height:28px;padding:0 8px;font-size:11px;">'+t+'mm</button>';
       });
       html+='<span style="font-size:11px;color:var(--text2);margin-left:8px;">高さH</span>';
-      html+='<input type="number" id="outline-H" value="'+(H||'')+'" placeholder="2400" inputmode="numeric" style="width:64px;height:28px;border:1.5px solid rgba(30,45,64,0.2);border-radius:6px;padding:0 6px;font-size:12px;font-family:inherit;">';
+      html+='<input type="text" id="outline-H" value="'+(H||'')+'" placeholder="2400" inputmode="numeric" style="width:64px;height:28px;border:1.5px solid rgba(30,45,64,0.2);border-radius:6px;padding:0 6px;font-size:12px;font-family:inherit;">';
       html+='<span style="font-size:11px;color:var(--text2);">mm</span>';
       html+='</div>';
       // 辺リスト
@@ -1824,7 +1824,7 @@ function _renderOutlineScreen(area, T, H){
         var hasDim=(_outlineDims&&_outlineDims[ei]>0);
         html+='<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;margin-bottom:4px;background:rgba(255,255,255,0.8);border:1px solid rgba(30,45,64,0.08)">';
         html+='<span style="font-size:12px;color:var(--text2);flex-shrink:0;width:28px;">辺'+(ei+1)+'</span>';
-        html+='<input type="number" id="odim-'+ei+'" value="'+(hasDim?_outlineDims[ei]:'')+'" placeholder="寸法mm" inputmode="numeric" style="flex:1;height:34px;border:1.5px solid rgba(30,45,64,0.15);border-radius:7px;padding:0 8px;font-size:13px;font-family:inherit;" oninput="setOutlineDim('+ei+',this.value)">';
+        html+='<input type="text" id="odim-'+ei+'" value="'+(hasDim?_outlineDims[ei]:'')+'" placeholder="寸法mm" inputmode="numeric" style="flex:1;height:34px;border:1.5px solid rgba(30,45,64,0.15);border-radius:7px;padding:0 8px;font-size:13px;font-family:inherit;" oninput="setOutlineDim('+ei+',this.value)">';
         html+='<span style="font-size:10px;color:var(--text2);">mm</span>';
         html+='<button onclick="event.stopPropagation();outlineDimFromBle('+ei+')" style="height:34px;padding:0 8px;border:none;border-radius:7px;background:var(--navy);color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">GLM</button>';
         html+='</div>';
@@ -3731,9 +3731,9 @@ function updMPCeil(){
       +'</div>'
       +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">'
         +'<div class="mpc-cell"><div class="mpc-lbl">幅 mm</div>'
-        +'<input type="number" id="cp-w-inp" value="'+cp.w+'" inputmode="numeric" style="width:100%;height:32px;border:1.5px solid rgba(42,106,74,0.4);border-radius:6px;padding:0 6px;font-size:13px;font-family:inherit;color:var(--tceil);text-align:center;background:#fff;" oninput="resizeCeil(&apos;w&apos;,this.value)"></div>'
+        +'<input type="text" id="cp-w-inp" value="'+cp.w+'" inputmode="numeric" style="width:100%;height:32px;border:1.5px solid rgba(42,106,74,0.4);border-radius:6px;padding:0 6px;font-size:13px;font-family:inherit;color:var(--tceil);text-align:center;background:#fff;" oninput="resizeCeil(&apos;w&apos;,this.value)"></div>'
         +'<div class="mpc-cell"><div class="mpc-lbl">奥行 mm</div>'
-        +'<input type="number" id="cp-h-inp" value="'+cp.h+'" inputmode="numeric" style="width:100%;height:32px;border:1.5px solid rgba(42,106,74,0.4);border-radius:6px;padding:0 6px;font-size:13px;font-family:inherit;color:var(--tceil);text-align:center;background:#fff;" oninput="resizeCeil(&apos;h&apos;,this.value)"></div>'
+        +'<input type="text" id="cp-h-inp" value="'+cp.h+'" inputmode="numeric" style="width:100%;height:32px;border:1.5px solid rgba(42,106,74,0.4);border-radius:6px;padding:0 6px;font-size:13px;font-family:inherit;color:var(--tceil);text-align:center;background:#fff;" oninput="resizeCeil(&apos;h&apos;,this.value)"></div>'
       +'</div>'
     +'</div>';
   document.getElementById('mpanel-wrap').innerHTML=h;
@@ -4217,9 +4217,9 @@ function updMPEq(){
       +'</div>'
       +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">'
         +'<div class="mpc-cell"><div class="mpc-lbl">幅 mm</div>'
-        +'<input type="number" id="eq-w-inp" value="'+eq.w+'" inputmode="numeric" style="width:100%;height:32px;border:1.5px solid rgba(26,106,170,0.4);border-radius:6px;padding:0 6px;font-size:13px;font-family:inherit;color:var(--teq);text-align:center;background:#fff;" oninput="resizeEq(&apos;w&apos;,this.value)"></div>'
+        +'<input type="text" id="eq-w-inp" value="'+eq.w+'" inputmode="numeric" style="width:100%;height:32px;border:1.5px solid rgba(26,106,170,0.4);border-radius:6px;padding:0 6px;font-size:13px;font-family:inherit;color:var(--teq);text-align:center;background:#fff;" oninput="resizeEq(&apos;w&apos;,this.value)"></div>'
         +'<div class="mpc-cell"><div class="mpc-lbl">高さ mm</div>'
-        +'<input type="number" id="eq-h-inp" value="'+eq.h+'" inputmode="numeric" style="width:100%;height:32px;border:1.5px solid rgba(26,106,170,0.4);border-radius:6px;padding:0 6px;font-size:13px;font-family:inherit;color:var(--teq);text-align:center;background:#fff;" oninput="resizeEq(&apos;h&apos;,this.value)"></div>'
+        +'<input type="text" id="eq-h-inp" value="'+eq.h+'" inputmode="numeric" style="width:100%;height:32px;border:1.5px solid rgba(26,106,170,0.4);border-radius:6px;padding:0 6px;font-size:13px;font-family:inherit;color:var(--teq);text-align:center;background:#fff;" oninput="resizeEq(&apos;h&apos;,this.value)"></div>'
       +'</div>'
     +'</div>';
   document.getElementById('mpanel-wrap').innerHTML=h;
