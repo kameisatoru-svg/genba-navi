@@ -476,6 +476,11 @@ canvas{display:block;width:100%;}
       <button onclick="projShowNew()" style="height:40px;border:1px solid rgba(255,255,255,0.25);border-radius:8px;background:transparent;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">＋ 新規</button>
       <button onclick="projShowAddRoom()" style="height:40px;border:1px solid rgba(200,169,110,0.5);border-radius:8px;background:rgba(200,169,110,0.1);color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">＋ 部屋追加</button>
     </div>
+    <!-- ファイルから開く（書き出したJSONを読み込む） -->
+    <button onclick="closeProjPanel();openDrawingFile();" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:40px;margin-top:8px;border:1px solid rgba(255,255,255,0.25);border-radius:8px;background:transparent;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><polyline points="12 11 12 17"/><polyline points="9.5 13.5 12 11 14.5 13.5"/></svg>
+      <span>ファイルから開く</span>
+    </button>
   </div>
 
   <!-- 新規入力ビュー -->
