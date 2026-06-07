@@ -2313,6 +2313,30 @@ const STATUS_META = {
   '消滅':               { color: 'var(--status-shomet)',         icon: 'icon-warning-triangle' }
 };
 
+// --- ステータスごとの「次の一手」ヒント（リマインド／タイムラインで共用）---
+// 細かい個別作業ではなく、そのステータスで次に着手すべき行動を短い命令文で示す。
+// 具体的な未完了項目（calcCheckProgress().nextLabel）があれば「次：○○」として補足する。
+const STATUS_NEXT_HINT = {
+  '相談':         '現地調査・見積方針を進めてください',
+  '調査中':       '現地調査・見積方針を進めてください',
+  '見積準備':     '見積もりを作成してください',
+  '見積提出済み': '顧客へフォロー連絡を入れてください',
+  '施工予定':     '業者段取り・着工準備を進めてください',
+  '施工中':       '進捗記録と完工確認を進めてください',
+  '請求済み':     '入金確認を進めてください'
+};
+
+// タイムラインのステータスピル用の短縮表記（長いステータス名を縮める）
+function statusShort(s) {
+  const M = {
+    '完了(請求書作成済み)': '完了(請求済)',
+    '完了・請求書作成待ち': '完了(請求待)',
+    '保守管理(継続)':       '保守管理',
+    '見積提出済み':         '見積提出済',
+  };
+  return M[s] || s;
+}
+
 // --- カンバン列定義(2ゾーン7列 + 任意のクローズゾーン) ---
 const KANBAN_ZONES = [
   { id: 'eigyo', label: '営業ゾーン',       cols: ['相談', '調査中', '見積準備', '見積提出済み'] },
@@ -3149,12 +3173,37 @@ function renderReminders() {
     }
   });
 
-  // ソート: danger → warn → success / 経過日数降順
-  const order = { danger: 0, warn: 1, success: 2 };
+  // 🔵 次の一手（各ステータスの状況を反映した、次のアクション喚起）
+  //   ・上の緊急/注意/今週予定で既に拾った案件は重複を避けて除外
+  //   ・あまり細かくせず 案件ごとに1件だけ、短い命令文で提示する
+  const flaggedKeys = new Set(reminders.map(r => r.anken['案件キー']));
+  STATE.案件.forEach(a => {
+    const status = a['ステータス'];
+    const hint = STATUS_NEXT_HINT[status];
+    if (!hint) return;                                   // 入金済み・完了・中止などは対象外
+    if (flaggedKeys.has(a['案件キー'])) return;          // 既に上位リマインドあり
+    const prog = calcCheckProgress(a);
+    const meta = (prog && prog.nextLabel)
+      ? `${hint} ／ 次：${prog.nextLabel}`
+      : hint;
+    reminders.push({
+      level: 'info',
+      type:  'next_action',
+      icon:  (STATUS_META[status] || {}).icon || 'icon-clipboard',
+      title: `次の一手（${status}）`,
+      anken: a,
+      book:  '',
+      days:  null,
+      meta
+    });
+  });
+
+  // ソート: danger → warn → success → info / 経過日数降順
+  const order = { danger: 0, warn: 1, success: 2, info: 3 };
   reminders.sort((x, y) =>
     order[x.level] - order[y.level] || ((y.days || 0) - (x.days || 0)));
 
-  const cnt = { danger: 0, warn: 0, success: 0 };
+  const cnt = { danger: 0, warn: 0, success: 0, info: 0 };
   reminders.forEach(r => cnt[r.level]++);
 
   // フィルタ適用（チップ or KPIタップで設定された REMINDER_FILTER.key）
