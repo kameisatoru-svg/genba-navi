@@ -3514,6 +3514,13 @@ function renderTimeline() {
         svg += `<circle cx="${x}" cy="${cy}" r="4" fill="#4a7c4e" stroke="#fff" stroke-width="1"><title>${escapeHtml(t)}</title></circle>`;
       }
     });
+
+    // 現在ステータスのマーカー（本日位置に菱形）＋「次の一手」ツールチップ
+    const prog = calcCheckProgress(a);
+    const hint = STATUS_NEXT_HINT[status];
+    const nextTxt = (prog && prog.nextLabel) ? ` ／ 次：${prog.nextLabel}` : '';
+    const dTitle = `現在: ${status}` + (hint ? `｜${hint}${nextTxt}` : '');
+    svg += `<path d="M ${todayX} ${cy - 6} L ${todayX + 6} ${cy} L ${todayX} ${cy + 6} L ${todayX - 6} ${cy} Z" fill="${sm.color}" stroke="#fff" stroke-width="1.2"><title>${escapeHtml(dTitle)}</title></path>`;
   });
 
   svg += `</svg>`;
