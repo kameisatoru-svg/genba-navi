@@ -816,6 +816,59 @@ async function saveDrawingFile(){
   }
 }
 
+// ── ピクトグラム（線アイコン・現場ナビ統一スタイル）──
+function _pict(paths, size){
+  return '<svg width="'+(size||18)+'" height="'+(size||18)+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+    +'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0;">'+paths+'</svg>';
+}
+var _PICT_OPEN  = '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><polyline points="12 11 12 17"/><polyline points="9.5 13.5 12 11 14.5 13.5"/>';
+var _PICT_SAVE  = '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>';
+var _PICT_PRINT = '<polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>';
+
+// ══════════════════════════════════════════
+//  ファイルから開く（書き出したJSONを読み込む）
+// ══════════════════════════════════════════
+function openDrawingFile(){
+  // File System Access API（PC＋Driveマウント等：フォルダから選択）
+  if(window.showOpenFilePicker){
+    window.showOpenFilePicker({
+      types:[{description:'図面データ(JSON)', accept:{'application/json':['.json']}}],
+      multiple:false
+    }).then(function(handles){ return handles[0].getFile(); })
+      .then(function(file){ return file.text(); })
+      .then(function(text){ _importDrawingJson(text); })
+      .catch(function(e){ if(e&&e.name==='AbortError') return; showWaToast('⚠ 読込失敗: '+(e&&e.message?e.message:e)); });
+    return;
+  }
+  // フォールバック（Android等）：input[type=file]
+  var inp=document.getElementById('zumen-file-input');
+  if(!inp){
+    inp=document.createElement('input');
+    inp.type='file'; inp.accept='.json,application/json'; inp.id='zumen-file-input'; inp.style.display='none';
+    inp.addEventListener('change', function(){
+      var f=inp.files&&inp.files[0]; if(!f){ return; }
+      var reader=new FileReader();
+      reader.onload=function(){ _importDrawingJson(reader.result); inp.value=''; };
+      reader.onerror=function(){ showWaToast('⚠ ファイル読込失敗'); inp.value=''; };
+      reader.readAsText(f);
+    });
+    document.body.appendChild(inp);
+  }
+  inp.click();
+}
+
+function _importDrawingJson(text){
+  var d;
+  try{ d=JSON.parse(text); }catch(e){ showWaToast('⚠ JSONの解析に失敗しました'); return; }
+  if(!d||!d.roomData){ showWaToast('⚠ 図面データのファイルではありません'); return; }
+  var meta=d._meta||{};
+  var g=meta['現場名']||(d.roomData&&d.roomData._ankenName)||'読込図面';
+  var r=meta['部屋名']||'部屋1';
+  _setupStep='choose'; _setupSelAnken=null;
+  _loadData(g, r, text);  // 既存の読込ロジックを再利用（roomData/開口部/外周等を復元・renderMainまで実行）
+  projAutoSave();         // localStorageにも取り込み、以降は継続編集・自動保存の対象に
+}
+
 // ══════════════════════════════════════════
 //  入力保存
 // ══════════════════════════════════════════
