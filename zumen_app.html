@@ -868,15 +868,24 @@ function openDrawingFile(){
 }
 
 function _importDrawingJson(text){
+  // 空ファイル（保存未完了・同期途中など）を明示検出
+  var s=(text==null)?'':String(text);
+  if(s.replace(/^﻿/,'').trim()===''){ showWaToast('⚠ ファイルが空です（0バイト）。保存が未完了か同期途中の可能性があります'); return; }
   var d;
-  try{ d=JSON.parse(text); }catch(e){ showWaToast('⚠ JSONの解析に失敗しました'); return; }
-  if(!d||!d.roomData){ showWaToast('⚠ 図面データのファイルではありません'); return; }
+  try{ d=JSON.parse(s.replace(/^﻿/,'')); }  // 先頭BOMがあれば除去
+  catch(e){ showWaToast('⚠ JSON解析エラー: '+(e&&e.message?e.message:e)); return; }
+  if(!d||typeof d!=='object'){ showWaToast('⚠ 図面データのファイルではありません'); return; }
+  if(!d.roomData){ showWaToast('⚠ 図面データではありません（roomData なし）'); return; }
   var meta=d._meta||{};
   var g=meta['現場名']||(d.roomData&&d.roomData._ankenName)||'読込図面';
   var r=meta['部屋名']||'部屋1';
   _setupStep='choose'; _setupSelAnken=null;
-  _loadData(g, r, text);  // 既存の読込ロジックを再利用（roomData/開口部/外周等を復元・renderMainまで実行）
-  projAutoSave();         // localStorageにも取り込み、以降は継続編集・自動保存の対象に
+  try{
+    _loadData(g, r, JSON.stringify(d));  // 既存の読込ロジックを再利用（roomData/開口部/外周等を復元・renderMainまで実行）
+    projAutoSave();                       // localStorageにも取り込み、以降は継続編集・自動保存の対象に
+  }catch(e){
+    showWaToast('⚠ 読込中エラー: '+(e&&e.message?e.message:e));
+  }
 }
 
 // ══════════════════════════════════════════
