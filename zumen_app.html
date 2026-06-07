@@ -834,32 +834,37 @@ var _PICT_PRINT = '<polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 
 //  ファイルから開く（書き出したJSONを読み込む）
 // ══════════════════════════════════════════
 function openDrawingFile(){
-  // File System Access API（PC＋Driveマウント等：フォルダから選択）
+  // フォールバック：input[type=file]（Android／Googleドライブ等）
+  //  ・accept は付けない。Android+Driveで「.json が選べない/グレーアウト」する癖を回避。
+  //    （拾ったファイルの中身は _importDrawingJson 側で検証するので安全）
+  function _openViaInput(){
+    var inp=document.getElementById('zumen-file-input');
+    if(!inp){
+      inp=document.createElement('input');
+      inp.type='file'; inp.id='zumen-file-input'; inp.style.display='none';
+      inp.addEventListener('change', function(){
+        var f=inp.files&&inp.files[0]; if(!f){ return; }
+        var reader=new FileReader();
+        reader.onload=function(){ _importDrawingJson(reader.result); inp.value=''; };
+        reader.onerror=function(){ showWaToast('⚠ ファイル読込失敗'); inp.value=''; };
+        reader.readAsText(f);
+      });
+      document.body.appendChild(inp);
+    }
+    inp.click();
+  }
+  // File System Access API（PC版Chrome等：フォルダから選択）。失敗時は input へフォールバック
   if(window.showOpenFilePicker){
     window.showOpenFilePicker({
-      types:[{description:'図面データ(JSON)', accept:{'application/json':['.json']}}],
-      multiple:false
+      types:[{description:'図面データ(JSON)', accept:{'application/json':['.json'],'text/plain':['.json','.txt']}}],
+      excludeAcceptAllOption:false, multiple:false
     }).then(function(handles){ return handles[0].getFile(); })
       .then(function(file){ return file.text(); })
       .then(function(text){ _importDrawingJson(text); })
-      .catch(function(e){ if(e&&e.name==='AbortError') return; showWaToast('⚠ 読込失敗: '+(e&&e.message?e.message:e)); });
+      .catch(function(e){ if(e&&e.name==='AbortError') return; _openViaInput(); });
     return;
   }
-  // フォールバック（Android等）：input[type=file]
-  var inp=document.getElementById('zumen-file-input');
-  if(!inp){
-    inp=document.createElement('input');
-    inp.type='file'; inp.accept='.json,application/json'; inp.id='zumen-file-input'; inp.style.display='none';
-    inp.addEventListener('change', function(){
-      var f=inp.files&&inp.files[0]; if(!f){ return; }
-      var reader=new FileReader();
-      reader.onload=function(){ _importDrawingJson(reader.result); inp.value=''; };
-      reader.onerror=function(){ showWaToast('⚠ ファイル読込失敗'); inp.value=''; };
-      reader.readAsText(f);
-    });
-    document.body.appendChild(inp);
-  }
-  inp.click();
+  _openViaInput();
 }
 
 function _importDrawingJson(text){
