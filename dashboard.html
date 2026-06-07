@@ -3212,6 +3212,7 @@ function renderReminders() {
     danger:     r => r.level === 'danger',
     warn:       r => r.level === 'warn',
     success:    r => r.level === 'success',
+    info:       r => r.level === 'info',
     unpaid:     r => r.type === 'unpaid',
     no_invoice: r => r.type === 'no_invoice',
   };
@@ -3233,6 +3234,7 @@ function renderReminders() {
       ${chip('danger', 'danger', `緊急 ${cnt.danger}件`)}
       ${chip('warn', 'warn', `注意 ${cnt.warn}件`)}
       ${chip('success', 'success', `今週予定 ${cnt.success}件`)}
+      ${chip('info', 'info', `次の一手 ${cnt.info}件`)}
       ${specialChip}
     </div>
   `;
@@ -3396,13 +3398,16 @@ function renderTimeline() {
   const endDate   = new Date(today.getTime() + 90 * 86400000);
   const totalDays = 121;
   const dayPx  = 6;
-  const labelW = 170;
+  const labelW = 200;
   const rowH   = 30;
   const W      = totalDays * dayPx;
 
-  // 中止・保守管理を除く + 最大15件
+  // 中止・保守管理を除く → パイプライン順(KANBAN_COLS)で並べて + 最大15件
+  const statusRank = (s) => { const i = KANBAN_COLS.indexOf(s); return i < 0 ? 999 : i; };
   const items = (STATE.案件 || [])
     .filter(a => !['中止', '保守管理(継続)'].includes(a['ステータス']))
+    .sort((a, b) => statusRank(a['ステータス']) - statusRank(b['ステータス'])
+                 || String(a['案件キー']).localeCompare(String(b['案件キー'])))
     .slice(0, 15);
 
   const xFor = (date) => {
