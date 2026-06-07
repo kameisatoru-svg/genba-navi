@@ -867,6 +867,28 @@ function openDrawingFile(){
   _openViaInput();
 }
 
+// AI生成/手書きJSONの軽微なゆらぎをアプリ形式へ正規化（破壊的だがimport対象のみ）
+function _normalizeDrawing(d){
+  try{
+    // 間仕切りの軸：大文字→小文字（アプリは 'h'/'v' 前提）
+    (d.planPartitions||[]).forEach(function(p){
+      if(p&&typeof p.axis==='string') p.axis=p.axis.toLowerCase();
+    });
+    // 数値が文字列で入っているケースを数値化（寸法・座標）
+    function num(o,keys){ if(!o) return; keys.forEach(function(k){ if(o[k]!=null&&o[k]!==''&&!isNaN(o[k])) o[k]=Number(o[k]); }); }
+    num(d.roomData,['W','D','H','wallT','compassDeg']);
+    (d.planColumns||[]).forEach(function(c){ num(c,['x','y','w','d','offset']); });
+    (d.planPartitions||[]).forEach(function(p){ num(p,['pos','start','len','t','dimOffset']); });
+    [].concat.apply([], d.faceOpenings||[]).forEach(function(o){ num(o,['x','y','w','h']); });
+    // 配列の欠損を補完（アプリ前提の4面構造）
+    if(!Array.isArray(d.faceOpenings)) d.faceOpenings=[[],[],[],[]];
+    while(d.faceOpenings.length<4) d.faceOpenings.push([]);
+    if(!Array.isArray(d.faceEquips)) d.faceEquips=[[],[],[],[]];
+    while(d.faceEquips.length<4) d.faceEquips.push([]);
+  }catch(e){}
+  return d;
+}
+
 function _importDrawingJson(text){
   // 空ファイル（保存未完了・同期途中など）を明示検出
   var s=(text==null)?'':String(text);
