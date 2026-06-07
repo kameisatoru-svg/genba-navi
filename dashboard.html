@@ -3402,12 +3402,33 @@ function renderTimeline() {
   const rowH   = 30;
   const W      = totalDays * dayPx;
 
-  // 中止・保守管理を除く → パイプライン順(KANBAN_COLS)で並べて + 最大15件
+  // 中止・保守管理を除外。
+  // 並び順は「期間内に予定・発行などの動きがある案件を優先 → 動きが無ければパイプライン順」。
+  // これで施工予定/施工中/請求など日付のある案件が上に来つつ、各行でステータスも反映される。
   const statusRank = (s) => { const i = KANBAN_COLS.indexOf(s); return i < 0 ? 999 : i; };
+  // 期間内で最も早い「動き」の日付（無ければ null）
+  const anchorTime = (a) => {
+    const cand = [];
+    (a['見積'] || []).forEach(e => { const d = parseDate(e['発行日']); if (d) cand.push(d); });
+    (a['請求'] || []).forEach(inv => {
+      const d = parseDate(inv['発行日']); if (d) cand.push(d);
+      const n = parseDate(inv['入金日']); if (n) cand.push(n);
+    });
+    extractDateRanges(a['備考'] || '', today.getFullYear()).forEach(r => cand.push(r.start));
+    const inWin = cand.filter(d => d >= startDate && d <= endDate).sort((x, y) => x - y);
+    return inWin.length ? inWin[0].getTime() : null;
+  };
   const items = (STATE.案件 || [])
     .filter(a => !['中止', '保守管理(継続)'].includes(a['ステータス']))
-    .sort((a, b) => statusRank(a['ステータス']) - statusRank(b['ステータス'])
-                 || String(a['案件キー']).localeCompare(String(b['案件キー'])))
+    .map(a => ({ a, anchor: anchorTime(a) }))
+    .sort((x, y) => {
+      if (x.anchor != null && y.anchor != null) return x.anchor - y.anchor;
+      if (x.anchor != null) return -1;   // 動きのある案件を上に
+      if (y.anchor != null) return 1;
+      return statusRank(x.a['ステータス']) - statusRank(y.a['ステータス'])
+          || String(x.a['案件キー']).localeCompare(String(y.a['案件キー']));
+    })
+    .map(o => o.a)
     .slice(0, 15);
 
   const xFor = (date) => {
