@@ -876,6 +876,7 @@ function _importDrawingJson(text){
   catch(e){ showWaToast('⚠ JSON解析エラー: '+(e&&e.message?e.message:e)); return; }
   if(!d||typeof d!=='object'){ showWaToast('⚠ 図面データのファイルではありません'); return; }
   if(!d.roomData){ showWaToast('⚠ 図面データではありません（roomData なし）'); return; }
+  _normalizeDrawing(d);   // AI生成/手書きJSONの軽微なゆらぎをアプリ形式へ正規化
   var meta=d._meta||{};
   var g=meta['現場名']||(d.roomData&&d.roomData._ankenName)||'読込図面';
   var r=meta['部屋名']||'部屋1';
