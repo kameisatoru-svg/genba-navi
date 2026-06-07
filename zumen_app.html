@@ -1364,9 +1364,9 @@ function _drawerOutput(){
   var note='<div style="font-size:11px;color:var(--text2);text-align:center;line-height:1.5;">'
     +'「'+_esc(_drawingFileName())+'」として保存します。<br>対応端末では保存先フォルダ（Driveの案件フォルダ等）を選べます。</div>';
   return '<div class="drawer-op" style="display:flex;flex-direction:column;gap:8px;">'+
-    '<button onclick="saveDrawingFile();" style="height:52px;border:none;border-radius:10px;background:var(--accent);color:var(--navy);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">💾 図面を保存（ファイル）</button>'+
+    '<button onclick="saveDrawingFile();" style="display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border:none;border-radius:10px;background:var(--accent);color:var(--navy);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">'+_pict(_PICT_SAVE,18)+'<span>図面を保存（ファイル）</span></button>'+
     note+
-    '<button onclick="doPrint();" style="height:52px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px;">🖨 印刷・出力（PDF）</button>'+
+    '<button onclick="doPrint();" style="display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px;">'+_pict(_PICT_PRINT,18)+'<span>印刷・出力（PDF）</span></button>'+
     '</div>';
 }
 
@@ -1750,6 +1750,8 @@ function _renderSetupChoose(area){
   }
 
   html+='<button onclick="setupShowManual()" style="width:100%;height:48px;border:1px solid var(--navy);border-radius:12px;background:transparent;color:var(--navy);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">リストにない案件を手入力</button>';
+  // ファイルから開く（書き出したJSONを読み込む）
+  html+='<button onclick="openDrawingFile()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:48px;margin-top:10px;border:1px solid var(--line,#dfe3ea);border-radius:12px;background:transparent;color:var(--text2);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">'+_pict(_PICT_OPEN,18)+'<span>ファイルから開く</span></button>';
   html+='</div>';
   if(area) area.innerHTML=html;
 }
