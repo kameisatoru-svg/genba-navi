@@ -1487,8 +1487,87 @@
           "金額": 114180,
           "入金状況": "minyukin",
           "入金日": "",
-          "備考": "自火報制御盤修理+排煙窓金物固定費=税抜¥103,800・税込¥114,180。",
-          "ファイル": "請_ネクサス-プラザ自火報-26.pdf"
+          "備考": "自家発電 制御盤修理・排煙窓金物固定費",
+          "ファイル": "請_ネクサス-プラザ自火報-26.pdf",
+          "お客様向け番号": "AR-26-T011-S001",
+          "_genbaDoc": {
+            "v": 1,
+            "savedAt": "2026-06-08T06:20:14.427Z",
+            "docType": "seikyu",
+            "mode": "flat",
+            "shokeihiRate": 15,
+            "nebiki": 0,
+            "hasuChousei": 0,
+            "header": {
+              "atena": "株式会社ネクサスプラザ 御中",
+              "mitsumoriNo": "AR-26-T011-S001",
+              "hakkoDate": "2026-03-27",
+              "shiharaiDate": "",
+              "kojimei": "自家発電 制御盤修理・排煙窓金物固定費",
+              "seshubasho": "ネクサスプラザ",
+              "koki": "",
+              "ankenKey": "ネクサス-プラザ自火報-26",
+              "fileSuffix": ""
+            },
+            "flatItems": [
+              {
+                "name": "自家発電 制御盤修理",
+                "qty": 1,
+                "unit": "式",
+                "price": 87000,
+                "note": ""
+              },
+              {
+                "name": "排煙窓金物固定費",
+                "qty": 1,
+                "unit": "式",
+                "price": 16800,
+                "note": ""
+              },
+              {
+                "name": "",
+                "qty": "",
+                "unit": "",
+                "price": "",
+                "note": "",
+                "pageBreak": false
+              },
+              {
+                "name": "",
+                "qty": "",
+                "unit": "",
+                "price": "",
+                "note": "",
+                "pageBreak": false
+              },
+              {
+                "name": "",
+                "qty": "",
+                "unit": "",
+                "price": "",
+                "note": "",
+                "pageBreak": false
+              },
+              {
+                "name": "",
+                "qty": "",
+                "unit": "",
+                "price": "",
+                "note": "",
+                "pageBreak": false
+              },
+              {
+                "name": "",
+                "qty": "",
+                "unit": "",
+                "price": "",
+                "note": "",
+                "pageBreak": false
+              }
+            ],
+            "groupItems": [],
+            "groupSummaryItems": []
+          }
         }
       ],
       "注文書": [],
