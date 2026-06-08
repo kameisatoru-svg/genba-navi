@@ -3394,15 +3394,20 @@ function renderChart() {
    ============================================================ */
 function renderTimeline() {
   const today = new Date(); today.setHours(0, 0, 0, 0);
-  const startDate = new Date(today.getTime() - 30 * 86400000);
-  const endDate   = new Date(today.getTime() + 90 * 86400000);
-  const totalDays = 121;
-  const dayPx  = 6;
+  const daysBack = 42, daysFwd = 168;   // 約6週前〜約24週先（横スクロール前提で広めに）
+  const startDate = new Date(today.getTime() - daysBack * 86400000);
+  const endDate   = new Date(today.getTime() + daysFwd  * 86400000);
+  const totalDays = daysBack + daysFwd + 1;
+  const dayPx  = 8;                       // 1日=8px（月の横幅を広めに）
   const labelW = 200;
-  const rowH   = 30;
+  const rowH   = 34;
   const W      = totalDays * dayPx;
 
-  // 中止・保守管理を除外。
+  // 完了・クローズ系は表示から除外（退去）。進行中の案件だけを残す。
+  const TIMELINE_EXCLUDE = new Set([
+    '中止', '消滅', '保守管理(継続)',
+    '完了', '完了(請求書作成済み)', '完了・請求書作成待ち'
+  ]);
   // 並び順は「期間内に予定・発行などの動きがある案件を優先 → 動きが無ければパイプライン順」。
   // これで施工予定/施工中/請求など日付のある案件が上に来つつ、各行でステータスも反映される。
   const statusRank = (s) => { const i = KANBAN_COLS.indexOf(s); return i < 0 ? 999 : i; };
@@ -3419,7 +3424,7 @@ function renderTimeline() {
     return inWin.length ? inWin[0].getTime() : null;
   };
   const items = (STATE.案件 || [])
-    .filter(a => !['中止', '保守管理(継続)'].includes(a['ステータス']))
+    .filter(a => !TIMELINE_EXCLUDE.has(a['ステータス']))
     .map(a => ({ a, anchor: anchorTime(a) }))
     .sort((x, y) => {
       if (x.anchor != null && y.anchor != null) return x.anchor - y.anchor;
