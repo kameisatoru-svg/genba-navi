@@ -3208,7 +3208,7 @@ function renderReminders() {
 
   // フィルタ適用（チップ or KPIタップで設定された REMINDER_FILTER.key）
   const FILTER_MATCH = {
-    all:        () => true,
+    all:        r => r.level !== 'info',   // 既定では「次の一手」は隠す（チップで開く）
     danger:     r => r.level === 'danger',
     warn:       r => r.level === 'warn',
     success:    r => r.level === 'success',
@@ -3230,7 +3230,7 @@ function renderReminders() {
 
   const summaryHtml = `
     <div class="reminders-summary">
-      ${chip('all', 'all', `すべて ${reminders.length}件`)}
+      ${chip('all', 'all', `すべて ${reminders.length - cnt.info}件`)}
       ${chip('danger', 'danger', `緊急 ${cnt.danger}件`)}
       ${chip('warn', 'warn', `注意 ${cnt.warn}件`)}
       ${chip('success', 'success', `今週予定 ${cnt.success}件`)}
