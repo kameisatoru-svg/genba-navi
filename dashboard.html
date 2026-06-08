@@ -3386,7 +3386,23 @@ function renderChart() {
       plugins: {
         legend: { position: 'bottom', labels: { font: { size: 11, family: "Hiragino Sans, Yu Gothic, Meiryo, sans-serif" } } },
         tooltip: {
-          callbacks: { label: c => `${c.dataset.label}: ¥${c.parsed.y.toLocaleString()}` }
+          mode: 'index',     // その月の全系列をまとめて表示
+          intersect: false,
+          callbacks: {
+            label: c => `${c.dataset.label}: ¥${c.parsed.y.toLocaleString()}`,
+            // 請求の合計・入金率をフッターに表示（僅かな未入金も数値で確認できる）
+            footer: (items) => {
+              let paid = 0, unpaid = 0;
+              items.forEach(it => {
+                if (it.dataset.label === '請求(入金済み)') paid = it.parsed.y;
+                if (it.dataset.label === '請求(未入金)')   unpaid = it.parsed.y;
+              });
+              const billed = paid + unpaid;
+              if (billed <= 0) return '';
+              const rate = Math.round(paid / billed * 100);
+              return [`請求合計: ¥${billed.toLocaleString()}`, `入金率: ${rate}%（未入金 ¥${unpaid.toLocaleString()}）`];
+            }
+          }
         }
       },
       scales: {
