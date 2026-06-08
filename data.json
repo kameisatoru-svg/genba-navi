@@ -2512,7 +2512,15 @@
         }
       ],
       "原価": {},
-      "規模": "標準"
+      "規模": "標準",
+      "チェック": {
+        "contact.first": "done",
+        "contact.apo": "done",
+        "survey.schedule": "done",
+        "survey.photo": "done",
+        "survey.sumpo": "done",
+        "survey.memo": "done"
+      }
     },
     {
       "案件キー": "村上-雨漏り修理-26",
