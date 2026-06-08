@@ -826,11 +826,26 @@ a { color: inherit; text-decoration: none; }
 .timeline-legend .lg-line { width: 16px; height: 1px; border-top: 1.5px dashed var(--danger); flex-shrink: 0; }
 
 .timeline-wrap {
-  overflow-x: auto;
-  overflow-y: visible;
+  display: flex;
+  align-items: flex-start;
+  overflow: hidden;            /* スクロールは右側の .timeline-scroll が担当 */
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: #fefcf8;
+}
+/* 左の案件キー列（横スクロールしても固定） */
+.timeline-labelcol {
+  flex: 0 0 auto;
+  background: #fefcf8;
+  box-shadow: 1px 0 0 var(--border), 3px 0 6px -3px rgba(0,0,0,0.18);
+  z-index: 2;
+}
+/* 右のチャート（横スクロール） */
+.timeline-scroll {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
 }
 .timeline-svg {
@@ -1860,9 +1875,9 @@ a { color: inherit; text-decoration: none; }
   .kanban-wf-link { display: none; }
   .kanban-filters { display: none; }
 
-  /* タイムラインは横スクロールせず全幅で */
-  .timeline-wrap { overflow: visible; }
-  .timeline-svg { width: 100% !important; max-width: 100%; }
+  /* タイムラインは横スクロールせず全幅で（左ラベル列は固定幅のまま） */
+  .timeline-scroll { overflow: visible; }
+  .timeline-chart-svg { width: 100% !important; max-width: 100%; }
 
   /* リマインドカードはリンクの下線消す */
   .reminder-card { page-break-inside: avoid; box-shadow: none; }
