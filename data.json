@@ -2947,12 +2947,116 @@
       "現場+工事": "壁天井修繕",
       "正式工事名": "アズコミュニケーションズ 執務室壁・天井修繕工事",
       "施工場所": "大分市大字勢家843番地の66",
-      "ステータス": "調査中",
+      "ステータス": "見積提出済み",
       "元請フラグ": false,
       "元請名": "",
       "備考": "執務室の壁段差（仕切り名残）の壁紙剥がれ修繕。天井クロス（パネル式）の浮き確認。過去に壁からの雨漏り補修済み。写真送付依頼中。",
       "旧案件番号": "",
-      "見積": [],
+      "見積": [
+        {
+          "書類番号": "見_アズコム-壁天井修繕-26",
+          "発行日": "2026-06-08",
+          "金額": 44000,
+          "備考": "事務所 壁・天井修繕工事",
+          "ファイル": "見_アズコム-壁天井修繕-26.pdf",
+          "お客様向け番号": "ARM-T031-260608-01",
+          "_genbaDoc": {
+            "v": 1,
+            "savedAt": "2026-06-08T00:52:18.549Z",
+            "docType": "mitsumori",
+            "mode": "flat",
+            "shokeihiRate": 11.11,
+            "nebiki": 0,
+            "hasuChousei": 0,
+            "header": {
+              "atena": "株式会社アズコミュニケーションズ",
+              "mitsumoriNo": "ARM-T031-260608-01",
+              "hakkoDate": "2026-06-08",
+              "shiharaiDate": "",
+              "kojimei": "事務所 壁・天井修繕工事",
+              "seshubasho": "大分市大字勢家843番地の66",
+              "koki": "",
+              "ankenKey": "アズコム-壁天井修繕-26",
+              "fileSuffix": ""
+            },
+            "flatItems": [
+              {
+                "name": "天井 岩綿吸音板タッカー留め直し",
+                "qty": 1,
+                "unit": "式",
+                "price": 8000,
+                "note": "",
+                "pageBreak": false
+              },
+              {
+                "name": "下がり壁補強（天井点検口取付）",
+                "qty": 1,
+                "unit": "式",
+                "price": 20000,
+                "note": "",
+                "pageBreak": false
+              },
+              {
+                "name": "下がり壁補強（補強工事費）",
+                "qty": 1,
+                "unit": "式",
+                "price": 8000,
+                "note": "",
+                "pageBreak": false
+              },
+              {
+                "name": "",
+                "qty": "",
+                "unit": "",
+                "price": "",
+                "note": "",
+                "pageBreak": false
+              },
+              {
+                "name": "",
+                "qty": "",
+                "unit": "",
+                "price": "",
+                "note": "",
+                "pageBreak": false
+              },
+              {
+                "name": "",
+                "qty": "",
+                "unit": "",
+                "price": "",
+                "note": "",
+                "pageBreak": false
+              },
+              {
+                "name": "",
+                "qty": "",
+                "unit": "",
+                "price": "",
+                "note": "",
+                "pageBreak": false
+              }
+            ],
+            "groupItems": [
+              {
+                "name": "",
+                "pageBreak": false,
+                "middleItems": [],
+                "items": [
+                  {
+                    "name": "",
+                    "qty": "",
+                    "unit": "",
+                    "price": "",
+                    "note": ""
+                  }
+                ]
+              }
+            ],
+            "groupSummaryItems": []
+          }
+        }
+      ],
       "請求": [],
       "注文書": [],
       "契約書": [],
