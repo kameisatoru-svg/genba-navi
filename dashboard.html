@@ -3473,52 +3473,63 @@ function renderTimeline() {
     return;
   }
 
-  let svg = `<svg width="${labelW + W}" height="${H}" xmlns="http://www.w3.org/2000/svg" class="timeline-svg">`;
+  // 行ジオメトリ（左ラベルSVG・右チャートSVGで共通）
+  const rowGeom = (i) => {
+    const y = 28 + i * rowH;
+    return { cy: y + rowH / 2 - 6, rowTop: y - rowH / 2 + 6 };
+  };
+
+  // ===== 左：案件キー固定列（横スクロールしても動かない）=====
+  let labelSvg = `<svg width="${labelW}" height="${H}" xmlns="http://www.w3.org/2000/svg" class="timeline-svg timeline-label-svg">`;
+  labelSvg += `<text x="10" y="14" font-size="11" fill="#8b9095" font-family="Hiragino Sans, Yu Gothic, Meiryo, sans-serif">案件</text>`;
+  items.forEach((a, i) => {
+    const { cy, rowTop } = rowGeom(i);
+    const status = a['ステータス'] || '';
+    const sm = STATUS_META[status] || { color: 'var(--text-mute)', icon: 'icon-document' };
+    if (i % 2 === 0) labelSvg += `<rect x="0" y="${rowTop}" width="${labelW}" height="${rowH}" fill="rgba(212,165,116,0.05)"/>`;
+    // ステータス色の左バンド
+    labelSvg += `<rect x="0" y="${rowTop}" width="4" height="${rowH}" fill="${sm.color}"/>`;
+    // 上にステータスピル、下に案件キー(クリックで案件モーダル)
+    const sShort = statusShort(status);
+    const pillW  = Math.min(labelW - 18, sShort.length * 10 + 12);
+    labelSvg += `<rect x="10" y="${cy - 11}" width="${pillW}" height="13" rx="6.5" fill="${sm.color}" opacity="0.92"/>`;
+    labelSvg += `<text x="${10 + pillW / 2}" y="${cy - 1}" font-size="9" text-anchor="middle" font-family="Hiragino Sans, Yu Gothic, Meiryo, sans-serif" fill="#fff">${escapeHtml(sShort)}</text>`;
+    const lbl = a['案件キー'].length > 18 ? a['案件キー'].substring(0, 18) + '…' : a['案件キー'];
+    labelSvg += `<text x="10" y="${cy + 11}" font-size="10.5" font-family="Consolas, monospace" fill="#1e2d40" class="timeline-label-link" data-key="${escapeHtml(a['案件キー'])}" style="cursor:pointer; text-decoration:underline;">${escapeHtml(lbl)}<title>${escapeHtml(a['案件キー'])} の詳細を開く</title></text>`;
+  });
+  labelSvg += `</svg>`;
+
+  // ===== 右：チャート（横スクロール）=====
+  const winS = startDate.getTime(), winE = endDate.getTime();
+  const cx = (t) => xFor(new Date(Math.max(winS, Math.min(winE, t))));   // チャート内座標（labelWオフセット無し）
+  let chartSvg = `<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg" class="timeline-svg timeline-chart-svg">`;
 
   // 週・月のグリッド線（薄線=週/月曜・濃線=月初）
   const cur = new Date(startDate); cur.setHours(0, 0, 0, 0);
   while (cur <= endDate) {
-    const x = labelW + xFor(cur);
+    const x = xFor(cur);
     if (cur.getDate() === 1) {
-      svg += `<line x1="${x}" y1="20" x2="${x}" y2="${H}" stroke="#e7dec9" stroke-width="1.2"/>`;
-      svg += `<text x="${x + 4}" y="14" font-size="11" fill="#8b9095" font-family="Consolas, monospace">${cur.getFullYear()}/${cur.getMonth() + 1}</text>`;
+      chartSvg += `<line x1="${x}" y1="20" x2="${x}" y2="${H}" stroke="#e7dec9" stroke-width="1.2"/>`;
+      chartSvg += `<text x="${x + 4}" y="14" font-size="11" fill="#8b9095" font-family="Consolas, monospace">${cur.getFullYear()}/${cur.getMonth() + 1}</text>`;
     } else if (cur.getDay() === 1) {   // 月曜＝週区切り
-      svg += `<line x1="${x}" y1="20" x2="${x}" y2="${H}" stroke="#f2ede1" stroke-width="1"/>`;
+      chartSvg += `<line x1="${x}" y1="20" x2="${x}" y2="${H}" stroke="#f2ede1" stroke-width="1"/>`;
     }
     cur.setDate(cur.getDate() + 1);
   }
 
   // 今日の縦線
-  const todayX = labelW + xFor(today);
-  svg += `<line x1="${todayX}" y1="20" x2="${todayX}" y2="${H}" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="3,3"/>`;
-  svg += `<text x="${todayX + 4}" y="${H - 6}" font-size="10" fill="#c0392b" font-family="Consolas, monospace">今日</text>`;
+  const todayX = xFor(today);
+  chartSvg += `<line x1="${todayX}" y1="20" x2="${todayX}" y2="${H}" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="3,3"/>`;
+  chartSvg += `<text x="${todayX + 4}" y="${H - 6}" font-size="10" fill="#c0392b" font-family="Consolas, monospace">今日</text>`;
 
-  // 各行
+  // 各行（チャート）
   items.forEach((a, i) => {
-    const y = 28 + i * rowH;
-    const cy = y + rowH / 2 - 6;
-    const rowTop = y - rowH / 2 + 6;
+    const { cy, rowTop } = rowGeom(i);
     const status = a['ステータス'] || '';
     const sm = STATUS_META[status] || { color: 'var(--text-mute)', icon: 'icon-document' };
 
-    // 縞背景
-    if (i % 2 === 0) {
-      svg += `<rect x="0" y="${rowTop}" width="${labelW + W}" height="${rowH}" fill="rgba(212,165,116,0.05)"/>`;
-    }
-
-    // ステータス色の左バンド
-    svg += `<rect x="0" y="${rowTop}" width="4" height="${rowH}" fill="${sm.color}"/>`;
-
-    // ラベル列：上にステータスピル、下に案件キー(クリックで案件モーダル)
-    const sShort = statusShort(status);
-    const pillW  = Math.min(labelW - 18, sShort.length * 10 + 12);
-    svg += `<rect x="10" y="${cy - 11}" width="${pillW}" height="13" rx="6.5" fill="${sm.color}" opacity="0.92"/>`;
-    svg += `<text x="${10 + pillW / 2}" y="${cy - 1}" font-size="9" text-anchor="middle" font-family="Hiragino Sans, Yu Gothic, Meiryo, sans-serif" fill="#fff">${escapeHtml(sShort)}</text>`;
-    const lbl = a['案件キー'].length > 18 ? a['案件キー'].substring(0, 18) + '…' : a['案件キー'];
-    svg += `<text x="10" y="${cy + 11}" font-size="10.5" font-family="Consolas, monospace" fill="#1e2d40" class="timeline-label-link" data-key="${escapeHtml(a['案件キー'])}" style="cursor:pointer; text-decoration:underline;">${escapeHtml(lbl)}<title>${escapeHtml(a['案件キー'])} の詳細を開く</title></text>`;
-
-    // 行のガイドライン
-    svg += `<line x1="${labelW}" y1="${cy}" x2="${labelW + W}" y2="${cy}" stroke="#f0eee5" stroke-width="1"/>`;
+    if (i % 2 === 0) chartSvg += `<rect x="0" y="${rowTop}" width="${W}" height="${rowH}" fill="rgba(212,165,116,0.05)"/>`;
+    chartSvg += `<line x1="0" y1="${cy}" x2="${W}" y2="${cy}" stroke="#f0eee5" stroke-width="1"/>`;
 
     // --- ステータス推移バー ---------------------------------------
     // data.json にステータス変更履歴は無いため、書類・予定の日付を
@@ -3538,8 +3549,6 @@ function renderTimeline() {
     ms.sort((x, y) => x.time - y.time);
 
     const barTop = cy - 6, barH = 12;
-    const winS = startDate.getTime(), winE = endDate.getTime();
-    const clampX = (t) => labelW + xFor(new Date(Math.max(winS, Math.min(winE, t))));
 
     // 「次の一手」を含む現状ツールチップ
     const prog = calcCheckProgress(a);
@@ -3553,33 +3562,34 @@ function renderTimeline() {
       for (let s = 0; s < ms.length; s++) {
         const segS = pts[s], segE = pts[s + 1];
         if (segE < winS || segS > winE || segE <= segS) continue;
-        const x1 = clampX(segS), x2 = clampX(segE);
+        const x1 = cx(segS), x2 = cx(segE);
         const segColor = (s === ms.length - 1) ? sm.color : ms[s].color; // 最新区間=現在ステータス色
-        svg += `<rect x="${x1}" y="${barTop}" width="${Math.max(2, x2 - x1)}" height="${barH}" rx="2" fill="${segColor}" opacity="0.85"><title>${escapeHtml(curTip)}</title></rect>`;
+        chartSvg += `<rect x="${x1}" y="${barTop}" width="${Math.max(2, x2 - x1)}" height="${barH}" rx="2" fill="${segColor}" opacity="0.85"><title>${escapeHtml(curTip)}</title></rect>`;
       }
       // 施工予定(備考)の計画期間を細い帯で補助表示
       ranges.forEach(r => {
         if (r.end.getTime() < winS || r.start.getTime() > winE) return;
-        const x1 = clampX(r.start.getTime()), x2 = clampX(r.end.getTime());
-        svg += `<rect x="${x1}" y="${barTop + barH + 2}" width="${Math.max(3, x2 - x1 + dayPx)}" height="3" rx="1.5" fill="rgba(212,165,116,0.95)"><title>${escapeHtml('施工予定 ' + r.raw)}</title></rect>`;
+        const x1 = cx(r.start.getTime()), x2 = cx(r.end.getTime());
+        chartSvg += `<rect x="${x1}" y="${barTop + barH + 2}" width="${Math.max(3, x2 - x1 + dayPx)}" height="3" rx="1.5" fill="rgba(212,165,116,0.95)"><title>${escapeHtml('施工予定 ' + r.raw)}</title></rect>`;
       });
       // ステータス変更点（節目）の▼マーカー
       ms.forEach(m => {
         if (m.time < winS || m.time > winE) return;
-        const x = clampX(m.time);
-        svg += `<line x1="${x}" y1="${barTop - 3}" x2="${x}" y2="${barTop + barH + 3}" stroke="#374151" stroke-width="1.4"/>`;
-        svg += `<path d="M ${x - 3.5} ${barTop - 8} L ${x + 3.5} ${barTop - 8} L ${x} ${barTop - 3} Z" fill="#374151"><title>${escapeHtml('ステータス変更: ' + m.label + ' (' + m.dateStr + ')')}</title></path>`;
+        const x = cx(m.time);
+        chartSvg += `<line x1="${x}" y1="${barTop - 3}" x2="${x}" y2="${barTop + barH + 3}" stroke="#374151" stroke-width="1.4"/>`;
+        chartSvg += `<path d="M ${x - 3.5} ${barTop - 8} L ${x + 3.5} ${barTop - 8} L ${x} ${barTop - 3} Z" fill="#374151"><title>${escapeHtml('ステータス変更: ' + m.label + ' (' + m.dateStr + ')')}</title></path>`;
       });
     } else {
       // 日付情報が無い案件：現在ステータスを今日付近の短い破線バーで示す
-      const x2 = clampX(today.getTime());
-      const x1 = Math.max(labelW, x2 - 16);
-      svg += `<rect x="${x1}" y="${barTop}" width="${Math.max(4, x2 - x1)}" height="${barH}" rx="2" fill="${sm.color}" opacity="0.5" stroke="${sm.color}" stroke-dasharray="2,2"><title>${escapeHtml(curTip + '（日付情報なし）')}</title></rect>`;
+      const x2 = cx(today.getTime());
+      const x1 = Math.max(0, x2 - 16);
+      chartSvg += `<rect x="${x1}" y="${barTop}" width="${Math.max(4, x2 - x1)}" height="${barH}" rx="2" fill="${sm.color}" opacity="0.5" stroke="${sm.color}" stroke-dasharray="2,2"><title>${escapeHtml(curTip + '（日付情報なし）')}</title></rect>`;
     }
   });
+  chartSvg += `</svg>`;
 
-  svg += `</svg>`;
-  replaceSectionBody('#sec-timeline', legend + `<div class="timeline-wrap">${svg}</div>`);
+  replaceSectionBody('#sec-timeline', legend +
+    `<div class="timeline-wrap"><div class="timeline-labelcol">${labelSvg}</div><div class="timeline-scroll">${chartSvg}</div></div>`);
 
   // タイムラインラベルクリック → 案件モーダル
   $$('#sec-timeline .timeline-label-link').forEach(el => {
