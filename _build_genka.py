@@ -55,11 +55,15 @@ def classify(kanjo, kubun):
         return kanjo if kanjo in ('材料費', '外注費', '労務費') else '経費'
     return '経費'
 
+# 勘定科目の転記補正（data.json確定集計と整合）：RC-26-007 部材紹介料=外注費
+H_FIX = {'RC-26-007': '外注費'}
+
 groups = collections.OrderedDict()
 for rid in sorted(merged):
     row = next(csv.reader(io.StringIO(merged[rid])))
     row = (row + [''] * 13)[:13]
     _, ban, genba, hiduke, mise, hinmoku, kin_s, kanjo, kubun, shiharai, src, biko, touroku = row
+    if rid in H_FIX: kanjo = H_FIX[rid]
     ban = ban.strip()
     try: kin = int(float((kin_s or '0').replace(',', '').strip() or 0))
     except ValueError: kin = 0
