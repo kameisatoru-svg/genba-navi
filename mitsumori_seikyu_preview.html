@@ -3684,10 +3684,14 @@ function clearAllData(){
 
   // ── 数値設定をクリア（デフォルト値へ） ──
   shokeihiRate = 15;
+  shokeihiMode = 'rate';
+  shokeihiFixed = 0;
   nebiki = 0;
   nebikiLabel = '値引き';
   hasuChousei = 0;
   clearVal('shokeihiRateInput', '15');
+  clearVal('shokeihiFixedInput', '0');
+  if(typeof setShokeihiMode==='function') setShokeihiMode('rate',{silent:true});
   clearVal('nebikiInput', '0');
   clearVal('nebikiLabelInput', '値引き');
   clearVal('hasuChouseiInput', '0');
