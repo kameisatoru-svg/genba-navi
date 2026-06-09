@@ -407,6 +407,14 @@ tr.dragging{opacity:0.4;}
     <span>案件台帳から読み込み（data.json）</span>
   </button>
   <div class="tm-sep"></div>
+  <button class="tm-item" id="tm-adjust" onclick="closeTopMenu();openAdjustPanel()">
+    <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="4" y1="7" x2="20" y2="7"/><circle cx="9" cy="7" r="2" fill="#fff"/>
+      <line x1="4" y1="14" x2="20" y2="14"/><circle cx="15" cy="14" r="2" fill="#fff"/>
+      <line x1="4" y1="21" x2="20" y2="21" opacity="0"/>
+    </svg>
+    <span>金額調整（目標額・丸め）</span>
+  </button>
   <button class="tm-item" id="tm-discount" onclick="closeTopMenu();applyDiscount()">
     <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
       <line x1="6" y1="18" x2="18" y2="6"/>
