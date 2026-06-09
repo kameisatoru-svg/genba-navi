@@ -3951,9 +3951,9 @@ async function exportBCS_CSV(){
     // 見積書モードかつ諸経費適用中のときのみ
     const isMits = (docType === 'mitsumori');
     const apply = (typeof applyShokeihi !== 'undefined') ? applyShokeihi : isMits;
-    if(isMits && apply && shokeihiRate > 0){
-      // 現在のgrandTotal（明細合計）に対して諸経費を計算
-      const shokeihi = Math.round(grandTotal * (shokeihiRate / 100));
+    if(isMits && apply){
+      // 現在のgrandTotal（明細合計）に対して諸経費を計算（率モード/金額固定モード両対応）
+      const shokeihi = shokeihiAmt(grandTotal);
       if(shokeihi > 0){
         const colA = nextColA++;
         rows.push(bcsRow(colA,'','','','','','',1,'','P','諸経費','',1,'式',shokeihi,'','','',''));
