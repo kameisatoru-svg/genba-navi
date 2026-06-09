@@ -862,6 +862,13 @@ function genkaSourceGroupOf(src){
   const g=GENKA_SOURCE_GROUPS.find(g=>g.match(s));
   return g?g.key:'その他';
 }
+// ソースグループ見出しの開閉（toggleMeisaiと違い innerHTML を壊さない＝名称・小計を保持）
+function toggleGenkaSrc(btn){
+  const wrap=btn.nextElementSibling;
+  if(!wrap)return;
+  const open=wrap.classList.toggle('open');
+  btn.classList.toggle('open',open);
+}
 function genkaMeisaiHtml(entry,safeId){
   const rows=(entry&&Array.isArray(entry.明細))?entry.明細:[];
   if(!rows.length) return '';
