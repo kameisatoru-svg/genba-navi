@@ -2361,7 +2361,7 @@ function collectReeditState(){
   return {
     _type:'mitsumori_seikyu', _v:1, savedAt:new Date().toISOString(),
     docType:docType, mode:mode,
-    shokeihiRate:shokeihiRate, nebiki:nebiki, hasuChousei:hasuChousei,
+    shokeihiRate:shokeihiRate, nebiki:nebiki, nebikiLabel:nebikiLabel, hasuChousei:hasuChousei,
     fields:{
       atena:_gv('atena'), mitsumoriNo:_gv('mitsumoriNo'), hakkoDate:_gv('hakkoDate'),
       shiharaiDate:_gv('shiharaiDate'), kojimei:_gv('kojimei'), seshubasho:_gv('seshubasho'),
@@ -2384,7 +2384,7 @@ function applyReeditState(s){
   groupSummaryItems = Array.isArray(s.groupSummaryItems) ? s.groupSummaryItems.slice() : [];
   // 3) スカラー
   shokeihiRate = (s.shokeihiRate!=null) ? s.shokeihiRate : 15;
-  nebiki = s.nebiki || 0; hasuChousei = s.hasuChousei || 0;
+  nebiki = s.nebiki || 0; nebikiLabel = s.nebikiLabel || '値引き'; hasuChousei = s.hasuChousei || 0;
   // 4) 入力欄（switchDocTypeの上書きを後勝ちで戻す）
   const f = s.fields || {};
   _sv('atena',f.atena); _sv('mitsumoriNo',f.mitsumoriNo); _sv('hakkoDate',f.hakkoDate);
@@ -3951,8 +3951,8 @@ async function exportBCS_CSV(){
     if(isMits && nebiki > 0){
       // SIM2準拠：マイナス値は数量-1, 単価=絶対値で表現
       const colA = nextColA++;
-      rows.push(bcsRow(colA,'','','','','','',1,'','P','値引き','',-1,'',Math.abs(nebiki),'','','',''));
-      rows.push(bcsRow(colA,'','','','','','',2,'','T','値引き計','','','','','','','',''));
+      rows.push(bcsRow(colA,'','','','','','',1,'','P',nebikiLabel,'',-1,'',Math.abs(nebiki),'','','',''));
+      rows.push(bcsRow(colA,'','','','','','',2,'','T',nebikiLabel+'計','','','','','','','',''));
       grandTotal -= nebiki;
     }
     
