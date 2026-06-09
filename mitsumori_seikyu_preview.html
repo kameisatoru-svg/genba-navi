@@ -1270,7 +1270,7 @@ function render(){
   // 請求書時は諸経費・値引き行を出さない
   const isMitsRender = docType==='mitsumori';
   const shokeihiTr = isMitsRender ? `<tr class="shokeihi-row"><td colspan="4" style="text-align:right">諸経費（${shokeihiRate}%）</td><td>${fmtN(t.shokeihi)}</td></tr>` : '';
-  const nebikiTr = (isMitsRender && nebiki>0) ? `<tr class="shokeihi-row"><td colspan="4" style="text-align:right">値　引　き</td><td>-${fmtN(nebiki)}</td></tr>` : '';
+  const nebikiTr = (isMitsRender && nebiki>0) ? `<tr class="shokeihi-row"><td colspan="4" style="text-align:right">${nebikiLabel}</td><td>-${fmtN(nebiki)}</td></tr>` : '';
 
   if(mode==='lump'){
     // 1式表記モード：groupSummaryItemsのみ表示（大項目なし）
@@ -1931,7 +1931,7 @@ function buildDocHTML(){
   // 請求書時は諸経費・値引き行を出さない
   const isMitsPrint = docType==='mitsumori';
   const shokeihiTrP = isMitsPrint ? `<tr class="shokeihi-row"><td colspan="4" style="text-align:right">諸経費（${shokeihiRate}%）</td><td style="text-align:right">${fmtN(t.shokeihi)}</td></tr>` : '';
-  const nebikiTrP = (isMitsPrint && nebiki>0) ? `<tr class="shokeihi-row"><td colspan="4" style="text-align:right">値　引　き</td><td style="text-align:right">-${fmtN(nebiki)}</td></tr>` : '';
+  const nebikiTrP = (isMitsPrint && nebiki>0) ? `<tr class="shokeihi-row"><td colspan="4" style="text-align:right">${nebikiLabel}</td><td style="text-align:right">-${fmtN(nebiki)}</td></tr>` : '';
 
   if(mode==='lump'){
     // 1式表記モード（請求書専用）：groupSummaryItemsのみ表示（大項目なし）
