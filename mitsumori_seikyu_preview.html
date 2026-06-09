@@ -470,11 +470,20 @@ tr.dragging{opacity:0.4;}
       <div id="items-editor"></div>
       <div class="total-box" id="total-box"></div>
       <div id="shokeihi-wrap" style="display:flex;gap:8px;margin-top:8px;align-items:center;">
-        <div class="fgroup" style="flex:1;margin:0;">
-          <label style="font-size:10px;color:var(--sub);">諸経費率（%）</label>
+        <div class="fgroup" style="flex:1.2;margin:0;">
+          <select id="shokeihiModeSelect" onchange="setShokeihiMode(this.value)"
+            title="諸経費を「率(%)」で出すか「金額固定」で出すか。金額固定は目標額の帳尻合わせ用。"
+            style="width:100%;border:1px solid var(--border);border-radius:3px;padding:1px 2px;font-size:10px;font-family:inherit;color:var(--sub);background:#fafafa;margin-bottom:1px;">
+            <option value="rate">諸経費率（%）</option>
+            <option value="fixed">諸経費（金額固定）</option>
+          </select>
           <input id="shokeihiRateInput" type="number" value="15" min="0" max="100" step="0.1"
             style="width:100%;border:1px solid var(--border);border-radius:3px;padding:4px 8px;font-size:12px;font-family:inherit;"
             oninput="shokeihiRate=parseFloat(this.value)||0;render()">
+          <input id="shokeihiFixedInput" type="number" value="0" min="0" step="1"
+            title="諸経費を金額で固定（円）"
+            style="display:none;width:100%;border:1px solid var(--border);border-radius:3px;padding:4px 8px;font-size:12px;font-family:inherit;"
+            oninput="shokeihiFixed=parseFloat(this.value)||0;render()">
         </div>
         <div class="fgroup" style="flex:2;margin:0;">
           <div style="display:flex;align-items:center;gap:3px;">
