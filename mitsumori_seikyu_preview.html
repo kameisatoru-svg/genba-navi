@@ -2762,10 +2762,23 @@ function revertDiscount(silent){
   groupItems.splice(0, groupItems.length, ...JSON.parse(JSON.stringify(discountBackup.groupItems)));
   groupSummaryItems.splice(0, groupSummaryItems.length, ...JSON.parse(JSON.stringify(discountBackup.groupSummaryItems)));
   hasuChousei = discountBackup.hasuChousei;
-  
+  // 金額調整パネルで変更した諸経費・値引きも退避時の値に戻す（存在すれば）
+  if(discountBackup.nebiki != null) nebiki = discountBackup.nebiki;
+  if(discountBackup.shokeihiRate != null) shokeihiRate = discountBackup.shokeihiRate;
+  if(discountBackup.shokeihiMode != null) shokeihiMode = discountBackup.shokeihiMode;
+  if(discountBackup.shokeihiFixed != null) shokeihiFixed = discountBackup.shokeihiFixed;
+
   const hasuInput = document.getElementById('hasuChouseiInput');
   if(hasuInput) hasuInput.value = hasuChousei;
-  
+  const _nbInput = document.getElementById('nebikiInput');
+  if(_nbInput) _nbInput.value = nebiki;
+  if(typeof setShokeihiMode === 'function') setShokeihiMode(shokeihiMode, {silent:true});
+  const _srInput = document.getElementById('shokeihiRateInput');
+  if(_srInput) _srInput.value = shokeihiRate;
+  const _sfInput = document.getElementById('shokeihiFixedInput');
+  if(_sfInput) _sfInput.value = Math.round(shokeihiFixed||0);
+  if(typeof adjUpdateCurrent === 'function') adjUpdateCurrent();
+
   discountBackup = null;
   
   // UI更新
