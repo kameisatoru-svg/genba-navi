@@ -4820,5 +4820,104 @@ window.addEventListener('DOMContentLoaded', () => {
     </div>
   </div>
 </div>
+
+<!-- ========== 💴 金額調整パネル（目標額スケール・単価丸め・帳尻合わせ） ========== -->
+<div id="adjust-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:8px;max-width:560px;width:100%;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,0.4);">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--navy);color:#fff;border-radius:8px 8px 0 0;">
+      <h3 style="font-size:14px;font-weight:600;letter-spacing:0.04em;">💴 金額調整（目標額・丸め・帳尻）</h3>
+      <button onclick="closeAdjustPanel()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:0 4px;">✕</button>
+    </div>
+    <div style="padding:10px 18px;font-size:11px;color:var(--sub);line-height:1.6;background:#f8f8f6;border-bottom:1px solid var(--border);">
+      目標額は<b>税抜合計</b>基準です。実行前のデータは退避され、メニューの「元に戻す」でいつでも戻せます。
+    </div>
+    <div id="adjust-current" style="padding:8px 18px;font-size:12px;color:var(--navy);background:#fffdf5;border-bottom:1px solid var(--border);"></div>
+    <div style="padding:14px 18px;flex:1;overflow:auto;display:flex;flex-direction:column;gap:14px;">
+
+      <!-- ① 全体スケール -->
+      <div style="border:1px solid var(--border);border-radius:6px;padding:10px 12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px;">① 全体スケール（単価を一律に増減）</div>
+        <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:8px;">
+          <div style="flex:1;min-width:140px;">
+            <label style="font-size:10px;color:var(--sub);">目標 税抜合計（円）</label>
+            <input id="adj-target-scale" type="number" step="1" placeholder="例: 2000000"
+              style="width:100%;border:1px solid var(--border);border-radius:3px;padding:5px 8px;font-size:13px;font-family:inherit;">
+          </div>
+          <button onclick="adjScaleToTarget()" style="padding:7px 14px;background:var(--gold);color:var(--navy);border:none;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">この額に合わせる</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
+          <div style="flex:1;min-width:140px;">
+            <label style="font-size:10px;color:var(--sub);">増減（%）＋で増額・−で減額</label>
+            <input id="adj-percent" type="number" step="0.1" placeholder="例: 20 または -10"
+              style="width:100%;border:1px solid var(--border);border-radius:3px;padding:5px 8px;font-size:13px;font-family:inherit;">
+          </div>
+          <button onclick="adjScaleByPercent()" style="padding:7px 14px;background:#eef1f4;color:var(--navy);border:1px solid var(--border);border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">％で増減</button>
+        </div>
+      </div>
+
+      <!-- ② 単価の丸め -->
+      <div style="border:1px solid var(--border);border-radius:6px;padding:10px 12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px;">② 単価の丸め</div>
+        <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
+          <div style="flex:1;min-width:110px;">
+            <label style="font-size:10px;color:var(--sub);">丸める桁</label>
+            <select id="adj-round-digit" style="width:100%;border:1px solid var(--border);border-radius:3px;padding:5px 6px;font-size:12px;font-family:inherit;">
+              <option value="10">10円単位</option>
+              <option value="100" selected>100円単位</option>
+              <option value="1000">1,000円単位</option>
+            </select>
+          </div>
+          <div style="flex:1;min-width:110px;">
+            <label style="font-size:10px;color:var(--sub);">丸め方</label>
+            <select id="adj-round-mode" style="width:100%;border:1px solid var(--border);border-radius:3px;padding:5px 6px;font-size:12px;font-family:inherit;">
+              <option value="round" selected>四捨五入</option>
+              <option value="ceil">切り上げ</option>
+              <option value="floor">切り捨て</option>
+            </select>
+          </div>
+          <button onclick="adjRoundUnitPrices()" style="padding:7px 14px;background:#eef1f4;color:var(--navy);border:1px solid var(--border);border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">単価を丸める</button>
+        </div>
+      </div>
+
+      <!-- ③ 帳尻合わせ -->
+      <div style="border:1px solid var(--border);border-radius:6px;padding:10px 12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px;">③ 目標額にぴったり合わせる（差額を吸収）</div>
+        <div style="margin-bottom:8px;">
+          <label style="font-size:10px;color:var(--sub);">目標 税抜合計（円）</label>
+          <input id="adj-target-balance" type="number" step="1" placeholder="例: 2000000"
+            style="width:100%;border:1px solid var(--border);border-radius:3px;padding:5px 8px;font-size:13px;font-family:inherit;">
+        </div>
+        <div style="margin-bottom:8px;">
+          <label style="font-size:10px;color:var(--sub);">差額の吸収先</label>
+          <select id="adj-absorb" style="width:100%;border:1px solid var(--border);border-radius:3px;padding:5px 6px;font-size:12px;font-family:inherit;">
+            <option value="shokeihi-fixed" selected>諸経費（金額固定で吸収）</option>
+            <option value="shokeihi-rate">諸経費（率を微調整して吸収）</option>
+            <option value="nebiki">値引きで吸収（減額のみ）</option>
+          </select>
+        </div>
+        <button onclick="adjBalanceToTarget()" style="width:100%;padding:8px 14px;background:var(--gold);color:var(--navy);border:none;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">この目標額にぴったり合わせる</button>
+      </div>
+
+      <!-- まとめ実行 -->
+      <div style="border:1px dashed var(--gold);border-radius:6px;padding:10px 12px;background:#fffdf5;">
+        <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:6px;">⭐ まとめて実行（①目標額→②丸め→③帳尻）</div>
+        <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
+          <div style="flex:1;min-width:140px;">
+            <label style="font-size:10px;color:var(--sub);">目標 税抜合計（円）</label>
+            <input id="adj-target-all" type="number" step="1" placeholder="例: 2000000"
+              style="width:100%;border:1px solid var(--border);border-radius:3px;padding:5px 8px;font-size:13px;font-family:inherit;">
+          </div>
+          <button onclick="adjRunAll()" style="padding:8px 14px;background:var(--navy);color:#fff;border:none;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">一気に合わせる</button>
+        </div>
+        <div style="font-size:10px;color:var(--sub);margin-top:5px;">②の丸め桁・③の吸収先は上の設定を使います。</div>
+      </div>
+
+    </div>
+    <div style="padding:10px 18px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;background:#f8f8f6;border-radius:0 0 8px 8px;">
+      <button onclick="adjRevert()" style="padding:8px 14px;background:#fff;color:var(--navy);border:1px solid var(--border);border-radius:4px;font-size:12px;cursor:pointer;font-family:inherit;">元に戻す</button>
+      <button onclick="closeAdjustPanel()" style="padding:8px 22px;background:#eef1f4;color:var(--navy);border:1px solid var(--border);border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">閉じる</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
