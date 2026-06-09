@@ -477,7 +477,13 @@ tr.dragging{opacity:0.4;}
             oninput="shokeihiRate=parseFloat(this.value)||0;render()">
         </div>
         <div class="fgroup" style="flex:2;margin:0;">
-          <label style="font-size:10px;color:var(--sub);">値引き（円）</label>
+          <div style="display:flex;align-items:center;gap:3px;">
+            <input id="nebikiLabelInput" type="text" value="値引き"
+              title="この名称がそのまま見積書に表示されます（例：端数値引き／調整値引き）"
+              style="flex:1;min-width:0;border:1px solid var(--border);border-radius:3px;padding:1px 4px;font-size:10px;font-family:inherit;color:var(--sub);background:#fafafa;"
+              oninput="nebikiLabel=(this.value.trim()||'値引き');render()">
+            <span style="font-size:10px;color:var(--sub);white-space:nowrap;">（円）</span>
+          </div>
           <input id="nebikiInput" type="number" value="0" min="0"
             style="width:100%;border:1px solid var(--border);border-radius:3px;padding:4px 8px;font-size:12px;font-family:inherit;"
             oninput="nebiki=parseFloat(this.value)||0;render()">
@@ -1206,7 +1212,7 @@ function calcTotals(){
 function renderTotalBox(t){
   const isMits = docType==='mitsumori';
   const shokeihiRow = isMits ? `<div class="total-row"><span>諸経費（${shokeihiRate}%）</span><span>${fmtN(t.shokeihi)}</span></div>` : '';
-  const nebikiRow = (isMits && nebiki>0) ? `<div class="total-row"><span>値引き</span><span>-${fmtN(nebiki)}</span></div>` : '';
+  const nebikiRow = (isMits && nebiki>0) ? `<div class="total-row"><span>${nebikiLabel}</span><span>-${fmtN(nebiki)}</span></div>` : '';
   document.getElementById('total-box').innerHTML=`
     <div class="total-row"><span>小計</span><span>${fmtN(t.subtotal)}</span></div>
     ${shokeihiRow}
