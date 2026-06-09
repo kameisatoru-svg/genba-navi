@@ -2390,7 +2390,7 @@ function applyReeditState(s){
   _sv('atena',f.atena); _sv('mitsumoriNo',f.mitsumoriNo); _sv('hakkoDate',f.hakkoDate);
   _sv('shiharaiDate',f.shiharaiDate); _sv('kojimei',f.kojimei); _sv('seshubasho',f.seshubasho);
   _sv('koki',f.koki); _sv('ankenKey',f.ankenKey); _sv('fileSuffix',f.fileSuffix); _sv('bikou',f.bikou);
-  _sv('shokeihiRateInput',shokeihiRate); _sv('nebikiInput',nebiki); _sv('hasuChouseiInput',hasuChousei);
+  _sv('shokeihiRateInput',shokeihiRate); _sv('nebikiInput',nebiki); _sv('nebikiLabelInput',nebikiLabel); _sv('hasuChouseiInput',hasuChousei);
   const b=document.getElementById('bikou'); if(b && f.bikou) b.dataset.auto='';
   // 5) 再描画
   renderEditor(); updateDocTitle(); render();
@@ -4484,7 +4484,7 @@ function captureDocSnapshot(){
   return {
     v: 1,
     savedAt: new Date().toISOString(),
-    docType, mode, shokeihiRate, nebiki, hasuChousei,
+    docType, mode, shokeihiRate, nebiki, nebikiLabel, hasuChousei,
     header: {
       atena:       g('atena'),
       mitsumoriNo: g('mitsumoriNo'),
@@ -4518,6 +4518,7 @@ function restoreDocSnapshot(snap){
   // 率・調整値
   if(typeof snap.shokeihiRate === 'number'){ shokeihiRate = snap.shokeihiRate; setVal('shokeihiRateInput', shokeihiRate); }
   nebiki = snap.nebiki || 0;           setVal('nebikiInput', nebiki);
+  nebikiLabel = snap.nebikiLabel || '値引き'; setVal('nebikiLabelInput', nebikiLabel);
   hasuChousei = snap.hasuChousei || 0; setVal('hasuChouseiInput', hasuChousei);
   // 表書き
   const h = snap.header || {};
