@@ -1492,7 +1492,8 @@ function renderGenka(){
       <div class="tab-detail-row"><span class="tab-detail-label">材料費</span><span class="tab-detail-value">${fmtYen(g.材料費||null)}</span></div>
       <div class="tab-detail-row"><span class="tab-detail-label">外注費</span><span class="tab-detail-value">${fmtYen(g.外注費||null)}</span></div>
       <div class="tab-detail-row"><span class="tab-detail-label">経費</span><span class="tab-detail-value">${fmtYen(g.経費||null)}</span></div>
-      ${gt>0?`<div style="margin-top:12px;">${genkaBarHtml}</div>`:'<div class="empty-hint" style="margin-top:8px;">原価未入力</div>'}`;
+      ${gt>0?`<div style="margin-top:12px;">${genkaBarHtml}</div>`:'<div class="empty-hint" style="margin-top:8px;">原価未入力</div>'}
+      ${genkaMeisaiHtml(genkaEntry(p),safeAnkenId(p))}`;
     return`
     <div class="tab-nav-card status-${rateClass}">
       <button class="tab-nav-card-header" onclick="toggleTabCard(this)">
