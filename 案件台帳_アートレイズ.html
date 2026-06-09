@@ -1454,7 +1454,7 @@ function renderGenka(){
   const q=document.getElementById('g-search').value.toLowerCase();
   const items=ALL_DATA.filter(p=>{
     const txt=[ankenKey(p),oldAnken(p),kojiName(p),customerName(p),customerRep(p)].filter(Boolean).join(' ').toLowerCase();
-    returnmatchQuery(txt,q);
+    return matchQuery(txt,q);
   });
   let tg=0,tu=0;
   items.forEach(p=>{
