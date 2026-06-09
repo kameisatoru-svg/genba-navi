@@ -885,7 +885,7 @@ function genkaMeisaiHtml(entry,safeId){
         <td class="right">${fmtYen(Number(r.金額||0))}</td>
       </tr>`).join('');
     return `<div class="genka-src-group">
-      <button class="meisai-toggle genka-src-head" onclick="toggleMeisai('${tid}', this)" style="--src-accent:${accentOf(k)};">
+      <button class="meisai-toggle genka-src-head" onclick="toggleGenkaSrc(this)" style="--src-accent:${accentOf(k)};">
         <svg class="meisai-toggle__chevron" width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><polygon points="2,1 8,5 2,9"/></svg>
         <span class="genka-src-name">${k}</span>
         <span class="genka-src-meta">${list.length}件 ・ ${fmtYen(subtotal)}</span>
