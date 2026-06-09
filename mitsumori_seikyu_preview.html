@@ -899,31 +899,53 @@ function updateAmt(inputEl){
 }
 
 // Enterキーで同行の次input→行末なら次行の品名にフォーカス移動
+// 明細欄のキー操作：
+//  Enter      → 同行の次の欄へ（行末なら次行の先頭欄へ）
+//  ↑ / ↓      → 同じ列の上下の行へ移動（type=number の1ずつ増減スピナーは無効化）
+//  ← / →      → 左右隣のセルへ移動（行頭/行末は前後の行へ折り返し）
 function enterNav(e){
-  if(e.key!=='Enter')return;
-  e.preventDefault();
-  const tr=e.target.closest('tr');
+  const el=e.target;
+  const tr=el.closest('tr');
   if(!tr)return;
-  const inputs=Array.from(tr.querySelectorAll('input:not([readonly])')).filter(el=>el.offsetParent!==null);
-  const idx=inputs.indexOf(e.target);
-  if(idx>=0&&idx<inputs.length-1){
-    // 同行の次へ
-    inputs[idx+1].focus();
-    inputs[idx+1].select();
-  } else {
-    // 行末→次のtrの最初のinputへ
+  // 同tbody内で、入力欄を持つ隣接行の「表示中・編集可能な入力欄配列」を返す（dir:+1=下 / -1=上）
+  const adjRowInputs=(dir)=>{
     const tbody=tr.closest('tbody');
-    if(!tbody)return;
+    if(!tbody)return null;
     const rows=Array.from(tbody.querySelectorAll('tr'));
-    const trIdx=rows.indexOf(tr);
-    for(let ni=trIdx+1;ni<rows.length;ni++){
-      const nextInputs=Array.from(rows[ni].querySelectorAll('input:not([readonly])')).filter(el=>el.offsetParent!==null);
-      if(nextInputs.length>0){
-        nextInputs[0].focus();
-        nextInputs[0].select();
-        return;
-      }
+    const ti=rows.indexOf(tr);
+    for(let n=ti+dir;n>=0&&n<rows.length;n+=dir){
+      const ins=Array.from(rows[n].querySelectorAll('input:not([readonly])')).filter(x=>x.offsetParent!==null);
+      if(ins.length)return ins;
     }
+    return null;
+  };
+  const focusSel=(inp)=>{if(!inp)return;inp.focus();try{inp.select();}catch(_){}};
+  const rowInputs=Array.from(tr.querySelectorAll('input:not([readonly])')).filter(x=>x.offsetParent!==null);
+  const col=rowInputs.indexOf(el); // 行内での列位置（金額欄=readonlyは除外済み）
+
+  if(e.key==='Enter'){
+    e.preventDefault();
+    if(col>=0&&col<rowInputs.length-1){focusSel(rowInputs[col+1]);}
+    else{const ni=adjRowInputs(1);if(ni)focusSel(ni[0]);}
+    return;
+  }
+  if(col<0)return;
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+    // ★ type=number のスピナー（1ずつ増減）を無効化し、上下の行の同じ列へ移動
+    e.preventDefault();
+    const sib=adjRowInputs(e.key==='ArrowDown'?1:-1);
+    if(sib)focusSel(sib[Math.min(col,sib.length-1)]);
+    return;
+  }
+  if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
+    // ★ 左右隣のセルへ移動（行頭/行末は前後の行へ折り返し）
+    e.preventDefault();
+    const dir=e.key==='ArrowRight'?1:-1;
+    const t=col+dir;
+    if(t>=0&&t<rowInputs.length){focusSel(rowInputs[t]);}
+    else if(dir>0){const ni=adjRowInputs(1);if(ni)focusSel(ni[0]);}
+    else{const pi=adjRowInputs(-1);if(pi)focusSel(pi[pi.length-1]);}
+    return;
   }
 }
 
