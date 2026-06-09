@@ -1085,7 +1085,8 @@ function buildAnkenCard(p){
       <div class="info-item"><span class="info-label">原価合計</span><span class="info-value minyukin">${fmtYen(genkaTotal||null)}</span></div>
       <div class="info-item"><span class="info-label">粗利</span><span class="info-value nyukin">${uriage&&genkaTotal?fmtYen(uriage-genkaTotal):'-'}</span></div>
     </div>
-    ${genkaBarHtml}`;
+    ${genkaBarHtml}
+    ${genkaMeisaiHtml(genkaEntry(p),safeId)}`;
 
   // ── カード全体 ──
   return`
