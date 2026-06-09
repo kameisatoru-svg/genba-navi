@@ -610,9 +610,11 @@ function shokeihiAmt(subtotal){
     ? Math.round(shokeihiFixed||0)
     : Math.round((subtotal||0)*(shokeihiRate/100));
 }
-// 諸経費行の表示名称
+// 諸経費行の表示名称（率は小数2桁までに整形して表示）
 function shokeihiLbl(){
-  return (shokeihiMode==='fixed') ? '諸経費（一式）' : `諸経費（${shokeihiRate}%）`;
+  if(shokeihiMode==='fixed') return '諸経費（一式）';
+  const r = Math.round((shokeihiRate||0)*100)/100; // 表示は2桁まで（内部は高精度のまま）
+  return `諸経費（${r}%）`;
 }
 
 // ── 案件選択機能の状態（実装本体は末尾） ──
@@ -3000,7 +3002,12 @@ function adjRunAll(){
   const f = _adjScaleToTarget(T);
   if(f === null){ alert('スケールできませんでした（明細の単価が0、または目標額が不正です）。'); return; }
   adjRoundAllPrices(unit, mode);
-  const r = _adjBalance(T, absorb);
+  let r = _adjBalance(T, absorb);
+  // 値引き吸収で「増額が必要（丸めで目標を下回った）」ときは諸経費固定で確実に合わせる
+  if(!r.ok && absorb === 'nebiki'){
+    r = _adjBalance(T, 'shokeihi-fixed');
+    if(r.ok) r.msg = '値引きでは増額できないため諸経費（一式）で吸収 → ' + r.msg;
+  }
   adjRefresh();
   const t = calcTotals();
   const modeLbl = mode === 'ceil' ? '切り上げ' : mode === 'floor' ? '切り捨て' : '四捨五入';
