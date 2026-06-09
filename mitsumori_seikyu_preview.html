@@ -584,6 +584,19 @@ let shokeihiRate = 15; // 諸経費率（%）
 let nebiki = 0;        // 値引き額
 let nebikiLabel = '値引き'; // 値引き行の表示名称（手動変更可・例：端数値引き／調整値引き）
 let hasuChousei = 0;   // 端数調整（BCS.CSV出力用・プラスマイナス両方可）
+let shokeihiMode = 'rate'; // 諸経費の算出方式：'rate'=率(%) / 'fixed'=金額固定（帳尻合わせ用）
+let shokeihiFixed = 0;     // shokeihiMode==='fixed' 時の諸経費金額（円）
+
+// 諸経費の金額を返す（率モード=小計×率／固定モード=固定額）
+function shokeihiAmt(subtotal){
+  return (shokeihiMode==='fixed')
+    ? Math.round(shokeihiFixed||0)
+    : Math.round((subtotal||0)*(shokeihiRate/100));
+}
+// 諸経費行の表示名称
+function shokeihiLbl(){
+  return (shokeihiMode==='fixed') ? '諸経費（一式）' : `諸経費（${shokeihiRate}%）`;
+}
 
 // ── 案件選択機能の状態（実装本体は末尾） ──
 let ankenData = null;        // data.json 全体
