@@ -2414,6 +2414,7 @@ function applyReeditState(s){
   groupSummaryItems = Array.isArray(s.groupSummaryItems) ? s.groupSummaryItems.slice() : [];
   // 3) スカラー
   shokeihiRate = (s.shokeihiRate!=null) ? s.shokeihiRate : 15;
+  shokeihiMode = (s.shokeihiMode==='fixed') ? 'fixed' : 'rate'; shokeihiFixed = s.shokeihiFixed || 0;
   nebiki = s.nebiki || 0; nebikiLabel = s.nebikiLabel || '値引き'; hasuChousei = s.hasuChousei || 0;
   // 4) 入力欄（switchDocTypeの上書きを後勝ちで戻す）
   const f = s.fields || {};
