@@ -843,6 +843,59 @@ function matchQuery(txt,q){
   return q.split(/[\s　]+/).filter(Boolean).every(t=>txt.includes(t));
 }
 
+// ─ 原価明細レンダラー ─
+// genka.json の案件エントリ（明細[]）を、Sheets K列「ソース」でグループ化して
+// 折りたたみテーブルにする。受取請求書／精算領収書・レシート／カード(AMEX)の3系統。
+const GENKA_SOURCE_GROUPS=[
+  {key:'受取請求書', match:s=>/請求/.test(s), accent:'#2563eb'},
+  {key:'精算領収書・レシート', match:s=>/領収|レシート|精算/.test(s), accent:'#16a34a'},
+  {key:'カード（AMEX）', match:s=>/amex|カード|クレジット/i.test(s), accent:'#d97706'},
+];
+function genkaSourceGroupOf(src){
+  const s=src||'';
+  const g=GENKA_SOURCE_GROUPS.find(g=>g.match(s));
+  return g?g.key:'その他';
+}
+function genkaMeisaiHtml(entry,safeId){
+  const rows=(entry&&Array.isArray(entry.明細))?entry.明細:[];
+  if(!rows.length) return '';
+  // ソース別にグループ化（定義順 → その他）
+  const order=[...GENKA_SOURCE_GROUPS.map(g=>g.key),'その他'];
+  const groups={};
+  rows.forEach(r=>{
+    const gk=genkaSourceGroupOf(r.ソース);
+    (groups[gk]=groups[gk]||[]).push(r);
+  });
+  const accentOf=k=>(GENKA_SOURCE_GROUPS.find(g=>g.key===k)||{}).accent||'#6b7280';
+  const blocks=order.filter(k=>groups[k]&&groups[k].length).map((k,gi)=>{
+    const list=groups[k];
+    const subtotal=list.reduce((s,r)=>s+Number(r.金額||0),0);
+    const tid=`genka-src-${safeId}-${gi}`;
+    const body=list.map(r=>`<tr>
+        <td>${fmtDate(r.日付)}</td>
+        <td>${r.店舗||r.業者名||'-'}</td>
+        <td>${r.品目||'-'}</td>
+        <td>${r.勘定科目||'-'}</td>
+        <td class="right">${fmtYen(Number(r.金額||0))}</td>
+      </tr>`).join('');
+    return `<div class="genka-src-group">
+      <button class="meisai-toggle genka-src-head" onclick="toggleMeisai('${tid}', this)" style="--src-accent:${accentOf(k)};">
+        <svg class="meisai-toggle__chevron" width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><polygon points="2,1 8,5 2,9"/></svg>
+        <span class="genka-src-name">${k}</span>
+        <span class="genka-src-meta">${list.length}件 ・ ${fmtYen(subtotal)}</span>
+      </button>
+      <div class="meisai-wrap" id="${tid}">
+        <table class="meisai-table">
+          <thead><tr><th>日付</th><th>店舗・業者</th><th>品目</th><th>勘定科目</th><th class="right">金額（税込）</th></tr></thead>
+          <tbody>${body}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+  const updated=entry.最終集計日?`<div class="genka-src-updated">明細最終集計 ${entry.最終集計日}${entry.件数?` ・ 全${entry.件数}件`:''}</div>`:'';
+  return `<div class="genka-meisai">${blocks}${updated}</div>`;
+}
+
 // ─ 案件ビュー ─
 function renderAnken(){
   const q=document.getElementById('anken-search').value.toLowerCase();
