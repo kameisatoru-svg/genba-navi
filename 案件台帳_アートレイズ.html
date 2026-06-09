@@ -1646,17 +1646,7 @@ async function saveEdit(safeId, ankenNo, e){
   }
 }
 
-// ─ Sheets編集 ─
-const SHEETS_URL='https://docs.google.com/spreadsheets/d/1M7CPRijH446h63LlDYIZGzwSSfUZnvqYT0VSRoEy2PU/edit';
-function openSheets(ankenNo, e){
-  e.stopPropagation();
-  // 案件番号をクリップボードにコピー
-  navigator.clipboard.writeText(ankenNo).catch(()=>{});
-  // トースト表示
-  showToast(`「${ankenNo}」をコピーしました\nSheets内でCtrl+Fで検索してください`);
-  // Sheetsを新タブで開く
-  window.open(SHEETS_URL, '_blank');
-}
+// ─ トースト（PAT設定エラー通知などで使用）─
 function showToast(msg){
   let t=document.getElementById('sheets-toast');
   if(!t){t=document.createElement('div');t.id='sheets-toast';document.body.appendChild(t);}
