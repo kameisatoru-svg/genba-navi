@@ -2794,6 +2794,225 @@ function revertDiscount(silent){
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 💴 金額調整パネル（目標額スケール・単価丸め・帳尻合わせ）
+// ・目標額は「税抜合計」基準
+// ・実行前データは discountBackup に退避（既存の「元に戻す」と共用）
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// 諸経費の算出方式を切替（'rate'=率(%) / 'fixed'=金額固定）
+function setShokeihiMode(v, opts){
+  shokeihiMode = (v === 'fixed') ? 'fixed' : 'rate';
+  const sel = document.getElementById('shokeihiModeSelect');
+  const ri  = document.getElementById('shokeihiRateInput');
+  const fi  = document.getElementById('shokeihiFixedInput');
+  if(sel) sel.value = shokeihiMode;
+  if(ri) ri.style.display = (shokeihiMode === 'fixed') ? 'none' : '';
+  if(fi) fi.style.display = (shokeihiMode === 'fixed') ? '' : 'none';
+  if(!(opts && opts.silent) && typeof render === 'function') render();
+}
+
+// 退避（既に退避済みなら維持＝最初の状態へ戻せる）
+function adjEnsureBackup(){
+  if(discountBackup) return;
+  discountBackup = {
+    flatItems: JSON.parse(JSON.stringify(flatItems)),
+    groupItems: JSON.parse(JSON.stringify(groupItems)),
+    groupSummaryItems: JSON.parse(JSON.stringify(groupSummaryItems)),
+    hasuChousei: hasuChousei,
+    nebiki: nebiki,
+    shokeihiRate: shokeihiRate,
+    shokeihiMode: shokeihiMode,
+    shokeihiFixed: shokeihiFixed,
+    rate: null
+  };
+  const tmRevert = document.getElementById('tm-revert');
+  const tmDiscount = document.getElementById('tm-discount');
+  if(tmRevert) tmRevert.style.display = 'flex';
+  if(tmDiscount) tmDiscount.style.display = 'none';
+}
+
+// 全明細の単価に係数を掛けて整数円に丸める
+function adjScaleAllPrices(factor){
+  const sc = (p) => Math.round((parseFloat(p)||0) * factor);
+  flatItems.forEach(it => it.price = sc(it.price));
+  groupItems.forEach(g => {
+    g.items.forEach(it => it.price = sc(it.price));
+    if(g.middleItems) g.middleItems.forEach(m => m.items.forEach(it => it.price = sc(it.price)));
+  });
+  groupSummaryItems.forEach(it => it.price = sc(it.price));
+}
+
+// 全明細の単価を桁丸め（unit:10/100/1000, mode:round/ceil/floor）
+function adjRoundAllPrices(unit, mode){
+  const fn = (mode === 'ceil') ? Math.ceil : (mode === 'floor') ? Math.floor : Math.round;
+  const rd = (p) => { const v = parseFloat(p)||0; return Math.max(0, fn(v/unit)*unit); };
+  flatItems.forEach(it => it.price = rd(it.price));
+  groupItems.forEach(g => {
+    g.items.forEach(it => it.price = rd(it.price));
+    if(g.middleItems) g.middleItems.forEach(m => m.items.forEach(it => it.price = rd(it.price)));
+  });
+  groupSummaryItems.forEach(it => it.price = rd(it.price));
+}
+
+// 目標税抜額に合わせて単価を一律スケール（内部・alertなし）。戻り値=適用したfactor
+function _adjScaleToTarget(T){
+  const cur = calcTotals();
+  if(!(cur.subtotal > 0)) return null;
+  let desiredSubtotal;
+  if(shokeihiMode === 'fixed'){
+    desiredSubtotal = T - Math.round(shokeihiFixed||0) + (nebiki||0);
+  } else {
+    const r = (shokeihiRate||0) / 100;
+    desiredSubtotal = (T + (nebiki||0)) / (1 + r);
+  }
+  if(!(desiredSubtotal > 0)) return null;
+  const f = desiredSubtotal / cur.subtotal;
+  adjScaleAllPrices(f);
+  return f;
+}
+
+// 差額を吸収して目標税抜額にぴったり合わせる（内部・alertなし）。戻り値={ok,msg}
+function _adjBalance(T, absorb){
+  const cur = calcTotals();
+  const sub = cur.subtotal;
+  if(absorb === 'nebiki'){
+    // 税抜 = 小計 + 諸経費 - 値引き = T → 値引き = 小計 + 諸経費 - T
+    const nb = sub + cur.shokeihi - T;
+    if(nb < 0){
+      return {ok:false, msg:'値引きでは増額できません（目標額が現在より大きい）。\n諸経費での吸収か、先に①でスケールしてください。'};
+    }
+    nebiki = Math.round(nb);
+    return {ok:true, msg:`値引き ¥${fmtN(nebiki)} で調整`};
+  }
+  // 諸経費で吸収：必要な諸経費額 = T - 小計 + 値引き
+  const needed = T - sub + (nebiki||0);
+  if(needed < 0){
+    return {ok:false, msg:`諸経費がマイナス（¥${fmtN(needed)}）になるため合わせられません。\n先に①で目標額付近までスケールするか、値引きを見直してください。`};
+  }
+  if(absorb === 'shokeihi-rate'){
+    if(!(sub > 0)) return {ok:false, msg:'小計が0のため率で調整できません。'};
+    shokeihiMode = 'rate';
+    shokeihiRate = needed / sub * 100; // 高精度：round(sub*rate/100)=needed で一致
+    return {ok:true, msg:`諸経費率 ${shokeihiRate.toFixed(2)}%（¥${fmtN(needed)}）で調整`};
+  }
+  // shokeihi-fixed（既定）
+  shokeihiMode = 'fixed';
+  shokeihiFixed = Math.round(needed);
+  return {ok:true, msg:`諸経費 ¥${fmtN(shokeihiFixed)}（金額固定）で調整`};
+}
+
+// パネル入力欄・現在値表示を同期
+function adjSyncInputs(){
+  if(typeof setShokeihiMode === 'function') setShokeihiMode(shokeihiMode, {silent:true});
+  const ri = document.getElementById('shokeihiRateInput'); if(ri) ri.value = shokeihiRate;
+  const fi = document.getElementById('shokeihiFixedInput'); if(fi) fi.value = Math.round(shokeihiFixed||0);
+  const nb = document.getElementById('nebikiInput'); if(nb) nb.value = nebiki;
+}
+function adjRefresh(){
+  adjSyncInputs();
+  if(typeof renderEditor === 'function') renderEditor();
+  if(typeof render === 'function') render();
+  adjUpdateCurrent();
+}
+function adjUpdateCurrent(){
+  const el = document.getElementById('adjust-current');
+  if(!el) return;
+  const t = calcTotals();
+  let s = `現在：小計 ¥${fmtN(t.subtotal)}`;
+  if(docType === 'mitsumori'){
+    s += ` ／ ${shokeihiLbl()} ¥${fmtN(t.shokeihi)}`;
+    if(nebiki > 0) s += ` ／ ${nebikiLabel} -¥${fmtN(nebiki)}`;
+  }
+  s += ` ／ <b>税抜 ¥${fmtN(t.zeinuki)}</b> ／ 税込 ¥${fmtN(t.total)}`;
+  if(docType === 'seikyu') s += '<br><span style="color:#b00;font-size:11px;">※請求書モードは諸経費・値引きが反映されません（見積書モードで調整してください）</span>';
+  el.innerHTML = s;
+}
+
+function openAdjustPanel(){
+  const m = document.getElementById('adjust-modal');
+  if(!m) return;
+  const t = calcTotals();
+  const pre = (id) => { const e = document.getElementById(id); if(e && !e.value) e.value = t.zeinuki; };
+  pre('adj-target-scale'); pre('adj-target-balance'); pre('adj-target-all');
+  adjUpdateCurrent();
+  m.style.display = 'flex';
+}
+function closeAdjustPanel(){
+  const m = document.getElementById('adjust-modal');
+  if(m) m.style.display = 'none';
+}
+
+// ① 目標額にスケール
+function adjScaleToTarget(){
+  const T = parseFloat(document.getElementById('adj-target-scale').value);
+  if(!(T > 0)){ alert('目標 税抜合計を入力してください。'); return; }
+  adjEnsureBackup();
+  const f = _adjScaleToTarget(T);
+  if(f === null){ alert('スケールできませんでした（明細の単価が0、または目標額が不正です）。'); return; }
+  adjRefresh();
+  const t = calcTotals();
+  alert(`目標額にスケールしました（×${f.toFixed(4)}）。\n\n税抜合計：¥${fmtN(t.zeinuki)}\n（単価丸めの影響でわずかにズレる場合は、②丸め→③帳尻で合わせてください）`);
+}
+// ① ％で増減
+function adjScaleByPercent(){
+  const p = parseFloat(document.getElementById('adj-percent').value);
+  if(isNaN(p)){ alert('増減（%）を入力してください。'); return; }
+  if(p <= -100){ alert('-100%以下は指定できません。'); return; }
+  adjEnsureBackup();
+  adjScaleAllPrices(1 + p/100);
+  adjRefresh();
+  const t = calcTotals();
+  alert(`単価を ${p >= 0 ? '+' : ''}${p}% しました。\n\n税抜合計：¥${fmtN(t.zeinuki)}`);
+}
+// ② 単価丸め
+function adjRoundUnitPrices(){
+  const unit = parseInt(document.getElementById('adj-round-digit').value, 10) || 100;
+  const mode = document.getElementById('adj-round-mode').value || 'round';
+  adjEnsureBackup();
+  adjRoundAllPrices(unit, mode);
+  adjRefresh();
+  const t = calcTotals();
+  const modeLbl = mode === 'ceil' ? '切り上げ' : mode === 'floor' ? '切り捨て' : '四捨五入';
+  alert(`単価を ${unit.toLocaleString()}円単位で${modeLbl}しました。\n\n税抜合計：¥${fmtN(t.zeinuki)}`);
+}
+// ③ 帳尻合わせ
+function adjBalanceToTarget(){
+  const T = parseFloat(document.getElementById('adj-target-balance').value);
+  if(!(T > 0)){ alert('目標 税抜合計を入力してください。'); return; }
+  const absorb = document.getElementById('adj-absorb').value;
+  adjEnsureBackup();
+  const r = _adjBalance(T, absorb);
+  if(!r.ok){ alert(r.msg); return; }
+  adjRefresh();
+  const t = calcTotals();
+  alert(`${r.msg}\n\n税抜合計：¥${fmtN(t.zeinuki)}（目標 ¥${fmtN(T)}）\n税込合計：¥${fmtN(t.total)}`);
+}
+// ⭐ まとめて実行（①→②→③）
+function adjRunAll(){
+  const T = parseFloat(document.getElementById('adj-target-all').value);
+  if(!(T > 0)){ alert('目標 税抜合計を入力してください。'); return; }
+  const unit = parseInt(document.getElementById('adj-round-digit').value, 10) || 100;
+  const mode = document.getElementById('adj-round-mode').value || 'round';
+  const absorb = document.getElementById('adj-absorb').value;
+  adjEnsureBackup();
+  const f = _adjScaleToTarget(T);
+  if(f === null){ alert('スケールできませんでした（明細の単価が0、または目標額が不正です）。'); return; }
+  adjRoundAllPrices(unit, mode);
+  const r = _adjBalance(T, absorb);
+  adjRefresh();
+  const t = calcTotals();
+  const modeLbl = mode === 'ceil' ? '切り上げ' : mode === 'floor' ? '切り捨て' : '四捨五入';
+  let msg = `一気に合わせました。\n\n①スケール ×${f.toFixed(4)}\n②単価丸め ${unit.toLocaleString()}円・${modeLbl}\n③${r.ok ? r.msg : '【帳尻失敗】'+r.msg}\n\n税抜合計：¥${fmtN(t.zeinuki)}（目標 ¥${fmtN(T)}）\n税込合計：¥${fmtN(t.total)}`;
+  alert(msg);
+}
+// 元に戻す（パネル内）
+function adjRevert(){
+  if(!discountBackup){ alert('調整前のデータはありません（まだ調整していないか、既に戻し済みです）。'); return; }
+  revertDiscount(false);
+  adjUpdateCurrent();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // BCS.CSV読込（柔軟解析・複数フォーマット対応）
 // 対応形式:
 //   ① BCS.CSV標準（19列・P/D/T/A行属性・c8階層・CP932 or UTF-8）
