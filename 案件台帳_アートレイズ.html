@@ -752,7 +752,36 @@ async function loadData(){
       VENDORS=cachedM.VENDORS||{};
     }catch(e2){ALL_DATA=[];CUSTOMERS={};VENDORS={};}
   }
+  // 原価明細（genka.json）も取得。失敗しても4分類集計表示は維持されるので致命的でない。
+  await loadGenka();
   renderAll();
+}
+// 原価明細（genka.json）の遅延ロード。案件カードは詳細HTMLを事前生成するため、
+// renderAll の前に GENKA を満たしておく必要がある。取得失敗時はキャッシュ→空でフォールバック。
+async function loadGenka(){
+  try{
+    const res=await fetch(GENKA_URL+'?v='+Date.now());
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const json=await res.json();
+    GENKA=json.案件||{};
+    localStorage.setItem(LS_KEY_GENKA,JSON.stringify(GENKA));
+  }catch(e){
+    try{ GENKA=JSON.parse(localStorage.getItem(LS_KEY_GENKA)||'{}'); }
+    catch(e2){ GENKA={}; }
+  }
+}
+// 案件キー / 旧案件番号 で原価明細エントリを引く
+function genkaEntry(p){
+  if(!GENKA||typeof GENKA!=='object') return null;
+  const k=ankenKey(p), old=oldAnken(p);
+  if(k && GENKA[k]) return GENKA[k];
+  if(old){
+    // 旧案件番号一致でも探す（genka.json側キーが旧番号のケース）
+    if(GENKA[old]) return GENKA[old];
+    const hit=Object.values(GENKA).find(e=>e&&e.旧案件番号===old);
+    if(hit) return hit;
+  }
+  return null;
 }
 // ヘッダーサマリー更新（案件ビュー表示中のみ）
 function updateHeaderSummary(count,amount){
