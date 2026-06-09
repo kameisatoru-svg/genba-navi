@@ -4783,6 +4783,9 @@ function restoreDocSnapshot(snap){
   }
   // 率・調整値
   if(typeof snap.shokeihiRate === 'number'){ shokeihiRate = snap.shokeihiRate; setVal('shokeihiRateInput', shokeihiRate); }
+  shokeihiMode = (snap.shokeihiMode==='fixed') ? 'fixed' : 'rate'; shokeihiFixed = snap.shokeihiFixed || 0;
+  setVal('shokeihiFixedInput', Math.round(shokeihiFixed||0));
+  if(typeof setShokeihiMode==='function') setShokeihiMode(shokeihiMode,{silent:true});
   nebiki = snap.nebiki || 0;           setVal('nebikiInput', nebiki);
   nebikiLabel = snap.nebikiLabel || '値引き'; setVal('nebikiLabelInput', nebikiLabel);
   hasuChousei = snap.hasuChousei || 0; setVal('hasuChouseiInput', hasuChousei);
