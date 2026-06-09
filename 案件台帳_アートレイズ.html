@@ -614,9 +614,12 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 <script>
 const BASE_URL='https://kameisatoru-svg.github.io/genba-navi/';
 const DATA_URL=BASE_URL+'data.json';
+const GENKA_URL=BASE_URL+'genka.json';
 const LS_KEY='artrise_allinone_v2';
 const LS_KEY_MASTERS='artrise_masters_v1';
+const LS_KEY_GENKA='artrise_genka_v1';
 let ALL_DATA=[];
+let GENKA={};      // 原価明細（案件キー → {分類,合計,件数,明細[]}）。genka.json由来・遅延fetch
 let CUSTOMERS={};  // 顧客マスター（顧客略 → 詳細）
 let VENDORS={};    // 業者マスター（業者略 → 詳細）
 let currentTab='anken';
