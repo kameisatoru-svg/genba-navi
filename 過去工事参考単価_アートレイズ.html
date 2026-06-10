@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>過去工事 参考単価マスター｜株式会社アート・レイズ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --band:#1e2d40; --band-mid:#33475f; --accent:#c8a96e;
+    --light:#f8f8f8; --border:#ddd; --border-dark:#aaa;
+    --text:#333; --text-sub:#666; --white:#fff; --even:#f5f5f5;
+    --hi:#fef3c7; --hi-text:#92400e; --blue:#2563eb; --green:#16a34a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Noto Sans JP',sans-serif;background:#eee;color:var(--text);font-size:14px;}
+  .container{max-width:1100px;margin:0 auto;padding:20px 14px 40px;}
+
+  .page-header{background:var(--band);color:var(--white);padding:18px 22px;border-radius:8px 8px 0 0;display:flex;justify-content:space-between;align-items:center;gap:12px;}
+  .page-header h1{font-size:19px;font-weight:700;letter-spacing:0.03em;}
+  .page-header .meta{font-size:11px;opacity:0.8;text-align:right;line-height:1.6;white-space:nowrap;}
+  .page-header a.back{color:var(--accent);font-size:12px;text-decoration:none;font-weight:700;}
+
+  .intro{background:var(--white);border:1px solid var(--border);border-top:none;padding:13px 22px;font-size:12px;color:var(--text-sub);line-height:1.7;}
+  .intro b{color:var(--band);}
+  .intro .pill{display:inline-block;background:var(--light);border:1px solid var(--border);border-radius:4px;padding:1px 8px;margin:0 2px;font-weight:700;color:var(--band);}
+
+  .toolbar{background:var(--white);border:1px solid var(--border);border-top:none;padding:12px 22px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .toolbar input{flex:1;min-width:200px;padding:9px 12px;border:1px solid var(--border-dark);border-radius:6px;font-size:14px;font-family:inherit;}
+  .toolbar input:focus{outline:none;border-color:var(--blue);}
+  .tabs{display:flex;gap:6px;}
+  .tab{padding:7px 14px;border:1px solid var(--border-dark);border-radius:6px;background:var(--white);font-size:12px;font-family:inherit;cursor:pointer;white-space:nowrap;}
+  .tab.active{background:var(--band);color:var(--white);border-color:var(--band);}
+  .sortsel{padding:8px 10px;border:1px solid var(--border-dark);border-radius:6px;font-size:12px;font-family:inherit;background:var(--white);}
+
+  .count-line{background:var(--white);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;padding:8px 22px;font-size:11px;color:var(--text-sub);margin-bottom:18px;}
+
+  .tablewrap{background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{background:var(--band);color:var(--white);padding:9px 12px;text-align:left;font-weight:700;font-size:11px;letter-spacing:0.03em;position:sticky;top:0;white-space:nowrap;}
+  thead th.num{text-align:right;}
+  thead th.ctr{text-align:center;}
+  tbody tr{border-bottom:1px solid var(--border);}
+  tbody tr:nth-child(even){background:var(--even);}
+  tbody td{padding:9px 12px;vertical-align:top;}
+  td.name{font-weight:500;}
+  td.name .spec{display:block;font-size:11px;color:var(--text-sub);font-weight:400;margin-top:1px;}
+  td.unit{text-align:center;color:var(--text-sub);white-space:nowrap;}
+  td.rep{text-align:right;font-weight:700;color:var(--band);white-space:nowrap;font-size:14px;}
+  td.range{text-align:right;color:var(--text-sub);white-space:nowrap;font-size:12px;}
+  td.cnt{text-align:center;white-space:nowrap;}
+  td.latest{text-align:right;white-space:nowrap;font-size:12px;color:var(--text-sub);}
+  .cnt-badge{display:inline-block;background:var(--band-mid);color:var(--white);border-radius:10px;padding:1px 8px;font-size:11px;font-weight:700;}
+  .cnt-badge.solo{background:#bbb;}
+  .trim{display:block;font-size:10px;color:var(--hi-text);font-weight:700;margin-top:2px;}
+  .src-btn{cursor:pointer;color:var(--blue);font-size:11px;text-decoration:underline;background:none;border:none;font-family:inherit;padding:0;}
+  tr.src-row td{background:#fafafa;padding:0;}
+  .src-list{padding:8px 14px 10px;font-size:11px;color:var(--text-sub);line-height:1.9;}
+  .src-list .s{display:block;}
+  .reliab{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle;}
+  .r-hi{background:var(--green);} .r-mid{background:var(--accent);} .r-lo{background:#ccc;}
+
+  .empty{padding:40px;text-align:center;color:var(--text-sub);}
+  .page-footer{text-align:center;font-size:11px;color:var(--text-sub);margin-top:20px;}
+
+  @media (max-width:700px){
+    .container{padding:12px 8px 30px;}
+    .page-header{flex-direction:column;align-items:flex-start;gap:6px;}
+    .page-header .meta{text-align:left;white-space:normal;}
+    .tablewrap{overflow-x:auto;}
+    table{min-width:680px;}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="page-header">
+    <div>
+      <h1>📊 過去工事 参考単価マスター</h1>
+      <a class="back" href="index.html">← 現場ナビへ戻る</a>
+    </div>
+    <div class="meta" id="meta">読み込み中...</div>
+  </div>
+
+  <div class="intro">
+    <b>実績ベースの参考単価</b>です。過去の<b>見積書（自社発行分）</b>から作業項目ごとの単価を抽出し、同一項目を<span class="pill">最新寄り加重平均</span>で集約しています（極端値は中央値の1/3〜3倍を外れたら自動除外）。
+    理論値の<a href="単価マスター_アートレイズ.html" style="color:var(--blue);font-weight:700;">工種別単価マスター</a>と併せてご利用ください。
+    信頼度の目安：<span class="reliab r-hi"></span>5回以上　<span class="reliab r-mid"></span>2〜4回　<span class="reliab r-lo"></span>1回
+  </div>
+
+  <div class="toolbar">
+    <input type="text" id="q" placeholder="🔍 作業項目・規格で絞り込み（例：クロス貼、巾木、タイル）" oninput="render()">
+    <div class="tabs">
+      <button class="tab active" id="tab-tanka" onclick="switchTab('tanka')">単価あり</button>
+      <button class="tab" id="tab-issiki" onclick="switchTab('issiki')">一式参考</button>
+    </div>
+    <select class="sortsel" id="sort" onchange="render()">
+      <option value="cnt">出現回数 多い順</option>
+      <option value="name">名称 順</option>
+      <option value="rep_desc">代表単価 高い順</option>
+      <option value="rep_asc">代表単価 安い順</option>
+      <option value="date">最新日付 順</option>
+    </select>
+  </div>
+  <div class="count-line" id="countLine"></div>
+
+  <div class="tablewrap">
+    <table>
+      <thead id="thead"></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="page-footer">株式会社アート・レイズ　現場ナビ｜過去工事参考単価マスター</div>
+</div>
+
+<script>
+let DATA=null, TAB='tanka';
+
+fetch('sanko_tanka.json?'+Date.now())
+  .then(r=>r.json())
+  .then(d=>{
+    DATA=d;
+    document.getElementById('meta').innerHTML =
+      `生成：${d.生成日}<br>${d.対象||''}　単価${d.参考単価件数}項目／一式${d.一式件数}項目<br><span style="opacity:.7">${d.集約方式||''}</span>`;
+    render();
+  })
+  .catch(e=>{
+    document.getElementById('tbody').innerHTML =
+      `<tr><td class="empty">データ読み込みに失敗しました（${e}）</td></tr>`;
+  });
+
+function switchTab(t){
+  TAB=t;
+  document.getElementById('tab-tanka').classList.toggle('active', t==='tanka');
+  document.getElementById('tab-issiki').classList.toggle('active', t==='issiki');
+  render();
+}
+
+function reliabDot(n){
+  if(n>=5) return '<span class="reliab r-hi" title="5回以上"></span>';
+  if(n>=2) return '<span class="reliab r-mid" title="2〜4回"></span>';
+  return '<span class="reliab r-lo" title="1回"></span>';
+}
+const yen = n => (n==null?'—':'¥'+Number(n).toLocaleString());
+
+function render(){
+  if(!DATA) return;
+  const q = document.getElementById('q').value.trim();
+  const sort = document.getElementById('sort').value;
+  const thead = document.getElementById('thead');
+  const tbody = document.getElementById('tbody');
+
+  let rows = (TAB==='tanka' ? DATA.参考単価 : DATA.一式参考).slice();
+  if(q){ rows = rows.filter(r => (r.名称+' '+r.単位).toLowerCase().includes(q.toLowerCase())); }
+
+  const repOf = r => TAB==='tanka' ? r.代表単価 : r.単純平均;
+  rows.sort((a,b)=>{
+    switch(sort){
+      case 'name': return a.名称.localeCompare(b.名称,'ja');
+      case 'rep_desc': return repOf(b)-repOf(a);
+      case 'rep_asc': return repOf(a)-repOf(b);
+      case 'date': return (b.最新日付||'').localeCompare(a.最新日付||'');
+      default: return b.出現回数-a.出現回数 || repOf(b)-repOf(a);
+    }
+  });
+
+  document.getElementById('countLine').textContent =
+    `表示 ${rows.length} 項目` + (q?`（「${q}」で絞り込み）`:'');
+
+  if(TAB==='tanka'){
+    thead.innerHTML = `<tr>
+      <th style="width:34%">作業内容</th><th class="ctr" style="width:7%">単位</th>
+      <th class="num" style="width:14%">代表単価</th><th class="num" style="width:16%">価格帯</th>
+      <th class="ctr" style="width:9%">出現</th><th class="num" style="width:20%">最新（出典）</th></tr>`;
+  }else{
+    thead.innerHTML = `<tr>
+      <th style="width:38%">項目（一式）</th><th class="ctr" style="width:7%">単位</th>
+      <th class="num" style="width:14%">平均金額</th><th class="num" style="width:16%">金額帯</th>
+      <th class="ctr" style="width:9%">出現</th><th class="num" style="width:16%">最新（出典）</th></tr>`;
+  }
+
+  if(!rows.length){ tbody.innerHTML = `<tr><td colspan="6" class="empty">該当なし</td></tr>`; return; }
+
+  let html='';
+  rows.forEach((r,i)=>{
+    const rep = repOf(r);
+    const range = r.最小===r.最大 ? yen(r.最小) : `${yen(r.最小)}〜${yen(r.最大)}`;
+    const latest = TAB==='tanka' ? r.最新単価 : r.最新金額;
+    const srcId = `src-${TAB}-${i}`;
+    const trimBadge = (TAB==='tanka' && r.外れ値除外>0) ? `<span class="trim">外れ値${r.外れ値除外}件除外</span>` : '';
+    html += `<tr>
+      <td class="name">${reliabDot(r.出現回数)}${esc(r.名称)}</td>
+      <td class="unit">${esc(r.単位||'—')}</td>
+      <td class="rep">${yen(rep)}${trimBadge}</td>
+      <td class="range">${range}</td>
+      <td class="cnt"><span class="cnt-badge${r.出現回数<2?' solo':''}">×${r.出現回数}</span></td>
+      <td class="latest">${yen(latest)} <span style="opacity:.6">${r.最新日付||''}</span>
+        ${r.出典&&r.出典.length?`<br><button class="src-btn" onclick="toggleSrc('${srcId}')">出典 ${r.出典.length}件 ▾</button>`:''}</td>
+    </tr>`;
+    if(r.出典&&r.出典.length){
+      html += `<tr class="src-row" id="${srcId}" style="display:none"><td colspan="6">
+        <div class="src-list">${r.出典.map(s=>`<span class="s">・${esc(s)}</span>`).join('')}</div></td></tr>`;
+    }
+  });
+  tbody.innerHTML = html;
+}
+
+function toggleSrc(id){
+  const el=document.getElementById(id);
+  el.style.display = el.style.display==='none' ? '' : 'none';
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+</script>
+</body>
+</html>
