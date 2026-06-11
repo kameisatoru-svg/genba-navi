@@ -617,7 +617,10 @@ canvas#wall-cv{touch-action:none;}
   <button class="btn-back" onclick="history.back()" title="戻る">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
   </button>
-  <div class="header-title">材料割付 <span class="price-master-badge" id="price-master-badge" onclick="refreshPriceMasterFromServer()" title="タップで再取得" style="display:none"></span></div>
+  <div class="header-title" style="display:flex;flex-direction:column;justify-content:center;min-width:0;gap:2px;">
+    <div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.55);line-height:1;">材料割付 <span class="price-master-badge" id="price-master-badge" onclick="refreshPriceMasterFromServer()" title="タップで再取得" style="display:none"></span></div>
+    <button id="genba-chip" onclick="switchGenba()" title="タップで案件を切替" style="background:none;border:none;padding:0;color:#fff;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;line-height:1.2;">案件未設定 ▾</button>
+  </div>
   <div class="header-cat" id="header-cat">床</div>
   <button class="btn-zumen" onclick="openZumenModal()">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M2 4h20M6 4v16M18 4v16M6 12h12"/></svg>
@@ -637,24 +640,8 @@ canvas#wall-cv{touch-action:none;}
   </div>
 </div>
 
-<!-- 案件保存モーダル -->
-<div class="modal-overlay hidden" id="save-modal" onclick="closeSaveModal(event)">
-  <div class="modal-box">
-    <div class="modal-head">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-      案件として保存
-    </div>
-    <div class="modal-body">
-      <div class="modal-label">案件名</div>
-      <input class="modal-input" id="save-name" type="text" placeholder="例：玉寿会-さくら床-26" maxlength="60">
-      <div style="font-size:11px;color:var(--text2);margin-top:8px;line-height:1.6">現在の入力・選択・計算結果をブラウザに保存します。同名の案件があれば上書きされます。</div>
-    </div>
-    <div class="modal-footer">
-      <button class="modal-cancel" onclick="closeSaveModal(null)">キャンセル</button>
-      <button class="modal-send" id="save-confirm-btn" onclick="doSaveProject()">保存する</button>
-    </div>
-  </div>
-</div>
+<!-- 初回セットアップ画面（案件選択→W/D/H入力：図面アプリ zumen_app 準拠） -->
+<div class="hidden" id="setup-screen" style="position:fixed;top:60px;left:0;right:0;bottom:0;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bg);z-index:95;"></div>
 
 <!-- 履歴モーダル -->
 <div class="modal-overlay hidden" id="load-modal" onclick="closeLoadModal(event)">
@@ -666,8 +653,9 @@ canvas#wall-cv{touch-action:none;}
     <div class="modal-body">
       <div class="history-list" id="history-list"></div>
     </div>
-    <div class="modal-footer" style="grid-template-columns:1fr">
+    <div class="modal-footer">
       <button class="modal-cancel" onclick="closeLoadModal(null)">閉じる</button>
+      <button class="modal-send" onclick="closeLoadModal(null);openProjectFile()">ファイルから開く</button>
     </div>
   </div>
 </div>
@@ -707,16 +695,16 @@ canvas#wall-cv{touch-action:none;}
       <div class="modal-label" style="margin-top:14px">寸法（mm）</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
         <div>
-          <div style="font-size:11px;color:var(--text2);margin-bottom:3px">幅（横）</div>
-          <input class="modal-input" id="room-W" type="number" value="3000" inputmode="numeric">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:3px">W：幅（横）</div>
+          <input class="modal-input" id="room-W" type="text" value="3000" inputmode="numeric">
         </div>
         <div>
-          <div style="font-size:11px;color:var(--text2);margin-bottom:3px">長さ（縦）</div>
-          <input class="modal-input" id="room-L" type="number" value="4000" inputmode="numeric">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:3px">D：奥行（縦）</div>
+          <input class="modal-input" id="room-L" type="text" value="4000" inputmode="numeric">
         </div>
         <div>
-          <div style="font-size:11px;color:var(--text2);margin-bottom:3px">天井高</div>
-          <input class="modal-input" id="room-H" type="number" value="2400" inputmode="numeric">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:3px">H：天井高</div>
+          <input class="modal-input" id="room-H" type="text" value="2400" inputmode="numeric">
         </div>
       </div>
       <div style="font-size:11px;color:var(--text2);margin-top:10px;line-height:1.6">床・天井のサイズと、壁A〜D（A=上辺、時計回りにB→C→D）の各面寸法に自動反映されます。</div>
@@ -759,7 +747,7 @@ canvas#wall-cv{touch-action:none;}
     <button class="cat-btn" onclick="setCat('ceil',this)">天井</button>
   </div>
   <div class="util-row">
-    <button class="util-btn" id="util-save" onclick="openSaveModal()"><span class="util-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></span>保存</button>
+    <button class="util-btn" id="util-save" onclick="saveProjectFile()"><span class="util-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></span>保存</button>
     <button class="util-btn" id="util-load" onclick="openLoadModal()"><span class="util-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>履歴</button>
     <button class="util-btn" id="util-tsv" onclick="openTsvModal()"><span class="util-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg></span>TSV</button>
     <button class="util-btn" id="util-pdf" onclick="openPdfReport()"><span class="util-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></span>PDF</button>
@@ -822,7 +810,7 @@ function refreshUtilIndicators(){
   }
   var loadBtn=document.getElementById('util-load');
   if(loadBtn){
-    try{var saves=JSON.parse(localStorage.getItem(_SAVES_KEY)||'{}');loadBtn.classList.toggle('has-data',Object.keys(saves).length>0);}catch(e){}
+    try{var saves=JSON.parse(localStorage.getItem(_SAVES_KEY)||'{}');loadBtn.classList.toggle('has-data',Object.keys(saves).length>0||_getSavedGenbaProjects().length>0);}catch(e){}
   }
   if(typeof renderRoomTabs==='function')renderRoomTabs();
 }
@@ -1031,15 +1019,18 @@ var _autosaveTimer=null;
 
 function autoSaveState(immediate){
   function doSave(){
+    if(!_projGenba)return; // 現場未設定（セットアップ中）は保存しない
     try{
       if(_curRoomIdx>=0&&_rooms[_curRoomIdx])_rooms[_curRoomIdx].state=_captureCurrentRoomState();
       var data={
-        version:1,
+        version:2,
+        genba:_projGenba,ankenKey:_projAnkenKey,ankenName:_projAnkenName,
         rooms:_rooms.map(function(r){return{name:r.name,state:r.state};}),
         curRoomIdx:_curRoomIdx,
-        savedAt:new Date().toISOString()
+        savedAt:Date.now()
       };
-      localStorage.setItem(_AUTOSAVE_KEY,JSON.stringify(data));
+      localStorage.setItem(WPROJ_PREFIX+_projGenba,JSON.stringify(data));
+      localStorage.setItem(_LAST_GENBA_KEY,_projGenba);
     }catch(e){/* quotaオーバー等は黙って失敗 */}
   }
   if(immediate){
@@ -1428,32 +1419,6 @@ function restoreState(s){
   refreshUtilIndicators();
 }
 
-// ── 保存モーダル ──
-function openSaveModal(){
-  var nameInput=document.getElementById('save-name');
-  nameInput.value='';
-  document.getElementById('save-modal').classList.remove('hidden');
-  setTimeout(function(){nameInput.focus();},100);
-}
-function closeSaveModal(e){
-  if(e&&e.target!==document.getElementById('save-modal'))return;
-  document.getElementById('save-modal').classList.add('hidden');
-}
-function doSaveProject(){
-  var name=document.getElementById('save-name').value.trim();
-  if(!name){alert('案件名を入力してください。');return;}
-  if(curCat==='wall')saveCurrentFaceInputs();
-  var saves;
-  try{saves=JSON.parse(localStorage.getItem(_SAVES_KEY)||'{}');}catch(e){saves={};}
-  saves[name]={state:captureState(),savedAt:new Date().toISOString()};
-  try{
-    localStorage.setItem(_SAVES_KEY,JSON.stringify(saves));
-    closeSaveModal(null);
-    showToast('💾 「'+name+'」を保存しました');
-    refreshUtilIndicators();
-  }catch(err){alert('保存に失敗しました: '+err.message);}
-}
-
 // ── 履歴モーダル ──
 function openLoadModal(){renderHistoryList();document.getElementById('load-modal').classList.remove('hidden');}
 function closeLoadModal(e){
@@ -1464,11 +1429,32 @@ function renderHistoryList(){
   var saves;try{saves=JSON.parse(localStorage.getItem(_SAVES_KEY)||'{}');}catch(e){saves={};}
   var names=Object.keys(saves).sort(function(a,b){return(saves[b].savedAt||'').localeCompare(saves[a].savedAt||'');});
   var el=document.getElementById('history-list');
-  if(!names.length){
-    el.innerHTML='<div class="history-empty">保存済み案件はありません。<br><br>計算結果を「💾 保存」で記録すると、ここから呼び出せます。</div>';
+  var projs=_getSavedGenbaProjects();
+  if(!names.length&&!projs.length){
+    el.innerHTML='<div class="history-empty">保存済み案件はありません。<br><br>現場を設定して作業すると自動保存され、ここから呼び出せます。</div>';
     return;
   }
   var h='';
+  // 現場ごとの自動保存（図面アプリ準拠）
+  if(projs.length){
+    h+='<div style="font-size:10px;font-weight:700;color:var(--text2);letter-spacing:0.08em;margin:2px 0 7px;">現場（自動保存）</div>';
+    projs.forEach(function(p){
+      var safeG=(p.g+'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      var dispG=(p.g+'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      var dt=_setupFmtDate(p.savedAt);
+      h+='<div class="history-item">';
+      h+='<div class="history-item-info" onclick="closeLoadModal(null);openGenbaProject(\''+safeG+'\')">';
+      h+='<div class="history-name">'+dispG+'</div>';
+      h+='<div class="history-meta">'+(p.g===_projGenba?'編集中':'自動保存')+(dt?' ・ '+dt:'')+'</div>';
+      h+='</div>';
+      h+='<div class="history-actions">';
+      h+='<button class="history-open" onclick="closeLoadModal(null);openGenbaProject(\''+safeG+'\')">開く</button>';
+      h+='<button class="history-del" onclick="deleteGenbaProject(\''+safeG+'\')" title="削除" aria-label="削除"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>';
+      h+='</div>';
+      h+='</div>';
+    });
+  }
+  if(names.length&&projs.length)h+='<div style="font-size:10px;font-weight:700;color:var(--text2);letter-spacing:0.08em;margin:14px 0 7px;">旧形式の保存</div>';
   names.forEach(function(n){
     var s=saves[n];
     var savedAt=s.savedAt?new Date(s.savedAt):null;
@@ -2465,6 +2451,12 @@ function openZumenModal(){
   var sendBtn=document.getElementById('zumen-send-btn');
   sendBtn.disabled=!hasAny;
   sendBtn.textContent=hasAny?'送信する':'（寸法入力がありません）';
+  // 現場名が設定済みなら案件名をプリフィル
+  var pj=document.getElementById('zumen-project');
+  if(pj&&!pj.value.trim()&&_projGenba){
+    var rn=(_curRoomIdx>=0&&_rooms[_curRoomIdx])?_rooms[_curRoomIdx].name:'';
+    pj.value=_projGenba+(rn?'　'+rn:'');
+  }
   document.getElementById('zumen-modal').classList.remove('hidden');
   setTimeout(function(){document.getElementById('zumen-project').focus();},100);
 }
@@ -2507,16 +2499,464 @@ function showToast(msg){
   setTimeout(function(){t.style.opacity='0';t.style.transition='opacity 0.4s';setTimeout(function(){document.body.removeChild(t);},400);},2200);
 }
 
-// ── 初期化 ──
-if(!loadAutoSavedState()){
-  _rooms=[{name:'部屋1',state:_newRoomState()}];
-  _curRoomIdx=0;
+// ══════════════════════════════════════════
+//  現場（案件）管理：図面アプリ（zumen_app）仕様
+//  ・初回は「案件選択（data.json）→ W/D/H入力」のセットアップ画面
+//  ・現場名ごとに localStorage 自動保存、前回の現場を自動再開
+//  ・保存＝JSONファイル書き出し（showSaveFilePicker→ダウンロード）
+//  ・読込＝ファイルから開く（showOpenFilePicker→input フォールバック）
+// ══════════════════════════════════════════
+var _projGenba='',_projAnkenKey='',_projAnkenName='';
+var WPROJ_PREFIX='waritsuke_proj_';
+var _LAST_GENBA_KEY='waritsuke_lastGenba';
+var _setupStep='choose';   // 'choose' | 'manual' | 'dims'
+var _setupSelGenba='',_setupSelKey='',_setupSelName='',_setupKeyword='';
+var _ankenList=null,_ankenLoading=false,_ankenError=false;
+
+// data.json の案件一覧を取得（同ディレクトリ配信・相対パス：図面アプリと同一）
+function _loadAnkenList(onReady){
+  if(_ankenList){if(onReady)onReady();return;}
+  if(_ankenLoading)return;
+  _ankenLoading=true;_ankenError=false;
+  fetch('data.json',{cache:'no-store'})
+    .then(function(res){if(!res.ok)throw new Error('HTTP '+res.status);return res.json();})
+    .then(function(d){
+      var arr=(d&&d['案件'])||[];
+      _ankenList=arr.filter(function(a){return a&&(a['案件キー']||a['正式工事名']||a['現場+工事']);});
+      _ankenLoading=false;
+      if(onReady)onReady();
+    })
+    .catch(function(e){
+      _ankenLoading=false;_ankenError=true;_ankenList=[];
+      if(onReady)onReady();
+    });
 }
-var _initSt=_rooms[_curRoomIdx].state;
-_loadRoomStateToGlobals(_initSt);
-_renderRoomWorkspace(_initSt);
-renderRoomTabs();
-refreshUtilIndicators();
+
+// 案件 → 現場名（表示・保存キー用）
+function _ankenGenba(a){
+  return(a&&(a['正式工事名']||a['現場+工事']||a['案件キー']))||'';
+}
+
+// savedAt → 「M/D」表記（0なら空）
+function _setupFmtDate(ms){
+  if(!ms)return'';
+  try{var d=new Date(ms);return(d.getMonth()+1)+'/'+d.getDate();}catch(e){return'';}
+}
+
+// 保存済み現場を更新日時降順で取得
+function _getSavedGenbaProjects(){
+  var arr=[];
+  for(var i=0;i<localStorage.length;i++){
+    var k=localStorage.key(i);
+    if(!k||k.indexOf(WPROJ_PREFIX)!==0)continue;
+    var g=k.slice(WPROJ_PREFIX.length);
+    if(!g)continue;
+    var savedAt=0;
+    try{savedAt=JSON.parse(localStorage.getItem(k)).savedAt||0;}catch(e){}
+    arr.push({g:g,savedAt:savedAt});
+  }
+  arr.sort(function(a,b){return b.savedAt-a.savedAt;});
+  return arr;
+}
+
+var _SVG_GENBA='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0;"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><rect x="9" y="12" width="6" height="9"/></svg>';
+
+function _safeJs(s){return(s+'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+
+function _updateGenbaLabel(){
+  var el=document.getElementById('genba-chip');
+  if(el)el.textContent=(_projGenba||'案件未設定')+' ▾';
+}
+
+// ヘッダーの現場名タップ → 案件切替（現在の作業は自動保存してから）
+function switchGenba(){
+  autoSaveState(true);
+  showSetupScreen('choose');
+}
+
+// ── セットアップ画面の表示／非表示 ──
+function showSetupScreen(step){
+  _setupStep=step||'choose';
+  _setupKeyword='';
+  document.getElementById('setup-screen').classList.remove('hidden');
+  renderSetup();
+}
+function hideSetupScreen(){
+  document.getElementById('setup-screen').classList.add('hidden');
+}
+
+// セットアップ画面の描画（step に応じて分岐）
+function renderSetup(){
+  var area=document.getElementById('setup-screen');
+  if(!area)return;
+  if(_setupStep==='dims'){_renderSetupDims(area);return;}
+  if(_setupStep==='manual'){_renderSetupManual(area);return;}
+  _renderSetupChoose(area);
+}
+
+// ── step: choose（data.json 案件一覧＋保存済み現場） ──
+function _renderSetupChoose(area){
+  if(!_ankenList&&!_ankenError){
+    _loadAnkenList(function(){
+      if(_setupStep==='choose'&&!document.getElementById('setup-screen').classList.contains('hidden'))renderSetup();
+    });
+  }
+  var h='<div style="padding:20px 16px;max-width:560px;margin:0 auto;">';
+  if(_projGenba){
+    h+='<button onclick="hideSetupScreen()" style="background:none;border:none;color:var(--text2);font-size:13px;cursor:pointer;font-family:inherit;padding:0;margin-bottom:14px;">← 「'+_escHtml(_projGenba)+'」に戻る</button>';
+  }
+  // 保存済みの現場（自動保存）を再開
+  var projs=_getSavedGenbaProjects();
+  if(projs.length){
+    h+='<div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;">保存済みの現場を開く</div>';
+    h+='<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px;max-height:32vh;overflow-y:auto;">';
+    projs.forEach(function(p){
+      var dt=_setupFmtDate(p.savedAt);
+      h+='<button onclick="openGenbaProject(\''+_safeJs(p.g)+'\')" style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 14px;border:1px solid #dfe3ea;border-radius:12px;background:#fff;cursor:pointer;font-family:inherit;text-align:left;">';
+      h+='<span style="color:var(--navy);flex-shrink:0;">'+_SVG_GENBA+'</span>';
+      h+='<span style="flex:1;min-width:0;font-size:14px;font-weight:700;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+_escHtml(p.g)+'</span>';
+      if(dt)h+='<span style="font-size:11px;color:var(--text2);flex-shrink:0;">'+dt+'</span>';
+      h+='</button>';
+    });
+    h+='</div>';
+  }
+  h+='<div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px;">案件を選択してください</div>';
+  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:14px;">案件台帳から選ぶか、リストにない場合は手入力します</div>';
+  if(_ankenLoading){
+    h+='<div style="font-size:13px;color:var(--text2);padding:20px 4px;">案件台帳を読み込み中…</div>';
+  }else if(_ankenError){
+    h+='<div style="font-size:13px;color:#b4541f;padding:14px 4px;">案件台帳を取得できませんでした。手入力で登録してください。</div>';
+  }else{
+    var list=_ankenList||[];
+    var kw=(_setupKeyword||'').trim();
+    if(kw){
+      list=list.filter(function(a){
+        var s=[a['案件キー'],a['顧客略'],a['現場+工事'],a['正式工事名'],a['施工場所'],a['ステータス']].join(' ');
+        return s.indexOf(kw)>=0;
+      });
+    }
+    h+='<input type="text" id="setup-anken-search" value="'+_escHtml(_setupKeyword)+'" oninput="setupAnkenSearch(this.value)" placeholder="現場名・顧客・工事名で検索" style="width:100%;height:42px;border:1px solid #dfe3ea;border-radius:10px;padding:0 12px;font-size:14px;font-family:inherit;box-sizing:border-box;margin-bottom:12px;outline:none;background:#fff;">';
+    h+='<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;max-height:46vh;overflow-y:auto;">';
+    if(list.length===0){
+      h+='<div style="font-size:13px;color:var(--text2);padding:14px 4px;">該当する案件がありません</div>';
+    }else{
+      list.forEach(function(a){
+        var key=a['案件キー']||'';
+        var name=_ankenGenba(a);
+        var sub=[a['顧客略'],a['施工場所']].filter(Boolean).join('・');
+        var st=a['ステータス']||'';
+        h+='<button onclick="setupPickAnken(\''+_safeJs(key)+'\')" style="display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;border:1px solid #dfe3ea;border-radius:12px;background:#fff;cursor:pointer;font-family:inherit;text-align:left;">';
+        h+='<span style="color:var(--navy);flex-shrink:0;">'+_SVG_GENBA+'</span>';
+        h+='<span style="flex:1;min-width:0;">';
+        h+='<span style="display:block;font-size:14px;font-weight:700;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+_escHtml(name)+'</span>';
+        if(sub)h+='<span style="display:block;font-size:11px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+_escHtml(sub)+'</span>';
+        h+='</span>';
+        if(st)h+='<span style="font-size:10px;color:var(--text2);background:var(--bg);border-radius:10px;padding:3px 8px;flex-shrink:0;white-space:nowrap;">'+_escHtml(st)+'</span>';
+        h+='</button>';
+      });
+    }
+    h+='</div>';
+  }
+  h+='<button onclick="setupShowManual()" style="width:100%;height:48px;border:1px solid var(--navy);border-radius:12px;background:transparent;color:var(--navy);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">リストにない案件を手入力</button>';
+  h+='<button onclick="openProjectFile()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:48px;margin-top:10px;border:1px solid #dfe3ea;border-radius:12px;background:transparent;color:var(--text2);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><polyline points="12 11 12 17"/><polyline points="9.5 13.5 12 11 14.5 13.5"/></svg><span>ファイルから開く</span></button>';
+  h+='</div>';
+  area.innerHTML=h;
+}
+
+// ── 案件一覧の検索（フォーカス保持で再描画） ──
+function setupAnkenSearch(v){
+  _setupKeyword=v;
+  renderSetup();
+  setTimeout(function(){
+    var el=document.getElementById('setup-anken-search');
+    if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length);}
+  },0);
+}
+
+// ── 案件をタップ → 保存済みなら再開／なければW・D・H入力へ ──
+function setupPickAnken(key){
+  var a=(_ankenList||[]).filter(function(x){return(x['案件キー']||'')===key;})[0];
+  if(!a){showToast('案件が見つかりません');return;}
+  var g=_ankenGenba(a);
+  if(localStorage.getItem(WPROJ_PREFIX+g)){openGenbaProject(g);return;}
+  _setupSelGenba=g;
+  _setupSelKey=a['案件キー']||'';
+  _setupSelName=a['正式工事名']||'';
+  _setupStep='dims';
+  renderSetup();
+}
+
+function setupShowManual(){_setupStep='manual';renderSetup();}
+function setupBackToChoose(){_setupStep='choose';renderSetup();}
+
+// ── step: manual（現場名の手入力） ──
+function _renderSetupManual(area){
+  var h='<div style="padding:20px 16px;max-width:560px;margin:0 auto;">';
+  h+='<button onclick="setupBackToChoose()" style="background:none;border:none;color:var(--text2);font-size:13px;cursor:pointer;font-family:inherit;padding:0;margin-bottom:14px;">← 案件の選択に戻る</button>';
+  h+='<div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px;">現場名を入力してください</div>';
+  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:20px;">割付データの保存先として使用します</div>';
+  h+='<div style="display:flex;flex-direction:column;gap:3px;margin-bottom:20px;"><span style="font-size:11px;color:var(--text2);">現場名</span>';
+  h+='<input type="text" id="setup-genba" value="'+_escHtml(_setupSelGenba||'')+'" placeholder="例：さくら苑" style="width:100%;height:48px;border:1.5px solid rgba(30,45,64,0.18);border-radius:10px;padding:0 12px;font-size:16px;font-family:inherit;background:#fff;outline:none;box-sizing:border-box;"></div>';
+  h+='<button onclick="setupManualNext()" style="width:100%;height:48px;border:none;border-radius:12px;background:var(--navy);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">次へ →</button>';
+  h+='</div>';
+  area.innerHTML=h;
+  setTimeout(function(){var el=document.getElementById('setup-genba');if(el)el.focus();},100);
+}
+
+function setupManualNext(){
+  var el=document.getElementById('setup-genba');
+  var gv=(el?el.value.trim():'');
+  if(!gv){showToast('⚠ 現場名を入力してください');return;}
+  if(localStorage.getItem(WPROJ_PREFIX+gv)){openGenbaProject(gv);return;}
+  _setupSelGenba=gv;_setupSelKey='';_setupSelName='';
+  _setupStep='dims';
+  renderSetup();
+}
+
+// ── step: dims（W・D・H入力：図面アプリの寸法ドロワーと同スタイル） ──
+function _renderSetupDims(area){
+  var h='<div style="padding:20px 16px;max-width:560px;margin:0 auto;">';
+  h+='<button onclick="setupBackToChoose()" style="background:none;border:none;color:var(--text2);font-size:13px;cursor:pointer;font-family:inherit;padding:0;margin-bottom:14px;">← 案件の選択に戻る</button>';
+  h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;"><span style="color:var(--navy);">'+_SVG_GENBA+'</span><span style="font-size:16px;font-weight:700;color:var(--navy);">'+_escHtml(_setupSelGenba)+'</span></div>';
+  h+='<div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px;">部屋の寸法を入力してください</div>';
+  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.6;">記入すると、床・天井のサイズと壁A〜D（A=上辺、時計回りにB→C→D）の各面寸法に自動反映されます</div>';
+  h+='<div style="display:flex;flex-direction:column;gap:3px;margin-bottom:14px;"><span style="font-size:11px;color:var(--text2);">部屋名</span>';
+  h+='<input type="text" id="setup-room" value="部屋1" placeholder="例：北側居室" style="width:100%;height:48px;border:1.5px solid rgba(30,45,64,0.18);border-radius:10px;padding:0 12px;font-size:16px;font-family:inherit;background:#fff;outline:none;box-sizing:border-box;"></div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px;">';
+  [['W','幅・横',3000],['D','奥行・縦',4000],['H','天井高',2400]].forEach(function(t){
+    h+='<div style="background:#fff;border-radius:9px;border:1.5px solid rgba(30,45,64,0.15);padding:10px 8px;text-align:center;">';
+    h+='<div style="font-size:10px;color:#5a6a7a;margin-bottom:2px;">'+t[0]+'（'+t[1]+'）mm</div>';
+    h+='<input id="setup-'+t[0]+'" type="text" value="'+t[2]+'" placeholder="0" inputmode="numeric" style="width:100%;border:none;outline:none;font-size:20px;font-weight:700;color:#1e2d40;text-align:center;background:transparent;font-family:inherit;">';
+    h+='</div>';
+  });
+  h+='</div>';
+  h+='<button onclick="setupStart()" style="width:100%;height:48px;border:none;border-radius:12px;background:var(--navy);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">この寸法で開始 →</button>';
+  h+='</div>';
+  area.innerHTML=h;
+  setTimeout(function(){var el=document.getElementById('setup-W');if(el){el.focus();el.select();}},100);
+}
+
+// ── 開始：W/D/H を床・壁・天井へ反映して作業画面へ ──
+function setupStart(){
+  var W=parseFloat((document.getElementById('setup-W')||{}).value)||0;
+  var D=parseFloat((document.getElementById('setup-D')||{}).value)||0;
+  var H=parseFloat((document.getElementById('setup-H')||{}).value)||0;
+  if(!(W>0&&D>0&&H>0)){showToast('⚠ W・D・H はすべて0より大きい値を入力してください');return;}
+  var room=((document.getElementById('setup-room')||{}).value||'').trim()||'部屋1';
+  var dims={W:W,L:D,H:H};  // D（奥行）は内部寸法では L（長さ）
+  _projGenba=_setupSelGenba;
+  _projAnkenKey=_setupSelKey;
+  _projAnkenName=_setupSelName;
+  var st=_newRoomState();
+  _applyDimsToState(st,dims);
+  _rooms=[{name:room,state:st}];
+  _curRoomIdx=0;
+  _loadRoomStateToGlobals(st);
+  _renderRoomWorkspace(st);
+  renderRoomTabs();
+  refreshUtilIndicators();
+  // 寸法注入の完了を待ってから自動保存（描画直後の既定値を拾わないように）
+  setTimeout(function(){_forceInjectDims(dims);autoSaveState(true);},150);
+  _updateGenbaLabel();
+  hideSetupScreen();
+  showToast('🏠 「'+_projGenba+'」を開始しました（床・壁・天井に反映済み）');
+}
+
+// ── 保存済み現場を開く ──
+function openGenbaProject(g){
+  var raw=localStorage.getItem(WPROJ_PREFIX+g);
+  if(!raw){showToast('⚠ データが見つかりません');return;}
+  var d;
+  try{d=JSON.parse(raw);}catch(e){showToast('⚠ 読込失敗: '+(e&&e.message?e.message:e));return;}
+  _projGenba=g;
+  _projAnkenKey=d.ankenKey||'';
+  _projAnkenName=d.ankenName||'';
+  restoreState(d);
+  _updateGenbaLabel();
+  hideSetupScreen();
+  try{localStorage.setItem(_LAST_GENBA_KEY,g);}catch(e){}
+  showToast('📂 「'+g+'」を読み込みました');
+}
+
+function deleteGenbaProject(g){
+  if(!confirm('「'+g+'」の自動保存データを削除しますか？'))return;
+  try{localStorage.removeItem(WPROJ_PREFIX+g);}catch(e){}
+  try{if(localStorage.getItem(_LAST_GENBA_KEY)===g)localStorage.removeItem(_LAST_GENBA_KEY);}catch(e){}
+  renderHistoryList();
+  refreshUtilIndicators();
+  if(!document.getElementById('setup-screen').classList.contains('hidden'))renderSetup();
+  showToast('🗑 削除しました');
+}
+
+// ══════════════════════════════════════════
+//  割付データをファイルに保存（図面アプリ saveDrawingFile と同仕様）
+//  ・showSaveFilePicker 対応環境（PC版Chrome等）では保存先フォルダを選択可能
+//  ・非対応環境（多くのAndroid）では端末のダウンロードフォルダへ保存
+// ══════════════════════════════════════════
+function _sanitizeFilename(s){
+  return String(s||'').replace(/[\\/:*?"<>|]/g,'_').replace(/\s+/g,'_').replace(/_+/g,'_').slice(0,60);
+}
+
+// 保存ファイル名（案件キー優先・なければ現場名）
+function _projectFileName(){
+  return '割付_'+_sanitizeFilename(_projAnkenKey||_projGenba)+'.json';
+}
+
+// 現在の割付データ一式を収集（autoSaveState と同じ構造＋メタ情報）
+function _collectProjectData(){
+  var d=captureState();
+  d._meta={
+    案件キー:_projAnkenKey,
+    案件名:_projAnkenName,
+    現場名:_projGenba,
+    アプリ:'材料割付',保存日時:new Date().toISOString()
+  };
+  d.genba=_projGenba;d.ankenKey=_projAnkenKey;d.ankenName=_projAnkenName;
+  d.savedAt=Date.now();
+  return d;
+}
+
+async function saveProjectFile(){
+  if(!_projGenba){showToast('⚠ 先に現場名を設定してください');showSetupScreen('choose');return;}
+  if(curCat==='wall')saveCurrentFaceInputs();
+  autoSaveState(true); // 端末内（localStorage）にも保存
+  var fname=_projectFileName();
+  var json=JSON.stringify(_collectProjectData(),null,2);
+  var blob=new Blob([json],{type:'application/json'});
+
+  // 1. File System Access API：保存先フォルダを選べる（PC＋Driveマウント等）
+  if(window.showSaveFilePicker){
+    try{
+      var handle=await window.showSaveFilePicker({
+        suggestedName:fname,
+        types:[{description:'割付データ(JSON)',accept:{'application/json':['.json']}}]
+      });
+      var w=await handle.createWritable();
+      await w.write(blob);await w.close();
+      showToast('✓ 保存しました：'+fname);
+      return;
+    }catch(e){
+      if(e&&e.name==='AbortError'){showToast('保存をキャンセルしました');return;}
+      // それ以外（未対応・権限等）は通常ダウンロードへフォールバック
+    }
+  }
+  // 2. 通常ダウンロード（Android等：ダウンロードフォルダへ）
+  try{
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url;a.download=fname;
+    document.body.appendChild(a);a.click();
+    setTimeout(function(){if(a.parentNode)document.body.removeChild(a);URL.revokeObjectURL(url);},1500);
+    showToast('✓ 保存しました：'+fname);
+  }catch(e){
+    showToast('⚠ 保存失敗: '+(e&&e.message?e.message:e));
+  }
+}
+
+// ══════════════════════════════════════════
+//  ファイルから開く（書き出したJSONを読み込む：図面アプリ openDrawingFile と同仕様）
+// ══════════════════════════════════════════
+function openProjectFile(){
+  // フォールバック：input[type=file]（Android／Googleドライブ等）
+  //  ・accept は付けない。Android+Driveで「.json が選べない/グレーアウト」する癖を回避。
+  //    （拾ったファイルの中身は _importProjectJson 側で検証するので安全）
+  function _openViaInput(){
+    var inp=document.getElementById('waritsuke-file-input');
+    if(!inp){
+      inp=document.createElement('input');
+      inp.type='file';inp.id='waritsuke-file-input';inp.style.display='none';
+      inp.addEventListener('change',function(){
+        var f=inp.files&&inp.files[0];if(!f)return;
+        var reader=new FileReader();
+        reader.onload=function(){_importProjectJson(reader.result);inp.value='';};
+        reader.onerror=function(){showToast('⚠ ファイル読込失敗');inp.value='';};
+        reader.readAsText(f);
+      });
+      document.body.appendChild(inp);
+    }
+    inp.click();
+  }
+  // File System Access API（PC版Chrome等：フォルダから選択）。失敗時は input へフォールバック
+  if(window.showOpenFilePicker){
+    window.showOpenFilePicker({
+      types:[{description:'割付データ(JSON)',accept:{'application/json':['.json'],'text/plain':['.json','.txt']}}],
+      excludeAcceptAllOption:false,multiple:false
+    }).then(function(handles){return handles[0].getFile();})
+      .then(function(file){return file.text();})
+      .then(function(text){_importProjectJson(text);})
+      .catch(function(e){if(e&&e.name==='AbortError')return;_openViaInput();});
+    return;
+  }
+  _openViaInput();
+}
+
+function _importProjectJson(text){
+  // 空ファイル（保存未完了・同期途中など）を明示検出
+  var s=(text==null)?'':String(text);
+  s=s.replace(/^﻿/,'');  // 先頭BOMがあれば除去
+  if(s.trim()===''){showToast('⚠ ファイルが空です（0バイト）。保存が未完了か同期途中の可能性があります');return;}
+  var d;
+  try{d=JSON.parse(s);}
+  catch(e){showToast('⚠ JSON解析エラー: '+(e&&e.message?e.message:e));return;}
+  if(!d||typeof d!=='object'){showToast('⚠ 割付データのファイルではありません');return;}
+  if(!d.rooms||!Array.isArray(d.rooms)||!d.rooms.length){showToast('⚠ 割付データではありません（rooms なし）');return;}
+  var meta=d._meta||{};
+  _projGenba=meta['現場名']||d.genba||'読込現場';
+  _projAnkenKey=meta['案件キー']||d.ankenKey||'';
+  _projAnkenName=meta['案件名']||d.ankenName||'';
+  try{
+    restoreState(d);
+    _updateGenbaLabel();
+    hideSetupScreen();
+    autoSaveState(true); // localStorageにも取り込み、以降は継続編集・自動保存の対象に
+    showToast('📂 「'+_projGenba+'」を読み込みました');
+  }catch(e){
+    showToast('⚠ 読込中エラー: '+(e&&e.message?e.message:e));
+  }
+}
+
+// ── 初期化（図面アプリ準拠：前回の現場を自動再開／なければセットアップ画面） ──
+(function(){
+  // 旧形式の自動保存（genba_autosave）は「(前回の作業)」として現場別保存へ移行
+  try{
+    var legacy=localStorage.getItem(_AUTOSAVE_KEY);
+    if(legacy){
+      var ld=JSON.parse(legacy);
+      if(ld&&ld.rooms&&ld.rooms.length&&!localStorage.getItem(WPROJ_PREFIX+'(前回の作業)')){
+        localStorage.setItem(WPROJ_PREFIX+'(前回の作業)',JSON.stringify({
+          version:2,genba:'(前回の作業)',
+          rooms:ld.rooms,curRoomIdx:ld.curRoomIdx||0,savedAt:Date.now()
+        }));
+      }
+      localStorage.removeItem(_AUTOSAVE_KEY);
+    }
+  }catch(e){}
+  var resumed=false;
+  try{
+    var g=localStorage.getItem(_LAST_GENBA_KEY);
+    if(g){
+      var raw=localStorage.getItem(WPROJ_PREFIX+g);
+      if(raw){
+        var d=JSON.parse(raw);
+        _projGenba=g;
+        _projAnkenKey=d.ankenKey||'';
+        _projAnkenName=d.ankenName||'';
+        restoreState(d);
+        resumed=true;
+      }
+    }
+  }catch(e){}
+  if(!resumed){
+    _rooms=[{name:'部屋1',state:_newRoomState()}];
+    _curRoomIdx=0;
+    _loadRoomStateToGlobals(_rooms[0].state);
+    _renderRoomWorkspace(_rooms[0].state);
+    renderRoomTabs();
+    refreshUtilIndicators();
+    showSetupScreen('choose');
+  }
+  _updateGenbaLabel();
+})();
 // 単価マスタを非同期取得（取得後に現在の部屋を自動再描画）
 if(typeof loadPriceMaster==='function')loadPriceMaster();
 // 音声入力初期化（非対応ブラウザでは自動非表示）

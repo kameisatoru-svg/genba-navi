@@ -976,16 +976,7 @@ function enterNav(e){
     if(sib)focusSel(sib[Math.min(col,sib.length-1)]);
     return;
   }
-  if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
-    // ★ 左右隣のセルへ移動（行頭/行末は前後の行へ折り返し）
-    e.preventDefault();
-    const dir=e.key==='ArrowRight'?1:-1;
-    const t=col+dir;
-    if(t>=0&&t<rowInputs.length){focusSel(rowInputs[t]);}
-    else if(dir>0){const ni=adjRowInputs(1);if(ni)focusSel(ni[0]);}
-    else{const pi=adjRowInputs(-1);if(pi)focusSel(pi[pi.length-1]);}
-    return;
-  }
+  // 左右矢印キーはセル間移動に使わず、入力内容内のカーソル移動（ブラウザ標準動作）に任せる（2026-06-11 変更）
 }
 
 function flatTogglePageBreak(i){
@@ -1318,12 +1309,13 @@ function render(){
     }).join('');
     tableHtml=`<table class="estimate-table" id="est-tbl">
       <thead><tr>
-        <th style="width:42%;text-align:left">工事内容</th>
+        <th style="width:50%;text-align:left">工事内容</th>
         <th style="width:8%">数量</th><th style="width:7%">単位</th>
-        <th style="width:13%">単価</th><th style="width:20%">金額（税抜）</th>
+        <th style="width:11%">単価</th><th style="width:14%">金額（税抜）</th>
       </tr></thead>
       <tbody>
         ${summaryRows}
+        <tr class="spacer-row"><td></td><td></td><td></td><td></td><td></td></tr>
         <tr class="subtotal-row"><td colspan="4" style="text-align:right">小　計</td><td>${fmtN(t.subtotal)}</td></tr>
       </tbody>
     </table>`;
@@ -1342,12 +1334,13 @@ function render(){
     }).join('');
     tableHtml=`<table class="estimate-table" id="est-tbl">
       <thead><tr>
-        <th style="width:42%;text-align:left">工事内容</th>
+        <th style="width:50%;text-align:left">工事内容</th>
         <th style="width:8%">数量</th><th style="width:7%">単位</th>
-        <th style="width:13%">単価</th><th style="width:20%">金額（税抜）</th>
+        <th style="width:11%">単価</th><th style="width:14%">金額（税抜）</th>
       </tr></thead>
       <tbody>
         ${rows}
+        <tr class="spacer-row"><td></td><td></td><td></td><td></td><td></td></tr>
         <tr class="subtotal-row"><td colspan="4" style="text-align:right">小　計</td><td>${fmtN(t.subtotal)}</td></tr>
         ${shokeihiTr}
         ${nebikiTr}
@@ -1377,14 +1370,15 @@ function render(){
     const sepRow=''; // 区切り行なし・続けて表示
     tableHtml=`<table class="estimate-table" id="est-tbl">
       <thead><tr>
-        <th style="width:42%;text-align:left">工事内容</th>
+        <th style="width:50%;text-align:left">工事内容</th>
         <th style="width:8%">数量</th><th style="width:7%">単位</th>
-        <th style="width:13%">単価</th><th style="width:20%">金額（税抜）</th>
+        <th style="width:11%">単価</th><th style="width:14%">金額（税抜）</th>
       </tr></thead>
       <tbody>
         ${groupRows}
         ${sepRow}
         ${summaryRows}
+        <tr class="spacer-row"><td></td><td></td><td></td><td></td><td></td></tr>
         <tr class="subtotal-row"><td colspan="4" style="text-align:right">小　計</td><td>${fmtN(t.subtotal)}</td></tr>
         ${shokeihiTr}
         ${nebikiTr}
@@ -1502,6 +1496,8 @@ function render(){
             <td>${amt}</td>
           </tr>`;
         });
+        // 空白行（明細と小計の間）
+        allRows+=`<tr class="spacer-row"><td></td><td></td><td></td><td></td><td></td></tr>`;
         // 小計行
         allRows+=`<tr class="group-subtotal-row"><td colspan="4" style="text-align:right;background:#e8e8e8;font-weight:700;padding:5px 8px;">小　計</td><td style="background:#e8e8e8;font-weight:700;text-align:right;padding:5px 8px;">${fmtN(gSub)}</td></tr>`;
       }
@@ -1513,11 +1509,11 @@ function render(){
       </div>
       <table class="estimate-table" id="group-detail-tbl" style="width:100%;border-collapse:collapse;border:1px solid #888;">
         <thead><tr>
-          <th style="width:42%;text-align:left;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;">工事内容</th>
+          <th style="width:50%;text-align:left;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;">工事内容</th>
           <th style="width:8%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">数量</th>
           <th style="width:7%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">単位</th>
-          <th style="width:13%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">単価</th>
-          <th style="width:20%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">金額（税抜）</th>
+          <th style="width:11%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">単価</th>
+          <th style="width:14%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">金額（税抜）</th>
         </tr></thead>
         <tbody>${allRows}</tbody>
       </table>
@@ -1579,8 +1575,8 @@ function applyManualPageBreaks(){
 
   // 全データ行とfixed行を取得
   const allRows=Array.from(tbody.querySelectorAll('tr'));
-  const dataRows=allRows.filter(tr=>!tr.classList.contains('subtotal-row')&&!tr.classList.contains('shokeihi-row')&&!tr.classList.contains('next-page-notice'));
-  const fixedRows=allRows.filter(tr=>tr.classList.contains('subtotal-row')||tr.classList.contains('shokeihi-row'));
+  const dataRows=allRows.filter(tr=>!tr.classList.contains('subtotal-row')&&!tr.classList.contains('shokeihi-row')&&!tr.classList.contains('spacer-row')&&!tr.classList.contains('next-page-notice'));
+  const fixedRows=allRows.filter(tr=>tr.classList.contains('subtotal-row')||tr.classList.contains('shokeihi-row')||tr.classList.contains('spacer-row'));
 
   const kojimei=document.getElementById('kojimei').value;
   const mno=document.getElementById('mitsumoriNo').value;
@@ -1647,7 +1643,7 @@ function checkAndPaginateGroup(){
   const isSubtotal=(idx)=>{
     if(idx<0||idx>=allRows.length)return false;
     const cl=allRows[idx].classList;
-    return cl.contains('middle-subtotal-row')||cl.contains('group-subtotal-row');
+    return cl.contains('middle-subtotal-row')||cl.contains('group-subtotal-row')||cl.contains('spacer-row');
   };
 
   allSegEnds.forEach(segEnd=>{
@@ -1724,11 +1720,11 @@ function checkAndPaginateGroup(){
     t2.className='estimate-table';
     t2.style.cssText='width:100%;border-collapse:collapse;border:1px solid #888;';
     t2.innerHTML='<thead><tr>'
-      +'<th style="width:42%;text-align:left;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;">工事内容</th>'
+      +'<th style="width:50%;text-align:left;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;">工事内容</th>'
       +'<th style="width:8%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">数量</th>'
       +'<th style="width:7%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">単位</th>'
-      +'<th style="width:13%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">単価</th>'
-      +'<th style="width:20%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">金額（税抜）</th>'
+      +'<th style="width:11%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">単価</th>'
+      +'<th style="width:14%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">金額（税抜）</th>'
       +'</tr></thead>';
     const tb2=document.createElement('tbody');
     overRows.forEach(tr=>{
@@ -1802,8 +1798,13 @@ function checkAndPaginate(){
   const tbody=tbl.querySelector('tbody');
   if(!tbody)return;
   const allRows=Array.from(tbody.querySelectorAll('tr'));
-  const dataRows=allRows.filter(tr=>!tr.classList.contains('subtotal-row')&&!tr.classList.contains('shokeihi-row'));
-  const fixedRows=allRows.filter(tr=>tr.classList.contains('subtotal-row')||tr.classList.contains('shokeihi-row'));
+  const dataRows=allRows.filter(tr=>!tr.classList.contains('subtotal-row')&&!tr.classList.contains('shokeihi-row')&&!tr.classList.contains('spacer-row'));
+  const fixedRows=allRows.filter(tr=>tr.classList.contains('subtotal-row')||tr.classList.contains('shokeihi-row')||tr.classList.contains('spacer-row'));
+
+  // 固定行（空白行・小計・諸経費）込みでページに収まるかを先に判定
+  const fixedRowsH=fixedRows.reduce((s,tr)=>s+tr.offsetHeight,0);
+  const dataRowsH=dataRows.reduce((s,tr)=>s+tr.offsetHeight,0);
+  if(dataRowsH+fixedRowsH<=availH)return; // 全行収まる→分割不要
 
   let cumH=0;
   let splitIdx=-1;
@@ -1814,7 +1815,11 @@ function checkAndPaginate(){
       break;
     }
   }
-  if(splitIdx<0)return;
+  // データ行自体は収まるが固定行込みで溢れる場合：最終データ行＋固定行を2ページ目へ
+  if(splitIdx<0){
+    if(dataRows.length<2)return;
+    splitIdx=dataRows.length-2;
+  }
 
   // 「次ページへ続く」行を挿入
   const noticeRow=document.createElement('tr');
@@ -1863,11 +1868,11 @@ function buildPage2(overflowRows, fixedRows, removeNotice){
   p2tbl.className='estimate-table';
   p2tbl.style.cssText='width:100%;border-collapse:collapse;border:1px solid #888;flex-shrink:0;';
   p2tbl.innerHTML='<thead><tr>'
-    +'<th style="width:42%;text-align:left;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;">工事内容</th>'
+    +'<th style="width:50%;text-align:left;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;">工事内容</th>'
     +'<th style="width:8%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">数量</th>'
     +'<th style="width:7%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">単位</th>'
-    +'<th style="width:13%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">単価</th>'
-    +'<th style="width:20%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">金額（税抜）</th>'
+    +'<th style="width:11%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">単価</th>'
+    +'<th style="width:14%;background:#555;color:#fff;padding:6px 8px;font-size:11.5px;text-align:right;">金額（税抜）</th>'
     +'</tr></thead>';
   const p2tbody=document.createElement('tbody');
   if(removeNotice && overflowRows[0]) overflowRows[0].classList.remove('pb-row-mark');
@@ -1979,14 +1984,15 @@ function buildDocHTML(){
     }).join('');
     tableHtml=`<table class="estimate-table" ${tblStyle}>
       <thead><tr>
-        <th ${thStyle} style="width:42%;text-align:left;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">工事内容</th>
+        <th ${thStyle} style="width:50%;text-align:left;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">工事内容</th>
         <th ${thStyle} style="width:8%;text-align:right;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">数量</th>
         <th ${thStyle} style="width:7%;text-align:right;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">単位</th>
-        <th ${thStyle} style="width:13%;text-align:right;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">単価</th>
-        <th ${thStyle} style="width:20%;text-align:right;background:var(--band);color:#fff;font-weight:700">金額（税抜）</th>
+        <th ${thStyle} style="width:11%;text-align:right;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">単価</th>
+        <th ${thStyle} style="width:14%;text-align:right;background:var(--band);color:#fff;font-weight:700">金額（税抜）</th>
       </tr></thead>
       <tbody>
         ${summaryRows}
+        <tr class="spacer-row"><td></td><td></td><td></td><td></td><td></td></tr>
         <tr class="subtotal-row"><td colspan="4" style="text-align:right">小　計</td><td style="text-align:right">${fmtN(t.subtotal)}</td></tr>
       </tbody>
     </table>`;
@@ -2002,14 +2008,15 @@ function buildDocHTML(){
     }).join('');
     tableHtml=`<table class="estimate-table" ${tblStyle}>
       <thead><tr>
-        <th ${thStyle} style="width:42%;text-align:left;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">工事内容</th>
+        <th ${thStyle} style="width:50%;text-align:left;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">工事内容</th>
         <th ${thStyle} style="width:8%;text-align:right;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">数量</th>
         <th ${thStyle} style="width:7%;text-align:right;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">単位</th>
-        <th ${thStyle} style="width:13%;text-align:right;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">単価</th>
-        <th ${thStyle} style="width:20%;text-align:right;background:var(--band);color:#fff;font-weight:700">金額（税抜）</th>
+        <th ${thStyle} style="width:11%;text-align:right;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">単価</th>
+        <th ${thStyle} style="width:14%;text-align:right;background:var(--band);color:#fff;font-weight:700">金額（税抜）</th>
       </tr></thead>
       <tbody>
         ${rows}
+        <tr class="spacer-row"><td></td><td></td><td></td><td></td><td></td></tr>
         <tr class="subtotal-row"><td colspan="4" style="text-align:right">小　計</td><td style="text-align:right">${fmtN(t.subtotal)}</td></tr>
         ${shokeihiTrP}
         ${nebikiTrP}
@@ -2039,15 +2046,16 @@ function buildDocHTML(){
     }).join('');
     tableHtml=`<table class="estimate-table" ${tblStyle}>
       <thead><tr>
-        <th ${thStyle} style="width:42%;text-align:left;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">工事内容</th>
+        <th ${thStyle} style="width:50%;text-align:left;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">工事内容</th>
         <th ${thStyle} style="width:8%;text-align:right;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">数量</th>
         <th ${thStyle} style="width:7%;text-align:right;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">単位</th>
-        <th ${thStyle} style="width:13%;text-align:right;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">単価</th>
-        <th ${thStyle} style="width:20%;text-align:right;background:var(--band);color:#fff;font-weight:700">金額（税抜）</th>
+        <th ${thStyle} style="width:11%;text-align:right;background:var(--band);color:#fff;font-weight:700;border-right:1px solid var(--band-mid)">単価</th>
+        <th ${thStyle} style="width:14%;text-align:right;background:var(--band);color:#fff;font-weight:700">金額（税抜）</th>
       </tr></thead>
       <tbody>
         ${groupRows}
         ${summaryRows}
+        <tr class="spacer-row"><td></td><td></td><td></td><td></td><td></td></tr>
         <tr class="subtotal-row"><td colspan="4" style="text-align:right">小　計</td><td style="text-align:right">${fmtN(t.subtotal)}</td></tr>
         ${shokeihiTrP}
         ${nebikiTrP}
@@ -2263,6 +2271,7 @@ ${(()=>{
           <td style="text-align:right;">${amt}</td>
         </tr>`;
       });
+      rows+=`<tr class="spacer-row"><td></td><td></td><td></td><td></td><td></td></tr>`;
       rows+=`<tr class="subtotal-row">
         <td colspan="4" style="text-align:right;background:#e8e8e8;font-weight:700;">小　計</td>
         <td style="text-align:right;background:#e8e8e8;font-weight:700;">${fmtN(gSub)}</td>
@@ -2275,11 +2284,11 @@ ${(()=>{
       </div>
       <table class="detail-table" style="width:100%;border-collapse:collapse;border:1px solid #888;">
         <thead><tr>
-          <th style="width:42%;text-align:left;background:#555;color:#fff;padding:6px 8px;">工事内容</th>
+          <th style="width:50%;text-align:left;background:#555;color:#fff;padding:6px 8px;">工事内容</th>
           <th style="width:8%;background:#555;color:#fff;padding:6px 8px;text-align:right;">数量</th>
           <th style="width:7%;background:#555;color:#fff;padding:6px 8px;text-align:right;">単位</th>
-          <th style="width:13%;background:#555;color:#fff;padding:6px 8px;text-align:right;">単価</th>
-          <th style="width:20%;background:#555;color:#fff;padding:6px 8px;text-align:right;">金額（税抜）</th>
+          <th style="width:11%;background:#555;color:#fff;padding:6px 8px;text-align:right;">単価</th>
+          <th style="width:14%;background:#555;color:#fff;padding:6px 8px;text-align:right;">金額（税抜）</th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
