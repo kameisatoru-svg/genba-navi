@@ -128,6 +128,18 @@ body{display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
 .photo-add{width:74px;height:74px;border-radius:10px;border:2px dashed rgba(30,45,64,.25);background:var(--white);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--text2);cursor:pointer;font-size:10px;font-weight:700;}
 .photo-add svg{width:24px;height:24px;}
 
+.manual-list{display:flex;flex-direction:column;gap:6px;}
+.manual-row{display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid rgba(30,45,64,.12);border-radius:10px;padding:8px 10px;font-size:13px;}
+.manual-row svg{width:18px;height:18px;flex-shrink:0;color:var(--navy);}
+.manual-row .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);}
+.manual-row .up{font-size:9px;color:#fff;background:rgba(30,45,64,.6);border-radius:6px;padding:1px 5px;flex-shrink:0;}
+.manual-row .del{width:22px;height:22px;border-radius:50%;background:rgba(192,57,43,.9);color:#fff;border:none;font-size:14px;line-height:1;cursor:pointer;flex-shrink:0;}
+.manual-add{display:flex;align-items:center;justify-content:center;gap:6px;border:2px dashed rgba(30,45,64,.25);border-radius:10px;padding:10px;color:var(--text2);cursor:pointer;font-size:12px;font-weight:700;}
+.manual-add svg{width:18px;height:18px;}
+.detail-manuals{display:flex;flex-direction:column;gap:6px;}
+.detail-manuals a{display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid rgba(30,45,64,.12);border-radius:10px;padding:9px 11px;font-size:13px;color:var(--navy);text-decoration:none;font-weight:600;}
+.detail-manuals a svg{width:18px;height:18px;flex-shrink:0;}
+
 .detail-photos{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;}
 .detail-photos.single{grid-template-columns:1fr;}
 .detail-photos img{width:100%;border-radius:12px;background:#e9e5dd;display:block;cursor:pointer;}
@@ -319,6 +331,11 @@ body{display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
         <input type="file" id="plateInput" accept="image/*" multiple capture="environment" class="hidden">
         <div class="fld-hint">銘板/型番シールの写真を「証跡」として別保存します。上の「銘板・型番ラベルで精度UP」で追加するとAI解析にも使われます。</div>
       </div>
+      <div class="fld"><label>取扱説明書（PDF・画像・複数可）</label>
+        <div class="manual-list" id="manualList"></div>
+        <input type="file" id="manualInput" accept="application/pdf,image/*" multiple class="hidden">
+        <div class="fld-hint">メーカーの取扱説明書PDFや画像をこの工具と一緒に保管します（tool_manuals/ に保存）。詳細画面からいつでも開けます。</div>
+      </div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" id="deleteBtn" onclick="deleteCurrent()" style="display:none;flex:0 0 auto;width:auto;padding:0 16px;color:var(--red);border-color:rgba(192,57,43,.4);">削除</button>
@@ -434,6 +451,7 @@ const GH_REPO = 'kameisatoru-svg/genba-navi';
 const GH_API_DATA = `https://api.github.com/repos/${GH_REPO}/contents/data.json`;
 const PAT_KEY = 'artrise_gh_pat';
 const PHOTO_DIR = 'tool_photos';
+const MANUAL_DIR = 'tool_manuals';
 
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
@@ -446,8 +464,10 @@ let ankenByKey = {};
 let currentTab = 'list';
 let searchQ = '';
 const photoCache = {};
+const manualCache = {};
 let editPhotos = [];
 let editNamePlates = [];   // 型番証跡（銘板写真）
+let editManuals = [];      // 取扱説明書（PDF/画像）
 let editingId = null;
 let mtToolId = null;
 let bringKey = '';      // 現在編集中の案件キー
@@ -617,6 +637,11 @@ async function ghPutPhoto(path, base64, message){
   const r=await fetch(api,{method:'PUT',headers:{Authorization:`token ${pat}`,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify({message,content:base64})});
   if(!r.ok){ const t=await r.text(); throw new Error('写真保存失敗 '+r.status+' '+t.slice(0,120)); }
 }
+async function ghPutFile(path, base64, message){
+  const pat=getPAT(); const api=`https://api.github.com/repos/${GH_REPO}/contents/${path}`;
+  const r=await fetch(api,{method:'PUT',headers:{Authorization:`token ${pat}`,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify({message,content:base64})});
+  if(!r.ok){ const t=await r.text(); throw new Error('ファイル保存失敗 '+r.status+' '+t.slice(0,120)); }
+}
 async function ghSaveData(mutator, message){
   const pat=getPAT();
   const r=await fetch(GH_API_DATA,{headers:{Authorization:`token ${pat}`,'Accept':'application/vnd.github.v3+json'}});
@@ -730,10 +755,14 @@ function openDetail(id){
   const plates=t['銘板写真']||[];
   const iPlate='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.6 13.4 11 3.8V3H4v7h.8l9.6 9.6a2 2 0 0 0 2.8 0l3.4-3.4a2 2 0 0 0 0-2.8z"/><circle cx="7.5" cy="6.5" r="1.3" fill="currentColor" stroke="none"/></svg>';
   const plateHtml=plates.length?`<div class="detail-sec"><div class="detail-sec__h">${iPlate}型番証跡（銘板）</div><div class="detail-photos ${plates.length===1?'single':''}">${plates.map(x=>`<img src="${esc(photoSrc(x))}" onclick="openLightbox('${esc(photoSrc(x))}')" onerror="this.style.display='none'">`).join('')}</div></div>`:'';
+  const iManual='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>';
+  const manuals=t['取扱説明書']||[];
+  const manualHtml=manuals.length?`<div class="detail-sec"><div class="detail-sec__h">${iManual}取扱説明書</div><div class="detail-manuals">${manuals.map(m=>`<a href="${esc(manualSrc(m['パス']||m.path))}" target="_blank" rel="noopener">${iManual}<span>${esc(m['名前']||m.name||'取扱説明書')}</span></a>`).join('')}</div></div>`:'';
   $('#detailTitle').textContent=t['名称'];
   $('#detailBody').innerHTML = ph
     + `<div class="detail-table">${rows.map(r=>`<div class="r"><div class="k">${esc(r[0])}</div><div class="v">${esc(r[1])}</div></div>`).join('')}</div>`
     + plateHtml
+    + manualHtml
     + sec('使用方法',iUse,t['使用方法'])
     + sec('応用編・コツ',iTip,t['応用'])
     + sec('注意事項・安全',iCau,t['注意事項'])
@@ -747,7 +776,7 @@ function closeDetail(){ $('#detailModal').classList.remove('show'); }
 
 /* ============================================================ 編集フォーム ============================================================ */
 function openEdit(id){
-  editingId=id||null; editPhotos=[]; editNamePlates=[];
+  editingId=id||null; editPhotos=[]; editNamePlates=[]; editManuals=[];
   const g=(k)=>$('#'+k);
   if(id){
     const t=toolById(id); $('#editTitle').textContent='工具を編集';
@@ -758,6 +787,7 @@ function openEdit(id){
     g('f_caution').value=t['注意事項']||''; g('f_next').value=t['次回点検']||''; g('f_note').value=t['備考']||'';
     editPhotos=(t['写真']||[]).map(p=>({path:p,dataURL:photoSrc(p),uploaded:true}));
     editNamePlates=(t['銘板写真']||[]).map(p=>({path:p,dataURL:photoSrc(p),uploaded:true,label:true}));
+    editManuals=(t['取扱説明書']||[]).map(m=>({path:m['パス']||m.path,name:m['名前']||m.name||'取扱説明書',uploaded:true}));
     $('#deleteBtn').style.display='';
   } else {
     $('#editTitle').textContent='工具を登録';
@@ -766,6 +796,7 @@ function openEdit(id){
     $('#deleteBtn').style.display='none';
   }
   renderPhotoGrid();
+  renderManualList();
   aiStatus('');
   $('#editModal').classList.add('show');
 }
@@ -786,6 +817,29 @@ $('#photoInput').addEventListener('change', async e=>{
 $('#plateInput').addEventListener('change', async e=>{
   const files=Array.from(e.target.files||[]); e.target.value='';
   for(const f of files){ if(!f.type.startsWith('image/')) continue; try{ const d=await compressImage(f,1500,0.85); editNamePlates.push({dataURL:d,uploaded:false,label:true}); renderPhotoGrid(); }catch(_){ toast('画像読込に失敗'); } }
+});
+
+/* ---- 取扱説明書（PDF/画像） ---- */
+const iDoc='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>';
+function manualSrc(path){ if(!path) return ''; if(/^(data:|https?:\/\/)/i.test(path)) return path; if(manualCache[path]) return manualCache[path]; return './'+path; }
+function fileToDataURL(file){ return new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=rej; fr.readAsDataURL(file); }); }
+function fileExt(name){ const m=String(name||'').match(/\.([a-z0-9]+)$/i); return m?m[1].toLowerCase():'pdf'; }
+function renderManualList(){
+  const rows=editManuals.map((m,i)=>`<div class="manual-row">${iDoc}<span class="nm">${esc(m.name||'取扱説明書')}</span>${m.uploaded?'':'<span class="up">未保存</span>'}<button class="del" onclick="removeManual(${i})">×</button></div>`).join('');
+  $('#manualList').innerHTML = rows + `<div class="manual-add" onclick="$('#manualInput').click()">${iDoc}取扱説明書を追加</div>`;
+}
+function removeManual(i){ editManuals.splice(i,1); renderManualList(); }
+$('#manualInput').addEventListener('change', async e=>{
+  const files=Array.from(e.target.files||[]); e.target.value='';
+  for(const f of files){
+    const isPdf=f.type==='application/pdf'||/\.pdf$/i.test(f.name);
+    if(!isPdf && !f.type.startsWith('image/')){ toast('PDFまたは画像を選択してください'); continue; }
+    try{
+      const d = isPdf ? await fileToDataURL(f) : await compressImage(f,1800,0.85);
+      editManuals.push({name:f.name||('取扱説明書.'+(isPdf?'pdf':'jpg')), dataURL:d, ext:isPdf?'pdf':'jpg', uploaded:false});
+      renderManualList();
+    }catch(_){ toast('読込に失敗'); }
+  }
 });
 
 async function saveEdit(){
@@ -815,6 +869,17 @@ async function saveEdit(){
       await ghPutPhoto(path, base64, `工具 型番証跡: ${name}`);
       photoCache[path]=ph.dataURL; platePaths.push(path);
     }
+    const manuals=[];
+    for(let i=0;i<editManuals.length;i++){
+      const m=editManuals[i];
+      if(m.uploaded&&m.path){ manuals.push({'名前':m.name||'取扱説明書','パス':m.path}); continue; }
+      const base64=m.dataURL.split(',')[1];
+      const ext=m.ext||fileExt(m.name);
+      const path=`${MANUAL_DIR}/${id}_${Date.now().toString(36)}${i}.${ext}`;
+      btn.textContent=`取扱説明書 保存中… ${i+1}/${editManuals.length}`;
+      await ghPutFile(path, base64, `工具 取扱説明書: ${name}`);
+      manualCache[path]=m.dataURL; manuals.push({'名前':m.name||'取扱説明書','パス':path});
+    }
     btn.textContent='データ保存中…';
     const prev=editingId?toolById(editingId):null;
     const rec={
@@ -823,6 +888,7 @@ async function saveEdit(){
       '取得日':$('#f_date').value,'取得価格':$('#f_price').value.trim(),'仕入先':$('#f_vendor').value.trim(),
       '使用方法':$('#f_usage').value.trim(),'応用':$('#f_tips').value.trim(),'注意事項':$('#f_caution').value.trim(),
       'メンテ履歴':prev?(prev['メンテ履歴']||[]):[],'次回点検':$('#f_next').value,'写真':photoPaths,'銘板写真':platePaths,
+      '取扱説明書':manuals,
       '備考':$('#f_note').value.trim(),'原価ID':prev?(prev['原価ID']||''):'',
       '登録日':prev?(prev['登録日']||today()):today(),'更新日':today()
     };
