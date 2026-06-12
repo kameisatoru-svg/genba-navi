@@ -2513,6 +2513,82 @@ function saveReeditHTML(){
   if(typeof showAnkenToast==='function') showAnkenToast('💾 再編集用HTMLを保存しました');
 }
 
+// ── 通常出力HTML（アプリ複製＋データ注入方式）の解析 ──
+// Claudeチャットのスキルが案件フォルダに保存するHTML（請_○○.html 等）は、
+// アプリ全体の複製に flatItems / docType / getElementById注入 でデータが書き込まれた形式。
+// artrays-doc-state タグが無いこの形式からも編集状態を復元できるようにする。
+function _extractJsArray(text, varName){
+  const re = new RegExp('(?:const|let|var)\\s+' + varName + '\\s*=\\s*\\[');
+  const m = re.exec(text);
+  if(!m) return null;
+  const start = m.index + m[0].length - 1; // '[' の位置
+  let depth = 0, inStr = null;
+  for(let j = start; j < text.length; j++){
+    const c = text[j];
+    if(inStr){
+      if(c === '\\'){ j++; continue; }
+      if(c === inStr) inStr = null;
+      continue;
+    }
+    if(c === "'" || c === '"' || c === '`'){ inStr = c; continue; }
+    if(c === '[') depth++;
+    else if(c === ']'){
+      depth--;
+      if(depth === 0){
+        try { return new Function('return ' + text.slice(start, j + 1))(); }
+        catch(e){ return null; }
+      }
+    }
+  }
+  return null;
+}
+function _unescapeJsStr(s){
+  return s.replace(/\\(['"\\nrt])/g, (a,c)=> c==='n' ? '\n' : c==='r' ? '\r' : c==='t' ? '\t' : c);
+}
+function parseInjectedAppHTML(text){
+  if(!/(?:const|let|var)\s+flatItems\s*=\s*\[/.test(text)) return null;
+  const state = {_type:'mitsumori_seikyu', _v:1, fields:{}};
+  let m;
+  // 書類種別：let docType 初期値 → 初期化部の switchDocType('...') 呼び出し（行頭のもの・最後勝ち）で上書き
+  m = text.match(/let\s+docType\s*=\s*'(\w+)'/);
+  state.docType = (m && m[1] === 'seikyu') ? 'seikyu' : 'mitsumori';
+  const swRe = /^\s*switchDocType\('(\w+)'\)/mg; let sm, swLast = null;
+  while((sm = swRe.exec(text))) swLast = sm[1];
+  if(swLast) state.docType = (swLast === 'seikyu') ? 'seikyu' : 'mitsumori';
+  // 明細モード
+  m = text.match(/let\s+mode\s*=\s*'(\w+)'/); state.mode = m ? m[1] : 'flat';
+  const smRe = /^\s*switchMode\('(\w+)'\)/mg; let mm2, smLast = null;
+  while((mm2 = smRe.exec(text))) smLast = mm2[1];
+  if(smLast) state.mode = smLast;
+  // スカラー（古い版に無い変数はデフォルトで埋める）
+  m = text.match(/let\s+shokeihiRate\s*=\s*([\d.]+)/); state.shokeihiRate = m ? parseFloat(m[1]) : 15;
+  m = text.match(/let\s+nebiki\s*=\s*([\d.]+)/); state.nebiki = m ? parseFloat(m[1]) : 0;
+  m = text.match(/let\s+nebikiLabel\s*=\s*'((?:[^'\\]|\\.)*)'/); state.nebikiLabel = m ? _unescapeJsStr(m[1]) : '値引き';
+  m = text.match(/let\s+hasuChousei\s*=\s*(-?[\d.]+)/); state.hasuChousei = m ? parseFloat(m[1]) : 0;
+  m = text.match(/let\s+shokeihiMode\s*=\s*'(\w+)'/); state.shokeihiMode = m ? m[1] : 'rate';
+  m = text.match(/let\s+shokeihiFixed\s*=\s*([\d.]+)/); state.shokeihiFixed = m ? parseFloat(m[1]) : 0;
+  // 明細配列
+  state.flatItems = _extractJsArray(text, 'flatItems') || [];
+  state.groupItems = _extractJsArray(text, 'groupItems') || [];
+  state.groupSummaryItems = _extractJsArray(text, 'groupSummaryItems') || [];
+  // 入力欄への注入（document.getElementById('id').value='...' 形式・ホワイトリスト・後勝ち）
+  const FIELD_IDS = ['atena','mitsumoriNo','hakkoDate','shiharaiDate','kojimei','seshubasho','koki','ankenKey','fileSuffix','bikou'];
+  const fre = /getElementById\(\s*'(\w+)'\s*\)\s*\.value\s*=\s*'((?:[^'\\]|\\.)*)'/g;
+  let fm;
+  while((fm = fre.exec(text))){
+    if(FIELD_IDS.indexOf(fm[1]) >= 0) state.fields[fm[1]] = _unescapeJsStr(fm[2]);
+  }
+  // 工期は変数経由パターン（const _kokiEl=...; _kokiEl.value='...'）でも注入される
+  m = text.match(/_kokiEl\s*\.value\s*=\s*'((?:[^'\\]|\\.)*)'/);
+  if(m) state.fields.koki = _unescapeJsStr(m[1]);
+  // 宛名も工事件名も明細も無いなら復元失敗とみなす
+  const hasItems = (state.flatItems.some(it=>it && String(it.name||'').trim()) ||
+                    state.groupItems.some(g=>g && String(g.name||'').trim()) ||
+                    state.groupSummaryItems.some(it=>it && String(it.name||'').trim()));
+  if(!hasItems && !state.fields.atena && !state.fields.kojimei) return null;
+  return state;
+}
+
 // 保存済みHTML（またはJSON）を読み込んで再編集
 async function loadReeditFile(event){
   const file=event.target.files[0]; event.target.value='';
