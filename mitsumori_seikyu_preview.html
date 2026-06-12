@@ -2606,10 +2606,12 @@ async function loadReeditFile(event){
       const doc=new DOMParser().parseFromString(text,'text/html');
       const el=doc.getElementById('artrays-doc-state');
       if(el) state=JSON.parse(el.textContent);
+      // 専用保存データが無い場合：通常出力HTML（データ注入式の複製アプリ）として解析
+      if(!state) state=parseInjectedAppHTML(text);
     }
   }catch(e){ alert('読み込みに失敗しました：'+(e.message||e)); return; }
   if(!state || state._type!=='mitsumori_seikyu'){
-    alert('このファイルには見積書・請求書の編集データが見つかりませんでした。\nこのアプリの「再編集用に保存（HTML）」で出力したファイルを選んでください。');
+    alert('このファイルには見積書・請求書の編集データが見つかりませんでした。\nこのアプリで出力・保存したHTMLファイル（請_○○.html・見_○○.html 等）を選んでください。');
     return;
   }
   applyReeditState(state);
