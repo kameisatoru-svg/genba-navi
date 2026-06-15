@@ -4685,6 +4685,9 @@ function resizeEq(axis,val){
     var info=_planSc(); if(!info) return;
     var mm=_snapMm(pos, info);
     _partDrag.detected = _detectColType(mm.x, mm.y);
+    // タップ位置(mm)を保持：独立柱の配置位置・壁柱のオフセット算出に使う
+    _partDrag.detected.tapX = mm.x;
+    _partDrag.detected.tapY = mm.y;
   }
 
   function onMove(e){
@@ -4797,11 +4800,9 @@ function resizeEq(axis,val){
     }
 
     if(_planMode==='column'){
-      // タップのみ反応（ドラッグは無視）
+      // タップのみ反応（ドラッグは無視）。コーナー/壁/室内いずれも種別を自動選択してダイアログを開く
       if(dx<10&&dy<10){
-        if(det.type==='corner'||det.type==='wall'){
-          openColDialog(det);
-        }
+        openColDialog(det);
       }
       return;
     }
