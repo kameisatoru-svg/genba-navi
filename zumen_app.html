@@ -56,6 +56,24 @@ body{
   font-size:9px;color:rgba(255,255,255,0.7);pointer-events:none;
 }
 
+/* 壁面タブ（A〜D：「壁」モード時のみ表示。割り付けアプリと同じ4面切替） */
+.face-tab-bar{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:6px;
+  background:var(--navy);padding:0 10px 8px;flex-shrink:0;
+}
+.face-tab{
+  height:34px;border:1px solid rgba(255,255,255,0.25);border-radius:9px;
+  background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.85);
+  font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.face-tab.active{background:var(--accent);color:var(--navy);border-color:var(--accent);}
+.face-tab .fdot{
+  width:6px;height:6px;border-radius:50%;background:var(--accent);display:none;
+}
+.face-tab.has-data .fdot{display:block;}
+.face-tab.active.has-data .fdot{background:var(--navy);}
+
 /* キャンバスエリア（ヘッダーとボトムバーの間を100%使用） */
 .cv-main-wrap{
   flex:1;position:relative;overflow:hidden;background:var(--bg);
@@ -354,7 +372,7 @@ canvas{display:block;width:100%;}
 /* ── 印刷スタイル ── */
 @media print{
   body{position:static;height:auto;overflow:visible;background:#fff;}
-  .header,.bottom-bar,.drawer,.ur-overlay,#eq-del-btn{display:none!important;}
+  .header,.bottom-bar,.drawer,.ur-overlay,#eq-del-btn,#face-tab-bar{display:none!important;}
   .cv-main-wrap{overflow:visible;height:auto;}
   .canvas-wrap{border:none;box-shadow:none;border-radius:0;height:auto;}
 }
@@ -400,6 +418,14 @@ canvas{display:block;width:100%;}
   <button id="btn-outline-finish" onclick="outlineFinish()" class="hidden" style="height:38px;padding:0 12px;border:none;border-radius:10px;background:var(--accent);color:var(--navy);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;">
     終了
   </button>
+</div>
+
+<!-- 壁面タブ（「壁」＝展開図モード時のみ表示。割り付けアプリと同じA〜D切替） -->
+<div id="face-tab-bar" class="face-tab-bar hidden">
+  <button class="face-tab" data-face="A" onclick="goFace('A')">A面<span class="fdot"></span></button>
+  <button class="face-tab" data-face="B" onclick="goFace('B')">B面<span class="fdot"></span></button>
+  <button class="face-tab" data-face="C" onclick="goFace('C')">C面<span class="fdot"></span></button>
+  <button class="face-tab" data-face="D" onclick="goFace('D')">D面<span class="fdot"></span></button>
 </div>
 
 <!-- キャンバスメインエリア -->
