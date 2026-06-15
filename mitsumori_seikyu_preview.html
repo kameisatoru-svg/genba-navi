@@ -467,7 +467,7 @@ tr.dragging{opacity:0.4;}
         <div class="fgroup"><label>発行日</label><input id="hakkoDate" type="date" oninput="render()"></div>
       </div>
       <div class="fgroup" id="shiharai-wrap"><label id="label-shiharai">有効期限</label><input id="shiharaiDate" type="date" oninput="render()"><div style="font-size:10px;color:var(--sub);margin-top:2px;" id="shiharai-hint">未入力時は発行日＋30日で自動計算されます</div></div>
-      <div class="fgroup"><label>工事件名</label><input id="kojimei" type="text" value="" placeholder="例：〇〇邸 外壁塗装工事" oninput="render()"></div>
+      <div class="fgroup"><label>工事件名</label><input id="kojimei" type="text" value="" placeholder="例：〇〇邸 外壁塗装工事" oninput="syncGroupLeadName();render()"></div>
       <div class="fgroup"><label>施工場所</label><input id="seshubasho" type="text" value="" placeholder="例：大分県別府市〇〇" oninput="render()"></div>
       <div class="fgroup" id="koki-wrap" style="display:none;"><label>工事期間</label><input id="koki" type="text" value="" oninput="render()" placeholder="例：2026/4/22 または 2026/4/1〜2026/4/30"></div>
       <div class="fgroup-row">
@@ -725,7 +725,23 @@ function migrateFlatToGroup(){
   if(!groupIsInitial) return; // 既存の大項目構成は尊重（再移行による重複を防ぐ）
   const kojimeiEl = document.getElementById('kojimei');
   const kojimei = (kojimeiEl ? kojimeiEl.value : '').trim() || '内装補修工事';
-  groupItems.splice(0, groupItems.length, {name:kojimei, pageBreak:false, middleItems:[], items:rows});
+  // _nameAuto:true … この大項目名（1枚目の「一式」行の品名）は工事件名と連動中。
+  //                  大項目名を手修正すると false になり、以後は工事件名を変えても上書きしない。
+  groupItems.splice(0, groupItems.length, {name:kojimei, pageBreak:false, middleItems:[], items:rows, _nameAuto:true});
+}
+
+// ── 工事件名 →「大項目・小項目」モード1枚目の単一明細（先頭大項目）の品名へ連動 ──
+// ・groupモードで、先頭大項目が _nameAuto（自動連動中）の間は、工事件名の入力に追従して品名を更新する
+// ・ユーザーが大項目名を手修正すると _nameAuto が外れ、それ以降は連動しない（手入力を尊重）
+function syncGroupLeadName(){
+  if(mode!=='group') return;
+  if(!groupItems.length) return;
+  const lead = groupItems[0];
+  if(!lead || !lead._nameAuto) return;
+  const el = document.getElementById('kojimei');
+  lead.name = el ? el.value : '';
+  // 編集パネルの大項目名入力にも反映（工事件名欄を入力中なのでフォーカスは奪われない）
+  if(typeof renderGroupBlocks === 'function') renderGroupBlocks();
 }
 
 // ── タイトル更新（タブ表示・PDF初期ファイル名）──
@@ -1054,7 +1070,7 @@ function renderGroupBlocks(){
     // ── 大項目ヘッダー ──
     let html=`
       <div class="group-header">
-        <input value="${g.name}" oninput="groupItems[${gi}].name=this.value;render()" placeholder="大項目名">
+        <input value="${g.name}" oninput="groupItems[${gi}].name=this.value;groupItems[${gi}]._nameAuto=false;render()" placeholder="大項目名">
         <button class="pb-btn${g.pageBreak?' on':''}" title="この工事の前で改ページ" onclick="groupTogglePageBreak(${gi})">改頁</button>
         <button class="add-middle-btn" onclick="groupAddMiddle(${gi})" title="中項目を追加">＋ 中項目</button>
         <button class="group-del-btn" onclick="groupDelGroup(${gi})">✕ 削除</button>
