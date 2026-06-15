@@ -690,6 +690,11 @@ function switchMode(v){
       }
     }
   }
+  // ★ フラット→「大項目・小項目」モード：フラット明細をすべて1つの大項目の小項目(明細)へ移行
+  //    1枚目は「工事件名 一式」の大項目1行、2ページ目以降にその小項目明細が並ぶ
+  if(prev==='flat' && v==='group'){
+    migrateFlatToGroup();
+  }
   // lumpモード切替時：groupSummaryItemsが空なら工事件名で1行サンプル投入
   if(v==='lump' && groupSummaryItems.length===0){
     const kojimei = document.getElementById('kojimei').value || '工事一式';
@@ -697,6 +702,25 @@ function switchMode(v){
   }
   renderEditor();
   render();
+}
+
+// ── フラット明細 →「大項目・小項目」モードへの移行 ──
+// ・入力済みフラット明細をすべて1つの大項目の「小項目（明細）」として取り込み、2ページ目以降に表示する
+// ・大項目名は工事件名（未入力時は「内装補修工事」）。1枚目では数量1・単位「式」で「工事件名 一式」と表記される
+// ・既にユーザーが大項目を編集済み（初期空状態でない）の場合は上書きしない（重複・データ消失防止）
+function migrateFlatToGroup(){
+  const rows = flatItems
+    .filter(it => String(it.name||'').trim()!=='' || parseFloat(it.qty) || parseFloat(it.price) || String(it.note||'').trim()!=='')
+    .map(it => ({name:it.name||'', qty:it.qty, unit:it.unit, price:it.price, note:it.note||''}));
+  if(rows.length===0) return; // 移すものが無ければ既存の大項目をそのまま
+  const groupIsInitial = groupItems.length===1
+    && !String(groupItems[0].name||'').trim()
+    && (!groupItems[0].middleItems || groupItems[0].middleItems.length===0)
+    && groupItems[0].items.every(it => !String(it.name||'').trim() && !parseFloat(it.qty) && !parseFloat(it.price) && !String(it.note||'').trim());
+  if(!groupIsInitial) return; // 既存の大項目構成は尊重（再移行による重複を防ぐ）
+  const kojimeiEl = document.getElementById('kojimei');
+  const kojimei = (kojimeiEl ? kojimeiEl.value : '').trim() || '内装補修工事';
+  groupItems.splice(0, groupItems.length, {name:kojimei, pageBreak:false, middleItems:[], items:rows});
 }
 
 // ── タイトル更新（タブ表示・PDF初期ファイル名）──
@@ -1191,14 +1215,16 @@ function groupPrefix(gi){
   do { s = String.fromCharCode(65 + (n % 26)) + s; n = Math.floor(n / 26) - 1; } while(n >= 0);
   return s;
 }
-// 「A 内装工事」のような表示名を返す
+// 「A 内装工事」のような表示名を返す（大項目が1つだけのときは記号を付けず工事件名をそのまま表示）
 function prefixedGroupName(gi, g){
   const nm = (g && g.name) ? g.name : ('大項目'+(gi+1));
+  if(groupItems.length<=1) return nm;
   return groupPrefix(gi) + ' ' + nm;
 }
-// 「A-1 壁工事」のような表示名を返す
+// 「A-1 壁工事」のような表示名を返す（大項目が1つだけのときは大項目記号を省き番号のみ）
 function prefixedMiddleName(gi, mi, m){
   const nm = (m && m.name) ? m.name : '中項目';
+  if(groupItems.length<=1) return (mi+1) + ' ' + nm;
   return groupPrefix(gi) + '-' + (mi+1) + ' ' + nm;
 }
 
