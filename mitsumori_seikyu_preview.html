@@ -467,7 +467,7 @@ tr.dragging{opacity:0.4;}
         <div class="fgroup"><label>発行日</label><input id="hakkoDate" type="date" oninput="render()"></div>
       </div>
       <div class="fgroup" id="shiharai-wrap"><label id="label-shiharai">有効期限</label><input id="shiharaiDate" type="date" oninput="render()"><div style="font-size:10px;color:var(--sub);margin-top:2px;" id="shiharai-hint">未入力時は発行日＋30日で自動計算されます</div></div>
-      <div class="fgroup"><label>工事件名</label><input id="kojimei" type="text" value="" placeholder="例：〇〇邸 外壁塗装工事" oninput="render()"></div>
+      <div class="fgroup"><label>工事件名</label><input id="kojimei" type="text" value="" placeholder="例：〇〇邸 外壁塗装工事" oninput="syncGroupLeadName();render()"></div>
       <div class="fgroup"><label>施工場所</label><input id="seshubasho" type="text" value="" placeholder="例：大分県別府市〇〇" oninput="render()"></div>
       <div class="fgroup" id="koki-wrap" style="display:none;"><label>工事期間</label><input id="koki" type="text" value="" oninput="render()" placeholder="例：2026/4/22 または 2026/4/1〜2026/4/30"></div>
       <div class="fgroup-row">
@@ -690,6 +690,11 @@ function switchMode(v){
       }
     }
   }
+  // ★ フラット→「大項目・小項目」モード：フラット明細をすべて1つの大項目の小項目(明細)へ移行
+  //    1枚目は「工事件名 一式」の大項目1行、2ページ目以降にその小項目明細が並ぶ
+  if(prev==='flat' && v==='group'){
+    migrateFlatToGroup();
+  }
   // lumpモード切替時：groupSummaryItemsが空なら工事件名で1行サンプル投入
   if(v==='lump' && groupSummaryItems.length===0){
     const kojimei = document.getElementById('kojimei').value || '工事一式';
@@ -697,6 +702,46 @@ function switchMode(v){
   }
   renderEditor();
   render();
+}
+
+// ── フラット明細 →「大項目・小項目」モードへの移行 ──
+// ・入力済みフラット明細をすべて1つの大項目の「小項目（明細）」として取り込み、2ページ目以降に表示する
+// ・大項目名は工事件名（未入力時は「内装補修工事」）。1枚目では数量1・単位「式」で「工事件名 一式」と表記される
+// ・既にユーザーが大項目を編集済み（初期空状態でない）の場合は上書きしない（重複・データ消失防止）
+function migrateFlatToGroup(){
+  const rows = flatItems
+    .filter(it => String(it.name||'').trim()!=='' || parseFloat(it.qty) || parseFloat(it.price) || String(it.note||'').trim()!=='')
+    .map(it => ({name:it.name||'', qty:it.qty, unit:it.unit, price:it.price, note:it.note||''}));
+  if(rows.length===0) return; // 移すものが無ければ既存の大項目をそのまま
+  // 「初期状態」＝大項目がまだ実質空のとき。次の2ケースを初期とみなす：
+  //   ① groupItems.length===0 … フラットCSVを置換取込した直後（groupItemsはクリアされ空配列）
+  //   ② groupItems.length===1 かつ 中身が全て空 … ツール起動直後の初期1行
+  const groupIsInitial = groupItems.length===0 || (
+    groupItems.length===1
+    && !String(groupItems[0].name||'').trim()
+    && (!groupItems[0].middleItems || groupItems[0].middleItems.length===0)
+    && groupItems[0].items.every(it => !String(it.name||'').trim() && !parseFloat(it.qty) && !parseFloat(it.price) && !String(it.note||'').trim())
+  );
+  if(!groupIsInitial) return; // 既存の大項目構成は尊重（再移行による重複を防ぐ）
+  const kojimeiEl = document.getElementById('kojimei');
+  const kojimei = (kojimeiEl ? kojimeiEl.value : '').trim() || '内装補修工事';
+  // _nameAuto:true … この大項目名（1枚目の「一式」行の品名）は工事件名と連動中。
+  //                  大項目名を手修正すると false になり、以後は工事件名を変えても上書きしない。
+  groupItems.splice(0, groupItems.length, {name:kojimei, pageBreak:false, middleItems:[], items:rows, _nameAuto:true});
+}
+
+// ── 工事件名 →「大項目・小項目」モード1枚目の単一明細（先頭大項目）の品名へ連動 ──
+// ・groupモードで、先頭大項目が _nameAuto（自動連動中）の間は、工事件名の入力に追従して品名を更新する
+// ・ユーザーが大項目名を手修正すると _nameAuto が外れ、それ以降は連動しない（手入力を尊重）
+function syncGroupLeadName(){
+  if(mode!=='group') return;
+  if(!groupItems.length) return;
+  const lead = groupItems[0];
+  if(!lead || !lead._nameAuto) return;
+  const el = document.getElementById('kojimei');
+  lead.name = el ? el.value : '';
+  // 編集パネルの大項目名入力にも反映（工事件名欄を入力中なのでフォーカスは奪われない）
+  if(typeof renderGroupBlocks === 'function') renderGroupBlocks();
 }
 
 // ── タイトル更新（タブ表示・PDF初期ファイル名）──
@@ -964,8 +1009,15 @@ function enterNav(e){
 
   if(e.key==='Enter'){
     e.preventDefault();
-    if(col>=0&&col<rowInputs.length-1){focusSel(rowInputs[col+1]);}
-    else{const ni=adjRowInputs(1);if(ni)focusSel(ni[0]);}
+    if(e.shiftKey){
+      // Shift+Enter：左へ。行頭なら前の行の末尾の入力欄へ。
+      if(col>0){focusSel(rowInputs[col-1]);}
+      else{const pi=adjRowInputs(-1);if(pi)focusSel(pi[pi.length-1]);}
+    } else {
+      // Enter：右へ。行末なら次の行の先頭の入力欄へ。
+      if(col>=0&&col<rowInputs.length-1){focusSel(rowInputs[col+1]);}
+      else{const ni=adjRowInputs(1);if(ni)focusSel(ni[0]);}
+    }
     return;
   }
   if(col<0)return;
@@ -1025,7 +1077,9 @@ function renderGroupBlocks(){
     // ── 大項目ヘッダー ──
     let html=`
       <div class="group-header">
-        <input value="${g.name}" oninput="groupItems[${gi}].name=this.value;render()" placeholder="大項目名">
+        <input value="${g.name}" oninput="groupItems[${gi}].name=this.value;groupItems[${gi}]._nameAuto=false;render()" placeholder="大項目名">
+        <button class="grp-move-btn" title="上へ移動（A,B,C,Dの順を入替）" onclick="groupMove(${gi},-1)" ${gi===0?'disabled':''} style="font-size:11px;padding:3px 8px;border:1px solid var(--border);background:#fff;border-radius:4px;cursor:pointer;">▲</button>
+        <button class="grp-move-btn" title="下へ移動（A,B,C,Dの順を入替）" onclick="groupMove(${gi},1)" ${gi===groupItems.length-1?'disabled':''} style="font-size:11px;padding:3px 8px;border:1px solid var(--border);background:#fff;border-radius:4px;cursor:pointer;">▼</button>
         <button class="pb-btn${g.pageBreak?' on':''}" title="この工事の前で改ページ" onclick="groupTogglePageBreak(${gi})">改頁</button>
         <button class="add-middle-btn" onclick="groupAddMiddle(${gi})" title="中項目を追加">＋ 中項目</button>
         <button class="group-del-btn" onclick="groupDelGroup(${gi})">✕ 削除</button>
@@ -1143,6 +1197,13 @@ function groupTogglePageBreak(gi){
   groupItems[gi].pageBreak=!groupItems[gi].pageBreak;
   renderGroupBlocks();render();
 }
+// 大項目（1枚目のA,B,C,D…）の並べ替え。dir=-1で上へ、+1で下へ。
+function groupMove(gi,dir){
+  const ni=gi+dir;
+  if(ni<0 || ni>=groupItems.length) return;
+  const t=groupItems[gi]; groupItems[gi]=groupItems[ni]; groupItems[ni]=t;
+  renderGroupBlocks(); render();
+}
 function groupAddGroup(){groupItems.push({name:'新規大項目',pageBreak:false,middleItems:[],items:[{name:'',qty:1,unit:'㎡',price:0,note:''}]});renderGroupBlocks();render();}
 function groupDelGroup(gi){groupItems.splice(gi,1);renderGroupBlocks();render();}
 function groupAddItem(gi){groupItems[gi].items.push({name:'',qty:'',unit:'',price:'',note:''});renderGroupBlocks();render();}
@@ -1191,14 +1252,16 @@ function groupPrefix(gi){
   do { s = String.fromCharCode(65 + (n % 26)) + s; n = Math.floor(n / 26) - 1; } while(n >= 0);
   return s;
 }
-// 「A 内装工事」のような表示名を返す
+// 「A 内装工事」のような表示名を返す（大項目が1つだけのときは記号を付けず工事件名をそのまま表示）
 function prefixedGroupName(gi, g){
   const nm = (g && g.name) ? g.name : ('大項目'+(gi+1));
+  if(groupItems.length<=1) return nm;
   return groupPrefix(gi) + ' ' + nm;
 }
-// 「A-1 壁工事」のような表示名を返す
+// 「A-1 壁工事」のような表示名を返す（大項目が1つだけのときは大項目記号を省き番号のみ）
 function prefixedMiddleName(gi, mi, m){
   const nm = (m && m.name) ? m.name : '中項目';
+  if(groupItems.length<=1) return (mi+1) + ' ' + nm;
   return groupPrefix(gi) + '-' + (mi+1) + ' ' + nm;
 }
 
@@ -2474,10 +2537,36 @@ ${printScript}
 </html>`;
 }
 
-function printHTML(){
-  const html=buildReeditHTML(true);
-  if(!html){alert('プレビューが見つかりません'); return;}
-  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+function printHTML(preWin){
+  // ① window.open + document.write 方式（既定）。
+  //    blob: URL で開くとブラウザの「PDFに保存」既定ファイル名が <title> を反映せず空になるため、
+  //    実ドキュメントとして書き込み、document.title がファイル名に使われるようにする。
+  //    この方式では子の load ベース自動印刷が再発火しないことがあるので、親から印刷を発火する
+  //    （二重発火はフラグで防止）。そのため自動印刷スクリプトを含まない buildReeditHTML(false) を使う。
+  let win = (preWin && !preWin.closed) ? preWin : null;
+  if(!win){ try{ win = window.open('', '_blank'); }catch(e){ win = null; } }
+  if(win && !win.closed){
+    const html = buildReeditHTML(false);
+    if(!html){ alert('プレビューが見つかりません'); try{ win.close(); }catch(e){} return; }
+    try{
+      win.document.open();
+      win.document.write(html);
+      win.document.close();
+      let printed = false;
+      const fire = function(){
+        if(printed) return; printed = true;
+        try{ win.focus(); win.print(); }catch(e){}
+      };
+      // 描画・画像読み込み完了後に印刷。load 再発火・タイムアウトのいずれか早い方で1回だけ実行。
+      try{ win.addEventListener('load', function(){ setTimeout(fire, 500); }); }catch(e){}
+      setTimeout(fire, 1500);
+      return;
+    }catch(e){ /* 失敗時は下のblob方式へフォールバック */ }
+  }
+  // ② フォールバック：ポップアップがブロックされた等の場合は従来の blob 方式（自動印刷スクリプト入り）
+  const html2 = buildReeditHTML(true);
+  if(!html2){ alert('プレビューが見つかりません'); return; }
+  const blob=new Blob([html2],{type:'text/html;charset=utf-8'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url; a.target='_blank'; a.rel='noopener'; a.click();
@@ -2488,17 +2577,30 @@ function printHTML(){
 // 仕様：印刷・PDFボタンは「①先にdata.jsonへ保存 → ②その後で印刷/PDF」の順で実行する。
 // 保存は silent（確認ダイアログ省略）で行い、現在の編集内容をそのまま台帳へ書き込む。
 // 保存が成功しなかった場合（案件キー未入力・中止・通信失敗等）は、印刷/PDFを続けるか確認する。
-async function _saveLedgerThenRun(action, actionName){
+async function _saveLedgerThenRun(action, actionName, winToCloseOnCancel){
   let ok = false;
   try { ok = await saveToAnkenLedger({silent:true}); }
   catch(e){ console.error(e); ok = false; }
   if(ok !== true){
     const go = confirm('案件台帳(data.json)への保存が完了していません。\n（案件キー未入力・保存中止・通信失敗などの可能性）\n\nこのまま' + actionName + 'を続けますか？\n「キャンセル」を押すと' + actionName + 'も中止します。');
-    if(!go) return;
+    if(!go){
+      // 中止時：印刷用に先行オープンした空ウィンドウがあれば閉じる
+      if(winToCloseOnCancel){ try{ winToCloseOnCancel.close(); }catch(e){} }
+      return;
+    }
   }
   await action();
 }
-function printHTMLWithSave(){ return _saveLedgerThenRun(printHTML, '印刷'); }
+function printHTMLWithSave(){
+  // クリック直後（=ユーザー操作中・await前）に同期でウィンドウを開く＝ポップアップブロック回避。
+  // 台帳保存(await)後に開くと user-activation を失いブロックされるため、ここで先行して開く。
+  let win = null;
+  try { win = window.open('', '_blank'); }catch(e){ win = null; }
+  if(win){
+    try{ win.document.write('<!doctype html><meta charset="utf-8"><title>準備中…</title><body style="font:14px sans-serif;padding:24px;color:#555">PDFを準備しています…</body>'); }catch(e){}
+  }
+  return _saveLedgerThenRun(()=>printHTML(win), '印刷', win);
+}
 function savePDFWithSave(){ return _saveLedgerThenRun(savePDF, 'PDF保存'); }
 
 // 再編集用HTMLを保存（ダウンロード）
