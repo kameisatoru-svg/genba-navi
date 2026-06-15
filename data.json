@@ -2909,6 +2909,80 @@
             ],
             "groupSummaryItems": []
           }
+        },
+        {
+          "書類番号": "見_T9614_村上-諸修繕相談-26",
+          "発行日": "2026-06-11",
+          "金額": 232848,
+          "備考": "村上邸 ソファ・椅子 生地張替え工事（張地 T-9614）",
+          "ファイル": "見_T9614_村上-諸修繕相談-26.pdf",
+          "お客様向け番号": "ARM-T028-260611-04",
+          "_genbaDoc": {
+            "v": 1,
+            "savedAt": "2026-06-15T00:18:02.416Z",
+            "docType": "mitsumori",
+            "mode": "flat",
+            "shokeihiRate": 0,
+            "shokeihiMode": "rate",
+            "shokeihiFixed": 0,
+            "nebiki": 0,
+            "nebikiLabel": "値引き",
+            "hasuChousei": 0,
+            "header": {
+              "atena": "村上信子 様",
+              "mitsumoriNo": "ARM-T028-260611-04",
+              "hakkoDate": "2026-06-11",
+              "shiharaiDate": "",
+              "kojimei": "村上邸 ソファ・椅子 生地張替え工事（張地 T-9614）",
+              "seshubasho": "大分県別府市青山町",
+              "koki": "",
+              "ankenKey": "村上-諸修繕相談-26",
+              "fileSuffix": "T9614"
+            },
+            "flatItems": [
+              {
+                "name": "3人掛けソファ 生地張替え（座面カバー×3・背面カバー×3）",
+                "qty": 1,
+                "unit": "台",
+                "price": 106560,
+                "note": "張地：T-9614",
+                "pageBreak": false
+              },
+              {
+                "name": "1人掛けソファ 生地張替え（座面カバー×1・背面カバー×1）",
+                "qty": 2,
+                "unit": "台",
+                "price": 40560,
+                "note": "張地：T-9614",
+                "pageBreak": false
+              },
+              {
+                "name": "運搬費（引取・納品 2工程／平日日中作業）",
+                "qty": 1,
+                "unit": "式",
+                "price": 24000,
+                "note": "※クッションのみ引取",
+                "pageBreak": false
+              }
+            ],
+            "groupItems": [
+              {
+                "name": "",
+                "pageBreak": false,
+                "middleItems": [],
+                "items": [
+                  {
+                    "name": "",
+                    "qty": "",
+                    "unit": "",
+                    "price": "",
+                    "note": ""
+                  }
+                ]
+              }
+            ],
+            "groupSummaryItems": []
+          }
         }
       ],
       "請求": [],
