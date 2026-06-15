@@ -3553,16 +3553,20 @@ function setWallT(t){
 //  平面図canvas描画
 // ══════════════════════════════════════════
 
-function redrawPlan(){
-  var cv=document.getElementById('zumen-cv'); if(!cv) return;
+// 平面図の描画ジオメトリを一元計算（描画 redrawPlan とヒット判定 _planSc が同じ値を使う）
+//   ・縦は「実際に見えているキャンバス領域(cv-main-wrap)」の高さを使用
+//     → 床/壁/天井バーやドロワーが開いてもキャンバス全体が常に画面内に収まる
+//   ・印刷時のみ従来どおり window 基準（高解像度レイアウトを保つ）
+function _computePlanGeom(){
   var W=roomData.W, D=roomData.D, T=roomData.wallT;
-  // キャンバス固定サイズ：
-  //   横 = Galaxy Z Fold内画面幅センター基準 = window.innerWidth
-  //   縦 = ヘッダー下ライン〜ボトムバー上ライン（固定・ドロワー開閉無関係）
   var CW = window.innerWidth;
-  var headerH = 54;   // .header height
-  var bottomH = 66;   // .bottom-bar height(64) + border(2)
-  var CH_avail = window.innerHeight - headerH - bottomH;
+  var CH_avail;
+  if(window._printMode){
+    CH_avail = window.innerHeight - 54 - 66;
+  } else {
+    var wrap=document.getElementById('cv-main-wrap');
+    CH_avail = (wrap&&wrap.offsetHeight>40) ? wrap.offsetHeight : (window.innerHeight - 54 - 66);
+  }
 
   // ── ドア弧の最大はみ出し量（mm）を事前計算 ──
   var maxArcU=0,maxArcD=0,maxArcL=0,maxArcR=0;
@@ -3576,12 +3580,9 @@ function redrawPlan(){
     });
   });
 
-  // ── 余白・スケール・中央寄せ ──
-  // 基本余白：寸法線を外壁面から離して配置する分を確保（外壁＋引き出し＋数値）
+  // ── 余白・スケール ──
   var PAD=44;
   var mL=Math.max(PAD,60), mR=PAD, mT=PAD, mB=PAD;
-
-  // 幅・高さ両方に合わせたスケール
   var scW=(CW-mL-mR)/W;
   var scH=(CH_avail-mT-mB)/D;
   var sc=Math.min(scW, scH);
@@ -3599,12 +3600,17 @@ function redrawPlan(){
   sc = Math.min(sc, scL, scR, scT, scB);
   sc = Math.max(sc, 0.01);
 
-  var Tpx=T*sc;
-  var rw=W*sc, rd=D*sc;
-  var CH=CH_avail;
-  // 横=センター、縦=左上基準（上余白mTから）
+  var Tpx=T*sc, rw=W*sc, rd=D*sc;
   var ox=Math.round((CW-rw)/2);
-  var oy=mT;
+  var oy=mT; // 縦は左上基準（上余白mTから）
+  return {W:W,D:D,T:T,CW:CW,CH_avail:CH_avail,PAD:PAD,mT:mT,sc:sc,Tpx:Tpx,rw:rw,rd:rd,ox:ox,oy:oy};
+}
+
+function redrawPlan(){
+  var cv=document.getElementById('zumen-cv'); if(!cv) return;
+  var g=_computePlanGeom();
+  var W=g.W, D=g.D, T=g.T, CW=g.CW, CH_avail=g.CH_avail, CH=g.CH_avail;
+  var sc=g.sc, Tpx=g.Tpx, rw=g.rw, rd=g.rd, ox=g.ox, oy=g.oy;
 
   var ctx=setupCanvas(cv,CW,CH);
   ctx.clearRect(0,0,CW,CH);
