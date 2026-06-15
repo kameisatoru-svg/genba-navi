@@ -385,14 +385,6 @@ canvas{display:block;width:100%;}
   <button class="btn-back" onclick="goBackToTop()" title="戻る">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
   </button>
-  <!-- 図面種別セレクト -->
-  <div class="view-select-wrap">
-    <select class="view-select" id="view-select" onchange="switchView(this.value)">
-      <option value="plan">床</option>
-      <option value="wall">壁</option>
-      <option value="ceil">天井</option>
-    </select>
-  </div>
   <!-- 現場名（タップでプロジェクトパネル）：縮小版 -->
   <button id="proj-btn" onclick="toggleProjPanel()" style="flex:1;min-width:0;max-width:160px;height:38px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:10px;color:var(--white);font-size:11px;font-family:inherit;cursor:pointer;padding:0 8px;display:flex;align-items:center;gap:3px;overflow:hidden;">
     <span id="proj-label" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-align:left;">未保存</span>
