@@ -3808,6 +3808,270 @@
               }
             ]
           }
+        },
+        {
+          "書類番号": "見_改１_ネクサス-ビル漏水修理-26",
+          "発行日": "2026-05-22",
+          "金額": 1260600,
+          "備考": "ネクサスプラザビル 漏水部分 天井復旧工事",
+          "ファイル": "見_改１_ネクサス-ビル漏水修理-26.pdf",
+          "お客様向け番号": "ARM-T011-260606-01",
+          "_genbaDoc": {
+            "v": 1,
+            "savedAt": "2026-06-15T06:21:32.681Z",
+            "docType": "mitsumori",
+            "mode": "group",
+            "shokeihiRate": 10,
+            "shokeihiMode": "rate",
+            "shokeihiFixed": 0,
+            "nebiki": 145,
+            "nebikiLabel": "調整値引き",
+            "hasuChousei": 0,
+            "header": {
+              "atena": "株式会社ネクサスプラザ",
+              "mitsumoriNo": "ARM-T011-260606-01",
+              "hakkoDate": "2026-05-22",
+              "shiharaiDate": "",
+              "kojimei": "ネクサスプラザビル 漏水部分 天井復旧工事",
+              "seshubasho": "大分県大分市府内町3丁目7番7号",
+              "koki": "",
+              "ankenKey": "ネクサス-ビル漏水修理-26",
+              "fileSuffix": "改１"
+            },
+            "flatItems": [
+              {
+                "name": "",
+                "qty": "",
+                "unit": "",
+                "price": "",
+                "note": "",
+                "pageBreak": false
+              },
+              {
+                "name": "",
+                "qty": "",
+                "unit": "",
+                "price": "",
+                "note": "",
+                "pageBreak": false
+              },
+              {
+                "name": "",
+                "qty": "",
+                "unit": "",
+                "price": "",
+                "note": "",
+                "pageBreak": false
+              }
+            ],
+            "groupItems": [
+              {
+                "name": "共通 仮設工事",
+                "pageBreak": false,
+                "middleItems": [],
+                "items": [
+                  {
+                    "name": "仮設・搬入養生",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 80000,
+                    "note": ""
+                  },
+                  {
+                    "name": "片付け清掃費",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 65000,
+                    "note": ""
+                  },
+                  {
+                    "name": "",
+                    "qty": "",
+                    "unit": "",
+                    "price": "",
+                    "note": ""
+                  }
+                ]
+              },
+              {
+                "name": "2階 男子トイレ 天井復旧工事",
+                "pageBreak": false,
+                "middleItems": [],
+                "items": [
+                  {
+                    "name": "既存天井撤去（仕上げ・下地とも）",
+                    "qty": 7,
+                    "unit": "㎡",
+                    "price": 2500,
+                    "note": ""
+                  },
+                  {
+                    "name": "撤去材 産業廃棄物処分費",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 38500,
+                    "note": ""
+                  },
+                  {
+                    "name": "天井 軽量鉄骨下地 新設",
+                    "qty": 7,
+                    "unit": "㎡",
+                    "price": 2800,
+                    "note": ""
+                  },
+                  {
+                    "name": "プラスターボード9.5mm 貼り",
+                    "qty": 7,
+                    "unit": "㎡",
+                    "price": 1600,
+                    "note": ""
+                  },
+                  {
+                    "name": "ビニールクロス貼り",
+                    "qty": 7,
+                    "unit": "㎡",
+                    "price": 1850,
+                    "note": ""
+                  },
+                  {
+                    "name": "ダウンライト（新設・配線共）",
+                    "qty": 3,
+                    "unit": "台",
+                    "price": 13800,
+                    "note": ""
+                  },
+                  {
+                    "name": "換気扇（新設・配管共）",
+                    "qty": 1,
+                    "unit": "台",
+                    "price": 22800,
+                    "note": ""
+                  }
+                ]
+              },
+              {
+                "name": "2F更衣室 壁・天井復旧工事",
+                "pageBreak": false,
+                "middleItems": [],
+                "items": [
+                  {
+                    "name": "既存壁・天井撤去（仕上げ・下地とも）",
+                    "qty": 32,
+                    "unit": "㎡",
+                    "price": 2500,
+                    "note": ""
+                  },
+                  {
+                    "name": "撤去材 産業廃棄物処分費",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 58000,
+                    "note": ""
+                  },
+                  {
+                    "name": "壁・天井 軽量鉄骨下地（LGS）新設",
+                    "qty": 32,
+                    "unit": "㎡",
+                    "price": 3000,
+                    "note": ""
+                  },
+                  {
+                    "name": "プラスターボード9.5mm 貼り（壁・天井）",
+                    "qty": 32,
+                    "unit": "㎡",
+                    "price": 1600,
+                    "note": ""
+                  },
+                  {
+                    "name": "ビニールクロス貼り（壁・天井）",
+                    "qty": 72,
+                    "unit": "㎡",
+                    "price": 1850,
+                    "note": ""
+                  },
+                  {
+                    "name": "床タイルカーペット貼替",
+                    "qty": 18,
+                    "unit": "㎡",
+                    "price": 6500,
+                    "note": ""
+                  },
+                  {
+                    "name": "ソフト巾木貼",
+                    "qty": 19,
+                    "unit": "ｍ",
+                    "price": 600,
+                    "note": ""
+                  },
+                  {
+                    "name": "ダウンライト（新設・配線共）",
+                    "qty": 8,
+                    "unit": "台",
+                    "price": 13800,
+                    "note": ""
+                  },
+                  {
+                    "name": "換気扇（新設・配管共）",
+                    "qty": 1,
+                    "unit": "台",
+                    "price": 22000,
+                    "note": ""
+                  },
+                  {
+                    "name": "",
+                    "qty": "",
+                    "unit": "",
+                    "price": "",
+                    "note": ""
+                  }
+                ]
+              },
+              {
+                "name": "2F厨房天井復旧工事",
+                "pageBreak": true,
+                "middleItems": [],
+                "items": [
+                  {
+                    "name": "既存壁・天井撤去（仕上げ・下地とも）",
+                    "qty": 4,
+                    "unit": "㎡",
+                    "price": 2500,
+                    "note": ""
+                  },
+                  {
+                    "name": "撤去材 産業廃棄物処分費",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 18000,
+                    "note": ""
+                  },
+                  {
+                    "name": "天井 軽量鉄骨下地（LGS）新設",
+                    "qty": 4,
+                    "unit": "㎡",
+                    "price": 3000,
+                    "note": ""
+                  },
+                  {
+                    "name": "プラスターボード9.5mm 貼り（天井）",
+                    "qty": 4,
+                    "unit": "㎡",
+                    "price": 1600,
+                    "note": ""
+                  },
+                  {
+                    "name": "ビニールクロス貼り（天井）",
+                    "qty": 4,
+                    "unit": "㎡",
+                    "price": 1850,
+                    "note": ""
+                  }
+                ],
+                "_nameAuto": false
+              }
+            ],
+            "groupSummaryItems": []
+          }
         }
       ],
       "請求": [],
