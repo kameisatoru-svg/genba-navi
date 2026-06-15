@@ -1009,8 +1009,15 @@ function enterNav(e){
 
   if(e.key==='Enter'){
     e.preventDefault();
-    if(col>=0&&col<rowInputs.length-1){focusSel(rowInputs[col+1]);}
-    else{const ni=adjRowInputs(1);if(ni)focusSel(ni[0]);}
+    if(e.shiftKey){
+      // Shift+Enter：左へ。行頭なら前の行の末尾の入力欄へ。
+      if(col>0){focusSel(rowInputs[col-1]);}
+      else{const pi=adjRowInputs(-1);if(pi)focusSel(pi[pi.length-1]);}
+    } else {
+      // Enter：右へ。行末なら次の行の先頭の入力欄へ。
+      if(col>=0&&col<rowInputs.length-1){focusSel(rowInputs[col+1]);}
+      else{const ni=adjRowInputs(1);if(ni)focusSel(ni[0]);}
+    }
     return;
   }
   if(col<0)return;
