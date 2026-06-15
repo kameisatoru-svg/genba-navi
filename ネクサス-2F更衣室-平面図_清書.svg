@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="'Noto Sans CJK JP','Noto Sans JP','IPAGothic','Yu Gothic','Hiragino Kaku Gothic ProN','Meiryo',sans-serif">
+  <defs>
+    <pattern id="orangeHatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="10" height="10" fill="#fde3c4"/>
+      <line x1="0" y1="0" x2="0" y2="10" stroke="#e8932e" stroke-width="2"/>
+    </pattern>
+    <marker id="dim" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+      <path d="M2,2 L8,5 L2,8" fill="none" stroke="#c0392b" stroke-width="1"/>
+    </marker>
+  </defs>
+
+  <!-- ===== タイトル ===== -->
+  <text x="30" y="40" font-size="22" font-weight="bold" fill="#1a2a3a">ネクサスプラザビル 2F更衣室 平面図（清書）</text>
+  <text x="30" y="62" font-size="13" fill="#555">手書きスケッチ(DrawNote)の清書／形状は概略・寸法は手書き記載値(mm)／天井高 CH=2750</text>
+
+  <!-- ===== 床(カーペット=グレー) ===== -->
+  <rect x="283" y="160" width="267" height="251" fill="#b9bcc2"/>
+  <!-- 入口側 廊下(グレー延長) -->
+  <polygon points="550,307 659,307 659,381 629,411 550,411" fill="#b9bcc2"/>
+
+  <!-- ===== 壁クロス張替(オレンジ)アルコーブ ===== -->
+  <rect x="130" y="160" width="153" height="251" fill="url(#orangeHatch)"/>
+
+  <!-- ===== 部屋 外形(壁芯) ===== -->
+  <path d="M130,160 L550,160 L550,307 L659,307 L659,381 L629,411 L130,411 Z"
+        fill="none" stroke="#2c3e50" stroke-width="4"/>
+
+  <!-- 間仕切り(LGS65) -->
+  <line x1="283" y1="160" x2="283" y2="411" stroke="#2c3e50" stroke-width="3" stroke-dasharray="1 0"/>
+  <text x="293" y="182" font-size="12" fill="#2c3e50" font-weight="bold">LGS65（軽鉄下地65）</text>
+  <text x="293" y="198" font-size="11" fill="#2c3e50">／入隅45°×2</text>
+
+  <!-- ドア(W750)＋開き勝手 -->
+  <path d="M360,411 A82,82 0 0,1 442,411" fill="none" stroke="#e8932e" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <line x1="360" y1="411" x2="360" y2="411" stroke="#e8932e"/>
+  <rect x="358" y="408" width="84" height="6" fill="#fff" stroke="#e8932e" stroke-width="1.5"/>
+  <text x="372" y="432" font-size="11" fill="#e8932e" font-weight="bold">W750</text>
+
+  <!-- 45°表記 -->
+  <text x="612" y="372" font-size="11" fill="#2c3e50">45°</text>
+
+  <!-- ===== 寸法線(赤) ===== -->
+  <!-- 上:3818 -->
+  <line x1="130" y1="135" x2="550" y2="135" stroke="#c0392b" stroke-width="1" marker-start="url(#dim)" marker-end="url(#dim)"/>
+  <text x="330" y="129" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">3818</text>
+  <!-- 上:990(廊下) -->
+  <line x1="550" y1="290" x2="659" y2="290" stroke="#c0392b" stroke-width="1" marker-start="url(#dim)" marker-end="url(#dim)"/>
+  <text x="604" y="284" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold">990</text>
+  <!-- 左:2283 -->
+  <line x1="105" y1="160" x2="105" y2="411" stroke="#c0392b" stroke-width="1" marker-start="url(#dim)" marker-end="url(#dim)"/>
+  <text x="98" y="290" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold" transform="rotate(-90 98 290)">2283</text>
+  <!-- アルコーブ幅:1387 -->
+  <line x1="130" y1="175" x2="283" y2="175" stroke="#c0392b" stroke-width="1" marker-start="url(#dim)" marker-end="url(#dim)"/>
+  <text x="206" y="170" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold">1387</text>
+  <!-- 左内:900 / 800 -->
+  <line x1="148" y1="160" x2="148" y2="275" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
+  <text x="158" y="222" font-size="11" fill="#c0392b">900</text>
+  <line x1="148" y1="275" x2="148" y2="411" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
+  <text x="158" y="348" font-size="11" fill="#c0392b">800</text>
+  <!-- 下:2065 / 775 -->
+  <line x1="130" y1="436" x2="357" y2="436" stroke="#c0392b" stroke-width="1" marker-start="url(#dim)" marker-end="url(#dim)"/>
+  <text x="243" y="452" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">2065</text>
+  <line x1="357" y1="436" x2="442" y2="436" stroke="#c0392b" stroke-width="1" marker-start="url(#dim)" marker-end="url(#dim)"/>
+  <text x="399" y="452" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold">775</text>
+  <!-- 右廊下:950 / 350 -->
+  <line x1="684" y1="307" x2="684" y2="411" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
+  <text x="690" y="362" font-size="11" fill="#c0392b">950</text>
+  <line x1="550" y1="307" x2="550" y2="411" stroke="#c0392b" stroke-width="0.6" stroke-dasharray="3 2"/>
+  <text x="556" y="332" font-size="10" fill="#c0392b">350</text>
+
+  <!-- ゾーン内ラベル -->
+  <text x="206" y="300" font-size="12" fill="#a8600a" text-anchor="middle" font-weight="bold">壁クロス</text>
+  <text x="206" y="316" font-size="12" fill="#a8600a" text-anchor="middle" font-weight="bold">張替部</text>
+  <text x="416" y="290" font-size="12" fill="#3a3f47" text-anchor="middle" font-weight="bold">タイルカーペット</text>
+  <text x="416" y="306" font-size="12" fill="#3a3f47" text-anchor="middle" font-weight="bold">張替（グレー）</text>
+
+  <!-- ===== 凡例 ===== -->
+  <g transform="translate(720,110)">
+    <text x="0" y="0" font-size="14" font-weight="bold" fill="#1a2a3a">凡 例</text>
+    <rect x="0" y="12" width="22" height="14" fill="url(#orangeHatch)" stroke="#e8932e"/>
+    <text x="30" y="24" font-size="12" fill="#333">壁クロス張替（オレンジ部）</text>
+    <rect x="0" y="34" width="22" height="14" fill="#b9bcc2"/>
+    <text x="30" y="46" font-size="12" fill="#333">タイルカーペット張替（グレー部）</text>
+    <line x1="0" y1="62" x2="22" y2="62" stroke="#2c3e50" stroke-width="4"/>
+    <text x="30" y="66" font-size="12" fill="#333">壁芯（アウトライン）</text>
+    <text x="0" y="88" font-size="12" fill="#333">※ 天井は囲い部を天井クロス張替</text>
+  </g>
+
+  <!-- ===== 損傷メモ ===== -->
+  <g transform="translate(720,230)">
+    <rect x="-8" y="-18" width="270" height="150" fill="#fff7f2" stroke="#e8932e" stroke-width="1.2" rx="6"/>
+    <text x="0" y="0" font-size="14" font-weight="bold" fill="#c0392b">損傷・補修メモ</text>
+    <text x="0" y="24" font-size="12" fill="#333">○ 天井 PB9.5mm</text>
+    <text x="14" y="42" font-size="12" fill="#333">≒ 600×800 落下 → 張替 約1枚</text>
+    <text x="0" y="66" font-size="12" fill="#333">○ 壁下部 PB12.5mm 欠損</text>
+    <text x="14" y="84" font-size="12" fill="#333">W900 × H600 → 張替 4〜5枚</text>
+    <text x="0" y="108" font-size="12" fill="#333">○ 天井高 CH = 2750</text>
+    <text x="0" y="126" font-size="11" fill="#888">（数量は概算・現地採寸で確定）</text>
+  </g>
+</svg>
