@@ -1857,24 +1857,61 @@ function removePlanCol(id){
   _renderDrawerContent();
 }
 
+// 移動可能な方向（種別・面で制限）。h=左右, v=上下
+function _colMoveAxis(c){
+  if(c.type==='corner') return {h:false, v:false};          // コーナーは固定
+  if(c.type==='wall'){
+    if(c.face==='A'||c.face==='C') return {h:true, v:false}; // 上下壁＝左右のみ
+    if(c.face==='B'||c.face==='D') return {h:false, v:true}; // 左右壁＝上下のみ
+  }
+  return {h:true, v:true};                                   // 独立柱は自由
+}
+
+// 指定した壁・コーナーから外れないよう、制約軸を壁面に再スナップ＋室内にクランプ
+function _snapCol(c){
+  var W=roomData.W, D=roomData.D;
+  var cw=Math.max(0,W-c.w), cd=Math.max(0,D-c.d);
+  if(c.type==='corner'){
+    if(c.corner==='tl'){ c.x=0;  c.y=0;  }
+    if(c.corner==='tr'){ c.x=cw; c.y=0;  }
+    if(c.corner==='bl'){ c.x=0;  c.y=cd; }
+    if(c.corner==='br'){ c.x=cw; c.y=cd; }
+    return;
+  }
+  if(c.type==='wall'){
+    if(c.face==='A') c.y=0;       // 上壁に固定
+    if(c.face==='C') c.y=cd;      // 下壁に固定
+    if(c.face==='D') c.x=0;       // 左壁に固定
+    if(c.face==='B') c.x=cw;      // 右壁に固定
+  }
+  // 沿う軸（および独立柱の両軸）は室内にクランプ
+  c.x=Math.max(0,Math.min(cw, c.x));
+  c.y=Math.max(0,Math.min(cd, c.y));
+}
+
 // 柱を矢印で移動（選択中の柱・moveStep単位。dy=-1で上方向）
+//   指定した壁／コーナーから外れる方向（壁に対して垂直＝宙に浮く方向）は無効
 function movPlanCol(dx,dy){
   var c=planColumns.find(function(c){return c.id===planColSelId;}); if(!c) return;
+  var ax=_colMoveAxis(c);
+  if(dx!==0 && !ax.h) return; // 左右移動が許されない面
+  if(dy!==0 && !ax.v) return; // 上下移動が許されない面
   pushHistory();
-  var W=roomData.W, D=roomData.D;
-  c.x=Math.max(0,Math.min(Math.max(0,W-c.w), c.x+dx*moveStep));
-  c.y=Math.max(0,Math.min(Math.max(0,D-c.d), c.y+dy*moveStep));
+  c.x+=dx*moveStep;
+  c.y+=dy*moveStep;
+  _snapCol(c); // 制約軸を壁に再スナップ＋クランプ
   _renderDrawerContent(); redrawPlan();
 }
 
-// 柱のサイズ変更
+// 柱のサイズ変更（変更後も指定の壁・コーナーに沿わせる）
 function resizePlanCol(dim,val){
   var c=planColumns.find(function(c){return c.id===planColSelId;}); if(!c) return;
   var v=_pint(val,0); if(v<10) return;
   pushHistory();
   var W=roomData.W, D=roomData.D;
-  if(dim==='w'){ c.w=W?Math.min(v,W):v; c.x=Math.max(0,Math.min(Math.max(0,(W||v)-c.w), c.x)); }
-  else         { c.d=D?Math.min(v,D):v; c.y=Math.max(0,Math.min(Math.max(0,(D||v)-c.d), c.y)); }
+  if(dim==='w'){ c.w=W?Math.min(v,W):v; }
+  else         { c.d=D?Math.min(v,D):v; }
+  _snapCol(c);
   _renderDrawerContent(); redrawPlan();
 }
 
