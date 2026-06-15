@@ -1071,6 +1071,8 @@ function renderGroupBlocks(){
     let html=`
       <div class="group-header">
         <input value="${g.name}" oninput="groupItems[${gi}].name=this.value;groupItems[${gi}]._nameAuto=false;render()" placeholder="大項目名">
+        <button class="grp-move-btn" title="上へ移動（A,B,C,Dの順を入替）" onclick="groupMove(${gi},-1)" ${gi===0?'disabled':''} style="font-size:11px;padding:3px 8px;border:1px solid var(--border);background:#fff;border-radius:4px;cursor:pointer;">▲</button>
+        <button class="grp-move-btn" title="下へ移動（A,B,C,Dの順を入替）" onclick="groupMove(${gi},1)" ${gi===groupItems.length-1?'disabled':''} style="font-size:11px;padding:3px 8px;border:1px solid var(--border);background:#fff;border-radius:4px;cursor:pointer;">▼</button>
         <button class="pb-btn${g.pageBreak?' on':''}" title="この工事の前で改ページ" onclick="groupTogglePageBreak(${gi})">改頁</button>
         <button class="add-middle-btn" onclick="groupAddMiddle(${gi})" title="中項目を追加">＋ 中項目</button>
         <button class="group-del-btn" onclick="groupDelGroup(${gi})">✕ 削除</button>
@@ -1187,6 +1189,13 @@ function renderGroupBlocks(){
 function groupTogglePageBreak(gi){
   groupItems[gi].pageBreak=!groupItems[gi].pageBreak;
   renderGroupBlocks();render();
+}
+// 大項目（1枚目のA,B,C,D…）の並べ替え。dir=-1で上へ、+1で下へ。
+function groupMove(gi,dir){
+  const ni=gi+dir;
+  if(ni<0 || ni>=groupItems.length) return;
+  const t=groupItems[gi]; groupItems[gi]=groupItems[ni]; groupItems[ni]=t;
+  renderGroupBlocks(); render();
 }
 function groupAddGroup(){groupItems.push({name:'新規大項目',pageBreak:false,middleItems:[],items:[{name:'',qty:1,unit:'㎡',price:0,note:''}]});renderGroupBlocks();render();}
 function groupDelGroup(gi){groupItems.splice(gi,1);renderGroupBlocks();render();}
