@@ -664,6 +664,10 @@ var curFaceIdx = 0;      // 展開図時の面インデックス
 var moveStep   = 10;
 var drawMode   = 'edit';
 
+// 全角数字→半角の保険（Typeless IME等で全角確定された数値対策）
+function _z2h(s){ return String(s==null?'':s).replace(/[０-９]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);}).replace(/[．。]/g,'.').replace(/[，、]/g,''); }
+function _pint(s,def){ var v=parseInt(_z2h(s),10); return isNaN(v)?(def||0):v; }
+
 // ══════════════════════════════════════════
 //  Undo/Redo
 // ══════════════════════════════════════════
