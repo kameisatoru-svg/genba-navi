@@ -1519,16 +1519,20 @@ function _drawerList(){
 
 function _drawerPlanList(){
   var h='<div class="drawer-op">';
+  // 選択中の柱の移動パネル（パーツから柱を選んで右・左などへ移動）
+  var selCol=(_planSelType==='column'&&planColSelId!=null)?planColumns.find(function(c){return c.id===planColSelId;}):null;
+  if(selCol){ h+=_colMovePanel(selCol); }
   if(planColumns.length===0&&planPartitions.length===0){
     h+='<div style="font-size:12px;color:#9a9a9a;text-align:center;padding:10px 0;">配置なし</div>';
   }
   planColumns.forEach(function(c){
     var sel=planColSelId===c.id;
     var bc=sel?'var(--accent)':'rgba(30,45,64,0.1)';
+    var tlbl={wall:'壁柱',corner:'コーナー柱',interior:'独立柱'}[c.type]||'柱';
     h+='<div data-colid="'+c.id+'" data-type="column" '
       +'onclick="var id=parseInt(this.dataset.colid);planColSelId=id;_planSelId=id;_planSelType=this.dataset.type;redrawPlan();_renderDrawerContent();" '
       +'style="background:#fff;border-radius:8px;border:1.5px solid '+bc+';padding:8px 12px;margin-bottom:5px;display:flex;align-items:center;gap:8px;cursor:pointer;">'
-      +'<div style="flex:1;font-size:12px;font-weight:700;color:#1e2d40;">柱 '+c.w+'×'+c.d+'mm</div>'
+      +'<div style="flex:1;font-size:12px;font-weight:700;color:#1e2d40;">'+tlbl+' '+c.w+'×'+c.d+'mm</div>'
       +'<button data-colid="'+c.id+'" data-type="column" '
       +'onclick="event.stopPropagation();var id=parseInt(this.dataset.colid);planColSelId=id;_planSelId=id;_planSelType=this.dataset.type;deletePlanSel();" '
       +'style="font-size:10px;color:#e53535;background:none;border:1px solid rgba(229,53,53,0.3);border-radius:5px;padding:2px 8px;cursor:pointer;">削除</button></div>';
