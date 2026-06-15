@@ -1517,6 +1517,55 @@ function _drawerList(){
   return _drawerOpList();
 }
 
+// 選択中の柱の移動・サイズ変更パネル（開口部の十字パネルと同形式）
+function _colMovePanel(c){
+  var W=roomData.W, D=roomData.D;
+  var d={left:c.x, right:Math.max(0,W-c.x-c.w), top:c.y, bottom:Math.max(0,D-c.y-c.d)};
+  var BW='52px';
+  var arrowStyle='height:'+BW+';width:'+BW+';border-radius:10px;border:1.5px solid rgba(30,45,64,0.2);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;';
+  function ab(dir,oc){
+    var paths={'up':'M12 8l-6 6h12z','down':'M12 16l6-6H6z','left':'M8 12l6-6v12z','right':'M16 12l-6 6V6z'};
+    return '<button onclick="'+oc+'" style="'+arrowStyle+'"><svg width="44" height="44" viewBox="0 0 24 24" fill="#1e2d40"><path d="'+paths[dir]+'"/></svg></button>';
+  }
+  var customOn=(moveStep!==10&&moveStep!==100&&moveStep!==300);
+  var typeLbl={wall:'壁柱',corner:'コーナー柱',interior:'独立柱'}[c.type]||'柱';
+  var hh='<div style="padding:2px 0 6px;">';
+  hh+='<div style="font-size:12px;font-weight:700;color:#1e2d40;text-align:center;margin-bottom:4px;">'+typeLbl+'を移動</div>';
+  hh+='<div style="display:flex;align-items:flex-start;gap:10px;">';
+  // 十字
+  hh+='<div style="display:grid;grid-template-columns:'+BW+' '+BW+' '+BW+';grid-template-rows:'+BW+' '+BW+' '+BW+';gap:4px;flex-shrink:0;">';
+  hh+='<div></div>'+ab('up','movPlanCol(0,-1)')+'<div></div>';
+  hh+=ab('left','movPlanCol(-1,0)')+'<div></div>'+ab('right','movPlanCol(1,0)');
+  hh+='<div></div>'+ab('down','movPlanCol(0,1)')+'<div></div>';
+  hh+='</div>';
+  // 右カラム
+  hh+='<div style="flex:1;display:flex;flex-direction:column;gap:3px;">';
+  // ステップ
+  hh+='<div style="display:flex;gap:4px;">';
+  [10,100,300].forEach(function(s){
+    var on=moveStep===s;
+    hh+='<button onclick="setMvStep('+s+')" style="flex:1;height:44px;border-radius:10px;border:1.5px solid rgba(30,45,64,0.15);background:'+(on?'#1e2d40':'#fff')+';color:'+(on?'#fff':'#5a6a7a')+';font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">'+s+'</button>';
+  });
+  hh+='<input id="col-step-custom" type="text" value="'+(customOn?moveStep:'')+'" placeholder="自由" inputmode="numeric" style="flex:1;height:44px;border-radius:10px;border:1.5px solid rgba(30,45,64,0.15);background:'+(customOn?'#1e2d40':'#fff')+';color:'+(customOn?'#fff':'#1e2d40')+';font-size:12px;font-weight:700;text-align:center;font-family:inherit;min-width:0;" oninput="var v=_pint(this.value,0);if(v>0)setMvStep(v);">';
+  hh+='</div>';
+  // 幅・奥行・削除
+  hh+='<div style="display:flex;gap:4px;align-items:stretch;">';
+  hh+='<div style="flex:1;background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:3px 4px;text-align:center;"><div style="font-size:8px;color:#5a6a7a;">幅 mm</div><input type="text" value="'+c.w+'" inputmode="numeric" style="width:100%;border:none;outline:none;font-size:13px;font-weight:700;color:#1e2d40;text-align:center;background:transparent;font-family:inherit;" oninput="resizePlanCol(\'w\',this.value)"></div>';
+  hh+='<div style="flex:1;background:#fff;border-radius:7px;border:1px solid rgba(30,45,64,0.12);padding:3px 4px;text-align:center;"><div style="font-size:8px;color:#5a6a7a;">奥行 mm</div><input type="text" value="'+c.d+'" inputmode="numeric" style="width:100%;border:none;outline:none;font-size:13px;font-weight:700;color:#1e2d40;text-align:center;background:transparent;font-family:inherit;" oninput="resizePlanCol(\'d\',this.value)"></div>';
+  hh+='<button onclick="removePlanCol('+c.id+')" style="height:44px;padding:0 10px;border:1.5px solid rgba(229,53,53,0.5);border-radius:10px;background:transparent;color:#e53535;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">削除</button>';
+  hh+='</div>';
+  // 位置情報
+  hh+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;">';
+  hh+='<div style="text-align:center;"><div style="font-size:8px;color:#9a9a9a;">左端から</div><div style="font-size:11px;font-weight:700;color:#5a6a7a;">'+Math.round(d.left)+'mm</div></div>';
+  hh+='<div style="text-align:center;"><div style="font-size:8px;color:#9a9a9a;">右端から</div><div style="font-size:11px;font-weight:700;color:#5a6a7a;">'+Math.round(d.right)+'mm</div></div>';
+  hh+='<div style="text-align:center;"><div style="font-size:8px;color:#9a9a9a;">上端から</div><div style="font-size:11px;font-weight:700;color:#5a6a7a;">'+Math.round(d.top)+'mm</div></div>';
+  hh+='<div style="text-align:center;"><div style="font-size:8px;color:#9a9a9a;">下端から</div><div style="font-size:11px;font-weight:700;color:#5a6a7a;">'+Math.round(d.bottom)+'mm</div></div>';
+  hh+='</div>';
+  hh+='</div></div>';
+  hh+='<div style="border-top:1px solid rgba(30,45,64,0.1);margin:6px 0 8px;"></div>';
+  return hh;
+}
+
 function _drawerPlanList(){
   var h='<div class="drawer-op">';
   // 選択中の柱の移動パネル（パーツから柱を選んで右・左などへ移動）
@@ -1882,6 +1931,7 @@ function deletePlanSel(){
     planPartitions=planPartitions.filter(function(p){return p.id!==_planSelId;});
   } else if(_planSelType==='column'){
     planColumns=planColumns.filter(function(c){return c.id!==_planSelId;});
+    if(planColSelId===_planSelId) planColSelId=null;
   }
   _planSelType=null; _planSelId=null;
   renderPlan();
