@@ -713,10 +713,15 @@ function migrateFlatToGroup(){
     .filter(it => String(it.name||'').trim()!=='' || parseFloat(it.qty) || parseFloat(it.price) || String(it.note||'').trim()!=='')
     .map(it => ({name:it.name||'', qty:it.qty, unit:it.unit, price:it.price, note:it.note||''}));
   if(rows.length===0) return; // 移すものが無ければ既存の大項目をそのまま
-  const groupIsInitial = groupItems.length===1
+  // 「初期状態」＝大項目がまだ実質空のとき。次の2ケースを初期とみなす：
+  //   ① groupItems.length===0 … フラットCSVを置換取込した直後（groupItemsはクリアされ空配列）
+  //   ② groupItems.length===1 かつ 中身が全て空 … ツール起動直後の初期1行
+  const groupIsInitial = groupItems.length===0 || (
+    groupItems.length===1
     && !String(groupItems[0].name||'').trim()
     && (!groupItems[0].middleItems || groupItems[0].middleItems.length===0)
-    && groupItems[0].items.every(it => !String(it.name||'').trim() && !parseFloat(it.qty) && !parseFloat(it.price) && !String(it.note||'').trim());
+    && groupItems[0].items.every(it => !String(it.name||'').trim() && !parseFloat(it.qty) && !parseFloat(it.price) && !String(it.note||'').trim())
+  );
   if(!groupIsInitial) return; // 既存の大項目構成は尊重（再移行による重複を防ぐ）
   const kojimeiEl = document.getElementById('kojimei');
   const kojimei = (kojimeiEl ? kojimeiEl.value : '').trim() || '内装補修工事';
