@@ -3358,8 +3358,7 @@ function goFace(f){
   saveCurrentInputs();
   curView='face'+f;
   curFaceIdx=['A','B','C','D'].indexOf(f);
-  document.getElementById('view-select').value=curView;
-  renderMain();
+  renderMain(); // セレクト＆壁面タブの同期はrenderMain内で実施
 }
 
 function setWallT(t){
