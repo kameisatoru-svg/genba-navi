@@ -953,16 +953,24 @@ function saveCurrentInputs(){
 // ══════════════════════════════════════════
 
 function renderMain(){
-  var sel=document.getElementById('view-select');
-  // セレクトはカテゴリ（床=plan / 壁=wall / 天井=ceil）を表示。展開図A〜Dはすべて「壁」
-  var cat=curView.indexOf('face')===0?'wall':curView;
-  if(sel&&sel.value!==cat) sel.value=cat;
+  _renderCatTabBar();
   _renderFaceTabBar();
   _renderBottomBar();
   _closeDrawer();
   if(curView==='plan')       renderPlan();
   else if(curView==='ceil')  renderCeil();
   else                       renderFace();
+}
+
+// ── カテゴリタブ（床／壁／天井）生成：常設。アクティブ表示のみ更新 ──
+function _renderCatTabBar(){
+  var bar=document.getElementById('cat-tab-bar');
+  if(!bar) return;
+  // 展開図A〜Dはすべて「壁」カテゴリ
+  var cat=curView.indexOf('face')===0?'wall':curView;
+  bar.querySelectorAll('.cat-tab').forEach(function(btn){
+    btn.classList.toggle('active', btn.dataset.cat===cat);
+  });
 }
 
 // ── 壁面タブ（A〜D）生成：「壁」＝展開図モード時のみ表示 ──
