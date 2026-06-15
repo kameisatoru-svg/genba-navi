@@ -283,6 +283,24 @@ canvas{display:block;width:100%;}
   background:var(--navy);color:#fff;font-size:14px;font-weight:700;
   cursor:pointer;font-family:inherit;
 }
+/* 柱ダイアログ：種別・面・コーナー選択 */
+.col-dlg-label{font-size:11px;color:var(--text2);font-weight:600;margin:8px 0 4px;}
+.col-type-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.col-type-btn{
+  height:44px;border:1.5px solid rgba(30,45,64,0.18);border-radius:10px;
+  background:#fff;color:var(--text2);font-size:13px;font-weight:700;
+  cursor:pointer;font-family:inherit;
+}
+.col-type-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+.col-pos-sec.hidden{display:none;}
+.col-face-row{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;}
+.col-corner-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.col-face-btn,.col-corner-btn{
+  height:40px;border:1.5px solid rgba(30,45,64,0.18);border-radius:9px;
+  background:#fff;color:var(--text2);font-size:12px;font-weight:700;
+  cursor:pointer;font-family:inherit;
+}
+.col-face-btn.active,.col-corner-btn.active{background:var(--accent);color:var(--navy);border-color:var(--accent);}
 
 /* ── 割付送信モーダル ── */
 .wa-modal-overlay{
