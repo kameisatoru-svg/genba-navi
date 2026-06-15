@@ -728,6 +728,8 @@ var CEIL_TYPES = [
 
 function switchView(v){
   saveCurrentInputs();
+  // 「壁」カテゴリは展開図(face)へ。直前に見ていた面を維持（無ければA面）
+  if(v==='wall'){ v='face'+FACES[curFaceIdx]; }
   curView = v;
   if(v.startsWith('face')){
     var fi = ['A','B','C','D'].indexOf(v.charAt(4));
@@ -960,12 +962,30 @@ function saveCurrentInputs(){
 
 function renderMain(){
   var sel=document.getElementById('view-select');
-  if(sel&&sel.value!==curView) sel.value=curView;
+  // セレクトはカテゴリ（床=plan / 壁=wall / 天井=ceil）を表示。展開図A〜Dはすべて「壁」
+  var cat=curView.indexOf('face')===0?'wall':curView;
+  if(sel&&sel.value!==cat) sel.value=cat;
+  _renderFaceTabBar();
   _renderBottomBar();
   _closeDrawer();
   if(curView==='plan')       renderPlan();
   else if(curView==='ceil')  renderCeil();
   else                       renderFace();
+}
+
+// ── 壁面タブ（A〜D）生成：「壁」＝展開図モード時のみ表示 ──
+function _renderFaceTabBar(){
+  var bar=document.getElementById('face-tab-bar');
+  if(!bar) return;
+  var isWall=curView.indexOf('face')===0;
+  bar.classList.toggle('hidden', !isWall);
+  if(!isWall) return;
+  bar.querySelectorAll('.face-tab').forEach(function(btn){
+    var fi=FACES.indexOf(btn.dataset.face);
+    var hasData=(faceOpenings[fi]&&faceOpenings[fi].length>0)||(faceEquips[fi]&&faceEquips[fi].length>0);
+    btn.classList.toggle('active', fi===curFaceIdx);
+    btn.classList.toggle('has-data', hasData);
+  });
 }
 
 // ── ボトムバー生成 ──
