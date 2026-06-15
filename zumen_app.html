@@ -1531,14 +1531,25 @@ function _colMovePanel(c){
   }
   var customOn=(moveStep!==10&&moveStep!==100&&moveStep!==300);
   var typeLbl={wall:'壁柱',corner:'コーナー柱',interior:'独立柱'}[c.type]||'柱';
+  var ax=_colMoveAxis(c);
+  // 制約の説明（指定した壁/コーナーから外れる方向は動かせない）
+  var faceJp={A:'A面（上壁）',B:'B面（右壁）',C:'C面（下壁）',D:'D面（左壁）'};
+  var cornerJp={tl:'左上',tr:'右上',bl:'左下',br:'右下'};
+  var hint='';
+  if(c.type==='corner') hint=(cornerJp[c.corner]||'')+'コーナーに固定';
+  else if(c.type==='wall') hint=(faceJp[c.face]||'')+'に沿って'+(ax.h?'左右':'上下')+'のみ';
+  else hint='自由に移動';
+  var dis='height:'+BW+';width:'+BW+';border-radius:10px;border:1.5px dashed rgba(30,45,64,0.12);background:rgba(30,45,64,0.03);';
+  function cell(dir,oc,ok){ return ok?ab(dir,oc):'<div style="'+dis+'"></div>'; }
   var hh='<div style="padding:2px 0 6px;">';
-  hh+='<div style="font-size:12px;font-weight:700;color:#1e2d40;text-align:center;margin-bottom:4px;">'+typeLbl+'を移動</div>';
+  hh+='<div style="font-size:12px;font-weight:700;color:#1e2d40;text-align:center;">'+typeLbl+'を移動</div>';
+  hh+='<div style="font-size:10px;color:#9a9a9a;text-align:center;margin-bottom:4px;">'+hint+'</div>';
   hh+='<div style="display:flex;align-items:flex-start;gap:10px;">';
-  // 十字
+  // 十字（許可された方向のみ操作可。禁止方向は破線の空セル）
   hh+='<div style="display:grid;grid-template-columns:'+BW+' '+BW+' '+BW+';grid-template-rows:'+BW+' '+BW+' '+BW+';gap:4px;flex-shrink:0;">';
-  hh+='<div></div>'+ab('up','movPlanCol(0,-1)')+'<div></div>';
-  hh+=ab('left','movPlanCol(-1,0)')+'<div></div>'+ab('right','movPlanCol(1,0)');
-  hh+='<div></div>'+ab('down','movPlanCol(0,1)')+'<div></div>';
+  hh+='<div></div>'+cell('up','movPlanCol(0,-1)',ax.v)+'<div></div>';
+  hh+=cell('left','movPlanCol(-1,0)',ax.h)+'<div></div>'+cell('right','movPlanCol(1,0)',ax.h);
+  hh+='<div></div>'+cell('down','movPlanCol(0,1)',ax.v)+'<div></div>';
   hh+='</div>';
   // 右カラム
   hh+='<div style="flex:1;display:flex;flex-direction:column;gap:3px;">';
