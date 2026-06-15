@@ -462,6 +462,39 @@ canvas{display:block;width:100%;}
   <div class="col-dialog-box">
     <div class="col-dialog-head" id="col-dialog-head">柱を配置</div>
     <div class="col-dialog-body">
+      <!-- 種別（タップ位置から自動選択。手動で変更可） -->
+      <div class="col-dlg-label">種別（タップ位置から自動。変更できます）</div>
+      <div class="col-type-row">
+        <button class="col-type-btn" data-ctype="wall"     onclick="setColType('wall')">壁柱</button>
+        <button class="col-type-btn" data-ctype="corner"   onclick="setColType('corner')">コーナー柱</button>
+        <button class="col-type-btn" data-ctype="interior" onclick="setColType('interior')">独立柱</button>
+      </div>
+      <!-- 壁柱：面選択 -->
+      <div id="col-pos-wall" class="col-pos-sec hidden">
+        <div class="col-dlg-label">面</div>
+        <div class="col-face-row">
+          <button class="col-face-btn" data-face="A" onclick="setColFace('A')">A面(上)</button>
+          <button class="col-face-btn" data-face="B" onclick="setColFace('B')">B面(右)</button>
+          <button class="col-face-btn" data-face="C" onclick="setColFace('C')">C面(下)</button>
+          <button class="col-face-btn" data-face="D" onclick="setColFace('D')">D面(左)</button>
+        </div>
+      </div>
+      <!-- コーナー柱：コーナー選択 -->
+      <div id="col-pos-corner" class="col-pos-sec hidden">
+        <div class="col-dlg-label">コーナー</div>
+        <div class="col-corner-grid">
+          <button class="col-corner-btn" data-corner="tl" onclick="setColCorner('tl')">左上</button>
+          <button class="col-corner-btn" data-corner="tr" onclick="setColCorner('tr')">右上</button>
+          <button class="col-corner-btn" data-corner="bl" onclick="setColCorner('bl')">左下</button>
+          <button class="col-corner-btn" data-corner="br" onclick="setColCorner('br')">右下</button>
+        </div>
+      </div>
+      <!-- 独立柱：説明のみ -->
+      <div id="col-pos-interior" class="col-pos-sec hidden">
+        <div class="col-dlg-label">配置はタップした位置。後から矢印で移動できます。</div>
+      </div>
+      <!-- サイズ -->
+      <div class="col-dlg-label">サイズ</div>
       <div class="r2">
         <div class="iw"><span>幅 mm</span><input type="text" id="col-dlg-w" value="120" inputmode="numeric"></div>
         <div class="iw"><span>奥行 mm</span><input type="text" id="col-dlg-d" value="120" inputmode="numeric"></div>
