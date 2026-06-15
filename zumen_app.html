@@ -4745,7 +4745,7 @@ function resizeEq(axis,val){
           for(var ci=planColumns.length-1;ci>=0;ci--){
             var c=planColumns[ci];
             if(mmX>=c.x&&mmX<=c.x+c.w&&mmY>=c.y&&mmY<=c.y+c.d){
-              _planSelType='column'; _planSelId=c.id; hit=true; break;
+              _planSelType='column'; _planSelId=c.id; planColSelId=c.id; hit=true; break;
             }
           }
         }
@@ -4785,7 +4785,8 @@ function resizeEq(axis,val){
             }
           }
         }
-        if(!hit){ _planSelType=null; _planSelId=null; }
+        if(!hit){ _planSelType=null; _planSelId=null; planColSelId=null; }
+        if(_planSelType!=='column') planColSelId=(_planSelType==='column')?planColSelId:null;
         if(_planSelType!=='opening') renderPlan();
         else redrawPlan();
       } else {
