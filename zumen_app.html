@@ -37,24 +37,17 @@ body{
 }
 .btn-back:active{background:rgba(255,255,255,0.15);}
 
-/* 図面種別セレクト */
-.view-select-wrap{
-  position:relative;flex:0 0 auto;
+/* カテゴリタブ（床／壁／天井：常設。ヘッダー直下） */
+.cat-tab-bar{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:6px;
+  background:var(--navy);padding:0 10px 6px;flex-shrink:0;
 }
-.view-select{
-  height:38px;
-  background:rgba(255,255,255,0.12);
-  border:1px solid rgba(255,255,255,0.25);
-  border-radius:10px;color:var(--white);
-  font-size:13px;font-weight:700;font-family:inherit;
-  padding:0 26px 0 10px;cursor:pointer;
-  -webkit-appearance:none;appearance:none;outline:none;
+.cat-tab{
+  height:38px;border:1px solid rgba(255,255,255,0.25);border-radius:10px;
+  background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.85);
+  font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;
 }
-.view-select option{background:#ffffff;color:#1e2d40;}
-.view-select-wrap::after{
-  content:'▼';position:absolute;right:8px;top:50%;transform:translateY(-50%);
-  font-size:9px;color:rgba(255,255,255,0.7);pointer-events:none;
-}
+.cat-tab.active{background:var(--accent);color:var(--navy);border-color:var(--accent);}
 
 /* 壁面タブ（A〜D：「壁」モード時のみ表示。割り付けアプリと同じ4面切替） */
 .face-tab-bar{
@@ -410,6 +403,13 @@ canvas{display:block;width:100%;}
   <button id="btn-outline-finish" onclick="outlineFinish()" class="hidden" style="height:38px;padding:0 12px;border:none;border-radius:10px;background:var(--accent);color:var(--navy);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;">
     終了
   </button>
+</div>
+
+<!-- カテゴリタブ（床／壁／天井：常設） -->
+<div id="cat-tab-bar" class="cat-tab-bar">
+  <button class="cat-tab" data-cat="plan" onclick="switchView('plan')">床</button>
+  <button class="cat-tab" data-cat="wall" onclick="switchView('wall')">壁</button>
+  <button class="cat-tab" data-cat="ceil" onclick="switchView('ceil')">天井</button>
 </div>
 
 <!-- 壁面タブ（「壁」＝展開図モード時のみ表示。割り付けアプリと同じA〜D切替） -->
