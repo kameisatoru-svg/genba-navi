@@ -1197,6 +1197,8 @@ function _openDrawerTab(tab){
   }
   _renderDrawerContent();
   _renderBottomBar();
+  // ドロワーが開いてレイアウトが縮んだ後にキャンバスを再描画 → 図面全体が見える高さに収める
+  setTimeout(redraw, 0);
 }
 function _closeDrawer(){
   var drawer=document.getElementById('main-drawer');
@@ -3418,47 +3420,16 @@ function removePlanPartition(id){
 
 function _planSc(){
   var cv=document.getElementById('zumen-cv'); if(!cv) return null;
-  var W=roomData.W, D=roomData.D;
-  var T=roomData.wallT;
-  var CW=window.innerWidth;
-  var CH_avail=window.innerHeight-54-66;
-  var PAD=30;
-  var mL=Math.max(PAD,56),mR=PAD,mT=PAD,mB=PAD;
-  var scW=(CW-mL-mR)/W, scH=(CH_avail-mT-mB)/D;
-  var sc=Math.min(scW,scH);
-  // renderPlanと同じsc縮小ロジック
-  try{
-    var Tpx0=T*sc;
-    var maxArcU=0,maxArcD=0,maxArcL=0,maxArcR=0;
-    [{fi:0,dir:'U'},{fi:2,dir:'D'},{fi:1,dir:'R'},{fi:3,dir:'L'}].forEach(function(f){
-      faceOpenings[f.fi].forEach(function(op){
-        if(!isDoor(op.type)) return;
-        if(f.dir==='U') maxArcU=Math.max(maxArcU,op.w);
-        if(f.dir==='D') maxArcD=Math.max(maxArcD,op.w);
-        if(f.dir==='L') maxArcL=Math.max(maxArcL,op.w);
-        if(f.dir==='R') maxArcR=Math.max(maxArcR,op.w);
-      });
-    });
-    var needL=Tpx0+maxArcL*sc+PAD, needR=Tpx0+maxArcR*sc+PAD;
-    var needT=Tpx0+maxArcU*sc+PAD, needB=Tpx0+maxArcD*sc+PAD;
-    var scL=needL>mL?sc*(mL/needL):sc;
-    var scR=needR>mR?sc*(mR/needR):sc;
-    var scT=needT>mT?sc*(mT/needT):sc;
-    var scB=needB>mB?sc*(mB/needB):sc;
-    sc=Math.min(sc,scL,scR,scT,scB);
-    sc=Math.max(sc,0.01);
-  }catch(e){}
-  var Tpx=T*sc;
-  var rw=W*sc, rd=D*sc;
-  var ox=Math.round((CW-rw)/2);
-  var oy=Math.round((CH_avail-rd)/2);
+  if(!roomData.W||!roomData.D) return null;
+  // 描画(redrawPlan)と同一ジオメトリを使う → タップ位置と図形が一致する
+  var g=_computePlanGeom();
   var hasOutline=(roomData._innerW!=null);
-  var pox=hasOutline?(ox+Tpx/2):ox;
-  var poy=hasOutline?(oy+Tpx/2):oy;
-  var iW=hasOutline?roomData._innerW:W;
-  var iD=hasOutline?roomData._innerD:D;
-  return{sc:sc, ox:ox, oy:oy, W:W, D:D, cv:cv,
-         pox:pox, poy:poy, iW:iW, iD:iD, T:T, Tpx:Tpx, hasOutline:hasOutline};
+  var pox=hasOutline?(g.ox+g.Tpx/2):g.ox;
+  var poy=hasOutline?(g.oy+g.Tpx/2):g.oy;
+  var iW=hasOutline?roomData._innerW:g.W;
+  var iD=hasOutline?roomData._innerD:g.D;
+  return{sc:g.sc, ox:g.ox, oy:g.oy, W:g.W, D:g.D, cv:cv,
+         pox:pox, poy:poy, iW:iW, iD:iD, T:g.T, Tpx:g.Tpx, hasOutline:hasOutline};
 }
 
 function _snapMm(px, info){
