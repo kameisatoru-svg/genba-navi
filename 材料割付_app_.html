@@ -598,6 +598,23 @@ canvas#wall-cv{touch-action:none;}
   background:var(--bf);border-color:var(--cf);color:var(--tf);font-weight:700;
 }
 
+/* ══════════ 現在の部屋寸法バー（幅W・奥行D・天井高H） ══════════ */
+.dims-bar{
+  display:flex;gap:6px;margin-bottom:12px;cursor:pointer;align-items:stretch;
+}
+.dims-chip{
+  flex:1;background:var(--white);border:1.5px solid rgba(30,45,64,0.12);
+  border-radius:10px;padding:6px 4px 7px;text-align:center;line-height:1.2;
+}
+.dims-chip .dl{font-size:10px;color:var(--text2);margin-bottom:1px;}
+.dims-chip .dv{font-size:16px;font-weight:700;color:var(--navy);}
+.dims-chip .du{font-size:9px;font-weight:400;color:var(--text2);margin-left:1px;}
+.dims-edit{
+  display:flex;align-items:center;justify-content:center;width:36px;
+  border:1.5px solid rgba(30,45,64,0.12);border-radius:10px;
+  background:var(--white);color:var(--text2);flex:0 0 auto;
+}
+
 /* ══════════ スティッキー計算ボタン（モバイル＝カバー画面） ══════════ */
 @media (max-width:599px){
   .calc-btn{
@@ -747,6 +764,7 @@ canvas#wall-cv{touch-action:none;}
     <button class="cat-btn" onclick="setCat('wall',this)">壁</button>
     <button class="cat-btn" onclick="setCat('ceil',this)">天井</button>
   </div>
+  <div class="dims-bar" id="dims-bar" style="display:none" onclick="editRoomDims()" title="この部屋の寸法（タップで編集）"></div>
   <div class="util-row">
     <button class="util-btn" id="util-save" onclick="saveProjectFile()"><span class="util-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></span>保存</button>
     <button class="util-btn" id="util-load" onclick="openLoadModal()"><span class="util-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>履歴</button>
@@ -897,7 +915,26 @@ function _renderRoomWorkspace(state){
     var fW=document.getElementById('f-W');if(fW)fW.value=dims.W;
     // 他フィールド（BL/BW/LOSS/PRICE 等）はレンダー時のカテゴリ別デフォルトをそのまま使用
   },80);
+  updateDimsBar();
 }
+
+// ── 現在の部屋寸法（幅W・奥行D=内部L・天井高H）バー ──
+function _curDims(){
+  var st=(typeof _curRoomIdx!=='undefined'&&_curRoomIdx>=0&&_rooms[_curRoomIdx]&&_rooms[_curRoomIdx].state)?_rooms[_curRoomIdx].state:null;
+  return (st&&st.dims)||null;
+}
+function updateDimsBar(){
+  var bar=document.getElementById('dims-bar');if(!bar)return;
+  var d=_curDims();
+  if(!d){bar.style.display='none';return;}
+  bar.style.display='flex';
+  bar.innerHTML=
+    '<div class="dims-chip"><div class="dl">幅 W</div><div class="dv">'+d.W+'<span class="du">mm</span></div></div>'+
+    '<div class="dims-chip"><div class="dl">奥行 D</div><div class="dv">'+d.L+'<span class="du">mm</span></div></div>'+
+    '<div class="dims-chip"><div class="dl">天井高 H</div><div class="dv">'+d.H+'<span class="du">mm</span></div></div>'+
+    '<div class="dims-edit"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></div>';
+}
+function editRoomDims(){if(typeof _curRoomIdx!=='undefined'&&_curRoomIdx>=0)openRoomModal('edit');}
 
 function _escHtml(s){return(s+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
@@ -1594,6 +1631,7 @@ function _captureVisibleCanvasImages(){
   var imgs=[];
   document.querySelectorAll('.scroll-area canvas').forEach(function(cv){
     if(!cv.offsetWidth||!cv.offsetHeight)return;
+    if(cv.closest('.no-export'))return;  // 入力プレビュー図は発注書に含めない
     try{
       var label=(cv.closest('.vw2')&&cv.closest('.vw2').querySelector('.vl'))?cv.closest('.vw2').querySelector('.vl').textContent.trim():'';
       imgs.push({title:label,src:cv.toDataURL('image/png')});
@@ -2072,6 +2110,14 @@ function setMvStep(s){moveStep=s;updMP();}
 function movOp(dx,dy){var op=getOpenings().find(function(o){return o.id===faceSelId[curFaceIdx];});if(!op)return;var L=fv('L')||3600,H=fv('W')||2400;op.x=Math.max(0,Math.min(L-op.w,op.x+dx*moveStep));op.y=Math.max(0,Math.min(H-op.h,op.y+dy*moveStep));updMP();redrawWall();}
 function toggleHH(){var s=document.getElementById('f-HABAKI_TYPE'),w=document.getElementById('hh-wrap');if(w)w.style.visibility=s&&s.value==='ソフト巾木'?'visible':'hidden';}
 
+// 床フォームの数値入力に応じてプレビュー図をライブ更新
+document.addEventListener('input',function(e){
+  if(typeof curCat==='undefined'||curCat!=='floor')return;
+  var t=e.target;if(!t||!t.id||t.id.indexOf('f-')!==0)return;
+  if(window._floorPrevT)clearTimeout(window._floorPrevT);
+  window._floorPrevT=setTimeout(drawFloorPreview,150);
+});
+
 document.addEventListener('click',function(e){
   var cv=document.getElementById('wall-cv');if(!cv||e.target!==cv)return;
   var r=cv.getBoundingClientRect(),px=(e.clientX-r.left),py=(e.clientY-r.top);
@@ -2143,6 +2189,7 @@ function renderFloorSubUI(){
     ['フローリング','無垢材'].forEach(function(t){var def=floorDefaults[t];h3+='<button class="sub-btn'+(curFlooringType===t?' ac-floor':'')+'" onclick="setFlooringType(\''+t+'\',this)"><span>'+t+'</span><span class="sub-hint">'+def.BL+'×'+def.BW+'mm</span></button>';});
     sa.innerHTML=h3+'</div>';renderPatArea();renderFlooringForm();
   }
+  drawFloorPreview();
 }
 
 function renderCompaneForm(){
@@ -2156,7 +2203,7 @@ function renderCompaneForm(){
   document.getElementById('form-area').innerHTML=h;
 }
 
-function setNedaLen(l){window.curNedaLen=l;[2,3,4].forEach(function(n){var b=document.getElementById('nb-'+n);if(!b)return;b.style.background=n===l?'var(--bf)':'var(--white)';b.style.color=n===l?'var(--tf)':'var(--text2)';b.style.fontWeight=n===l?'700':'400';b.style.borderColor=n===l?'var(--cf)':'rgba(30,45,64,0.15)';});}
+function setNedaLen(l){window.curNedaLen=l;[2,3,4].forEach(function(n){var b=document.getElementById('nb-'+n);if(!b)return;b.style.background=n===l?'var(--bf)':'var(--white)';b.style.color=n===l?'var(--tf)':'var(--text2)';b.style.fontWeight=n===l?'700':'400';b.style.borderColor=n===l?'var(--cf)':'rgba(30,45,64,0.15)';});drawFloorPreview();}
 
 function doCompaneCalc(){
   var L=fv('L'),W=fv('W'),BL=fv('BL')||1800,BW=fv('BW')||900,loss=fv('LOSS'),price=fv('PRICE'),nedaPrice=fv('NEDA_PRICE'),nedaLen=window.curNedaLen||3;
@@ -2186,8 +2233,8 @@ function doCompaneCalc(){
   setOrder(items,'[床] コンパネ＋根太');
 }
 
-function drawCompaneViz(L,W,BL,BW,eH,eV,cols,rows,nedaCount,PITCH){
-  var cv=document.getElementById('viz-cv');if(!cv)return;
+function drawCompaneViz(L,W,BL,BW,eH,eV,cols,rows,nedaCount,PITCH,cvId){
+  var cv=document.getElementById(cvId||'viz-cv');if(!cv)return;
   var CW=cv.offsetWidth||340,CH=200;
   var mL=10,mR=14,mT=14,mB=20,sc=Math.min((CW-mL-mR)/L,(CH-mT-mB)/W);
   var rw=L*sc,rh=W*sc,ox=mL,oy=mT,ctx=setupCanvas(cv,CW,CH);
@@ -2201,14 +2248,59 @@ function drawCompaneViz(L,W,BL,BW,eH,eV,cols,rows,nedaCount,PITCH){
   ctx.fillStyle='rgba(90,106,122,0.7)';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.fillText(L+'mm',ox+rw/2,oy+rh+14);ctx.save();ctx.translate(ox-6,oy+rh/2);ctx.rotate(-Math.PI/2);ctx.fillText(W+'mm',0,0);ctx.restore();
 }
 
-function setTileType(t,btn){curTileType=t;document.querySelectorAll('#sub-area .sub-btn').forEach(function(b){b.className='sub-btn';});btn.className='sub-btn ac-floor';document.getElementById('result-area').innerHTML='';renderTileForm();}
-function setSheetW(w,btn){curSheetW=w;document.querySelectorAll('.swb').forEach(function(b){b.className='swb';});btn.className='swb act';document.getElementById('result-area').innerHTML='';}
-function setFlooringType(t,btn){curFlooringType=t;document.querySelectorAll('#sub-area .sub-btn').forEach(function(b){b.className='sub-btn';});btn.className='sub-btn ac-floor';document.getElementById('result-area').innerHTML='';renderFlooringForm();}
+function setTileType(t,btn){curTileType=t;document.querySelectorAll('#sub-area .sub-btn').forEach(function(b){b.className='sub-btn';});btn.className='sub-btn ac-floor';document.getElementById('result-area').innerHTML='';renderTileForm();drawFloorPreview();}
+function setSheetW(w,btn){curSheetW=w;document.querySelectorAll('.swb').forEach(function(b){b.className='swb';});btn.className='swb act';document.getElementById('result-area').innerHTML='';drawFloorPreview();}
+function setFlooringType(t,btn){curFlooringType=t;document.querySelectorAll('#sub-area .sub-btn').forEach(function(b){b.className='sub-btn';});btn.className='sub-btn ac-floor';document.getElementById('result-area').innerHTML='';renderFlooringForm();drawFloorPreview();}
 function renderPatArea(){var pats=patsByCat['floor'];if(pats.indexOf(curPat)<0)curPat=pats[0];var h='<div class="st" style="margin-bottom:8px">割付パターン</div><div class="pat-row">';pats.forEach(function(p){h+='<button class="pat-btn'+(p===curPat?' ac-floor':'')+'" onclick="setFloorPat(\''+p+'\',this)">'+p+'</button>';});document.getElementById('pat-area').innerHTML=h+'</div>';}
-function setFloorPat(pat,btn){curPat=pat;document.querySelectorAll('.pat-btn').forEach(function(b){b.className='pat-btn';});btn.className='pat-btn ac-floor';document.getElementById('result-area').innerHTML='';}
+function setFloorPat(pat,btn){curPat=pat;document.querySelectorAll('.pat-btn').forEach(function(b){b.className='pat-btn';});btn.className='pat-btn ac-floor';document.getElementById('result-area').innerHTML='';drawFloorPreview();}
 function renderTileForm(){var def=tileDefaults[curTileType];document.getElementById('form-area').innerHTML='<div style="margin-bottom:12px"><div class="st">床寸法</div><div class="r2"><div class="iw"><span>長さ mm</span><input type="number" id="f-L" value="4000" inputmode="numeric"></div><div class="iw"><span>幅 mm</span><input type="number" id="f-W" value="3000" inputmode="numeric"></div></div></div><div style="margin-bottom:12px"><div class="st">タイルサイズ</div><div class="r2"><div class="iw"><span>長さ mm</span><input type="number" id="f-BL" value="'+def.BL+'" inputmode="numeric"></div><div class="iw"><span>幅 mm</span><input type="number" id="f-BW" value="'+def.BW+'" inputmode="numeric"></div></div></div><div style="margin-bottom:12px"><div class="st">設定</div><div class="r2"><div class="iw"><span>ロス率 %</span><input type="number" id="f-LOSS" value="'+def.LOSS+'" inputmode="numeric"></div><div class="iw"><span>単価 円/枚</span><input type="number" id="f-PRICE" value="'+def.PRICE+'" inputmode="numeric"></div></div></div><button class="calc-btn calc-floor" onclick="doFloorCalc()">計算する</button>';}
 function renderSheetForm(){document.getElementById('form-area').innerHTML='<div style="margin-bottom:12px"><div class="st">床寸法</div><div class="r2"><div class="iw"><span>長さ mm（長手）</span><input type="number" id="f-L" value="4000" inputmode="numeric"></div><div class="iw"><span>幅 mm（短手）</span><input type="number" id="f-W" value="3000" inputmode="numeric"></div></div></div><div style="margin-bottom:12px"><div class="st">設定</div><div class="r2"><div class="iw"><span>ロス率 %</span><input type="number" id="f-LOSS" value="5" inputmode="numeric"></div><div class="iw"><span>単価 円/m</span><input type="number" id="f-PRICE" value="1500" inputmode="numeric"></div></div></div><button class="calc-btn calc-floor" onclick="doFloorCalc()">計算する</button>';}
 function renderFlooringForm(){var def=floorDefaults[curFlooringType];document.getElementById('form-area').innerHTML='<div style="margin-bottom:12px"><div class="st">床寸法</div><div class="r2"><div class="iw"><span>長さ mm</span><input type="number" id="f-L" value="4000" inputmode="numeric"></div><div class="iw"><span>幅 mm</span><input type="number" id="f-W" value="3000" inputmode="numeric"></div></div></div><div style="margin-bottom:12px"><div class="st">フローリングサイズ</div><div class="r2"><div class="iw"><span>長さ mm</span><input type="number" id="f-BL" value="'+def.BL+'" inputmode="numeric"></div><div class="iw"><span>幅 mm</span><input type="number" id="f-BW" value="'+def.BW+'" inputmode="numeric"></div></div></div><div style="margin-bottom:12px"><div class="st">設定</div><div class="r2"><div class="iw"><span>ロス率 %</span><input type="number" id="f-LOSS" value="'+def.LOSS+'" inputmode="numeric"></div><div class="iw"><span>単価 円/枚</span><input type="number" id="f-PRICE" value="'+def.PRICE+'" inputmode="numeric"></div></div></div><button class="calc-btn calc-floor" onclick="doFloorCalc()">計算する</button>';}
+
+// ── 床：計算前ライブプレビュー（フォーム内に割り付け図を即時表示） ──
+function drawFloorPreview(){
+  if(curCat!=='floor')return;
+  var fa=document.getElementById('form-area');if(!fa)return;
+  var host=document.getElementById('floor-preview');
+  if(!host){
+    host=document.createElement('div');host.id='floor-preview';
+    var btn=fa.querySelector('.calc-btn');
+    if(btn&&btn.parentNode)btn.parentNode.insertBefore(host,btn);else fa.appendChild(host);
+  }
+  var L=fv('L'),W=fv('W');
+  if(!(L>0&&W>0)){host.innerHTML='';return;}
+  var loss=fv('LOSS'),price=fv('PRICE');
+  if(curFloorType==='長尺シート'){
+    var tate=calcSheetDir(L,W,curSheetW,loss,price,'縦割り');
+    var yoko=calcSheetDir(L,W,curSheetW,loss,price,'横割り');
+    host.innerHTML='<div class="vw2 no-export" style="margin-bottom:12px"><div class="vl">床割り付け図プレビュー（'+curSheetW+'mm幅・縦割り/横割り）</div><div class="viz-row" style="padding:8px 8px 4px"><div class="vw-sheet"><div class="vl">縦割り</div><canvas id="fp-tate" height="150"></canvas></div><div class="vw-sheet"><div class="vl">横割り</div><canvas id="fp-yoko" height="150"></canvas></div></div></div>';
+    setTimeout(function(){
+      var cv0=document.getElementById('fp-tate');if(!cv0)return;
+      var CW=cv0.offsetWidth||170,CH=150,mL=8,mR=30,mT=8,mB=30;
+      var sc=Math.min((CW-mL-mR)/W,(CH-mT-mB)/L);
+      var rw=W*sc,rh=L*sc,ox=mL,oy=mT;
+      drawSheetCanvas('fp-tate',tate,L,W,sc,ox,oy,rw,rh,CW,CH,'縦');
+      drawSheetCanvas('fp-yoko',yoko,L,W,sc,ox,oy,rw,rh,CW,CH,'横');
+      addZoomButtons();
+    },30);
+    return;
+  }
+  host.innerHTML='<div class="vw2 no-export" style="margin-bottom:12px"><div class="vl">床割り付け図プレビュー</div><canvas id="fp-cv" height="200"></canvas></div>';
+  if(curFloorType==='コンパネ'){
+    var BL=fv('BL')||1800,BW=fv('BW')||900;
+    var eH=edgeSize(L,BL),eV=edgeSize(W,BW),cols=Math.ceil(L/BL),rows=Math.ceil(W/BW);
+    var PITCH=303,nedaCount=(Math.ceil(W/PITCH)+1)+2;
+    setTimeout(function(){drawCompaneViz(L,W,BL,BW,eH,eV,cols,rows,nedaCount,PITCH,'fp-cv');addZoomButtons();},30);
+  }else{
+    var bl=fv('BL'),bw=fv('BW');
+    if(!(bl>0&&bw>0)){host.innerHTML='';return;}  // 板サイズ未入力時は描画せず無限ループを防止
+    var r=(curFloorType==='タイル')
+      ?calcFloorTile({L:L,W:W,BL:bl,BW:bw,LOSS:loss,PRICE:price},curPat)
+      :calcFlooringMat({L:L,W:W,BL:bl,BW:bw,LOSS:loss,PRICE:price},curPat);
+    if(r.viz&&r.viz.tW)setTimeout(function(){drawViz(r.viz,'floor','fp-cv');addZoomButtons();},30);
+    else host.innerHTML='';
+  }
+}
 
 function doFloorCalc(){
   var L=fv('L'),W=fv('W'),loss=fv('LOSS'),price=fv('PRICE');
@@ -2401,8 +2493,8 @@ function buildResultHTML(r,cc){
   return h;
 }
 
-function drawViz(v,cc){
-  var cv=document.getElementById('viz-cv');if(!cv)return;
+function drawViz(v,cc,cvId){
+  var cv=document.getElementById(cvId||'viz-cv');if(!cv)return;
   var CW=cv.offsetWidth||340;var CH=200;
   var mL=38,mR=14,mT=10,mB=44,sc=Math.min((CW-mL-mR)/v.rW,(CH-mT-mB)/v.rH);
   var rw=v.rW*sc,rh=v.rH*sc,ox=mL,oy=mT,col=vcols[cc];
