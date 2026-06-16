@@ -2299,6 +2299,8 @@ function buildReportHtml(){
     }
     var rcols=s.shape&&s.shape.columns;
     if(rcols&&rcols.length)L.push(_columnsReportHtml(rcols));
+    var rfeats=s.shape&&s.shape.features;
+    if(rfeats&&rfeats.length)L.push(_featuresReportHtml(rfeats));
     L.push('</div>');
   });
 
