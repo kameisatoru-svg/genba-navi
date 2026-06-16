@@ -3145,29 +3145,30 @@ function buildResultHTML(r,cc){
 
 function drawViz(v,cc,cvId){
   var cv=document.getElementById(cvId||'viz-cv');if(!cv)return;
-  var CW=cv.offsetWidth||340;var CH=200;
-  var mL=38,mR=14,mT=10,mB=44,sc=Math.min((CW-mL-mR)/v.rW,(CH-mT-mB)/v.rH);
-  var rw=v.rW*sc,rh=v.rH*sc,ox=mL,oy=mT,col=vcols[cc];
+  var CW=cv.offsetWidth||340;var CH=200;var col=vcols[cc];
+  var W=v.rW,L=v.rH;
+  var g=_planGeom(W,L,CW,CH,38,14,10,44,true); // 横=W, 縦=L（凹凸込みでフィット）
+  var sc=g.sc,ox=g.ox,oy=g.oy,rw=g.rw,rh=g.rh;
   var ctx=setupCanvas(cv,CW,CH);ctx.clearRect(0,0,CW,CH);
-  ctx.save();ctx.beginPath();ctx.rect(ox,oy,rw,rh);ctx.clip();
-  ctx.fillStyle='rgba(128,128,128,0.05)';ctx.fillRect(ox,oy,rw,rh);
+  ctx.save();g.path(ctx);ctx.clip();
+  ctx.fillStyle='rgba(128,128,128,0.05)';ctx.fillRect(g.gx0,g.gy0,g.gx1-g.gx0,g.gy1-g.gy0);
   ctx.strokeStyle=col;ctx.lineWidth=0.8;ctx.globalAlpha=0.6;
   var tw=v.tW*sc,th=v.tH*sc;
-  if(v.pat==='ダイヤ張り'){ctx.save();ctx.translate(ox+rw/2,oy+rh/2);ctx.rotate(Math.PI/4);for(var x=-rw*1.5;x<=rw*1.5;x+=tw){ctx.beginPath();ctx.moveTo(x,-rh*1.5);ctx.lineTo(x,rh*1.5);ctx.stroke();}for(var y=-rh*1.5;y<=rh*1.5;y+=th){ctx.beginPath();ctx.moveTo(-rw*1.5,y);ctx.lineTo(rw*1.5,y);ctx.stroke();}ctx.restore();}
-  else if(v.pat==='レンガ張り'){var row=0;for(var yy=oy;yy<=oy+rh+th;yy+=th){var off=(row%2===1)?tw/2:0;for(var xx=ox-tw+off;xx<=ox+rw+tw;xx+=tw){ctx.strokeRect(xx,yy,tw,th);}row++;}}
-  else{for(var xi=ox;xi<=ox+rw+tw;xi+=tw){ctx.beginPath();ctx.moveTo(xi,oy);ctx.lineTo(xi,oy+rh);ctx.stroke();}for(var yi=oy;yi<=oy+rh+th;yi+=th){ctx.beginPath();ctx.moveTo(ox,yi);ctx.lineTo(ox+rw,yi);ctx.stroke();}}
+  if(v.pat==='ダイヤ張り'){ctx.save();ctx.translate(ox+rw/2,oy+rh/2);ctx.rotate(Math.PI/4);var R=Math.max(g.gx1-g.gx0,g.gy1-g.gy0)*1.6;for(var x=-R;x<=R;x+=tw){ctx.beginPath();ctx.moveTo(x,-R);ctx.lineTo(x,R);ctx.stroke();}for(var y=-R;y<=R;y+=th){ctx.beginPath();ctx.moveTo(-R,y);ctx.lineTo(R,y);ctx.stroke();}ctx.restore();}
+  else if(v.pat==='レンガ張り'){var ys=oy+Math.floor((g.gy0-oy)/th)*th;for(var yy=ys;yy<=g.gy1+th;yy+=th){var off=(Math.round((yy-oy)/th)%2!==0)?tw/2:0;var xs=ox+Math.floor((g.gx0-ox)/tw)*tw-tw+off;for(var xx=xs;xx<=g.gx1+tw;xx+=tw){ctx.strokeRect(xx,yy,tw,th);}}}
+  else{var xs2=ox+Math.floor((g.gx0-ox)/tw)*tw;for(var xi=xs2;xi<=g.gx1+tw;xi+=tw){ctx.beginPath();ctx.moveTo(xi,g.gy0);ctx.lineTo(xi,g.gy1);ctx.stroke();}var ys2=oy+Math.floor((g.gy0-oy)/th)*th;for(var yi=ys2;yi<=g.gy1+th;yi+=th){ctx.beginPath();ctx.moveTo(g.gx0,yi);ctx.lineTo(g.gx1,yi);ctx.stroke();}}
   ctx.globalAlpha=0.18;ctx.fillStyle=col;
   if(v.eH>0&&v.eH*sc>2)ctx.fillRect(ox+rw-v.eH*sc,oy,v.eH*sc,rh);
   if(v.eV>0&&v.eV*sc>2)ctx.fillRect(ox,oy+rh-v.eV*sc,rw,v.eV*sc);
   ctx.restore();
-  ctx.strokeStyle='rgba(30,45,64,0.45)';ctx.lineWidth=1.5;ctx.strokeRect(ox,oy,rw,rh);ctx.globalAlpha=1;
+  // 外周線：凹凸・切欠・カットを織り込んだ一体ライン
+  ctx.strokeStyle='rgba(30,45,64,0.7)';ctx.lineWidth=1.8;ctx.globalAlpha=1;g.path(ctx);ctx.stroke();
   ctx.fillStyle='rgba(90,106,122,0.7)';ctx.font='10px sans-serif';
   if(v.eH>0&&v.eH*sc>10){ctx.textAlign='center';ctx.fillText(v.eH+'mm',ox+rw-v.eH*sc/2,oy+rh+13);ctx.strokeStyle='rgba(120,120,120,0.4)';ctx.lineWidth=0.8;ctx.beginPath();ctx.moveTo(ox+rw-v.eH*sc,oy+rh+9);ctx.lineTo(ox+rw,oy+rh+9);ctx.stroke();ctx.beginPath();ctx.moveTo(ox+rw-v.eH*sc,oy+rh+6);ctx.lineTo(ox+rw-v.eH*sc,oy+rh+12);ctx.stroke();ctx.beginPath();ctx.moveTo(ox+rw,oy+rh+6);ctx.lineTo(ox+rw,oy+rh+12);ctx.stroke();}
   if(v.eV>0&&v.eV*sc>10){ctx.save();ctx.translate(ox-10,oy+rh-v.eV*sc/2);ctx.rotate(-Math.PI/2);ctx.textAlign='center';ctx.fillText(v.eV+'mm',0,0);ctx.restore();}
   ctx.fillStyle=col;ctx.globalAlpha=0.18;ctx.fillRect(ox,oy+rh+24,12,10);ctx.globalAlpha=1;ctx.strokeStyle='rgba(30,45,64,0.2)';ctx.lineWidth=0.5;ctx.strokeRect(ox,oy+rh+24,12,10);ctx.fillStyle='rgba(90,106,122,0.7)';ctx.textAlign='left';ctx.fillText('端材',ox+16,oy+rh+33);ctx.textAlign='center';ctx.fillText(v.lbl,CW/2,oy+rh+33);
-  // 形状・柱を重ね描き（drawViz：水平=部屋幅W=v.rW, 垂直=奥行L=v.rH）
-  _drawShapeOverlay(ctx,ox,oy,rw,rh,v.rW,v.rH,true);
-  _drawColumnsOverlay(ctx,ox,oy,rw,rh,v.rW,v.rH,true);
+  // 柱を重ね描き（部屋原点ox,oy・rw=W*sc 基準）
+  _drawColumnsOverlay(ctx,ox,oy,rw,rh,W,L,true);
 }
 
 // ── 作図へ送る ──
