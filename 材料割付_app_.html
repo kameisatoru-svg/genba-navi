@@ -958,7 +958,7 @@ function _captureCurrentRoomState(){
     wall:{faceIdx:curFaceIdx,faceData:faceData,faceInputs:faceInputs,faceOpenings:faceOpenings,faceSelId:faceSelId,faceOidSeq:faceOidSeq},
     lastOrder:_lastOrder,
     dims:prev.dims||{W:3000,L:4000,H:2400},  // 部屋寸法はグローバルにないので前回値から引き継ぐ（無ければ既定）
-    shape:{columns:curColumns,colSeq:_colSeq}  // 柱はグローバル curColumns を真とする（faceData と同様）
+    shape:{columns:curColumns,colSeq:_colSeq,features:curFeatures,featSeq:_featSeq}  // 柱・形状はグローバルを真とする（faceData と同様）
   };
 }
 
@@ -978,9 +978,11 @@ function _loadRoomStateToGlobals(s){
     curFaceIdx=0;faceData=[null,null,null,null];faceInputs=[null,null,null,null];
     faceOpenings=[[],[],[],[]];faceSelId=[null,null,null,null];faceOidSeq=[0,0,0,0];
   }
-  // 柱（部屋共有）
+  // 柱・形状（部屋共有）
   curColumns=(s.shape&&Array.isArray(s.shape.columns))?s.shape.columns:[];
   _colSeq=(s.shape&&s.shape.colSeq)||curColumns.reduce(function(m,c){return Math.max(m,c.id||0);},0);
+  curFeatures=(s.shape&&Array.isArray(s.shape.features))?s.shape.features:[];
+  _featSeq=(s.shape&&s.shape.featSeq)||curFeatures.reduce(function(m,f){return Math.max(m,f.id||0);},0);
   _lastOrder=s.lastOrder||null;
 }
 
