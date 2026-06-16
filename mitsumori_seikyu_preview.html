@@ -2516,6 +2516,7 @@ function applyReeditState(s){
   _sv('shiharaiDate',f.shiharaiDate); _sv('kojimei',f.kojimei); _sv('seshubasho',f.seshubasho);
   _sv('koki',f.koki); _sv('ankenKey',f.ankenKey); _sv('fileSuffix',f.fileSuffix); _sv('bikou',f.bikou);
   _sv('shokeihiRateInput',shokeihiRate); _sv('shokeihiFixedInput',Math.round(shokeihiFixed||0)); _sv('nebikiInput',nebiki); _sv('nebikiLabelInput',nebikiLabel); _sv('hasuChouseiInput',hasuChousei);
+  { const _c=document.getElementById('hasuAutoChk'); if(_c) _c.checked=hasuNebikiAuto; }
   if(typeof setShokeihiMode==='function') setShokeihiMode(shokeihiMode,{silent:true});
   const b=document.getElementById('bikou'); if(b && f.bikou) b.dataset.auto='';
   // 5) 再描画
@@ -4970,7 +4971,7 @@ function captureDocSnapshot(){
   return {
     v: 1,
     savedAt: new Date().toISOString(),
-    docType, mode, shokeihiRate, shokeihiMode, shokeihiFixed, nebiki, nebikiLabel, hasuChousei,
+    docType, mode, shokeihiRate, shokeihiMode, shokeihiFixed, nebiki, nebikiLabel, hasuNebikiAuto, hasuChousei,
     header: {
       atena:       g('atena'),
       mitsumoriNo: g('mitsumoriNo'),
@@ -5007,7 +5008,9 @@ function restoreDocSnapshot(snap){
   setVal('shokeihiFixedInput', Math.round(shokeihiFixed||0));
   if(typeof setShokeihiMode==='function') setShokeihiMode(shokeihiMode,{silent:true});
   nebiki = snap.nebiki || 0;           setVal('nebikiInput', nebiki);
-  nebikiLabel = snap.nebikiLabel || '値引き'; setVal('nebikiLabelInput', nebikiLabel);
+  nebikiLabel = snap.nebikiLabel || '端数値引き'; setVal('nebikiLabelInput', nebikiLabel);
+  hasuNebikiAuto = (snap.hasuNebikiAuto!==undefined) ? !!snap.hasuNebikiAuto : !(snap.nebiki>0);
+  { const _c=document.getElementById('hasuAutoChk'); if(_c) _c.checked=hasuNebikiAuto; }
   hasuChousei = snap.hasuChousei || 0; setVal('hasuChouseiInput', hasuChousei);
   // 表書き
   const h = snap.header || {};
