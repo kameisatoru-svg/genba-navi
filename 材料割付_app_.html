@@ -1287,15 +1287,22 @@ function _applyColumnsToAreaRes(r,L,W){
   return r;
 }
 
-function _persistColumns(){
+// 柱・形状の変更を保存。rederiveWalls=true（形状変更時）は壁面の長さを再計算
+function _persistShape(rederiveWalls){
   if(_curRoomIdx>=0&&_rooms[_curRoomIdx]){
     var st=_rooms[_curRoomIdx].state||(_rooms[_curRoomIdx].state={});
-    st.shape={columns:curColumns,colSeq:_colSeq};
+    st.shape={columns:curColumns,colSeq:_colSeq,features:curFeatures,featSeq:_featSeq};
+    if(rederiveWalls){
+      _applyShapeToFaces(st);          // 各面のLを base±delta に再計算
+      faceInputs=st.wall.faceInputs;   // グローバルにも反映
+      if(curCat==='wall'&&document.getElementById('wall-cv')&&typeof renderWallForm==='function')renderWallForm();
+    }
   }
   autoSaveState(true);
   updateDimsBar();
   if(curCat==='floor'&&typeof drawFloorPreview==='function')drawFloorPreview();
 }
+function _persistColumns(){_persistShape(false);} // 柱は壁に影響しない
 
 function openColumnsModal(){
   if(!_colDraft)_colDraft={kind:'corner',corner:'tl',face:'A'};
