@@ -495,15 +495,18 @@ tr.dragging{opacity:0.4;}
         </div>
         <div class="fgroup" style="flex:2;margin:0;">
           <div style="display:flex;align-items:center;gap:3px;">
-            <input id="nebikiLabelInput" type="text" value="値引き"
+            <input id="nebikiLabelInput" type="text" value="端数値引き"
               title="この名称がそのまま見積書に表示されます（例：端数値引き／調整値引き）"
               style="flex:1;min-width:0;border:1px solid var(--border);border-radius:3px;padding:1px 4px;font-size:10px;font-family:inherit;color:var(--sub);background:#fafafa;"
-              oninput="nebikiLabel=(this.value.trim()||'値引き');render()">
-            <span style="font-size:10px;color:var(--sub);white-space:nowrap;">（円）</span>
+              oninput="nebikiLabel=(this.value.trim()||'端数値引き');render()">
+            <label style="font-size:9px;color:var(--sub);white-space:nowrap;display:flex;align-items:center;gap:2px;cursor:pointer;margin:0;" title="ON＝税込合計の100円未満を自動で値引き（端数値引き）。値引き額を手入力するか、このチェックを外すと自動OFF（その額で固定）になります。">
+              <input type="checkbox" id="hasuAutoChk" checked style="margin:0;" onchange="hasuNebikiAuto=this.checked;render()">端数自動
+            </label>
           </div>
           <input id="nebikiInput" type="number" value="0" min="0"
+            title="端数自動ON時は自動算出（税込を100円単位に切下げ）。手入力すると自動OFF・その額で固定。"
             style="width:100%;border:1px solid var(--border);border-radius:3px;padding:4px 8px;font-size:12px;font-family:inherit;"
-            oninput="nebiki=parseFloat(this.value)||0;render()">
+            oninput="hasuNebikiAuto=false;var _c=document.getElementById('hasuAutoChk');if(_c)_c.checked=false;nebiki=parseFloat(this.value)||0;render()">
         </div>
         <div class="fgroup" style="flex:2;margin:0;" title="BCS.CSV出力にのみ反映される端数調整。プラス/マイナス両方可。">
           <label style="font-size:10px;color:var(--sub);">端数調整（円・BCS用）</label>
@@ -1267,6 +1270,14 @@ function prefixedMiddleName(gi, mi, m){
 }
 
 // ── 合計計算 ──
+// 端数値引き額を算出：税込合計が100円単位（端数カット）になる最小の値引き額（税抜ベース）を返す
+function calcHasuNebiki(baseZeinuki){
+  const totalAt = n => { const z=baseZeinuki-n; return z+Math.round(z*0.1); };
+  const t0 = totalAt(0);
+  if(baseZeinuki<=0 || t0%100===0) return 0;
+  for(let n=1;n<=300;n++){ if(totalAt(n)%100===0) return n; }
+  return 0;
+}
 function calcTotals(){
   let subtotal=0;
   if(mode==='flat'){
@@ -1289,6 +1300,12 @@ function calcTotals(){
   // 1式表記（請求書）・請求書の他モード時は諸経費・値引きを適用しない
   const applyShokeihi = docType==='mitsumori';
   const shokeihi = applyShokeihi ? shokeihiAmt(subtotal) : 0;
+  // 端数値引き自動：税込が100円単位になるよう値引き額を自動算出（手入力時=hasuNebikiAuto:false はスキップ）
+  if(applyShokeihi && hasuNebikiAuto){
+    nebiki = calcHasuNebiki(subtotal+shokeihi);
+    const _ni=document.getElementById('nebikiInput');
+    if(_ni && document.activeElement!==_ni) _ni.value=nebiki;
+  }
   const nb = applyShokeihi ? nebiki : 0;
   const zeinuki=subtotal+shokeihi-nb;
   const tax=Math.round(zeinuki*0.1);
