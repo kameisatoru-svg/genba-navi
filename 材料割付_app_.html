@@ -2760,12 +2760,14 @@ function doCompaneCalc(){
   var eH=edgeSize(L,BL),eV=edgeSize(W,BW);
   var PITCH=303,nedaW=Math.ceil(W/PITCH)+1,nedaL2=2,nedaCount=nedaW+nedaL2;
   var totalLenM=(nedaW*(L/1000))+(nedaL2*(W/1000));
-  var _cfp=_columnsFootprintMm2();
+  var _bdRows=_floorBreakdownRows(L,W);
+  var _hasMod=_bdRows.length>0;
   var _areaM2=(L/1000)*(W/1000);
-  var _areaVal=(_cfp>0?Math.max(0,_areaM2-_cfp/1e6):_areaM2).toFixed(2)+'m²';
+  var _areaVal=(_hasMod?_floorNetM2(L,W):_areaM2).toFixed(2)+'m²';
+  var _bdHtml=_bdRows.map(function(rr){return '<div class="dr"><span>'+rr[0]+(rr[1]?' '+rr[1]:'')+'</span><span>'+rr[2]+'</span></div>';}).join('');
   var h='<div style="margin-top:14px"><div class="st">コンパネ割り付け</div><div class="mx">';
-  [{v:base+'枚',l:'必要枚数'},{v:total+'枚',l:'発注数（ロス込）'},{v:_areaVal,l:(_cfp>0?'面積（柱控除後）':'面積')},{v:loss+'%',l:'ロス率'}].forEach(function(x){h+='<div class="mc2 mc2-floor"><div class="mv mv-floor">'+x.v+'</div><div class="ml">'+x.l+'</div></div>';});
-  h+='</div><div class="dt" style="margin-bottom:10px"><div class="dr"><span>横（長手）</span><span>'+cols+'列　端材 '+eH+'mm</span></div><div class="dr"><span>縦（短手）</span><span>'+rows+'行　端材 '+eV+'mm</span></div><div class="dr"><span>張り方</span><span>レンガ張り</span></div>'+(_cfp>0?'<div class="dr"><span>柱控除 '+_columnsCount()+'本</span><span>-'+(_cfp/1e6).toFixed(2)+'㎡</span></div>':'')+'</div>';
+  [{v:base+'枚',l:'必要枚数'},{v:total+'枚',l:'発注数（ロス込）'},{v:_areaVal,l:(_hasMod?'面積（実）':'面積')},{v:loss+'%',l:'ロス率'}].forEach(function(x){h+='<div class="mc2 mc2-floor"><div class="mv mv-floor">'+x.v+'</div><div class="ml">'+x.l+'</div></div>';});
+  h+='</div><div class="dt" style="margin-bottom:10px"><div class="dr"><span>横（長手）</span><span>'+cols+'列　端材 '+eH+'mm</span></div><div class="dr"><span>縦（短手）</span><span>'+rows+'行　端材 '+eV+'mm</span></div><div class="dr"><span>張り方</span><span>レンガ張り</span></div>'+_bdHtml+'</div>';
   h+='<div class="vw2"><div class="vl">コンパネ・根太 割り付け図</div><canvas id="viz-cv" height="200"></canvas></div>';
   h+='<div class="dt" style="margin-bottom:12px"><div class="dr"><span>材料費（正味）</span><span>'+fmt(base*price)+'</span></div><div class="dr" style="font-weight:700"><span>材料費（ロス込）</span><span>'+fmt(total*price)+'</span></div></div>';
   var positions=[];for(var i=0;i<nedaCount;i++)positions.push(Math.round(Math.min(i*PITCH,W))+'mm');
