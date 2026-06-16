@@ -1177,19 +1177,16 @@ function _drawColumnsOverlay(ctx,ox,oy,rw,rh,horizMm,vertMm,horizIsW){
   if(!(W>0&&L>0))return;
   ctx.save();
   curColumns.forEach(function(c){
-    for(var n=0;n<(c.count||1);n++){
-      var p=_resolveColXY(c,W,L);
-      var hx,hy,hw,hh;
-      if(horizIsW){hx=p.x;hy=p.y;hw=c.w;hh=c.d;}else{hx=p.y;hy=p.x;hw=c.d;hh=c.w;}
-      var px=ox+(hx/horizMm)*rw,py=oy+(hy/vertMm)*rh;
-      var pw=Math.max(3,(hw/horizMm)*rw),ph=Math.max(3,(hh/vertMm)*rh);
-      ctx.fillStyle='rgba(30,45,64,0.5)';ctx.fillRect(px,py,pw,ph);
-      ctx.strokeStyle='rgba(30,45,64,0.95)';ctx.lineWidth=1.2;ctx.strokeRect(px,py,pw,ph);
-      ctx.strokeStyle='rgba(255,255,255,0.65)';ctx.lineWidth=0.8;
-      ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px+pw,py+ph);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(px+pw,py);ctx.lineTo(px,py+ph);ctx.stroke();
-      break; // count>1 でも位置は同一なので1回だけ描く
-    }
+    var p=_resolveColXY(c,W,L);
+    var hx,hy,hw,hh;
+    if(horizIsW){hx=p.x;hy=p.y;hw=c.w;hh=c.d;}else{hx=p.y;hy=p.x;hw=c.d;hh=c.w;}
+    var px=ox+(hx/horizMm)*rw,py=oy+(hy/vertMm)*rh;
+    var pw=Math.max(3,(hw/horizMm)*rw),ph=Math.max(3,(hh/vertMm)*rh);
+    ctx.fillStyle='rgba(30,45,64,0.5)';ctx.fillRect(px,py,pw,ph);
+    ctx.strokeStyle='rgba(30,45,64,0.95)';ctx.lineWidth=1.2;ctx.strokeRect(px,py,pw,ph);
+    ctx.strokeStyle='rgba(255,255,255,0.65)';ctx.lineWidth=0.8;
+    ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px+pw,py+ph);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(px+pw,py);ctx.lineTo(px,py+ph);ctx.stroke();
   });
   ctx.restore();
 }
