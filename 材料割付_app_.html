@@ -2145,6 +2145,18 @@ function buildMultiRoomTsv(){
     lines.push(['部屋','種別','位置','幅mm','奥行mm'].join('\t'));
     colRoomLines.forEach(function(l){lines.push(l);});
   }
+  // 形状一覧（部屋別）
+  var featRoomLines=[];
+  _rooms.forEach(function(r){
+    var feats=r.state&&r.state.shape&&r.state.shape.features;
+    if(feats&&feats.length){feats.forEach(function(f){featRoomLines.push([r.name,_featKindLabel(f),_featDescLabel(f)].join('\t'));});}
+  });
+  if(featRoomLines.length){
+    lines.push('');
+    lines.push('【部屋の形状一覧】');
+    lines.push(['部屋','種別','内容'].join('\t'));
+    featRoomLines.forEach(function(l){lines.push(l);});
+  }
   return lines.join('\n');
 }
 
