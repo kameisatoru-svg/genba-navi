@@ -205,6 +205,58 @@ body{
   color:var(--text2);font-size:13px;line-height:1.6;
 }
 
+/* ─── 音声会話 要約モーダル ─── */
+.voice-rec-status{
+  display:flex;align-items:center;gap:8px;
+  font-size:12.5px;color:var(--text2);
+  padding:2px 2px 10px;
+}
+.voice-dot{
+  width:10px;height:10px;border-radius:50%;
+  background:rgba(30,45,64,0.25);flex-shrink:0;
+}
+.voice-rec-on .voice-dot{
+  background:#d8513c;
+  animation:voice-pulse 1.1s ease-in-out infinite;
+}
+@keyframes voice-pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.35;transform:scale(.7);}}
+.voice-transcript{
+  width:100%;box-sizing:border-box;
+  min-height:160px;max-height:42vh;resize:vertical;
+  border:1.5px solid rgba(30,45,64,0.18);
+  border-radius:var(--radius-md);padding:10px 12px;
+  font-size:14px;font-family:inherit;line-height:1.6;
+  background:#fff;outline:none;color:var(--text);
+}
+.voice-transcript:focus{border-color:var(--accent);}
+.voice-interim{color:var(--text2);}
+.voice-actions{
+  display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;
+}
+.voice-btn{
+  flex:1;min-width:120px;height:48px;border:none;
+  border-radius:var(--radius-md);font-family:inherit;
+  font-size:14px;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+}
+.voice-btn svg{flex-shrink:0;}
+.voice-btn-rec{background:#d8513c;color:#fff;}
+.voice-btn-rec:active{background:#bf4330;}
+.voice-btn-rec.on{background:#5a6a7a;}
+.voice-btn-sum{background:var(--accent);color:var(--navy);}
+.voice-btn-sum:active{background:#b89a5e;}
+.voice-btn:disabled{opacity:.45;cursor:not-allowed;}
+.voice-hint{
+  font-size:11.5px;color:var(--text2);line-height:1.55;
+  margin-top:10px;
+}
+.voice-warn{
+  font-size:12px;color:#a04040;background:#ffe9e3;
+  border:1px solid rgba(160,64,64,0.25);
+  border-radius:var(--radius-sm);padding:8px 10px;margin-bottom:10px;
+  line-height:1.55;
+}
+
 /* 印刷時 */
 @media print{
   body{position:static;height:auto;overflow:visible;background:#fff;}
@@ -285,6 +337,53 @@ body{
   </div>
 </div>
 
+<!-- 音声会話 要約モーダル -->
+<div class="ai-modal" id="voice-modal" onclick="voiceCloseOnBg(event)">
+  <div class="ai-modal-box" onclick="event.stopPropagation()">
+    <div class="ai-modal-head">
+      <div class="ai-modal-title">音声会話を要約</div>
+      <button class="ai-modal-close" onclick="voiceClose()" aria-label="閉じる">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="ai-modal-body">
+      <div id="voice-warn" class="voice-warn" style="display:none;"></div>
+      <div class="voice-rec-status" id="voice-status">
+        <span class="voice-dot"></span>
+        <span id="voice-status-text">マイクボタンを押して会話を録音し、文字起こしします。</span>
+      </div>
+      <textarea id="voice-transcript" class="voice-transcript"
+        placeholder="ここに会話の文字起こしが表示されます。手入力・修正・貼り付けもできます。"></textarea>
+      <div class="voice-actions">
+        <button class="voice-btn voice-btn-rec" id="voice-rec-btn" onclick="voiceToggleRec()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+          <span id="voice-rec-label">録音開始</span>
+        </button>
+        <button class="voice-btn voice-btn-sum" id="voice-sum-btn" onclick="voiceSummarize()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/>
+            <line x1="8" y1="17" x2="13" y2="17"/>
+          </svg>
+          <span>要約してチャットへ</span>
+        </button>
+      </div>
+      <div class="voice-hint">
+        ・録音は無音が続くと自動で区切られますが、再開ボタンを押すまで継続録音します。<br>
+        ・文字起こしはブラウザの音声認識（端末で処理）を使用します。要約は AI（Claude）に送信されます。<br>
+        ・「要約してチャットへ」で、決定事項・TODO・確認事項・関連案件に整理してチャットに表示します。
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- スキルボタン -->
 <div class="ai-skills">
   <button class="ai-skill" onclick="aiPresetFill('checklist')">
@@ -309,6 +408,15 @@ body{
       <path d="m9 13 2 2 4-4"/>
     </svg>
     <span>完了報告書</span>
+  </button>
+  <button class="ai-skill" onclick="voiceOpen()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+      <line x1="12" y1="19" x2="12" y2="23"/>
+      <line x1="8" y1="23" x2="16" y2="23"/>
+    </svg>
+    <span>音声会話を要約</span>
   </button>
   <button class="ai-skill" onclick="aiPresetFill('callmemo')">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -696,20 +804,41 @@ function goBack(){
     var ta = document.getElementById('ai-input-text');
     var text = (ta.value || '').trim();
     if(!text) return;
-
-    var key = getKey();
-    if(!key){
-      if(!window.aiPromptKey()) return;
-      key = getKey();
-      if(!key) return;
-    }
+    if(!ensureKey()) return;
 
     appendMsg('user', text);
     ta.value = '';
     ta.style.height='auto';
     aiHistory.push({role:'user', content:text});
     persistCurrent();   // ユーザー発言の時点で保存（API失敗でも残せる）
+    await runAI();
+  };
 
+  // APIキーを確認（未設定なら入力を促す）
+  function ensureKey(){
+    var key = getKey();
+    if(!key){
+      if(!window.aiPromptKey()) return false;
+      key = getKey();
+      if(!key) return false;
+    }
+    return true;
+  }
+
+  // ユーザー発言をチャットに積んで送信（音声要約など外部から利用）
+  window.aiSubmitUserText = async function(text){
+    text = (text || '').trim();
+    if(!text) return;
+    if(!ensureKey()) return;
+    appendMsg('user', text);
+    aiHistory.push({role:'user', content:text});
+    persistCurrent();
+    await runAI();
+  };
+
+  // aiHistory の末尾をAIに送って返答を表示
+  async function runAI(){
+    var key = getKey();
     var data = await loadData(false);
     if(!data){
       appendMsg('error', 'data.jsonを読み込めませんでした。GitHub Pages配下から開いていますか？');
@@ -772,6 +901,164 @@ function goBack(){
     }
   };
 
+  /* ====== 音声会話 → 要約 ====== */
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var voiceRec = null;       // SpeechRecognition インスタンス
+  var voiceActive = false;   // ユーザーが録音中とみなしている状態
+  var voiceFinal = '';       // 確定済み文字起こし
+  var voiceManualEdit = '';  // 録音外でユーザーが手入力/修正したぶんの保持用
+
+  function voiceSetStatus(text, recording){
+    var st = document.getElementById('voice-status');
+    var tx = document.getElementById('voice-status-text');
+    if(tx) tx.textContent = text;
+    if(st) st.classList.toggle('voice-rec-on', !!recording);
+  }
+
+  function voiceRenderTranscript(interim){
+    var ta = document.getElementById('voice-transcript');
+    if(!ta) return;
+    ta.value = voiceFinal + (interim ? interim : '');
+    ta.scrollTop = ta.scrollHeight;
+  }
+
+  window.voiceOpen = function(){
+    voiceFinal = '';
+    var ta = document.getElementById('voice-transcript');
+    if(ta) ta.value = '';
+    var warn = document.getElementById('voice-warn');
+    if(SR){
+      if(warn) warn.style.display = 'none';
+      voiceSetStatus('マイクボタンを押して会話を録音し、文字起こしします。', false);
+    }else{
+      if(warn){
+        warn.style.display = 'block';
+        warn.textContent = 'このブラウザは音声認識に対応していません（iOS/Android Chrome・Safari推奨）。下の欄に会話を手入力・貼り付けすれば要約できます。';
+      }
+      voiceSetStatus('音声認識は使えません。会話を手入力・貼り付けしてください。', false);
+      var rb = document.getElementById('voice-rec-btn');
+      if(rb) rb.disabled = true;
+    }
+    document.getElementById('voice-modal').classList.add('open');
+  };
+
+  window.voiceClose = function(){
+    voiceStopRec();
+    document.getElementById('voice-modal').classList.remove('open');
+  };
+  window.voiceCloseOnBg = function(e){
+    if(e.target && e.target.id === 'voice-modal') window.voiceClose();
+  };
+
+  function voiceStartRec(){
+    if(!SR || voiceActive) return;
+    // 編集中のテキストを確定分として取り込む（手修正を失わない）
+    var ta = document.getElementById('voice-transcript');
+    if(ta){
+      voiceFinal = ta.value || '';
+      if(voiceFinal && !/\s$/.test(voiceFinal)) voiceFinal += ' ';
+    }
+    try{
+      voiceRec = new SR();
+    }catch(e){
+      voiceSetStatus('音声認識を開始できませんでした。', false);
+      return;
+    }
+    voiceRec.lang = 'ja-JP';
+    voiceRec.continuous = true;
+    voiceRec.interimResults = true;
+
+    voiceRec.onresult = function(ev){
+      var interim = '';
+      for(var i = ev.resultIndex; i < ev.results.length; i++){
+        var r = ev.results[i];
+        if(r.isFinal){
+          voiceFinal += r[0].transcript;
+        }else{
+          interim += r[0].transcript;
+        }
+      }
+      voiceRenderTranscript(interim);
+    };
+    voiceRec.onerror = function(ev){
+      if(ev && (ev.error === 'no-speech' || ev.error === 'aborted')) return; // onendで再開
+      if(ev && ev.error === 'not-allowed'){
+        voiceActive = false;
+        voiceUpdateRecBtn();
+        voiceSetStatus('マイクの使用が許可されていません。端末の設定を確認してください。', false);
+      }
+    };
+    voiceRec.onend = function(){
+      // モバイルは無音で自動停止する。ユーザーが止めていなければ再開。
+      if(voiceActive){
+        try{ voiceRec.start(); }catch(e){}
+      }
+    };
+    try{
+      voiceRec.start();
+      voiceActive = true;
+      voiceUpdateRecBtn();
+      voiceSetStatus('録音中… 話してください（無音でも継続します）', true);
+    }catch(e){
+      voiceSetStatus('音声認識を開始できませんでした。', false);
+    }
+  }
+
+  function voiceStopRec(){
+    voiceActive = false;
+    if(voiceRec){
+      try{ voiceRec.onend = null; voiceRec.stop(); }catch(e){}
+      voiceRec = null;
+    }
+    voiceRenderTranscript('');
+    voiceUpdateRecBtn();
+    if(SR) voiceSetStatus('録音を停止しました。「要約してチャットへ」で整理します。', false);
+  }
+
+  function voiceUpdateRecBtn(){
+    var btn = document.getElementById('voice-rec-btn');
+    var label = document.getElementById('voice-rec-label');
+    if(!btn) return;
+    btn.classList.toggle('on', voiceActive);
+    if(label) label.textContent = voiceActive ? '録音停止' : '録音開始';
+  }
+
+  window.voiceToggleRec = function(){
+    if(voiceActive) voiceStopRec();
+    else voiceStartRec();
+  };
+
+  window.voiceSummarize = function(){
+    var ta = document.getElementById('voice-transcript');
+    var transcript = ((ta && ta.value) || '').trim();
+    if(!transcript){
+      alert('文字起こしが空です。録音するか、会話を入力してください。');
+      return;
+    }
+    voiceStopRec();
+    var prompt = [
+      '以下は音声で記録した会話（打合せ・通話・現場でのやり取りなど）の文字起こしです。',
+      '音声認識の誤変換や言い淀みが含まれる場合は、文脈から推測して自然に補正したうえで整理してください。',
+      '取引先マスター・案件一覧を参照し、関連しそうな案件・取引先があれば紐づけてください。',
+      '',
+      '次のマークダウン形式で出力してください：',
+      '## 概要',
+      '（会話の要点を2〜3行で）',
+      '## 決定事項',
+      '## TODO',
+      '（誰が・いつまでに が分かれば併記。例: - [担当] 内容（期限））',
+      '## 確認・保留事項',
+      '## 関連しそうな案件・取引先',
+      '（推測できる範囲で。なければ「特定できず」）',
+      '',
+      '--- 文字起こしここから ---',
+      transcript,
+      '--- 文字起こしここまで ---'
+    ].join('\n');
+    window.voiceClose();
+    window.aiSubmitUserText(prompt);
+  };
+
   document.addEventListener('DOMContentLoaded', function(){
     var ta = document.getElementById('ai-input-text');
     if(!ta) return;
@@ -785,9 +1072,11 @@ function goBack(){
         window.aiSend();
       }
     });
-    // ESCで履歴モーダルを閉じる
+    // ESCでモーダルを閉じる
     document.addEventListener('keydown', function(e){
       if(e.key === 'Escape'){
+        var v = document.getElementById('voice-modal');
+        if(v && v.classList.contains('open')){ window.voiceClose(); return; }
         var m = document.getElementById('ai-hist-modal');
         if(m && m.classList.contains('open')) window.aiCloseHistory();
       }
