@@ -2015,6 +2015,8 @@ function buildReportHtml(){
     }else{
       L.push('<div class="no-data">（計算済みのデータはありません）</div>');
     }
+    var rcols=s.shape&&s.shape.columns;
+    if(rcols&&rcols.length)L.push(_columnsReportHtml(rcols));
     L.push('</div>');
   });
 
