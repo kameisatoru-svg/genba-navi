@@ -805,6 +805,24 @@ canvas#wall-cv{touch-action:none;}
   </div>
 </div>
 
+<!-- 部屋の形状モーダル -->
+<div class="modal-overlay hidden" id="shape-modal" onclick="closeShapeModal(event)">
+  <div class="modal-box modal-wide">
+    <div class="modal-head">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h12v6h6v12H3z"/></svg>
+      <span>部屋の形状（正方形でない部屋）</span>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:8px;line-height:1.6">コーナー切欠・壁の凸凹・コーナーカットを登録します。床・天井の面積と壁の長さに反映し、平面図・発注書にも出力します。</div>
+      <div id="shape-list"></div>
+      <div class="col-add-card" id="shape-add-card"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-cancel" onclick="closeShapeModal(null)">閉じる</button>
+    </div>
+  </div>
+</div>
+
 <!-- 作図へ送るモーダル -->
 <div class="modal-overlay hidden" id="zumen-modal" onclick="closeZumenModal(event)">
   <div class="modal-box">
