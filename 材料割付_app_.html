@@ -3082,7 +3082,8 @@ function drawViz(v,cc,cvId){
   if(v.eH>0&&v.eH*sc>10){ctx.textAlign='center';ctx.fillText(v.eH+'mm',ox+rw-v.eH*sc/2,oy+rh+13);ctx.strokeStyle='rgba(120,120,120,0.4)';ctx.lineWidth=0.8;ctx.beginPath();ctx.moveTo(ox+rw-v.eH*sc,oy+rh+9);ctx.lineTo(ox+rw,oy+rh+9);ctx.stroke();ctx.beginPath();ctx.moveTo(ox+rw-v.eH*sc,oy+rh+6);ctx.lineTo(ox+rw-v.eH*sc,oy+rh+12);ctx.stroke();ctx.beginPath();ctx.moveTo(ox+rw,oy+rh+6);ctx.lineTo(ox+rw,oy+rh+12);ctx.stroke();}
   if(v.eV>0&&v.eV*sc>10){ctx.save();ctx.translate(ox-10,oy+rh-v.eV*sc/2);ctx.rotate(-Math.PI/2);ctx.textAlign='center';ctx.fillText(v.eV+'mm',0,0);ctx.restore();}
   ctx.fillStyle=col;ctx.globalAlpha=0.18;ctx.fillRect(ox,oy+rh+24,12,10);ctx.globalAlpha=1;ctx.strokeStyle='rgba(30,45,64,0.2)';ctx.lineWidth=0.5;ctx.strokeRect(ox,oy+rh+24,12,10);ctx.fillStyle='rgba(90,106,122,0.7)';ctx.textAlign='left';ctx.fillText('端材',ox+16,oy+rh+33);ctx.textAlign='center';ctx.fillText(v.lbl,CW/2,oy+rh+33);
-  // 柱を重ね描き（drawViz：水平=部屋幅W=v.rW, 垂直=奥行L=v.rH）
+  // 形状・柱を重ね描き（drawViz：水平=部屋幅W=v.rW, 垂直=奥行L=v.rH）
+  _drawShapeOverlay(ctx,ox,oy,rw,rh,v.rW,v.rH,true);
   _drawColumnsOverlay(ctx,ox,oy,rw,rh,v.rW,v.rH,true);
 }
 
