@@ -616,9 +616,10 @@ canvas#wall-cv{touch-action:none;}
 }
 
 /* ══════════ 柱（コーナー柱・壁柱・独立柱） ══════════ */
+.shape-btn-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
 .shape-btn{
   display:flex;align-items:center;justify-content:center;gap:6px;width:100%;
-  margin-bottom:12px;padding:9px 10px;border:1.5px solid rgba(30,45,64,0.15);
+  padding:9px 8px;border:1.5px solid rgba(30,45,64,0.15);
   border-radius:10px;background:var(--white);color:var(--navy);
   font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;
 }
@@ -835,10 +836,16 @@ canvas#wall-cv{touch-action:none;}
     <button class="cat-btn" onclick="setCat('ceil',this)">天井</button>
   </div>
   <div class="dims-bar" id="dims-bar" style="display:none" onclick="editRoomDims()" title="この部屋の寸法（タップで編集）"></div>
-  <button class="shape-btn" id="shape-btn" style="display:none" onclick="openColumnsModal()">
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="18" rx="1"/><path d="M5 21V8M19 21V8"/></svg>
-    柱を登録（コーナー・壁・独立）<span class="shape-count" id="shape-count" style="display:none"></span>
-  </button>
+  <div class="shape-btn-row" id="shape-btn-row" style="display:none">
+    <button class="shape-btn" onclick="openColumnsModal()">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="18" rx="1"/><path d="M5 21V8M19 21V8"/></svg>
+      柱<span class="shape-count" id="shape-count" style="display:none"></span>
+    </button>
+    <button class="shape-btn" onclick="openShapeModal()">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h12v6h6v12H3z"/></svg>
+      部屋の形状<span class="shape-count" id="feat-count" style="display:none"></span>
+    </button>
+  </div>
   <div class="util-row">
     <button class="util-btn" id="util-save" onclick="saveProjectFile()"><span class="util-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></span>保存</button>
     <button class="util-btn" id="util-load" onclick="openLoadModal()"><span class="util-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>履歴</button>
