@@ -1264,8 +1264,8 @@ function renderColumnsModal(){
   }else{
     h+='<div class="r2" style="margin-bottom:8px"><div class="iw"><span>左から mm（任意）</span><input type="text" id="cd-x" inputmode="numeric" placeholder="中央"></div><div class="iw"><span>上から mm（任意）</span><input type="text" id="cd-y" inputmode="numeric" placeholder="中央"></div></div>';
   }
-  // サイズ・本数
-  h+='<div class="r3" style="margin-bottom:8px"><div class="iw"><span>幅 mm</span><input type="text" id="cd-w" value="'+(dr.w||120)+'" inputmode="numeric"></div><div class="iw"><span>奥行 mm</span><input type="text" id="cd-d" value="'+(dr.d||120)+'" inputmode="numeric"></div><div class="iw"><span>本数</span><input type="text" id="cd-count" value="'+(dr.count||1)+'" inputmode="numeric"></div></div>';
+  // サイズ
+  h+='<div class="r2" style="margin-bottom:8px"><div class="iw"><span>幅 mm</span><input type="text" id="cd-w" class="col-size-inp" value="'+(dr.w||120)+'" inputmode="numeric"></div><div class="iw"><span>奥行 mm</span><input type="text" id="cd-d" class="col-size-inp" value="'+(dr.d||120)+'" inputmode="numeric"></div></div>';
   h+='<button class="col-add-go" onclick="addColumnFromDraft()">＋ この柱を追加</button>';
   var ce=document.getElementById('cols-add-card');if(ce)ce.innerHTML=h;
 }
@@ -1274,10 +1274,9 @@ function addColumnFromDraft(){
   var dr=_colDraft||{kind:'corner'};
   var w=_pnum((document.getElementById('cd-w')||{}).value)||0;
   var d=_pnum((document.getElementById('cd-d')||{}).value)||0;
-  var count=Math.max(1,Math.round(_pnum((document.getElementById('cd-count')||{}).value)||1));
   if(!(w>0&&d>0)){alert('幅・奥行を入力してください。');return;}
   _colSeq++;
-  var c={id:_colSeq,kind:dr.kind,w:w,d:d,count:count};
+  var c={id:_colSeq,kind:dr.kind,w:w,d:d};
   if(dr.kind==='corner'){c.corner=dr.corner||'tl';}
   else if(dr.kind==='wall'){
     c.face=dr.face||'A';
