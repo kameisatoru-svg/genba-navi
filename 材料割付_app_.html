@@ -2087,6 +2087,8 @@ function buildTsv(){
   lines.push('合計\t\t\t\t\t\t¥'+total.toLocaleString());
   var clines=_columnsTsvLines(curColumns);
   if(clines.length){lines.push('');clines.forEach(function(l){lines.push(l);});}
+  var flines=_featuresTsvLines(curFeatures);
+  if(flines.length){lines.push('');flines.forEach(function(l){lines.push(l);});}
   return lines.join('\n');
 }
 
