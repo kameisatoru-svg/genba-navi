@@ -791,6 +791,12 @@ var faceSelId=[null,null,null,null];
 var faceOidSeq=[0,0,0,0];
 var moveStep=10;
 
+// ── 柱（部屋ごとに共有：床・壁・天井すべての割付・図面・発注書に反映）──
+// 各要素: {id, kind:'corner'|'wall'|'free', corner:'tl'|'tr'|'bl'|'br', face:'A'|'B'|'C'|'D', offset, x, y, w, d, count}
+var curColumns=[];
+var _colSeq=0;
+var _colDraft=null; // 柱モーダルの追加フォーム作業中データ
+
 // ── Z Fold5対応：リサイズ/fold追従 ──
 var _lastVizRedraw=null,_resizeT=null;
 window.addEventListener('resize',function(){
