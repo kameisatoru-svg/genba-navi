@@ -2483,7 +2483,7 @@ function collectReeditState(){
   return {
     _type:'mitsumori_seikyu', _v:1, savedAt:new Date().toISOString(),
     docType:docType, mode:mode,
-    shokeihiRate:shokeihiRate, shokeihiMode:shokeihiMode, shokeihiFixed:shokeihiFixed, nebiki:nebiki, nebikiLabel:nebikiLabel, hasuChousei:hasuChousei,
+    shokeihiRate:shokeihiRate, shokeihiMode:shokeihiMode, shokeihiFixed:shokeihiFixed, nebiki:nebiki, nebikiLabel:nebikiLabel, hasuNebikiAuto:hasuNebikiAuto, hasuChousei:hasuChousei,
     fields:{
       atena:_gv('atena'), mitsumoriNo:_gv('mitsumoriNo'), hakkoDate:_gv('hakkoDate'),
       shiharaiDate:_gv('shiharaiDate'), kojimei:_gv('kojimei'), seshubasho:_gv('seshubasho'),
@@ -2507,7 +2507,9 @@ function applyReeditState(s){
   // 3) スカラー
   shokeihiRate = (s.shokeihiRate!=null) ? s.shokeihiRate : 15;
   shokeihiMode = (s.shokeihiMode==='fixed') ? 'fixed' : 'rate'; shokeihiFixed = s.shokeihiFixed || 0;
-  nebiki = s.nebiki || 0; nebikiLabel = s.nebikiLabel || '値引き'; hasuChousei = s.hasuChousei || 0;
+  nebiki = s.nebiki || 0; nebikiLabel = s.nebikiLabel || '端数値引き'; hasuChousei = s.hasuChousei || 0;
+  // 端数自動：明示フラグがあれば従う／無ければ既存値引き(>0)を保全するためOFF・それ以外はON
+  hasuNebikiAuto = (s.hasuNebikiAuto!==undefined) ? !!s.hasuNebikiAuto : !(s.nebiki>0);
   // 4) 入力欄（switchDocTypeの上書きを後勝ちで戻す）
   const f = s.fields || {};
   _sv('atena',f.atena); _sv('mitsumoriNo',f.mitsumoriNo); _sv('hakkoDate',f.hakkoDate);
