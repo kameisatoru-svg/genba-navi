@@ -1817,6 +1817,8 @@ function buildTsv(){
   });
   lines.push('');
   lines.push('合計\t\t\t\t\t\t¥'+total.toLocaleString());
+  var clines=_columnsTsvLines(curColumns);
+  if(clines.length){lines.push('');clines.forEach(function(l){lines.push(l);});}
   return lines.join('\n');
 }
 
@@ -1859,6 +1861,20 @@ function buildMultiRoomTsv(){
   });
   lines.push('');
   lines.push('総合計\t\t\t\t¥'+totalCost.toLocaleString());
+  // 柱一覧（部屋別）
+  var colRoomLines=[];
+  _rooms.forEach(function(r){
+    var cols=r.state&&r.state.shape&&r.state.shape.columns;
+    if(cols&&cols.length){
+      cols.forEach(function(c){colRoomLines.push([r.name,_colKindLabel(c),_colPosLabel(c),(c.w||''),(c.d||''),(c.count||1)].join('\t'));});
+    }
+  });
+  if(colRoomLines.length){
+    lines.push('');
+    lines.push('【柱一覧】');
+    lines.push(['部屋','種別','位置','幅mm','奥行mm','本数'].join('\t'));
+    colRoomLines.forEach(function(l){lines.push(l);});
+  }
   return lines.join('\n');
 }
 
