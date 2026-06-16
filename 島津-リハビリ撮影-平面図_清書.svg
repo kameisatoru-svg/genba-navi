@@ -1,104 +1,155 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 640" font-family="'Noto Sans CJK JP','Noto Sans JP','IPAGothic','Yu Gothic','Hiragino Kaku Gothic ProN','Meiryo',sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 760" font-family="'Noto Sans CJK JP','Noto Sans JP','IPAGothic','Yu Gothic','Hiragino Kaku Gothic ProN','Meiryo',sans-serif">
   <defs>
     <marker id="dim" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
       <path d="M2,2 L8,5 L2,8" fill="none" stroke="#c0392b" stroke-width="1"/>
     </marker>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+      <path d="M1,1 L9,5 L1,9" fill="none" stroke="#2a6da3" stroke-width="1.4"/>
+    </marker>
+    <pattern id="pit" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="8" height="8" fill="#dfe7ec"/>
+      <line x1="0" y1="0" x2="0" y2="8" stroke="#9bb3c2" stroke-width="1.4"/>
+    </pattern>
   </defs>
 
   <!-- ===== タイトル ===== -->
   <text x="30" y="40" font-size="22" font-weight="bold" fill="#1a2a3a">大分リハビリテーション病院 一般撮影室 平面図（清書）</text>
-  <text x="30" y="62" font-size="13" fill="#555">島津レイアウト図＋現地調査スケッチ(2026/5/21)の清書／形状は概略・寸法は記載値(mm)／天井高 CH=2790</text>
+  <text x="30" y="60" font-size="12.5" fill="#555">現地調査スケッチ(2026/5/21・操作室=上)を基準に作図／壁仕上げ品番は島津レイアウト図(操作室=下)から180°回転して各壁へ対応／寸法mm・CH=2790</text>
 
-  <!-- ===== 床(長尺シート PT-105M = ライトブルー) ===== -->
-  <rect x="300" y="150" width="280" height="394" fill="#cfe3f0"/>
+  <!-- ===== 操作室(隣接・上) ===== -->
+  <rect x="510" y="92" width="90" height="58" fill="#eef1f4" stroke="#9aa3ad" stroke-width="1" stroke-dasharray="5 3"/>
+  <text x="555" y="125" font-size="12" fill="#5b6670" text-anchor="middle">操作室</text>
 
-  <!-- 操作室への開口(下・延長) -->
-  <polygon points="370,544 470,544 470,590 370,590" fill="#cfe3f0"/>
+  <!-- ===== 床(長尺シート PT-105M = ライトブルー) L字 ===== -->
+  <polygon points="300,150 510,150 510,257 600,257 600,570 300,570" fill="#cfe3f0"/>
 
   <!-- ===== 部屋 外形(壁芯) ===== -->
-  <path d="M300,150 L580,150 L580,544 L470,544 L470,590 L370,590 L370,544 L300,544 Z"
-        fill="none" stroke="#2c3e50" stroke-width="4"/>
+  <polygon points="300,150 510,150 510,257 600,257 600,570 300,570" fill="none" stroke="#2c3e50" stroke-width="4"/>
 
-  <!-- 入口ドア(廊下側・上左)＋開き勝手 -->
-  <rect x="318" y="147" width="72" height="6" fill="#fff" stroke="#e8932e" stroke-width="1.5"/>
-  <path d="M318,150 A72,72 0 0,1 318,222" fill="none" stroke="#e8932e" stroke-width="1.5" stroke-dasharray="4 3"/>
-  <text x="324" y="170" font-size="10" fill="#e8932e" font-weight="bold">入口</text>
+  <!-- 柱(670) 入隅 -->
+  <rect x="510" y="257" width="40" height="40" fill="url(#pit)" stroke="#2c3e50" stroke-width="1.5"/>
+  <text x="530" y="312" font-size="10" fill="#2c3e50" text-anchor="middle">柱 670</text>
 
-  <!-- 操作室開口ラベル -->
-  <text x="420" y="572" font-size="11" fill="#3a3f47" text-anchor="middle">操作室へ</text>
+  <!-- 操作室への開口(ドア) -->
+  <rect x="507" y="178" width="6" height="44" fill="#fff" stroke="#e8932e" stroke-width="1.4"/>
+  <path d="M510,178 A44,44 0 0,0 466,178" fill="none" stroke="#e8932e" stroke-width="1.4" stroke-dasharray="4 3"/>
 
-  <!-- ===== 壁クロス品番(各面・サンゲツFE) ===== -->
-  <!-- 上:廊下側 FE-76251 -->
-  <rect x="410" y="158" width="14" height="14" fill="#fff" stroke="#a8600a"/>
-  <text x="430" y="170" font-size="12" fill="#a8600a" font-weight="bold">壁 廊下側：FE-76251</text>
-  <!-- 左:空室側 FE-76109 -->
-  <g transform="rotate(-90 322 350)">
-    <rect x="276" y="343" width="14" height="14" fill="#fff" stroke="#a8600a"/>
-    <text x="296" y="355" font-size="12" fill="#a8600a" font-weight="bold">壁 左面：FE-76109</text>
+  <!-- ドア(W900×H2025) 受付側(左)寄り右上付近 -->
+  <rect x="597" y="320" width="6" height="50" fill="#fff" stroke="#e8932e" stroke-width="1.4"/>
+  <path d="M600,370 A50,50 0 0,1 550,370" fill="none" stroke="#e8932e" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <text x="556" y="356" font-size="9.5" fill="#e8932e" font-weight="bold">W900/H2025</text>
+
+  <!-- 親子ドア(W1280) 廊下側(下)=入口 -->
+  <rect x="392" y="567" width="96" height="6" fill="#fff" stroke="#e8932e" stroke-width="1.4"/>
+  <path d="M392,570 A60,60 0 0,1 452,570" fill="none" stroke="#e8932e" stroke-width="1.2" stroke-dasharray="4 3"/>
+  <path d="M488,570 A36,36 0 0,0 452,570" fill="none" stroke="#e8932e" stroke-width="1.2" stroke-dasharray="4 3"/>
+  <text x="440" y="588" font-size="10" fill="#e8932e" font-weight="bold" text-anchor="middle">親子ドア W1280</text>
+
+  <!-- ===== 室内設備(概略) ===== -->
+  <!-- 床ピット(撮影台ベース) -->
+  <rect x="395" y="305" width="95" height="150" fill="url(#pit)" stroke="#9bb3c2" stroke-width="1"/>
+  <text x="442" y="385" font-size="11" fill="#5b7384" text-anchor="middle">床ピット</text>
+  <!-- 左:床ピット/レール -->
+  <rect x="330" y="205" width="34" height="160" fill="url(#pit)" stroke="#9bb3c2" stroke-width="1"/>
+  <!-- AC エアコン -->
+  <rect x="345" y="250" width="34" height="22" fill="#fff" stroke="#3a6ea5" stroke-width="1.2"/>
+  <text x="362" y="265" font-size="10" fill="#3a6ea5" text-anchor="middle">AC</text>
+  <!-- 非常灯 -->
+  <circle cx="372" cy="430" r="9" fill="#fff" stroke="#c0392b" stroke-width="1.2"/>
+  <text x="372" y="434" font-size="9" fill="#c0392b" text-anchor="middle">非</text>
+  <!-- SP スピーカー -->
+  <circle cx="345" cy="500" r="9" fill="#fff" stroke="#555" stroke-width="1.2"/>
+  <text x="345" y="504" font-size="8.5" fill="#555" text-anchor="middle">SP</text>
+  <!-- 換気扇 ×2 -->
+  <rect x="462" y="196" width="18" height="14" fill="#fff" stroke="#555" stroke-width="1"/><line x1="462" y1="196" x2="480" y2="210" stroke="#555" stroke-width="0.8"/><line x1="480" y1="196" x2="462" y2="210" stroke="#555" stroke-width="0.8"/>
+  <rect x="322" y="470" width="18" height="14" fill="#fff" stroke="#555" stroke-width="1"/><line x1="322" y1="470" x2="340" y2="484" stroke="#555" stroke-width="0.8"/><line x1="340" y1="470" x2="322" y2="484" stroke="#555" stroke-width="0.8"/>
+  <!-- 照明 40W×2 -->
+  <g stroke="#888" stroke-width="0.9" fill="none">
+    <rect x="430" y="235" width="26" height="11"/><line x1="430" y1="240.5" x2="456" y2="240.5"/>
+    <rect x="430" y="475" width="26" height="11"/><line x1="430" y1="480.5" x2="456" y2="480.5"/>
   </g>
-  <!-- 右:受付側 FE-76728 -->
-  <g transform="rotate(-90 560 350)">
-    <rect x="514" y="343" width="14" height="14" fill="#fff" stroke="#a8600a"/>
-    <text x="534" y="355" font-size="12" fill="#a8600a" font-weight="bold">壁 受付側：FE-76728</text>
-  </g>
-  <!-- 下:操作室側 FE-76751 -->
-  <rect x="300" y="524" width="14" height="14" fill="#fff" stroke="#a8600a"/>
-  <text x="320" y="536" font-size="12" fill="#a8600a" font-weight="bold">壁 操作室側：FE-76751</text>
 
-  <!-- 室内ラベル -->
-  <text x="440" y="345" font-size="15" fill="#2c3e50" text-anchor="middle" font-weight="bold">一般撮影室</text>
-  <text x="440" y="366" font-size="12" fill="#2a6da3" text-anchor="middle" font-weight="bold">床：長尺シート PT-105M</text>
-  <text x="440" y="384" font-size="12" fill="#2a6da3" text-anchor="middle">天井：FE-76202（ルーバー有）</text>
-  <text x="440" y="402" font-size="11" fill="#3a3f47" text-anchor="middle">巾木 H80</text>
+  <!-- ===== 壁仕上げ品番(各面・アンカー+FE) ===== -->
+  <!-- 上:操作室側 FE-76751 -->
+  <rect x="312" y="158" width="13" height="13" fill="#fff" stroke="#a8600a"/>
+  <text x="330" y="169" font-size="12" fill="#a8600a" font-weight="bold">壁 操作室側（上）：FE-76751</text>
+  <!-- 下:廊下側 FE-76251 -->
+  <rect x="312" y="548" width="13" height="13" fill="#fff" stroke="#a8600a"/>
+  <text x="330" y="559" font-size="12" fill="#a8600a" font-weight="bold">壁 廊下側（下）：FE-76251</text>
+  <!-- 左:受付側 FE-76728 -->
+  <g transform="rotate(-90 290 360)">
+    <rect x="244" y="353" width="13" height="13" fill="#fff" stroke="#a8600a"/>
+    <text x="262" y="364" font-size="12" fill="#a8600a" font-weight="bold">壁 受付側（左）：FE-76728</text>
+  </g>
+  <!-- 右:空室側 FE-76109 -->
+  <g transform="rotate(-90 615 430)">
+    <rect x="569" y="423" width="13" height="13" fill="#fff" stroke="#a8600a"/>
+    <text x="587" y="434" font-size="12" fill="#a8600a" font-weight="bold">壁 空室側（右）：FE-76109</text>
+  </g>
+
+  <!-- 室名 -->
+  <text x="448" y="280" font-size="15" fill="#2c3e50" text-anchor="middle" font-weight="bold">一般撮影室</text>
+  <text x="448" y="298" font-size="11" fill="#2a6da3" text-anchor="middle">床：長尺シート PT-105M</text>
 
   <!-- ===== 寸法線(赤) ===== -->
-  <!-- 上:3600 -->
-  <line x1="300" y1="125" x2="580" y2="125" stroke="#c0392b" stroke-width="1" marker-start="url(#dim)" marker-end="url(#dim)"/>
-  <text x="440" y="119" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">3600</text>
-  <!-- 左:5050 -->
-  <line x1="275" y1="150" x2="275" y2="544" stroke="#c0392b" stroke-width="1" marker-start="url(#dim)" marker-end="url(#dim)"/>
-  <text x="268" y="347" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold" transform="rotate(-90 268 347)">5050</text>
-  <!-- 下:操作室開口 1000 -->
-  <line x1="370" y1="612" x2="470" y2="612" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
-  <text x="420" y="606" font-size="11" fill="#c0392b" text-anchor="middle" font-weight="bold">開口</text>
+  <!-- 上:3618 -->
+  <line x1="300" y1="124" x2="600" y2="124" stroke="#c0392b" stroke-width="1" marker-start="url(#dim)" marker-end="url(#dim)"/>
+  <text x="450" y="118" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">3618</text>
+  <!-- 右:5073 総 -->
+  <line x1="648" y1="150" x2="648" y2="570" stroke="#c0392b" stroke-width="1" marker-start="url(#dim)" marker-end="url(#dim)"/>
+  <text x="641" y="362" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold" transform="rotate(-90 641 362)">5073</text>
+  <!-- 右:内訳 1289/670/3125 -->
+  <line x1="624" y1="150" x2="624" y2="257" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
+  <text x="630" y="207" font-size="10" fill="#c0392b">1289</text>
+  <line x1="624" y1="257" x2="624" y2="297" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
+  <text x="630" y="282" font-size="10" fill="#c0392b">670</text>
+  <line x1="624" y1="297" x2="624" y2="570" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
+  <text x="630" y="438" font-size="10" fill="#c0392b">3125</text>
 
-  <!-- 方位(展開方向) -->
-  <g transform="translate(640,560)">
-    <circle cx="0" cy="0" r="26" fill="none" stroke="#888" stroke-width="1"/>
-    <text x="0" y="-14" font-size="11" fill="#555" text-anchor="middle">A</text>
-    <text x="20" y="4" font-size="11" fill="#555" text-anchor="middle">B</text>
-    <text x="0" y="22" font-size="11" fill="#555" text-anchor="middle">C</text>
-    <text x="-20" y="4" font-size="11" fill="#555" text-anchor="middle">D</text>
-    <text x="0" y="42" font-size="10" fill="#888" text-anchor="middle">展開方向</text>
+  <!-- ===== 流れ方向 ===== -->
+  <g transform="translate(150,470)">
+    <line x1="0" y1="0" x2="0" y2="60" stroke="#2a6da3" stroke-width="1.4" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <text x="8" y="34" font-size="12" fill="#2a6da3" font-weight="bold">床流れ（縦）</text>
+    <line x1="0" y1="86" x2="80" y2="86" stroke="#2a6da3" stroke-width="1.4" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <text x="0" y="106" font-size="12" fill="#2a6da3" font-weight="bold">クロス流れ（横）</text>
   </g>
 
   <!-- ===== 凡例 ===== -->
-  <g transform="translate(700,120)">
+  <g transform="translate(675,120)">
     <text x="0" y="0" font-size="14" font-weight="bold" fill="#1a2a3a">凡 例</text>
-    <rect x="0" y="12" width="22" height="14" fill="#cfe3f0" stroke="#2a6da3"/>
-    <text x="30" y="24" font-size="12" fill="#333">床 長尺シート張替（PT-105M）</text>
-    <rect x="0" y="34" width="22" height="14" fill="#fff" stroke="#a8600a"/>
-    <text x="30" y="46" font-size="12" fill="#333">壁クロス張替（サンゲツFE）</text>
-    <line x1="0" y1="62" x2="22" y2="62" stroke="#2c3e50" stroke-width="4"/>
-    <text x="30" y="66" font-size="12" fill="#333">壁芯（アウトライン）</text>
-    <rect x="0" y="76" width="22" height="6" fill="#fff" stroke="#e8932e" stroke-width="1.5"/>
-    <text x="30" y="84" font-size="12" fill="#333">建具（入口ドア）</text>
+    <rect x="0" y="10" width="20" height="13" fill="#cfe3f0" stroke="#2a6da3"/>
+    <text x="28" y="21" font-size="11.5" fill="#333">床 長尺シート（PT-105M）</text>
+    <rect x="0" y="30" width="20" height="13" fill="#fff" stroke="#a8600a"/>
+    <text x="28" y="41" font-size="11.5" fill="#333">壁クロス品番（サンゲツFE）</text>
+    <line x1="0" y1="58" x2="20" y2="58" stroke="#2c3e50" stroke-width="4"/>
+    <text x="28" y="62" font-size="11.5" fill="#333">壁芯（アウトライン）</text>
+    <rect x="0" y="70" width="20" height="6" fill="#fff" stroke="#e8932e" stroke-width="1.4"/>
+    <text x="28" y="80" font-size="11.5" fill="#333">建具（ドア／親子ドア）</text>
+    <rect x="0" y="88" width="20" height="13" fill="url(#pit)" stroke="#9bb3c2"/>
+    <text x="28" y="99" font-size="11.5" fill="#333">柱／床ピット</text>
+    <text x="225" y="21" font-size="11.5" fill="#333">照明 40W×2</text>
+    <text x="225" y="41" font-size="11.5" fill="#333">AC＝エアコン</text>
+    <text x="225" y="62" font-size="11.5" fill="#333">SP＝スピーカー</text>
+    <text x="225" y="80" font-size="11.5" fill="#333">換気扇</text>
+    <text x="225" y="99" font-size="11.5" fill="#333">非＝非常灯</text>
   </g>
 
   <!-- ===== 仕上げ・数量メモ ===== -->
-  <g transform="translate(700,230)">
-    <rect x="-8" y="-18" width="290" height="200" fill="#f2f8fc" stroke="#2a6da3" stroke-width="1.2" rx="6"/>
-    <text x="0" y="0" font-size="14" font-weight="bold" fill="#2a6da3">仕上げ・数量メモ</text>
-    <text x="0" y="24" font-size="12" fill="#333">○ 床：長尺シート PT-105M／巾木 H80</text>
-    <text x="0" y="44" font-size="12" fill="#333">○ 天井：サンゲツ FE-76202（ルーバー有）</text>
-    <text x="0" y="64" font-size="12" fill="#333">○ 壁クロス（サンゲツ）：</text>
-    <text x="14" y="82" font-size="11" fill="#333">廊下側 FE-76251／左面 FE-76109</text>
-    <text x="14" y="98" font-size="11" fill="#333">受付側 FE-76728／操作室側 FE-76751</text>
-    <text x="0" y="120" font-size="12" fill="#333">○ 天井高 CH = 2790</text>
-    <text x="0" y="140" font-size="12" fill="#333">○ 数量（見_改２）：床18㎡／壁49㎡</text>
-    <text x="0" y="162" font-size="11" fill="#888">（形状概略・数量は概算／発注前に品番確認）</text>
+  <g transform="translate(675,250)">
+    <rect x="-8" y="-16" width="430" height="232" fill="#f2f8fc" stroke="#2a6da3" stroke-width="1.2" rx="6"/>
+    <text x="0" y="2" font-size="14" font-weight="bold" fill="#2a6da3">仕上げ・数量メモ</text>
+    <text x="0" y="26" font-size="12" fill="#333">○ 床：長尺シート <tspan font-weight="bold">PT-105M</tspan>（流れ＝縦）</text>
+    <text x="0" y="46" font-size="12" fill="#333">○ 巾木：<tspan font-weight="bold">田島 No.80</tspan>（品番。※高さではない）</text>
+    <text x="0" y="66" font-size="12" fill="#333">○ 天井：サンゲツ <tspan font-weight="bold">FE-76202</tspan>（ルーバー〔エアー吹出〕有）</text>
+    <text x="0" y="90" font-size="12" fill="#333">○ 壁クロス（サンゲツ・流れ＝横）：</text>
+    <text x="16" y="110" font-size="12" fill="#333">操作室側（上）<tspan font-weight="bold">FE-76751</tspan>　／　廊下側（下）<tspan font-weight="bold">FE-76251</tspan></text>
+    <text x="16" y="130" font-size="12" fill="#333">受付側（左）<tspan font-weight="bold">FE-76728</tspan>　／　空室側（右）<tspan font-weight="bold">FE-76109</tspan></text>
+    <text x="0" y="154" font-size="12" fill="#333">○ 天井高 CH＝2790　／　概略 W3618 × D5073</text>
+    <text x="0" y="174" font-size="12" fill="#333">○ 数量（見_改２）：床 18㎡ ／ 壁クロス 49㎡</text>
+    <text x="0" y="198" font-size="10.5" fill="#9a5a00">※ 壁品番は島津図(操作室=下)を180°回転し、各壁の隣接室で対応付け。</text>
+    <text x="0" y="212" font-size="10.5" fill="#888">形状・数量は概略／発注前に品番・在庫・数量を確認。</text>
   </g>
 
-  <!-- ===== 工程メモ ===== -->
-  <text x="30" y="600" font-size="11" fill="#888">施工：7/18(土)・19(日) 土日施工（剥取・貼替・清掃／騒音発生）。設置工程表7/17-21・使用開始7/21。</text>
+  <!-- 工程メモ -->
+  <text x="30" y="700" font-size="11" fill="#888">施工：7/18(土)・19(日) 土日施工（剥取・貼替・清掃／騒音発生）。設置工程表7/17-21・使用開始7/21。</text>
 </svg>
