@@ -1392,6 +1392,28 @@ function _faceWrapRegions(fIdx){
   return {regions:regions,devTotal:dev,baseW:baseW};
 }
 
+// 壁展開図の端：コーナー切欠／コーナーカットを反映するキャップ
+// 戻り: [{side:'left'|'right', type:'cutDiag'|'cutMark'|'notch', size, label}]
+function _faceCornerCaps(fIdx){
+  var dims=_curDims();if(!dims)return [];
+  var W=dims.W,L=dims.L,face=FACES[fIdx];
+  var ENDS={A:['tl','tr'],B:['tr','br'],C:['br','bl'],D:['bl','tl']}[face];
+  if(!ENDS)return [];
+  var caps=[];
+  (curFeatures||[]).forEach(function(f){
+    if(f.type==='cut'){
+      var g=_cutGeom(f,W,L);if(!g)return;
+      if(g.inFace===face)caps.push({side:'right',type:'cutDiag',size:g.diag,label:'斜め壁'}); // 斜め壁はこの面の終端に展開
+      else if(g.outFace===face)caps.push({side:'left',type:'cutMark',size:0,label:'カット'}); // 始端が斜めにカット
+    }else if(f.type==='notch'){
+      var along=(face==='A'||face==='C')?(f.w||0):(f.d||0); // この面に沿った欠き幅
+      if(f.corner===ENDS[0])caps.push({side:'left',type:'notch',size:along,label:'切欠'});
+      if(f.corner===ENDS[1])caps.push({side:'right',type:'notch',size:along,label:'切欠'});
+    }
+  });
+  return caps;
+}
+
 // 床/天井の計算結果に柱・形状を反映（面積metricを実面積へ・内訳行を追加）
 function _applyColumnsToAreaRes(r,L,W){
   var rows=_floorBreakdownRows(L,W);if(!rows.length)return r;
