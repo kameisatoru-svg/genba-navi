@@ -2891,11 +2891,12 @@ function renderSheetResult(tate,yoko,L,W){
   var h='<div style="margin-top:14px"><div class="st">長尺シート '+curSheetW+'mm幅　縦割り / 横割り 比較</div><div class="sheet-compare">';
   [tate,yoko].forEach(function(s){var isBest=s.dir===best;h+='<div class="sheet-card'+(isBest?' best':'')+'">';h+='<div class="sct"><span>'+s.dir+'</span>'+(isBest?'<span class="bb">ロス少</span>':'')+'</div><div class="sv">'+s.ordM.toFixed(1)+'m</div><div class="ss">発注数（ロス込）</div><div class="sd">'+s.cols+'本　×　'+s.lenPerCol.toFixed(2)+'m/本<br>正味 '+s.totalM.toFixed(1)+'m<br>端材 '+(s.edgeMm>0?s.edgeMm+'mm':'なし')+(s.costOrd>0?'<br>材料費 ¥'+s.costOrd.toLocaleString():'')+'</div></div>';});
   h+='</div>';
-  // 柱控除（長尺シートは全幅で割付けるため発注mは減らさず、床面積のみ控除表示）
-  var _cfp=_columnsFootprintMm2();
-  if(_cfp>0){
-    var _net=Math.max(0,(L/1000)*(W/1000)-_cfp/1e6).toFixed(2);
-    h+='<div class="dt" style="margin-top:10px"><div class="dr"><span>床面積（柱控除後）</span><span>'+_net+'㎡</span></div><div class="dr"><span>柱控除 '+_columnsCount()+'本</span><span>-'+(_cfp/1e6).toFixed(2)+'㎡</span></div><div class="dr" style="font-size:10.5px;color:var(--text2)"><span>※長尺シートは全幅で割付けるため発注mは柱では減りません</span><span></span></div></div>';
+  // 柱・形状（長尺シートは全幅で割付けるため発注mは減らさず、床面積のみ反映表示）
+  var _bdRows=_floorBreakdownRows(L,W);
+  if(_bdRows.length){
+    var _net=_floorNetM2(L,W).toFixed(2);
+    var _bdHtml=_bdRows.map(function(rr){return '<div class="dr"><span>'+rr[0]+(rr[1]?' '+rr[1]:'')+'</span><span>'+rr[2]+'</span></div>';}).join('');
+    h+='<div class="dt" style="margin-top:10px"><div class="dr"><span>床面積（実）</span><span>'+_net+'㎡</span></div>'+_bdHtml+'<div class="dr" style="font-size:10.5px;color:var(--text2)"><span>※長尺シートは全幅で割付けるため発注mは減りません</span><span></span></div></div>';
   }
   h+='<div class="viz-row"><div class="vw-sheet"><div class="vl">縦割り</div><canvas id="cv-tate" height="170"></canvas></div><div class="vw-sheet"><div class="vl">横割り</div><canvas id="cv-yoko" height="170"></canvas></div></div></div>';
   document.getElementById('result-area').innerHTML=h;
