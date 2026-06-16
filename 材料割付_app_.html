@@ -1479,44 +1479,6 @@ function removeColumn(id){
   renderColumnsModal();
 }
 
-// ── 平面ビューに部屋形状（切欠・凸凹・カット）を重ね描き ──
-// (px,py)変換は柱と同じ：horizIsW=true → 水平=W・垂直=L
-function _drawShapeOverlay(ctx,ox,oy,rw,rh,horizMm,vertMm,horizIsW){
-  if(!curFeatures||!curFeatures.length)return;
-  var dd=_curDims();if(!dd)return;var W=dd.W,L=dd.L;if(!(W>0&&L>0))return;
-  // (W横,L縦)mm → canvas px
-  function P(x,y){var hx,hy;if(horizIsW){hx=x;hy=y;}else{hx=y;hy=x;}return [ox+(hx/horizMm)*rw, oy+(hy/vertMm)*rh];}
-  function eraseRect(x,y,w,h){var a=P(x,y),b=P(x+w,y+h);var rx=Math.min(a[0],b[0]),ry=Math.min(a[1],b[1]),rw2=Math.abs(b[0]-a[0]),rh2=Math.abs(b[1]-a[1]);
-    ctx.fillStyle='#ffffff';ctx.fillRect(rx,ry,rw2,rh2);
-    ctx.strokeStyle='rgba(200,80,40,0.9)';ctx.lineWidth=1.4;ctx.setLineDash([4,3]);ctx.strokeRect(rx,ry,rw2,rh2);ctx.setLineDash([]);}
-  ctx.save();
-  curFeatures.forEach(function(f){
-    if(f.type==='notch'){
-      var nc={tl:[0,0],tr:[W-f.w,0],bl:[0,L-f.d],br:[W-f.w,L-f.d]}[f.corner||'tl'];
-      eraseRect(nc[0],nc[1],f.w,f.d);
-    }else if(f.type==='bump'){
-      var wlen=(f.face==='A'||f.face==='C')?W:L,off=_featOffset(f,wlen);
-      var x,y,w,h;
-      if(f.face==='A'){x=off;w=f.w;h=f.d;y=(f.dir==='in')?0:-f.d;}
-      else if(f.face==='C'){x=off;w=f.w;h=f.d;y=(f.dir==='in')?L-f.d:L;}
-      else if(f.face==='D'){y=off;h=f.w;w=f.d;x=(f.dir==='in')?0:-f.d;}
-      else{y=off;h=f.w;w=f.d;x=(f.dir==='in')?W-f.d:W;} // B
-      if(f.dir==='in'){eraseRect(x,y,w,h);}
-      else{ // 凸：室外側に追加枠（マージン内に描く）
-        var a=P(x,y),b=P(x+w,y+h);var rx=Math.min(a[0],b[0]),ry=Math.min(a[1],b[1]),rw2=Math.abs(b[0]-a[0]),rh2=Math.abs(b[1]-a[1]);
-        ctx.fillStyle='rgba(13,110,80,0.12)';ctx.fillRect(rx,ry,rw2,rh2);
-        ctx.strokeStyle='rgba(13,110,80,0.9)';ctx.lineWidth=1.4;ctx.strokeRect(rx,ry,rw2,rh2);
-      }
-    }else if(f.type==='cut'){
-      var g=_cutGeom(f,W,L);if(!g)return;
-      var c=P(g.corner[0],g.corner[1]),p1=P(g.p1[0],g.p1[1]),p2=P(g.p2[0],g.p2[1]);
-      ctx.fillStyle='#ffffff';ctx.beginPath();ctx.moveTo(c[0],c[1]);ctx.lineTo(p1[0],p1[1]);ctx.lineTo(p2[0],p2[1]);ctx.closePath();ctx.fill();
-      ctx.strokeStyle='rgba(200,80,40,0.95)';ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(p1[0],p1[1]);ctx.lineTo(p2[0],p2[1]);ctx.stroke();
-    }
-  });
-  ctx.restore();
-}
-
 // ══════════ 部屋形状モーダル ══════════
 function openShapeModal(){
   if(!_featDraft)_featDraft={type:'notch',corner:'tl',face:'A',dir:'out'};
