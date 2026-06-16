@@ -2809,7 +2809,7 @@ function redrawWall(){
   _faceCornerCaps(curFaceIdx).forEach(function(cap){
     if(cap.type==='cutMark'){ // 始端が斜めカット：角を斜線で示す
       var mx=(cap.side==='left')?ox:ox+rw2,sgn=(cap.side==='left')?1:-1,dd=Math.min(rh*0.5,rw2*0.16);
-      ctx.strokeStyle='rgba(200,80,40,0.95)';ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(mx,oy+dd);ctx.lineTo(mx+sgn*dd,oy);ctx.stroke();
+      ctx.strokeStyle='rgba(30,45,64,0.6)';ctx.lineWidth=1.6;ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(mx,oy+dd);ctx.lineTo(mx+sgn*dd,oy);ctx.stroke();
       ctx.fillStyle='rgba(160,80,20,0.95)';ctx.font='bold 9px sans-serif';ctx.textAlign=(cap.side==='left')?'left':'right';ctx.fillText(cap.label,(cap.side==='left')?ox+dd+3:ox+rw2-dd-3,oy+9);
       return;
     }
@@ -2823,7 +2823,7 @@ function redrawWall(){
     }else{ // notch
       ctx.fillStyle='rgba(30,45,64,0.07)';ctx.fillRect(x0,oy,bw,rh);
     }
-    ctx.strokeStyle='rgba(200,80,40,0.9)';ctx.lineWidth=1.2;ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(foldX,oy);ctx.lineTo(foldX,oy+rh);ctx.stroke();ctx.setLineDash([]);
+    ctx.strokeStyle='rgba(30,45,64,0.6)';ctx.lineWidth=1.4;ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(foldX,oy);ctx.lineTo(foldX,oy+rh);ctx.stroke();
     ctx.fillStyle='rgba(160,80,20,0.95)';ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.fillText(cap.label,x0+bw/2,oy+12);
   });
   ctx.strokeStyle='rgba(30,45,64,0.25)';ctx.lineWidth=0.8;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(ox,oy+rh+12);ctx.lineTo(ox+rw2,oy+rh+12);ctx.stroke();ctx.setLineDash([]);
