@@ -963,6 +963,9 @@ function _loadRoomStateToGlobals(s){
     curFaceIdx=0;faceData=[null,null,null,null];faceInputs=[null,null,null,null];
     faceOpenings=[[],[],[],[]];faceSelId=[null,null,null,null];faceOidSeq=[0,0,0,0];
   }
+  // 柱（部屋共有）
+  curColumns=(s.shape&&Array.isArray(s.shape.columns))?s.shape.columns:[];
+  _colSeq=(s.shape&&s.shape.colSeq)||curColumns.reduce(function(m,c){return Math.max(m,c.id||0);},0);
   _lastOrder=s.lastOrder||null;
 }
 
@@ -999,7 +1002,14 @@ function _curDims(){
 function updateDimsBar(){
   var bar=document.getElementById('dims-bar');if(!bar)return;
   var d=_curDims();
-  if(!d){bar.style.display='none';return;}
+  var sb=document.getElementById('shape-btn');
+  if(!d){bar.style.display='none';if(sb)sb.style.display='none';return;}
+  if(sb){
+    sb.style.display='flex';
+    var badge=document.getElementById('shape-count');
+    var n=_columnsCount();
+    if(badge){ if(n>0){badge.style.display='';badge.textContent='柱'+n+'本';}else{badge.style.display='none';} }
+  }
   bar.style.display='flex';
   bar.innerHTML=
     '<div class="dims-chip"><div class="dl">幅 W</div><div class="dv">'+d.W+'<span class="du">mm</span></div></div>'+
