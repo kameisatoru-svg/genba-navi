@@ -1272,6 +1272,70 @@ function _floorNetM2(L,W){
   var base=(L/1000)*(W/1000);
   return Math.max(0, base + _shapeAreaDeltaMm2(W,L)/1e6 - _columnsFootprintMm2()/1e6);
 }
+
+// ── 部屋の外周ポリゴン（凹凸・切欠・カットを外周線に織り込む）──
+// 戻り: [[x,y],...]（時計回り, x=左から[W方向], y=上から[L方向], mm）
+function _roomPolygonMm(W,L){
+  function cap(corner){
+    var n=null,c=null;
+    curFeatures.forEach(function(f){
+      if(f.type==='notch'&&f.corner===corner&&!n)n=f;
+      if(f.type==='cut'&&f.corner===corner&&!c)c=f;
+    });
+    if(c){var g=_cutGeom(c,W,L);if(g)return [[g.p1[0],g.p1[1]],[g.p2[0],g.p2[1]]];}
+    if(n){var w=n.w,d=n.d;
+      if(corner==='tl')return [[0,d],[w,d],[w,0]];
+      if(corner==='tr')return [[W-w,0],[W-w,d],[W,d]];
+      if(corner==='br')return [[W,L-d],[W-w,L-d],[W-w,L]];
+      if(corner==='bl')return [[w,L],[w,L-d],[0,L-d]];
+    }
+    return [({tl:[0,0],tr:[W,0],br:[W,L],bl:[0,L]})[corner].slice()];
+  }
+  function bumps(face){
+    var out=[],bs=curFeatures.filter(function(f){return f.type==='bump'&&f.face===face;});
+    if(!bs.length)return out;
+    var wallLen=(face==='A'||face==='C')?W:L;
+    bs.sort(function(a,b){return _featOffset(a,wallLen)-_featOffset(b,wallLen);});
+    bs.forEach(function(f){
+      var off=_featOffset(f,wallLen),w=f.w,d=f.d,o=(f.dir==='out');
+      if(face==='A'){var x1=off,x2=off+w,y=(o?-d:d);out.push([x1,0],[x1,y],[x2,y],[x2,0]);}
+      else if(face==='B'){var y1=off,y2=off+w,x=W+(o?d:-d);out.push([W,y1],[x,y1],[x,y2],[W,y2]);}
+      else if(face==='C'){var xa=W-off,xb=W-off-w,yc=L+(o?d:-d);out.push([xa,L],[xa,yc],[xb,yc],[xb,L]);}
+      else{var ya=L-off,yb=L-off-w,xd=(o?-d:d);out.push([0,ya],[xd,ya],[xd,yb],[0,yb]);} // D
+    });
+    return out;
+  }
+  var poly=[];
+  poly=poly.concat(cap('tl')).concat(bumps('A'));
+  poly=poly.concat(cap('tr')).concat(bumps('B'));
+  poly=poly.concat(cap('br')).concat(bumps('C'));
+  poly=poly.concat(cap('bl')).concat(bumps('D'));
+  return poly;
+}
+// ポリゴンの外接矩形（基準矩形 0..W × 0..L を必ず含む）
+function _polyBBox(poly,W,L){
+  var minX=0,minY=0,maxX=W,maxY=L;
+  poly.forEach(function(p){if(p[0]<minX)minX=p[0];if(p[1]<minY)minY=p[1];if(p[0]>maxX)maxX=p[0];if(p[1]>maxY)maxY=p[1];});
+  return {minX:minX,minY:minY,maxX:maxX,maxY:maxY,bbW:maxX-minX,bbH:maxY-minY};
+}
+// 平面ジオメトリ（凹凸込みbboxにフィット）。horizIsW=true:横=W,縦=L / false:横=L,縦=W
+// 戻り: {sc, ox, oy(=部屋原点px), P(x,y), poly, path(ctx), gx0,gy0,gx1,gy1(bbox px)}
+function _planGeom(W,L,CW,CH,mL,mR,mT,mB,horizIsW){
+  var poly=_roomPolygonMm(W,L),bb=_polyBBox(poly,W,L);
+  var spanH=horizIsW?bb.bbW:bb.bbH, spanV=horizIsW?bb.bbH:bb.bbW;
+  var sc=Math.min((CW-mL-mR)/spanH,(CH-mT-mB)/spanV);if(!(sc>0))sc=0.01;
+  var usedW=spanH*sc,usedH=spanV*sc;
+  var ax=mL+((CW-mL-mR)-usedW)/2, ay=mT+((CH-mT-mB)-usedH)/2;
+  function P(x,y){return horizIsW?[ax+(x-bb.minX)*sc,ay+(y-bb.minY)*sc]:[ax+(y-bb.minY)*sc,ay+(x-bb.minX)*sc];}
+  function path(ctx){ctx.beginPath();poly.forEach(function(p,i){var q=P(p[0],p[1]);i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]);});ctx.closePath();}
+  var o=P(0,0);
+  return {sc:sc,P:P,poly:poly,path:path,ox:o[0],oy:o[1],
+          rw:(horizIsW?W:L)*sc,rh:(horizIsW?L:W)*sc,
+          gx0:Math.min(P(bb.minX,bb.minY)[0],P(bb.maxX,bb.maxY)[0]),
+          gy0:Math.min(P(bb.minX,bb.minY)[1],P(bb.maxX,bb.maxY)[1]),
+          gx1:Math.max(P(bb.minX,bb.minY)[0],P(bb.maxX,bb.maxY)[0]),
+          gy1:Math.max(P(bb.minX,bb.minY)[1],P(bb.maxX,bb.maxY)[1])};
+}
 // 面積内訳の明細行（[ラベル,補足,値]の配列）
 function _floorBreakdownRows(L,W){
   var rows=[];
