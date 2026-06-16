@@ -1371,6 +1371,26 @@ function _applyShapeToFaces(st){
   for(var i=0;i<4;i++){var ex=st.wall.faceInputs[i]||{};ex.L=Math.max(100,Math.round(base[i]+fd[i]));st.wall.faceInputs[i]=ex;}
 }
 
+// 壁の展開図で、その面の障害物（壁柱・凸・凹）を巻き込む区間を求める
+// 戻り: {regions:[{devStart,sideD,faceW,kind,dir,label}], devTotal, baseW}（展開幅mm基準）
+function _faceWrapRegions(fIdx){
+  var dims=_curDims();if(!dims)return null;
+  var face=FACES[fIdx],baseW=(face==='A'||face==='C')?dims.W:dims.L;
+  var obs=[];
+  (curColumns||[]).forEach(function(c){if(c.kind==='wall'&&c.face===face){var off=(c.offset!=null)?c.offset:Math.max(0,(baseW-(c.w||0))/2);obs.push({off:off,w:c.w||0,d:c.d||0,kind:'col',label:'柱'});}});
+  (curFeatures||[]).forEach(function(f){if(f.type==='bump'&&f.face===face){obs.push({off:_featOffset(f,baseW),w:f.w||0,d:f.d||0,kind:'bump',dir:f.dir,label:(f.dir==='in'?'凹':'凸')});}});
+  if(!obs.length)return null;
+  obs.sort(function(a,b){return a.off-b.off;});
+  var dev=0,base=0,regions=[];
+  obs.forEach(function(o){
+    dev+=Math.max(0,o.off-base);base=o.off;
+    regions.push({devStart:dev,sideD:o.d,faceW:o.w,kind:o.kind,dir:o.dir,label:o.label});
+    dev+=2*o.d+o.w;base+=o.w;
+  });
+  dev+=Math.max(0,baseW-base);
+  return {regions:regions,devTotal:dev,baseW:baseW};
+}
+
 // 床/天井の計算結果に柱・形状を反映（面積metricを実面積へ・内訳行を追加）
 function _applyColumnsToAreaRes(r,L,W){
   var rows=_floorBreakdownRows(L,W);if(!rows.length)return r;
