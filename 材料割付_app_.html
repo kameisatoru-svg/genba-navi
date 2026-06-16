@@ -2547,6 +2547,7 @@ function doFloorCalc(){
   var L=fv('L'),W=fv('W'),loss=fv('LOSS'),price=fv('PRICE');
   if(curFloorType==='タイル'){
     var r=calcFloorTile({L:L,W:W,BL:fv('BL'),BW:fv('BW'),LOSS:loss,PRICE:price},curPat);
+    _applyColumnsToAreaRes(r,L,W);
     renderResult(r,'floor');
     var items=[],qi=(r.m||[]).find(function(x){return x.l.indexOf('発注')>=0;});
     if(qi){var q=parseQty(qi.v);items.push({cat:'床',name:curTileType,spec:fv('BL')+'×'+fv('BW')+'mm',qty:q.n,unit:q.u||'枚',price:price,cost:Math.round(q.n*price),note:'ロス'+loss+'%'+(curPat==='ダイヤ張り'?'+ダイヤ7%':'')+'込'});}
@@ -2561,6 +2562,7 @@ function doFloorCalc(){
   }
   else{
     var r2=calcFlooringMat({L:L,W:W,BL:fv('BL'),BW:fv('BW'),LOSS:loss,PRICE:price},curPat);
+    _applyColumnsToAreaRes(r2,L,W);
     renderResult(r2,'floor');
     var items2=[],qi2=(r2.m||[]).find(function(x){return x.l.indexOf('発注')>=0;});
     if(qi2){var q2=parseQty(qi2.v);items2.push({cat:'床',name:curFlooringType,spec:fv('BL')+'×'+fv('BW')+'mm',qty:q2.n,unit:q2.u||'枚',price:price,cost:Math.round(q2.n*price),note:'ロス'+loss+'%込'});}
