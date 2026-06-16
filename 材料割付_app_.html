@@ -1383,9 +1383,10 @@ function _faceWrapRegions(fIdx){
   obs.sort(function(a,b){return a.off-b.off;});
   var dev=0,base=0,regions=[];
   obs.forEach(function(o){
-    dev+=Math.max(0,o.off-base);base=o.off;
+    var start=Math.max(base,o.off); // カーソルは後退させない（重なり対策）
+    dev+=(start-base);
     regions.push({devStart:dev,sideD:o.d,faceW:o.w,kind:o.kind,dir:o.dir,label:o.label});
-    dev+=2*o.d+o.w;base+=o.w;
+    dev+=2*o.d+o.w;base=start+o.w;
   });
   dev+=Math.max(0,baseW-base);
   return {regions:regions,devTotal:dev,baseW:baseW};
