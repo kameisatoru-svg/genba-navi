@@ -2768,6 +2768,21 @@ function redrawWall(){
     if(op.type==='ドア'){ctx.strokeStyle='rgba(13,110,80,0.6)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(rx,oy+rh);ctx.lineTo(rx+rw3,oy+rh);ctx.stroke();}
   });
   ctx.strokeStyle='rgba(30,45,64,0.6)';ctx.lineWidth=2;ctx.strokeRect(ox,oy,rw2,rh);
+  // 障害物（壁柱・凸・凹）の巻き込み区間：折り線＋側面バンド＋ラベル
+  var wrap=_faceWrapRegions(curFaceIdx);
+  if(wrap&&wrap.devTotal>0){
+    var ps=rw2/wrap.devTotal; // 展開mm→px（描画幅Wに合わせる）
+    function X(mm){return ox+mm*ps;}
+    wrap.regions.forEach(function(rg){
+      var xS1=X(rg.devStart),xF=X(rg.devStart+rg.sideD),xF2=X(rg.devStart+rg.sideD+rg.faceW),xE=X(rg.devStart+2*rg.sideD+rg.faceW);
+      ctx.fillStyle='rgba(200,120,40,0.18)';ctx.fillRect(xS1,oy,xF-xS1,rh);ctx.fillRect(xF2,oy,xE-xF2,rh); // 側面=巻き込み
+      ctx.fillStyle=(rg.kind==='bump'&&rg.dir==='in')?'rgba(30,45,64,0.05)':'rgba(13,110,80,0.10)';ctx.fillRect(xF,oy,xF2-xF,rh); // 前面/奥
+      ctx.strokeStyle='rgba(200,120,40,0.9)';ctx.lineWidth=1;ctx.setLineDash([4,3]);
+      [xS1,xF,xF2,xE].forEach(function(fx){ctx.beginPath();ctx.moveTo(fx,oy);ctx.lineTo(fx,oy+rh);ctx.stroke();});
+      ctx.setLineDash([]);
+      ctx.fillStyle='rgba(160,80,20,0.95)';ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.fillText(rg.label+'巻込',(xS1+xE)/2,oy+rh-4);
+    });
+  }
   ctx.strokeStyle='rgba(30,45,64,0.25)';ctx.lineWidth=0.8;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(ox,oy+rh+12);ctx.lineTo(ox+rw2,oy+rh+12);ctx.stroke();ctx.setLineDash([]);
   ctx.fillStyle='rgba(90,106,122,0.7)';ctx.font='10px sans-serif';ctx.textAlign='center';ctx.fillText(W+'mm',ox+rw2/2,oy+rh+24);
   addZoomButtons();
