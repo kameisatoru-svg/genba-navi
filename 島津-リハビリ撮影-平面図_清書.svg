@@ -58,7 +58,7 @@
   <!-- ===== 操作室ドア(A面 W970/H2025・内開き・吊元右) 実線=扉/点線=先端軌道 ===== -->
   <g stroke="#e8932e" fill="none">
     <line x1="592" y1="150" x2="592" y2="231" stroke-width="2.4"/>
-    <path d="M511,150 A81,81 0 0,1 592,231" stroke-width="1" stroke-dasharray="3 3"/>
+    <path d="M592,231 A81,81 0 0,1 511,150" stroke-width="1" stroke-dasharray="3 3"/>
   </g>
   <text x="551" y="205" font-size="9.5" fill="#e8932e" text-anchor="middle" font-weight="bold">操作室ドア</text>
   <text x="551" y="216" font-size="9" fill="#e8932e" text-anchor="middle">W970/H2025</text>
@@ -66,7 +66,7 @@
   <!-- ===== ドア(B面 W900/H2025・内開き・吊元上) 実線=扉/点線=先端軌道 ===== -->
   <g stroke="#e8932e" fill="none">
     <line x1="600" y1="314" x2="525" y2="314" stroke-width="2.4"/>
-    <path d="M525,314 A75,75 0 0,1 600,389" stroke-width="1" stroke-dasharray="3 3"/>
+    <path d="M525,314 A75,75 0 0,0 600,389" stroke-width="1" stroke-dasharray="3 3"/>
   </g>
   <text x="556" y="333" font-size="9.5" fill="#e8932e" text-anchor="middle" font-weight="bold">ドア W900/H2025</text>
 
@@ -74,7 +74,7 @@
   <g stroke="#e8932e" fill="none">
     <!-- 親(右) -->
     <line x1="592" y1="570" x2="592" y2="499" stroke-width="2.4"/>
-    <path d="M592,499 A71,71 0 0,1 521,570" stroke-width="1" stroke-dasharray="3 3"/>
+    <path d="M592,499 A71,71 0 0,0 521,570" stroke-width="1" stroke-dasharray="3 3"/>
     <!-- 子(左) -->
     <line x1="486" y1="570" x2="486" y2="535" stroke-width="2.4"/>
     <path d="M486,535 A35,35 0 0,1 521,570" stroke-width="1" stroke-dasharray="3 3"/>
