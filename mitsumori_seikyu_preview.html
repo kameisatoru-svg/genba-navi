@@ -1372,7 +1372,7 @@ function render(){
   const hasManualBreak=mode==='flat'&&flatItems.some((it,i)=>i>0&&it.pageBreak);
   // 請求書時は諸経費・値引き行を出さない
   const isMitsRender = docType==='mitsumori';
-  const shokeihiTr = isMitsRender ? `<tr class="shokeihi-row"><td colspan="4" style="text-align:right">${shokeihiLbl()}</td><td>${fmtN(t.shokeihi)}</td></tr>` : '';
+  const shokeihiTr = (isMitsRender && t.shokeihi>0) ? `<tr class="shokeihi-row"><td colspan="4" style="text-align:right">${shokeihiLbl()}</td><td>${fmtN(t.shokeihi)}</td></tr>` : '';
   const nebikiTr = (isMitsRender && nebiki>0) ? `<tr class="shokeihi-row"><td colspan="4" style="text-align:right">${nebikiLabel}</td><td>-${fmtN(nebiki)}</td></tr>` : '';
 
   if(mode==='lump'){
@@ -2047,7 +2047,7 @@ function buildDocHTML(){
   const tblStyle=tblFsStyle?`style="width:100%;border-collapse:collapse;font-size:${tblFsStyle};margin-bottom:8px;border:1px solid var(--border-dark)"`:'style="width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:8px;border:1px solid var(--border-dark)"';
   // 請求書時は諸経費・値引き行を出さない
   const isMitsPrint = docType==='mitsumori';
-  const shokeihiTrP = isMitsPrint ? `<tr class="shokeihi-row"><td colspan="4" style="text-align:right">${shokeihiLbl()}</td><td style="text-align:right">${fmtN(t.shokeihi)}</td></tr>` : '';
+  const shokeihiTrP = (isMitsPrint && t.shokeihi>0) ? `<tr class="shokeihi-row"><td colspan="4" style="text-align:right">${shokeihiLbl()}</td><td style="text-align:right">${fmtN(t.shokeihi)}</td></tr>` : '';
   const nebikiTrP = (isMitsPrint && nebiki>0) ? `<tr class="shokeihi-row"><td colspan="4" style="text-align:right">${nebikiLabel}</td><td style="text-align:right">-${fmtN(nebiki)}</td></tr>` : '';
 
   if(mode==='lump'){
