@@ -871,6 +871,12 @@ var curColumns=[];
 var _colSeq=0;
 var _colDraft=null; // 柱モーダルの追加フォーム作業中データ
 
+// ── 部屋形状（正方形でない部屋）：部屋ごとに共有 ──
+// 各要素: {id, type:'notch'|'bump'|'cut', corner, face, dir:'out'|'in', w, d, s1, s2, s3, offset}
+var curFeatures=[];
+var _featSeq=0;
+var _featDraft=null;
+
 // ── Z Fold5対応：リサイズ/fold追従 ──
 var _lastVizRedraw=null,_resizeT=null;
 window.addEventListener('resize',function(){
@@ -926,7 +932,7 @@ function _newRoomState(){
     wall:{faceIdx:0,faceData:[null,null,null,null],faceInputs:[null,null,null,null],faceOpenings:[[],[],[],[]],faceSelId:[null,null,null,null],faceOidSeq:[0,0,0,0]},
     lastOrder:null,
     dims:{W:3000,L:4000,H:2400},
-    shape:{columns:[],colSeq:0}
+    shape:{columns:[],colSeq:0,features:[],featSeq:0}
   };
   _applyDimsToState(s,s.dims);
   return s;
