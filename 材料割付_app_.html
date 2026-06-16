@@ -1139,6 +1139,7 @@ function _applyDimsToState(state,dims){
     merged.L=fdims[i][0];merged.W=fdims[i][1];
     state.wall.faceInputs[i]=merged;
   }
+  _applyShapeToFaces(state); // 部屋形状（凸凹・カット）の見付長さデルタを各面に反映
 }
 
 function _applyDimsToCurrentRoom(dims){
