@@ -598,8 +598,9 @@ const TMPL_CSS = `
 let mode = 'flat';
 let docType = 'mitsumori'; // 'mitsumori' or 'seikyu'
 let shokeihiRate = 15; // 諸経費率（%）
-let nebiki = 0;        // 値引き額
-let nebikiLabel = '値引き'; // 値引き行の表示名称（手動変更可・例：端数値引き／調整値引き）
+let nebiki = 0;        // 値引き額（端数自動ON時は端数値引き額を自動算出）
+let nebikiLabel = '端数値引き'; // 値引き行の表示名称（手動変更可・既定=端数値引き）
+let hasuNebikiAuto = true; // 端数値引き自動（既定ON）：税込合計を100円単位に切り下げる値引き額を自動算出。値引き額の手入力／チェック解除でOFF
 let hasuChousei = 0;   // 端数調整（BCS.CSV出力用・プラスマイナス両方可）
 let shokeihiMode = 'rate'; // 諸経費の算出方式：'rate'=率(%) / 'fixed'=金額固定（帳尻合わせ用）
 let shokeihiFixed = 0;     // shokeihiMode==='fixed' 時の諸経費金額（円）
