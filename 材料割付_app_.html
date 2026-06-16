@@ -1357,6 +1357,9 @@ function _shapeFaceLenDelta(st,W,L){
     else if(f.type==='cut'){var g=_cutGeom(f,W,L);if(g){d[FI[g.inFace]]+=(g.diag-g.legIn);d[FI[g.outFace]]+=(-g.legOut);}}
     // notch: 正味0（外周長さ不変）
   });
+  // 壁柱：その面のクロス/塗装が側面2dぶん巻き込む
+  var cols=(st&&st.shape&&st.shape.columns)||[];
+  cols.forEach(function(c){if(c.kind==='wall'){var i=FI[c.face];if(i!=null)d[i]+=2*(c.d||0);}});
   return d;
 }
 // 形状を壁面（faceInputs[i].L）へ反映：base±delta
