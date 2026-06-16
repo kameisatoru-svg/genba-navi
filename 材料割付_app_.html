@@ -1199,14 +1199,90 @@ function _drawColumnsOverlay(ctx,ox,oy,rw,rh,horizMm,vertMm,horizIsW){
   ctx.restore();
 }
 
-// 床/天井の計算結果に柱控除を反映（面積metricを純面積へ・控除行を追加）
+// ══════════ 部屋形状（コーナー切欠・壁凸凹・コーナーカット） ══════════
+function _cornerJp(c){return {tl:'左上',tr:'右上',bl:'左下',br:'右下'}[c]||'';}
+function _faceJp(f){return {A:'A面(上)',B:'B面(右)',C:'C面(下)',D:'D面(左)'}[f]||'';}
+function _featKindLabel(f){
+  if(f.type==='notch')return 'コーナー切欠';
+  if(f.type==='bump')return (f.dir==='in'?'壁凹（内側）':'壁凸（外側）');
+  if(f.type==='cut')return 'コーナーカット';
+  return '形状';
+}
+function _featDescLabel(f){
+  if(f.type==='notch')return _cornerJp(f.corner)+'　'+(f.w||0)+'×'+(f.d||0)+'mm';
+  if(f.type==='bump')return _faceJp(f.face)+'　'+(f.w||0)+'×'+(f.d||0)+'mm';
+  if(f.type==='cut')return _cornerJp(f.corner)+'　寸法1='+(f.s1||0)+' / 斜め='+(f.s2||0)+' / 寸法3='+(f.s3||0)+'mm';
+  return '';
+}
+// コーナーカットの幾何（corner=コーナー点, p1=入隣壁上, p2=出隣壁上, 入/出面と脚長, 面積, 斜辺）
+function _cutGeom(f,W,L){
+  var s1=f.s1||0,s2=f.s2||0,s3=f.s3||0;
+  var M={
+    tl:{corner:[0,0], p1:[0,L-s1],   p2:[W-s3,0], inFace:'D',outFace:'A',legIn:L-s1,legOut:W-s3},
+    tr:{corner:[W,0], p1:[s1,0],     p2:[W,L-s3], inFace:'A',outFace:'B',legIn:W-s1,legOut:L-s3},
+    br:{corner:[W,L], p1:[W,s1],     p2:[s3,L],   inFace:'B',outFace:'C',legIn:L-s1,legOut:W-s3},
+    bl:{corner:[0,L], p1:[W-s1,L],   p2:[0,s3],   inFace:'C',outFace:'D',legIn:W-s1,legOut:L-s3}
+  }[f.corner||'tl'];
+  if(!M)return null;
+  M.legIn=Math.max(0,M.legIn);M.legOut=Math.max(0,M.legOut);
+  M.area=0.5*M.legIn*M.legOut;M.diag=s2;
+  return M;
+}
+// 壁沿いオフセット（既定=中央）
+function _featOffset(f,wallLen){return (f.offset!=null)?f.offset:Math.max(0,(wallLen-(f.w||0))/2);}
+// 形状による床面積の符号付き増減(mm²)：凸=+ / 凹・切欠・カット=-
+function _shapeAreaDeltaMm2(W,L){
+  var t=0;
+  curFeatures.forEach(function(f){
+    if(f.type==='notch')t-=(f.w||0)*(f.d||0);
+    else if(f.type==='bump')t+=((f.dir==='in')?-1:1)*(f.w||0)*(f.d||0);
+    else if(f.type==='cut'){var g=_cutGeom(f,W,L);if(g)t-=g.area;}
+  });
+  return t;
+}
+// 床/天井の実面積(m²)＝基準±形状−柱
+function _floorNetM2(L,W){
+  var base=(L/1000)*(W/1000);
+  return Math.max(0, base + _shapeAreaDeltaMm2(W,L)/1e6 - _columnsFootprintMm2()/1e6);
+}
+// 面積内訳の明細行（[ラベル,補足,値]の配列）
+function _floorBreakdownRows(L,W){
+  var rows=[];
+  curFeatures.forEach(function(f){
+    if(f.type==='notch')rows.push(['コーナー切欠 '+_cornerJp(f.corner),(f.w||0)+'×'+(f.d||0),'-'+(((f.w||0)*(f.d||0))/1e6).toFixed(2)+'㎡']);
+    else if(f.type==='bump')rows.push([(f.dir==='in'?'壁凹':'壁凸')+' '+_faceJp(f.face),(f.w||0)+'×'+(f.d||0),(f.dir==='in'?'-':'+')+(((f.w||0)*(f.d||0))/1e6).toFixed(2)+'㎡']);
+    else if(f.type==='cut'){var g=_cutGeom(f,W,L);if(g)rows.push(['コーナーカット '+_cornerJp(f.corner),'斜'+(f.s2||0),'-'+(g.area/1e6).toFixed(2)+'㎡']);}
+  });
+  var cf=_columnsFootprintMm2();
+  if(cf>0)rows.push(['柱控除',_columnsCount()+'本','-'+(cf/1e6).toFixed(2)+'㎡']);
+  return rows;
+}
+// 形状による各面(A/B/C/D)の見付長さデルタ(mm)
+function _shapeFaceLenDelta(st,W,L){
+  var d=[0,0,0,0],FI={A:0,B:1,C:2,D:3};
+  var feats=(st&&st.shape&&st.shape.features)||[];
+  feats.forEach(function(f){
+    if(f.type==='bump'){var i=FI[f.face];if(i!=null)d[i]+=2*(f.d||0);}            // 凸も凹も側面2dぶん増
+    else if(f.type==='cut'){var g=_cutGeom(f,W,L);if(g){d[FI[g.inFace]]+=(g.diag-g.legIn);d[FI[g.outFace]]+=(-g.legOut);}}
+    // notch: 正味0（外周長さ不変）
+  });
+  return d;
+}
+// 形状を壁面（faceInputs[i].L）へ反映：base±delta
+function _applyShapeToFaces(st){
+  if(!st)return;var dims=st.dims||{W:3000,L:4000};var W=dims.W,L=dims.L;
+  var base=[W,L,W,L],fd=_shapeFaceLenDelta(st,W,L);
+  st.wall=st.wall||{faceIdx:0,faceData:[null,null,null,null],faceInputs:[null,null,null,null],faceOpenings:[[],[],[],[]],faceSelId:[null,null,null,null],faceOidSeq:[0,0,0,0]};
+  st.wall.faceInputs=st.wall.faceInputs||[null,null,null,null];
+  for(var i=0;i<4;i++){var ex=st.wall.faceInputs[i]||{};ex.L=Math.max(100,Math.round(base[i]+fd[i]));st.wall.faceInputs[i]=ex;}
+}
+
+// 床/天井の計算結果に柱・形状を反映（面積metricを実面積へ・内訳行を追加）
 function _applyColumnsToAreaRes(r,L,W){
-  var fp=_columnsFootprintMm2();if(fp<=0)return r;
-  var baseM2=(L/1000)*(W/1000);
-  var netM2=Math.max(0,baseM2-fp/1e6);
-  if(r.m){r.m.forEach(function(x){if((x.l||'').indexOf('面積')>=0){x.v=netM2.toFixed(2)+'m²';x.l='面積（柱控除後）';}});}
-  r.rows=r.rows||[];
-  r.rows.push(['柱控除',_columnsCount()+'本','-'+(fp/1e6).toFixed(2)+'㎡']);
+  var rows=_floorBreakdownRows(L,W);if(!rows.length)return r;
+  var net=_floorNetM2(L,W);
+  if(r.m){r.m.forEach(function(x){if((x.l||'').indexOf('面積')>=0){x.v=net.toFixed(2)+'m²';x.l='面積（実）';}});}
+  r.rows=(r.rows||[]).concat(rows);
   return r;
 }
 
