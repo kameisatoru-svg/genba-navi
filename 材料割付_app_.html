@@ -1300,21 +1300,21 @@ function removeColumn(id){
 // 発注書（TSV）用：柱一覧の行
 function _columnsTsvLines(cols){
   if(!cols||!cols.length)return [];
-  var out=['【柱】',['種別','位置','幅mm','奥行mm','本数'].join('\t')];
-  cols.forEach(function(c){out.push([_colKindLabel(c),_colPosLabel(c),(c.w||''),(c.d||''),(c.count||1)].join('\t'));});
-  var fp=cols.reduce(function(t,c){return t+(c.w||0)*(c.d||0)*(c.count||1);},0);
-  out.push('柱控除 面積合計\t\t\t\t'+(fp/1e6).toFixed(2)+'㎡');
+  var out=['【柱】',['種別','位置','幅mm','奥行mm'].join('\t')];
+  cols.forEach(function(c){out.push([_colKindLabel(c),_colPosLabel(c),(c.w||''),(c.d||'')].join('\t'));});
+  var fp=cols.reduce(function(t,c){return t+(c.w||0)*(c.d||0);},0);
+  out.push('柱'+cols.length+'本　控除面積合計\t\t\t'+(fp/1e6).toFixed(2)+'㎡');
   return out;
 }
 // PDF用：柱一覧のHTML
 function _columnsReportHtml(cols){
   if(!cols||!cols.length)return '';
-  var h='<h3>柱</h3><table><tr><th>種別</th><th>位置</th><th>幅</th><th>奥行</th><th>本数</th></tr>';
+  var h='<h3>柱（'+cols.length+'本）</h3><table><tr><th>種別</th><th>位置</th><th>幅</th><th>奥行</th></tr>';
   cols.forEach(function(c){
-    h+='<tr><td>'+_escHtml(_colKindLabel(c))+'</td><td>'+_escHtml(_colPosLabel(c))+'</td><td class="num">'+(c.w||'')+'mm</td><td class="num">'+(c.d||'')+'mm</td><td class="num">'+(c.count||1)+'</td></tr>';
+    h+='<tr><td>'+_escHtml(_colKindLabel(c))+'</td><td>'+_escHtml(_colPosLabel(c))+'</td><td class="num">'+(c.w||'')+'mm</td><td class="num">'+(c.d||'')+'mm</td></tr>';
   });
-  var fp=cols.reduce(function(t,c){return t+(c.w||0)*(c.d||0)*(c.count||1);},0);
-  h+='<tr class="total-row"><td colspan="4">柱控除 面積合計</td><td class="num">-'+(fp/1e6).toFixed(2)+'㎡</td></tr>';
+  var fp=cols.reduce(function(t,c){return t+(c.w||0)*(c.d||0);},0);
+  h+='<tr class="total-row"><td colspan="3">柱控除 面積合計</td><td class="num">-'+(fp/1e6).toFixed(2)+'㎡</td></tr>';
   h+='</table>';
   return h;
 }
@@ -1871,13 +1871,13 @@ function buildMultiRoomTsv(){
   _rooms.forEach(function(r){
     var cols=r.state&&r.state.shape&&r.state.shape.columns;
     if(cols&&cols.length){
-      cols.forEach(function(c){colRoomLines.push([r.name,_colKindLabel(c),_colPosLabel(c),(c.w||''),(c.d||''),(c.count||1)].join('\t'));});
+      cols.forEach(function(c){colRoomLines.push([r.name,_colKindLabel(c),_colPosLabel(c),(c.w||''),(c.d||'')].join('\t'));});
     }
   });
   if(colRoomLines.length){
     lines.push('');
     lines.push('【柱一覧】');
-    lines.push(['部屋','種別','位置','幅mm','奥行mm','本数'].join('\t'));
+    lines.push(['部屋','種別','位置','幅mm','奥行mm'].join('\t'));
     colRoomLines.forEach(function(l){lines.push(l);});
   }
   return lines.join('\n');
