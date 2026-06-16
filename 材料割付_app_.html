@@ -2800,9 +2800,8 @@ function redrawWall(){
       var xS1=X(rg.devStart),xF=X(rg.devStart+rg.sideD),xF2=X(rg.devStart+rg.sideD+rg.faceW),xE=X(rg.devStart+2*rg.sideD+rg.faceW);
       ctx.fillStyle='rgba(200,120,40,0.18)';ctx.fillRect(xS1,oy,xF-xS1,rh);ctx.fillRect(xF2,oy,xE-xF2,rh); // 側面=巻き込み
       ctx.fillStyle=(rg.kind==='bump'&&rg.dir==='in')?'rgba(30,45,64,0.05)':'rgba(13,110,80,0.10)';ctx.fillRect(xF,oy,xF2-xF,rh); // 前面/奥
-      ctx.strokeStyle='rgba(200,120,40,0.9)';ctx.lineWidth=1;ctx.setLineDash([4,3]);
+      ctx.strokeStyle='rgba(30,45,64,0.6)';ctx.lineWidth=1.4;ctx.setLineDash([]);
       [xS1,xF,xF2,xE].forEach(function(fx){ctx.beginPath();ctx.moveTo(fx,oy);ctx.lineTo(fx,oy+rh);ctx.stroke();});
-      ctx.setLineDash([]);
       ctx.fillStyle='rgba(160,80,20,0.95)';ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.fillText(rg.label+'巻込',(xS1+xE)/2,oy+rh-4);
     });
   }
