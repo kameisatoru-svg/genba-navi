@@ -4109,6 +4109,9 @@ function applyCsvImport(parsed, action){
       nebiki = parsed.nebiki;
       const nebikiInput = document.getElementById('nebikiInput');
       if(nebikiInput) nebikiInput.value = nebiki;
+      // 既存の値引き額を持つ書類の再編集：自動を切って元の金額を保全
+      hasuNebikiAuto = false;
+      const _c=document.getElementById('hasuAutoChk'); if(_c)_c.checked=false;
     }
     if(parsed.hasuChousei !== 0){
       hasuChousei = parsed.hasuChousei;
