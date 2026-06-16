@@ -499,12 +499,12 @@ tr.dragging{opacity:0.4;}
               title="この名称がそのまま見積書に表示されます（例：端数値引き／調整値引き）"
               style="flex:1;min-width:0;border:1px solid var(--border);border-radius:3px;padding:1px 4px;font-size:10px;font-family:inherit;color:var(--sub);background:#fafafa;"
               oninput="nebikiLabel=(this.value.trim()||'端数値引き');render()">
-            <label style="font-size:9px;color:var(--sub);white-space:nowrap;display:flex;align-items:center;gap:2px;cursor:pointer;margin:0;" title="ON＝税込合計の100円未満を自動で値引き（端数値引き）。値引き額を手入力するか、このチェックを外すと自動OFF（その額で固定）になります。">
+            <label style="font-size:9px;color:var(--sub);white-space:nowrap;display:flex;align-items:center;gap:2px;cursor:pointer;margin:0;" title="ON＝税抜合計を1000円単位に切り下げる端数値引きを自動適用（下3桁→000・税込は00止まり）。値引き額を手入力するか、このチェックを外すと自動OFF（その額で固定）になります。">
               <input type="checkbox" id="hasuAutoChk" checked style="margin:0;" onchange="hasuNebikiAuto=this.checked;render()">端数自動
             </label>
           </div>
           <input id="nebikiInput" type="number" value="0" min="0"
-            title="端数自動ON時は自動算出（税込を100円単位に切下げ）。手入力すると自動OFF・その額で固定。"
+            title="端数自動ON時は自動算出（税抜を1000円単位に切下げ）。手入力すると自動OFF・その額で固定。"
             style="width:100%;border:1px solid var(--border);border-radius:3px;padding:4px 8px;font-size:12px;font-family:inherit;"
             oninput="hasuNebikiAuto=false;var _c=document.getElementById('hasuAutoChk');if(_c)_c.checked=false;nebiki=parseFloat(this.value)||0;render()">
         </div>
