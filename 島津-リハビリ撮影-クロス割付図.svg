@@ -10,71 +10,71 @@
   </defs>
 
   <text x="30" y="36" font-size="21" font-weight="bold" fill="#1a2a3a">大分リハビリテーション病院 一般撮影室 壁・天井クロス割付図（サンゲツ FE）</text>
-  <text x="30" y="56" font-size="12" fill="#555">ロール巾920／横貼り（流れ＝横）＝水平に通す／CH2790＝920×3＋端部30の4段／開口控除・各面FE品番／寸法mm</text>
+  <text x="30" y="56" font-size="12" fill="#555">壁＝縦貼り（短冊 巾920×高さCH2790＋上下しろ）／天井＝横流れ（920帯を3618方向に通す）／開口控除・各面FE品番／寸法mm</text>
 
-  <!-- ============ A面 操作室側 (3618×2790) FE-76751 ============ -->
+  <!-- ============ A面 操作室側 (3618×2790) FE-76751 縦貼り4短冊 ============ -->
   <g>
-    <text x="70" y="108" font-size="13" font-weight="bold" fill="#a8600a">A面 操作室側　FE-76751（L=3618）</text>
-    <!-- 帯(横) 下から B1,B2,B3,B4 -->
+    <text x="70" y="108" font-size="13" font-weight="bold" fill="#a8600a">A面 操作室側　FE-76751（L=3618）縦貼り4短冊</text>
     <rect x="70" y="135" width="242" height="187" fill="#eaf3fa" stroke="#2c3e50" stroke-width="2.4"/>
-    <rect x="70" y="260" width="242" height="62" fill="#dceaf5"/>
-    <rect x="70" y="137" width="242" height="62" fill="#dceaf5"/>
-    <!-- 横継ぎ(目地) -->
+    <rect x="131.6" y="135" width="61.7" height="187" fill="#dceaf5"/>
+    <rect x="254.9" y="135" width="57.1" height="187" fill="#dceaf5"/>
     <g stroke="#c0392b" stroke-width="1" stroke-dasharray="6 3">
-      <line x1="70" y1="260" x2="312" y2="260"/>
-      <line x1="70" y1="199" x2="312" y2="199"/>
-      <line x1="70" y1="137" x2="312" y2="137"/>
+      <line x1="131.6" y1="135" x2="131.6" y2="322"/>
+      <line x1="193.3" y1="135" x2="193.3" y2="322"/>
+      <line x1="254.9" y1="135" x2="254.9" y2="322"/>
     </g>
-    <!-- 開口: 窓(腰下860,H850) -->
+    <!-- 窓(中連・腰下860,H850) -->
     <rect x="143" y="207" width="57" height="57" fill="#fff" stroke="#2a6da3" stroke-width="1.3"/>
     <text x="171" y="200" font-size="8.5" fill="#2a6da3" text-anchor="middle">中連窓850</text>
-    <!-- 開口: 操作室ドア(H2025) -->
+    <!-- 操作室ドア(H2025) -->
     <rect x="241" y="186" width="65" height="136" fill="#fff" stroke="#e8932e" stroke-width="1.3"/>
     <text x="273" y="258" font-size="8.5" fill="#e8932e" text-anchor="middle">ドア970</text>
-    <!-- 帯番号 -->
-    <text x="64" y="295" font-size="9" fill="#c0392b" text-anchor="end">①</text>
-    <text x="64" y="234" font-size="9" fill="#c0392b" text-anchor="end">②</text>
-    <text x="64" y="172" font-size="9" fill="#c0392b" text-anchor="end">③</text>
-    <text x="64" y="139" font-size="8" fill="#c0392b" text-anchor="end">④</text>
-    <!-- 寸法 CH -->
+    <!-- 短冊番号 -->
+    <text x="100" y="131" font-size="9" fill="#c0392b" text-anchor="middle">①</text>
+    <text x="162" y="131" font-size="9" fill="#c0392b" text-anchor="middle">②</text>
+    <text x="224" y="131" font-size="9" fill="#c0392b" text-anchor="middle">③</text>
+    <text x="283" y="131" font-size="9" fill="#c0392b" text-anchor="middle">④</text>
     <line x1="324" y1="135" x2="324" y2="322" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
     <text x="331" y="232" font-size="9.5" fill="#c0392b" transform="rotate(-90 331 232)" text-anchor="middle">2790</text>
     <line x1="70" y1="332" x2="312" y2="332" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
     <text x="191" y="345" font-size="9.5" fill="#c0392b" text-anchor="middle">3618</text>
   </g>
 
-  <!-- ============ C面 廊下側 (3618×2790) FE-76251 ============ -->
+  <!-- ============ C面 廊下側 (3618×2790) FE-76251 縦貼り4短冊 ============ -->
   <g>
-    <text x="560" y="108" font-size="13" font-weight="bold" fill="#a8600a">C面 廊下側　FE-76251（L=3618）</text>
+    <text x="560" y="108" font-size="13" font-weight="bold" fill="#a8600a">C面 廊下側　FE-76251（L=3618）縦貼り4短冊</text>
     <rect x="560" y="135" width="242" height="187" fill="#eaf3fa" stroke="#2c3e50" stroke-width="2.4"/>
-    <rect x="560" y="260" width="242" height="62" fill="#dceaf5"/>
-    <rect x="560" y="137" width="242" height="62" fill="#dceaf5"/>
+    <rect x="621.6" y="135" width="61.7" height="187" fill="#dceaf5"/>
+    <rect x="744.9" y="135" width="57.1" height="187" fill="#dceaf5"/>
     <g stroke="#c0392b" stroke-width="1" stroke-dasharray="6 3">
-      <line x1="560" y1="260" x2="802" y2="260"/>
-      <line x1="560" y1="199" x2="802" y2="199"/>
-      <line x1="560" y1="137" x2="802" y2="137"/>
+      <line x1="621.6" y1="135" x2="621.6" y2="322"/>
+      <line x1="683.3" y1="135" x2="683.3" y2="322"/>
+      <line x1="744.9" y1="135" x2="744.9" y2="322"/>
     </g>
-    <!-- 開口: 親子ドア(H2025,W1280) -->
+    <!-- 親子ドア(H2025,W1280) -->
     <rect x="710" y="186" width="86" height="136" fill="#fff" stroke="#e8932e" stroke-width="1.3"/>
     <text x="753" y="258" font-size="8.5" fill="#e8932e" text-anchor="middle">親子ドア1280</text>
-    <text x="554" y="295" font-size="9" fill="#c0392b" text-anchor="end">①</text>
-    <text x="554" y="234" font-size="9" fill="#c0392b" text-anchor="end">②</text>
-    <text x="554" y="172" font-size="9" fill="#c0392b" text-anchor="end">③</text>
-    <text x="554" y="139" font-size="8" fill="#c0392b" text-anchor="end">④</text>
+    <text x="590" y="131" font-size="9" fill="#c0392b" text-anchor="middle">①</text>
+    <text x="652" y="131" font-size="9" fill="#c0392b" text-anchor="middle">②</text>
+    <text x="714" y="131" font-size="9" fill="#c0392b" text-anchor="middle">③</text>
+    <text x="773" y="131" font-size="9" fill="#c0392b" text-anchor="middle">④</text>
     <line x1="560" y1="332" x2="802" y2="332" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
     <text x="681" y="345" font-size="9.5" fill="#c0392b" text-anchor="middle">3618</text>
   </g>
 
-  <!-- ============ B面 空室側 (5073×2790) FE-76109 ============ -->
+  <!-- ============ B面 空室側 (5073×2790) FE-76109 縦貼り6短冊 ============ -->
   <g>
-    <text x="70" y="388" font-size="13" font-weight="bold" fill="#a8600a">B面 空室側　FE-76109（L=5073）　※壁柱670あり</text>
+    <text x="70" y="388" font-size="13" font-weight="bold" fill="#a8600a">B面 空室側　FE-76109（L=5073）縦貼り6短冊　※壁柱670あり</text>
     <rect x="70" y="415" width="340" height="187" fill="#eaf3fa" stroke="#2c3e50" stroke-width="2.4"/>
-    <rect x="70" y="540" width="340" height="62" fill="#dceaf5"/>
-    <rect x="70" y="417" width="340" height="62" fill="#dceaf5"/>
+    <rect x="131.6" y="415" width="61.7" height="187" fill="#dceaf5"/>
+    <rect x="254.9" y="415" width="61.7" height="187" fill="#dceaf5"/>
+    <rect x="378.2" y="415" width="31.8" height="187" fill="#dceaf5"/>
     <g stroke="#c0392b" stroke-width="1" stroke-dasharray="6 3">
-      <line x1="70" y1="540" x2="410" y2="540"/>
-      <line x1="70" y1="479" x2="410" y2="479"/>
-      <line x1="70" y1="417" x2="410" y2="417"/>
+      <line x1="131.6" y1="415" x2="131.6" y2="602"/>
+      <line x1="193.3" y1="415" x2="193.3" y2="602"/>
+      <line x1="254.9" y1="415" x2="254.9" y2="602"/>
+      <line x1="316.6" y1="415" x2="316.6" y2="602"/>
+      <line x1="378.2" y1="415" x2="378.2" y2="602"/>
     </g>
     <!-- 壁柱(全高) -->
     <rect x="156" y="415" width="45" height="187" fill="url(#col)" stroke="#2c3e50" stroke-width="1.2"/>
@@ -82,74 +82,86 @@
     <!-- ドアW900(H2025) -->
     <rect x="203" y="466" width="60" height="136" fill="#fff" stroke="#e8932e" stroke-width="1.3"/>
     <text x="233" y="538" font-size="8.5" fill="#e8932e" text-anchor="middle">ドア900</text>
-    <text x="64" y="575" font-size="9" fill="#c0392b" text-anchor="end">①</text>
-    <text x="64" y="514" font-size="9" fill="#c0392b" text-anchor="end">②</text>
-    <text x="64" y="452" font-size="9" fill="#c0392b" text-anchor="end">③</text>
-    <text x="64" y="419" font-size="8" fill="#c0392b" text-anchor="end">④</text>
+    <text x="100" y="411" font-size="9" fill="#c0392b" text-anchor="middle">①</text>
+    <text x="162" y="411" font-size="9" fill="#c0392b" text-anchor="middle">②</text>
+    <text x="224" y="411" font-size="9" fill="#c0392b" text-anchor="middle">③</text>
+    <text x="285" y="411" font-size="9" fill="#c0392b" text-anchor="middle">④</text>
+    <text x="347" y="411" font-size="9" fill="#c0392b" text-anchor="middle">⑤</text>
+    <text x="394" y="411" font-size="9" fill="#c0392b" text-anchor="middle">⑥</text>
     <line x1="70" y1="612" x2="410" y2="612" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
     <text x="240" y="625" font-size="9.5" fill="#c0392b" text-anchor="middle">5073</text>
   </g>
 
-  <!-- ============ D面 受付側 (5073×2790) FE-76728 ============ -->
+  <!-- ============ D面 受付側 (5073×2790) FE-76728 縦貼り6短冊 ============ -->
   <g>
-    <text x="560" y="388" font-size="13" font-weight="bold" fill="#a8600a">D面 受付側　FE-76728（L=5073・開口なし）</text>
+    <text x="560" y="388" font-size="13" font-weight="bold" fill="#a8600a">D面 受付側　FE-76728（L=5073・開口なし）縦貼り6短冊</text>
     <rect x="560" y="415" width="340" height="187" fill="#eaf3fa" stroke="#2c3e50" stroke-width="2.4"/>
-    <rect x="560" y="540" width="340" height="62" fill="#dceaf5"/>
-    <rect x="560" y="417" width="340" height="62" fill="#dceaf5"/>
+    <rect x="621.6" y="415" width="61.7" height="187" fill="#dceaf5"/>
+    <rect x="744.9" y="415" width="61.7" height="187" fill="#dceaf5"/>
+    <rect x="868.2" y="415" width="31.8" height="187" fill="#dceaf5"/>
     <g stroke="#c0392b" stroke-width="1" stroke-dasharray="6 3">
-      <line x1="560" y1="540" x2="900" y2="540"/>
-      <line x1="560" y1="479" x2="900" y2="479"/>
-      <line x1="560" y1="417" x2="900" y2="417"/>
+      <line x1="621.6" y1="415" x2="621.6" y2="602"/>
+      <line x1="683.3" y1="415" x2="683.3" y2="602"/>
+      <line x1="744.9" y1="415" x2="744.9" y2="602"/>
+      <line x1="806.6" y1="415" x2="806.6" y2="602"/>
+      <line x1="868.2" y1="415" x2="868.2" y2="602"/>
     </g>
-    <text x="554" y="575" font-size="9" fill="#c0392b" text-anchor="end">①</text>
-    <text x="554" y="514" font-size="9" fill="#c0392b" text-anchor="end">②</text>
-    <text x="554" y="452" font-size="9" fill="#c0392b" text-anchor="end">③</text>
-    <text x="554" y="419" font-size="8" fill="#c0392b" text-anchor="end">④</text>
+    <text x="590" y="411" font-size="9" fill="#c0392b" text-anchor="middle">①</text>
+    <text x="652" y="411" font-size="9" fill="#c0392b" text-anchor="middle">②</text>
+    <text x="714" y="411" font-size="9" fill="#c0392b" text-anchor="middle">③</text>
+    <text x="775" y="411" font-size="9" fill="#c0392b" text-anchor="middle">④</text>
+    <text x="837" y="411" font-size="9" fill="#c0392b" text-anchor="middle">⑤</text>
+    <text x="884" y="411" font-size="9" fill="#c0392b" text-anchor="middle">⑥</text>
     <line x1="560" y1="612" x2="900" y2="612" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
     <text x="730" y="625" font-size="9.5" fill="#c0392b" text-anchor="middle">5073</text>
-    <text x="730" y="500" font-size="11" fill="#2a6da3" text-anchor="middle">①〜④ 各920巾を水平に通す</text>
   </g>
 
-  <!-- ============ 天井 (3618×5073) FE-76202 ============ -->
+  <!-- ============ 天井 (3618×5073) FE-76202 横流れ6帯 ============ -->
   <g>
-    <text x="70" y="668" font-size="13" font-weight="bold" fill="#a8600a">天井　FE-76202（3618×5073・ルーバー有）</text>
-    <!-- plan s2=0.0394: 3618->143, 5073->200 -->
+    <text x="70" y="668" font-size="13" font-weight="bold" fill="#a8600a">天井　FE-76202（3618×5073・横流れ＝3618方向に通す）</text>
+    <!-- plan 3618->143(s=0.0395), 5073->200 -->
     <rect x="70" y="685" width="143" height="200" fill="#eef6f0" stroke="#2c3e50" stroke-width="2"/>
-    <!-- 4列(920巾) 縦方向(5073に通す) -->
+    <rect x="70" y="721.3" width="143" height="36.3" fill="#e2efe5"/>
+    <rect x="70" y="793.9" width="143" height="36.3" fill="#e2efe5"/>
+    <rect x="70" y="866.5" width="143" height="18.5" fill="#e2efe5"/>
     <g stroke="#7aa37d" stroke-width="1" stroke-dasharray="5 3">
-      <line x1="106" y1="685" x2="106" y2="885"/>
-      <line x1="142" y1="685" x2="142" y2="885"/>
-      <line x1="178" y1="685" x2="178" y2="885"/>
+      <line x1="70" y1="721.3" x2="213" y2="721.3"/>
+      <line x1="70" y1="757.6" x2="213" y2="757.6"/>
+      <line x1="70" y1="793.9" x2="213" y2="793.9"/>
+      <line x1="70" y1="830.2" x2="213" y2="830.2"/>
+      <line x1="70" y1="866.5" x2="213" y2="866.5"/>
     </g>
-    <text x="88" y="790" font-size="8" fill="#5a7a5d" text-anchor="middle" transform="rotate(-90 88 790)">①</text>
-    <text x="124" y="790" font-size="8" fill="#5a7a5d" text-anchor="middle" transform="rotate(-90 124 790)">②</text>
-    <text x="160" y="790" font-size="8" fill="#5a7a5d" text-anchor="middle" transform="rotate(-90 160 790)">③</text>
-    <text x="196" y="790" font-size="8" fill="#5a7a5d" text-anchor="middle" transform="rotate(-90 196 790)">④</text>
-    <text x="142" y="905" font-size="9.5" fill="#555" text-anchor="middle">920×4列（5073方向に通す）</text>
+    <text x="60" y="706" font-size="8" fill="#5a7a5d" text-anchor="end">①</text>
+    <text x="60" y="742" font-size="8" fill="#5a7a5d" text-anchor="end">②</text>
+    <text x="60" y="778" font-size="8" fill="#5a7a5d" text-anchor="end">③</text>
+    <text x="60" y="815" font-size="8" fill="#5a7a5d" text-anchor="end">④</text>
+    <text x="60" y="851" font-size="8" fill="#5a7a5d" text-anchor="end">⑤</text>
+    <text x="60" y="881" font-size="8" fill="#5a7a5d" text-anchor="end">⑥</text>
+    <text x="142" y="903" font-size="9.5" fill="#555" text-anchor="middle">920×6帯（3618方向＝横に通す）</text>
   </g>
 
   <!-- ============ 数量メモ ============ -->
   <g transform="translate(300,690)">
     <rect x="-8" y="-16" width="610" height="350" fill="#fdf6ef" stroke="#a8600a" stroke-width="1.2" rx="6"/>
-    <text x="0" y="2" font-size="14" font-weight="bold" fill="#a8600a">クロス 割付・数量（920巾・横貼り）</text>
-    <text x="0" y="26" font-size="12" fill="#333">○ 横貼り：各面とも 920巾の帯を水平に通す。CH2790 ＝</text>
-    <text x="16" y="44" font-size="12" fill="#333">①920 ＋ ②920 ＋ ③920 ＋ ④端部30 ＝ 4段</text>
+    <text x="0" y="2" font-size="14" font-weight="bold" fill="#a8600a">クロス 割付・数量（920巾）</text>
+    <text x="0" y="24" font-size="12" fill="#333">○ 壁＝<tspan font-weight="bold">縦貼り</tspan>（短冊 巾920×高さCH2790＋上下しろ）</text>
+    <text x="0" y="42" font-size="12" fill="#333">○ 天井＝<tspan font-weight="bold">横流れ</tspan>（920帯を3618方向に通す）</text>
 
-    <text x="0" y="72" font-size="12.5" font-weight="bold" fill="#333">面別（帯長＝壁長／開口は控除しカット）</text>
-    <text x="0" y="92" font-size="12" fill="#333">・A面 操作室側 FE-76751：4段×3618 ＝ 14.5m（窓・ドア控除）</text>
-    <text x="0" y="110" font-size="12" fill="#333">・B面 空室側　FE-76109：4段×5073 ＝ 20.3m（壁柱・ドア控除）</text>
-    <text x="0" y="128" font-size="12" fill="#333">・C面 廊下側　FE-76251：4段×3618 ＝ 14.5m（親子ドア控除）</text>
-    <text x="0" y="146" font-size="12" fill="#333">・D面 受付側　FE-76728：4段×5073 ＝ 20.3m（開口なし）</text>
-    <text x="0" y="164" font-size="12" fill="#333">・天井　　　　FE-76202：920×4列×5073 ＝ 20.3m</text>
+    <text x="0" y="68" font-size="12.5" font-weight="bold" fill="#333">面別 短冊数（開口は控除しカット）</text>
+    <text x="0" y="88" font-size="12" fill="#333">・A面 操作室側 FE-76751：4短冊（窓・ドア控除）</text>
+    <text x="0" y="106" font-size="12" fill="#333">・B面 空室側　FE-76109：6短冊（壁柱・ドア控除）</text>
+    <text x="0" y="124" font-size="12" fill="#333">・C面 廊下側　FE-76251：4短冊（親子ドア控除）</text>
+    <text x="0" y="142" font-size="12" fill="#333">・D面 受付側　FE-76728：6短冊（開口なし）</text>
+    <text x="0" y="160" font-size="12" fill="#333">・天井　　　　FE-76202：920×6帯×3618 ＝ 21.7m</text>
 
-    <text x="0" y="190" font-size="12" fill="#333">○ 壁クロス正味 ≒ <tspan font-weight="bold">49㎡</tspan>（見積）。横貼り総延長(粗) ≒ 69.5m＋天井20.3m</text>
-    <text x="0" y="208" font-size="12" fill="#333">○ 発注はロール巾920で品番別に集計（FE品番ごとに分ける）</text>
+    <text x="0" y="186" font-size="12" fill="#333">○ 壁 短冊計 20本×（2790＋しろ） ≒ 58〜60m（粗）</text>
+    <text x="0" y="204" font-size="12" fill="#333">○ 壁クロス正味 ≒ <tspan font-weight="bold">49㎡</tspan>（見積）／発注はFE品番別に集計</text>
 
-    <text x="0" y="234" font-size="11.5" fill="#9a5a00" font-weight="bold">※ 要確認</text>
-    <text x="0" y="251" font-size="11.5" fill="#9a5a00">・CH2790は920の倍数でないため最上段が30mmの細帯になります。</text>
-    <text x="16" y="267" font-size="11.5" fill="#9a5a00">横貼りだとロス大。縦貼り（高さ2790通し）の方が歩留り良。</text>
-    <text x="0" y="285" font-size="11.5" fill="#9a5a00">・FE品番系は無地〜微柄。柄合わせ(リピート)有無を発注前に確認。</text>
-    <text x="0" y="303" font-size="11.5" fill="#9a5a00">・壁柱(670)の見付・見込面、入隅/出隅の回し分は別途加算。</text>
-    <text x="0" y="324" font-size="10.5" fill="#888">寸法は清書基準・概略／割付・数量は発注前に最終確認。</text>
+    <text x="0" y="230" font-size="11.5" fill="#9a5a00" font-weight="bold">※ 要確認</text>
+    <text x="0" y="247" font-size="11.5" fill="#9a5a00">・短冊割付の端短冊（A/C=858、B/D=473）は入隅で回す/逃がす。</text>
+    <text x="0" y="263" font-size="11.5" fill="#9a5a00">・FE品番系は無地〜微柄。柄合わせ(リピート)有無を発注前に確認。</text>
+    <text x="0" y="279" font-size="11.5" fill="#9a5a00">・壁柱(670)の見付・見込面、入隅/出隅の回し分は別途加算。</text>
+    <text x="0" y="295" font-size="11.5" fill="#9a5a00">・天井ルーバー(エアー吹出)まわりは開口控除・カット。</text>
+    <text x="0" y="318" font-size="10.5" fill="#888">寸法は清書基準・概略／割付・数量は発注前に最終確認。</text>
   </g>
 </svg>
