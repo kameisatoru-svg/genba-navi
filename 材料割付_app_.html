@@ -2999,57 +2999,35 @@ function renderSheetResult(tate,yoko,L,W){
 function drawSheetCanvas(cvId,s,L,W,sc,ox,oy,rw,rh,CW,CH,lineDir){
   var cv=document.getElementById(cvId);if(!cv)return;
   var ctx=setupCanvas(cv,CW,CH);ctx.clearRect(0,0,CW,CH);
+  var g=_planGeom(W,L,CW,CH,8,30,8,30,true); // 横=W,縦=L（凹凸込みでフィット）
+  sc=g.sc;ox=g.ox;oy=g.oy;rw=g.rw;rh=g.rh;
   var swPx=curSheetW*sc;
-  // 室内背景
-  ctx.fillStyle='rgba(154,90,16,0.05)';ctx.fillRect(ox,oy,rw,rh);
   function drawHorizDim(x1,x2,y,label){ctx.strokeStyle='rgba(154,90,16,0.85)';ctx.fillStyle='rgba(154,90,16,0.85)';ctx.lineWidth=0.9;ctx.beginPath();ctx.moveTo(x1,y);ctx.lineTo(x2,y);ctx.stroke();ctx.beginPath();ctx.moveTo(x1,y-3);ctx.lineTo(x1,y+3);ctx.stroke();ctx.beginPath();ctx.moveTo(x2,y-3);ctx.lineTo(x2,y+3);ctx.stroke();ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(label,(x1+x2)/2,y+5);}
   function drawVertDim(x,y1,y2,label){ctx.strokeStyle='rgba(154,90,16,0.85)';ctx.fillStyle='rgba(154,90,16,0.85)';ctx.lineWidth=0.9;ctx.beginPath();ctx.moveTo(x,y1);ctx.lineTo(x,y2);ctx.stroke();ctx.beginPath();ctx.moveTo(x-3,y1);ctx.lineTo(x+3,y1);ctx.stroke();ctx.beginPath();ctx.moveTo(x-3,y2);ctx.lineTo(x+3,y2);ctx.stroke();ctx.save();ctx.translate(x+12,(y1+y2)/2);ctx.rotate(Math.PI/2);ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,0,0);ctx.restore();}
+  // 背景＋分割線（部屋形状にクリップ）
+  ctx.save();g.path(ctx);ctx.clip();
+  ctx.fillStyle='rgba(154,90,16,0.05)';ctx.fillRect(g.gx0,g.gy0,g.gx1-g.gx0,g.gy1-g.gy0);
   if(lineDir==='縦'){
-    // 切り出し最終本（カット幅 edgeMm）のハイライト：canvas右端側
-    if(s.edgeMm>0&&s.cols>0){
-      var cutX1=ox+(s.cols-1)*swPx;
-      var cutX2=Math.min(cutX1+s.edgeMm*sc,ox+rw);
-      ctx.fillStyle='rgba(154,90,16,0.22)';
-      ctx.fillRect(cutX1,oy,cutX2-cutX1,rh);
-    }
-    // 区切り線（cols-1本）
+    if(s.edgeMm>0&&s.cols>0){var cutX1=ox+(s.cols-1)*swPx,cutX2=Math.min(cutX1+s.edgeMm*sc,ox+rw);ctx.fillStyle='rgba(154,90,16,0.22)';ctx.fillRect(cutX1,oy,cutX2-cutX1,rh);}
     ctx.strokeStyle='rgba(154,90,16,0.6)';ctx.lineWidth=1;
-    for(var i=1;i<s.cols;i++){
-      var lx=ox+i*swPx;if(lx>ox+rw)break;
-      ctx.beginPath();ctx.moveTo(lx,oy);ctx.lineTo(lx,oy+rh);ctx.stroke();
-    }
-    // 切り出し本の使用幅ラベル
-    if(s.edgeMm>0){
-      var d1=ox+(s.cols-1)*swPx;
-      var d2=Math.min(d1+s.edgeMm*sc,ox+rw);
-      drawHorizDim(d1,d2,oy+rh+10,s.edgeMm+'mm');
-    }
-    ctx.fillStyle='rgba(90,106,122,0.7)';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';
-    ctx.fillText(s.cols+'本',ox+rw/2,oy+rh+(s.edgeMm>0?22:6));
+    for(var i=1;i<s.cols;i++){var lx=ox+i*swPx;if(lx>ox+rw)break;ctx.beginPath();ctx.moveTo(lx,oy);ctx.lineTo(lx,oy+rh);ctx.stroke();}
   }else{
-    // 切り出し最終本：canvas下端側
-    if(s.edgeMm>0&&s.cols>0){
-      var cutY1=oy+(s.cols-1)*swPx;
-      var cutY2=Math.min(cutY1+s.edgeMm*sc,oy+rh);
-      ctx.fillStyle='rgba(154,90,16,0.22)';
-      ctx.fillRect(ox,cutY1,rw,cutY2-cutY1);
-    }
+    if(s.edgeMm>0&&s.cols>0){var cutY1=oy+(s.cols-1)*swPx,cutY2=Math.min(cutY1+s.edgeMm*sc,oy+rh);ctx.fillStyle='rgba(154,90,16,0.22)';ctx.fillRect(ox,cutY1,rw,cutY2-cutY1);}
     ctx.strokeStyle='rgba(154,90,16,0.6)';ctx.lineWidth=1;
-    for(var j=1;j<s.cols;j++){
-      var ly=oy+j*swPx;if(ly>oy+rh)break;
-      ctx.beginPath();ctx.moveTo(ox,ly);ctx.lineTo(ox+rw,ly);ctx.stroke();
-    }
-    if(s.edgeMm>0){
-      var e1=oy+(s.cols-1)*swPx;
-      var e2=Math.min(e1+s.edgeMm*sc,oy+rh);
-      drawVertDim(ox+rw+10,e1,e2,s.edgeMm+'mm');
-    }
-    ctx.fillStyle='rgba(90,106,122,0.7)';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';
-    ctx.fillText(s.cols+'本',ox+rw/2,oy+rh+6);
+    for(var j=1;j<s.cols;j++){var ly=oy+j*swPx;if(ly>oy+rh)break;ctx.beginPath();ctx.moveTo(ox,ly);ctx.lineTo(ox+rw,ly);ctx.stroke();}
   }
-  ctx.strokeStyle='rgba(30,45,64,0.55)';ctx.lineWidth=1.5;ctx.strokeRect(ox,oy,rw,rh);
-  // 形状・柱を重ね描き（長尺シート：水平=W, 垂直=L）
-  _drawShapeOverlay(ctx,ox,oy,rw,rh,W,L,true);
+  ctx.restore();
+  // 外周線：凹凸・切欠・カットを織り込んだ一体ライン
+  ctx.strokeStyle='rgba(30,45,64,0.55)';ctx.lineWidth=1.6;g.path(ctx);ctx.stroke();
+  // 寸法ラベル・本数（クリップ外）
+  if(lineDir==='縦'){
+    if(s.edgeMm>0){var d1=ox+(s.cols-1)*swPx,d2=Math.min(d1+s.edgeMm*sc,ox+rw);drawHorizDim(d1,d2,oy+rh+10,s.edgeMm+'mm');}
+    ctx.fillStyle='rgba(90,106,122,0.7)';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(s.cols+'本',ox+rw/2,oy+rh+(s.edgeMm>0?22:6));
+  }else{
+    if(s.edgeMm>0){var e1=oy+(s.cols-1)*swPx,e2=Math.min(e1+s.edgeMm*sc,oy+rh);drawVertDim(ox+rw+10,e1,e2,s.edgeMm+'mm');}
+    ctx.fillStyle='rgba(90,106,122,0.7)';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(s.cols+'本',ox+rw/2,oy+rh+6);
+  }
+  // 柱を重ね描き
   _drawColumnsOverlay(ctx,ox,oy,rw,rh,W,L,true);
 }
 
