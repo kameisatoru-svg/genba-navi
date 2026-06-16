@@ -2798,7 +2798,8 @@ function drawCompaneViz(L,W,BL,BW,eH,eV,cols,rows,nedaCount,PITCH,cvId){
   var lthick=Math.max(2,45*sc);[ox,ox+rw-lthick].forEach(function(lx){ctx.fillStyle='rgba(37,99,168,0.22)';ctx.fillRect(lx,oy,lthick,rh);ctx.strokeStyle='rgba(37,99,168,0.5)';ctx.lineWidth=0.8;ctx.strokeRect(lx,oy,lthick,rh);});
   ctx.strokeStyle='rgba(30,45,64,0.6)';ctx.lineWidth=1.5;ctx.strokeRect(ox,oy,rw,rh);
   ctx.fillStyle='rgba(90,106,122,0.7)';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.fillText(L+'mm',ox+rw/2,oy+rh+14);ctx.save();ctx.translate(ox-6,oy+rh/2);ctx.rotate(-Math.PI/2);ctx.fillText(W+'mm',0,0);ctx.restore();
-  // 柱を重ね描き（コンパネビュー：水平=L, 垂直=W）
+  // 形状・柱を重ね描き（コンパネビュー：水平=L, 垂直=W）
+  _drawShapeOverlay(ctx,ox,oy,rw,rh,L,W,false);
   _drawColumnsOverlay(ctx,ox,oy,rw,rh,L,W,false);
 }
 
@@ -2962,7 +2963,8 @@ function drawSheetCanvas(cvId,s,L,W,sc,ox,oy,rw,rh,CW,CH,lineDir){
     ctx.fillText(s.cols+'本',ox+rw/2,oy+rh+6);
   }
   ctx.strokeStyle='rgba(30,45,64,0.55)';ctx.lineWidth=1.5;ctx.strokeRect(ox,oy,rw,rh);
-  // 柱を重ね描き（長尺シート：水平=W, 垂直=L）
+  // 形状・柱を重ね描き（長尺シート：水平=W, 垂直=L）
+  _drawShapeOverlay(ctx,ox,oy,rw,rh,W,L,true);
   _drawColumnsOverlay(ctx,ox,oy,rw,rh,W,L,true);
 }
 
