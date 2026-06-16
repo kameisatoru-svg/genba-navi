@@ -47,40 +47,41 @@
     <text x="560" y="289" font-size="10" fill="#2c3e50" text-anchor="end" font-weight="bold">壁柱 670</text>
   </g>
 
-  <!-- ===== 窓(A面 W850/H1850・腰壁860) ===== -->
+  <!-- ===== 窓(A面 中連窓 W850/H850・腰下860) ===== -->
   <g>
-    <rect x="390" y="147" width="71" height="6" fill="#fff" stroke="#2a6da3" stroke-width="1.2"/>
+    <rect x="390" y="146" width="71" height="8" fill="#fff" stroke="#2a6da3" stroke-width="1.2"/>
     <line x1="390" y1="150" x2="461" y2="150" stroke="#2a6da3" stroke-width="0.8"/>
-    <text x="425" y="201" font-size="9.5" fill="#2a6da3" text-anchor="middle" font-weight="bold">窓 W850</text>
-    <text x="425" y="212" font-size="9" fill="#2a6da3" text-anchor="middle">H1850/腰壁860</text>
+    <text x="425" y="201" font-size="9.5" fill="#2a6da3" text-anchor="middle" font-weight="bold">中連窓 W850</text>
+    <text x="425" y="212" font-size="9" fill="#2a6da3" text-anchor="middle">H850/腰下860</text>
   </g>
 
-  <!-- ===== 操作室ドア(A面 W970/H2025・内開き・吊元右) ===== -->
+  <!-- ===== 操作室ドア(A面 W970/H2025・内開き・吊元右) 実線=扉/点線=先端軌道 ===== -->
   <g stroke="#e8932e" fill="none">
-    <rect x="511" y="147" width="81" height="6" fill="#fff" stroke="#e8932e" stroke-width="1.2"/>
-    <line x1="592" y1="150" x2="592" y2="231" stroke-width="1.4"/>
-    <path d="M592,231 A81,81 0 0,0 511,150" stroke-width="1.2" stroke-dasharray="4 3"/>
+    <line x1="592" y1="150" x2="592" y2="231" stroke-width="2.4"/>
+    <path d="M511,150 A81,81 0 0,1 592,231" stroke-width="1" stroke-dasharray="3 3"/>
   </g>
   <text x="551" y="205" font-size="9.5" fill="#e8932e" text-anchor="middle" font-weight="bold">操作室ドア</text>
   <text x="551" y="216" font-size="9" fill="#e8932e" text-anchor="middle">W970/H2025</text>
 
-  <!-- ===== ドア(B面 W900/H2025・内開き・吊元上) ===== -->
+  <!-- ===== ドア(B面 W900/H2025・内開き・吊元上) 実線=扉/点線=先端軌道 ===== -->
   <g stroke="#e8932e" fill="none">
-    <rect x="597" y="314" width="6" height="75" fill="#fff" stroke="#e8932e" stroke-width="1.2"/>
-    <line x1="600" y1="314" x2="525" y2="314" stroke-width="1.4"/>
-    <path d="M525,314 A75,75 0 0,1 600,389" stroke-width="1.2" stroke-dasharray="4 3"/>
+    <line x1="600" y1="314" x2="525" y2="314" stroke-width="2.4"/>
+    <path d="M525,314 A75,75 0 0,1 600,389" stroke-width="1" stroke-dasharray="3 3"/>
   </g>
   <text x="556" y="333" font-size="9.5" fill="#e8932e" text-anchor="middle" font-weight="bold">ドア W900/H2025</text>
 
-  <!-- ===== 親子ドア(C面 W1280・内開き) ===== -->
+  <!-- ===== 親子ドア(C面 W1280・内開き・親=右/子=左) 実線=扉/点線=先端軌道 ===== -->
   <g stroke="#e8932e" fill="none">
-    <rect x="486" y="567" width="106" height="6" fill="#fff" stroke="#e8932e" stroke-width="1.2"/>
-    <line x1="486" y1="570" x2="486" y2="500" stroke-width="1.4"/>
-    <path d="M486,500 A70,70 0 0,1 556,570" stroke-width="1.2" stroke-dasharray="4 3"/>
-    <line x1="592" y1="570" x2="592" y2="534" stroke-width="1.4"/>
-    <path d="M592,534 A36,36 0 0,0 556,570" stroke-width="1.2" stroke-dasharray="4 3"/>
+    <!-- 親(右) -->
+    <line x1="592" y1="570" x2="592" y2="499" stroke-width="2.4"/>
+    <path d="M592,499 A71,71 0 0,1 521,570" stroke-width="1" stroke-dasharray="3 3"/>
+    <!-- 子(左) -->
+    <line x1="486" y1="570" x2="486" y2="535" stroke-width="2.4"/>
+    <path d="M486,535 A35,35 0 0,1 521,570" stroke-width="1" stroke-dasharray="3 3"/>
   </g>
-  <text x="539" y="588" font-size="10" fill="#e8932e" text-anchor="middle" font-weight="bold">親子ドア W1280</text>
+  <text x="568" y="515" font-size="9" fill="#e8932e" text-anchor="middle">親</text>
+  <text x="497" y="552" font-size="9" fill="#e8932e" text-anchor="middle">子</text>
+  <text x="500" y="588" font-size="10" fill="#e8932e" text-anchor="middle" font-weight="bold">親子ドア W1280（親=右/子=左）</text>
 
   <!-- ===== 室内設備(概略・鉛筆) ===== -->
   <rect x="395" y="300" width="95" height="150" fill="url(#pit)" stroke="#9bb3c2" stroke-width="1"/>
@@ -171,8 +172,8 @@
     <text x="0" y="90" font-size="12" fill="#333">○ 壁クロス（サンゲツ・流れ＝横）：</text>
     <text x="16" y="110" font-size="12" fill="#333">A面 操作室側 <tspan font-weight="bold">FE-76751</tspan>　／　C面 廊下側 <tspan font-weight="bold">FE-76251</tspan></text>
     <text x="16" y="130" font-size="12" fill="#333">D面 受付側 <tspan font-weight="bold">FE-76728</tspan>　／　B面 空室側 <tspan font-weight="bold">FE-76109</tspan></text>
-    <text x="0" y="154" font-size="12" fill="#333">○ 建具：操作室ドアW970／ドアW900（H2025）／親子ドアW1280</text>
-    <text x="16" y="172" font-size="12" fill="#333">窓 W850・H1850（腰壁860）　すべて内開き</text>
+    <text x="0" y="154" font-size="12" fill="#333">○ 建具：操作室ドアW970／ドアW900（H2025）／親子ドアW1280(親右子左)</text>
+    <text x="16" y="172" font-size="12" fill="#333">中連窓 W850・H850（腰下860）　ドアは内開き（実線=扉/点線=軌道）</text>
     <text x="0" y="194" font-size="12" fill="#333">○ 壁柱 670（B面）／ CH＝2790 ／ W3618×D5073</text>
     <text x="0" y="214" font-size="11.5" fill="#333">○ 数量（見_改２）：床 18㎡ ／ 壁クロス 49㎡</text>
     <text x="0" y="230" font-size="10" fill="#9a5a00">※ 壁品番は島津図(操作室=下)を180°回転し各壁へ対応。形状・数量は概略。</text>
