@@ -2870,18 +2870,20 @@ function doCompaneCalc(){
 function drawCompaneViz(L,W,BL,BW,eH,eV,cols,rows,nedaCount,PITCH,cvId){
   var cv=document.getElementById(cvId||'viz-cv');if(!cv)return;
   var CW=cv.offsetWidth||340,CH=200;
-  var mL=10,mR=14,mT=14,mB=20,sc=Math.min((CW-mL-mR)/L,(CH-mT-mB)/W);
-  var rw=L*sc,rh=W*sc,ox=mL,oy=mT,ctx=setupCanvas(cv,CW,CH);
-  ctx.clearRect(0,0,CW,CH);
+  var g=_planGeom(W,L,CW,CH,10,14,14,20,false); // 横=L, 縦=W（凹凸込みでフィット）
+  var sc=g.sc,ox=g.ox,oy=g.oy,rw=g.rw,rh=g.rh; // rw=L*sc, rh=W*sc
+  var ctx=setupCanvas(cv,CW,CH);ctx.clearRect(0,0,CW,CH);
+  ctx.save();g.path(ctx);ctx.clip();
   var tw=BL*sc,th=BW*sc;
   for(var row=0;row<rows;row++){var off=(row%2===1)?tw/2:0;var y1=oy+row*th,y2=Math.min(oy+(row+1)*th,oy+rh);for(var col=0;col<cols+(row%2===1?1:0);col++){var x1=ox+col*tw-off,x2=Math.min(x1+tw,ox+rw);if(x1>=ox+rw)break;var isEdge=(x2-Math.max(x1,ox)<tw-1)||(y2-y1<th-1);ctx.fillStyle=isEdge?'rgba(154,90,16,0.18)':'rgba(154,90,16,0.05)';ctx.fillRect(Math.max(x1,ox),y1,Math.min(x2,ox+rw)-Math.max(x1,ox),y2-y1);ctx.strokeStyle='rgba(154,90,16,0.4)';ctx.lineWidth=0.8;ctx.strokeRect(Math.max(x1,ox),y1,Math.min(x2,ox+rw)-Math.max(x1,ox),y2-y1);}}
   var nedaW=Math.ceil(W/PITCH)+1;
   for(var n=0;n<nedaW;n++){var ny=oy+Math.min(n*PITCH,W)*sc,nthick=Math.max(2,45*sc);ctx.fillStyle='rgba(37,99,168,0.15)';ctx.fillRect(ox,ny-nthick/2,rw,nthick);ctx.strokeStyle='rgba(37,99,168,0.4)';ctx.lineWidth=0.8;ctx.strokeRect(ox,ny-nthick/2,rw,nthick);}
   var lthick=Math.max(2,45*sc);[ox,ox+rw-lthick].forEach(function(lx){ctx.fillStyle='rgba(37,99,168,0.22)';ctx.fillRect(lx,oy,lthick,rh);ctx.strokeStyle='rgba(37,99,168,0.5)';ctx.lineWidth=0.8;ctx.strokeRect(lx,oy,lthick,rh);});
-  ctx.strokeStyle='rgba(30,45,64,0.6)';ctx.lineWidth=1.5;ctx.strokeRect(ox,oy,rw,rh);
+  ctx.restore();
+  // 外周線：凹凸・切欠・カットを織り込んだ一体ライン
+  ctx.strokeStyle='rgba(30,45,64,0.6)';ctx.lineWidth=1.6;g.path(ctx);ctx.stroke();
   ctx.fillStyle='rgba(90,106,122,0.7)';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.fillText(L+'mm',ox+rw/2,oy+rh+14);ctx.save();ctx.translate(ox-6,oy+rh/2);ctx.rotate(-Math.PI/2);ctx.fillText(W+'mm',0,0);ctx.restore();
-  // 形状・柱を重ね描き（コンパネビュー：水平=L, 垂直=W）
-  _drawShapeOverlay(ctx,ox,oy,rw,rh,L,W,false);
+  // 柱を重ね描き
   _drawColumnsOverlay(ctx,ox,oy,rw,rh,L,W,false);
 }
 
