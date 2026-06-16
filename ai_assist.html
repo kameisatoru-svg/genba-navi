@@ -245,7 +245,13 @@ body{
 .voice-btn-rec.on{background:#5a6a7a;}
 .voice-btn-sum{background:var(--accent);color:var(--navy);}
 .voice-btn-sum:active{background:#b89a5e;}
+.voice-btn-file{width:100%;background:var(--navy);color:#fff;}
+.voice-btn-file:active{background:var(--navy2);}
 .voice-btn:disabled{opacity:.45;cursor:not-allowed;}
+.voice-or{
+  text-align:center;font-size:11.5px;color:var(--text2);
+  margin:14px 0 10px;letter-spacing:.5px;
+}
 .voice-hint{
   font-size:11.5px;color:var(--text2);line-height:1.55;
   margin-top:10px;
@@ -375,10 +381,21 @@ body{
           <span>要約してチャットへ</span>
         </button>
       </div>
+
+      <div class="voice-or">— または 録音ファイルから —</div>
+      <input type="file" id="voice-audio-file" accept="audio/*,video/mp4,.m4a,.amr" style="display:none;" onchange="voiceSummarizeAudioFile(this.files[0])">
+      <button class="voice-btn voice-btn-file" id="voice-file-btn" onclick="document.getElementById('voice-audio-file').click()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+        </svg>
+        <span id="voice-file-label">録音ファイルを選んで要約（Gemini）</span>
+      </button>
+
       <div class="voice-hint">
         ・録音は無音が続くと自動で区切られますが、再開ボタンを押すまで継続録音します。<br>
         ・文字起こしはブラウザの音声認識（端末で処理）を使用します。要約は AI（Claude）に送信されます。<br>
-        ・「要約してチャットへ」で、決定事項・TODO・確認事項・関連案件に整理してチャットに表示します。
+        ・電話などの<b>録音ファイル</b>は「録音ファイルを選んで要約（Gemini）」から。Gemini が音声を直接聞き取り、文字起こしと要約をまとめます（要 Gemini APIキー）。<br>
+        ・どちらも、決定事項・TODO・確認事項・関連案件に整理してチャットに表示します。
       </div>
     </div>
   </div>
@@ -1057,6 +1074,156 @@ function goBack(){
     ].join('\n');
     window.voiceClose();
     window.aiSubmitUserText(prompt);
+  };
+
+  /* ── 録音ファイル → Gemini で文字起こし＋要約 ── */
+  var GEMINI_KEY   = 'GEMINI_API_KEY';
+  var GEMINI_MODEL = 'gemini-2.0-flash';
+
+  function getGeminiKey(){ return (localStorage.getItem(GEMINI_KEY)||'').trim(); }
+  function setGeminiKey(k){ localStorage.setItem(GEMINI_KEY, (k||'').trim()); }
+
+  window.voicePromptGeminiKey = function(){
+    var cur = getGeminiKey();
+    var masked = cur ? cur.slice(0,6)+'…'+cur.slice(-4) : '(未設定)';
+    var key = prompt('Gemini APIキーを入力してください\n（Google AI Studio で取得。ブラウザのこの端末にのみ保存されます）\n現在: '+masked, cur);
+    if(key === null) return false;
+    setGeminiKey(key);
+    return !!key.trim();
+  };
+
+  function fileToBase64(file){
+    return new Promise(function(resolve, reject){
+      var r = new FileReader();
+      r.onload = function(){
+        var s = String(r.result || '');
+        var i = s.indexOf(',');
+        resolve(i >= 0 ? s.slice(i+1) : s);
+      };
+      r.onerror = function(){ reject(r.error || new Error('ファイル読み込みに失敗しました')); };
+      r.readAsDataURL(file);
+    });
+  }
+
+  function guessAudioMime(file){
+    var t = (file.type || '').toLowerCase();
+    if(t && t.indexOf('audio') === 0) return t;
+    var n = (file.name || '').toLowerCase();
+    if(/\.mp3$/.test(n))  return 'audio/mp3';
+    if(/\.wav$/.test(n))  return 'audio/wav';
+    if(/\.m4a$/.test(n) || /\.mp4$/.test(n)) return 'audio/mp4';
+    if(/\.aac$/.test(n))  return 'audio/aac';
+    if(/\.ogg$/.test(n))  return 'audio/ogg';
+    if(/\.flac$/.test(n)) return 'audio/flac';
+    if(/\.aiff?$/.test(n))return 'audio/aiff';
+    if(/\.amr$/.test(n))  return 'audio/amr';
+    return t || 'audio/mpeg';
+  }
+
+  window.voiceSummarizeAudioFile = async function(file){
+    if(!file) return;
+    var key = getGeminiKey();
+    if(!key){
+      if(!window.voicePromptGeminiKey()) return;
+      key = getGeminiKey();
+      if(!key) return;
+    }
+    if(file.size > 18*1024*1024){
+      alert('ファイルが大きすぎます（'+(file.size/1048576).toFixed(1)+'MB）。\n18MB以下の録音にするか、分割してお試しください。');
+      var fi0 = document.getElementById('voice-audio-file');
+      if(fi0) fi0.value = '';
+      return;
+    }
+
+    var fileInput = document.getElementById('voice-audio-file');
+    var btn   = document.getElementById('voice-file-btn');
+    var label = document.getElementById('voice-file-label');
+    var recBtn = document.getElementById('voice-rec-btn');
+    var sumBtn = document.getElementById('voice-sum-btn');
+    if(btn) btn.disabled = true;
+    if(recBtn) recBtn.disabled = true;
+    if(sumBtn) sumBtn.disabled = true;
+    if(label) label.textContent = '要約中…（'+file.name+'）';
+    voiceSetStatus('Geminiに音声を送信して要約しています…（数十秒かかる場合があります）', false);
+
+    // 案件・取引先の紐づけ用に軽量コンテキストを添える
+    var ctx = '';
+    try{
+      var data = await loadData(false);
+      if(data){
+        ctx = '\n\n【参照: 取引先マスター】\n' + JSON.stringify(data['取引先マスター'] || []) +
+              '\n\n【参照: 進行中の案件】\n' + JSON.stringify(data['案件'] || []);
+      }
+    }catch(_){}
+
+    var gprompt = [
+      'あなたはアートレイズ（株式会社アートレイズ、大分県別府市の建設・内装仕上げ会社）の現場管理アシスタントです。',
+      '添付の音声（電話・打合せ・現場でのやり取りの録音）を日本語で聞き取り、文字起こししたうえで整理・要約してください。',
+      '聞き取りにくい箇所は [不明瞭] と記し、固有名詞（社名・現場名・担当者）は参照情報から推測して補正してください。',
+      '',
+      '次のマークダウン形式で出力してください：',
+      '## 概要',
+      '（会話の要点を2〜3行で）',
+      '## 文字起こし（要点）',
+      '（発言の流れを要点で。長い場合は要約可）',
+      '## 決定事項',
+      '## TODO',
+      '（誰が・いつまでに が分かれば併記）',
+      '## 確認・保留事項',
+      '## 関連しそうな案件・取引先',
+      '（参照情報から推測。なければ「特定できず」）',
+      ctx
+    ].join('\n');
+
+    try{
+      var b64 = await fileToBase64(file);
+      var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + GEMINI_MODEL + ':generateContent';
+      var res = await fetch(url, {
+        method:'POST',
+        headers:{ 'content-type':'application/json', 'x-goog-api-key': key },
+        body: JSON.stringify({
+          contents:[{ parts:[
+            { text: gprompt },
+            { inline_data: { mime_type: guessAudioMime(file), data: b64 } }
+          ]}]
+        })
+      });
+      if(!res.ok){
+        var errText = '';
+        try{
+          var ej = await res.json();
+          errText = (ej.error && ej.error.message) ? ej.error.message : JSON.stringify(ej);
+        }catch(_){ errText = await res.text(); }
+        window.voiceClose();
+        appendMsg('error', 'Geminiエラー ('+res.status+')\n'+errText);
+        return;
+      }
+      var json = await res.json();
+      var reply = '';
+      var cand = json.candidates && json.candidates[0];
+      if(cand && cand.content && Array.isArray(cand.content.parts)){
+        reply = cand.content.parts.map(function(p){ return p.text || ''; }).join('');
+      }
+      if(!reply){
+        reply = '(Geminiの返答が空でした' +
+          (json.promptFeedback ? '：' + JSON.stringify(json.promptFeedback) : '') + '）';
+      }
+      window.voiceClose();
+      appendMsg('user', '🎙️ 録音ファイルをGeminiで要約：' + file.name);
+      aiHistory.push({ role:'user', content:'（音声ファイル「'+file.name+'」をGeminiで文字起こし・要約）' });
+      appendMsg('ai', reply);
+      aiHistory.push({ role:'assistant', content: reply });
+      persistCurrent();
+    }catch(e){
+      window.voiceClose();
+      appendMsg('error', '通信エラー: ' + (e && e.message ? e.message : String(e)));
+    }finally{
+      if(btn) btn.disabled = false;
+      if(recBtn) recBtn.disabled = false;
+      if(sumBtn) sumBtn.disabled = false;
+      if(label) label.textContent = '録音ファイルを選んで要約（Gemini）';
+      if(fileInput) fileInput.value = '';
+    }
   };
 
   document.addEventListener('DOMContentLoaded', function(){
