@@ -777,6 +777,24 @@ canvas#wall-cv{touch-action:none;}
   </div>
 </div>
 
+<!-- 柱の登録モーダル -->
+<div class="modal-overlay hidden" id="cols-modal" onclick="closeColumnsModal(event)">
+  <div class="modal-box modal-wide">
+    <div class="modal-head">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="18" rx="1"/><path d="M5 21V8M19 21V8"/></svg>
+      <span>柱の登録</span>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:8px;line-height:1.6">この部屋の柱を登録します。床・天井の面積から自動で控除し、平面図と発注書にも反映します。</div>
+      <div id="cols-list"></div>
+      <div class="col-add-card" id="cols-add-card"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-cancel" onclick="closeColumnsModal(null)">閉じる</button>
+    </div>
+  </div>
+</div>
+
 <!-- 作図へ送るモーダル -->
 <div class="modal-overlay hidden" id="zumen-modal" onclick="closeZumenModal(event)">
   <div class="modal-box">
@@ -808,6 +826,10 @@ canvas#wall-cv{touch-action:none;}
     <button class="cat-btn" onclick="setCat('ceil',this)">天井</button>
   </div>
   <div class="dims-bar" id="dims-bar" style="display:none" onclick="editRoomDims()" title="この部屋の寸法（タップで編集）"></div>
+  <button class="shape-btn" id="shape-btn" style="display:none" onclick="openColumnsModal()">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="18" rx="1"/><path d="M5 21V8M19 21V8"/></svg>
+    柱を登録（コーナー・壁・独立）<span class="shape-count" id="shape-count" style="display:none"></span>
+  </button>
   <div class="util-row">
     <button class="util-btn" id="util-save" onclick="saveProjectFile()"><span class="util-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></span>保存</button>
     <button class="util-btn" id="util-load" onclick="openLoadModal()"><span class="util-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>履歴</button>
@@ -894,7 +916,8 @@ function _newRoomState(){
     nedaLen:3,formInputs:{},
     wall:{faceIdx:0,faceData:[null,null,null,null],faceInputs:[null,null,null,null],faceOpenings:[[],[],[],[]],faceSelId:[null,null,null,null],faceOidSeq:[0,0,0,0]},
     lastOrder:null,
-    dims:{W:3000,L:4000,H:2400}
+    dims:{W:3000,L:4000,H:2400},
+    shape:{columns:[],colSeq:0}
   };
   _applyDimsToState(s,s.dims);
   return s;
