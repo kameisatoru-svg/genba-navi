@@ -2806,6 +2806,27 @@ function redrawWall(){
       ctx.fillStyle='rgba(160,80,20,0.95)';ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.fillText(rg.label+'巻込',(xS1+xE)/2,oy+rh-4);
     });
   }
+  // コーナー切欠／コーナーカットを端に反映
+  _faceCornerCaps(curFaceIdx).forEach(function(cap){
+    if(cap.type==='cutMark'){ // 始端が斜めカット：角を斜線で示す
+      var mx=(cap.side==='left')?ox:ox+rw2,sgn=(cap.side==='left')?1:-1,dd=Math.min(rh*0.5,rw2*0.16);
+      ctx.strokeStyle='rgba(200,80,40,0.95)';ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(mx,oy+dd);ctx.lineTo(mx+sgn*dd,oy);ctx.stroke();
+      ctx.fillStyle='rgba(160,80,20,0.95)';ctx.font='bold 9px sans-serif';ctx.textAlign=(cap.side==='left')?'left':'right';ctx.fillText(cap.label,(cap.side==='left')?ox+dd+3:ox+rw2-dd-3,oy+9);
+      return;
+    }
+    var bw=Math.max(8,Math.min((cap.size||0)*sc,rw2*0.45));
+    var x0=(cap.side==='left')?ox:ox+rw2-bw, foldX=(cap.side==='left')?x0+bw:x0;
+    if(cap.type==='cutDiag'){ // 斜め壁：斜めハッチ
+      ctx.save();ctx.beginPath();ctx.rect(x0,oy,bw,rh);ctx.clip();
+      ctx.fillStyle='rgba(160,80,20,0.10)';ctx.fillRect(x0,oy,bw,rh);
+      ctx.strokeStyle='rgba(160,80,20,0.45)';ctx.lineWidth=0.8;for(var dh=-rh;dh<bw+rh;dh+=7){ctx.beginPath();ctx.moveTo(x0+dh,oy);ctx.lineTo(x0+dh+rh,oy+rh);ctx.stroke();}
+      ctx.restore();
+    }else{ // notch
+      ctx.fillStyle='rgba(30,45,64,0.07)';ctx.fillRect(x0,oy,bw,rh);
+    }
+    ctx.strokeStyle='rgba(200,80,40,0.9)';ctx.lineWidth=1.2;ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(foldX,oy);ctx.lineTo(foldX,oy+rh);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='rgba(160,80,20,0.95)';ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.fillText(cap.label,x0+bw/2,oy+12);
+  });
   ctx.strokeStyle='rgba(30,45,64,0.25)';ctx.lineWidth=0.8;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(ox,oy+rh+12);ctx.lineTo(ox+rw2,oy+rh+12);ctx.stroke();ctx.setLineDash([]);
   ctx.fillStyle='rgba(90,106,122,0.7)';ctx.font='10px sans-serif';ctx.textAlign='center';ctx.fillText(W+'mm',ox+rw2/2,oy+rh+24);
   addZoomButtons();
