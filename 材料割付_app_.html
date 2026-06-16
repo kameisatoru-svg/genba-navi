@@ -1150,9 +1150,9 @@ function _colPosLabel(c){
   if(c.kind==='wall'){var f=({A:'A面(上)',B:'B面(右)',C:'C面(下)',D:'D面(左)'}[c.face||'A']);return f+(c.offset!=null?'・端から'+c.offset+'mm':'');}
   return '室内'+(c.x!=null&&c.y!=null?'（左'+c.x+'・上'+c.y+'）':'');
 }
-function _colSizeLabel(c){return (c.w||0)+'×'+(c.d||0)+'mm'+((c.count||1)>1?' ×'+(c.count)+'本':'');}
-function _columnsCount(){var t=0;curColumns.forEach(function(c){t+=(c.count||1);});return t;}
-function _columnsFootprintMm2(){var t=0;curColumns.forEach(function(c){t+=(c.w||0)*(c.d||0)*(c.count||1);});return t;}
+function _colSizeLabel(c){return (c.w||0)+'×'+(c.d||0)+'mm';}
+function _columnsCount(){return curColumns.length;}
+function _columnsFootprintMm2(){var t=0;curColumns.forEach(function(c){t+=(c.w||0)*(c.d||0);});return t;}
 
 // 柱の平面位置（x=左から[W方向], y=上から[L方向]）を解決。室内にクランプ
 function _resolveColXY(c,W,L){
@@ -1288,8 +1288,8 @@ function addColumnFromDraft(){
     if(ey&&ey.value.trim()!=='')c.y=_pnum(ey.value)||0;
   }
   curColumns.push(c);
-  // 次回のため寸法・本数を記憶
-  _colDraft.w=w;_colDraft.d=d;_colDraft.count=count;
+  // 次回のため寸法を記憶
+  _colDraft.w=w;_colDraft.d=d;
   _persistColumns();
   renderColumnsModal();
 }
