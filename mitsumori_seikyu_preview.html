@@ -3904,13 +3904,15 @@ function clearAllData(){
   shokeihiMode = 'rate';
   shokeihiFixed = 0;
   nebiki = 0;
-  nebikiLabel = '値引き';
+  nebikiLabel = '端数値引き';
+  hasuNebikiAuto = true;
   hasuChousei = 0;
   clearVal('shokeihiRateInput', '15');
   clearVal('shokeihiFixedInput', '0');
   if(typeof setShokeihiMode==='function') setShokeihiMode('rate',{silent:true});
   clearVal('nebikiInput', '0');
-  clearVal('nebikiLabelInput', '値引き');
+  clearVal('nebikiLabelInput', '端数値引き');
+  { const _c=document.getElementById('hasuAutoChk'); if(_c) _c.checked=true; }
   clearVal('hasuChouseiInput', '0');
 
   // ── 明細データを初期1行にリセット ──
@@ -4067,6 +4069,7 @@ function applyCsvImport(parsed, action){
       if(!isNaN(v)){
         nebiki = v;
         setVal('nebikiInput', v);
+        if(v>0){ hasuNebikiAuto=false; const _c=document.getElementById('hasuAutoChk'); if(_c)_c.checked=false; }
       }
     }
     if(meta.hasuChousei !== undefined && meta.hasuChousei !== ''){
