@@ -1395,7 +1395,7 @@ function _persistShape(rederiveWalls){
   updateDimsBar();
   if(curCat==='floor'&&typeof drawFloorPreview==='function')drawFloorPreview();
 }
-function _persistColumns(){_persistShape(false);} // 柱は壁に影響しない
+function _persistColumns(){_persistShape(true);} // 壁柱はその面のクロス長に影響するため壁も再計算
 
 function openColumnsModal(){
   if(!_colDraft)_colDraft={kind:'corner',corner:'tl',face:'A'};
