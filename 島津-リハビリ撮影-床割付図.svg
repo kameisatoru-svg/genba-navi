@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 560" font-family="'Noto Sans CJK JP','Noto Sans JP','IPAGothic','Yu Gothic','Hiragino Kaku Gothic ProN','Meiryo',sans-serif">
+  <defs>
+    <marker id="dim" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+      <path d="M2,2 L8,5 L2,8" fill="none" stroke="#c0392b" stroke-width="1"/>
+    </marker>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+      <path d="M1,1 L9,5 L1,9" fill="none" stroke="#2a6da3" stroke-width="1.4"/>
+    </marker>
+    <pattern id="pit" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="8" height="8" fill="#dfe7ec"/>
+      <line x1="0" y1="0" x2="0" y2="8" stroke="#9bb3c2" stroke-width="1.4"/>
+    </pattern>
+  </defs>
+
+  <text x="30" y="38" font-size="21" font-weight="bold" fill="#1a2a3a">大分リハビリテーション病院 一般撮影室 床割付図（長尺シート PT-105M）</text>
+  <text x="30" y="58" font-size="12" fill="#555">シート巾1820／流れ＝縦（縦割り）／2列(1820+1798)・縦継ぎ1本／開口位置・壁柱を表示／寸法mm</text>
+
+  <!-- ===== 床割付 平面 ===== -->
+  <!-- 室内 W3618 × L5073、原点(300,170) s=0.065 -->
+  <!-- ストリップ1(D側) 1820 -->
+  <rect x="300" y="170" width="118" height="330" fill="#cfe3f0"/>
+  <!-- ストリップ2 1798 -->
+  <rect x="418" y="170" width="117" height="330" fill="#dcebf6"/>
+  <rect x="418" y="170" width="117" height="330" fill="#d9ebf5"/>
+
+  <!-- 継ぎ目(縦・1本) -->
+  <line x1="418" y1="170" x2="418" y2="500" stroke="#c0392b" stroke-width="2" stroke-dasharray="7 4"/>
+  <text x="424" y="460" font-size="11" fill="#c0392b" font-weight="bold">継ぎ目</text>
+
+  <!-- 壁柱(B面) -->
+  <rect x="505" y="254" width="30" height="43" fill="url(#pit)" stroke="#2c3e50" stroke-width="1.3"/>
+  <line x1="505" y1="254" x2="535" y2="297" stroke="#fff" stroke-width="0.7"/>
+  <line x1="535" y1="254" x2="505" y2="297" stroke="#fff" stroke-width="0.7"/>
+  <text x="500" y="279" font-size="9" fill="#2c3e50" text-anchor="end" font-weight="bold">壁柱</text>
+
+  <!-- 室内 外形(壁芯)・開口で途切れ -->
+  <g stroke="#2c3e50" stroke-width="3.5" fill="none" stroke-linecap="square">
+    <!-- A面(上): 操作室ドアで途切れ(窓は床に影響せず通し) -->
+    <line x1="300" y1="170" x2="466" y2="170"/>
+    <line x1="529" y1="170" x2="535" y2="170"/>
+    <!-- B面(右): ドアW900で途切れ -->
+    <line x1="535" y1="170" x2="535" y2="299"/>
+    <line x1="535" y1="357" x2="535" y2="500"/>
+    <!-- C面(下): 親子ドアで途切れ -->
+    <line x1="300" y1="500" x2="446" y2="500"/>
+    <line x1="529" y1="500" x2="535" y2="500"/>
+    <!-- D面(左) -->
+    <line x1="300" y1="170" x2="300" y2="500"/>
+  </g>
+
+  <!-- 開口ラベル(床は建具下まで通し張り) -->
+  <text x="497" y="165" font-size="9" fill="#888" text-anchor="middle">操作室ドア</text>
+  <text x="551" y="332" font-size="9" fill="#888" text-anchor="middle" transform="rotate(90 551 332)">ドアW900</text>
+  <text x="487" y="514" font-size="9" fill="#888" text-anchor="middle">親子ドア</text>
+
+  <!-- 流れ(縦) -->
+  <line x1="359" y1="225" x2="359" y2="445" stroke="#2a6da3" stroke-width="1.6" marker-start="url(#ar)" marker-end="url(#ar)"/>
+  <text x="366" y="338" font-size="12" fill="#2a6da3" font-weight="bold">流れ（縦）</text>
+
+  <!-- ストリップ番号 -->
+  <text x="359" y="195" font-size="12" fill="#2a6da3" text-anchor="middle" font-weight="bold">①</text>
+  <text x="476" y="195" font-size="12" fill="#2a6da3" text-anchor="middle" font-weight="bold">②</text>
+
+  <!-- 寸法線 -->
+  <!-- 上:全幅3618 -->
+  <line x1="300" y1="146" x2="535" y2="146" stroke="#c0392b" stroke-width="1" marker-start="url(#dim)" marker-end="url(#dim)"/>
+  <text x="417" y="140" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold">3618</text>
+  <!-- 上内訳:1820/1798 -->
+  <line x1="300" y1="160" x2="418" y2="160" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
+  <text x="359" y="156" font-size="10" fill="#c0392b" text-anchor="middle">1820</text>
+  <line x1="418" y1="160" x2="535" y2="160" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
+  <text x="476" y="156" font-size="10" fill="#c0392b" text-anchor="middle">1798</text>
+  <!-- 左:全長5073 -->
+  <line x1="276" y1="170" x2="276" y2="500" stroke="#c0392b" stroke-width="1" marker-start="url(#dim)" marker-end="url(#dim)"/>
+  <text x="269" y="335" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold" transform="rotate(-90 269 335)">5073</text>
+
+  <!-- 面記号 -->
+  <text x="417" y="183" font-size="10" fill="#aaa" text-anchor="middle">A</text>
+  <text x="544" y="240" font-size="10" fill="#aaa">B</text>
+  <text x="417" y="494" font-size="10" fill="#aaa" text-anchor="middle">C</text>
+  <text x="290" y="335" font-size="10" fill="#aaa">D</text>
+
+  <!-- ===== 数量メモ ===== -->
+  <g transform="translate(610,150)">
+    <rect x="-8" y="-16" width="290" height="250" fill="#f2f8fc" stroke="#2a6da3" stroke-width="1.2" rx="6"/>
+    <text x="0" y="2" font-size="14" font-weight="bold" fill="#2a6da3">床 割付・数量</text>
+    <text x="0" y="26" font-size="12" fill="#333">○ 材料：長尺シート <tspan font-weight="bold">PT-105M</tspan></text>
+    <text x="0" y="46" font-size="12" fill="#333">○ シート巾：1820mm／流れ＝縦</text>
+    <text x="0" y="66" font-size="12" fill="#333">○ 割付：縦割り <tspan font-weight="bold">2列</tspan>（1820＋1798）</text>
+    <text x="0" y="86" font-size="12" fill="#333">○ 継ぎ目：縦 <tspan font-weight="bold">1本</tspan>（左端から1820）</text>
+    <text x="0" y="106" font-size="12" fill="#333">○ 各列長さ：5073（＋上下しろ）</text>
+    <text x="0" y="126" font-size="12" fill="#333">○ 施工面積：約 <tspan font-weight="bold">18.35㎡</tspan>（見積18㎡）</text>
+    <text x="0" y="150" font-size="12" fill="#333">○ 発注長：2列×5073 ＝ 10,146mm</text>
+    <text x="16" y="168" font-size="12" fill="#333">＋ロス10% ≒ <tspan font-weight="bold">11.2m</tspan>（巾1820）</text>
+    <text x="0" y="192" font-size="11" fill="#9a5a00">※ 壁柱・建具下は通し張り後カット。継ぎ位置は</text>
+    <text x="0" y="206" font-size="11" fill="#9a5a00">　 撮影台・動線を見て現場調整可。</text>
+    <text x="0" y="226" font-size="10.5" fill="#888">寸法は清書基準・概略／発注前に最終確認。</text>
+  </g>
+
+  <text x="30" y="540" font-size="11" fill="#888">施工：7/18(土)・19(日)。床は既存撤去後、長尺シート貼替（巾木＝田島No.80共）。</text>
+</svg>
