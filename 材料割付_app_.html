@@ -1379,23 +1379,32 @@ function _applyShapeToFaces(st){
 // 戻り: {regions:[{devStart,sideD,faceW,kind,dir,label}], devTotal, baseW}（展開幅mm基準）
 function _faceWrapRegions(fIdx){
   var dims=_curDims();if(!dims)return null;
-  var face=FACES[fIdx],horiz=(face==='A'||face==='C'),baseW=horiz?dims.W:dims.L;
+  var W=dims.W,L=dims.L;
+  var face=FACES[fIdx],horiz=(face==='A'||face==='C'),baseW=horiz?W:L;
+  var ENDS={A:['tl','tr'],B:['tr','br'],C:['br','bl'],D:['bl','tl']}[face]||[];
+  // コーナーカットによる展開長の増減を「始端側 startPad / 終端側 endPad」へ振り分け
+  // （入隣面=斜め壁s2が付き直線legInが消える=正味 s2-legIn / 出隣面=直線legOutが消える）。これで devTotal が faceInputs.L と一致する
+  var startPad=0,endPad=0;
+  (curFeatures||[]).forEach(function(f){
+    if(f.type!=='cut')return;var g=_cutGeom(f,W,L);if(!g)return;var atEnd=(f.corner===ENDS[1]);
+    if(g.inFace===face){var di=g.diag-g.legIn;if(atEnd)endPad+=di;else startPad+=di;}
+    if(g.outFace===face){var dO=-g.legOut;if(atEnd)endPad+=dO;else startPad+=dO;}
+  });
   var obs=[];
   // 壁柱（面の途中）：両側面が巻き込む
   (curColumns||[]).forEach(function(c){if(c.kind==='wall'&&c.face===face){var off=(c.offset!=null)?c.offset:Math.max(0,(baseW-(c.w||0))/2);obs.push({pos:'mid',off:off,sideD:c.d||0,faceW:c.w||0,kind:'col',label:'柱'});}});
   // 凸凹：両側面
   (curFeatures||[]).forEach(function(f){if(f.type==='bump'&&f.face===face){obs.push({pos:'mid',off:_featOffset(f,baseW),sideD:f.d||0,faceW:f.w||0,kind:'bump',dir:f.dir,label:(f.dir==='in'?'凹':'凸')});}});
   // コーナー柱：この面の両端に来るものを、室内側の1面だけ巻き込む形で端へ配置
-  var ENDS={A:['tl','tr'],B:['tr','br'],C:['br','bl'],D:['bl','tl']}[face]||[];
   (curColumns||[]).forEach(function(c){
     if(c.kind!=='corner')return;
     var fw=horiz?(c.w||0):(c.d||0),sd=horiz?(c.d||0):(c.w||0); // fw=壁沿い幅 / sd=室内へ出る側面(1面巻込)
     if(c.corner===ENDS[0])obs.push({pos:'left',off:0,sideD:sd,faceW:fw,kind:'col',label:'柱'});
     else if(c.corner===ENDS[1])obs.push({pos:'right',off:Math.max(0,baseW-fw),sideD:sd,faceW:fw,kind:'col',label:'柱'});
   });
-  if(!obs.length)return null;
+  if(!obs.length&&startPad===0&&endPad===0)return null;
   obs.sort(function(a,b){return a.off-b.off;});
-  var dev=0,base=0,regions=[];
+  var dev=startPad,base=0,regions=[]; // 始端パッド分ずらして開始（出隣面カットで前方が短くなる等）
   obs.forEach(function(o){
     var start=Math.max(base,o.off); // カーソルは後退させない（重なり対策）
     dev+=(start-base);
@@ -1407,7 +1416,7 @@ function _faceWrapRegions(fIdx){
     regions.push({devStart:dev,segs:segs,kind:o.kind,dir:o.dir,label:o.label});
     dev+=add;base=start+o.faceW;
   });
-  dev+=Math.max(0,baseW-base);
+  dev+=Math.max(0,baseW-base)+endPad; // 終端パッド（入隣面カットの斜め壁ぶん等）
   return {regions:regions,devTotal:dev,baseW:baseW};
 }
 
