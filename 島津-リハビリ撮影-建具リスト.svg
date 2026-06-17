@@ -41,7 +41,12 @@
   <text x="250" y="111" font-size="11" fill="#222" text-anchor="middle">数量 1</text>
   <!-- 姿図 -->
   <rect x="177" y="207" width="106" height="223" fill="none" stroke="#2c3e50" stroke-width="2"/>
-  <line x1="283" y1="430" x2="177" y2="207" stroke="#2c3e50" stroke-width="0.8"/>  <!-- 吊元右の開き表示 -->
+  <!-- 開き勝手: 吊元右(283)・センター(318)でくの字・一点鎖線 -->
+  <g stroke="#2c3e50" stroke-width="0.9" fill="none" stroke-dasharray="7 2 2 2">
+    <path d="M283,318 L177,207 M283,318 L177,430"/>
+  </g>
+  <!-- レバーハンドル(先側=左) -->
+  <circle cx="186" cy="318" r="2.6" fill="#1a2a3a"/><line x1="188" y1="318" x2="199" y2="318" stroke="#1a2a3a" stroke-width="1.7"/>
   <line x1="232" y1="430" x2="430" y2="430" stroke="#2c3e50" stroke-width="1"/>
   <path d="M177,427 l8,0 l-4,7 z" fill="#2c3e50"/><text x="170" y="425" font-size="8" fill="#555" text-anchor="end">FL</text>
   <line x1="177" y1="448" x2="283" y2="448" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
@@ -63,7 +68,12 @@
   <text x="520" y="93" font-size="12" fill="#222" text-anchor="middle">片開きドア</text>
   <text x="520" y="111" font-size="11" fill="#222" text-anchor="middle">数量 1</text>
   <rect x="451" y="207" width="99" height="223" fill="none" stroke="#2c3e50" stroke-width="2"/>
-  <line x1="451" y1="430" x2="550" y2="207" stroke="#2c3e50" stroke-width="0.8"/>
+  <!-- 開き勝手: 吊元左(451)・センター(318)でくの字・一点鎖線 -->
+  <g stroke="#2c3e50" stroke-width="0.9" fill="none" stroke-dasharray="7 2 2 2">
+    <path d="M451,318 L550,207 M451,318 L550,430"/>
+  </g>
+  <!-- レバーハンドル(先側=右) -->
+  <circle cx="541" cy="318" r="2.6" fill="#1a2a3a"/><line x1="539" y1="318" x2="528" y2="318" stroke="#1a2a3a" stroke-width="1.7"/>
   <line x1="500" y1="430" x2="700" y2="430" stroke="#2c3e50" stroke-width="1"/>
   <path d="M451,427 l8,0 l-4,7 z" fill="#2c3e50"/><text x="444" y="425" font-size="8" fill="#555" text-anchor="end">FL</text>
   <line x1="451" y1="448" x2="550" y2="448" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
@@ -85,8 +95,13 @@
   <text x="790" y="111" font-size="11" fill="#222" text-anchor="middle">数量 1</text>
   <rect x="700" y="207" width="141" height="223" fill="none" stroke="#2c3e50" stroke-width="2"/>
   <line x1="794" y1="207" x2="794" y2="430" stroke="#2c3e50" stroke-width="1"/>  <!-- 親子境界(親=右側広い) -->
-  <line x1="794" y1="430" x2="841" y2="207" stroke="#2c3e50" stroke-width="0.8"/>  <!-- 親(右) -->
-  <line x1="794" y1="430" x2="700" y2="207" stroke="#2c3e50" stroke-width="0.8"/>  <!-- 子(左) -->
+  <!-- 開き: 親(吊元右841)・子(吊元左700)、各センターでくの字・一点鎖線 -->
+  <g stroke="#2c3e50" stroke-width="0.9" fill="none" stroke-dasharray="7 2 2 2">
+    <path d="M841,318 L794,207 M841,318 L794,430"/>  <!-- 親(右) -->
+    <path d="M700,318 L794,207 M700,318 L794,430"/>  <!-- 子(左・ハンドル無) -->
+  </g>
+  <!-- レバーハンドルは親のみ(先側=境界・親側) -->
+  <circle cx="803" cy="318" r="2.6" fill="#1a2a3a"/><line x1="805" y1="318" x2="815" y2="318" stroke="#1a2a3a" stroke-width="1.7"/>
   <text x="817" y="225" font-size="8" fill="#777" text-anchor="middle">親</text>
   <text x="747" y="225" font-size="8" fill="#777" text-anchor="middle">子</text>
   <line x1="770" y1="430" x2="905" y2="430" stroke="#2c3e50" stroke-width="1"/>
@@ -131,7 +146,7 @@
   <!-- 備考 -->
   <g font-size="10.5" fill="#222">
     <text x="105" y="665">○ 本工事は内装（クロス・床シート・巾木）。建具は既存のため、本リストは開口・寸法の記録（養生・取合い確認用）。</text>
-    <text x="105" y="685">○ 寸法・開き勝手・吊元は清書/展開図に一致。記号 D=ドア／W=窓。FL＝床仕上面。</text>
+    <text x="105" y="685">○ 寸法・開き勝手・吊元は清書/展開図に一致。記号 D=ドア／W=窓。FL＝床仕上面。姿図の<tspan fill="#2c3e50">一点鎖線（くの字・吊元側センターで折返）＝開き勝手</tspan>、<tspan fill="#1a2a3a">●—＝レバーハンドル位置</tspan>（親子の子扉はハンドル無）。</text>
     <text x="105" y="705" fill="#c0392b">※ 建具を更新する場合は、仕上（枠材・塗装）・ガラス（複層/網入等）・付属金物（ハンドル/クローザー）を現場確認のうえ確定。</text>
   </g>
 </svg>

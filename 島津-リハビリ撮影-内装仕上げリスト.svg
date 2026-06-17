@@ -2,7 +2,7 @@
   <rect x="0" y="0" width="1188" height="840" fill="#fff"/>
   <text x="24" y="38" font-size="20" font-weight="bold" fill="#1a2a3a">■大分リハビリテーション病院 一般撮影室 内装仕上げリスト</text>
   <text x="1164" y="38" font-size="12" fill="#555" text-anchor="end">2026/06/17</text>
-  <text x="24" y="60" font-size="11" fill="#c0392b">※スウォッチは代表色（実サンプルは別途ご確認）。品番は清書/仕上げ表と一致。</text>
+  <text x="24" y="58" font-size="10.5" fill="#c0392b">※スウォッチは代表色。製品画像・柄リピートはメーカー(サンゲツ等)が自動取得不可(403)のため未貼付＝画像/リピート値の支給で反映。品番は清書/仕上げ表と一致。</text>
 
   <!-- 表枠 -->
   <g stroke="#888" stroke-width="1" fill="none">
@@ -35,6 +35,7 @@
     <text x="486" y="182" font-weight="bold">FE-76202</text>
     <text x="486" y="204">ルーバー（エアー吹出）有</text>
     <text x="486" y="226" fill="#2a6da3">貼り方向＝横流れ（920×6帯／3618方向）</text>
+    <text x="486" y="248" fill="#9a5a00">サンゲツ FINE 2023-26｜柄リピート＝要取得</text>
   </g>
 
   <!-- 壁: 4面 FE -->
@@ -53,7 +54,8 @@
     <text x="486" y="334">A面 操作室側 <tspan font-weight="bold">FE-76751</tspan>　／　C面 廊下側 <tspan font-weight="bold">FE-76251</tspan></text>
     <text x="486" y="356">D面 受付側 <tspan font-weight="bold">FE-76728</tspan>　／　B面 空室側 <tspan font-weight="bold">FE-76109</tspan></text>
     <text x="486" y="380" fill="#2a6da3">貼り方向＝縦貼り（A/C面4短冊・B/D面6短冊）</text>
-    <text x="486" y="404">数量 約49㎡（開口控除）</text>
+    <text x="486" y="402">数量 約49㎡（開口控除）｜サンゲツ FINE 2023-26・巾92cm</text>
+    <text x="486" y="424" fill="#c0392b">※FE-76751＝モダン/パターン柄（木立＋パール）→柄合わせ要。他＝機能性(ハードストレッチ等)。リピート数値＝要取得</text>
   </g>
 
   <!-- 床: PT-105M -->
@@ -64,6 +66,7 @@
     <text x="486" y="527" font-weight="bold">PT-105M</text>
     <text x="486" y="549" fill="#2a6da3">流れ＝縦（巾1820縦割り2列・縦継ぎ1本）</text>
     <text x="486" y="571">数量 約18㎡</text>
+    <text x="486" y="593" fill="#9a5a00">メーカー・巾・製品画像＝要取得（柄方向は流れに合わせる）</text>
   </g>
 
   <!-- 巾木: 田島No.80 -->
