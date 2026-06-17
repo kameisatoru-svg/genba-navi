@@ -1,6 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 760" font-family="'Noto Sans CJK JP','Noto Sans JP','IPAGothic','Yu Gothic','Hiragino Kaku Gothic ProN','Meiryo',sans-serif">
   <defs>
-    <marker id="dim" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+    <marker id="dimS" markerWidth="10" markerHeight="10" refX="2" refY="5" orient="auto">
+      <path d="M8,2 L2,5 L8,8" fill="none" stroke="#c0392b" stroke-width="1"/>
+    </marker>
+    <marker id="dimE" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
       <path d="M2,2 L8,5 L2,8" fill="none" stroke="#c0392b" stroke-width="1"/>
     </marker>
     <marker id="ar" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
@@ -137,21 +140,21 @@
   <text x="445" y="262" font-size="11" fill="#2a6da3" text-anchor="middle">床：長尺シート PT-105M</text>
 
   <!-- ===== 寸法線(赤) ===== -->
-  <line x1="300" y1="126" x2="600" y2="126" stroke="#c0392b" stroke-width="1" marker-start="url(#dim)" marker-end="url(#dim)"/>
+  <line x1="300" y1="126" x2="600" y2="126" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
   <text x="450" y="120" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">3618</text>
-  <line x1="660" y1="150" x2="660" y2="570" stroke="#c0392b" stroke-width="1" marker-start="url(#dim)" marker-end="url(#dim)"/>
+  <line x1="660" y1="150" x2="660" y2="570" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
   <text x="653" y="362" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold" transform="rotate(-90 653 362)">5073</text>
-  <line x1="636" y1="150" x2="636" y2="257" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
-  <text x="642" y="207" font-size="10" fill="#c0392b">1289</text>
-  <line x1="636" y1="257" x2="636" y2="312" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
-  <text x="642" y="289" font-size="10" fill="#c0392b">670</text>
-  <line x1="636" y1="312" x2="636" y2="570" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
-  <text x="642" y="445" font-size="10" fill="#c0392b">3125</text>
-  <!-- 下:親子ドア W1280 / 左2241 -->
-  <line x1="300" y1="592" x2="486" y2="592" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
-  <text x="393" y="605" font-size="10" fill="#c0392b" text-anchor="middle">2241</text>
-  <line x1="486" y1="592" x2="592" y2="592" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
-  <text x="539" y="605" font-size="10" fill="#c0392b" text-anchor="middle">1280</text>
+  <line x1="636" y1="150" x2="636" y2="257" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+  <text x="628" y="203" font-size="10" fill="#c0392b" text-anchor="middle" transform="rotate(-90 628 203)">1289</text>
+  <line x1="636" y1="257" x2="636" y2="312" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+  <text x="628" y="285" font-size="10" fill="#c0392b" text-anchor="middle" transform="rotate(-90 628 285)">670</text>
+  <line x1="636" y1="312" x2="636" y2="570" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+  <text x="628" y="441" font-size="10" fill="#c0392b" text-anchor="middle" transform="rotate(-90 628 441)">3125</text>
+  <!-- 下:親子ドア W1280 / 左2241（数字は線の上） -->
+  <line x1="300" y1="610" x2="486" y2="610" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+  <text x="393" y="603" font-size="10" fill="#c0392b" text-anchor="middle">2241</text>
+  <line x1="486" y1="610" x2="592" y2="610" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+  <text x="539" y="603" font-size="10" fill="#c0392b" text-anchor="middle">1280</text>
 
   <!-- 面記号 -->
   <text x="450" y="143" font-size="11" fill="#888" text-anchor="middle">A</text>

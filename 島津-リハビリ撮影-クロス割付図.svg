@@ -1,6 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 1090" font-family="'Noto Sans CJK JP','Noto Sans JP','IPAGothic','Yu Gothic','Hiragino Kaku Gothic ProN','Meiryo',sans-serif">
   <defs>
-    <marker id="dim" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+    <marker id="dimS" markerWidth="10" markerHeight="10" refX="2" refY="5" orient="auto">
+      <path d="M8,2 L2,5 L8,8" fill="none" stroke="#c0392b" stroke-width="1"/>
+    </marker>
+    <marker id="dimE" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
       <path d="M2,2 L8,5 L2,8" fill="none" stroke="#c0392b" stroke-width="1"/>
     </marker>
     <pattern id="col" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
@@ -34,10 +37,10 @@
     <text x="162" y="131" font-size="9" fill="#c0392b" text-anchor="middle">②</text>
     <text x="224" y="131" font-size="9" fill="#c0392b" text-anchor="middle">③</text>
     <text x="283" y="131" font-size="9" fill="#c0392b" text-anchor="middle">④</text>
-    <line x1="324" y1="135" x2="324" y2="322" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
-    <text x="331" y="232" font-size="9.5" fill="#c0392b" transform="rotate(-90 331 232)" text-anchor="middle">2790</text>
-    <line x1="70" y1="332" x2="312" y2="332" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
-    <text x="191" y="345" font-size="9.5" fill="#c0392b" text-anchor="middle">3618</text>
+    <line x1="324" y1="135" x2="324" y2="322" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+    <text x="316" y="232" font-size="9.5" fill="#c0392b" transform="rotate(-90 316 232)" text-anchor="middle">2790</text>
+    <line x1="70" y1="342" x2="312" y2="342" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+    <text x="191" y="335" font-size="9.5" fill="#c0392b" text-anchor="middle">3618</text>
   </g>
 
   <!-- ============ C面 廊下側 (3618×2790) FE-76251 縦貼り4短冊 ============ -->
@@ -58,8 +61,8 @@
     <text x="652" y="131" font-size="9" fill="#c0392b" text-anchor="middle">②</text>
     <text x="714" y="131" font-size="9" fill="#c0392b" text-anchor="middle">③</text>
     <text x="773" y="131" font-size="9" fill="#c0392b" text-anchor="middle">④</text>
-    <line x1="560" y1="332" x2="802" y2="332" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
-    <text x="681" y="345" font-size="9.5" fill="#c0392b" text-anchor="middle">3618</text>
+    <line x1="560" y1="342" x2="802" y2="342" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+    <text x="681" y="335" font-size="9.5" fill="#c0392b" text-anchor="middle">3618</text>
   </g>
 
   <!-- ============ B面 空室側 (5073×2790) FE-76109 縦貼り6短冊 ============ -->
@@ -88,8 +91,8 @@
     <text x="285" y="411" font-size="9" fill="#c0392b" text-anchor="middle">④</text>
     <text x="347" y="411" font-size="9" fill="#c0392b" text-anchor="middle">⑤</text>
     <text x="394" y="411" font-size="9" fill="#c0392b" text-anchor="middle">⑥</text>
-    <line x1="70" y1="612" x2="410" y2="612" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
-    <text x="240" y="625" font-size="9.5" fill="#c0392b" text-anchor="middle">5073</text>
+    <line x1="70" y1="620" x2="410" y2="620" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+    <text x="240" y="613" font-size="9.5" fill="#c0392b" text-anchor="middle">5073</text>
   </g>
 
   <!-- ============ D面 受付側 (5073×2790) FE-76728 縦貼り6短冊 ============ -->
@@ -112,8 +115,8 @@
     <text x="775" y="411" font-size="9" fill="#c0392b" text-anchor="middle">④</text>
     <text x="837" y="411" font-size="9" fill="#c0392b" text-anchor="middle">⑤</text>
     <text x="884" y="411" font-size="9" fill="#c0392b" text-anchor="middle">⑥</text>
-    <line x1="560" y1="612" x2="900" y2="612" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dim)" marker-end="url(#dim)"/>
-    <text x="730" y="625" font-size="9.5" fill="#c0392b" text-anchor="middle">5073</text>
+    <line x1="560" y1="620" x2="900" y2="620" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+    <text x="730" y="613" font-size="9.5" fill="#c0392b" text-anchor="middle">5073</text>
   </g>
 
   <!-- ============ 天井 (3618×5073) FE-76202 横流れ6帯 ============ -->
