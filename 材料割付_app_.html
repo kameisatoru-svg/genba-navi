@@ -1026,13 +1026,14 @@ function _loadRoomStateToGlobals(s){
 
 function _renderRoomWorkspace(state){
   document.querySelectorAll('.cat-btn').forEach(function(b){b.className='cat-btn';});
-  var idx={floor:0,wall:1,ceil:2}[curCat];
+  var idx={floor:0,wall:1,ceil:2,all:3}[curCat];
   var btns=document.querySelectorAll('.cat-btn');
   if(btns[idx])btns[idx].className='cat-btn ac-'+curCat;
-  document.getElementById('header-cat').textContent={ceil:'天井',wall:'壁',floor:'床'}[curCat];
+  document.getElementById('header-cat').textContent={ceil:'天井',wall:'壁',floor:'床',all:'全体'}[curCat];
   document.getElementById('result-area').innerHTML='';
   if(curCat==='floor')renderFloorUI();
   else if(curCat==='wall')renderWallUI();
+  else if(curCat==='all'){renderOverview();updateDimsBar();return;}
   else renderMats();
   setTimeout(function(){
     if(curCat==='wall'){
