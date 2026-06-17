@@ -1820,6 +1820,183 @@
           "金額": 500940,
           "備考": "床貼替え18m2・壁クロス張替え49m2",
           "ファイル": "見_改２_島津-リハビリ撮影-26.pdf"
+        },
+        {
+          "書類番号": "見_改3_島津-リハビリ撮影-26",
+          "発行日": "2026-05-14",
+          "金額": 578600,
+          "備考": "大分リハビリテーション病院 一般撮影室内装工事",
+          "ファイル": "見_改3_島津-リハビリ撮影-26.pdf",
+          "お客様向け番号": "ARS-T013-260514-01",
+          "_genbaDoc": {
+            "v": 1,
+            "savedAt": "2026-06-17T00:07:58.494Z",
+            "docType": "mitsumori",
+            "mode": "group",
+            "shokeihiRate": 10,
+            "shokeihiMode": "rate",
+            "shokeihiFixed": 0,
+            "nebiki": 900,
+            "nebikiLabel": "調整値引き",
+            "hasuNebikiAuto": true,
+            "hasuChousei": 0,
+            "header": {
+              "atena": "株式会社　島津製作所",
+              "mitsumoriNo": "ARS-T013-260514-01",
+              "hakkoDate": "2026-05-14",
+              "shiharaiDate": "2026-06-30",
+              "kojimei": "大分リハビリテーション病院 一般撮影室内装工事",
+              "seshubasho": "大分県大分市(大分リハビリテーション病院)",
+              "koki": "",
+              "ankenKey": "島津-リハビリ撮影-26",
+              "fileSuffix": "改3"
+            },
+            "flatItems": [],
+            "groupItems": [
+              {
+                "name": "一般撮影室内装工事",
+                "pageBreak": false,
+                "middleItems": [],
+                "items": [
+                  {
+                    "name": "壁クロス撤去",
+                    "qty": 49,
+                    "unit": "㎡",
+                    "price": 400,
+                    "note": ""
+                  },
+                  {
+                    "name": "壁クロス貼",
+                    "qty": 49,
+                    "unit": "㎡",
+                    "price": 1600,
+                    "note": ""
+                  },
+                  {
+                    "name": "天井クロス撤去",
+                    "qty": 18,
+                    "unit": "㎡",
+                    "price": 400,
+                    "note": ""
+                  },
+                  {
+                    "name": "天井クロス貼",
+                    "qty": 18,
+                    "unit": "㎡",
+                    "price": 1600,
+                    "note": ""
+                  },
+                  {
+                    "name": "床長尺シート撤去",
+                    "qty": 18,
+                    "unit": "㎡",
+                    "price": 2000,
+                    "note": ""
+                  },
+                  {
+                    "name": "床下地調整費",
+                    "qty": 18,
+                    "unit": "㎡",
+                    "price": 1250,
+                    "note": ""
+                  },
+                  {
+                    "name": "床長尺シート貼",
+                    "qty": 18,
+                    "unit": "㎡",
+                    "price": 5800,
+                    "note": ""
+                  },
+                  {
+                    "name": "巾木撤去",
+                    "qty": 17,
+                    "unit": "m",
+                    "price": 300,
+                    "note": ""
+                  },
+                  {
+                    "name": "ソフト巾木貼",
+                    "qty": 16,
+                    "unit": "m",
+                    "price": 750,
+                    "note": ""
+                  },
+                  {
+                    "name": "片開きドア塗装　撮影室側のみ　枠共　以下同",
+                    "qty": 2,
+                    "unit": "箇所",
+                    "price": 15000,
+                    "note": ""
+                  },
+                  {
+                    "name": "親子ドア塗装",
+                    "qty": 1,
+                    "unit": "箇所",
+                    "price": 25000,
+                    "note": ""
+                  },
+                  {
+                    "name": "覗き窓塗装",
+                    "qty": 1,
+                    "unit": "箇所",
+                    "price": 10000,
+                    "note": ""
+                  },
+                  {
+                    "name": "資材運搬・搬入費",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 25000,
+                    "note": ""
+                  },
+                  {
+                    "name": "廃材運搬処分費",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 35000,
+                    "note": ""
+                  },
+                  {
+                    "name": "養生・片付け清掃費",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 40000,
+                    "note": ""
+                  }
+                ]
+              }
+            ],
+            "groupSummaryItems": [
+              {
+                "name": "",
+                "qty": "",
+                "unit": "",
+                "price": "",
+                "note": ""
+              },
+              {
+                "name": "",
+                "qty": "",
+                "unit": "",
+                "price": "",
+                "note": ""
+              },
+              {
+                "name": "",
+                "qty": "",
+                "unit": "",
+                "price": "",
+                "note": ""
+              },
+              {
+                "name": "",
+                "qty": "",
+                "unit": "",
+                "price": "",
+                "note": ""
+              }
+            ]
+          }
         }
       ],
       "請求": [],
