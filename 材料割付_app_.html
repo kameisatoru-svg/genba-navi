@@ -2658,7 +2658,8 @@ var cats={
 function setCat(cat,btn){
   if(_curRoomIdx>=0&&_rooms[_curRoomIdx]){
     // 現状を部屋にスナップショット → cat だけ差し替えて再描画
-    _rooms[_curRoomIdx].state=_captureCurrentRoomState();
+    // ただし「全体」ビューはフォーム入力欄を持たないので取り込まない（formInputs/faceInputs消失防止）
+    if(curCat!=='all')_rooms[_curRoomIdx].state=_captureCurrentRoomState();
     _rooms[_curRoomIdx].state.cat=cat;
     _loadRoomStateToGlobals(_rooms[_curRoomIdx].state);
     _renderRoomWorkspace(_rooms[_curRoomIdx].state);
@@ -2672,11 +2673,12 @@ function setCat(cat,btn){
   faceOpenings=[[],[],[],[]];faceSelId=[null,null,null,null];faceOidSeq=[0,0,0,0];
   document.querySelectorAll('.cat-btn').forEach(function(b){b.className='cat-btn';});
   if(btn)btn.className='cat-btn ac-'+cat;
-  document.getElementById('header-cat').textContent={ceil:'天井',wall:'壁',floor:'床'}[cat];
+  document.getElementById('header-cat').textContent={ceil:'天井',wall:'壁',floor:'床',all:'全体'}[cat];
   document.getElementById('result-area').innerHTML='';
   setOrder([],null);
   if(cat==='floor'){renderFloorUI();}
   else if(cat==='wall'){renderWallUI();}
+  else if(cat==='all'){renderOverview();}
   else{renderMats();}
 }
 
