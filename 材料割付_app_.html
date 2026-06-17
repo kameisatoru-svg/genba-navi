@@ -1632,6 +1632,7 @@ function renderShapeModal(){
   }
   h+='<button class="col-add-go" onclick="addFeatureFromDraft()">＋ この形状を追加</button>';
   var ce=document.getElementById('shape-add-card');if(ce)ce.innerHTML=h;
+  if(dr.type==='cut')_updateCutDiag(); // 斜辺の初期表示（既存s1/s3から再計算）
 }
 
 function addFeatureFromDraft(){
