@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1188 840" font-family="'Noto Sans CJK JP','Noto Sans JP','IPAGothic','Yu Gothic','Hiragino Kaku Gothic ProN','Meiryo',sans-serif">
+  <rect x="0" y="0" width="1188" height="840" fill="#fff"/>
+  <!-- タイトル -->
+  <text x="24" y="38" font-size="20" font-weight="bold" fill="#1a2a3a">■大分リハビリテーション病院 一般撮影室 内部仕上げ表</text>
+  <text x="1164" y="38" font-size="12" fill="#555" text-anchor="end">2026/06/17</text>
+  <text x="24" y="62" font-size="11" fill="#c0392b">※赤字は注記です。ご確認願います。</text>
+  <text x="300" y="62" font-size="11" fill="#999">※グレー字は支給品（お見積り不要）。</text>
+
+  <!-- ===== 表 ===== -->
+  <!-- 外枠・行罫線 -->
+  <g stroke="#888" stroke-width="1" fill="none">
+    <rect x="20" y="78" width="1148" height="222"/>
+    <line x1="20" y1="102" x2="1168" y2="102"/>   <!-- ヘッダ下 -->
+    <line x1="20" y1="118" x2="1168" y2="118"/>   <!-- サブヘッダ下 -->
+  </g>
+  <!-- 縦罫線 -->
+  <g stroke="#888" stroke-width="1">
+    <line x1="150" y1="78" x2="150" y2="300"/>
+    <line x1="340" y1="78" x2="340" y2="300"/>
+    <line x1="500" y1="78" x2="500" y2="300"/>
+    <line x1="700" y1="78" x2="700" y2="300"/>
+    <line x1="870" y1="78" x2="870" y2="300"/>
+  </g>
+  <!-- ヘッダ帯 -->
+  <rect x="20" y="78" width="1148" height="24" fill="#eef2f6"/>
+  <g font-size="12.5" font-weight="bold" fill="#1a2a3a" text-anchor="middle">
+    <text x="85" y="95">室名</text>
+    <text x="245" y="95">床</text>
+    <text x="420" y="95">巾木</text>
+    <text x="600" y="95">壁</text>
+    <text x="785" y="95">天井</text>
+    <text x="1019" y="95">その他部材・設備品</text>
+  </g>
+  <g font-size="9.5" fill="#777" text-anchor="middle">
+    <text x="245" y="113">仕上・品名・品番</text>
+    <text x="420" y="113">仕上・品名・品番</text>
+    <text x="600" y="113">仕上・品名・品番</text>
+    <text x="785" y="113">仕上・品名・品番</text>
+    <text x="1019" y="113">仕上・品名・品番</text>
+  </g>
+
+  <!-- ===== 本体行：一般撮影室 ===== -->
+  <text x="85" y="200" font-size="12.5" font-weight="bold" fill="#1a2a3a" text-anchor="middle">一般撮影室</text>
+
+  <!-- 床 -->
+  <g font-size="10.5" fill="#222">
+    <text x="158" y="138">長尺シート</text>
+    <text x="158" y="154" font-weight="bold">PT-105M</text>
+    <text x="158" y="170" fill="#2a6da3">（流れ＝縦）</text>
+  </g>
+  <!-- 巾木 -->
+  <g font-size="10.5" fill="#222">
+    <text x="348" y="138">ソフト巾木</text>
+    <text x="348" y="154" font-weight="bold">田島 No.80</text>
+    <text x="348" y="170" fill="#c0392b">※品番（高さではない）</text>
+  </g>
+  <!-- 壁 -->
+  <g font-size="10.5" fill="#222">
+    <text x="508" y="138">ビニルクロス（サンゲツ FE）</text>
+    <text x="508" y="156">A面 操作室側：<tspan font-weight="bold">FE-76751</tspan></text>
+    <text x="508" y="172">C面 廊下側：<tspan font-weight="bold">FE-76251</tspan></text>
+    <text x="508" y="188">D面 受付側：<tspan font-weight="bold">FE-76728</tspan></text>
+    <text x="508" y="204">B面 空室側：<tspan font-weight="bold">FE-76109</tspan></text>
+    <text x="508" y="222" fill="#c0392b">※縦貼り。割付は割付図参照</text>
+  </g>
+  <!-- 天井 -->
+  <g font-size="10.5" fill="#222">
+    <text x="708" y="138">ビニルクロス（サンゲツ）</text>
+    <text x="708" y="154" font-weight="bold">FE-76202</text>
+    <text x="708" y="170">ルーバー（エアー吹出）有</text>
+    <text x="708" y="188" fill="#c0392b">※横流れ。ルーバー開口控除</text>
+  </g>
+  <!-- その他部材・設備品 -->
+  <g font-size="10.5" fill="#222">
+    <text x="878" y="137" font-weight="bold">【建具】</text>
+    <text x="892" y="153">・操作室ドア W970/H2025（内開き）</text>
+    <text x="892" y="169">・ドア W900/H2025（内開き）</text>
+    <text x="892" y="185">・親子ドア W1280（親=右/子=左・内開き）</text>
+    <text x="878" y="203" font-weight="bold">【窓】<tspan font-weight="normal">中連窓 W850×H850（腰下860）</tspan></text>
+    <text x="878" y="219" font-weight="bold">【柱】<tspan font-weight="normal">壁柱 670（B面・室内突出459）</tspan></text>
+    <text x="878" y="235">CH＝2790　室内 W3618×D5073</text>
+    <text x="878" y="253" fill="#c0392b">※開き勝手・建具・割付は清書/展開図参照</text>
+  </g>
+
+  <!-- ===== 備考 ===== -->
+  <text x="24" y="324" font-size="13" font-weight="bold" fill="#1a2a3a">■備考</text>
+  <rect x="20" y="332" width="1148" height="486" fill="#fff" stroke="#888" stroke-width="1"/>
+  <g font-size="11.5" fill="#222">
+    <text x="34" y="356">○ 元請：株式会社島津製作所（担当：竹村勝利 / ktake@shimadzu.co.jp）。本工事＝内装（クロス・床シート・巾木）はアート・レイズ。</text>
+    <text x="34" y="378">○ 施工：7/18(土)・19(日) 土日施工（既存剥取・貼替・清掃／騒音発生）。設置工程表 7/17-21・使用開始 7/21。</text>
+    <text x="34" y="400">○ 数量（見_改２）：床 18㎡ ／ 壁クロス 49㎡。床＝巾1820縦割り2列、壁＝縦貼り(A/C面4短冊・B/D面6短冊)、天井＝横流れ920×6帯。</text>
+    <text x="34" y="424" fill="#c0392b">※ 壁品番は島津レイアウト図（操作室=下）を180°回転し各壁の隣接室で対応付け。FE品番のリピート（柄合わせ）有無・在庫を発注前に確認。</text>
+    <text x="34" y="444" fill="#c0392b">※ 寸法・数量は清書基準の概略。壁柱の見付・見込、入隅/出隅の回し分は別途。発注前に最終確認。</text>
+  </g>
+</svg>
