@@ -2930,7 +2930,12 @@ function renderOverview(){
   setTimeout(function(){
     _drawPlanMini('ov-floor',true);
     _drawPlanMini('ov-ceil',false);
-    FACES.forEach(function(f,i){_drawFaceMini('ov-w'+i,i);});
+    // 4面共通の縮尺：一番長い面がカード幅に収まるスケールで全面を描く（長い面が見た目でも長くなる）
+    var cv0=document.getElementById('ov-w0'),cw=(cv0&&cv0.offsetWidth)||150;
+    var pad=10,availW=cw-2*pad,H=(_curDims()||{}).H||2400,maxH=88;
+    var maxW=Math.max(_faceDrawWidth(0),_faceDrawWidth(1),_faceDrawWidth(2),_faceDrawWidth(3),100);
+    var gsc=Math.min(availW/maxW,maxH/H);if(!(gsc>0))gsc=0.02;
+    FACES.forEach(function(f,i){_drawFaceMini('ov-w'+i,i,gsc);});
   },40);
 }
 // 平面（床/天井）ミニ図：部屋ポリゴン＋参考グリッド＋柱
