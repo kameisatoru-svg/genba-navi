@@ -1640,19 +1640,20 @@ function addFeatureFromDraft(){
   var f={id:0,type:dr.type};
   if(dr.type==='cut'){
     var s1=_pnum((document.getElementById('fd-s1')||{}).value)||0;
-    var s2=_pnum((document.getElementById('fd-s2')||{}).value)||0;
     var s3=_pnum((document.getElementById('fd-s3')||{}).value)||0;
-    if(!(s1>0&&s2>0&&s3>0)){alert('寸法1・2・3 をすべて入力してください。');return;}
+    if(!(s1>0&&s3>0)){alert('寸法1・寸法3 を入力してください。（寸法2＝斜めは自動計算）');return;}
     var corner=dr.corner||'tl';
     // 外飛び出しチェック：切断点が壁内に収まるか（角に残る脚 legIn/legOut が正）。
     // inLen=寸法1が沿う壁長 / outLen=寸法3が沿う壁長。寸法が壁長以上だと切断点が角を越えて外側へ飛び出す＝入力間違い
     var cdim=_curDims()||{W:0,L:0};
     var inLen=(corner==='tr'||corner==='bl')?cdim.W:cdim.L;
     var outLen=(corner==='tr'||corner==='bl')?cdim.L:cdim.W;
-    if(inLen>0&&outLen>0&&((inLen-s1)<=0||(outLen-s3)<=0)){
+    if(!(inLen>0&&outLen>0)){alert('先に部屋の幅・奥行を設定してください。');return;}
+    if((inLen-s1)<=0||(outLen-s3)<=0){
       alert('コーナーカットが壁の外に飛び出しています。\n寸法1（'+s1+'mm）は接する壁 '+Math.round(inLen)+'mm より短く、寸法3（'+s3+'mm）は次の壁 '+Math.round(outLen)+'mm より短くしてください。');
       return;
     }
+    var s2=_cutDiagAuto(corner,s1,s3); // 斜辺(寸法2)は脚から自動計算
     f.corner=corner;f.s1=s1;f.s2=s2;f.s3=s3;
     dr.s1=s1;dr.s2=s2;dr.s3=s3;
   }else{
