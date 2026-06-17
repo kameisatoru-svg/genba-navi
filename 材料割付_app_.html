@@ -1359,7 +1359,11 @@ function _shapeFaceLenDelta(st,W,L){
   });
   // 壁柱：その面のクロス/塗装が側面2dぶん巻き込む
   var cols=(st&&st.shape&&st.shape.columns)||[];
-  cols.forEach(function(c){if(c.kind==='wall'){var i=FI[c.face];if(i!=null)d[i]+=2*(c.d||0);}});
+  cols.forEach(function(c){
+    if(c.kind==='wall'){var i=FI[c.face];if(i!=null)d[i]+=2*(c.d||0);}
+    // コーナー柱：接する2面それぞれに、室内へ出る側面1ぶんを加算（横面A/C=奥行d, 縦面B/D=幅w）
+    else if(c.kind==='corner'){var cw=c.w||0,cd=c.d||0;var mp={tl:[[0,cd],[3,cw]],tr:[[0,cd],[1,cw]],br:[[1,cw],[2,cd]],bl:[[2,cd],[3,cw]]}[c.corner||'tl'];if(mp)mp.forEach(function(p){d[p[0]]+=p[1];});}
+  });
   return d;
 }
 // 形状を壁面（faceInputs[i].L）へ反映：base±delta
