@@ -45,13 +45,13 @@
   <!-- 床 -->
   <g font-size="10.5" fill="#222">
     <text x="158" y="138">長尺シート</text>
-    <text x="158" y="154" font-weight="bold">PT-105M</text>
-    <text x="158" y="170" fill="#2a6da3">（流れ＝縦）</text>
+    <text x="158" y="154" font-weight="bold">PT-105M（タジマ）</text>
+    <text x="158" y="170" fill="#2a6da3">パーマリューム/流れ縦</text>
   </g>
   <!-- 巾木 -->
   <g font-size="10.5" fill="#222">
     <text x="348" y="138">ソフト巾木</text>
-    <text x="348" y="154" font-weight="bold">田島 No.80</text>
+    <text x="348" y="154" font-weight="bold">タジマ No.80(HB-80)</text>
     <text x="348" y="170" fill="#c0392b">※品番（高さではない）</text>
   </g>
   <!-- 壁 -->
