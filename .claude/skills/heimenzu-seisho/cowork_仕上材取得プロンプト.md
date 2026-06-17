@@ -3,6 +3,11 @@
 現場ナビの「内装仕上げリスト／割付」を Claude Code 側で作るための**素材集め**を、Claude in Chrome（Co-Work）に依頼するためのプロンプト。
 ブラウザ操作（メーカー公式の品番ページから**スウォッチ画像**と**リピート等の仕様**を取得）→ A4データシート(HTML→PDF) → **Google Drive 案件フォルダへ保存**まで行わせる。
 
+> ★ **Co-Work側の正式プロンプト＝`finish-material-datasheet`**（かめさんが作成し Claude in Chrome 側に保存）。
+> 実運用はこれを実行し、**品番リストと保存先だけ差し替える**。本ファイルは同じ意図のスペック（同期用の控え）。
+> Claude Code 側から Co-Work 作業を案内するときは、**長文を貼らず**「`finish-material-datasheet` を実行（品番・保存先を差替え）」と案内する。
+> ※`finish-material-datasheet` の中身を更新したら、その内容を共有してもらい本ファイルも同期（drift防止）。
+
 ---
 
 ## 使い方
