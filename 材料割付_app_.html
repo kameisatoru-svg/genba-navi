@@ -1498,6 +1498,7 @@ function _persistShape(rederiveWalls){
   autoSaveState(true);
   updateDimsBar();
   if(curCat==='floor'&&typeof drawFloorPreview==='function')drawFloorPreview();
+  if(curCat==='all'&&typeof renderOverview==='function')renderOverview(); // 全体ビュー中は柱・形状変更で再描画
 }
 function _persistColumns(){_persistShape(true);} // 壁柱はその面のクロス長に影響するため壁も再計算
 
