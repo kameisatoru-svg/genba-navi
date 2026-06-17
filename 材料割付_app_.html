@@ -2953,46 +2953,82 @@ function _drawPlanMini(cvId,isFloor){
   ctx.fillStyle='rgba(90,106,122,0.8)';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';
   ctx.fillText('幅'+W+' × 奥行'+L+'mm',ox+rw/2,Math.min(oy+rh+3,CH-11));
 }
-// 壁面ミニ立面：壁枠＋開口＋柱/凸凹巻込＋コーナーカット（状態から直接描画）
-function _drawFaceMini(cvId,fIdx){
+// 全体プレビュー用の壁の物理展開幅（柱の巻き込み=奥行展開は含めない／コーナーカットの斜め壁・凸凹は含む）
+function _faceDrawWidth(fIdx){
+  var d=_curDims();if(!d)return 100;
+  var W=d.W,L=d.L,face=FACES[fIdx],baseW=(face==='A'||face==='C')?W:L,extra=0;
+  (curFeatures||[]).forEach(function(f){
+    if(f.type==='cut'){var g=_cutGeom(f,W,L);if(g&&g.inFace===face)extra+=(g.diag-g.legIn);} // 入隣面=斜め壁ぶん延長／出隣面=全幅のまま切取りハッチ表示(net0)
+    else if(f.type==='bump'&&f.face===face)extra+=2*(f.d||0);
+  });
+  return Math.max(100,baseW+extra);
+}
+// 壁面ミニ立面（全体プレビュー用）：物理形状を gsc(全面共通縮尺) で描画。柱は素の矩形（巻込=奥行展開は表示しない／クロス割付の計算では別途巻込）
+function _drawFaceMini(cvId,fIdx,gsc){
   var cv=document.getElementById(cvId);if(!cv)return;
   var d=_curDims();if(!d)return;
-  var st=(_curRoomIdx>=0&&_rooms[_curRoomIdx])?_rooms[_curRoomIdx].state:null;if(!st)return;
-  var face=FACES[fIdx],horiz=(face==='A'||face==='C'),baseW=horiz?d.W:d.L;
-  var fd=_shapeFaceLenDelta(st,d.W,d.L);
-  var devW=Math.max(100,baseW+(fd[fIdx]||0));
-  var H=d.H||((st.wall&&st.wall.faceInputs&&st.wall.faceInputs[fIdx]&&st.wall.faceInputs[fIdx].W)||2400);
-  var CW=cv.offsetWidth||150,pad=10,oy=8,maxH=88;
-  var sc=Math.min((CW-2*pad)/devW,maxH/H);if(!(sc>0))sc=0.02;
-  var rw=devW*sc,rh=H*sc,ox=pad;
+  var W=d.W,L=d.L,face=FACES[fIdx],horiz=(face==='A'||face==='C'),baseW=horiz?W:L,H=d.H||2400;
+  var ENDS={A:['tl','tr'],B:['tr','br'],C:['br','bl'],D:['bl','tl']}[face]||[];
+  var drawW=_faceDrawWidth(fIdx),sc=gsc||0.02;
+  var CW=cv.offsetWidth||150,pad=10,oy=8,ox=pad,rw=drawW*sc,rh=H*sc;
   var ctx=setupCanvas(cv,CW,rh+20);ctx.clearRect(0,0,CW,rh+20);
+  function X(mm){return ox+mm*sc;}
+  // 壁面背景
   ctx.fillStyle='rgba(13,110,80,0.05)';ctx.fillRect(ox,oy,rw,rh);
+  // コーナーカット：入隣面=斜め壁(終端,橙ハッチ)／出隣面=切取り(始端,灰ハッチ)。境界は縦の折り線
+  var startCut=null,endCut=null;
+  (curFeatures||[]).forEach(function(f){
+    if(f.type!=='cut')return;var g=_cutGeom(f,W,L);if(!g)return;var atEnd=(f.corner===ENDS[1]);
+    if(g.inFace===face){var z={len:g.diag,kind:'diag'};if(atEnd)endCut=z;else startCut=z;}
+    if(g.outFace===face){var z2={len:g.legOut,kind:'cut'};if(atEnd)endCut=z2;else startCut=z2;}
+  });
+  function hatchZone(x0mm,len,kind){
+    var x0=X(x0mm),bw=len*sc;if(bw<=0.5)return;
+    var col=(kind==='diag')?'rgba(160,80,20,':'rgba(30,45,64,';
+    ctx.save();ctx.beginPath();ctx.rect(x0,oy,bw,rh);ctx.clip();
+    ctx.fillStyle=col+'0.08)';ctx.fillRect(x0,oy,bw,rh);
+    ctx.strokeStyle=col+(kind==='diag'?'0.45)':'0.32)');ctx.lineWidth=0.7;
+    for(var dh=-rh;dh<bw+rh;dh+=6){ctx.beginPath();ctx.moveTo(x0+dh,oy);ctx.lineTo(x0+dh+rh,oy+rh);ctx.stroke();}
+    ctx.restore();
+  }
+  if(startCut)hatchZone(0,startCut.len,startCut.kind);
+  if(endCut)hatchZone(drawW-endCut.len,endCut.len,endCut.kind);
+  // 凸凹（物理・バンド表示）
+  (curFeatures||[]).forEach(function(f){
+    if(f.type!=='bump'||f.face!==face)return;
+    var off=_featOffset(f,baseW),bx=X(off),bw=(f.w||0)*sc;
+    ctx.fillStyle=(f.dir==='in')?'rgba(30,45,64,0.06)':'rgba(13,110,80,0.12)';ctx.fillRect(bx,oy,bw,rh);
+    ctx.strokeStyle='rgba(30,45,64,0.4)';ctx.lineWidth=0.8;ctx.strokeRect(bx,oy,bw,rh);
+  });
+  // 開口
   (faceOpenings[fIdx]||[]).forEach(function(op){
-    var rx=ox+op.x*sc,ry=oy+(H-op.y-op.h)*sc,ow=op.w*sc,oh=op.h*sc;
+    var rx=X(op.x),ry=oy+(H-op.y-op.h)*sc,ow=op.w*sc,oh=op.h*sc;
     ctx.fillStyle='#f8f7f4';ctx.fillRect(rx,ry,ow,oh);
     ctx.strokeStyle='rgba(60,60,60,0.5)';ctx.lineWidth=1;ctx.strokeRect(rx,ry,ow,oh);
     ctx.fillStyle='rgba(60,60,60,0.7)';ctx.font='bold 8px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText(op.type==='ドア'?'D':(op.type==='窓（中連）'?'中':'掃'),rx+ow/2,ry+oh/2);
   });
-  var wrap=_faceWrapRegions(fIdx);
-  if(wrap&&wrap.devTotal>0){
-    var ps=rw/wrap.devTotal;
-    wrap.regions.forEach(function(rg){
-      var cur=rg.devStart,bounds=[ox+cur*ps];
-      rg.segs.forEach(function(s){var x0=ox+cur*ps,x1=ox+(cur+s.len)*ps;ctx.fillStyle=s.t==='side'?'rgba(200,120,40,0.20)':(rg.kind==='bump'&&rg.dir==='in'?'rgba(30,45,64,0.05)':'rgba(13,110,80,0.10)');ctx.fillRect(x0,oy,x1-x0,rh);cur+=s.len;bounds.push(ox+cur*ps);});
-      ctx.strokeStyle='rgba(30,45,64,0.6)';ctx.lineWidth=1;bounds.forEach(function(fx){ctx.beginPath();ctx.moveTo(fx,oy);ctx.lineTo(fx,oy+rh);ctx.stroke();});
-    });
-  }
-  _faceCornerCaps(fIdx).forEach(function(cap){
-    if(cap.type==='cutMark'){var mx=(cap.side==='left')?ox:ox+rw,sgn=(cap.side==='left')?1:-1,dd=Math.min(rh*0.5,rw*0.16);ctx.strokeStyle='rgba(30,45,64,0.6)';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(mx,oy+dd);ctx.lineTo(mx+sgn*dd,oy);ctx.stroke();return;}
-    var bw=Math.max(6,Math.min((cap.size||0)*sc,rw*0.45)),x0=(cap.side==='left')?ox:ox+rw-bw,foldX=(cap.side==='left')?x0+bw:x0;
-    if(cap.type==='cutDiag'){ctx.save();ctx.beginPath();ctx.rect(x0,oy,bw,rh);ctx.clip();ctx.fillStyle='rgba(160,80,20,0.10)';ctx.fillRect(x0,oy,bw,rh);ctx.strokeStyle='rgba(160,80,20,0.45)';ctx.lineWidth=0.7;for(var dh=-rh;dh<bw+rh;dh+=6){ctx.beginPath();ctx.moveTo(x0+dh,oy);ctx.lineTo(x0+dh+rh,oy+rh);ctx.stroke();}ctx.restore();}
-    else{ctx.fillStyle='rgba(30,45,64,0.07)';ctx.fillRect(x0,oy,bw,rh);}
-    ctx.strokeStyle='rgba(30,45,64,0.6)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(foldX,oy);ctx.lineTo(foldX,oy+rh);ctx.stroke();
+  // 柱（素の矩形・巻込/奥行展開なし）
+  function colRect(offMm,wMm){var cx=X(offMm),cw=Math.max(2,wMm*sc);ctx.fillStyle='rgba(30,45,64,0.5)';ctx.fillRect(cx,oy,cw,rh);ctx.strokeStyle='rgba(30,45,64,0.92)';ctx.lineWidth=1;ctx.strokeRect(cx,oy,cw,rh);}
+  (curColumns||[]).forEach(function(c){
+    if(c.kind==='wall'&&c.face===face){colRect((c.offset!=null)?c.offset:Math.max(0,(baseW-(c.w||0))/2),c.w||0);}
+    else if(c.kind==='corner'){var fw=horiz?(c.w||0):(c.d||0);if(c.corner===ENDS[0])colRect(0,fw);else if(c.corner===ENDS[1])colRect(baseW-fw,fw);}
   });
+  // コーナー切欠（端の灰バンド・net0）
+  (curFeatures||[]).forEach(function(f){
+    if(f.type!=='notch')return;var along=horiz?(f.w||0):(f.d||0),bw=along*sc;if(bw<=0.5)return;
+    if(f.corner===ENDS[0]){ctx.fillStyle='rgba(30,45,64,0.07)';ctx.fillRect(ox,oy,bw,rh);ctx.strokeStyle='rgba(30,45,64,0.5)';ctx.lineWidth=1.1;ctx.beginPath();ctx.moveTo(ox+bw,oy);ctx.lineTo(ox+bw,oy+rh);ctx.stroke();}
+    if(f.corner===ENDS[1]){ctx.fillStyle='rgba(30,45,64,0.07)';ctx.fillRect(ox+rw-bw,oy,bw,rh);ctx.strokeStyle='rgba(30,45,64,0.5)';ctx.lineWidth=1.1;ctx.beginPath();ctx.moveTo(ox+rw-bw,oy);ctx.lineTo(ox+rw-bw,oy+rh);ctx.stroke();}
+  });
+  // カットの折り線（縦線）
+  ctx.strokeStyle='rgba(30,45,64,0.65)';ctx.lineWidth=1.4;
+  if(startCut){var fx=X(startCut.len);ctx.beginPath();ctx.moveTo(fx,oy);ctx.lineTo(fx,oy+rh);ctx.stroke();}
+  if(endCut){var fx2=X(drawW-endCut.len);ctx.beginPath();ctx.moveTo(fx2,oy);ctx.lineTo(fx2,oy+rh);ctx.stroke();}
+  // 外枠
   ctx.strokeStyle='rgba(30,45,64,0.6)';ctx.lineWidth=1.5;ctx.strokeRect(ox,oy,rw,rh);
+  // 寸法（公称＝部屋寸法）
   ctx.fillStyle='rgba(90,106,122,0.8)';ctx.font='8.5px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';
-  ctx.fillText(Math.round(devW)+'×'+H+'mm',ox+rw/2,oy+rh+4);
+  ctx.fillText(baseW+'×'+H+'mm',ox+rw/2,oy+rh+4);
 }
 
 // ── 床 ──
