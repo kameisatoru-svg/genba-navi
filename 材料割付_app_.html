@@ -1625,7 +1625,7 @@ function renderShapeModal(){
   }
   // 寸法入力
   if(dr.type==='cut'){
-    h+='<div class="r3" style="margin-bottom:8px"><div class="iw"><span>寸法1 mm（隣から）</span><input type="text" id="fd-s1" class="col-size-inp" value="'+(dr.s1||'')+'" inputmode="numeric"></div><div class="iw"><span>寸法2 mm（斜め）</span><input type="text" id="fd-s2" class="col-size-inp" value="'+(dr.s2||'')+'" inputmode="numeric"></div><div class="iw"><span>寸法3 mm（次まで）</span><input type="text" id="fd-s3" class="col-size-inp" value="'+(dr.s3||'')+'" inputmode="numeric"></div></div>';
+    h+='<div class="r3" style="margin-bottom:8px"><div class="iw"><span>寸法1 mm（隣から）</span><input type="text" id="fd-s1" class="col-size-inp" value="'+(dr.s1||'')+'" inputmode="numeric" oninput="_updateCutDiag()"></div><div class="iw"><span>寸法2 mm（斜め・自動）</span><input type="text" id="fd-s2" class="col-size-inp" value="'+(dr.s2||'')+'" inputmode="numeric" readonly tabindex="-1" style="background:rgba(30,45,64,0.06);color:var(--text2);cursor:not-allowed"></div><div class="iw"><span>寸法3 mm（次まで）</span><input type="text" id="fd-s3" class="col-size-inp" value="'+(dr.s3||'')+'" inputmode="numeric" oninput="_updateCutDiag()"></div></div>';
   }else{
     var wlbl=(dr.type==='notch')?'幅 mm（横方向）':'幅 mm（壁沿い）';
     h+='<div class="r2" style="margin-bottom:8px"><div class="iw"><span>'+wlbl+'</span><input type="text" id="fd-w" class="col-size-inp" value="'+(dr.w||300)+'" inputmode="numeric"></div><div class="iw"><span>奥行 mm</span><input type="text" id="fd-d" class="col-size-inp" value="'+(dr.d||300)+'" inputmode="numeric"></div></div>';
