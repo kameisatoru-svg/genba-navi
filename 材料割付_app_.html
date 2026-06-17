@@ -1379,18 +1379,33 @@ function _applyShapeToFaces(st){
 // 戻り: {regions:[{devStart,sideD,faceW,kind,dir,label}], devTotal, baseW}（展開幅mm基準）
 function _faceWrapRegions(fIdx){
   var dims=_curDims();if(!dims)return null;
-  var face=FACES[fIdx],baseW=(face==='A'||face==='C')?dims.W:dims.L;
+  var face=FACES[fIdx],horiz=(face==='A'||face==='C'),baseW=horiz?dims.W:dims.L;
   var obs=[];
-  (curColumns||[]).forEach(function(c){if(c.kind==='wall'&&c.face===face){var off=(c.offset!=null)?c.offset:Math.max(0,(baseW-(c.w||0))/2);obs.push({off:off,w:c.w||0,d:c.d||0,kind:'col',label:'柱'});}});
-  (curFeatures||[]).forEach(function(f){if(f.type==='bump'&&f.face===face){obs.push({off:_featOffset(f,baseW),w:f.w||0,d:f.d||0,kind:'bump',dir:f.dir,label:(f.dir==='in'?'凹':'凸')});}});
+  // 壁柱（面の途中）：両側面が巻き込む
+  (curColumns||[]).forEach(function(c){if(c.kind==='wall'&&c.face===face){var off=(c.offset!=null)?c.offset:Math.max(0,(baseW-(c.w||0))/2);obs.push({pos:'mid',off:off,sideD:c.d||0,faceW:c.w||0,kind:'col',label:'柱'});}});
+  // 凸凹：両側面
+  (curFeatures||[]).forEach(function(f){if(f.type==='bump'&&f.face===face){obs.push({pos:'mid',off:_featOffset(f,baseW),sideD:f.d||0,faceW:f.w||0,kind:'bump',dir:f.dir,label:(f.dir==='in'?'凹':'凸')});}});
+  // コーナー柱：この面の両端に来るものを、室内側の1面だけ巻き込む形で端へ配置
+  var ENDS={A:['tl','tr'],B:['tr','br'],C:['br','bl'],D:['bl','tl']}[face]||[];
+  (curColumns||[]).forEach(function(c){
+    if(c.kind!=='corner')return;
+    var fw=horiz?(c.w||0):(c.d||0),sd=horiz?(c.d||0):(c.w||0); // fw=壁沿い幅 / sd=室内へ出る側面(1面巻込)
+    if(c.corner===ENDS[0])obs.push({pos:'left',off:0,sideD:sd,faceW:fw,kind:'col',label:'柱'});
+    else if(c.corner===ENDS[1])obs.push({pos:'right',off:Math.max(0,baseW-fw),sideD:sd,faceW:fw,kind:'col',label:'柱'});
+  });
   if(!obs.length)return null;
   obs.sort(function(a,b){return a.off-b.off;});
   var dev=0,base=0,regions=[];
   obs.forEach(function(o){
     var start=Math.max(base,o.off); // カーソルは後退させない（重なり対策）
     dev+=(start-base);
-    regions.push({devStart:dev,sideD:o.d,faceW:o.w,kind:o.kind,dir:o.dir,label:o.label});
-    dev+=2*o.d+o.w;base=start+o.w;
+    var segs;
+    if(o.pos==='left')segs=[{t:'face',len:o.faceW},{t:'side',len:o.sideD}];          // 角=面→室内側面
+    else if(o.pos==='right')segs=[{t:'side',len:o.sideD},{t:'face',len:o.faceW}];      // 室内側面→面=角
+    else segs=[{t:'side',len:o.sideD},{t:'face',len:o.faceW},{t:'side',len:o.sideD}];  // 途中=両側面
+    var add=0;segs.forEach(function(s){add+=s.len;});
+    regions.push({devStart:dev,segs:segs,kind:o.kind,dir:o.dir,label:o.label});
+    dev+=add;base=start+o.faceW;
   });
   dev+=Math.max(0,baseW-base);
   return {regions:regions,devTotal:dev,baseW:baseW};
@@ -2801,12 +2816,16 @@ function redrawWall(){
     var ps=rw2/wrap.devTotal; // 展開mm→px（描画幅Wに合わせる）
     function X(mm){return ox+mm*ps;}
     wrap.regions.forEach(function(rg){
-      var xS1=X(rg.devStart),xF=X(rg.devStart+rg.sideD),xF2=X(rg.devStart+rg.sideD+rg.faceW),xE=X(rg.devStart+2*rg.sideD+rg.faceW);
-      ctx.fillStyle='rgba(200,120,40,0.18)';ctx.fillRect(xS1,oy,xF-xS1,rh);ctx.fillRect(xF2,oy,xE-xF2,rh); // 側面=巻き込み
-      ctx.fillStyle=(rg.kind==='bump'&&rg.dir==='in')?'rgba(30,45,64,0.05)':'rgba(13,110,80,0.10)';ctx.fillRect(xF,oy,xF2-xF,rh); // 前面/奥
+      var cur=rg.devStart,bounds=[X(cur)];
+      rg.segs.forEach(function(s){
+        var x0=X(cur),x1=X(cur+s.len);
+        if(s.t==='side')ctx.fillStyle='rgba(200,120,40,0.18)';                                                  // 側面=巻き込み
+        else ctx.fillStyle=(rg.kind==='bump'&&rg.dir==='in')?'rgba(30,45,64,0.05)':'rgba(13,110,80,0.10)';      // 前面/奥
+        ctx.fillRect(x0,oy,x1-x0,rh);cur+=s.len;bounds.push(X(cur));
+      });
       ctx.strokeStyle='rgba(30,45,64,0.6)';ctx.lineWidth=1.4;ctx.setLineDash([]);
-      [xS1,xF,xF2,xE].forEach(function(fx){ctx.beginPath();ctx.moveTo(fx,oy);ctx.lineTo(fx,oy+rh);ctx.stroke();});
-      ctx.fillStyle='rgba(160,80,20,0.95)';ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.fillText(rg.label+'巻込',(xS1+xE)/2,oy+rh-4);
+      bounds.forEach(function(fx){ctx.beginPath();ctx.moveTo(fx,oy);ctx.lineTo(fx,oy+rh);ctx.stroke();});
+      ctx.fillStyle='rgba(160,80,20,0.95)';ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.fillText(rg.label+'巻込',(X(rg.devStart)+X(cur))/2,oy+rh-4);
     });
   }
   // コーナー切欠／コーナーカットを端に反映
