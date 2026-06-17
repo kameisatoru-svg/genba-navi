@@ -2911,6 +2911,90 @@ function redrawWall(){
   addZoomButtons();
 }
 
+// ══════════ 全体プレビュー（床・天井・壁4面をまとめて表示） ══════════
+function renderOverview(){
+  ['mat-list','sub-area','pat-area','result-area'].forEach(function(id){var e=document.getElementById(id);if(e)e.innerHTML='';});
+  var fa=document.getElementById('form-area');if(!fa)return;
+  var d=_curDims();
+  if(!d){fa.innerHTML='<div style="padding:24px;text-align:center;color:var(--text2);font-size:13px">先に部屋の寸法（幅・奥行）を設定してください。</div>';return;}
+  var nCol=(curColumns||[]).length,nFeat=(curFeatures||[]).length;
+  var nOp=(faceOpenings||[]).reduce(function(t,a){return t+((a&&a.length)||0);},0);
+  var h='<div class="ov-note">割り付け前プレビュー：床・天井・壁4面の形状をまとめて確認できます（柱'+nCol+'本／部屋形状'+nFeat+'件／開口'+nOp+'件）。各面の素材選択・編集は床・壁・天井タブで行ってください。</div>';
+  h+='<div class="ov-sec"><div class="ov-h ov-h-floor">床（'+d.W+'×'+d.L+'mm）</div><div class="ov-card"><canvas id="ov-floor" height="180"></canvas></div></div>';
+  h+='<div class="ov-sec"><div class="ov-h ov-h-ceil">天井（'+d.W+'×'+d.L+'mm）</div><div class="ov-card"><canvas id="ov-ceil" height="180"></canvas></div></div>';
+  h+='<div class="ov-sec"><div class="ov-h ov-h-wall">壁 4面（高さ '+d.H+'mm）</div><div class="ov-wall-grid">';
+  var fp={A:'（上）',B:'（右）',C:'（下）',D:'（左）'};
+  FACES.forEach(function(f,i){h+='<div class="ov-wall"><div class="ov-wl">'+f+'面'+fp[f]+'</div><canvas id="ov-w'+i+'" height="110"></canvas></div>';});
+  h+='</div></div>';
+  fa.innerHTML=h;
+  setTimeout(function(){
+    _drawPlanMini('ov-floor',true);
+    _drawPlanMini('ov-ceil',false);
+    FACES.forEach(function(f,i){_drawFaceMini('ov-w'+i,i);});
+  },40);
+}
+// 平面（床/天井）ミニ図：部屋ポリゴン＋参考グリッド＋柱
+function _drawPlanMini(cvId,isFloor){
+  var cv=document.getElementById(cvId);if(!cv)return;
+  var d=_curDims();if(!d)return;var W=d.W,L=d.L;if(!(W>0&&L>0))return;
+  var CW=cv.offsetWidth||300,CH=180;
+  var ctx=setupCanvas(cv,CW,CH);ctx.clearRect(0,0,CW,CH);
+  var g=_planGeom(W,L,CW,CH,12,12,12,16,true);
+  var ox=g.ox,oy=g.oy,rw=W*g.sc,rh=L*g.sc;
+  ctx.save();g.path(ctx);ctx.clip();
+  ctx.fillStyle=isFloor?'rgba(154,90,16,0.05)':'rgba(37,99,168,0.05)';
+  ctx.fillRect(g.gx0,g.gy0,g.gx1-g.gx0,g.gy1-g.gy0);
+  ctx.strokeStyle=isFloor?'rgba(154,90,16,0.16)':'rgba(37,99,168,0.16)';ctx.lineWidth=0.6;var P=910;
+  for(var gx=P;gx<W;gx+=P){var px=ox+gx*g.sc;ctx.beginPath();ctx.moveTo(px,oy);ctx.lineTo(px,oy+rh);ctx.stroke();}
+  for(var gy=P;gy<L;gy+=P){var py=oy+gy*g.sc;ctx.beginPath();ctx.moveTo(ox,py);ctx.lineTo(ox+rw,py);ctx.stroke();}
+  ctx.restore();
+  ctx.strokeStyle='rgba(30,45,64,0.55)';ctx.lineWidth=1.6;g.path(ctx);ctx.stroke();
+  _drawColumnsOverlay(ctx,ox,oy,rw,rh,W,L,true);
+  ctx.fillStyle='rgba(90,106,122,0.8)';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';
+  ctx.fillText('幅'+W+' × 奥行'+L+'mm',ox+rw/2,Math.min(oy+rh+3,CH-11));
+}
+// 壁面ミニ立面：壁枠＋開口＋柱/凸凹巻込＋コーナーカット（状態から直接描画）
+function _drawFaceMini(cvId,fIdx){
+  var cv=document.getElementById(cvId);if(!cv)return;
+  var d=_curDims();if(!d)return;
+  var st=(_curRoomIdx>=0&&_rooms[_curRoomIdx])?_rooms[_curRoomIdx].state:null;if(!st)return;
+  var face=FACES[fIdx],horiz=(face==='A'||face==='C'),baseW=horiz?d.W:d.L;
+  var fd=_shapeFaceLenDelta(st,d.W,d.L);
+  var devW=Math.max(100,baseW+(fd[fIdx]||0));
+  var H=d.H||((st.wall&&st.wall.faceInputs&&st.wall.faceInputs[fIdx]&&st.wall.faceInputs[fIdx].W)||2400);
+  var CW=cv.offsetWidth||150,pad=10,oy=8,maxH=88;
+  var sc=Math.min((CW-2*pad)/devW,maxH/H);if(!(sc>0))sc=0.02;
+  var rw=devW*sc,rh=H*sc,ox=pad;
+  var ctx=setupCanvas(cv,CW,rh+20);ctx.clearRect(0,0,CW,rh+20);
+  ctx.fillStyle='rgba(13,110,80,0.05)';ctx.fillRect(ox,oy,rw,rh);
+  (faceOpenings[fIdx]||[]).forEach(function(op){
+    var rx=ox+op.x*sc,ry=oy+(H-op.y-op.h)*sc,ow=op.w*sc,oh=op.h*sc;
+    ctx.fillStyle='#f8f7f4';ctx.fillRect(rx,ry,ow,oh);
+    ctx.strokeStyle='rgba(60,60,60,0.5)';ctx.lineWidth=1;ctx.strokeRect(rx,ry,ow,oh);
+    ctx.fillStyle='rgba(60,60,60,0.7)';ctx.font='bold 8px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(op.type==='ドア'?'D':(op.type==='窓（中連）'?'中':'掃'),rx+ow/2,ry+oh/2);
+  });
+  var wrap=_faceWrapRegions(fIdx);
+  if(wrap&&wrap.devTotal>0){
+    var ps=rw/wrap.devTotal;
+    wrap.regions.forEach(function(rg){
+      var cur=rg.devStart,bounds=[ox+cur*ps];
+      rg.segs.forEach(function(s){var x0=ox+cur*ps,x1=ox+(cur+s.len)*ps;ctx.fillStyle=s.t==='side'?'rgba(200,120,40,0.20)':(rg.kind==='bump'&&rg.dir==='in'?'rgba(30,45,64,0.05)':'rgba(13,110,80,0.10)');ctx.fillRect(x0,oy,x1-x0,rh);cur+=s.len;bounds.push(ox+cur*ps);});
+      ctx.strokeStyle='rgba(30,45,64,0.6)';ctx.lineWidth=1;bounds.forEach(function(fx){ctx.beginPath();ctx.moveTo(fx,oy);ctx.lineTo(fx,oy+rh);ctx.stroke();});
+    });
+  }
+  _faceCornerCaps(fIdx).forEach(function(cap){
+    if(cap.type==='cutMark'){var mx=(cap.side==='left')?ox:ox+rw,sgn=(cap.side==='left')?1:-1,dd=Math.min(rh*0.5,rw*0.16);ctx.strokeStyle='rgba(30,45,64,0.6)';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(mx,oy+dd);ctx.lineTo(mx+sgn*dd,oy);ctx.stroke();return;}
+    var bw=Math.max(6,Math.min((cap.size||0)*sc,rw*0.45)),x0=(cap.side==='left')?ox:ox+rw-bw,foldX=(cap.side==='left')?x0+bw:x0;
+    if(cap.type==='cutDiag'){ctx.save();ctx.beginPath();ctx.rect(x0,oy,bw,rh);ctx.clip();ctx.fillStyle='rgba(160,80,20,0.10)';ctx.fillRect(x0,oy,bw,rh);ctx.strokeStyle='rgba(160,80,20,0.45)';ctx.lineWidth=0.7;for(var dh=-rh;dh<bw+rh;dh+=6){ctx.beginPath();ctx.moveTo(x0+dh,oy);ctx.lineTo(x0+dh+rh,oy+rh);ctx.stroke();}ctx.restore();}
+    else{ctx.fillStyle='rgba(30,45,64,0.07)';ctx.fillRect(x0,oy,bw,rh);}
+    ctx.strokeStyle='rgba(30,45,64,0.6)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(foldX,oy);ctx.lineTo(foldX,oy+rh);ctx.stroke();
+  });
+  ctx.strokeStyle='rgba(30,45,64,0.6)';ctx.lineWidth=1.5;ctx.strokeRect(ox,oy,rw,rh);
+  ctx.fillStyle='rgba(90,106,122,0.8)';ctx.font='8.5px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';
+  ctx.fillText(Math.round(devW)+'×'+H+'mm',ox+rw/2,oy+rh+4);
+}
+
 // ── 床 ──
 function renderFloorUI(){
   document.getElementById('mat-list').innerHTML='';document.getElementById('pat-area').innerHTML='';document.getElementById('sub-area').innerHTML='';
