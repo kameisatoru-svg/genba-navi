@@ -1238,7 +1238,7 @@ function _featKindLabel(f){
 function _featDescLabel(f){
   if(f.type==='notch')return _cornerJp(f.corner)+'　'+(f.w||0)+'×'+(f.d||0)+'mm';
   if(f.type==='bump')return _faceJp(f.face)+'　'+(f.w||0)+'×'+(f.d||0)+'mm';
-  if(f.type==='cut')return _cornerJp(f.corner)+'　寸法1='+(f.s1||0)+' / 斜め='+(f.s2||0)+' / 寸法3='+(f.s3||0)+'mm';
+  if(f.type==='cut'){var dg=_cutDiagAuto(f.corner,f.s1||0,f.s3||0)||(f.s2||0);return _cornerJp(f.corner)+'　寸法1='+(f.s1||0)+' / 斜め='+dg+' / 寸法3='+(f.s3||0)+'mm';}
   return '';
 }
 // コーナーカットの幾何（corner=コーナー点, p1=入隣壁上, p2=出隣壁上, 入/出面と脚長, 面積, 斜辺）
@@ -1252,11 +1252,30 @@ function _cutGeom(f,W,L){
   }[f.corner||'tl'];
   if(!M)return null;
   M.legIn=Math.max(0,M.legIn);M.legOut=Math.max(0,M.legOut);
-  M.area=0.5*M.legIn*M.legOut;M.diag=s2;
+  // 斜辺は2脚から幾何的に一意に決まる（直角の角を切る＝√(legIn²+legOut²)）。保存値 s2 には依存しない＝部屋寸法を変えても自動追従
+  M.area=0.5*M.legIn*M.legOut;M.diag=Math.round(Math.sqrt(M.legIn*M.legIn+M.legOut*M.legOut));
   return M;
 }
 // 壁沿いオフセット（既定=中央）
 function _featOffset(f,wallLen){return (f.offset!=null)?f.offset:Math.max(0,(wallLen-(f.w||0))/2);}
+// コーナーカットの斜辺(寸法2)を s1・s3・部屋寸法から自動算出。外飛び出し(脚<=0)なら0
+function _cutDiagAuto(corner,s1,s3){
+  var d=_curDims();if(!d)return 0;
+  var inLen=(corner==='tr'||corner==='bl')?d.W:d.L;
+  var outLen=(corner==='tr'||corner==='bl')?d.L:d.W;
+  var legIn=inLen-s1,legOut=outLen-s3;
+  if(legIn<=0||legOut<=0)return 0;
+  return Math.round(Math.sqrt(legIn*legIn+legOut*legOut));
+}
+// 形状モーダルの寸法2(斜め)欄を自動更新（寸法1/3入力・コーナー変更で呼ぶ）
+function _updateCutDiag(){
+  var dr=_featDraft;if(!dr||dr.type!=='cut')return;
+  var s1=_pnum((document.getElementById('fd-s1')||{}).value)||0;
+  var s3=_pnum((document.getElementById('fd-s3')||{}).value)||0;
+  dr.s1=s1;dr.s3=s3; // 入力をドラフトに保持（コーナー変更の再描画で消えないように）
+  var diag=_cutDiagAuto(dr.corner||'tl',s1,s3);dr.s2=diag;
+  var el=document.getElementById('fd-s2');if(el)el.value=diag>0?diag:'';
+}
 // 形状による床面積の符号付き増減(mm²)：凸=+ / 凹・切欠・カット=-
 function _shapeAreaDeltaMm2(W,L){
   var t=0;
@@ -1342,7 +1361,7 @@ function _floorBreakdownRows(L,W){
   curFeatures.forEach(function(f){
     if(f.type==='notch')rows.push(['コーナー切欠 '+_cornerJp(f.corner),(f.w||0)+'×'+(f.d||0),'-'+(((f.w||0)*(f.d||0))/1e6).toFixed(2)+'㎡']);
     else if(f.type==='bump')rows.push([(f.dir==='in'?'壁凹':'壁凸')+' '+_faceJp(f.face),(f.w||0)+'×'+(f.d||0),(f.dir==='in'?'-':'+')+(((f.w||0)*(f.d||0))/1e6).toFixed(2)+'㎡']);
-    else if(f.type==='cut'){var g=_cutGeom(f,W,L);if(g)rows.push(['コーナーカット '+_cornerJp(f.corner),'斜'+(f.s2||0),'-'+(g.area/1e6).toFixed(2)+'㎡']);}
+    else if(f.type==='cut'){var g=_cutGeom(f,W,L);if(g)rows.push(['コーナーカット '+_cornerJp(f.corner),'斜'+Math.round(g.diag),'-'+(g.area/1e6).toFixed(2)+'㎡']);}
   });
   var cf=_columnsFootprintMm2();
   if(cf>0)rows.push(['柱控除',_columnsCount()+'本','-'+(cf/1e6).toFixed(2)+'㎡']);
