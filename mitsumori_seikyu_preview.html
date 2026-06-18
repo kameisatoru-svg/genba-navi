@@ -495,15 +495,18 @@ tr.dragging{opacity:0.4;}
         </div>
         <div class="fgroup" style="flex:2;margin:0;">
           <div style="display:flex;align-items:center;gap:3px;">
-            <input id="nebikiLabelInput" type="text" value="値引き"
+            <input id="nebikiLabelInput" type="text" value="端数値引き"
               title="この名称がそのまま見積書に表示されます（例：端数値引き／調整値引き）"
               style="flex:1;min-width:0;border:1px solid var(--border);border-radius:3px;padding:1px 4px;font-size:10px;font-family:inherit;color:var(--sub);background:#fafafa;"
-              oninput="nebikiLabel=(this.value.trim()||'値引き');render()">
-            <span style="font-size:10px;color:var(--sub);white-space:nowrap;">（円）</span>
+              oninput="nebikiLabel=(this.value.trim()||'端数値引き');render()">
+            <label style="font-size:9px;color:var(--sub);white-space:nowrap;display:flex;align-items:center;gap:2px;cursor:pointer;margin:0;" title="ON＝税抜合計を1000円単位に切り下げる端数値引きを自動適用（下3桁→000・税込は00止まり）。値引き額を手入力するか、このチェックを外すと自動OFF（その額で固定）になります。">
+              <input type="checkbox" id="hasuAutoChk" checked style="margin:0;" onchange="hasuNebikiAuto=this.checked;render()">端数自動
+            </label>
           </div>
           <input id="nebikiInput" type="number" value="0" min="0"
+            title="端数自動ON時は自動算出（税抜を1000円単位に切下げ）。手入力すると自動OFF・その額で固定。"
             style="width:100%;border:1px solid var(--border);border-radius:3px;padding:4px 8px;font-size:12px;font-family:inherit;"
-            oninput="nebiki=parseFloat(this.value)||0;render()">
+            oninput="hasuNebikiAuto=false;var _c=document.getElementById('hasuAutoChk');if(_c)_c.checked=false;nebiki=parseFloat(this.value)||0;render()">
         </div>
         <div class="fgroup" style="flex:2;margin:0;" title="BCS.CSV出力にのみ反映される端数調整。プラス/マイナス両方可。">
           <label style="font-size:10px;color:var(--sub);">端数調整（円・BCS用）</label>
@@ -598,8 +601,9 @@ const TMPL_CSS = `
 let mode = 'flat';
 let docType = 'mitsumori'; // 'mitsumori' or 'seikyu'
 let shokeihiRate = 15; // 諸経費率（%）
-let nebiki = 0;        // 値引き額
-let nebikiLabel = '値引き'; // 値引き行の表示名称（手動変更可・例：端数値引き／調整値引き）
+let nebiki = 0;        // 値引き額（端数自動ON時は端数値引き額を自動算出）
+let nebikiLabel = '端数値引き'; // 値引き行の表示名称（手動変更可・既定=端数値引き）
+let hasuNebikiAuto = true; // 端数値引き自動（既定ON）：税抜合計を1000円単位に切り下げる値引き額を自動算出（下3桁→000・税込は「00」止まり）。値引き額の手入力／チェック解除でOFF
 let hasuChousei = 0;   // 端数調整（BCS.CSV出力用・プラスマイナス両方可）
 let shokeihiMode = 'rate'; // 諸経費の算出方式：'rate'=率(%) / 'fixed'=金額固定（帳尻合わせ用）
 let shokeihiFixed = 0;     // shokeihiMode==='fixed' 時の諸経費金額（円）
@@ -1266,6 +1270,13 @@ function prefixedMiddleName(gi, mi, m){
 }
 
 // ── 合計計算 ──
+// 端数値引き額を算出：税抜合計を1000円単位に切り下げる値引き額（下3桁→000）を返す。
+// 税抜が1000円単位なら税込は必ず「00」止まりになる（1000×1.1=1100）。
+function calcHasuNebiki(baseZeinuki){
+  const b = Math.round(baseZeinuki);
+  if(b<=0) return 0;
+  return b % 1000;
+}
 function calcTotals(){
   let subtotal=0;
   if(mode==='flat'){
@@ -1288,6 +1299,12 @@ function calcTotals(){
   // 1式表記（請求書）・請求書の他モード時は諸経費・値引きを適用しない
   const applyShokeihi = docType==='mitsumori';
   const shokeihi = applyShokeihi ? shokeihiAmt(subtotal) : 0;
+  // 端数値引き自動：税込が100円単位になるよう値引き額を自動算出（手入力時=hasuNebikiAuto:false はスキップ）
+  if(applyShokeihi && hasuNebikiAuto){
+    nebiki = calcHasuNebiki(subtotal+shokeihi);
+    const _ni=document.getElementById('nebikiInput');
+    if(_ni && document.activeElement!==_ni) _ni.value=nebiki;
+  }
   const nb = applyShokeihi ? nebiki : 0;
   const zeinuki=subtotal+shokeihi-nb;
   const tax=Math.round(zeinuki*0.1);
@@ -1297,7 +1314,7 @@ function calcTotals(){
 
 function renderTotalBox(t){
   const isMits = docType==='mitsumori';
-  const shokeihiRow = isMits ? `<div class="total-row"><span>${shokeihiLbl()}</span><span>${fmtN(t.shokeihi)}</span></div>` : '';
+  const shokeihiRow = (isMits && t.shokeihi>0) ? `<div class="total-row"><span>${shokeihiLbl()}</span><span>${fmtN(t.shokeihi)}</span></div>` : '';
   const nebikiRow = (isMits && nebiki>0) ? `<div class="total-row"><span>${nebikiLabel}</span><span>-${fmtN(nebiki)}</span></div>` : '';
   document.getElementById('total-box').innerHTML=`
     <div class="total-row"><span>小計</span><span>${fmtN(t.subtotal)}</span></div>
@@ -1355,7 +1372,7 @@ function render(){
   const hasManualBreak=mode==='flat'&&flatItems.some((it,i)=>i>0&&it.pageBreak);
   // 請求書時は諸経費・値引き行を出さない
   const isMitsRender = docType==='mitsumori';
-  const shokeihiTr = isMitsRender ? `<tr class="shokeihi-row"><td colspan="4" style="text-align:right">${shokeihiLbl()}</td><td>${fmtN(t.shokeihi)}</td></tr>` : '';
+  const shokeihiTr = (isMitsRender && t.shokeihi>0) ? `<tr class="shokeihi-row"><td colspan="4" style="text-align:right">${shokeihiLbl()}</td><td>${fmtN(t.shokeihi)}</td></tr>` : '';
   const nebikiTr = (isMitsRender && nebiki>0) ? `<tr class="shokeihi-row"><td colspan="4" style="text-align:right">${nebikiLabel}</td><td>-${fmtN(nebiki)}</td></tr>` : '';
 
   if(mode==='lump'){
@@ -2030,7 +2047,7 @@ function buildDocHTML(){
   const tblStyle=tblFsStyle?`style="width:100%;border-collapse:collapse;font-size:${tblFsStyle};margin-bottom:8px;border:1px solid var(--border-dark)"`:'style="width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:8px;border:1px solid var(--border-dark)"';
   // 請求書時は諸経費・値引き行を出さない
   const isMitsPrint = docType==='mitsumori';
-  const shokeihiTrP = isMitsPrint ? `<tr class="shokeihi-row"><td colspan="4" style="text-align:right">${shokeihiLbl()}</td><td style="text-align:right">${fmtN(t.shokeihi)}</td></tr>` : '';
+  const shokeihiTrP = (isMitsPrint && t.shokeihi>0) ? `<tr class="shokeihi-row"><td colspan="4" style="text-align:right">${shokeihiLbl()}</td><td style="text-align:right">${fmtN(t.shokeihi)}</td></tr>` : '';
   const nebikiTrP = (isMitsPrint && nebiki>0) ? `<tr class="shokeihi-row"><td colspan="4" style="text-align:right">${nebikiLabel}</td><td style="text-align:right">-${fmtN(nebiki)}</td></tr>` : '';
 
   if(mode==='lump'){
@@ -2465,7 +2482,7 @@ function collectReeditState(){
   return {
     _type:'mitsumori_seikyu', _v:1, savedAt:new Date().toISOString(),
     docType:docType, mode:mode,
-    shokeihiRate:shokeihiRate, shokeihiMode:shokeihiMode, shokeihiFixed:shokeihiFixed, nebiki:nebiki, nebikiLabel:nebikiLabel, hasuChousei:hasuChousei,
+    shokeihiRate:shokeihiRate, shokeihiMode:shokeihiMode, shokeihiFixed:shokeihiFixed, nebiki:nebiki, nebikiLabel:nebikiLabel, hasuNebikiAuto:hasuNebikiAuto, hasuChousei:hasuChousei,
     fields:{
       atena:_gv('atena'), mitsumoriNo:_gv('mitsumoriNo'), hakkoDate:_gv('hakkoDate'),
       shiharaiDate:_gv('shiharaiDate'), kojimei:_gv('kojimei'), seshubasho:_gv('seshubasho'),
@@ -2489,13 +2506,16 @@ function applyReeditState(s){
   // 3) スカラー
   shokeihiRate = (s.shokeihiRate!=null) ? s.shokeihiRate : 15;
   shokeihiMode = (s.shokeihiMode==='fixed') ? 'fixed' : 'rate'; shokeihiFixed = s.shokeihiFixed || 0;
-  nebiki = s.nebiki || 0; nebikiLabel = s.nebikiLabel || '値引き'; hasuChousei = s.hasuChousei || 0;
+  nebiki = s.nebiki || 0; nebikiLabel = s.nebikiLabel || '端数値引き'; hasuChousei = s.hasuChousei || 0;
+  // 端数自動：明示フラグがあれば従う／無ければ既存値引き(>0)を保全するためOFF・それ以外はON
+  hasuNebikiAuto = (s.hasuNebikiAuto!==undefined) ? !!s.hasuNebikiAuto : !(s.nebiki>0);
   // 4) 入力欄（switchDocTypeの上書きを後勝ちで戻す）
   const f = s.fields || {};
   _sv('atena',f.atena); _sv('mitsumoriNo',f.mitsumoriNo); _sv('hakkoDate',f.hakkoDate);
   _sv('shiharaiDate',f.shiharaiDate); _sv('kojimei',f.kojimei); _sv('seshubasho',f.seshubasho);
   _sv('koki',f.koki); _sv('ankenKey',f.ankenKey); _sv('fileSuffix',f.fileSuffix); _sv('bikou',f.bikou);
   _sv('shokeihiRateInput',shokeihiRate); _sv('shokeihiFixedInput',Math.round(shokeihiFixed||0)); _sv('nebikiInput',nebiki); _sv('nebikiLabelInput',nebikiLabel); _sv('hasuChouseiInput',hasuChousei);
+  { const _c=document.getElementById('hasuAutoChk'); if(_c) _c.checked=hasuNebikiAuto; }
   if(typeof setShokeihiMode==='function') setShokeihiMode(shokeihiMode,{silent:true});
   const b=document.getElementById('bikou'); if(b && f.bikou) b.dataset.auto='';
   // 5) 再描画
@@ -3883,13 +3903,15 @@ function clearAllData(){
   shokeihiMode = 'rate';
   shokeihiFixed = 0;
   nebiki = 0;
-  nebikiLabel = '値引き';
+  nebikiLabel = '端数値引き';
+  hasuNebikiAuto = true;
   hasuChousei = 0;
   clearVal('shokeihiRateInput', '15');
   clearVal('shokeihiFixedInput', '0');
   if(typeof setShokeihiMode==='function') setShokeihiMode('rate',{silent:true});
   clearVal('nebikiInput', '0');
-  clearVal('nebikiLabelInput', '値引き');
+  clearVal('nebikiLabelInput', '端数値引き');
+  { const _c=document.getElementById('hasuAutoChk'); if(_c) _c.checked=true; }
   clearVal('hasuChouseiInput', '0');
 
   // ── 明細データを初期1行にリセット ──
@@ -4046,6 +4068,7 @@ function applyCsvImport(parsed, action){
       if(!isNaN(v)){
         nebiki = v;
         setVal('nebikiInput', v);
+        if(v>0){ hasuNebikiAuto=false; const _c=document.getElementById('hasuAutoChk'); if(_c)_c.checked=false; }
       }
     }
     if(meta.hasuChousei !== undefined && meta.hasuChousei !== ''){
@@ -4085,6 +4108,9 @@ function applyCsvImport(parsed, action){
       nebiki = parsed.nebiki;
       const nebikiInput = document.getElementById('nebikiInput');
       if(nebikiInput) nebikiInput.value = nebiki;
+      // 既存の値引き額を持つ書類の再編集：自動を切って元の金額を保全
+      hasuNebikiAuto = false;
+      const _c=document.getElementById('hasuAutoChk'); if(_c)_c.checked=false;
     }
     if(parsed.hasuChousei !== 0){
       hasuChousei = parsed.hasuChousei;
@@ -4950,7 +4976,7 @@ function captureDocSnapshot(){
   return {
     v: 1,
     savedAt: new Date().toISOString(),
-    docType, mode, shokeihiRate, shokeihiMode, shokeihiFixed, nebiki, nebikiLabel, hasuChousei,
+    docType, mode, shokeihiRate, shokeihiMode, shokeihiFixed, nebiki, nebikiLabel, hasuNebikiAuto, hasuChousei,
     header: {
       atena:       g('atena'),
       mitsumoriNo: g('mitsumoriNo'),
@@ -4987,7 +5013,9 @@ function restoreDocSnapshot(snap){
   setVal('shokeihiFixedInput', Math.round(shokeihiFixed||0));
   if(typeof setShokeihiMode==='function') setShokeihiMode(shokeihiMode,{silent:true});
   nebiki = snap.nebiki || 0;           setVal('nebikiInput', nebiki);
-  nebikiLabel = snap.nebikiLabel || '値引き'; setVal('nebikiLabelInput', nebikiLabel);
+  nebikiLabel = snap.nebikiLabel || '端数値引き'; setVal('nebikiLabelInput', nebikiLabel);
+  hasuNebikiAuto = (snap.hasuNebikiAuto!==undefined) ? !!snap.hasuNebikiAuto : !(snap.nebiki>0);
+  { const _c=document.getElementById('hasuAutoChk'); if(_c) _c.checked=hasuNebikiAuto; }
   hasuChousei = snap.hasuChousei || 0; setVal('hasuChouseiInput', hasuChousei);
   // 表書き
   const h = snap.header || {};
