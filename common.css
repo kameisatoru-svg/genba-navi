@@ -394,6 +394,10 @@ input, select, textarea, button{
 .nav-list-item:active{
   background: rgba(30,45,64,0.03);
 }
+/* v2: デスクトップ（ホバー可能環境）のみ。モバイルの :active とは干渉しない */
+@media (hover:hover){
+  .nav-list-item:hover{ background: rgba(30,45,64,0.03); }
+}
 .nav-list-item__icon{
   width: 32px;
   height: 32px;
