@@ -2816,6 +2816,7 @@ async function saveAnkenEdit(ankenKey) {
     statusEl.className   = 'anken-edit-status success';
 
     renderKpi();
+    renderTopics();
     renderKanban();
     renderReminders();
     renderChart();
@@ -3989,7 +3990,14 @@ function showAnkenModal(a) {
          <svg class="icon"><use href="#icon-clipboard"/></svg>ワークフローを開く
        </a>`
     : '';
+  const sUrl = summaryUrl(key);
+  const summaryBtn = sUrl
+    ? `<a class="modal-action-btn primary" href="${sUrl}" target="_blank" rel="noopener">
+         <svg class="icon"><use href="#icon-document"/></svg>案件サマリーを開く
+       </a>`
+    : '';
   $('#anken-modal-actions').innerHTML = `
+    ${summaryBtn}
     ${wfBtn}
     <a class="modal-action-btn" href="${driveSearchUrl(key)}" target="_blank" rel="noopener">
       <svg class="icon"><use href="#icon-folder"/></svg>Driveで案件を検索
