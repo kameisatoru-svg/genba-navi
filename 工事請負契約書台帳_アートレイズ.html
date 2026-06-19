@@ -4,30 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>工事請負契約書台帳｜株式会社アート・レイズ</title>
+<link rel="stylesheet" href="common.css">
 <style>
-:root{--navy:#1e2d40;--beige:#eeebe5;--gold:#c8a96e;--white:#fff;--bg:#eeebe5;--text:#333;--text2:#666;--border:#ddd;}
+/* ★ 2026/6/19 common.css v2 へ移行：ローカルの :root と nav-list 複製を撤去し共通定義を使用。
+   page-scroll の overflow 解除のみ残す（このアプリ固有の縦スクロール化）。 */
 .page-scroll{overflow:auto!important;height:auto!important;min-height:100dvh!important;}
-.nav-list{background:#fff;border-radius:16px;box-shadow:0 2px 8px rgba(30,45,64,0.07);overflow:hidden;margin-bottom:12px;}
-.nav-list-section{font-size:10px;color:#666;letter-spacing:0.08em;padding:10px 16px 4px;font-weight:700;}
-.nav-list-item{display:flex;align-items:center;gap:14px;min-height:60px;padding:13px 14px;width:100%;box-sizing:border-box;text-align:left;border:none;background:transparent;font-family:inherit;cursor:pointer;border-bottom:1px solid rgba(30,45,64,0.05);}
-.nav-list-item:last-child{border-bottom:none;}
-.nav-list-item:hover{background:#faf9f6;}
-.nav-list-item__icon{width:32px!important;height:32px!important;flex-shrink:0!important;flex-grow:0!important;color:#1e2d40;}
-.nav-list-item__body{flex:1;min-width:0;text-align:left;}
-.nav-list-item__title{font-size:14px;font-weight:700;color:#333;text-align:left;}
-.nav-list-item__desc{font-size:11px;color:#666;margin-top:1px;text-align:left;}
-.nav-list-item__arrow{font-size:14px;color:#666;opacity:0.5;flex-shrink:0;}
-.nav-list-item__value{font-size:13px;font-weight:700;color:#1e2d40;white-space:nowrap;flex-shrink:0;}
 </style>
 <style>
-/* ★ 現場ナビ系との配色統一（2026/4/23）：bg・card-header をnavy系に揃える
-   その他の変数（text/text-sub/green/red/orange/blue）は書類固有のまま維持 */
-:root {
-  --navy:#1e2d40; --accent:#c8a96e; --white:#fff;
-  --bg:#eeebe5; --border:#ddd; --border-dark:#aaa;
-  --text:#333; --text-sub:#666; --light:#f8f8f8;
-  --green:#16a34a; --red:#dc2626; --orange:#d97706; --blue:#2563eb;
-}
+/* ★ 2026/6/19 common.css v2 へ移行：配色・テキスト・ステータス色を共通トークンへ統一。
+   旧ローカル :root（--text #333 / Tailwind系ステータス等）を撤去し、ブランド色に統一。 */
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--text);font-size:14px;padding-bottom:20px;
   /* ★ common.cssの overflow:hidden と height:100dvh を解除してページ全体スクロールを有効化 */
@@ -176,6 +161,8 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 @keyframes navExpandFade{from{opacity:0;}to{opacity:1;}}
 /* 展開が空な時の案内 */
 .empty-hint{font-size:13px;color:#999;padding:8px 0;}
+.mitsumori-create-btn{display:inline-flex;align-items:center;gap:6px;margin:2px 0 12px;padding:8px 14px;background:#4a6090;color:#fff;border:1px solid #3a5070;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;line-height:1;transition:background 0.12s;}
+.mitsumori-create-btn:hover{background:#3a5070;}
 .badge{
   padding:5px 0;border-radius:12px;font-size:11px;font-weight:700;
   white-space:nowrap;flex-shrink:0;letter-spacing:0.02em;
@@ -240,6 +227,12 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 .genka-bar-fill{transition:width 0.3s;}
 .genka-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;}
 .genka-dot{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:4px;}
+/* 原価明細：ソース別グループ（受取請求書／精算領収書・レシート／カード） */
+.genka-meisai{margin-top:14px;display:flex;flex-direction:column;gap:8px;}
+.meisai-toggle.genka-src-head{display:flex;align-items:center;gap:8px;width:100%;border-left:4px solid var(--src-accent,#6b7280);}
+.genka-src-name{font-weight:700;color:var(--navy);}
+.genka-src-meta{margin-left:auto;font-size:12px;color:var(--text-sub);font-weight:600;white-space:nowrap;}
+.genka-src-updated{font-size:11px;color:var(--text-sub);text-align:right;margin-top:2px;}
 /* ★ タスク2 (2026/4/24): view-card を案件タブ.cardのデザインに寄せる
    白基調・角丸14px・影のみ・枠線なし・左端状態色バー */
 .view-card{
@@ -452,7 +445,7 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 <body>
 <div class="page-header">
   <h1><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="6" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="9" y1="15.5" x2="11" y2="15.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>工事請負契約書台帳</h1>
-  <div class="summary" id="headerSummary">-</div>
+  <div class="summary" id="headerSummary" style="display:none;">-</div>
 </div>
 <div class="tab-nav">
   <button class="tab-btn" onclick="switchTab('anken')">
@@ -481,7 +474,7 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
   <div class="filter-bar">
     <div class="search-input-wrap">
       <svg class="search-icon" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><line x1="13.5" y1="13.5" x2="17" y2="17"/></svg>
-      <input type="text" id="anken-search" placeholder="案件・顧客・工事内容を検索" oninput="renderAnken()">
+      <input type="text" id="anken-search" placeholder="案件・顧客・工事内容を検索（スペース区切りで複数語）" oninput="renderAnken()">
     </div>
     <button class="filter-toggle-btn" id="anken-filter-btn" onclick="openFilterSheet()" aria-label="絞り込み">
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
@@ -500,7 +493,7 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 <!-- フィルタシート（下からスライドアップ） -->
 <div class="filter-sheet-backdrop" id="filterBackdrop" onclick="closeFilterSheet()"></div>
 <div class="filter-sheet" id="filterSheet">
-  <div class="filter-sheet-title">ステータスで絞り込み</div>
+  <div class="filter-sheet-title">ステータスで絞り込み（複数選択可）</div>
   <div class="filter-sheet-chips" id="filter-sheet-chips"></div>
   <button class="filter-sheet-close" onclick="closeFilterSheet()">閉じる</button>
 </div>
@@ -612,15 +605,18 @@ body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--
 <script>
 const BASE_URL='https://kameisatoru-svg.github.io/genba-navi/';
 const DATA_URL=BASE_URL+'data.json';
+const GENKA_URL=BASE_URL+'genka.json';
 const LS_KEY='artrise_allinone_v2';
 const LS_KEY_MASTERS='artrise_masters_v1';
+const LS_KEY_GENKA='artrise_genka_v1';
 let ALL_DATA=[];
+let GENKA={};      // 原価明細（案件キー → {分類,合計,件数,明細[]}）。genka.json由来・遅延fetch
 let CUSTOMERS={};  // 顧客マスター（顧客略 → 詳細）
 let VENDORS={};    // 業者マスター（業者略 → 詳細）
 let currentTab='keiyaku';
 let seikyuFilter='minyukin'; // デフォルト：未入金のみ
 let keiyakuFilter='all';
-let ankenStatusFilter='all';
+let ankenStatusSel=new Set();// 選択中ステータス（空=すべて表示）。複数選択可
 // 完了除外フラグ（デフォルトON = 完了を隠す）
 const ANKEN_DONE_STATUS=['入金済み','完了'];
 const MITSUMORI_HIDE_STATUS=['施工中','受注済','請求済み','入金済み','完了','完了・請求書作成待ち'];
@@ -635,8 +631,19 @@ let mitsumoriHideActive=true;
 const ankenKey = p => p.案件キー || p.案件番号 || '-';
 const oldAnken = p => p.旧案件番号 || (p.案件番号 && p.案件キー ? p.案件番号 : '');
 const kojiName = p => p.正式工事名 || p.工事名 || '-';
-const customerName = p => (CUSTOMERS[p.顧客略]?.正式名称) || p.法人名 || p.代表者 || '-';
-const customerRep = p => (CUSTOMERS[p.顧客略]?.代表者) || p.代表者 || '-';
+// 顧客略でマスターを解決：完全一致 → 前方一致が1件だけならそれを採用。
+// 個人宅は案件キーが名字の短縮（例「村上」）、マスターはフルネーム登録（例「村上信子」）に
+// なりがちで完全一致しないため、一意に定まる前方一致だけ救済する（曖昧な複数一致は不採用）。
+function resolveCustomer(ryaku){
+  if(!ryaku) return null;
+  if(CUSTOMERS[ryaku]) return CUSTOMERS[ryaku];
+  const hits = Object.values(CUSTOMERS).filter(c =>
+    (c.顧客略||'').startsWith(ryaku) || (c.正式名称||'').startsWith(ryaku));
+  return hits.length === 1 ? hits[0] : null;
+}
+const customerName = p => (resolveCustomer(p.顧客略)?.正式名称) || p.法人名 || p.代表者 || '-';
+const customerRep = p => (resolveCustomer(p.顧客略)?.代表者) || p.代表者 || '-';
+const customerContact = p => (resolveCustomer(p.顧客略)?.担当者) || p.担当者 || '';
 const vendorName = c => (VENDORS[c.業者略]?.正式名称) || c.業者名 || '-';
 // 配列保証（旧構造の単一オブジェクトもラップ）
 const asArray = v => Array.isArray(v) ? v : (v && typeof v === 'object' && Object.keys(v).length ? [v] : []);
@@ -669,11 +676,35 @@ const uriageOf = p => {
   return ms.reduce((mx, m) => Math.max(mx, docAmt(m)), 0);
 };
 
-// マスター情報のロード（顧客/業者マスターを連想配列に変換）
+// マスター情報のロード（取引先マスター → CUSTOMERS / VENDORS に振り分け）
+// 新構造: 取引先マスター[{id, 略称, 正式名称, rel:[顧客|業者|元請|...], basic:{rep,contact}, contact:{...}}]
 function loadMasters(json){
-  CUSTOMERS = Object.fromEntries((json.顧客マスター || []).map(c => [c.顧客略, c]));
-  VENDORS = Object.fromEntries((json.業者マスター || []).map(v => [v.業者略, v]));
-  // 旧構造 取引先 配列のフォールバック
+  CUSTOMERS = {};
+  VENDORS = {};
+  // 新構造（取引先マスター）対応
+  (json.取引先マスター || []).forEach(t => {
+    if(!t.略称) return;
+    const entry = {
+      顧客略: t.略称,
+      業者略: t.略称,
+      id: t.id || '',
+      正式名称: t.正式名称 || '',
+      代表者: t.basic?.rep || '',
+      担当者: t.basic?.contact || '',
+      tel: t.contact?.tel || '',
+      mobile: t.contact?.mobile || '',
+      mail: t.contact?.mail || '',
+      address: t.contact?.address || '',
+      memo: t.memo || ''
+    };
+    const rel = Array.isArray(t.rel) ? t.rel : [];
+    if(rel.includes('顧客') || rel.includes('元請')) CUSTOMERS[t.略称] = entry;
+    if(rel.includes('業者')) VENDORS[t.略称] = entry;
+  });
+  // 旧構造（顧客マスター・業者マスター）も互換維持
+  (json.顧客マスター || []).forEach(c => { if(c.顧客略 && !CUSTOMERS[c.顧客略]) CUSTOMERS[c.顧客略] = c; });
+  (json.業者マスター || []).forEach(v => { if(v.業者略 && !VENDORS[v.業者略]) VENDORS[v.業者略] = v; });
+  // さらに旧構造 取引先 配列のフォールバック
   if(!Object.keys(CUSTOMERS).length && Array.isArray(json.取引先)){
     json.取引先.forEach(t => {
       const key = t.取引先番号 || t.取引先名;
@@ -688,6 +719,13 @@ function loadMasters(json){
   try { localStorage.setItem(LS_KEY_MASTERS, JSON.stringify({CUSTOMERS, VENDORS})); } catch(e){}
 }
 
+// 顧客情報（取引先マスター）＋案件の顧客リンクのシグネチャ。
+// これが変われば「顧客情報が修正された」とみなして再反映する。
+function customerSig(json){
+  return JSON.stringify(json.取引先マスター||json.顧客マスター||[])
+       + '|' + JSON.stringify((json.案件||[]).map(a=>a.顧客略||''));
+}
+let _customerSig='';
 async function loadData(){
   try{
     const res=await fetch(DATA_URL+'?v='+Date.now());
@@ -695,6 +733,7 @@ async function loadData(){
     const json=await res.json();
     ALL_DATA=json.案件||[];
     loadMasters(json);
+    _customerSig=customerSig(json);
     localStorage.setItem(LS_KEY,JSON.stringify(ALL_DATA));
   }catch(e){
     try{
@@ -704,10 +743,36 @@ async function loadData(){
       VENDORS=cachedM.VENDORS||{};
     }catch(e2){ALL_DATA=[];CUSTOMERS={};VENDORS={};}
   }
+  // 原価明細（genka.json）も取得。失敗しても4分類集計表示は維持されるので致命的でない。
+  await loadGenka();
   renderAll();
-  // 初期タブに応じてheaderSummary表示制御＋activeクラス整合
-  const sum=document.getElementById('headerSummary');
-  if(sum)sum.style.display=currentTab==='anken'?'':'none';
+}
+// 原価明細（genka.json）の遅延ロード。案件カードは詳細HTMLを事前生成するため、
+// renderAll の前に GENKA を満たしておく必要がある。取得失敗時はキャッシュ→空でフォールバック。
+async function loadGenka(){
+  try{
+    const res=await fetch(GENKA_URL+'?v='+Date.now());
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const json=await res.json();
+    GENKA=json.案件||{};
+    localStorage.setItem(LS_KEY_GENKA,JSON.stringify(GENKA));
+  }catch(e){
+    try{ GENKA=JSON.parse(localStorage.getItem(LS_KEY_GENKA)||'{}'); }
+    catch(e2){ GENKA={}; }
+  }
+}
+// 案件キー / 旧案件番号 で原価明細エントリを引く
+function genkaEntry(p){
+  if(!GENKA||typeof GENKA!=='object') return null;
+  const k=ankenKey(p), old=oldAnken(p);
+  if(k && GENKA[k]) return GENKA[k];
+  if(old){
+    // 旧案件番号一致でも探す（genka.json側キーが旧番号のケース）
+    if(GENKA[old]) return GENKA[old];
+    const hit=Object.values(GENKA).find(e=>e&&e.旧案件番号===old);
+    if(hit) return hit;
+  }
+  return null;
 }
 // ヘッダーサマリー更新（案件ビュー表示中のみ）
 function updateHeaderSummary(count,amount){
@@ -727,9 +792,10 @@ function closeFilterSheet(){
 }
 function renderFilterSheetChips(){
   const statuses=['all',...new Set(ALL_DATA.map(p=>p.ステータス).filter(Boolean))];
-  document.getElementById('filter-sheet-chips').innerHTML=statuses.map(s=>
-    `<button class="filter-sheet-chip ${s===ankenStatusFilter?'active':''}" onclick="setAnkenStatus('${s}')">${s==='all'?'すべて':s}</button>`
-  ).join('');
+  document.getElementById('filter-sheet-chips').innerHTML=statuses.map(s=>{
+    const active=s==='all'?ankenStatusSel.size===0:ankenStatusSel.has(s);
+    return `<button class="filter-sheet-chip ${active?'active':''}" onclick="setAnkenStatus('${s}')">${s==='all'?'すべて':s}</button>`;
+  }).join('');
 }
 function switchTab(tab){
   currentTab=tab;
@@ -762,15 +828,83 @@ const pdfTag=(pdf,label)=>{
   return `<a class="pdf-tag on" href="${url}" target="_blank" rel="noopener">${ICON_PDF}<span>${label}</span></a>`;
 };
 const driveTag=url=>url?`<a class="drive-tag" href="${url}" target="_blank" rel="noopener">${ICON_FOLDER}<span>Drive</span></a>`:`<span class="drive-tag off">${ICON_FOLDER}<span>Drive</span></span>`;
+// 検索クエリのマッチ判定：空白（半角/全角）区切りの複数キーワードをAND検索。txt・qともに小文字化済み前提。
+function matchQuery(txt,q){
+  if(!q)return true;
+  return q.split(/[\s　]+/).filter(Boolean).every(t=>txt.includes(t));
+}
+
+// ─ 原価明細レンダラー ─
+// genka.json の案件エントリ（明細[]）を、Sheets K列「ソース」でグループ化して
+// 折りたたみテーブルにする。受取請求書／精算領収書・レシート／カード(AMEX)の3系統。
+const GENKA_SOURCE_GROUPS=[
+  {key:'受取請求書', match:s=>/請求/.test(s), accent:'#2563eb'},
+  {key:'精算領収書・レシート', match:s=>/領収|レシート|精算/.test(s), accent:'#16a34a'},
+  {key:'カード（AMEX）', match:s=>/amex|カード|クレジット/i.test(s), accent:'#d97706'},
+];
+function genkaSourceGroupOf(src){
+  const s=src||'';
+  const g=GENKA_SOURCE_GROUPS.find(g=>g.match(s));
+  return g?g.key:'その他';
+}
+// ソースグループ見出しの開閉（toggleMeisaiと違い innerHTML を壊さない＝名称・小計を保持）
+function toggleGenkaSrc(btn){
+  const wrap=btn.nextElementSibling;
+  if(!wrap)return;
+  const open=wrap.classList.toggle('open');
+  btn.classList.toggle('open',open);
+}
+function genkaMeisaiHtml(entry,safeId){
+  const rows=(entry&&Array.isArray(entry.明細))?entry.明細:[];
+  if(!rows.length) return '';
+  // ソース別にグループ化（定義順 → その他）
+  const order=[...GENKA_SOURCE_GROUPS.map(g=>g.key),'その他'];
+  const groups={};
+  rows.forEach(r=>{
+    const gk=genkaSourceGroupOf(r.ソース);
+    (groups[gk]=groups[gk]||[]).push(r);
+  });
+  const accentOf=k=>(GENKA_SOURCE_GROUPS.find(g=>g.key===k)||{}).accent||'#6b7280';
+  const blocks=order.filter(k=>groups[k]&&groups[k].length).map((k,gi)=>{
+    const list=groups[k];
+    const subtotal=list.reduce((s,r)=>s+Number(r.金額||0),0);
+    const tid=`genka-src-${safeId}-${gi}`;
+    const body=list.map(r=>`<tr>
+        <td>${fmtDate(r.日付)}</td>
+        <td>${r.店舗||r.業者名||'-'}</td>
+        <td>${r.品目||'-'}</td>
+        <td>${r.勘定科目||'-'}</td>
+        <td class="right">${fmtYen(Number(r.金額||0))}</td>
+      </tr>`).join('');
+    return `<div class="genka-src-group">
+      <button class="meisai-toggle genka-src-head" onclick="toggleGenkaSrc(this)" style="--src-accent:${accentOf(k)};">
+        <svg class="meisai-toggle__chevron" width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><polygon points="2,1 8,5 2,9"/></svg>
+        <span class="genka-src-name">${k}</span>
+        <span class="genka-src-meta">${list.length}件 ・ ${fmtYen(subtotal)}</span>
+      </button>
+      <div class="meisai-wrap" id="${tid}">
+        <table class="meisai-table">
+          <thead><tr><th>日付</th><th>店舗・業者</th><th>品目</th><th>勘定科目</th><th class="right">金額（税込）</th></tr></thead>
+          <tbody>${body}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+  const updated=entry.最終集計日?`<div class="genka-src-updated">明細最終集計 ${entry.最終集計日}${entry.件数?` ・ 全${entry.件数}件`:''}</div>`:'';
+  return `<div class="genka-meisai">${blocks}${updated}</div>`;
+}
 
 // ─ 案件ビュー ─
 function renderAnken(){
   const q=document.getElementById('anken-search').value.toLowerCase();
+  // 検索クエリ入力時・ステータス明示選択時は完了/入金済みフィルタを一時的に解除（ヒット漏れ防止）
+  const searchOverride=q.length>0;
+  const statusOverride=ankenStatusSel.size>0;
   const data=ALL_DATA.filter(p=>{
     const txt=[ankenKey(p),oldAnken(p),kojiName(p),customerName(p),customerRep(p),p.施工場所,p.ステータス,p.備考].filter(Boolean).join(' ').toLowerCase();
-    const statusOk=ankenStatusFilter==='all'||p.ステータス===ankenStatusFilter;
-    const doneOk=!ankenHideDone||!ANKEN_DONE_STATUS.includes(p.ステータス);
-    return(!q||txt.includes(q))&&statusOk&&doneOk;
+    const statusOk=ankenStatusSel.size===0||ankenStatusSel.has(p.ステータス);
+    const doneOk=!ankenHideDone||searchOverride||statusOverride||!ANKEN_DONE_STATUS.includes(p.ステータス);
+    return(matchQuery(txt,q))&&statusOk&&doneOk;
   });
   data.sort((a,b)=>{
     const ai=STATUS_ORDER.indexOf(a.ステータス);const bi=STATUS_ORDER.indexOf(b.ステータス);
@@ -782,15 +916,29 @@ function renderAnken(){
   updateHeaderSummary(data.length,amt);
   // フィルタボタンの状態表示
   const btn=document.getElementById('anken-filter-btn');
-  if(btn)btn.classList.toggle('has-filter',ankenStatusFilter!=='all'||!ankenHideDone);
-  // 完了除外トグルボタンの表示更新
+  if(btn)btn.classList.toggle('has-filter',ankenStatusSel.size>0||!ankenHideDone);
+  // 完了除外トグルボタンの表示更新（検索オーバーライド中は注記を付ける）
   const doneBtn=document.getElementById('anken-done-toggle');
-  if(doneBtn){doneBtn.textContent=ankenHideDone?'完了済みも表示':'完了済みを隠す';doneBtn.classList.toggle('active',!ankenHideDone);}
+  if(doneBtn){
+    if(ankenHideDone&&searchOverride){
+      doneBtn.textContent='完了済みも表示中（検索）';
+      doneBtn.classList.add('active');
+    }else{
+      doneBtn.textContent=ankenHideDone?'完了済みも表示':'完了済みを隠す';
+      doneBtn.classList.toggle('active',!ankenHideDone);
+    }
+  }
   const area=document.getElementById('anken-area');
   if(!data.length){area.innerHTML='<div class="empty">該当する案件がありません</div>';return;}
   area.innerHTML=data.map(p=>buildAnkenCard(p)).join('');
 }
-function setAnkenStatus(s){ankenStatusFilter=s;renderAnken();closeFilterSheet();}
+function setAnkenStatus(s){
+  if(s==='all'){ankenStatusSel.clear();}
+  else if(ankenStatusSel.has(s)){ankenStatusSel.delete(s);}
+  else{ankenStatusSel.add(s);}
+  renderFilterSheetChips();// 複数選択を続けられるようシートは閉じず再描画
+  renderAnken();
+}
 function toggleAnkenDone(){ankenHideDone=!ankenHideDone;renderAnken();}
 function toggleCard(h){h.closest('.card').classList.toggle('open');}
 // ★ C-4: nav-list-item の個別展開
@@ -829,14 +977,16 @@ function buildAnkenCard(p){
   const keiyakuColor=keiyakuStatus==='締結済み'?'#1a7a30':'#d97706';
   // DOM ID（配列インデックス方式・日本語キー衝突回避）
   const safeId=safeAnkenId(p);
-  // 顧客名・代表者（マスター優先）
+  // 顧客名・代表者・担当者（マスター優先）
   const cName=customerName(p);
   const cRep=customerRep(p);
+  const cContact=customerContact(p);
 
   // ── 詳細セクションHTML生成 ──
   const detailBasic=`
     <div class="info-grid">
       <div class="info-item"><span class="info-label">法人名</span><span class="info-value">${cName}</span></div>
+      ${cContact?`<div class="info-item"><span class="info-label">担当者</span><span class="info-value">${cContact}</span></div>`:''}
       <div class="info-item"><span class="info-label">代表者</span><span class="info-value">${cRep}</span></div>
       <div class="info-item"><span class="info-label">施工場所</span><span class="info-value">${p.施工場所||'-'}</span></div>
       ${p.元請フラグ?`<div class="info-item"><span class="info-label">元請</span><span class="info-value" style="color:#b45309;">${p.元請名||'-'}</span></div>`:''}
@@ -933,7 +1083,8 @@ function buildAnkenCard(p){
       <div class="info-item"><span class="info-label">原価合計</span><span class="info-value minyukin">${fmtYen(genkaTotal||null)}</span></div>
       <div class="info-item"><span class="info-label">粗利</span><span class="info-value nyukin">${uriage&&genkaTotal?fmtYen(uriage-genkaTotal):'-'}</span></div>
     </div>
-    ${genkaBarHtml}`;
+    ${genkaBarHtml}
+    ${genkaMeisaiHtml(genkaEntry(p),safeId)}`;
 
   // ── カード全体 ──
   return`
@@ -970,7 +1121,7 @@ function buildAnkenCard(p){
           <div class="nav-list-item__value">${mAmt}</div>
           <div class="nav-list-item__arrow">›</div>
         </button>
-        <div class="nav-expand-body">${detailMitsumori}</div>
+        <div class="nav-expand-body">${p.案件キー?`<a href="mitsumori_seikyu_preview.html?anken=${encodeURIComponent(p.案件キー)}" target="_blank" rel="noopener" class="mitsumori-create-btn" title="見積エディタを開き、この案件の宛先・工事件名・施工場所などを自動入力します"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M4 3 L13 3 L16 6 L16 17 L4 17 Z"/><path d="M8 10 L12 10 M8 13 L12 13"/></svg>見積エディタで作成（案件情報を自動入力）</a>`:''}${detailMitsumori}</div>
 
         <!-- 請求 -->
         <button class="nav-list-item nav-expand" onclick="toggleNavItem(this)">
@@ -1062,10 +1213,6 @@ function buildAnkenCard(p){
           <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3 L17 6 L8 15 L4 16 L5 12 Z"/></svg>
           編集
         </button>
-        <button class="sheets-edit-btn-small" onclick="openSheets('${ankenKey(p)}',event)">
-          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="14" height="14" rx="2"/><line x1="3" y1="8" x2="17" y2="8"/><line x1="8" y1="8" x2="8" y2="17"/></svg>
-          Sheetsで編集
-        </button>
       </div>
     </div>
   </div>`;
@@ -1084,7 +1231,7 @@ function renderMitsumori(){
     mList.forEach((m,mi)=>{
       const txt=[ankenKey(p),oldAnken(p),kojiName(p),customerName(p),customerRep(p),docNo(m)].filter(Boolean).join(' ').toLowerCase();
       const hideOk=!mitsumoriHideActive||!MITSUMORI_HIDE_STATUS.includes(p.ステータス);
-      if((!q||txt.includes(q))&&inRange(docDate(m),from,to)&&hideOk){
+      if((matchQuery(txt,q))&&inRange(docDate(m),from,to)&&hideOk){
         items.push({p,m,mi});
       }
     });
@@ -1146,7 +1293,7 @@ function renderSeikyu(){
   ALL_DATA.forEach(p=>getSeikyuList(p).forEach((r,ri)=>{
     const txt=[ankenKey(p),oldAnken(p),kojiName(p),customerName(p),customerRep(p),docNo(r)].filter(Boolean).join(' ').toLowerCase();
     const sStat=seikyuStatus(r);
-    if((!q||txt.includes(q))&&inRange(docDate(r),from,to)&&(seikyuFilter==='all'||sStat===seikyuFilter))items.push({p,r,ri});
+    if((matchQuery(txt,q))&&inRange(docDate(r),from,to)&&(seikyuFilter==='all'||sStat===seikyuFilter))items.push({p,r,ri});
   }));
   const minyukin=items.filter(x=>seikyuStatus(x.r)!=='nyukin');
   document.getElementById('r-total').textContent=items.length;
@@ -1203,7 +1350,7 @@ function renderChumon(){
   const items=[];
   ALL_DATA.forEach(p=>getChumonList(p).forEach(c=>{
     const txt=[ankenKey(p),oldAnken(p),kojiName(p),customerName(p),vendorName(c),docNo(c)].filter(Boolean).join(' ').toLowerCase();
-    if((!q||txt.includes(q))&&inRange(docDate(c),from,to))items.push({p,c});
+    if((matchQuery(txt,q))&&inRange(docDate(c),from,to))items.push({p,c});
   }));
   document.getElementById('c-total').textContent=items.length;
   document.getElementById('c-total-amt').textContent=fmtYen(items.reduce((s,x)=>s+docAmt(x.c),0)||null);
@@ -1255,7 +1402,7 @@ function renderKeiyaku(){
     kList.forEach((k,ki)=>{
       const txt=[ankenKey(p),oldAnken(p),kojiName(p),customerName(p),customerRep(p),docNo(k)].filter(Boolean).join(' ').toLowerCase();
       const isSigned=keiyakuStatusOf(k)==='締結済み';
-      if((!q||txt.includes(q))&&inRange(docDate(k),from,to)&&(keiyakuFilter==='all'||(keiyakuFilter==='signed'&&isSigned)||(keiyakuFilter==='pending'&&!isSigned))){
+      if((matchQuery(txt,q))&&inRange(docDate(k),from,to)&&(keiyakuFilter==='all'||(keiyakuFilter==='signed'&&isSigned)||(keiyakuFilter==='pending'&&!isSigned))){
         items.push({p,k,ki});
       }
     });
@@ -1299,7 +1446,7 @@ function renderGenka(){
   const q=document.getElementById('g-search').value.toLowerCase();
   const items=ALL_DATA.filter(p=>{
     const txt=[ankenKey(p),oldAnken(p),kojiName(p),customerName(p),customerRep(p)].filter(Boolean).join(' ').toLowerCase();
-    return!q||txt.includes(q);
+    return matchQuery(txt,q);
   });
   let tg=0,tu=0;
   items.forEach(p=>{
@@ -1337,7 +1484,8 @@ function renderGenka(){
       <div class="tab-detail-row"><span class="tab-detail-label">材料費</span><span class="tab-detail-value">${fmtYen(g.材料費||null)}</span></div>
       <div class="tab-detail-row"><span class="tab-detail-label">外注費</span><span class="tab-detail-value">${fmtYen(g.外注費||null)}</span></div>
       <div class="tab-detail-row"><span class="tab-detail-label">経費</span><span class="tab-detail-value">${fmtYen(g.経費||null)}</span></div>
-      ${gt>0?`<div style="margin-top:12px;">${genkaBarHtml}</div>`:'<div class="empty-hint" style="margin-top:8px;">原価未入力</div>'}`;
+      ${gt>0?`<div style="margin-top:12px;">${genkaBarHtml}</div>`:'<div class="empty-hint" style="margin-top:8px;">原価未入力</div>'}
+      ${genkaMeisaiHtml(genkaEntry(p),safeAnkenId(p))}`;
     return`
     <div class="tab-nav-card status-${rateClass}">
       <button class="tab-nav-card-header" onclick="toggleTabCard(this)">
@@ -1497,17 +1645,7 @@ async function saveEdit(safeId, ankenNo, e){
   }
 }
 
-// ─ Sheets編集 ─
-const SHEETS_URL='https://docs.google.com/spreadsheets/d/1M7CPRijH446h63LlDYIZGzwSSfUZnvqYT0VSRoEy2PU/edit';
-function openSheets(ankenNo, e){
-  e.stopPropagation();
-  // 案件番号をクリップボードにコピー
-  navigator.clipboard.writeText(ankenNo).catch(()=>{});
-  // トースト表示
-  showToast(`「${ankenNo}」をコピーしました\nSheets内でCtrl+Fで検索してください`);
-  // Sheetsを新タブで開く
-  window.open(SHEETS_URL, '_blank');
-}
+// ─ トースト（PAT設定エラー通知などで使用）─
 function showToast(msg){
   let t=document.getElementById('sheets-toast');
   if(!t){t=document.createElement('div');t.id='sheets-toast';document.body.appendChild(t);}
@@ -1531,6 +1669,32 @@ function toggleMeisai(id,btn){
 }
 
 loadData();
+
+// ── 顧客情報の修正を案件の基本情報へ自動反映 ──
+// 取引先台帳などで顧客（正式名称・代表者・担当者…）を修正したあと、この画面に
+// 戻ってくると最新の取引先マスターを取り直し、変化があったときだけ再描画する。
+// ・案件は顧客情報を「持たず」顧客略でマスターを参照するため、ここでマスターを
+//   更新すれば全カードの基本情報が最新になる。
+// ・変化が無ければ画面はそのまま（開いているカードや操作を邪魔しない）。
+// ・クイック編集パネルを開いている最中は入力保護のため見送る。
+async function refreshCustomersIfChanged(){
+  if(document.querySelector('.edit-panel.open')) return;   // 編集中は触らない
+  try{
+    const res=await fetch(DATA_URL+'?v='+Date.now());
+    if(!res.ok) return;                                    // 取得失敗時は古い表示で上書きしない
+    const json=await res.json();
+    const sig=customerSig(json);
+    if(sig===_customerSig) return;                         // 顧客情報に変化なし → 何もしない
+    ALL_DATA=json.案件||ALL_DATA;
+    loadMasters(json);
+    _customerSig=sig;
+    localStorage.setItem(LS_KEY,JSON.stringify(ALL_DATA));
+    renderAll();
+  }catch(e){ /* オフライン等は無視（古い表示を維持） */ }
+}
+// タブが再表示された / ウィンドウにフォーカスが戻った時に最新化
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) refreshCustomersIfChanged(); });
+window.addEventListener('focus',refreshCustomersIfChanged);
 </script>
 </body>
 </html>
