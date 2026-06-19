@@ -4,20 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>案件台帳｜株式会社アート・レイズ</title>
+<link rel="stylesheet" href="common.css">
 <style>
-:root{--navy:#1e2d40;--beige:#eeebe5;--gold:#c8a96e;--white:#fff;--bg:#eeebe5;--text:#333;--text2:#666;--border:#ddd;}
+/* ★ 2026/6/19 common.css v2 へ移行：ローカルの :root と nav-list 複製を撤去し共通定義を使用。
+   page-scroll の overflow 解除のみ残す（このアプリ固有の縦スクロール化）。 */
 .page-scroll{overflow:auto!important;height:auto!important;min-height:100dvh!important;}
-.nav-list{background:#fff;border-radius:16px;box-shadow:0 2px 8px rgba(30,45,64,0.07);overflow:hidden;margin-bottom:12px;}
-.nav-list-section{font-size:10px;color:#666;letter-spacing:0.08em;padding:10px 16px 4px;font-weight:700;}
-.nav-list-item{display:flex;align-items:center;gap:14px;min-height:60px;padding:13px 14px;width:100%;box-sizing:border-box;text-align:left;border:none;background:transparent;font-family:inherit;cursor:pointer;border-bottom:1px solid rgba(30,45,64,0.05);}
-.nav-list-item:last-child{border-bottom:none;}
-.nav-list-item:hover{background:#faf9f6;}
-.nav-list-item__icon{width:32px!important;height:32px!important;flex-shrink:0!important;flex-grow:0!important;color:#1e2d40;}
-.nav-list-item__body{flex:1;min-width:0;text-align:left;}
-.nav-list-item__title{font-size:14px;font-weight:700;color:#333;text-align:left;}
-.nav-list-item__desc{font-size:11px;color:#666;margin-top:1px;text-align:left;}
-.nav-list-item__arrow{font-size:14px;color:#666;opacity:0.5;flex-shrink:0;}
-.nav-list-item__value{font-size:13px;font-weight:700;color:#1e2d40;white-space:nowrap;flex-shrink:0;}
 </style>
 <style>
 /* ★ 現場ナビ系との配色統一（2026/4/23）：bg・card-header をnavy系に揃える
