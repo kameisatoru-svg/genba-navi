@@ -1,0 +1,312 @@
+{
+ "案件キー": "島津-リハビリ撮影-26",
+ "顧客略": "島津",
+ "現場+工事": "リハビリ撮影",
+ "正式工事名": "大分リハビリテーション病院 一般撮影室内装工事",
+ "施工場所": "大分県大分市(大分リハビリテーション病院)",
+ "ステータス": "施工予定",
+ "元請フラグ": false,
+ "元請名": "株式会社島津製作所",
+ "備考": "担当:竹村勝利(ktake@shimadzu.co.jp)。施工日程:7/18(土)-19(日)土日施工(設置工程表7/17-21・使用開始7/21)。現地調査2026-05-21。仕上げ:床=PT-105M タジマ パーマリューム ストリート(巾1820/厚2.0・流れ縦)/巾木=タジマ ソフト巾木No.80(HB-80)、壁クロス=サンゲツFE-76251(廊下側)/FE-76109(左面)/FE-76728(受付側)/FE-76751(操作室側)、天井=FE-76202(ルーバー有)。CH2790。数量:床18㎡/壁49㎡。詳細→現地調査メモ_島津-リハビリ撮影-26.md 2026-06-16 追加見積依頼受領：撮影室付随のスチールドア塗装。①親子ドア1箇所②片開きドア2箇所③覗き窓1箇所。すべて撮影室側の片面のみ・枠も片面。塗装は古賀美装に見積依頼中（見積待ち）。",
+ "旧案件番号": "AR-26-013",
+ "見積": [
+  {
+   "書類番号": "見_改２_島津-リハビリ撮影-26",
+   "お客様向け番号": "ARS-T013-260514-01",
+   "発行日": "2026-05-14",
+   "金額": 500940,
+   "備考": "床貼替え18m2・壁クロス張替え49m2",
+   "ファイル": "見_改２_島津-リハビリ撮影-26.pdf"
+  },
+  {
+   "書類番号": "見_改3_島津-リハビリ撮影-26",
+   "発行日": "2026-05-14",
+   "金額": 578600,
+   "備考": "大分リハビリテーション病院 一般撮影室内装工事",
+   "ファイル": "見_改3_島津-リハビリ撮影-26.pdf",
+   "お客様向け番号": "ARS-T013-260514-01",
+   "_genbaDoc": {
+    "v": 1,
+    "savedAt": "2026-06-17T00:08:52.620Z",
+    "docType": "mitsumori",
+    "mode": "group",
+    "shokeihiRate": 10,
+    "shokeihiMode": "rate",
+    "shokeihiFixed": 0,
+    "nebiki": 900,
+    "nebikiLabel": "調整値引き",
+    "hasuNebikiAuto": true,
+    "hasuChousei": 0,
+    "header": {
+     "atena": "株式会社　島津製作所",
+     "mitsumoriNo": "ARS-T013-260514-01",
+     "hakkoDate": "2026-05-14",
+     "shiharaiDate": "2026-06-30",
+     "kojimei": "大分リハビリテーション病院 一般撮影室内装工事",
+     "seshubasho": "大分県大分市(大分リハビリテーション病院)",
+     "koki": "",
+     "ankenKey": "島津-リハビリ撮影-26",
+     "fileSuffix": "改3"
+    },
+    "flatItems": [],
+    "groupItems": [
+     {
+      "name": "一般撮影室内装工事",
+      "pageBreak": false,
+      "middleItems": [],
+      "items": [
+       {
+        "name": "壁クロス撤去",
+        "qty": 49,
+        "unit": "㎡",
+        "price": 400,
+        "note": ""
+       },
+       {
+        "name": "壁クロス貼",
+        "qty": 49,
+        "unit": "㎡",
+        "price": 1600,
+        "note": ""
+       },
+       {
+        "name": "天井クロス撤去",
+        "qty": 18,
+        "unit": "㎡",
+        "price": 400,
+        "note": ""
+       },
+       {
+        "name": "天井クロス貼",
+        "qty": 18,
+        "unit": "㎡",
+        "price": 1600,
+        "note": ""
+       },
+       {
+        "name": "床長尺シート撤去",
+        "qty": 18,
+        "unit": "㎡",
+        "price": 2000,
+        "note": ""
+       },
+       {
+        "name": "床下地調整費",
+        "qty": 18,
+        "unit": "㎡",
+        "price": 1250,
+        "note": ""
+       },
+       {
+        "name": "床長尺シート貼",
+        "qty": 18,
+        "unit": "㎡",
+        "price": 5800,
+        "note": ""
+       },
+       {
+        "name": "巾木撤去",
+        "qty": 17,
+        "unit": "m",
+        "price": 300,
+        "note": ""
+       },
+       {
+        "name": "ソフト巾木貼",
+        "qty": 16,
+        "unit": "m",
+        "price": 750,
+        "note": ""
+       },
+       {
+        "name": "片開きドア塗装　撮影室側のみ　枠共　以下同",
+        "qty": 2,
+        "unit": "箇所",
+        "price": 15000,
+        "note": ""
+       },
+       {
+        "name": "親子ドア塗装",
+        "qty": 1,
+        "unit": "箇所",
+        "price": 25000,
+        "note": ""
+       },
+       {
+        "name": "覗き窓塗装",
+        "qty": 1,
+        "unit": "箇所",
+        "price": 10000,
+        "note": ""
+       },
+       {
+        "name": "資材運搬・搬入費",
+        "qty": 1,
+        "unit": "式",
+        "price": 25000,
+        "note": ""
+       },
+       {
+        "name": "廃材運搬処分費",
+        "qty": 1,
+        "unit": "式",
+        "price": 35000,
+        "note": ""
+       },
+       {
+        "name": "養生・片付け清掃費",
+        "qty": 1,
+        "unit": "式",
+        "price": 40000,
+        "note": ""
+       }
+      ]
+     }
+    ],
+    "groupSummaryItems": [
+     {
+      "name": "",
+      "qty": "",
+      "unit": "",
+      "price": "",
+      "note": ""
+     },
+     {
+      "name": "",
+      "qty": "",
+      "unit": "",
+      "price": "",
+      "note": ""
+     },
+     {
+      "name": "",
+      "qty": "",
+      "unit": "",
+      "price": "",
+      "note": ""
+     },
+     {
+      "name": "",
+      "qty": "",
+      "unit": "",
+      "price": "",
+      "note": ""
+     }
+    ]
+   }
+  }
+ ],
+ "請求": [],
+ "注文書": [],
+ "契約書": [
+  {
+   "ステータス": "未締結"
+  }
+ ],
+ "原価": {
+  "労務費": 0,
+  "材料費": 0,
+  "外注費": 0,
+  "経費": 0,
+  "合計": 0,
+  "件数": 0,
+  "最終集計日": "2026-05-14"
+ },
+ "チェック": {
+  "doc_k.mitsumori_final": "done",
+  "contact.first": "done",
+  "contact.apo": "done",
+  "survey.schedule": "done",
+  "survey.photo": "done",
+  "survey.sumpo": "done",
+  "survey.memo": "done",
+  "prep.mat": "done",
+  "prep.tanka": "done",
+  "compose.breakdown": "done",
+  "compose.amount": "done",
+  "followup.arrive": "done",
+  "submit.followup": "done",
+  "submit.send": "done",
+  "followup.react": "done",
+  "followup.decision": "done",
+  "compose.review": "done"
+ }
+}
+
+{
+ "案件キー": "島津-鶴見MRI-26",
+ "顧客略": "島津",
+ "現場+工事": "鶴見MRI",
+ "正式工事名": "鶴見病院 MRI室・操作室 内装工事",
+ "施工場所": "",
+ "ステータス": "見積提出済み",
+ "元請フラグ": false,
+ "元請名": "株式会社島津製作所",
+ "備考": "顧客T-013島津製作所。島津-リハビリ撮影-26とは別案件。",
+ "旧案件番号": "",
+ "見積": [
+  {
+   "書類番号": "見_島津-鶴見MRI-26",
+   "発行日": "2026-02-28",
+   "金額": 967659,
+   "備考": "A.MRI室・操作室内装工事+B.諸経費=税込¥967,659。",
+   "ファイル": "見_島津-鶴見MRI-26.pdf"
+  }
+ ],
+ "請求": [],
+ "注文書": [],
+ "契約書": [],
+ "原価": {
+  "労務費": 0,
+  "材料費": 0,
+  "外注費": 0,
+  "経費": 0,
+  "合計": 0,
+  "件数": 0,
+  "最終集計日": "2026-05-14"
+ },
+ "チェック": {
+  "followup.arrive": "done",
+  "followup.react": "done",
+  "followup.decision": "done",
+  "contact.first": "done",
+  "contact.apo": "done",
+  "survey.schedule": "done",
+  "survey.photo": "done",
+  "survey.sumpo": "done",
+  "survey.memo": "done",
+  "prep.tanka": "done",
+  "compose.breakdown": "done",
+  "submit.send": "done",
+  "compose.amount": "done",
+  "submit.followup": "done"
+ }
+}
+
+{
+ "案件キー": "島津-豊後大野市民-26",
+ "顧客略": "島津",
+ "現場+工事": "豊後大野市民",
+ "正式工事名": "豊後大野市民病院（相談）",
+ "施工場所": "大分県豊後大野市",
+ "ステータス": "相談",
+ "元請フラグ": false,
+ "元請名": "",
+ "備考": "図面のみ受領。初期段階。2026-06-03 A-1未登録より遡及登録。",
+ "旧案件番号": "",
+ "見積": [],
+ "請求": [],
+ "注文書": [],
+ "契約書": [],
+ "原価": {},
+ "チェック": {
+  "contact.first": "done",
+  "contact.apo": "done",
+  "survey.schedule": "done",
+  "survey.photo": "done",
+  "survey.sumpo": "done",
+  "survey.memo": "done",
+  "prep.tanka": "done",
+  "prep.mat": "done"
+ }
+}
