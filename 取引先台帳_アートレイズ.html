@@ -13,10 +13,13 @@
    - カード展開はC-4準拠（nav-list化・2階層折りたたみ）
    - 検索＋フィルタはC-1準拠（フィルタシート下スライド） */
 :root {
-  --navy:#1e2d40; --accent:#c8a96e; --white:#fff;
-  --bg:#eeebe5; --border:#ddd; --border-dark:#aaa;
-  --text:#333; --text-sub:#666; --light:#f8f8f8;
-  --green:#16a34a; --red:#dc2626; --orange:#d97706; --blue:#2563eb;
+  /* ★ 2026/6/19 common.css v2 へ移行：
+     共通色（navy/accent/white/bg/border/border-dark/light）は common.css のトークンに集約し、
+     ここでの重複定義を削除（v2と同値のため見た目は不変）。
+     以下は取引先台帳で意図的に上書きしている値のみ残す（将来の全体統一で再検討）。 */
+  --text:#333;       /* common v2 は #1e2d40（ブランド紺）。本台帳は従来の墨色を維持 */
+  --text-sub:#666;   /* common v2 は --text2 #5a6a7a。印刷下限#666の値を維持 */
+  --green:#16a34a; --red:#dc2626; --orange:#d97706; --blue:#2563eb;  /* 関係性バッジ（Tailwind系）。common v2 はブランド寄りの落ち着いた色 */
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--text);font-size:14px;padding-bottom:20px;
