@@ -1,61 +1,116 @@
 /* =========================================
    現場ナビPRO 共通スタイル
-   common.css v1.0
-   作成日：2026/4/23
-   
-   Phase 0：基盤作り
-   - CSS変数の共通化
-   - 基本ボタン・カード・ヘッダーの共通化
-   - タイポグラフィの共通化
-   
-   Phase 1以降：
-   - Phase 1：配色見直し（変数値の調整のみで対応）
-   - Phase 2：ボタン52→60px化（--btn-default の値変更のみ）
-   - Phase 3：全アプリ展開（既に完了済み状態）
-   - Phase 4：案件ID連携（このCSSには影響なし）
-   
+   common.css v2.0
+   作成日：2026/4/23（v1.0）／改訂：2026/6/19（v2.0）
+
+   ── v2.0 の方針（破壊リスク最小・追加のみ）─────────────
+   ★ 正準トークンの値は v1.0 のまま据え置き。
+     → 既に <link> 済みのアプリは色・サイズが一切変わらない。
+       追加された :focus-visible / :disabled / loading 等の改善だけを受け取る。
+   ★ アプリ間でバラついていた「別名トークン」を alias で吸収（§1-E）。
+     → 各台帳は自前 :root を消して <link> 1行追加するだけで移行できる。
+   ★ アクセシビリティ状態（:focus-visible / :disabled / loading）を全コンポに補完。
+
+   ── v2.0 変更点サマリー ─────────────
+   - §1-B  テキスト第3階層 --text3 を追加（旧 --text-mute 相当）
+   - §1-C  罫線を体系化：--line（半透明ヘアライン）／--border（実線）／--border-strong
+   - §1-D  ステータス色に soft 背景（--*-bg）を追加（バッジ・左罫線用）
+   - §1-E  後方互換エイリアス群を新設（--primary/--gold/--beige/--sub/--text-sub 等）
+   - §1-F  スペーシングスケール --space-* を追加（padding/margin の直書き撲滅用）
+   - §1-G  角丸 --radius-pill、影 --shadow-pop（hover用）、フォーカス --focus、モーション追加
+   - §4    ボタンに :focus-visible / :disabled / .is-loading（スピナー）を追加
+   - §6    .card に opt-in の .card--hover を追加
+   - §8    .input に :focus-visible / :disabled を追加
+   - §11   .nav-list-item に :focus-visible を追加
+   - §13   sr-only（スクリーンリーダー専用テキスト）／spin キーフレームを追加
+
+   ── 移行ガイド（各アプリ側の作業）─────────────
+   1) <head> に <link rel="stylesheet" href="common.css"> を追加
+   2) アプリ固有でない色トークンを定義した自前 :root を削除
+      （--cop/--bop 等の図面色、workflow の --status-* 等“固有”は残す）
+   3) 旧名（--gold/--beige/--text-sub/--sub/--primary）はそのまま使える（§1-E で吸収）
+   4) 余裕があれば旧名 → 正準名（--accent/--bg/--text2/--navy）へ置換
+
    ★ 各HTMLは <link rel="stylesheet" href="common.css"> を <head> に追加
    ★ アプリ固有の変数・スタイルは各HTMLに残す（開口部色・図面スタイル等）
    ========================================= */
 
-/* ── 1. CSS変数（共通カラーパレット） ───────────── */
+/* ── 1. CSS変数 ───────────── */
 :root{
-  /* 基本色 */
+
+  /* §1-A 基本色（正準・値はv1据え置き）*/
   --bg: #eeebe5;
   --navy: #1e2d40;
-  --navy2: #2a3f5a;
+  --navy2: #2a3f5a;          /* navy の :active / グラデ濃色 */
   --accent: #c8a96e;
+  --accent2: #b8996a;        /* accent の :active（v1のハードコード値をトークン化）*/
   --white: #ffffff;
-  
-  /* テキスト */
-  --text: #1e2d40;
-  --text2: #5a6a7a;
-  
-  /* ステータス色 */
-  --green: #1a7a30;
-  --blue: #1a6fc4;
-  --red: #c0392b;
-  --orange: #b06a00;
-  
-  /* ボタンサイズ
-     現状：最小44 / 標準52
-     Phase 2で 52 / 60 に引き上げ予定（値を変えるだけで全アプリ反映） */
+
+  /* §1-B テキスト */
+  --text: #1e2d40;           /* 本文（ブランド紺）*/
+  --text2: #5a6a7a;          /* 補助テキスト（印刷下限#666より濃く印刷安全）*/
+  --text3: #95a5a6;          /* さらに薄い注記（画面用。印刷で文字には使わない）*/
+
+  /* §1-C 罫線・サーフェス */
+  --line: rgba(30,45,64,0.10);   /* 半透明ヘアライン（カード内仕切り等）*/
+  --border: #ddd;                /* 実線の罫線（表・台帳の枠）*/
+  --border-strong: #aaa;         /* 強い実線（旧 --border-dark）*/
+  --surface: #ffffff;            /* カード等の面 */
+  --surface2: #f8f8f8;           /* 一段沈めた面（旧 --light）*/
+
+  /* §1-D ステータス色（正準＝落ち着いたブランド系）＋ soft 背景 */
+  --green: #1a7a30;   --green-bg: #e7f0e9;
+  --blue:  #1a6fc4;   --blue-bg:  #e6eef8;
+  --red:   #c0392b;   --red-bg:   #f7e7e4;
+  --orange:#b06a00;   --orange-bg:#f6ecdd;
+
+  /* §1-E 後方互換エイリアス（旧アプリの var(--xxx) をそのまま生かす）
+     ※ 各アプリが自前 :root で同名を再定義していればそちらが優先される（隔離可）*/
+  --primary: var(--navy);        /* dashboard 等の「主色＝紺」。水色 --primary を使う
+                                    workflow.html は自前 :root を保持して隔離すること */
+  --primary-dark: var(--navy2);
+  --gold: var(--accent);         /* 台帳系の金 */
+  --beige: var(--bg);            /* 台帳系の地色 */
+  --sub: var(--text2);           /* 見積/請求プレビューの補助テキスト */
+  --text-sub: var(--text2);      /* dashboard/workflow 命名 */
+  --text-mute: var(--text3);     /* dashboard/workflow 命名 */
+  --border-dark: var(--border-strong);
+  --light: var(--surface2);
+
+  /* §1-F スペーシングスケール（4の倍数。直書きpx撲滅用）*/
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* ボタンサイズ */
   --btn-min: 44px;
   --btn-default: 52px;
   --btn-large: 60px;
-  
-  /* 角丸 */
+
+  /* §1-G 角丸 */
   --radius-sm: 8px;
   --radius-md: 10px;
   --radius-lg: 14px;
   --radius-xl: 16px;
-  
+  --radius-pill: 999px;          /* チップ・丸ボタン用 */
+
   /* 影 */
   --shadow-card: 0 2px 8px rgba(30,45,64,0.07);
-  --shadow-modal: 0 8px 32px rgba(30,45,64,0.25);
-  
+  --shadow-pop:  0 6px 18px rgba(30,45,64,0.14);   /* カード hover 等 */
+  --shadow-modal:0 8px 32px rgba(30,45,64,0.25);
+
   /* ヘッダー */
   --header-height: 54px;
+
+  /* フォーカスリング（キーボード操作の可視化。視認性重視で青）*/
+  --focus: #1a6fc4;
+
+  /* モーション */
+  --dur: 0.15s;
+  --ease: cubic-bezier(.4,0,.2,1);
 }
 
 /* ── 2. リセット ───────────── */
@@ -93,7 +148,7 @@ body{
   align-items: center;
   justify-content: center;
   gap: 6px;
-  transition: background 0.15s;
+  transition: background var(--dur), opacity var(--dur);
   user-select: none;
   -webkit-user-select: none;
 }
@@ -108,7 +163,7 @@ body{
   background: var(--accent);
   color: var(--navy);
 }
-.btn-accent:active{ background: #b8996a; }
+.btn-accent:active{ background: var(--accent2); }
 
 .btn-ghost{
   background: transparent;
@@ -139,6 +194,40 @@ body{
 }
 .btn-back:active{ background: rgba(255,255,255,0.15); }
 
+/* --- v2: ボタンの状態 --- */
+
+/* 無効（:disabled と aria-disabled の両対応）*/
+.btn:disabled,
+.btn[aria-disabled="true"]{
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ローディング（.is-loading を付与。ラベルを隠してスピナー表示）*/
+.btn.is-loading{
+  color: transparent !important;
+  pointer-events: none;
+  position: relative;
+}
+.btn.is-loading::after{
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 16px; height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid rgba(255,255,255,0.45);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+/* 明るい地のボタンは濃色スピナー */
+.btn-ghost.is-loading::after,
+.btn-accent.is-loading::after{
+  border-color: rgba(30,45,64,0.25);
+  border-top-color: var(--navy);
+}
+
 /* ── 5. ヘッダー共通 ───────────── */
 .app-header{
   background: var(--navy);
@@ -162,11 +251,18 @@ body{
 
 /* ── 6. カード共通 ───────────── */
 .card{
-  background: var(--white);
+  background: var(--surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
   padding: 14px;
 }
+/* v2: クリック可能カードに付与（hover/active で浮かせる）*/
+.card--hover{
+  transition: box-shadow var(--dur), transform var(--dur);
+  cursor: pointer;
+}
+.card--hover:hover{ box-shadow: var(--shadow-pop); }
+.card--hover:active{ transform: translateY(1px); }
 
 /* ── 7. ユーティリティ ───────────── */
 .hidden{ display: none !important; }
@@ -176,15 +272,27 @@ body{
 .flex-1{ flex: 1; }
 .items-center{ align-items: center; }
 .justify-between{ justify-content: space-between; }
-.gap-1{ gap: 4px; }
-.gap-2{ gap: 8px; }
-.gap-3{ gap: 12px; }
+.gap-1{ gap: var(--space-1); }
+.gap-2{ gap: var(--space-2); }
+.gap-3{ gap: var(--space-3); }
+.gap-4{ gap: var(--space-4); }   /* v2 追加 */
 
 /* スクロール可能エリア */
 .scroll-area{
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+/* v2: スクリーンリーダー専用テキスト（アイコンのみボタンのラベル等）*/
+.sr-only{
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* ── 8. フォーム共通 ───────────── */
@@ -201,10 +309,16 @@ input, select, textarea, button{
   font-size: 14px;
   color: var(--text);
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color var(--dur);
 }
 .input:focus{
   border-color: var(--accent);
+}
+/* v2: 入力の状態 */
+.input:disabled{
+  background: var(--surface2);
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 /* ── 9. セーフエリア対応 ───────────── */
@@ -223,7 +337,7 @@ input, select, textarea, button{
 /* ── 11. ナビリスト（現場ナビ標準の「1行リスト」パターン） ─────────────
    書類BOXの展開・案件詳細の各セクションなど、
    「ピクト + タイトル/説明 + 矢印」の並びを共通化。
-   
+
    基本構造:
      <div class="nav-list">
        <div class="nav-list-section">セクション見出し（任意）</div>
@@ -320,4 +434,24 @@ input, select, textarea, button{
   color: var(--navy);
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+/* ── 12. フォーカス可視化（キーボード操作・WCAG対応） ─────────────
+   :focus-visible はキーボード操作時のみ発火（タップ/クリックでは出ない）。
+   モバイル優先の :active と両立する。 */
+.btn:focus-visible,
+.btn-back:focus-visible,
+.nav-list-item:focus-visible{
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.input:focus-visible{
+  outline: 2px solid var(--focus);
+  outline-offset: -1px;
+  border-color: var(--focus);
+}
+
+/* ── 13. キーフレーム ───────────── */
+@keyframes spin{
+  to{ transform: rotate(360deg); }
 }
