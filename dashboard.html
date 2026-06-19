@@ -3079,7 +3079,7 @@ function renderTopics() {
     const title = g.desc ? g.desc : (a ? (a['正式工事名'] || a['現場+工事'] || '') : '');
     const { md, rel } = topicDateLabel(g.d);
     const sUrl = summaryUrl(g.key);
-    const nTag = g.n > 1 ? `<span class="topic-kpi">${g.n}件</span>` : '';
+    const moreTag = g.moreCount > 0 ? `<span class="topic-more">＋履歴${g.moreCount}件</span>` : '';
     const amt = g.amt ? `<div class="topic-amt">${formatYen(g.amt)}</div>` : '';
     const sLink = sUrl
       ? `<a class="topic-summary-link" href="${sUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()"><svg class="icon"><use href="#icon-document"/></svg>案件サマリーを見る</a>`
@@ -3092,8 +3092,8 @@ function renderTopics() {
         <div class="topic-body">
           <div class="topic-head">
             <span class="topic-type">${g.type}</span>
-            ${nTag}
             ${meta.kpi ? `<span class="topic-kpi">→ ${meta.kpi}</span>` : ''}
+            ${moreTag}
             ${statusBadge(g.st)}
           </div>
           <div class="topic-key">${escapeHtml(g.key)}</div>
