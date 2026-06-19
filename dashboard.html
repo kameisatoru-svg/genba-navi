@@ -2975,6 +2975,124 @@ function renderKpi() {
   });
 }
 
+/* ============================================================
+   Section 2.5: 最近の動き(トピック)
+   KPIを動かした最近のイベント(見積発行・契約締結・請求発行・入金)を
+   案件横断で時系列に並べる。原価の月次バッチ集計はノイズなので除外。
+   ============================================================ */
+const TOPIC_WINDOW_DAYS = 45;  // この日数以内のイベントを対象
+const TOPIC_MIN = 6;           // 対象が少ない時はこの件数まで直近で補完
+const TOPIC_MAX = 14;          // 表示上限
+
+const TOPIC_META = {
+  '見積発行': { cls: 'topic-mitsumori', icon: 'icon-document',     kpi: '今月の見積総額' },
+  '契約締結': { cls: 'topic-keiyaku',   icon: 'icon-check-box',    kpi: '受注' },
+  '請求発行': { cls: 'topic-seikyu',    icon: 'icon-invoice',      kpi: '未請求・未入金' },
+  '入金':     { cls: 'topic-nyukin',    icon: 'icon-check-circle', kpi: '未入金が解消' }
+};
+
+// 案件サマリーHTMLのURL(マニフェストに存在すれば相対パス、無ければ null)
+function summaryUrl(key) {
+  const m = STATE.summaries && STATE.summaries['案件'];
+  const path = m && m[key];
+  return path ? encodeURI(`summaries/${path}`) : null;
+}
+
+// 今日基準の相対日付ラベル
+function topicDateLabel(d) {
+  const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+  const dd = new Date(d); dd.setHours(0, 0, 0, 0);
+  const diff = Math.round((t0 - dd) / 86400000);
+  const md = `${dd.getMonth() + 1}/${dd.getDate()}`;
+  let rel;
+  if (diff <= 0) rel = '今日';
+  else if (diff === 1) rel = '昨日';
+  else if (diff < 7) rel = `${diff}日前`;
+  else if (diff < 14) rel = '先週';
+  else rel = `${Math.floor(diff / 7)}週前`;
+  return { md, rel };
+}
+
+// 全案件から日付付きイベントを収集し、案件×種別×日 で集約
+function collectTopics() {
+  const evs = [];
+  (STATE.案件 || []).forEach(a => {
+    const key = a['案件キー'], st = a['ステータス'];
+    const push = (dateStr, type, amt) => {
+      const d = parseDate(dateStr);
+      if (d) evs.push({ d, type, key, st, amt: amt || 0 });
+    };
+    (a['見積']   || []).forEach(e => push(e['発行日'], '見積発行', e['金額']));
+    (a['契約書'] || []).forEach(e => push(e['契約日'], '契約締結', e['金額']));
+    (a['請求']   || []).forEach(e => {
+      push(e['発行日'], '請求発行', e['金額']);
+      if (e['入金状況'] === 'nyukin') push(e['入金日'], '入金', e['金額']);
+    });
+  });
+  // 同一 案件×種別×日 を1行に集約(同日複数見積などをまとめる)
+  const groups = new Map();
+  evs.forEach(ev => {
+    const ymd = `${ev.d.getFullYear()}-${ev.d.getMonth()}-${ev.d.getDate()}`;
+    const gk = `${ev.key}|${ev.type}|${ymd}`;
+    let g = groups.get(gk);
+    if (!g) { g = { d: ev.d, type: ev.type, key: ev.key, st: ev.st, amt: 0, n: 0 }; groups.set(gk, g); }
+    g.amt += ev.amt; g.n += 1;
+  });
+  const arr = Array.from(groups.values()).sort((a, b) => b.d - a.d);
+  // 直近 TOPIC_WINDOW_DAYS 以内。少なければ TOPIC_MIN 件まで直近で補完。
+  const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+  const within = arr.filter(g => (t0 - g.d) / 86400000 <= TOPIC_WINDOW_DAYS);
+  const out = within.length >= TOPIC_MIN ? within : arr.slice(0, TOPIC_MIN);
+  return out.slice(0, TOPIC_MAX);
+}
+
+function renderTopics() {
+  const topics = collectTopics();
+  const badge = $('#topics-badge');
+  if (badge) badge.textContent = topics.length ? `直近 ${topics.length}件` : '';
+  if (!topics.length) {
+    replaceSectionBody('#sec-topics', `<div class="topics-empty">最近の動きはありません</div>`);
+    return;
+  }
+  const rows = topics.map(g => {
+    const meta = TOPIC_META[g.type] || {};
+    const a = findAnken(g.key);
+    const title = a ? (a['正式工事名'] || a['現場+工事'] || '') : '';
+    const { md, rel } = topicDateLabel(g.d);
+    const sUrl = summaryUrl(g.key);
+    const nTag = g.n > 1 ? `<span class="topic-kpi">${g.n}件</span>` : '';
+    const amt = g.amt ? `<div class="topic-amt">${formatYen(g.amt)}</div>` : '';
+    const sLink = sUrl
+      ? `<a class="topic-summary-link" href="${sUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()"><svg class="icon"><use href="#icon-document"/></svg>案件サマリーを見る</a>`
+      : '';
+    return `
+      <button class="topic-item ${meta.cls || ''}" type="button" data-key="${escapeHtml(g.key)}"
+              aria-label="${escapeHtml(g.key)} ${g.type}">
+        <div class="topic-date"><b>${md}</b>${rel}</div>
+        <div class="topic-icon"><svg class="icon"><use href="#${meta.icon || 'icon-clock'}"/></svg></div>
+        <div class="topic-body">
+          <div class="topic-head">
+            <span class="topic-type">${g.type}</span>
+            ${nTag}
+            ${meta.kpi ? `<span class="topic-kpi">→ ${meta.kpi}</span>` : ''}
+            ${statusBadge(g.st)}
+          </div>
+          <div class="topic-key">${escapeHtml(g.key)}</div>
+          ${title ? `<div class="topic-title">${escapeHtml(title)}</div>` : ''}
+          ${amt}
+          ${sLink}
+        </div>
+      </button>`;
+  }).join('');
+  replaceSectionBody('#sec-topics', `<div class="topics-feed">${rows}</div>`);
+  $$('#sec-topics .topic-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const a = findAnken(el.dataset.key);
+      if (a) showAnkenModal(a);
+    });
+  });
+}
+
 // 指定セクションへスムーズスクロールし、一瞬ハイライトして視線を誘導
 function jumpToSection(sel) {
   const el = document.querySelector(sel);
@@ -4553,6 +4671,16 @@ async function loadData() {
     STATE.案件           = data['案件'] || [];
     STATE.中止案件       = data['中止案件'] || [];
 
+    // 案件サマリーHTMLのマニフェスト(任意・無ければ空のまま)
+    try {
+      const sres = await fetch('./summaries/index.json', { cache: 'no-store' });
+      if (sres.ok) {
+        const sj = await sres.json();
+        STATE.summaries = { 案件: sj['案件'] || {}, 顧客: sj['顧客'] || {} };
+        log(`summaries manifest: 案件=${Object.keys(STATE.summaries.案件).length}件`);
+      }
+    } catch (e) { log('summaries/index.json なし(任意)', e?.message || e); }
+
     // ヘッダ・フッタに最終更新を反映
     const lu = STATE.最終更新 || '不明';
     $('#data-last-updated').textContent = lu;
@@ -4569,6 +4697,7 @@ async function loadData() {
 
     // セクションレンダリング
     renderKpi();
+    renderTopics();
     renderKanban();
     renderReminders();
     renderChart();
