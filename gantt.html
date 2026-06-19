@@ -9,13 +9,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#1e2d40">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="common.css">
 <style>
 :root {
-  --bg:#eeebe5; --navy:#1e2d40; --navy2:#2a3f5a;
-  --accent:#c8a96e; --text:#1e2d40; --text2:#5a6a7a;
-  --white:#ffffff; --border:#d0ccc4; --surface:#ffffff;
-  --surface2:#f5f2ed; --red:#c0392b; --green:#1a7a30;
-  --blue:#1a5fb4; --muted:#8a9aaa;
+  /* ★ 2026/6/19 common.css v2 へ移行：共通色は common.css に集約（重複削除・値同一で見た目不変）。
+     gantt固有/微調整の値のみ残す（border/surface2/blue は v2 と僅差で意図的に維持）。 */
+  --border:#d0ccc4; --surface2:#f5f2ed; --blue:#1a5fb4;
+  --muted:#8a9aaa;
   --font:'Noto Sans JP',sans-serif;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
