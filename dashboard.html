@@ -455,6 +455,7 @@ a { color: inherit; text-decoration: none; }
 .topic-keiyaku   { --topic-color: var(--accent); }
 .topic-seikyu    { --topic-color: var(--status-seikyu); }
 .topic-nyukin    { --topic-color: var(--status-nyukin); }
+.topic-move      { --topic-color: var(--info); }
 
 /* ----- Section 3: カンバン ----- */
 .kanban-filters {
@@ -3050,7 +3051,17 @@ function collectTopics() {
     if (!g) { g = { d: ev.d, type: ev.type, key: ev.key, st: ev.st, amt: 0, n: 0 }; groups.set(gk, g); }
     g.amt += ev.amt; g.n += 1;
   });
-  const arr = Array.from(groups.values()).sort((a, b) => b.d - a.d);
+  const arr = Array.from(groups.values());
+  // 現場活動イベント: 各案件の「動き」配列(財務マイルストーン以外の進捗)を追加。
+  // 概要(desc)を保持し、財務イベントとは集約せず1動き=1行で扱う。
+  (STATE.案件 || []).forEach(a => {
+    const key = a['案件キー'], st = a['ステータス'];
+    (a['動き'] || []).forEach(m => {
+      const d = parseDate(m['日']);
+      if (d) arr.push({ d, type: m['種別'] || '更新', key, st, amt: 0, n: 1, desc: m['概要'] || '', move: true });
+    });
+  });
+  arr.sort((a, b) => b.d - a.d);
   // 直近 TOPIC_WINDOW_DAYS 以内。少なければ TOPIC_MIN 件まで直近で補完。
   const t0 = new Date(); t0.setHours(0, 0, 0, 0);
   const within = arr.filter(g => (t0 - g.d) / 86400000 <= TOPIC_WINDOW_DAYS);
@@ -3067,9 +3078,10 @@ function renderTopics() {
     return;
   }
   const rows = topics.map(g => {
-    const meta = TOPIC_META[g.type] || {};
+    const meta = TOPIC_META[g.type] || (g.move ? { cls: 'topic-move', icon: 'icon-refresh' } : {});
     const a = findAnken(g.key);
-    const title = a ? (a['正式工事名'] || a['現場+工事'] || '') : '';
+    // 動きイベントは概要を主役に、財務イベントは正式工事名を表示
+    const title = g.desc ? g.desc : (a ? (a['正式工事名'] || a['現場+工事'] || '') : '');
     const { md, rel } = topicDateLabel(g.d);
     const sUrl = summaryUrl(g.key);
     const nTag = g.n > 1 ? `<span class="topic-kpi">${g.n}件</span>` : '';
