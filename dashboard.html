@@ -3026,46 +3026,41 @@ function topicDateLabel(d) {
   return { md, rel };
 }
 
-// 全案件から日付付きイベントを収集し、案件×種別×日 で集約
-function collectTopics() {
+// 1案件の日付付きイベント(財務マイルストーン＋現場活動「動き」)を収集
+function ankenEvents(a) {
+  const key = a['案件キー'], st = a['ステータス'];
   const evs = [];
-  (STATE.案件 || []).forEach(a => {
-    const key = a['案件キー'], st = a['ステータス'];
-    const push = (dateStr, type, amt) => {
-      const d = parseDate(dateStr);
-      if (d) evs.push({ d, type, key, st, amt: amt || 0 });
-    };
-    (a['見積']   || []).forEach(e => push(e['発行日'], '見積発行', e['金額']));
-    (a['契約書'] || []).forEach(e => push(e['契約日'], '契約締結', e['金額']));
-    (a['請求']   || []).forEach(e => {
-      push(e['発行日'], '請求発行', e['金額']);
-      if (e['入金状況'] === 'nyukin') push(e['入金日'], '入金', e['金額']);
-    });
+  const push = (dateStr, type, amt, desc, move) => {
+    const d = parseDate(dateStr);
+    if (d) evs.push({ d, type, key, st, amt: amt || 0, desc: desc || '', move: !!move });
+  };
+  (a['見積']   || []).forEach(e => push(e['発行日'], '見積発行', e['金額']));
+  (a['契約書'] || []).forEach(e => push(e['契約日'], '契約締結', e['金額']));
+  (a['請求']   || []).forEach(e => {
+    push(e['発行日'], '請求発行', e['金額']);
+    if (e['入金状況'] === 'nyukin') push(e['入金日'], '入金', e['金額']);
   });
-  // 同一 案件×種別×日 を1行に集約(同日複数見積などをまとめる)
-  const groups = new Map();
-  evs.forEach(ev => {
-    const ymd = `${ev.d.getFullYear()}-${ev.d.getMonth()}-${ev.d.getDate()}`;
-    const gk = `${ev.key}|${ev.type}|${ymd}`;
-    let g = groups.get(gk);
-    if (!g) { g = { d: ev.d, type: ev.type, key: ev.key, st: ev.st, amt: 0, n: 0 }; groups.set(gk, g); }
-    g.amt += ev.amt; g.n += 1;
+  (a['動き']   || []).forEach(m => push(m['日'], m['種別'] || '更新', 0, m['概要'], true));
+  return evs;
+}
+
+// 「最近の動き」フィード: 全案件の最新イベントを1案件1行に集約(積み重ねない)。
+// 同一案件の過去イベント数は moreCount として保持し、行クリックで案件モーダルの履歴に誘導。
+function collectTopics() {
+  const all = [];
+  (STATE.案件 || []).forEach(a => ankenEvents(a).forEach(e => all.push(e)));
+  all.sort((x, y) => y.d - x.d);
+  const byCase = new Map();
+  all.forEach(ev => {
+    const c = byCase.get(ev.key);
+    if (!c) byCase.set(ev.key, { ...ev, moreCount: 0 });  // 最新(先頭)を採用
+    else c.moreCount += 1;                                  // 以降は履歴件数に積む
   });
-  const arr = Array.from(groups.values());
-  // 現場活動イベント: 各案件の「動き」配列(財務マイルストーン以外の進捗)を追加。
-  // 概要(desc)を保持し、財務イベントとは集約せず1動き=1行で扱う。
-  (STATE.案件 || []).forEach(a => {
-    const key = a['案件キー'], st = a['ステータス'];
-    (a['動き'] || []).forEach(m => {
-      const d = parseDate(m['日']);
-      if (d) arr.push({ d, type: m['種別'] || '更新', key, st, amt: 0, n: 1, desc: m['概要'] || '', move: true });
-    });
-  });
-  arr.sort((a, b) => b.d - a.d);
-  // 直近 TOPIC_WINDOW_DAYS 以内。少なければ TOPIC_MIN 件まで直近で補完。
+  const cases = Array.from(byCase.values()).sort((x, y) => y.d - x.d);
+  // 直近 TOPIC_WINDOW_DAYS 以内に動いた案件。少なければ TOPIC_MIN 件まで直近で補完。
   const t0 = new Date(); t0.setHours(0, 0, 0, 0);
-  const within = arr.filter(g => (t0 - g.d) / 86400000 <= TOPIC_WINDOW_DAYS);
-  const out = within.length >= TOPIC_MIN ? within : arr.slice(0, TOPIC_MIN);
+  const within = cases.filter(c => (t0 - c.d) / 86400000 <= TOPIC_WINDOW_DAYS);
+  const out = within.length >= TOPIC_MIN ? within : cases.slice(0, TOPIC_MIN);
   return out.slice(0, TOPIC_MAX);
 }
 
