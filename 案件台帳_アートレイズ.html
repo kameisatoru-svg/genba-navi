@@ -11,14 +11,8 @@
 .page-scroll{overflow:auto!important;height:auto!important;min-height:100dvh!important;}
 </style>
 <style>
-/* ★ 現場ナビ系との配色統一（2026/4/23）：bg・card-header をnavy系に揃える
-   その他の変数（text/text-sub/green/red/orange/blue）は書類固有のまま維持 */
-:root {
-  --navy:#1e2d40; --accent:#c8a96e; --white:#fff;
-  --bg:#eeebe5; --border:#ddd; --border-dark:#aaa;
-  --text:#333; --text-sub:#666; --light:#f8f8f8;
-  --green:#16a34a; --red:#dc2626; --orange:#d97706; --blue:#2563eb;
-}
+/* ★ 2026/6/19 common.css v2 へ移行：配色・テキスト・ステータス色を共通トークンへ統一。
+   旧ローカル :root（--text #333 / Tailwind系ステータス等）を撤去し、ブランド色に統一。 */
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:Meiryo,'Yu Gothic',sans-serif;background:var(--bg);color:var(--text);font-size:14px;padding-bottom:20px;
   /* ★ common.cssの overflow:hidden と height:100dvh を解除してページ全体スクロールを有効化 */
