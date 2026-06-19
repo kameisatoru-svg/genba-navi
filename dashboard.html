@@ -3930,6 +3930,26 @@ function showAnkenModal(a) {
        </div>`
     : '';
 
+  // 動き履歴(財務マイルストーン＋現場活動「動き」を時系列降順で表示)
+  const histEvents = ankenEvents(a).sort((x, y) => y.d - x.d);
+  const histHtml = histEvents.length
+    ? `<div class="modal-section">
+         <div class="modal-section-title">動き履歴 <span style="color:var(--text-mute);font-weight:400;letter-spacing:normal;text-transform:none;">(${histEvents.length}件)</span></div>
+         <ul class="anken-hist">
+           ${histEvents.map(e => {
+             const m = TOPIC_META[e.type] || (e.move ? { icon: 'icon-refresh' } : {});
+             const md = `${e.d.getMonth() + 1}/${e.d.getDate()}`;
+             const right = e.move ? escapeHtml(e.desc || '') : (e.amt ? formatYen(e.amt) : '');
+             return `<li class="anken-hist-item ${e.move ? 'is-move' : 'is-fin'}">
+               <span class="anken-hist-date">${e.d.getFullYear()}<b>${md}</b></span>
+               <svg class="icon anken-hist-icon"><use href="#${m.icon || 'icon-clock'}"/></svg>
+               <span class="anken-hist-main"><span class="anken-hist-type">${escapeHtml(e.type)}</span>${right ? `<span class="anken-hist-desc">${right}</span>` : ''}</span>
+             </li>`;
+           }).join('')}
+         </ul>
+       </div>`
+    : '';
+
   // チェックセクション(看板のチェック状態を編集)
   const checkHtml = renderModalCheckSection(a);
 
@@ -3999,7 +4019,7 @@ function showAnkenModal(a) {
     </div>
   `;
 
-  $('#anken-modal-body').innerHTML = basicHtml + docsHtml + checkHtml + costHtml + memoHtml + editHtml;
+  $('#anken-modal-body').innerHTML = basicHtml + docsHtml + histHtml + checkHtml + costHtml + memoHtml + editHtml;
 
   // アクションボタン
   const key = a['案件キー'];
