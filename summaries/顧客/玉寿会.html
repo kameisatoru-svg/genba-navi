@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>さくら苑（玉寿会）案件サマリー</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif;
+  background: #1a1a2e;
+  color: #e8e8f0;
+  padding: clamp(12px, 3vw, 24px);
+  line-height: 1.6;
+  font-size: clamp(13px, 2.5vw, 15px);
+}
+.wrap { max-width: 1200px; margin: 0 auto; }
+
+header {
+  background: linear-gradient(135deg, #2a4d3a 0%, #5a7c5a 100%);
+  padding: clamp(16px, 4vw, 28px);
+  border-radius: 14px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+header h1 {
+  font-size: clamp(18px, 4vw, 26px);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+header .sub { font-size: clamp(11px, 2.3vw, 13px); opacity: 0.85; }
+.badges { display: flex; gap: 8px; flex-wrap: wrap; }
+.badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: clamp(11px, 2.2vw, 12px);
+  font-weight: 600;
+}
+.b-done { background: #2d6a4f; color: #d8f3dc; }
+.b-prog { background: #b08900; color: #fff8dc; }
+.b-plan { background: #1d5d8c; color: #cfe9ff; }
+
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.kpi {
+  background: #232347;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border-left: 4px solid #5a7c5a;
+}
+.kpi .lbl { font-size: clamp(10px, 2vw, 12px); color: #a0a0c0; margin-bottom: 4px; }
+.kpi .val { font-size: clamp(16px, 3.5vw, 22px); font-weight: 700; color: #fff; }
+.kpi .sub { font-size: clamp(10px, 2vw, 11px); color: #8888aa; margin-top: 2px; }
+
+.section {
+  background: #232347;
+  border-radius: 12px;
+  padding: clamp(14px, 3vw, 20px);
+  margin-bottom: 16px;
+}
+.section h2 {
+  font-size: clamp(14px, 3vw, 18px);
+  margin-bottom: 12px;
+  color: #b8e0c8;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #3a3a5e;
+}
+.section h3 {
+  font-size: clamp(13px, 2.8vw, 15px);
+  margin: 14px 0 8px;
+  color: #d0e0d8;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 768px) { .grid2 { grid-template-columns: 1fr; } }
+
+.doc {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #2a2a52;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s, transform 0.15s;
+}
+a.doc:hover { background: #34345a; transform: translateX(3px); }
+.doc-icon { font-size: 22px; min-width: 28px; text-align: center; }
+.doc-info { flex: 1; min-width: 0; }
+.doc-name { font-weight: 600; font-size: clamp(12px, 2.5vw, 13px); margin-bottom: 2px; }
+.doc-meta-s { font-size: clamp(10px, 2vw, 11px); color: #9090b0; }
+.doc-st {
+  font-size: clamp(10px, 2vw, 11px);
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.s-ok { background: #2d6a4f; color: #d8f3dc; }
+.s-wait { background: #6a4f2d; color: #f3e0d8; }
+.s-plan { background: #2d4f6a; color: #d8e8f3; }
+
+table { width: 100%; border-collapse: collapse; font-size: clamp(11px, 2.3vw, 13px); }
+th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #3a3a5e; }
+th { background: #2a2a52; color: #b8e0c8; font-weight: 600; }
+.right { text-align: right; }
+.amount { font-family: "SF Mono", Consolas, monospace; font-weight: 600; }
+
+.warn {
+  background: #4a2d2d;
+  border-left: 4px solid #d04848;
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin: 8px 0;
+  font-size: clamp(11px, 2.3vw, 13px);
+}
+.ok {
+  background: #2d4a3a;
+  border-left: 4px solid #48d068;
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin: 8px 0;
+  font-size: clamp(11px, 2.3vw, 13px);
+}
+
+footer {
+  margin-top: 24px;
+  padding: 16px;
+  text-align: center;
+  font-size: clamp(10px, 2vw, 12px);
+  color: #8080a0;
+}
+
+@media print {
+  body { background: white; color: black; }
+  .section, .kpi, header { box-shadow: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1>🌸 さくら苑（社会福祉法人 玉寿会）</h1>
+    <div class="sub">熊本県玉名市伊倉北方1533 ／ 西 俊至 様（事務課長）／ 山田 勝徳 理事長</div>
+  </div>
+  <!-- AUTO:JSON:STATUS_BADGES -->
+  <div class="badges">
+    <span class="badge b-done">さくら床 第1期 入金済</span>
+    <span class="badge b-prog">さくら床 第2期 完工・請求済</span>
+    <span class="badge b-plan">立願の森 5/25-27 施工予定</span>
+  </div>
+  <!-- /AUTO:JSON:STATUS_BADGES -->
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="width:100%;text-align:right;">最終更新: 2026-05-01</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</header>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi">
+    <div class="lbl">案件総額（さくら床+立願の森）</div>
+    <div class="val">¥20,150,700</div>
+    <div class="sub">税込・3案件合算（さくら床1+2期+立願の森）</div>
+  </div>
+  <div class="kpi">
+    <div class="lbl">入金済</div>
+    <div class="val">¥9,990,200</div>
+    <div class="sub">さくら床 第1期 / 2026-04-28 入金確認</div>
+  </div>
+  <div class="kpi">
+    <div class="lbl">未入金</div>
+    <div class="val">¥8,860,500</div>
+    <div class="sub">さくら床 第2期（4/21請求発行）</div>
+  </div>
+  <div class="kpi">
+    <div class="lbl">未請求</div>
+    <div class="val">¥1,300,000</div>
+    <div class="sub">立願の森（5/25-27施工後）</div>
+  </div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<!-- ========== 玉寿会-さくら床-26 ========== -->
+<div class="section">
+  <h2>📁 玉寿会-さくら床-26 ／ さくら苑 床工事</h2>
+
+  <div class="grid2">
+    <div>
+      <h3>工期・進捗</h3>
+      <table>
+        <tr><th>第1期</th><td>2026/03/21-22 ／ 完工・入金済</td></tr>
+        <tr><th>第2期</th><td>2026/04/18-20 ／ 完工・請求発行済（未入金）</td></tr>
+        <tr><th>第3期</th><td>未着工（医務室・ひまわり天井 ¥1,204,500見積）</td></tr>
+        <tr><th>残材</th><td>ウッドタイル10ケース・接着剤5ケース・見切り金物8本</td></tr>
+      </table>
+    </div>
+
+    <div>
+      <h3>主要書類</h3>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="https://drive.google.com/file/d/1Mo95VVxMXah1RmxU68ULNlJx46kQ32pN/view" target="_blank">
+        <div class="doc-icon">📝</div>
+        <div class="doc-info">
+          <div class="doc-name">見_第1期_玉寿会-さくら床-26.pdf</div>
+          <div class="doc-meta-s">2026/02/27 ／ ¥9,990,200</div>
+        </div>
+        <div class="doc-st s-ok">提出済</div>
+      </a>
+      <a class="doc" href="https://drive.google.com/file/d/1Qea8Zz0yoNydt28I-Ylhc6q4BeziSKdj/view" target="_blank">
+        <div class="doc-icon">📝</div>
+        <div class="doc-info">
+          <div class="doc-name">見_第2期_玉寿会-さくら床-26.pdf</div>
+          <div class="doc-meta-s">2026/02/27 ／ ¥8,860,500</div>
+        </div>
+        <div class="doc-st s-ok">提出済</div>
+      </a>
+      <a class="doc" href="https://drive.google.com/file/d/1RFYRKdNrSrRUlkAwITIXlFsP-eL4hIle/view" target="_blank">
+        <div class="doc-icon">📝</div>
+        <div class="doc-info">
+          <div class="doc-name">見_第3期_玉寿会-さくら床-26.pdf</div>
+          <div class="doc-meta-s">2026/02/21 ／ ¥1,204,500（医務室・ひまわり天井）</div>
+        </div>
+        <div class="doc-st s-plan">未着工</div>
+      </a>
+      <a class="doc" href="https://drive.google.com/file/d/1XftBFYu2FoHPYlwC3n7rlXt674qg8mFh/view" target="_blank">
+        <div class="doc-icon">📄</div>
+        <div class="doc-info">
+          <div class="doc-name">負_第1期_玉寿会-さくら床-26.pdf</div>
+          <div class="doc-meta-s">工事請負契約書 締結済</div>
+        </div>
+        <div class="doc-st s-ok">締結済</div>
+      </a>
+      <a class="doc" href="https://drive.google.com/file/d/152BWpeFoZyONVeno05avrrTA2XPDEngV/view" target="_blank">
+        <div class="doc-icon">📄</div>
+        <div class="doc-info">
+          <div class="doc-name">負_第2期_玉寿会-さくら床-26.pdf</div>
+          <div class="doc-meta-s">2026/04/08 締結済</div>
+        </div>
+        <div class="doc-st s-ok">締結済</div>
+      </a>
+      <a class="doc" href="https://drive.google.com/file/d/1mXnmcTJmMYhk5fQhymqfoGOyjnWiIc52/view" target="_blank">
+        <div class="doc-icon">💰</div>
+        <div class="doc-info">
+          <div class="doc-name">請_第1期_玉寿会-さくら床-26.pdf</div>
+          <div class="doc-meta-s">2026/03/24発行 ／ ¥9,990,200 ／ 2026-04-28 入金確認</div>
+        </div>
+        <div class="doc-st s-ok">入金済</div>
+      </a>
+      <a class="doc" href="https://drive.google.com/file/d/1n5KvOiDQ2Zgo03dyYBSHWtOG3Z3MbLKe/view" target="_blank">
+        <div class="doc-icon">💰</div>
+        <div class="doc-info">
+          <div class="doc-name">請_第2期_玉寿会-さくら床-26.pdf</div>
+          <div class="doc-meta-s">2026/04/21発行 ／ ¥8,860,500 ／ 第2期完工</div>
+        </div>
+        <div class="doc-st s-wait">未入金</div>
+      </a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+    </div>
+  </div>
+
+  <h3>📋 見積書（金額一覧）</h3>
+  <table>
+    <thead>
+      <tr><th>書類番号</th><th>発行日</th><th class="right">金額（税込）</th><th>備考</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>見_第1期_玉寿会-さくら床-26</td><td>2026/02/27</td><td class="right amount">¥9,990,200</td><td>第1期</td></tr>
+      <tr><td>見_第2期_玉寿会-さくら床-26</td><td>2026/02/27</td><td class="right amount">¥8,860,500</td><td>第2期</td></tr>
+      <tr><td>見_第3期_玉寿会-さくら床-26</td><td>2026/02/21</td><td class="right amount">¥1,204,500</td><td>医務室・ひまわり天井</td></tr>
+    </tbody>
+  </table>
+
+  <h3>💸 請求書（入金状況）</h3>
+  <table>
+    <thead>
+      <tr><th>書類番号</th><th>発行日</th><th class="right">金額</th><th>支払期限</th><th>入金状況</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>請_第1期_玉寿会-さくら床-26</td><td>2026/03/24</td><td class="right amount">¥9,990,200</td><td>2026/04/30</td><td>✅ 入金済（4/28）</td></tr>
+      <tr><td>請_第2期_玉寿会-さくら床-26</td><td>2026/04/21</td><td class="right amount">¥8,860,500</td><td>—</td><td>⏳ 未入金</td></tr>
+    </tbody>
+  </table>
+
+  <h3>📐 相見積（業者）</h3>
+  <table>
+    <thead>
+      <tr><th>業者</th><th>ファイル</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>アート</td><td>見_合_アート_玉寿会-さくら床-26.pdf</td></tr>
+      <tr><td>塩出</td><td>見_合_塩出_玉寿会-さくら床-26.pdf</td></tr>
+      <tr><td>釘宮</td><td>見_合_釘宮_玉寿会-さくら床-26.pdf</td></tr>
+    </tbody>
+  </table>
+
+  <h3>👥 関係者・取引先</h3>
+  <table>
+    <tr><th>顧客</th><td>T-001 社会福祉法人 玉寿会（さくら苑）／ 西 俊至 様（事務課長）／ 山田 勝徳 理事長</td></tr>
+    <tr><th>紹介者</th><td>T-014 平エンジニアリング（平方 聡）</td></tr>
+    <tr><th>協力業者</th><td>T-006 インテリア中津屋（佐藤）／ T-007 いわい装飾（岩井 健一）／ T-015 古長 ／ T-017 佐藤株式会社（材料仕入）</td></tr>
+  </table>
+</div>
+
+<!-- ========== 玉寿会-立願の森-26 ========== -->
+<div class="section">
+  <h2>📁 玉寿会-立願の森-26 ／ 立願の森 天井復旧工事</h2>
+
+  <div class="grid2">
+    <div>
+      <h3>工期・進捗</h3>
+      <table>
+        <tr><th>施工日程</th><td>2026/05/25-27 ／ 施工予定</td></tr>
+        <tr><th>工事内容</th><td>既存天井の上から岩綿吸音板貼（採用③案）</td></tr>
+        <tr><th>連携業者</th><td>T-014 平エンジニアリング（電気・空調・スプリンクラー脱着）</td></tr>
+        <tr><th>現調</th><td>2025/11/15（食堂・天井汚れ調査）／ 2026/04/20（医務室）</td></tr>
+      </table>
+    </div>
+
+    <div>
+      <h3>主要書類</h3>
+      <a class="doc" href="https://drive.google.com/file/d/143ZAiBarfopFtdfRzofKZdXclComxDBU/view" target="_blank">
+        <div class="doc-icon">📝</div>
+        <div class="doc-info">
+          <div class="doc-name">見_玉寿会-立願の森-26.pdf（採用版）</div>
+          <div class="doc-meta-s">2026/02/27 ／ ¥1,300,000 ／ ③案ベース諸経費追加</div>
+        </div>
+        <div class="doc-st s-ok">採用案</div>
+      </a>
+      <a class="doc" href="https://drive.google.com/file/d/164dF5-7cIUlrRnHgU_7cPlwWdNHFIrEg/view" target="_blank">
+        <div class="doc-icon">📋</div>
+        <div class="doc-info">
+          <div class="doc-name">見_旧A_玉寿会-立願の森-26.pdf</div>
+          <div class="doc-meta-s">2025/11/17 ／ ¥1,177,000 ／ ①案 天井ジプトーン貼替</div>
+        </div>
+        <div class="doc-st s-wait">旧A</div>
+      </a>
+      <a class="doc" href="https://drive.google.com/file/d/15udLE7M8LbmPTVqfOUyLLC5eIMyp6nxn/view" target="_blank">
+        <div class="doc-icon">📋</div>
+        <div class="doc-info">
+          <div class="doc-name">見_旧B_玉寿会-立願の森-26.pdf</div>
+          <div class="doc-meta-s">2025/11/17 ／ ¥891,000 ／ ②案 既存上ジプトーン貼</div>
+        </div>
+        <div class="doc-st s-wait">旧B</div>
+      </a>
+      <a class="doc" href="https://drive.google.com/file/d/16_NjXcmLuro_QrI2R8VY_mhUYCSvRvP5/view" target="_blank">
+        <div class="doc-icon">📋</div>
+        <div class="doc-info">
+          <div class="doc-name">見_旧C_玉寿会-立願の森-26.pdf</div>
+          <div class="doc-meta-s">2025/11/17 ／ ¥1,100,000 ／ ③案 既存上岩綿吸音板貼</div>
+        </div>
+        <div class="doc-st s-wait">旧C</div>
+      </a>
+    </div>
+  </div>
+
+  <h3>📋 見積書（複数案比較）</h3>
+  <table>
+    <thead>
+      <tr><th>書類番号</th><th>発行日</th><th class="right">金額（税込）</th><th>備考</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>見_玉寿会-立願の森-26（採用）</td><td>2026/02/27</td><td class="right amount">¥1,300,000</td><td>採用案・③ベース諸経費追加</td></tr>
+      <tr><td>見_旧A_玉寿会-立願の森-26</td><td>2025/11/17</td><td class="right amount">¥1,177,000</td><td>①天井ジプトーン貼替（既存撤去）</td></tr>
+      <tr><td>見_旧B_玉寿会-立願の森-26</td><td>2025/11/17</td><td class="right amount">¥891,000</td><td>②既存上ジプトーン貼</td></tr>
+      <tr><td>見_旧C_玉寿会-立願の森-26</td><td>2025/11/17</td><td class="right amount">¥1,100,000</td><td>③既存上岩綿吸音板貼（採用ベース）</td></tr>
+    </tbody>
+  </table>
+
+  <h3>📷 現調写真・図面</h3>
+  <table>
+    <tr><th>写真</th><td>食堂6枚（11/15撮影）+ 医務室1枚（4/20撮影）+ 動画2本</td></tr>
+    <tr><th>図面</th><td>1F食堂・A3ベース・マーキング除去・天井補修・工事範囲・平面図・搬入路・医務室内装受領資料</td></tr>
+    <tr><th>業者向け</th><td>業者_業者用説明_玉寿会-立願の森-26.gdoc</td></tr>
+  </table>
+
+  <!-- AUTO:CALL_DECISIONS -->
+  <h3>📞 議事録・通話記録（要点）</h3>
+  <ul style="padding-left: 20px; line-height: 1.8;">
+    <li><strong>2026/04/21 工事打合：</strong>業者分担と工程確定。電気・空調・スプリンクラーは平エンジニアリングが担当。</li>
+    <li><strong>天井設置物調査：</strong>既存天井の埋設機具を全数把握済み（議事_天井設置物調査）。</li>
+    <li><strong>岩綿吸音板施工ポイント：</strong>既存ジプトーンの上から重ね貼り（議事_岩綿吸音板ポイント）。</li>
+  </ul>
+  <!-- /AUTO:CALL_DECISIONS -->
+</div>
+
+<!-- ========== 整合性チェック結果 ========== -->
+<!-- AUTO:CALC:PROFIT_TOTAL -->
+<div class="section">
+  <h2>🔍 整合性チェック（自走3原則ベース）</h2>
+
+  <h3>玉寿会-さくら床-26</h3>
+  <div class="ok">✅ 見積金額 vs 請求金額：<br>第1期 見積¥9,990,200 = 請求¥9,990,200（一致）／ 第2期 見積¥8,860,500 = 請求¥8,860,500（一致）</div>
+  <div class="ok">✅ 見積発行日 vs 請求発行日：第1期 見積2/27 < 請求3/24（OK）／ 第2期 見積2/27 < 請求4/21（OK）</div>
+  <div class="ok">✅ PDF実数値 vs data.json：書類フォルダ内の見・請PDFは正規命名済み（短縮一文字方式）</div>
+
+  <h3>玉寿会-立願の森-26</h3>
+  <div class="ok">✅ 採用案¥1,300,000 vs 旧A¥1,177,000・旧B¥891,000・旧C¥1,100,000：旧版にサフィックス付与済み（採用案=③ベース諸経費追加版）</div>
+  <div class="ok">✅ 見積発行日2026/02/27（採用版）／ 旧版は2025/11/17：時系列OK</div>
+  <div class="warn">⚠️ 請求未発行：施工予定（5/25-27）後に発行予定。現時点では比較対象なし</div>
+
+  <p style="margin-top:12px;font-size:clamp(11px,2.2vw,13px);color:#a0a0c0;">
+  ※ 警告 1件（立願の森の請求未発行）。これは施工予定前の正常状態のため対応不要。<br>
+  ※ さくら床側は3原則すべてクリア。
+  </p>
+</div>
+<!-- /AUTO:CALC:PROFIT_TOTAL -->
+
+<!-- ========== 受領・参考資料 ========== -->
+<div class="section">
+  <h2>📚 その他書類・参考資料</h2>
+  <!-- AUTO:FILES:OTHER_DOCS -->
+  <div class="grid2">
+    <div>
+      <h3>さくら床 受領</h3>
+      <ul style="padding-left: 20px;">
+        <li>受領_工事別単価一覧_玉寿会-さくら床-26.docx</li>
+        <li>受領_工事別単価一覧_改1_玉寿会-さくら床-26.docx</li>
+        <li>受領_資材単価_玉寿会-さくら床-26.docx</li>
+        <li>受領_資材単価一覧_玉寿会-さくら床-26.docx</li>
+        <li>受領_西さん名刺_玉寿会-さくら床-26.jpg</li>
+      </ul>
+      <h3>さくら床 経費</h3>
+      <ul style="padding-left: 20px;">
+        <li>経費_第1期_玉寿会-さくら床-26.pdf</li>
+      </ul>
+    </div>
+    <div>
+      <h3>立願の森 受領</h3>
+      <ul style="padding-left: 20px;">
+        <li>受領_医務室内装_玉寿会-立願の森-26.pdf</li>
+        <li>受領_天井復旧資料_玉寿会-立願の森-26.pdf</li>
+      </ul>
+      <h3>立願の森 議事</h3>
+      <ul style="padding-left: 20px;">
+        <li>議事_260421打合_玉寿会-立願の森-26.md</li>
+        <li>議事_ワークフロー_玉寿会-立願の森-26.html</li>
+        <li>議事_天井設置物調査_玉寿会-立願の森-26.gdoc</li>
+        <li>議事_岩綿吸音板ポイント_玉寿会-立願の森-26.gdoc</li>
+      </ul>
+    </div>
+  </div>
+  <!-- /AUTO:FILES:OTHER_DOCS -->
+</div>
+
+<!-- AUTO:JSON:FOOTER_META -->
+<footer>
+  案件キー: 玉寿会-さくら床-26 ／ 玉寿会-立願の森-26 ／ 株式会社アートレイズ ／ 生成日 2026-05-01
+</footer>
+<!-- /AUTO:JSON:FOOTER_META -->
+
+</div>
+</body>
+</html>

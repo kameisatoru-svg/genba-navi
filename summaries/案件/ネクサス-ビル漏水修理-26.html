@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ネクサス-ビル漏水修理-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;} li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;} .doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;} .doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);} .s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;} th{color:var(--sub);font-weight:600;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;} .tl-text{font-size:13px;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>ネクサスプラザビル 漏水調査・復旧工事</h1>
+  <div class="sub">ネクサス-ビル漏水修理-26 ｜ 大分県大分市府内町3丁目7番7号</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">🔧 施工予定</span>
+    <span class="badge">🏢 ネクサスプラザ（T-011）</span>
+    <span class="badge">🗓 更衣室 6/18・6/22 施工</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E3%83%8D%E3%82%AF%E3%82%B5%E3%82%B9-%E3%83%93%E3%83%AB%E6%BC%8F%E6%B0%B4%E4%BF%AE%E7%90%86-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-06-14 23:39</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">施工予定</div><div class="l">ステータス</div></div>
+  <div class="kpi"><div class="v">¥275,000</div><div class="l">更衣室見積（最新）</div></div>
+  <div class="kpi"><div class="v">見積5版</div><div class="l">保険申請¥1,144,000他</div></div>
+  <div class="kpi"><div class="v">写真40枚超</div><div class="l">現調6/3・更衣室6/12</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>進行フロー</b>：現地調査（たつみ板金同行）→見積範囲確定→保険申請用見積→緊急概算（保険打合せ用）→更衣室スコープ確定→施工日程確定</li>
+        <li><b>現在地</b>：更衣室天井復旧の<b>施工予定</b>（天井ボード張り6/18・クロス張り6/22）。2F/3Fトイレ復旧・外防水は別スコープで見積継続中</li>
+        <li><b>スコープ</b>：当初2Fトイレ・3F映画館トイレ・外防水（通路・3Fベランダ防水は除外）。更衣室・厨房を追加で先行施工</li>
+        <li><b>保険</b>：保険適用検討中。6/10保険会社打合せ用に概算見積提出済み</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>発注者</td><td>株式会社ネクサスプラザ（T-011）</td><td>担当：力武太郎さん</td></tr>
+        <tr><td>協力</td><td>たつみ板金（高山さん）</td><td>現地調査同行（6/3）</td></tr>
+        <tr><td>施工</td><td>株式会社アート・レイズ</td><td>調査・見積・内装復旧工事</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">見_更衣室-厨房_ネクサス-ビル漏水修理-26.pdf</div><div class="doc-meta-s">2026/6/15 最新版・税込¥275,000（更衣室＋2F厨房天井）</div></div><div class="doc-st s-ok">最新</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">見_ネクサス-ビル漏水修理-26.pdf</div><div class="doc-meta-s">2026/6/5 保険申請用・税込¥1,144,000（2F/3Fトイレ天井復旧）</div></div><div class="doc-st s-ok">保険用</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">見_改１_ネクサス-ビル漏水修理-26.pdf</div><div class="doc-meta-s">2026/5/22 旧版・¥1,260,600（トイレ＋更衣室＋厨房）</div></div><div class="doc-st s-wip">旧版</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">見_改2_ネクサス-ビル漏水修理-26.pdf</div><div class="doc-meta-s">2026/6/2 ¥770,000（3F男女トイレ天井）</div></div><div class="doc-st s-wip">旧版</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📐</div><div class="doc-info"><div class="doc-name">図面/ネクサス2F更衣室平面図_清書.png</div><div class="doc-meta-s">更衣室補修 平面図（清書）</div></div><div class="doc-st s-ok">作成済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📐</div><div class="doc-info"><div class="doc-name">図面/雨漏り補修箇所.pdf</div><div class="doc-meta-s">雨漏り補修箇所図</div></div><div class="doc-st s-ok">作成済</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ Driveリンクは同期後に付与。</div>
+    </div>
+    <div class="card">
+      <div class="card-t">📷 写真・現調記録</div>
+      <ul>
+        <li><b>6/3 現調22枚</b>：屋上防水（室外機デッキ）・2Fトイレ天井破損・3F映画館トイレ天井破損 → 連番リネーム済</li>
+        <li><b>6/12 更衣室15枚＋DrawNote</b>：更衣室・厨房 漏水箇所まわり（壁/天井/床）</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話記録から抽出した重要決定事項</div>
+  <ul>
+    <li>2026/06/03 力武太郎さん＋たつみ板金 現地調査：調理場・ベランダの漏水。配管オーバーフロー・防水層からの浸水。天井撤去・配管交換・防水工事が必要。保険適用を検討</li>
+    <li>2026/06/04 見積範囲確定：2Fトイレ・3F映画館トイレ・外防水を対象、通路・3Fベランダ防水は除外</li>
+    <li>2026/06/09 力武さん緊急見積依頼（6/10保険会社打合せ用）：2Fカラオケ厨房・更衣室。概算かさ増しで可</li>
+    <li>2026/06/15 力武さん通話：工事範囲確定。床＝タイルカーペット部分貼替（10〜20枚パッチワーク）／天井＝奥の一段下がり部（約5cm）ボード貼替／壁＝外壁側ボードをL字型貼替。正式見積を本日〜翌日送付</li>
+    <li>2026/06/16【決定】更衣室天井復旧の施工日程確定：天井ボード張り6/18（木）・クロス張り6/22（月）。アートレイズ予定に登録</li>
+    <li>2026/06/18【進捗】2F更衣室・厨房の天井ボード補修完了。クロス施工は6/20（土）に確定（施工：河原内装 T-026）。クロス品番＝天井 SP-2567／壁 SP-2566、発注先＝佐藤株式会社（T-017、発注済み）。※6/16時点の「クロス張り6/22（月）」から6/20（土）へ前倒し変更</li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <div class="doc-meta-s">原価計上なし（施工前）</div>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <div class="doc-meta-s">受取見積書・受取請求書なし</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/6/16（火）</div><div class="tl-text">更衣室天井復旧の施工日程確定（6/18ボード・6/22クロス）。ステータスを施工予定へ更新</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/15（月）</div><div class="tl-text">力武さん通話で工事範囲確定。更衣室・厨房見積¥275,000を発行</div></div>
+    <div class="tl-item"><div class="tl-date">2026/6/9〜10</div><div class="tl-text">力武さん緊急見積依頼→保険会社打合せ用に概算提出</div></div>
+    <div class="tl-item"><div class="tl-date">2026/6/5（金）</div><div class="tl-text">保険申請用見積¥1,144,000発行</div></div>
+    <div class="tl-item"><div class="tl-date">2026/6/4（木）</div><div class="tl-text">見積範囲確定（2F/3Fトイレ・外防水）</div></div>
+    <div class="tl-item"><div class="tl-date">2026/6/3（火）</div><div class="tl-text">たつみ板金同行で現地調査・原因特定</div></div>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li>2F/3Fトイレ復旧・外防水は別スコープ。保険申請・見積を継続中</li>
+    <li>更衣室見積は数量仮・現地確定要の項目あり（壁クロス16.5㎡・床TC6㎡等）</li>
+    <li>未入金・施工前。施工後に原価計上予定</li>
+  </ul>
+</div>
+
+<div class="footer">案件サマリー（案件単位）｜ 生成 2026-06-17 ｜ data.json最終更新 2026-06-14 23:39</div>
+</body>
+</html>

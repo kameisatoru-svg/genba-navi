@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大分BD-日出内装-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
+details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin:6px 0;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>買取大吉 日出町店 内装工事</h1>
+  <div class="sub">大分BD-日出内装-26 ｜ 大分県速見郡日出町3888-5（旧サラダ館 日出中央店・日出SC内）</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">📋 相談</span>
+    <span class="badge">🏢 大分ビルダー（T-027）</span>
+    <span class="badge">🎯 11月オープン目標</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E5%A4%A7%E5%88%86BD-%E6%97%A5%E5%87%BA%E5%86%85%E8%A3%85-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-06-08</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">相談</div><div class="l">ステータス</div></div>
+  <div class="kpi"><div class="v">29.87坪</div><div class="l">面積（83.75㎡）</div></div>
+  <div class="kpi"><div class="v">見積前</div><div class="l">金額（本部承認後に見積）</div></div>
+  <div class="kpi"><div class="v">56点</div><div class="l">現調写真・動画（6/5）</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>進行フロー</b>：①AR実測・図面制作 → 大吉本部送付 ②本部デザイン案作成 ③オーナー（大分ビルダー）承認 ④承認内容でAR見積作成</li>
+        <li><b>現在地</b>：6/5 現調・実測済み。6/7 実測スケッチ作成済み → 図面制作・本部送付が次アクション</li>
+        <li><b>契約形態</b>：大分ビルダー（T-027）と直接契約（本部契約ではない）／物件は普通借家2年・申込ベース（コンペでない）</li>
+        <li><b>物件内寸</b>：6,700×12,500（実測 7,671×9,795・CH2,662・天井GP900×900）・既存トイレ右奥1,000×1,300</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>発注者</td><td>株式会社大分ビルダー（T-027）</td><td>代表: 古宮純一／買取大吉FC 3店舗体制へ（萩原・森町・日出）</td></tr>
+        <tr><td>担当</td><td>戸田大輔</td><td>不動産事業部部長・買取大吉大分牧店店長兼務</td></tr>
+        <tr><td>施工</td><td>株式会社アート・レイズ</td><td>実測・図面・内装工事</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📐</div><div class="doc-info"><div class="doc-name">図面_実測スケッチ_大分BD-日出内装-26.pdf</div><div class="doc-meta-s">2026/6/7 DrawNote実測・寸法/照明/間仕切りメモ入り</div></div><div class="doc-st s-ok">作成済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📐</div><div class="doc-info"><div class="doc-name">図面_現状平面_大分BD-日出内装-26.hoc</div><div class="doc-meta-s">図面ツールデータ（現状）</div></div><div class="doc-st s-wip">作業用</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📐</div><div class="doc-info"><div class="doc-name">図面_分割後平面_大分BD-日出内装-26.hoc</div><div class="doc-meta-s">図面ツールデータ（分割案）</div></div><div class="doc-st s-wip">作業用</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">受領_物件概要書_日出町SC29.87坪_大分BD-日出内装-26.pdf</div><div class="doc-meta-s">2026/6/4 戸田氏より受領（物件概要・平面図・内観写真）</div></div><div class="doc-st s-ok">受領済</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ 見積・契約書類は未発行（相談フェーズ）。Driveリンクは同期後に付与。</div>
+    </div>
+    <div class="card">
+      <div class="card-t">📷 写真・現調記録</div>
+      <ul>
+        <li><b>6/4 受領外観3枚</b>：写真_外観全景・正面入口・外観側面（戸田氏提供）</li>
+        <li><b>6/5 現調スマホ28枚</b>：店内全景・売場壁面・バックヤード（流し台/分電盤/LGS下地/トイレ）・天井（天カセ/蛍光灯）・外観・駐車場 → 連番01〜28でリネーム済み</li>
+        <li><b>6/5 ドローン25枚＋動画1本</b>：DJI_*（外観・屋根上空撮影）</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話記録から抽出した重要決定事項</div>
+  <ul>
+    <li>2026/06/01 古宮純一さん（T-027）通話：日出店内装の相談発生。11月オープン目標・2店舗同時出店の2店目・旧シャディサラダ館跡地。物件所有はシャディ親会社「きづ」（宝飾店が購入希望あり・返済条件が整えば入居交渉可）。図面作成は亀井さん担当で本部へ送付する段取り。出入口が裏側・駐車場なしのため店舗配置に工夫が必要</li>
+    <li>2026/06/04 戸田大輔さん（大分ビルダー）通話：建物基礎部分の補強工事に約500万円の費用見込み。建物所有権は大家ではなく「サラダ館」側にあり（無許可建築との説明あり・保険適用等に不透明さ）。賃貸契約は11月予定、契約時期は電気工事の確認後に確定。看板の設置許可・撤去の確認が必要</li>
+    <li>2026/06/05 エムエスビルダー小宮社長（T-018）通話：入口2か所化のため外壁（軽量鉄骨）を解体する方針。エアコンはリース返却となり使用不可→新規手配が必要</li>
+    <li>2026/06/08【決定】店舗内分割案はキャンセルし、テナント一括借りに変更。既存ポール看板は撤去、側面看板も全撤去のうえ新規作成</li>
+    <li>2026/06/08 古宮純一さん（T-027）通話：既存エアコン（前入居者の借用品）は引き継がず、新規に小型エアコンを設置する前提で計画（エアコン無しの物件として扱う）</li>
+    <li>2026/06/15 古宮純一さん（T-027）通話：仮店舗（改装部分）の図面を今月中に作成し本部承認を得る方針。今月から家賃発生のため改装を先行。図面は亀井さん作成→古宮さん→戸田さん経由で本部へ承認依頼、本部仕様で最終化。6/15に図面送付済み。オープンは10〜11月目標で、改装済みスペースで面接実施予定</li>
+    <li>2026/06/15 戸田大輔さん（大分ビルダー）通話：現看板は木製ベース腐朽のため撤去必須・再利用不可。新規看板はロードサイド（敷地内）設置可、4m超で許可要のため4m以下推奨、費用は300〜500万円の見込み（本部最終判断）。エアコンはリース返却→新規設置が必要。FAX送付先は「ごっち18」宛で確定</li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <div class="doc-meta-s">見積未発行・原価計上なし（相談フェーズ）</div>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <div class="doc-meta-s">受取見積書・受取請求書なし</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/6/8（月）</div><div class="tl-text">分割案図面を作成しエムエスビルダーへ送付→工事費の都合で分割案キャンセル・テナント一括借りへ方針変更。看板は既存撤去・新規作成方針確定。現状写真を大吉本部へ送付</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/8（月）</div><div class="tl-text">フォルダ整理：現調写真28枚リネーム・写真/振り分け、DrawNote→図面_実測スケッチPDF化、サマリーHTML生成</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/7（日）</div><div class="tl-text">実測スケッチ作成（DrawNote・寸法/照明LED化/間仕切りメモ）</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/5（金）</div><div class="tl-text">現地調査・実測（スマホ28枚＋ドローン25枚・動画1本）</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/4（木）</div><div class="tl-text">担当者確定（戸田大輔氏）・物件資料受領（日出町SC 29.87坪 PDF＋外観写真3枚）・進行フロー確定</div></div>
+    <details class="tl-archive"><summary>過去の経緯を見る（1件・7日超）</summary>
+      <div class="tl-item"><div class="tl-date">2026/6/1（月）</div><div class="tl-text">古宮さん通話で案件発生・data.json登録（相談）</div></div>
+    </details>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li>売場は既存フローリング・白クロス・天カセ1台＋蛍光灯多数（実測スケッチに「蛍光灯→LED交換」メモあり）</li>
+    <li>バックヤードは土間コン・折板外壁・LGS間仕切り新設下地あり・流し台/分電盤/トイレ（�

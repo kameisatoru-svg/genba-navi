@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>未来システム熊本事務所 内装工事 案件サマリー</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI','Meiryo','Noto Sans JP',sans-serif;line-height:1.6;padding:clamp(12px,3vw,32px)}
+.dash{max-width:1100px;margin:0 auto}
+.hdr{text-align:center;padding:clamp(16px,3vw,32px) 0;border-bottom:2px solid rgba(184,184,208,.15)}
+.hdr h1{font-size:clamp(18px,4vw,28px);background:linear-gradient(135deg,#f59e0b,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:800;letter-spacing:.05em}
+.hdr .upd{color:#b8b8d0;font-size:clamp(10px,1.6vw,12px);margin-top:6px}
+.badge{display:inline-block;padding:3px 14px;border-radius:20px;font-size:clamp(10px,1.8vw,12px);font-weight:700;margin-top:4px}
+.s-ok{background:rgba(34,197,94,.2);color:#4ade80;border:1px solid rgba(34,197,94,.4)}
+.s-prog{background:rgba(59,130,246,.25);color:#60a5fa;border:1px solid rgba(59,130,246,.4)}
+.s-plan{background:rgba(148,163,184,.15);color:#b8b8d0;border:1px solid rgba(148,163,184,.3)}
+.s-warn{background:rgba(250,204,21,.2);color:#fbbf24;border:1px solid rgba(250,204,21,.4)}
+.s-cancel{background:rgba(239,68,68,.2);color:#f87171;border:1px solid rgba(239,68,68,.4)}
+.cancel-banner{background:linear-gradient(135deg,rgba(239,68,68,.18),rgba(185,28,28,.12));border:2px solid rgba(239,68,68,.4);border-radius:14px;padding:clamp(16px,3vw,24px);margin:clamp(16px,3vw,24px) 0;position:relative}
+.cancel-banner::before{content:'⚠';position:absolute;top:clamp(12px,2vw,18px);left:clamp(16px,2.5vw,22px);font-size:clamp(24px,4vw,32px);color:#f87171}
+.cancel-banner .cb-title{color:#fca5a5;font-size:clamp(14px,2.2vw,18px);font-weight:800;margin-left:clamp(36px,6vw,52px);letter-spacing:.05em}
+.cancel-banner .cb-body{color:#fecaca;font-size:clamp(11px,1.7vw,13px);margin-top:8px;margin-left:clamp(36px,6vw,52px);line-height:1.7}
+.cancel-banner .cb-body strong{color:#fca5a5;font-weight:700}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(8px,2vw,16px);margin:clamp(16px,3vw,28px) 0}
+.kpi{border-radius:14px;padding:clamp(14px,2.5vw,22px);text-align:center;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;inset:0;border-radius:14px;padding:1px;background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.kpi1{background:linear-gradient(135deg,rgba(147,51,234,.2),rgba(245,158,11,.15))}
+.kpi2{background:linear-gradient(135deg,rgba(59,130,246,.2),rgba(6,182,212,.15))}
+.kpi3{background:linear-gradient(135deg,rgba(34,197,94,.2),rgba(16,185,129,.15))}
+.kpi4{background:linear-gradient(135deg,rgba(249,115,22,.2),rgba(236,72,153,.15))}
+.kpi .lbl{font-size:clamp(9px,1.5vw,11px);color:#b8b8d0;text-transform:uppercase;letter-spacing:.08em}
+.kpi .val{font-size:clamp(18px,3vw,26px);font-weight:800;margin:4px 0}
+.kpi1 .val{color:#c084fc}.kpi2 .val{color:#38bdf8}.kpi3 .val{color:#4ade80}.kpi4 .val{color:#fb923c}
+.kpi .sub{font-size:clamp(9px,1.4vw,11px);color:#b8b8d0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(12px,2.5vw,20px);margin-bottom:clamp(12px,2.5vw,20px)}
+.card{background:rgba(184,184,208,.08);border:1px solid rgba(184,184,208,.12);border-radius:14px;padding:clamp(14px,2.5vw,22px);margin-bottom:clamp(12px,2.5vw,20px)}
+.card h2{font-size:clamp(13px,2vw,16px);font-weight:700;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(184,184,208,.15)}
+.card h2 .icon{margin-right:6px}
+.card h3{font-size:clamp(12px,1.8vw,14px);font-weight:700;margin:14px 0 8px;color:#b8b8d0}
+.doc-list{list-style:none}
+.doc-list li{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(184,184,208,.08);font-size:clamp(11px,1.7vw,13px)}
+.doc-list li:last-child{border-bottom:none}
+.doc-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.di-pdf{background:rgba(239,68,68,.2);color:#f87171}
+.di-img{background:rgba(168,85,247,.2);color:#c084fc}
+.di-dwg{background:rgba(34,197,94,.2);color:#4ade80}
+.di-xlsx{background:rgba(59,130,246,.2);color:#60a5fa}
+.di-zip{background:rgba(148,163,184,.2);color:#b8b8d0}
+.di-vid{background:rgba(249,115,22,.2);color:#fb923c}
+.doc-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dtbl{width:100%;border-collapse:collapse;font-size:clamp(10px,1.6vw,12px)}
+.dtbl th{background:rgba(184,184,208,.12);padding:8px 10px;text-align:left;font-weight:600;border-bottom:1px solid rgba(184,184,208,.15)}
+.dtbl td{padding:8px 10px;border-bottom:1px solid rgba(184,184,208,.08)}
+.info-lbl{color:#b8b8d0;font-size:clamp(9px,1.4vw,11px)}
+.note{background:rgba(250,204,21,.08);border-left:3px solid #fbbf24;padding:10px 14px;border-radius:0 8px 8px 0;font-size:clamp(10px,1.6vw,12px);color:#fbbf24;margin-top:12px}
+.photo-sec h3{font-size:clamp(11px,1.7vw,13px);color:#b8b8d0;margin:10px 0 6px;font-weight:600}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:4px;font-size:clamp(8px,1.2vw,10px);color:#b8b8d0}
+.photo-grid span{background:rgba(184,184,208,.06);padding:4px 6px;border-radius:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ftr{text-align:center;padding:clamp(16px,3vw,28px) 0;color:#a8dadc;font-size:clamp(9px,1.4vw,11px);border-top:1px solid rgba(184,184,208,.12);margin-top:clamp(12px,2vw,20px)}
+@media(max-width:768px){.kpi-row{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr}}
+@media print{body{background:#fff;color:#222}.card{border-color:#ccc}.kpi{border:1px solid #ccc}.hdr h1{color:#333;-webkit-text-fill-color:#333}}
+</style>
+</head>
+<body>
+<div class="dash">
+
+<!-- AUTO:JSON:STATUS_BADGES -->
+<!-- AUTO:JSON:LAST_UPDATED -->
+<div class="hdr">
+  <h1>未来システム熊本事務所 内装工事</h1>
+  <div><span class="badge s-cancel">工事中止</span></div>
+  <div class="upd">最終更新: 2026年4月21日 ｜ 案件フォルダ: AR-2026/未来システム ｜ 参考事例として保管</div>
+</div>
+
+<!-- 工事中止通知バナー -->
+<div class="cancel-banner">
+  <div class="cb-title">本案件は工事中止となりました</div>
+  <div class="cb-body">
+    <strong>中止決定日：</strong>2026年4月21日<br>
+    <strong>取引先：</strong>未来システム熊本（T-012）※取引先台帳には保持（将来再開可能性あり）<br>
+    <strong>資料の扱い：</strong>本サマリーおよび関連資料（ワイヤーフレーム・図面・DXF・仕上げ表・現調写真等）は、<strong>AI連携ワークフローの実例・社内参考事例</strong>として引き続き保管します。削除は行いません。
+  </div>
+</div>
+
+<!-- KPI -->
+<!-- /AUTO:JSON:LAST_UPDATED -->
+<!-- /AUTO:JSON:STATUS_BADGES -->
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi kpi1">
+    <div class="lbl">エリア数</div>
+    <div class="val">6区画</div>
+    <div class="sub">オフィス/マルチ/会議/エントランス/パントリー/トイレ</div>
+  </div>
+  <div class="kpi kpi2">
+    <div class="lbl">図面</div>
+    <div class="val">4図面</div>
+    <div class="sub">平面図・天井図・展開図・エントランス間仕切</div>
+  </div>
+  <div class="kpi kpi3">
+    <div class="lbl">現調写真</div>
+    <div class="val">13枚+1動画</div>
+    <div class="sub">2026/03/31 撮影（解体後）</div>
+  </div>
+  <div class="kpi kpi4">
+    <div class="lbl">デスク</div>
+    <div class="val">10台</div>
+    <div class="sub">W1400×D700 ナチュラル木目×ブラック脚</div>
+  </div>
+</div>
+
+<!-- 原価・利益サマリー -->
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<!-- AUTO:CALC:PROFIT_CATEGORIES -->
+<div class="card" style="margin-bottom:clamp(12px,2.5vw,20px);background:linear-gradient(135deg,rgba(147,51,234,.1),rgba(59,130,246,.08));border:1px solid rgba(184,184,208,.2)">
+  <h2><span class="icon">📊</span>原価・利益サマリー</h2>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(12px,2vw,16px)">
+    <div style="background:rgba(239,68,68,.15);border-radius:10px;padding:12px;border-left:3px solid #f87171">
+      <div style="font-size:clamp(11px,1.6vw,12px);color:#b8b8d0;margin-bottom:4px">売上（見積）</div>
+      <div style="font-size:clamp(20px,3.5vw,24px);font-weight:800;color:#f87171">計上なし</div>
+      <div style="font-size:clamp(10px,1.5vw,11px);color:#b8b8d0;margin-top:4px">工事中止のため</div>
+    </div>
+    <div style="background:rgba(239,68,68,.15);border-radius:10px;padding:12px;border-left:3px solid #f87171">
+      <div style="font-size:clamp(11px,1.6vw,12px);color:#b8b8d0;margin-bottom:4px">外注費</div>
+      <div style="font-size:clamp(18px,3vw,22px);font-weight:800;color:#f87171">計上なし</div>
+      <div style="font-size:clamp(10px,1.5vw,11px);color:#b8b8d0;margin-top:4px">発注前に中止</div>
+    </div>
+    <div style="background:rgba(239,68,68,.15);border-radius:10px;padding:12px;border-left:3px solid #f87171">
+      <div style="font-size:clamp(11px,1.6vw,12px);color:#b8b8d0;margin-bottom:4px">現場経費</div>
+      <div style="font-size:clamp(18px,3vw,22px);font-weight:800;color:#f87171">計上なし</div>
+      <div style="font-size:clamp(10px,1.5vw,11px);color:#b8b8d0;margin-top:4px">着工前</div>
+    </div>
+    <div style="background:rgba(239,68,68,.15);border-radius:10px;padding:12px;border-left:3px solid #f87171">
+      <div style="font-size:clamp(11px,1.6vw,12px);color:#b8b8d0;margin-bottom:4px">粗利率</div>
+      <div style="font-size:clamp(18px,3vw,22px);font-weight:800;color:#f87171">ー</div>
+      <div style="font-size:clamp(10px,1.5vw,11px);color:#b8b8d0;margin-top:4px">案件中止</div>
+    </div>
+  </div>
+</div>
+
+<!-- 仕上げ表 -->
+<!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+
+<div class="card">
+  <h2><span class="icon">🎨</span>仕上げ表（エリア別）</h2>
+  <table class="dtbl">
+    <thead><tr><th>エリア</th><th>床</th><th>壁</th><th>天井</th><th>備考</th></tr></thead>
+    <tbody>
+      <tr><td>マルチルーム</td><td>サンゲツ NT-31901<br>カーペットタイル</td><td>サンゲツ TH34037<br>TONEGRID DULL</td><td>サンゲツ TH34190<br>スモークグレー木目</td><td>配置物なし</td></tr>
+      <tr><td>オフィス</td><td>同上</td><td>同上</td><td>同上</td><td>デスク10台<br>ファイリングキャビネット</td></tr>
+      <tr><td>ミーティング</td><td>同上</td><td>同上</td><td>同上</td><td>応接セット（持込）<br>垂木ダブル独立壁</td></tr>
+      <tr><td>エントランス</td><td>オオムラ 8784<br>ストーンロック黒 300×600</td><td>ガラス&メタル<br>モザイクタイル</td><td>同上</td><td>MIRAISYSTEMサイン<br>シューズBOX</td></tr>
+      <tr><td>パントリー</td><td>サンゲツ PM24051<br>長尺防滑シート</td><td>サンゲツ TH34668<br>ボタニカル柄</td><td>同上</td><td>コンパクトキッチン<br>冷蔵庫</td></tr>
+      <tr><td>トイレ</td><td>サンゲツ PM24068<br>長尺防滑シート</td><td>サンゲツ TH34790<br>ウッド調</td><td>同上</td><td>LEDダウンライト<br>（品番未定）</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 建具・照明・家具 -->
+<div class="grid2">
+  <div class="card">
+    <h2><span class="icon">💡</span>照明計画</h2>
+    <table class="dtbl">
+      <tbody>
+        <tr><td>スポットライト</td><td>コイズミ XS707811BM<br>LED 11.6W 温白色3500K ブラック</td></tr>
+        <tr><td>ラインライト</td><td>オーデリック OL291シリーズ<br>シームレスLED 温白色 1500/1200mm混合</td></tr>
+        <tr><td>ライティングレール</td><td>横2本＋縦7本 ブラック<br>3m×9本 + 2m×5本</td></tr>
+        <tr><td>ダウンライト</td><td>トイレ用（品番未定）</td></tr>
+        <tr><td>LED直管</td><td>40W相当 レール取付 2台<br>マルチルーム・パントリー各1</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h2><span class="icon">🪑</span>造作家具・建具</h2>
+    <table class="dtbl">
+      <tbody>
+        <tr><td>ファイリングキャビネット</td><td>H900×D360 全長6,300mm<br>アイカ TJ-2054K オーク柾目指紋レス<br>シューズBOX 900mm含む</td></tr>
+        <tr><td>デスク×10台</td><td>W1,400×D700×H720mm<br>ナチュラル木目×ブラックスチール角脚</td></tr>
+        <tr><td>応接セット（持込）</td><td>U字型ブース 約W2,000×D1,600<br>ライトグレー×ダークグレー</td></tr>
+        <tr><td>入口ガラスフィルム</td><td>サンゲツ GF1854 フォグ2000</td></tr>
+        <tr><td>ブラインド×5</td><td>立川 アフタービート AB-7716<br>Wood Black 35mmスラット</td></tr>
+        <tr><td>MIRAISYSTEMサイン</td><td>マット黒アルミ複合板<br>ゴールドアクリル切文字</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 電気部材 -->
+<div class="card">
+  <h2><span class="icon">⚡</span>電気部材拾い出し（抜粋）</h2>
+  <table class="dtbl">
+    <thead><tr><th>品名</th><th>数量</th><th>備考</th></tr></thead>
+    <tbody>
+      <tr><td>ライティングレール 3m</td><td>9本</td><td>office</td></tr>
+      <tr><td>ライティングレール 2m</td><td>5本</td><td>office</td></tr>
+      <tr><td>コンセント H250</td><td>5箇所</td><td>壁付け</td></tr>
+      <tr><td>アース付きコンセント</td><td>1箇所</td><td>—</td></tr>
+      <tr><td>フロアコンセント</td><td>6箇所</td><td>office・meeting room</td></tr>
+      <tr><td>家具コンセント</td><td>3箇所</td><td>filing cabinet沿い</td></tr>
+      <tr><td>スイッチ</td><td>6箇所</td><td>—</td></tr>
+      <tr><td>レール部材（FI/TJ/LJ/END）</td><td>16個</td><td>フィードイン・エンドキャップ等</td></tr>
+    </tbody>
+  </table>
+  <div class="note">CON H1000・CON H1300は図面上に?マークあり → 高さ要確認</div>
+</div>
+
+<!-- 未決定事項 -->
+<div class="card">
+  <h2><span class="icon">📝</span>未決定事項・備考</h2>
+  <ul style="list-style:none;font-size:clamp(11px,1.7vw,13px)">
+    <li style="padding:4px 0">・トイレ用LEDダウンライトの品番 → 別途選定</li>
+    <li style="padding:4px 0">・応接セットの正確な寸法 → お客様に実測確認要</li>
+    <li style="padding:4px 0">・ライティングレール右端（東端）の離れ寸法 → 別途確認</li>
+    <li style="padding:4px 0">・Geminiによる内観パース生成 → 全仕様確定後に実施予定</li>
+    <li style="padding:4px 0">・コンセント H1000 / H1300 の高さ → 図面?マーク要確認</li>
+  </ul>
+</div>
+
+<!-- 書類一覧 -->
+<div class="card">
+  <h2><span class="icon">📁</span>書類一覧</h2>
+  <h3>図面（アート・レイズ作成 1/50）</h3>
+  <ul class="doc-list">
+    <li><span class="doc-icon di-pdf">PDF</span><span class="doc-name">平面図.pdf / .jpg</span><span class="badge s-ok" style="font-size:10px">作成済</span></li>
+    <li><span class="doc-icon di-pdf">PDF</span><span class="doc-name">天井図.pdf / .jpg（スイッチ・コンセント配置図他）</span><span class="badge s-ok" style="font-size:10px">作成済</span></li>
+    <li><span class="doc-icon di-pdf">PDF</span><span class="doc-name">展開図.pdf / .jpg（A〜D室展開図）</span><span class="badge s-ok" style="font-size:10px">作成済</span></li>
+    <li><span class="doc-icon di-pdf">PDF</span><span class="doc-name">ENTRANCE間仕切.pdf / .jpg（サイン壁詳細）</span><span class="badge s-ok" style="font-size:10px">作成済</span></li>
+    <li><span class="doc-icon di-pdf">HTML</span><span class="doc-name">mirai_system_floor_plan_v1.html（未来システム熊本オフィス 平面図 インタラクティブ版）</span><span class="badge s-ok" style="font-size:10px">R8.4.17作成</span></li>
+    <li><span class="doc-icon di-pdf">HTML</span><span class="doc-name">mirai_as_built_sketch.html（現況平面図 推定・現調情報ベース）</span><span class="badge s-ok" style="font-size:10px">R8.4.17作成</span></li>
+  </ul>
+  <h3>仕様書・部材表</h3>
+  <ul class="doc-list">
+    <li><span class="doc-icon di-pdf">PDF</span><span class="doc-name">未来システム熊本_仕上げ表v2.pdf（エリア別仕上・照明・家具）</span></li>
+    <li><span class="doc-icon di-pdf">PDF</span><span class="doc-name">未来システム熊本_仕上げ表2.xlsx - Google スプレッドシート.pdf</span></li>
+    <li><span class="doc-icon di-pdf">PDF</span><span class="doc-name">電気部材拾い出し一覧.pdf</span></li>
+    <li><span class="doc-icon di-xlsx">XLS</span><span class="doc-name">部材拾い出し一覧.xlsx</span></li>
+  </ul>
+  <h3>CADデータ</h3>
+  <ul class="doc-list">
+    <li><span class="doc-icon di-dwg">DXF</span><span class="doc-name">未来システム熊本オフィス内装工事.dxf</span></li>
+    <li><span class="doc-icon di-dwg">DXF</span><span class="doc-name">未来システム_家具追記.dxf</span></li>
+    <li><span class="doc-icon di-dwg">HOC</span><span class="doc-name">A3図面.hoc</span></li>
+  </ul>
+  <h3>その他</h3>
+  <ul class="doc-list">
+    <li><span class="doc-icon di-img">IMG</span><span class="doc-name">未来システム熊本オフィス内装工事_PaoImg_4AF.jpg（Art-raysロゴ）</span></li>
+    <li><span class="doc-icon di-zip">ZIP</span><span class="doc-name">ilovepdf_pages-to-jpg.zip（PDF→JPG変換済み）</span></li>
+  </ul>
+</div>
+
+<!-- 写真一覧 -->
+<div class="card">
+  <h2><span class="icon">📷</span>現調写真一覧（2026/03/31 撮影 13枚+動画1本）</h2>
+  <div class="photo-sec">
+    <h3>オフィス・エントランス（解体後）</h3>
+    <div class="photo-grid">
+      <span>01 応接セット（お客様持込品）</span>
+      <span>02 オフィス空間 解体後全景</span>
+      <span>03 エントランス側 玄関ドア方向</span>
+      <span>04 エントランス壁面 分電盤</span>
+      <span>05 オフィス空間 窓側から奥</span>
+      <span>06 天井 ジプトン・開口部</span>
+    </div>
+    <h3>水回り</h3>
+    <div class="photo-grid">
+      <span>07 トイレ 既存状態</span>
+      <span>08 浴室 解体中（ハツリ）</span>
+      <span>09 浴室 タイル壁解体跡</span>
+    </div>
+    <h3>個室・パントリー予定</h3>
+    <div class="photo-grid">
+      <span>10 パントリー予定エリア</span>
+      <span>11 小部屋 合板壁・格子窓</span>
+    </div>
+    <h3>建物外観</h3>
+    <div class="photo-grid">
+      <span>12 外観正面 エントランス側</span>
+      <span>13 外観引き 全体像</span>
+      <span>14 現調動画（外観周辺）.mp4</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- AUTO:FILES:MAIN_DOCS -->
+<div class="card">
+<h2>書類・ファイル一覧</h2>
+<div class="doc-list">
+<a class="doc ref" href="https://drive.google.com/file/d/1DmINwi8YwsJNkteOk8ico79scLZpMk-z/view" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">ENTRANCE間仕切.pdf</div><div class="doc-meta-s">PDF</div></div></a><a class="doc draw" href="https://drive.google.com/file/d/1YC5FS3xn3-wYOtfmTyYmdzrYkk9CRrqG/view" target="_blank"><div class="doc-icon">🗺</div><div class="doc-info"><div class="doc-name">天井図.pdf</div><div class="doc-meta-s">PDF</div></div></a><a class="doc draw" href="https://drive.google.com/file/d/13TrAa99qFun6uwZlQqks4i3IK4bgz0-e/view" target="_blank"><div class="doc-icon">🗺</div><div class="doc-info"><div class="doc-name">展開図.pdf</div><div class="doc-meta-s">PDF</div></div></a><a class="doc draw" href="https://drive.google.com/file/d/1gNxPqrVGKngDOzt-Z3HoI93EJUtMs0PH/view" target="_blank"><div class="doc-icon">🗺</div><div class="doc-info"><div class="doc-name">平面図.pdf</div><div class="doc-meta-s">PDF</div></div></a><a class="doc ref" href="https://drive.google.com/file/d/1NZ87EgTE7sylWPZvcAFQBCeOZonA8m7n/view" target="_blank"><div class="doc-icon">📊</div><div class="doc-info"><div class="doc-name">未来システム熊本_仕上げ表2.xlsx</div><div class="doc-meta-s">XLSX</div></div></a><a class="doc ref" href="https://drive.google.com/file/d/1Q-_F0dBYXRe7Ly9BmemuPmwlxGx8odYl/view" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">未来システム熊本_仕上げ表v2.pdf</div><div class="doc-meta-s">PDF</div></div></a><a class="doc ref" href="https://drive.google.com/file/d/1eDQ80hnFpQZqKR9U0kyScovhqZvnrW5_/view" target="_blank"><div class="doc-icon">📊</div><div class="doc-info"><div class="doc-name">部材拾い出し一覧.xlsx</div><div class="doc-meta-s">XLSX</div></div></a><a class="doc ref" href="https://drive.google.com/file/d/1X8PE-zWPPe1eiPB-itk-JAr4FfYrVfsW/view" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">電気部材拾い出し一覧.pdf</div><div class="doc-meta-s">PDF</div></div></a><a class="doc ref" href="https://drive.google.com/drive/folders/1NmpCfcyF1D3ccD02JE0V_A_M77lJ2BNf" target="_blank"><div class="doc-icon">📁</div><div class="doc-info"><div class="doc-name">写真</div><div class="doc-meta-s">0ファイル</div></div><div class="doc-st s-plan">フォルダ</div></a>
+</div>
+</div>
+
+<div class="ftr">
+  AR-2026 / 未来システム ｜ 株式会社アート・レイズ ｜ 設計：亀井悟 ｜ 生成日: 2026-04-08 ｜ 工事中止反映: 2026-04-21
+</div>
+
+</div>
+<!-- /AUTO:FILES:MAIN_DOCS -->
+
+</body>
+</html>

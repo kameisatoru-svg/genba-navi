@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>バイオメディカル 案件サマリー</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #1a1a2e;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            padding: clamp(1rem, 5%, 2rem);
+        }
+        .dash {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .hdr {
+            margin-bottom: clamp(1.5rem, 5%, 2.5rem);
+            border-bottom: 2px solid #10b981;
+            padding-bottom: clamp(0.75rem, 3%, 1.5rem);
+        }
+        .hdr h1 {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 700;
+            color: #f0f0f0;
+        }
+        .hdr p {
+            font-size: clamp(0.875rem, 2vw, 1rem);
+            color: #b0b0b0;
+            margin-top: 0.5rem;
+        }
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: clamp(1rem, 3%, 1.5rem);
+            margin-bottom: clamp(1.5rem, 5%, 2.5rem);
+        }
+        .kpi {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 0.5rem;
+            padding: clamp(1rem, 4%, 1.5rem);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .kpi.amount {
+            background: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%);
+        }
+        .kpi.status {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+        }
+        .kpi.count {
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+        }
+        .kpi-label {
+            font-size: clamp(0.75rem, 2vw, 0.875rem);
+            color: rgba(255,255,255,0.85);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        .kpi-value {
+            font-size: clamp(1.25rem, 3vw, 1.75rem);
+            font-weight: 700;
+            color: #ffffff;
+        }
+        .card {
+            background: #252541;
+            border: 1px solid #3d3d5c;
+            border-radius: 0.5rem;
+            padding: clamp(1.25rem, 4%, 1.75rem);
+            margin-bottom: clamp(1rem, 3%, 1.5rem);
+        }
+        .card h2 {
+            font-size: clamp(1.125rem, 3vw, 1.5rem);
+            color: #f0f0f0;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #10b981;
+            padding-bottom: 0.75rem;
+        }
+        .dtbl {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: clamp(0.875rem, 2vw, 1rem);
+        }
+        .dtbl td {
+            padding: clamp(0.5rem, 2%, 0.75rem);
+            border-bottom: 1px solid #3d3d5c;
+        }
+        .dtbl td:first-child {
+            color: #10b981;
+            font-weight: 600;
+            width: 30%;
+        }
+        .dtbl td:last-child {
+            color: #e0e0e0;
+        }
+        .dtbl tr:last-child td {
+            border-bottom: none;
+        }
+        .footer {
+            text-align: center;
+            margin-top: clamp(2rem, 5%, 3rem);
+            padding-top: clamp(1.5rem, 3%, 2rem);
+            border-top: 1px solid #3d3d5c;
+            color: #808080;
+            font-size: clamp(0.75rem, 2vw, 0.875rem);
+        }
+        @media (max-width: 768px) {
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 400px) {
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+            .kpi-value {
+                font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+            }
+        }
+        @media print {
+            body {
+                background: #ffffff;
+                color: #000000;
+            }
+            .hdr, .card {
+                border-color: #cccccc;
+            }
+            .kpi {
+                background: #f5f5f5 !important;
+                color: #000000 !important;
+                border: 1px solid #cccccc;
+            }
+            .kpi-label, .kpi-value {
+                color: #000000 !important;
+            }
+            .card {
+                background: #ffffff;
+            }
+            .dtbl td {
+                border-color: #cccccc;
+            }
+        }
+    
+.doc-list{display:flex;flex-direction:column;gap:8px}
+a.doc{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:8px;background:#2a2a4a;text-decoration:none;color:inherit;transition:background 0.15s,transform 0.15s;border-left:3px solid #7eb8ff}
+a.doc:hover{background:#34345a;transform:translateX(3px)}
+.doc-icon{font-size:1.5rem;min-width:32px;text-align:center}
+.doc-info{flex:1;min-width:0}
+.doc-name{font-size:clamp(0.85rem,2vw,0.95rem);font-weight:600;color:#e0e0e0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.doc-meta-s{font-size:clamp(0.7rem,1.5vw,0.8rem);color:#a8a8c8;margin-top:2px}
+.doc-st{font-size:10px;font-weight:700;padding:3px 10px;border-radius:12px;white-space:nowrap}
+.doc-st.s-ok{background:#2d6a4f;color:#95d5b2}
+.doc-st.s-wait{background:#4a3f2e;color:#f0c674}
+.doc-st.s-plan{background:#2d4a6a;color:#7eb8ff}
+a.doc.est{border-left-color:#d4a574}
+a.doc.inv{border-left-color:#f0c674}
+a.doc.cont{border-left-color:#95d5b2}
+a.doc.draw{border-left-color:#c77dff}
+a.doc.ref{border-left-color:#7eb8ff}
+a.doc.photo{border-left-color:#48cae4}
+
+</style>
+</head>
+<body>
+    <div class="dash">
+        <!-- AUTO:JSON:STATUS_BADGES -->
+<!-- AUTO:JSON:LAST_UPDATED -->
+<div class="hdr">
+            <h1>バイオメディカル</h1>
+            <p>案件サマリー | 2026年4月8日更新</p>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi amount">
+                <div class="kpi-label">受注額（税込）</div>
+                <div class="kpi-value">¥38,500</div>
+            </div>
+            <div class="kpi count">
+                <div class="kpi-label">発注No.</div>
+                <div class="kpi-value">1747348</div>
+            </div>
+            <div class="kpi status">
+                <div class="kpi-label">ステータス</div>
+                <div class="kpi-value">納品・請求完了</div>
+            </div>
+        </div>
+<!-- /AUTO:JSON:LAST_UPDATED -->
+<!-- /AUTO:JSON:STATUS_BADGES -->
+
+
+        <div class="card">
+            <h2>案件概要</h2>
+            <table class="dtbl">
+                <tr>
+                    <td>案件名</td>
+                    <td>アクリル加工</td>
+                </tr>
+                <tr>
+                    <td>発注者</td>
+                    <td>バイオメディカル</td>
+                </tr>
+                <tr>
+                    <td>エンドユーザー</td>
+                    <td>永冨脳神経外科病院</td>
+                </tr>
+                <tr>
+                    <td>発注番号</td>
+                    <td>1747348</td>
+                </tr>
+                <tr>
+                    <td>受注額（税込）</td>
+                    <td>¥38,500</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+<div class="card">
+            <h2>原価・利益サマリー</h2>
+            <table class="dtbl">
+                <tr>
+                    <td>売上（税込）</td>
+                    <td>¥38,500</td>
+                </tr>
+                <tr>
+                    <td>外注費</td>
+                    <td>なし（自社加工）</td>
+                </tr>
+                <tr>
+                    <td>材料費（原価）</td>
+                    <td>約 ¥23,000〜¥28,000</td>
+                </tr>
+                <tr>
+                    <td>粗利</td>
+                    <td>¥10,500〜¥15,500</td>
+                </tr>
+                <tr>
+                    <td>粗利率</td>
+                    <td>約 27%〜40%</td>
+                </tr>
+            </table>
+        </div>
+<!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+
+
+        <div class="card">
+            <h2>製品仕様</h2>
+            <table class="dtbl">
+                <tr>
+                    <td>製品1</td>
+                    <td>アクリル5mm透明 1820×910 ¥23,000</td>
+                </tr>
+                <tr>
+                    <td>製品2</td>
+                    <td>加工費・小口磨き 1500×700 ¥12,000</td>
+                </tr>
+                <tr>
+                    <td>合計（税抜）</td>
+                    <td>¥35,000</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>提出・納品書類</h2>
+            <table class="dtbl">
+                <tr>
+                    <td>1</td>
+                    <td>【注文書】アクリル加工（アートレイズ）.pdf</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>見積書　アクリル加工.pdf</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>納品書_アクリル加工_アートレイズ.pdf</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>請求書 アクリル加工 バイオメディカル - 株式会社アート・レイズ.pdf</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>請求書_バイオメディカル_アクリル加工.html</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- AUTO:JSON:FOOTER_META -->
+<div class="footer">
+            <p>株式会社アート・レイズ | 案件サマリーダッシュボード</p>
+        </div>
+<!-- /AUTO:JSON:FOOTER_META -->
+    
+<!-- AUTO:FILES:MAIN_DOCS -->
+<div class="card">
+<h2>書類・ファイル一覧</h2>
+<div class="doc-list">
+<a class="doc cont" href="https://drive.google.com/file/d/1fPTrCwzdsSuhW6oGL_DW9yYHI18BaOy0/view" target="_blank"><div class="doc-icon">📋</div><div class="doc-info"><div class="doc-name">【注文書】アクリル加工（アートレイズ）.pdf</div><div class="doc-meta-s">PDF</div></div><div class="doc-st s-ok">締結済</div></a><a class="doc ref" href="https://drive.google.com/file/d/1cuNRNMnyi0k0wOWkiiyUM11dzwMvjmk_/view" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">納品書_アクリル加工_アートレイズ.pdf</div><div class="doc-meta-s">PDF</div></div></a><a class="doc est" href="https://drive.google.com/file/d/1x15vn46nJgj6ZVYk_oEg3GeMM3TTulv7/view" target="_blank"><div class="doc-icon">📝</div><div class="doc-info"><div class="doc-name">見積書 アクリル加工.pdf</div><div class="doc-meta-s">PDF</div></div><div class="doc-st s-ok">提出済</div></a><a class="doc ref" href="https://drive.google.com/drive/folders/1a9FrCnRK0MdSHjjrY5Fxw51zyZzYdrB-" target="_blank"><div class="doc-icon">📁</div><div class="doc-info"><div class="doc-name">バイオメディカル_アクリル加工</div><div class="doc-meta-s">2ファイル</div></div><div class="doc-st s-plan">フォルダ</div></a><a class="doc inv" href="https://drive.google.com/file/d/1nYBFBgFS3cZicoViOVROZcXxbQb-fVR-/view" target="_blank"><div class="doc-icon">💰</div><div class="doc-info"><div class="doc-name">  └ 請求書 アクリル加工.pdf</div><div class="doc-meta-s">PDF</div></div><div class="doc-st s-ok">発行済</div></a><a class="doc inv" href="https://drive.google.com/file/d/1rtQnkO1yTZ4o_pbO0rhDSO1fAvpNpJZd/view" target="_blank"><div class="doc-icon">💰</div><div class="doc-info"><div class="doc-name">  └ 請求書_バイオメディカル_アクリル加工.html</div><div class="doc-meta-s">HTML</div></div><div class="doc-st s-ok">発行済</div></a>
+</div>
+</div>
+</div>
+<!-- /AUTO:FILES:MAIN_DOCS -->
+
+</body>
+</html>

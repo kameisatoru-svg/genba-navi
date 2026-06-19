@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>立願の森 天井復旧工事 案件サマリー</title>
+<!--
+  =========================================================================
+  案件サマリー: 玉寿会-立願の森-26
+  生成日: 2026-05-07
+  役割: 過去〜現在の参照ダッシュボード（ワークフローHTMLと対をなす）
+
+  AUTOマーカー (デイリー再注入対象 4種):
+    AUTO:JSON:STATUS_BADGES    … ステータスバッジ群（data.json）
+    AUTO:JSON:KPI              … KPI 5タイル（data.json + 原価管理Sheets）
+    AUTO:CALL_DECISIONS        … 通話決定事項リスト（通話記録 .md）
+    AUTO:WORKFLOW:TIMELINE     … ワークフロー完了タイムライン（履歴ノート）
+
+  マーカー外の手書き編集（施工方針メモ・関連ファイルパス）は再注入時に保護される。
+  =========================================================================
+-->
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; padding: 0; padding-bottom: 80px;
+    background: #f5f6f8;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+    color: #2c3e50;
+  }
+
+  /* ===== SVGアイコン共通 ===== */
+  .ico { width: 20px; height: 20px; flex-shrink: 0; vertical-align: middle; }
+  .ico-lg { width: 28px; height: 28px; flex-shrink: 0; }
+  .ico-mini { width: 14px; height: 14px; flex-shrink: 0; vertical-align: -2px; }
+
+  /* ===== ヒーロー（gold gradient） ===== */
+  .hero {
+    position: relative;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #c8a96e 100%);
+    color: #fff;
+    padding: 24px 18px 32px;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(200,169,110,0.4) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    opacity: 0.7;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .hero-title {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin: 0 0 12px 0;
+    letter-spacing: 0.02em;
+  }
+  .hero-key {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 4px 10px;
+    border-radius: 14px;
+    font-size: 11px;
+    margin-bottom: 14px;
+    backdrop-filter: blur(4px);
+  }
+  .hero-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+    font-size: 12px;
+    margin-top: 12px;
+  }
+  .hero-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    opacity: 0.92;
+  }
+  .hero-meta-item .ico-mini { opacity: 0.7; }
+  .hero-budget {
+    margin-top: 18px;
+    padding: 14px 16px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .hero-budget-label {
+    font-size: 11px;
+    opacity: 0.7;
+    letter-spacing: 0.1em;
+  }
+  .hero-budget-value {
+    font-size: 26px;
+    font-weight: 700;
+    color: #fff8e8;
+    letter-spacing: 0.02em;
+  }
+
+  /* ===== セクション共通 ===== */
+  .section {
+    background: #fff;
+    margin-top: 12px;
+    padding: 16px 16px 18px;
+  }
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #2c3e50;
+    border-left: 3px solid #c8a96e;
+    padding-left: 10px;
+  }
+  .section-head .ico { color: #c8a96e; width: 18px; height: 18px; }
+
+  /* ===== ステータスバッジ群 ===== */
+  .badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .badge .ico-mini { color: currentColor; }
+  .badge.stage  { background: #e8f1fb; color: #2980b9; }
+  .badge.urgent { background: #fdecea; color: #c0392b; }
+  .badge.payment { background: #fff4e6; color: #d35400; }
+  .badge.note   { background: #f3e8fb; color: #7d3c98; }
+
+  /* ===== KPIタイル ===== */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .kpi-tile {
+    background: #fafbfc;
+    border: 1px solid #e6e8ec;
+    border-radius: 12px;
+    padding: 12px 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-tile.span2 { grid-column: span 2; }
+  .kpi-tile-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: #7f8c8d;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .kpi-tile-label .ico-mini { color: #b9770e; }
+  .kpi-tile-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1.2;
+  }
+  .kpi-tile-sub {
+    font-size: 11px;
+    color: #7f8c8d;
+    margin-top: 3px;
+  }
+  .kpi-tile.profit { background: linear-gradient(135deg, #fef9e7 0%, #fff8d4 100%); border-color: #f4d03f; }
+  .kpi-tile.profit .kpi-tile-value { color: #b9770e; }
+  .kpi-tile.warn { background: #fef9e7; border-color: #f9d71c; }
+
+  /* ===== 関係者マップ ===== */
+  .actors {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .actor-card {
+    background: #fafbfc;
+    border-left: 3px solid #c8a96e;
+    border-radius: 4px;
+    padding: 10px 12px;
+  }
+  .actor-card.client { border-left-color: #2980b9; }
+  .actor-card.subcon { border-left-color: #27ae60; }
+  .actor-card.intro  { border-left-color: #c8a96e; }
+  .actor-role {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: #7f8c8d;
+    margin-bottom: 3px;
+  }
+  .actor-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1.3;
+    margin-bottom: 3px;
+  }
+  .actor-detail {
+    font-size: 11px;
+    color: #5d6770;
+    line-height: 1.5;
+  }
+
+  /* ===== 書類パネル ===== */
+  .doc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .doc-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #fafbfc;
+    border: 1px solid #e6e8ec;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #2c3e50;
+    text-decoration: none;
+  }
+  .doc-item .ico { color: #95a5a6; width: 18px; height: 18px; }
+  .doc-item.adopted { background: #e8f8ef; border-color: #27ae60; }
+  .doc-item.adopted .ico { color: #27ae60; }
+  .doc-item.archived { opacity: 0.65; }
+  .doc-item-body { flex: 1; }
+  .doc-item-name { font-weight: 600; }
+  .doc-item-meta { font-size: 10px; color: #7f8c8d; margin-top: 2px; }
+  .doc-item-amount { font-weight: 700; color: #2c3e50; font-variant-numeric: tabular-nums; }
+  .doc-item-status {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: #ecf0f1;
+    color: #7f8c8d;
+    font-weight: 600;
+  }
+  .doc-item.adopted .doc-item-status { background: #27ae60; color: #fff; }
+  .doc-item.empty {
+    background: #fef9e7;
+    border-color: #f4d03f;
+    border-style: dashed;
+    color: #b9770e;
+    font-style: italic;
+  }
+  .doc-item.empty .ico { color: #b9770e; }
+
+  /* ===== タイムライン ===== */
+  .timeline {
+    position: relative;
+    padding-left: 20px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px; top: 6px; bottom: 6px;
+    width: 2px;
+    background: #e0e3e8;
+  }
+  .tl-item {
+    position: relative;
+    margin-bottom: 14px;
+  }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -17px; top: 4px;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: #c8a96e;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px #c8a96e;
+  }
+  .tl-item.recent::before { background: #27ae60; box-shadow: 0 0 0 1px #27ae60; }
+  .tl-date {
+    font-size: 11px;
+    font-weight: 700;
+    color: #c8a96e;
+    margin-bottom: 3px;
+    letter-spacing: 0.05em;
+  }
+  .tl-item.recent .tl-date { color: #27ae60; }
+  .tl-text {
+    font-size: 12px;
+    color: #2c3e50;
+    line-height: 1.5;
+  }
+  details.tl-archive {
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px dashed #e0e3e8;
+  }
+  details.tl-archive summary {
+    font-size: 11px;
+    color: #7f8c8d;
+    cursor: pointer;
+    padding: 4px 0;
+    list-style: none;
+  }
+  details.tl-archive summary::before { content: '▶ '; font-size: 9px; }
+  details.tl-archive[open] summary::before { content: '▼ '; }
+
+  /* ===== 通話決定事項 ===== */
+  .call-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .call-item {
+    background: #fef9e7;
+    border-left: 3px solid #f39c12;
+    padding: 10px 12px;
+    border-radius: 4px;
+  }
+  .call-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    color: #b9770e;
+    font-weight: 700;
+    margin-bottom: 5px;
+    letter-spacing: 0.05em;
+  }
+  .call-meta .ico-mini { color: #b9770e; }
+  .call-decision {
+    font-size: 12px;
+    color: #2c3e50;
+    line-height: 1.6;
+  }
+  .call-decision strong { color: #b9770e; }
+
+  /* ===== 写真・図面ギャラリー ===== */
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .gallery-tile {
+    background: #fafbfc;
+    border: 1px solid #e6e8ec;
+    border-radius: 8px;
+    padding: 10px 8px;
+    text-align: center;
+    text-decoration: none;
+    color: #2c3e50;
+  }
+  .gallery-tile .ico-lg { color: #c8a96e; margin-bottom: 4px; }
+  .gallery-tile-label {
+    font-size: 10px;
+    line-height: 1.3;
+    color: #5d6770;
+  }
+  .gallery-tile-count {
+    display: inline-block;
+    background: #c8a96e;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 8px;
+    margin-top: 4px;
+  }
+
+  /* ===== 施工方針メモ（手書きエリア） ===== */
+  .memo {
+    background: #fafbfc;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 12px;
+    line-height: 1.7;
+    color: #5d6770;
+  }
+  .memo strong { color: #2c3e50; }
+  .memo ul { margin: 4px 0 8px 0; padding-left: 18px; }
+  .memo li { margin-bottom: 3px; }
+
+  /* ===== クイックリンク（最下部） ===== */
+  .quicklinks {
+    display: flex;
+    gap: 8px;
+    padding: 14px 16px;
+    background: #2c3e50;
+    color: #fff;
+  }
+  .quicklink {
+    flex: 1;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    padding: 10px 8px;
+    text-align: center;
+    text-decoration: none;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .quicklink .ico { color: #c8a96e; }
+
+  .footer {
+    padding: 16px;
+    text-align: center;
+    font-size: 10px;
+    color: #95a5a6;
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== SVGピクト辞書 ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="building-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="3" width="16" height="18" rx="1"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/>
+    </symbol>
+    <symbol id="key-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="8" cy="12" r="4"/><line x1="12" y1="12" x2="22" y2="12"/><line x1="18" y1="12" x2="18" y2="16"/><line x1="22" y1="12" x2="22" y2="15"/>
+    </symbol>
+    <symbol id="location-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2a7 7 0 017 7c0 5-7 13-7 13S5 14 5 9a7 7 0 017-7z"/><circle cx="12" cy="9" r="2.5"/>
+    </symbol>
+    <symbol id="calendar-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="5" width="16" height="15" rx="1"/><line x1="4" y1="10" x2="20" y2="10"/><line x1="9" y1="3" x2="9" y2="7"/><line x1="15" y1="3" x2="15" y2="7"/>
+    </symbol>
+    <symbol id="customer-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0114 0"/>
+    </symbol>
+    <symbol id="construction-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3l3 6 6 1-4.5 4.5L18 21l-6-3.5L6 21l1.5-6.5L3 10l6-1z"/>
+    </symbol>
+    <symbol id="status-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"/><polyline points="8,12 11,15 16,9"/>
+    </symbol>
+    <symbol id="kpi-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="3" y1="20" x2="21" y2="20"/><rect x="5" y="13" width="3" height="7"/><rect x="11" y="8" width="3" height="12"/><rect x="17" y="4" width="3" height="16"/>
+    </symbol>
+    <symbol id="estimate-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="3" width="16" height="18" rx="1.5"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/><circle cx="17" cy="16" r="2"/>
+    </symbol>
+    <symbol id="invoice-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 3h14v18l-3-2-3 2-3-2-3 2-2-2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/>
+    </symbol>
+    <symbol id="payment-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 10h5a2 2 0 010 4H9"/>
+    </symbol>
+    <symbol id="cost-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="6" width="18" height="13" rx="1"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="8" cy="14" r="1.2"/><line x1="12" y1="14" x2="18" y2="14"/>
+    </symbol>
+    <symbol id="profit-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="3,17 9,11 13,15 21,7"/><polyline points="15,7 21,7 21,13"/>
+    </symbol>
+    <symbol id="people-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20a6 6 0 0112 0"/><path d="M14 20a5 5 0 017-3"/>
+    </symbol>
+    <symbol id="document-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 3h10l4 4v14H5z"/><path d="M15 3v4h4"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/>
+    </symbol>
+    <symbol id="contract-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="5" y="4" width="14" height="16" rx="1"/><polyline points="9,9 11,11 15,7"/><line x1="9" y1="14" x2="15" y2="14"/><line x1="9" y1="17" x2="13" y2="17"/>
+    </symbol>
+    <symbol id="timeline-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"/><polyline points="12,7 12,12 15,15"/>
+    </symbol>
+    <symbol id="phone-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a1 1 0 01-1 1A14 14 0 014 5a1 1 0 011-1z"/>
+    </symbol>
+    <symbol id="photo-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="6" width="18" height="13" rx="1"/><circle cx="12" cy="13" r="3.5"/><path d="M8 6l1.5-2h5L16 6"/>
+    </symbol>
+    <symbol id="floorplan-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="18" height="18"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="12" y1="3" x2="12" y2="21"/><circle cx="6" cy="6" r="0.8"/>
+    </symbol>
+    <symbol id="video-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="6" width="13" height="12" rx="1"/><polygon points="16,10 22,7 22,17 16,14"/>
+    </symbol>
+    <symbol id="memo-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 4h11l3 3v13H5z"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="9" y1="14" x2="15" y2="14"/><line x1="9" y1="17" x2="13" y2="17"/>
+    </symbol>
+    <symbol id="link-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 14a4 4 0 005.66 0l3-3a4 4 0 00-5.66-5.66l-1 1"/><path d="M14 10a4 4 0 00-5.66 0l-3 3a4 4 0 005.66 5.66l1-1"/>
+    </symbol>
+    <symbol id="warning-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3l10 18H2z"/><line x1="12" y1="10" x2="12" y2="15"/><circle cx="12" cy="18" r="0.6" fill="currentColor"/>
+    </symbol>
+    <symbol id="workflow-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="6" height="6"/><rect x="15" y="3" width="6" height="6"/><rect x="9" y="15" width="6" height="6"/><line x1="6" y1="9" x2="6" y2="13"/><line x1="18" y1="9" x2="18" y2="13"/><line x1="6" y1="13" x2="18" y2="13"/><line x1="12" y1="13" x2="12" y2="15"/>
+    </symbol>
+    <symbol id="folder-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+    </symbol>
+    <symbol id="rireki-icon" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="3" width="16" height="18" rx="1.5"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="14" y2="16"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ============ ヒーロー ============ -->
+<div class="hero">
+  <div class="hero-label">
+    <svg class="ico-mini"><use href="#building-icon"/></svg>
+    <span>CASE SUMMARY</span>
+  </div>
+  <h1 class="hero-title">立願の森<br>天井復旧工事</h1>
+  <span class="hero-key">
+    <svg class="ico-mini" style="vertical-align:-1px;margin-right:3px;"><use href="#key-icon"/></svg>
+    玉寿会-立願の森-26
+  </span>
+  <div class="hero-meta">
+    <div class="hero-meta-item">
+      <svg class="ico-mini"><use href="#customer-icon"/></svg>
+      <span>T-001 玉寿会</span>
+    </div>
+    <div class="hero-meta-item">
+      <svg class="ico-mini"><use href="#location-icon"/></svg>
+      <span>熊本県玉名市</span>
+    </div>
+    <div class="hero-meta-item">
+      <svg class="ico-mini"><use href="#calendar-icon"/></svg>
+      <span>5/25(月)-26(火)</span>
+    </div>
+    <div class="hero-meta-item">
+      <svg class="ico-mini"><use href="#construction-icon"/></svg>
+      <span>共同生活室 約117㎡</span>
+    </div>
+  </div>
+  <div class="hero-budget">
+    <span class="hero-budget-label">受注金額（税込）</span>
+    <span class="hero-budget-value">¥1,300,000</span>
+  </div>
+</div>
+
+<!-- ============ ステータスバッジ群 ============ -->
+<div class="section">
+  <div class="section-head">
+    <svg class="ico"><use href="#status-icon"/></svg>
+    <span>ステータス</span>
+  </div>
+  <!-- AUTO:JSON:STATUS_BADGES:START -->
+  <div class="badges">
+    <span class="badge stage">
+      <svg class="ico-mini"><use href="#workflow-icon"/></svg>
+      ステータス：請求済み
+    </span>
+    <span class="badge urgent">
+      <svg class="ico-mini"><use href="#calendar-icon"/></svg>
+      入金待ち（請求 2026/5/29）
+    </span>
+    <span class="badge payment">
+      <svg class="ico-mini"><use href="#invoice-icon"/></svg>
+      請求 ¥1,300,000 発行済み
+    </span>
+    <span class="badge note">
+      <svg class="ico-mini"><use href="#contract-icon"/></svg>
+      契約書 締結済み（2026/5/20）
+    </span>
+  </div>
+  <!-- AUTO:JSON:STATUS_BADGES:END -->
+</div>
+
+<!-- ============ KPIタイル ============ -->
+<div class="section">
+  <div class="section-head">
+    <svg class="ico"><use href="#kpi-icon"/></svg>
+    <span>KPI</span>
+  </div>
+  <!-- AUTO:JSON:KPI:START -->
+  <div class="kpi-grid">
+    <div class="kpi-tile">
+      <div class="kpi-tile-label">
+        <svg class="ico-mini"><use href="#estimate-icon"/></svg>
+        見積（採用案）
+      </div>
+      <div class="kpi-tile-value">¥1,300,000</div>
+      <div class="kpi-tile-sub">2026/2/27 発行</div>
+    </div>
+    <div class="kpi-tile">
+      <div class="kpi-tile-label">
+        <svg class="ico-mini"><use href="#invoice-icon"/></svg>
+        請求
+      </div>
+      <div class="kpi-tile-value">¥1,300,000</div>
+      <div class="kpi-tile-sub">2026/5/29 発行（ARS-T001-260529-02）</div>
+    </div>
+    <div class="kpi-tile">
+      <div class="kpi-tile-label">
+        <svg class="ico-mini"><use href="#payment-icon"/></svg>
+        入金
+      </div>
+      <div class="kpi-tile-value">¥0</div>
+      <div class="kpi-tile-sub">入金待ち</div>
+    </div>
+    <div class="kpi-tile">
+      <div class="kpi-tile-label">
+        <svg class="ico-mini"><use href="#cost-icon"/></svg>
+        原価（実績）
+      </div>
+      <div class="kpi-tile-value">¥0</div>
+      <div class="kpi-tile-sub">原価管理Sheets未計上（最終集計 2026/5/14）</div>
+    </div>
+    <div class="kpi-tile profit span2">
+      <div class="kpi-tile-label">
+        <svg class="ico-mini"><use href="#profit-icon"/></svg>
+        粗利見込（受注-原価実績）
+      </div>
+      <div class="kpi-tile-value">¥1,300,000</div>
+      <div class="kpi-tile-sub">原価未計上のため請求額そのまま・原価集計後に再計算</div>
+    </div>
+  </div>
+  <!-- AUTO:JSON:KPI:END -->
+</div>
+
+<!-- ============ 関係者マップ ============ -->
+<div class="section">
+  <div class="section-head">
+    <svg class="ico"><use href="#people-icon"/></svg>
+    <span>関係者</span>
+  </div>
+  <div class="actors">
+    <div class="actor-card client">
+      <div class="actor-role">CLIENT・発注者</div>
+      <div class="actor-name">T-001 玉寿会</div>
+      <div class="actor-detail">担当: 西俊至 様<br>代表: 山田勝徳 理事長<br>096-875-1139</div>
+    </div>
+    <div class="actor-card intro">
+      <div class="actor-role">紹介元・施工協力</div>
+      <div class="actor-name">T-014 平エンジニアリング</div>
+      <div class="actor-detail">代表: 平方聡<br>電気・空調・SP・自火報<br>080-1787-4584</div>
+    </div>
+    <div class="actor-card subcon">
+      <div class="actor-role">下請・本番施工</div>
+      <div class="actor-name">T-006 中津屋（佐藤）</div>
+      <div class="actor-detail">天井養生・除菌<br>岩綿吸音板増し貼り<br>0978-63-0081</div>
+    </div>
+    <div class="actor-card subcon">
+      <div class="actor-role">下請・補助</div>
+      <div class="actor-name">T-007 いわい装飾</div>
+      <div class="actor-detail">岩井健一<br>5/25-26 補修・床貼り<br>別府市南須賀1組</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 書類パネル ============ -->
+<div class="section">
+  <div class="section-head">
+    <svg class="ico"><use href="#document-icon"/></svg>
+    <span>書類</span>
+  </div>
+  <div class="doc-list">
+
+    <a class="doc-item adopted" href="書類/見_玉寿会-立願の森-26.pdf">
+      <svg class="ico"><use href="#estimate-icon"/></svg>
+      <div class="doc-item-body">
+        <div class="doc-item-name">見_玉寿会-立願の森-26.pdf</div>
+        <div class="doc-item-meta">採用案・2026/2/27 発行</div>
+      </div>
+      <div class="doc-item-amount">¥1,300,000</div>
+      <span class="doc-item-status">採用</span>
+    </a>
+
+    <a class="doc-item archived" href="書類/見_旧A_玉寿会-立願の森-26.pdf">
+      <svg class="ico"><use href="#estimate-icon"/></svg>
+      <div class="doc-item-body">
+        <div class="doc-item-name">見_旧A_玉寿会-立願の森-26.pdf</div>
+        <div class="doc-item-meta">①ジプトーン貼替・2025/11/17</div>
+      </div>
+      <div class="doc-item-amount">¥1,177,000</div>
+      <span class="doc-item-status">旧版</span>
+    </a>
+
+    <a class="doc-item archived" href="書類/見_旧B_玉寿会-立願の森-26.pdf">
+      <svg class="ico"><use href="#estimate-icon"/></svg>
+      <div class="doc-item-body">
+        <div class="doc-item-name">見_旧B_玉寿会-立願の森-26.pdf</div>
+        <div class="doc-item-meta">②既存上ジプトーン貼り・2025/11/17</div>
+      </div>
+      <div class="doc-item-amount">¥891,000</div>
+      <span class="doc-item-status">旧版</span>
+    </a>
+
+    <a class="doc-item archived" href="書類/見_旧C_玉寿会-立願の森-26.pdf">
+      <svg class="ico"><use href="#estimate-icon"/></svg>
+      <div class="doc-item-body">
+        <div class="doc-item-name">見_旧C_玉寿会-立願の森-26.pdf</div>
+        <div class="doc-item-meta">③既存上岩綿吸音板貼り・2025/11/17</div>
+      </div>
+      <div class="doc-item-amount">¥1,100,000</div>
+      <span class="doc-item-status">旧版</span>
+    </a>
+
+    <div class="doc-item empty">
+      <svg class="ico"><use href="#contract-icon"/></svg>
+      <div class="doc-item-body">
+        <div class="doc-item-name">工事請負契約書 未発行</div>
+        <div class="doc-item-meta">玉寿会宛・¥1,300,000</div>
+      </div>
+      <span class="doc-item-status">未発行</span>
+    </div>
+
+    <div class="doc-item empty">
+      <svg class="ico"><use href="#document-icon"/></svg>
+      <div class="doc-item-body">
+        <div class="doc-item-name">注文書 中津屋・平E宛 未発行</div>
+        <div class="doc-item-meta">2社別発行予定</div>
+      </div>
+      <span class="doc-item-status">未発行</span>
+    </div>
+
+    <div class="doc-item empty">
+      <svg class="ico"><use href="#invoice-icon"/></svg>
+      <div class="doc-item-body">
+        <div class="doc-item-name">請求書 未発行</div>
+        <div class="doc-item-meta">完工後発行・玉寿会宛</div>
+      </div>
+      <span class="doc-item-status">未発行</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============ 完了タイムライン ============ -->
+<div class="section">
+  <div class="section-head">
+    <svg class="ico"><use href="#timeline-icon"/></svg>
+    <span>経緯タイムライン</span>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+
+    <div class="tl-item recent">
+      <div class="tl-date">2026/6/4（木）</div>
+      <div class="tl-text">完成写真5枚 受領（食堂天井全景・厨房側・廊下・ホール窓側・天井照明）</div>
+    </div>
+
+    <div class="tl-item recent">
+      <div class="tl-date">2026/5/29（金）</div>
+      <div class="tl-text">請求書発行・西様へメール送信（ARS-T001-260529-02・税込¥1,300,000）。data.json登録・ステータス「請求済み」更新。TODO：入金確認</div>
+    </div>
+
+    <details class="tl-archive">
+      <summary>過去の経緯を見る（8件・7日超）</summary>
+
+      <div class="tl-item">
+        <div class="tl-date">2026/5/7（木）</div>
+        <div class="tl-text">案件管理用ファイル整備（00_/01_ プレフィックス運用開始）・新仕様ワークフロー配置・履歴ノート作成</div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-date">2026/4/22（水）</div>
+        <div class="tl-text">中津屋佐藤・岩井健一と通話。施工分担最終調整：かめさんは1丁目側、立願の森は中津屋・平E・いわい・河原くん</div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-date">2026/4/21（火）</div>
+        <div class="tl-text">玉寿会打合・施工方針確定。工法：既存ジプトーン上に岩綿吸音板増し貼り。業者分担確定。T-014 平エンジニアリング採番</div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-date">2026/4/20（月）</div>
+        <div class="tl-text">医務室天井 追加現調・動画2本</div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-date">2026/2/27（金）</div>
+        <div class="tl-text">見積採用案 提出 ¥1,300,000（税込）。③ベース＋諸経費追加の最終確定版</div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-date">2025/11/17（月）</div>
+        <div class="tl-text">見積3案提示（旧A ¥1,177,000／旧B ¥891,000／旧C ¥1,100,000 → 採用ベース）</div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-date">2025/11/15（土）</div>
+        <div class="tl-text">現調実施・写真6枚（食堂全景・前居室天井・厨房側・天井汚れ・窓側エアコン・通路側）</div>
+      </div>
+
+    </details>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<!-- ============ 通話決定事項 ============ -->
+<div class="section">
+  <div class="section-head">
+    <svg class="ico"><use href="#phone-icon"/></svg>
+    <span>通話決定事項</span>
+  </div>
+  <!-- AUTO:CALL_DECISIONS:START -->
+  <div class="call-list">
+
+    <div class="call-item">
+      <div class="call-meta">
+        <svg class="ico-mini"><use href="#phone-icon"/></svg>
+        <span>2026/4/22 14:18 中津屋 佐藤</span>
+      </div>
+      <div class="call-decision">
+        <strong>役割分担確定</strong>：かめさんは「さくら苑1丁目」担当・中津屋チームは「立願の森」担当。<strong>古長さん（T-015）下請け参加</strong>でおばあちゃん誘導も対応。電気屋は壁貼り後に穴開け。
+      </div>
+    </div>
+
+    <div class="call-item">
+      <div class="call-meta">
+        <svg class="ico-mini"><use href="#phone-icon"/></svg>
+        <span>2026/4/22 13:44 中津屋 佐藤</span>
+      </div>
+      <div class="call-decision">
+        <strong>除菌方針</strong>：天井ボード貼付前にアルコール（気化性）で拭き上げ。エアコン回りカビ部位中心。クイックルワイパー使用OK。塗り屋さんを別途呼んだ方が良い可能性あり。
+      </div>
+    </div>
+
+    <div class="call-item">
+      <div class="call-meta">
+        <svg class="ico-mini"><use href="#phone-icon"/></svg>
+        <span>2026/4/22 18:33 岩井 健一</span>
+      </div>
+      <div class="call-decision">
+        <strong>5/25-26 段取り確定</strong>：5/25 補修（岩井さん）+ 河原くんがクロス屋として医務室壁クロス。5/26 岩井さん医務室床貼り（4m角現場）。中津屋は近くで本業し夜合流。
+      </div>
+    </div>
+
+  </div>
+  <!-- AUTO:CALL_DECISIONS:END -->
+</div>
+
+<!-- ↓↓↓ ここから下はマーカー外・手書き編集領域(再注入時に保護される) ↓↓↓ -->
+
+<!-- ============ 写真・図面ギャラリー ============ -->
+<div class="section">
+  <div class="section-head">
+    <svg class="ico"><use href="#folder-icon"/></svg>
+    <span>関連ファイル</span>
+  </div>
+  <div class="gallery">
+    <a class="gallery-tile" href="写真/">
+      <svg class="ico-lg"><use href="#photo-icon"/></svg>
+      <div class="gallery-tile-label">現調写真</div>
+      <span class="gallery-tile-count">12</span>
+    </a>
+    <a class="gallery-tile" href="写真/">
+      <svg class="ico-lg"><use href="#video-icon"/></svg>
+      <div class="gallery-tile-label">現調動画</div>
+      <span class="gallery-tile-count">2</span>
+    </a>
+    <a class="gallery-tile" href="図面/">
+      <svg class="ico-lg"><use href="#floorplan-icon"/></svg>
+      <div class="gallery-tile-label">図面</div>
+      <span class="gallery-tile-count">9</span>
+    </a>
+    <a class="gallery-tile" href="議事/">
+      <svg class="ico-lg"><use href="#memo-icon"/></svg>
+      <div class="gallery-tile-label">議事録</div>
+      <span class="gallery-tile-count">4</span>
+    </a>
+    <a class="gallery-tile" href="議事/通話記録/">
+      <svg class="ico-lg"><use href="#phone-icon"/></svg>
+      <div class="gallery-tile-label">通話記録</div>
+      <span class="gallery-tile-count">2</span>
+    </a>
+    <a class="gallery-tile" href="受領/">
+      <svg class="ico-lg"><use href="#document-icon"/></svg>
+      <div class="gallery-tile-label">受領資料</div>
+      <span class="gallery-tile-count">3</span>
+    </a>
+  </div>
+</div>
+
+<!-- ============ 施工方針メモ（手書きエリア） ============ -->
+<div class="section">
+  <div class="section-head">
+    <svg class="ico"><use href="#memo-icon"/></svg>
+    <span>施工方針メモ</span>
+  </div>
+  <div class="memo">
+    <strong>除菌方針</strong>：エタノール75%で確定。塩素・オゾンは入居者在室のため不可。アルコール単独ではカビ根絶困難だが、岩綿吸音板で完全に覆う「封じ込め」方式で十分。
+    <br><br>
+    <strong>エアコン結露カビ対策</strong>：天井黒ずみはエアコン冷気と室温差による結露カビ。<strong>玉寿会側にエアコン内部清掃を依頼</strong>（再発防止のため）。
+    <br><br>
+    <strong>接着方法</strong>：ボンド+タッカー併用。圧着でボンドが乾く・乾燥待ち不要。
+    <br><br>
+    <strong>施工順序</strong>：ホールを入口から見て<strong>右半分→左半分</strong>。入居者は反対側で過ごす。食事時間帯も継続作業（静音配慮）。
+    <br><br>
+    <strong>Gemini動画解析の検証結果（4/21時点）</strong>：
+    <ul>
+      <li>スクエア埋込LED 10〜12個・丸型ダウンライト 10〜15個</li>
+      <li>天カセエアコン HITACHI製 2台</li>
+      <li>火災報知器 6〜8個・誘導灯 4個以上</li>
+      <li>点検口 1箇所</li>
+    </ul>
+    実写検証で全項目妥当性確認済。
+  </div>
+</div>
+
+<!-- ============ クイックリンク ============ -->
+<div class="quicklinks">
+  <a class="quicklink" href="01_ワークフロー.html">
+    <svg class="ico"><use href="#workflow-icon"/></svg>
+    <span>ワークフロー</span>
+  </a>
+  <a class="quicklink" href="00_履歴_玉寿会-立願の森-26.md">
+    <svg class="ico"><use href="#rireki-icon"/></svg>
+    <span>履歴ノート</span>
+  </a>
+  <a class="quicklink" href="https://kameisatoru-svg.github.io/genba-navi/">
+    <svg class="ico"><use href="#link-icon"/></svg>
+    <span>現場ナビ</span>
+  </a>
+</div>
+
+<div class="footer">
+  生成: anken-summary v改訂3 / 4種マーカー埋込 / 2026-05-07<br>
+  案件: 玉寿会-立願の森-26
+</div>
+
+</body>
+</html>
