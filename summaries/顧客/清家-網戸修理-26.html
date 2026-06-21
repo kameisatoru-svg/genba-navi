@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ネクサス-串たつ外壁-26 案件サマリー</title>
+<title>清家邸 網戸修理 案件サマリー</title>
 <style>
-:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;--alert:#f87171;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
 .header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header.alert{background:linear-gradient(135deg,#f87171,#fdbb2d);}
 .header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
 .header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
 .badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
@@ -21,20 +22,28 @@ body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic Pro
 .kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
 .card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card.alert{border:1px solid var(--alert);}
 .card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
-ul{padding-left:1.3em;} li{margin-bottom:4px;}
+.card-t.alert{color:var(--alert);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
 .doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
 a.doc:hover{background:#34345a;transform:translateX(3px);}
-.doc-icon{font-size:18px;} .doc-info{flex:1;min-width:0;}
-.doc-name{font-weight:700;font-size:13px;word-break:break-all;} .doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
 .doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
-.s-ok{background:#14532d;color:var(--ok);} .s-wip{background:#56450c;color:var(--warn);}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
 table{width:100%;border-collapse:collapse;font-size:12px;}
-th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;} th{color:var(--sub);font-weight:600;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
 .timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
 .timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
 .timeline .tl-item.recent::before{background:var(--ok);}
-.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;} .tl-text{font-size:13px;}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
 .footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
 @media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
 @media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
@@ -44,46 +53,44 @@ th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;} th{color
 <body>
 
 <div class="header">
-  <h1>串焼きたつみ 外壁幅木補修工事</h1>
-  <div class="sub">ネクサス-串たつ外壁-26 ｜ 大分県大分市（ネクサスプラザ内テナント）</div>
+  <h1>清家邸 網戸修理</h1>
+  <div class="sub">清家-網戸修理-26 ｜ 清家様（個人宅）</div>
   <div class="badges">
     <!-- AUTO:JSON:STATUS_BADGES -->
-    <span class="badge">🧾 請求済み（未入金）</span>
-    <span class="badge">🏢 ネクサスプラザ（T-011）</span>
-    <span class="badge">💴 ¥18,634</span>
+    <span class="badge">💬 相談（訪問予定）</span><span class="badge">🏠 清家様</span><span class="badge">🔧 網戸枠外れ</span><span class="badge">⚠️ data.json未登録</span>
     <!-- /AUTO:JSON:STATUS_BADGES -->
-    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E3%83%8D%E3%82%AF%E3%82%B5%E3%82%B9-%E4%B8%B2%E3%81%9F%E3%81%A4%E5%A4%96%E5%A3%81-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E6%B8%85%E5%AE%B6-%E7%B6%B2%E6%88%B8%E4%BF%AE%E7%90%86-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
   </div>
   <!-- AUTO:JSON:LAST_UPDATED -->
-  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-06-17 09:05</div>
+  <div class="sub" style="margin-top:6px;">⚠️ data.json未登録（新規問合せ・案件キーは採番済み）</div>
   <!-- /AUTO:JSON:LAST_UPDATED -->
 </div>
 
 <!-- AUTO:JSON:KPI_ROW -->
 <div class="kpi-row">
-  <div class="kpi"><div class="v">請求済み</div><div class="l">ステータス</div></div>
-  <div class="kpi"><div class="v">¥18,634</div><div class="l">請求額</div></div>
-  <div class="kpi"><div class="v">未入金</div><div class="l">入金状況</div></div>
-  <div class="kpi"><div class="v">4/22</div><div class="l">工期</div></div>
+  <div class="kpi"><div class="v">相談</div><div class="l">ステータス</div></div>
+  <div class="kpi"><div class="v">見積前</div><div class="l">金額</div></div>
+  <div class="kpi"><div class="v">通話1件</div><div class="l">記録</div></div>
+  <div class="kpi"><div class="v">6/21</div><div class="l">訪問予定</div></div>
 </div>
 <!-- /AUTO:JSON:KPI_ROW -->
 
 <div class="grid">
   <div>
     <div class="card">
-      <div class="card-t">📅 進行状況・フロー</div>
+      <div class="card-t">📅 進行状況</div>
       <ul>
-        <li><b>進行フロー</b>：現地調査→工事（4/22 玄関ドア下部モルタル劣化補修）→請求（4/30 ¥18,634）</li>
-        <li><b>現在地</b>：請求済み・<b>入金待ち</b></li>
-        <li><b>内容</b>：ネクサスプラザ内テナント「串焼きたつみ」の外壁幅木（玄関ドア下部モルタル）補修</li>
+        <li><b>6/19</b>：清家さん奥様より電話。網戸の枠に何かがぶつかり、外れてはまらない状態。</li>
+        <li><b>対応</b>：亀井が工具持参で対応可能と判断。<b>6/21（明後日）訪問予定</b>で約束。</li>
+        <li><b>次のステップ</b>：現地確認 → 枠の嵌め直し or 網戸交換の要否判断 → 必要なら見積。</li>
       </ul>
     </div>
     <div class="card">
       <div class="card-t">👥 関係者</div>
       <table>
         <tr><th>役割</th><th>名称</th><th>備考</th></tr>
-        <tr><td>発注者</td><td>株式会社ネクサスプラザ（T-011）</td><td>テナント：串焼きたつみ</td></tr>
-        <tr><td>施工</td><td>株式会社アート・レイズ</td><td>外壁幅木補修</td></tr>
+        <tr><td>施主</td><td>清家様（奥様が窓口）</td><td>個人宅</td></tr>
+        <tr><td>施工</td><td>株式会社アート・レイズ</td><td>網戸修理</td></tr>
       </table>
     </div>
   </div>
@@ -91,30 +98,26 @@ th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;} th{color
     <div class="card">
       <div class="card-t">📂 主要書類</div>
       <!-- AUTO:FILES:MAIN_DOCS -->
-      <a class="doc" href="" target="_blank"><div class="doc-icon">🧾</div><div class="doc-info"><div class="doc-name">請_ネクサス-串たつ外壁-26.pdf</div><div class="doc-meta-s">2026/4/30 税抜¥16,940・税込¥18,634</div></div><div class="doc-st s-ok">発行済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📞</div><div class="doc-info"><div class="doc-name">20260619_清家奥さん_transcript.md</div><div class="doc-meta-s">通話文字起こし（網戸修理の相談）</div></div><div class="doc-st s-ok">記録</div></a>
       <!-- /AUTO:FILES:MAIN_DOCS -->
-      <div class="doc-meta-s" style="margin-top:4px;">※ Driveリンクは同期後に付与。</div>
     </div>
-    <div class="card">
-      <div class="card-t">📷 写真・現調記録</div>
-      <ul>
-        <li>現調・工事前・工事後3枚：外壁レンガ取合い／玄関ドア下部モルタル劣化（前）／補修後</li>
-      </ul>
-    </div>
+
   </div>
 </div>
 
 <!-- AUTO:CALL_DECISIONS -->
 <div class="card">
-  <div class="card-t">📞 通話記録から抽出した重要決定事項</div>
-  <div class="doc-meta-s">通話記録からの確定事項なし</div>
+  <div class="card-t">📞 通話記録から抽出した重要事項</div>
+  <ul>
+    <li>2026/6/19：網戸の枠が外れてはまらない（何かがぶつかった衝撃で外れた）。自分で直すのは難しいとのこと → 亀井が <b>6/21（明後日）に訪問</b>すると約束。</li>
+  </ul>
 </div>
 <!-- /AUTO:CALL_DECISIONS -->
 
 <div class="card">
   <div class="card-t">💰 原価・利益サマリー</div>
   <!-- AUTO:CALC:PROFIT_CATEGORIES -->
-  <table><tr><th>区分</th><th>金額</th></tr><tr><td>経費</td><td>¥300</td></tr><tr><td>合計</td><td>¥300</td></tr></table>
+  <div class="doc-meta-s">原価未集計（見積前）</div>
   <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
   <!-- AUTO:CALC:PROFIT_TOTAL -->
   <!-- /AUTO:CALC:PROFIT_TOTAL -->
@@ -123,7 +126,7 @@ th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;} th{color
 <div class="card">
   <div class="card-t">🧾 外注費・受取書類</div>
   <!-- AUTO:FILES:GAICHU_TABLE -->
-  <div class="doc-meta-s">受取見積書・受取請求書なし</div>
+  <div class="doc-meta-s">受取書類なし</div>
   <!-- /AUTO:FILES:GAICHU_TABLE -->
 </div>
 
@@ -131,20 +134,24 @@ th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;} th{color
   <div class="card-t">🕒 タイムライン</div>
   <!-- AUTO:WORKFLOW:TIMELINE:START -->
   <div class="timeline">
-    <div class="tl-item recent"><div class="tl-date">2026/4/30（水）</div><div class="tl-text">請求書発行 ¥18,634</div></div>
-    <div class="tl-item"><div class="tl-date">2026/4/22（火）</div><div class="tl-text">玄関ドア下部モルタル補修 施工</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/21（日）</div><div class="tl-text">現地訪問予定（網戸確認・対応）</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/19（金）</div><div class="tl-text">奥様より相談電話受電（網戸枠が外れてはまらない）</div></div>
   </div>
   <!-- AUTO:WORKFLOW:TIMELINE:END -->
 </div>
 
 <div class="card">
-  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <div class="card-t">📝 所見・特記事項</div>
   <ul>
-    <li>入金待ち（未入金）</li>
-    <li>小規模補修・即日施工</li>
+    <li>小口修理（網戸枠の嵌め直し or 網戸交換）。工具持参で現地対応想定。</li>
+    <li>訪問後に費用が発生する規模なら見積／請求を起票。data.json への登録（相談）も検討。</li>
   </ul>
 </div>
 
-<div class="footer">案件サマリー（案件単位）｜ 生成 2026-06-19 ｜ data.json最終更新 2026-06-17 09:05</div>
+<div class="footer">
+  自動生成: 案件サマリー（AUTOマーカー方式）｜ data.json を真実の源泉とし、Drive同期後にDriveリンクを付与<br>
+  清家-網戸修理-26
+</div>
+
 </body>
 </html>

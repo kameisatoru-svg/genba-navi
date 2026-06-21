@@ -3,56 +3,58 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>玉寿会（さくら苑・立願の森） 案件一覧</title>
+<title>アズコミュニケーションズ 案件一覧</title>
 <style>
-:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#2a8d5a;--acc2:#8fc18f;--ok:#4ade80;--warn:#facc15;}
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
-.header{background:linear-gradient(135deg,#2a4d3a,#5a7c5a);border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#f3fff3;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
 .header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
-.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.9;margin-top:2px;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
 .badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
 .badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
 .card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
 .card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;} li{margin-bottom:4px;}
 .doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
 a.doc:hover{background:#34345a;transform:translateX(3px);}
 .doc-icon{font-size:18px;} .doc-info{flex:1;min-width:0;}
 .doc-name{font-weight:700;font-size:13px;word-break:break-all;} .doc-meta-s{font-size:11px;color:var(--sub);}
 .doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
 .s-ok{background:#14532d;color:var(--ok);} .s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;} th{color:var(--sub);font-weight:600;}
 .footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
-@media print{body{background:#fff;color:#000;}.card{background:#f4f4f8;}}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>🌸 玉寿会（さくら苑・立願の森） 案件一覧</h1>
-  <div class="sub">社会福祉法人 玉寿会（T-001）｜ 熊本県玉名市 ｜ 西 俊至 様（事務課長）／ 山田 勝徳 理事長</div>
+  <h1>アズコミュニケーションズ 案件一覧</h1>
+  <div class="sub">株式会社アズコミュニケーションズ（T-031）｜ 担当窓口：森本晶太さん（取締役営業部長）</div>
   <div class="badges">
-    <span class="badge">📒 案件索引（2件）</span>
+    <span class="badge">📒 案件索引（1件）</span>
     <span class="badge">各案件の詳細は個別サマリーへ</span>
   </div>
 </div>
 
 <div class="card">
   <div class="card-t">📁 案件一覧（タップで個別サマリーを開く）</div>
-      <a class="doc" href="./玉寿会-さくら床-26/00_案件サマリー.html" target="_blank">
+      <a class="doc" href="./アズコム-壁天井修繕-26/00_案件サマリー.html" target="_blank">
         <div class="doc-icon">📁</div>
         <div class="doc-info">
-          <div class="doc-name">さくら苑 床工事</div>
-          <div class="doc-meta-s">玉寿会-さくら床-26 ｜ 熊本県玉名市 ｜ 第1・2期入金済、第3期(医務室・ひまわり天井 ¥1,204,500)請求済・入金待ち ｜ ¥9,990,200〜</div>
+          <div class="doc-name">執務室 壁・天井修繕工事</div>
+          <div class="doc-meta-s">アズコム-壁天井修繕-26 ｜ 6/8見積送付・社内協議の回答待ち（受領写真ベース概算） ｜ ¥44,000</div>
         </div>
-        <div class="doc-st s-wip">請求済み</div>
-      </a>
-      <a class="doc" href="./玉寿会-立願の森-26/00_案件サマリー.html" target="_blank">
-        <div class="doc-icon">📁</div>
-        <div class="doc-info">
-          <div class="doc-name">立願の森 天井復旧工事</div>
-          <div class="doc-meta-s">玉寿会-立願の森-26 ｜ 熊本県玉名市立願寺623-1 ｜ 5/25-27施工完了、既存上に岩綿吸音板貼(採用③案)・平エンジ連携 ｜ ¥1,300,000</div>
-        </div>
-        <div class="doc-st s-wip">請求済み</div>
+        <div class="doc-st s-wip">見積提出済み</div>
       </a>
 </div>
 
@@ -60,6 +62,6 @@ a.doc:hover{background:#34345a;transform:translateX(3px);}
   <div class="doc-meta-s">※ この画面は索引です。各案件の進行状況・通話決定事項・書類・原価などの詳細は、各案件フォルダ直下の <b>00_案件サマリー.html</b>（個別サマリー）に集約しています。日次更新チェックは個別サマリー側を更新します。</div>
 </div>
 
-<div class="footer">案件索引 ｜ 社会福祉法人 玉寿会（T-001）｜ data.json最終更新 2026-06-17 09:05</div>
+<div class="footer">案件索引 ｜ 案件単位サマリーへ移行 ｜ data.json最終更新 2026-06-17 09:05</div>
 </body>
 </html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>松村邸 自宅ロールスクリーン修理 案件サマリー</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI','Hiragino Sans','Meiryo',sans-serif;line-height:1.6;padding:clamp(12px,3vw,32px)}
+.dash{max-width:1100px;margin:0 auto}
+.hdr{background:linear-gradient(135deg,#3e2a1a,#5e3a1a);border-radius:16px;padding:clamp(16px,3vw,32px);margin-bottom:24px;border-left:5px solid #ffa67d}
+.hdr h1{font-size:clamp(18px,4vw,28px);color:#fff;margin-bottom:4px}
+.hdr .sub{font-size:clamp(12px,2.5vw,15px);color:#d0b0a0}
+.badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:700;margin-left:8px;vertical-align:middle}
+.s-ok{background:#0d7a3e;color:#a8ffcf}
+.s-wait{background:#7a6b0d;color:#fff3a8}
+.s-plan{background:#3a3a5c;color:#b0b0d0}
+.s-empty{background:#4a2020;color:#ffaaaa}
+.kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.kpi{border-radius:14px;padding:clamp(12px,2vw,20px);text-align:center}
+.kpi .label{font-size:clamp(10px,2vw,12px);color:#b0b0d0;letter-spacing:1px}
+.kpi .val{font-size:clamp(20px,4vw,30px);font-weight:800;margin-top:4px}
+.kpi .sub{font-size:clamp(9px,1.8vw,11px);color:#a8dadc;margin-top:2px}
+.kpi:nth-child(1){background:linear-gradient(135deg,#69461b,#8a6b2c)}.kpi:nth-child(1) .val{color:#ffd4a8}
+.kpi:nth-child(2){background:linear-gradient(135deg,#1b694a,#2c8a5e)}.kpi:nth-child(2) .val{color:#a8ffd4}
+.kpi:nth-child(3){background:linear-gradient(135deg,#691b3e,#8a2c5e)}.kpi:nth-child(3) .val{color:#ffa8d4}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
+.card{background:#16213e;border-radius:14px;padding:clamp(14px,2.5vw,24px);margin-bottom:24px}
+.card h2{font-size:clamp(14px,3vw,18px);color:#ffa67d;margin-bottom:12px;border-bottom:1px solid #4a4a6a;padding-bottom:8px}
+.card h3{font-size:clamp(12px,2.5vw,15px);color:#a8dadc;margin:12px 0 6px}
+.dtbl{width:100%;border-collapse:collapse;font-size:clamp(11px,2vw,13px)}
+.dtbl th{text-align:left;color:#a8dadc;padding:6px 8px;border-bottom:1px solid #4a4a6a;font-weight:600}
+.dtbl td{padding:6px 8px;border-bottom:1px solid #3a3a5a}
+.dtbl .amt{text-align:right;font-family:'Courier New',monospace;font-weight:700}
+.dtbl tr:hover{background:#1e2d4a}
+.note{background:#1e2d4a;border-left:3px solid #ffa67d;padding:12px 16px;border-radius:0 8px 8px 0;margin-top:12px;font-size:clamp(11px,2vw,13px)}
+.warn{background:#3a2020;border-left:3px solid #ff4444;padding:10px 14px;border-radius:0 8px 8px 0;margin-top:8px;font-size:clamp(11px,2vw,12px);color:#ffaaaa}
+.footer{text-align:center;padding:20px;color:#a8dadc;font-size:11px;border-top:1px solid #4a4a6a;margin-top:24px}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.photo-grid img{width:100%;border-radius:8px;border:1px solid #3a3a5a;cursor:pointer}
+@media(max-width:768px){.kpi-row{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}.photo-grid{grid-template-columns:repeat(2,1fr)}}
+@media print{body{background:#fff;color:#222}.hdr{background:#f0f0f0}.hdr h1{color:#222}.card{background:#f8f8f8;border:1px solid #ddd}.kpi{background:#f0f0f0!important}.kpi .val{color:#222!important}}
+
+.doc-list{display:flex;flex-direction:column;gap:8px}
+a.doc{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:8px;background:#2a2a4a;text-decoration:none;color:inherit;transition:background 0.15s,transform 0.15s;border-left:3px solid #7eb8ff}
+a.doc:hover{background:#34345a;transform:translateX(3px)}
+.doc-icon{font-size:1.5rem;min-width:32px;text-align:center}
+.doc-info{flex:1;min-width:0}
+.doc-name{font-size:clamp(0.85rem,2vw,0.95rem);font-weight:600;color:#e0e0e0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.doc-meta-s{font-size:clamp(0.7rem,1.5vw,0.8rem);color:#a8a8c8;margin-top:2px}
+.doc-st{font-size:10px;font-weight:700;padding:3px 10px;border-radius:12px;white-space:nowrap}
+.doc-st.s-ok{background:#2d6a4f;color:#95d5b2}
+.doc-st.s-wait{background:#4a3f2e;color:#f0c674}
+.doc-st.s-plan{background:#2d4a6a;color:#7eb8ff}
+a.doc.est{border-left-color:#d4a574}
+a.doc.inv{border-left-color:#f0c674}
+a.doc.ref{border-left-color:#7eb8ff}
+a.doc.photo{border-left-color:#48cae4}
+</style>
+</head>
+<body>
+<div class="dash">
+
+<div class="hdr">
+  <h1>松村邸 自宅ロールスクリーン修理 <!-- AUTO:JSON:STATUS_BADGES --><span class="badge s-ok">請求済</span><!-- /AUTO:JSON:STATUS_BADGES --></h1>
+  <div class="sub">案件キー: <strong>松村-自宅ロール-26</strong> ／ 旧案件番号: AR-26-017</div>
+  <div class="sub" style="margin-top:4px"><!-- AUTO:JSON:LAST_UPDATED -->最終更新: 2026-04-29(切出新設) ／ サマリー生成: 2026-04-30<!-- /AUTO:JSON:LAST_UPDATED --></div>
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi">
+    <div class="label">本案件分(税抜)</div>
+    <div class="val">&yen;25,000</div>
+    <div class="sub">@&yen;12,500 &times; 2箇所</div>
+  </div>
+  <div class="kpi">
+    <div class="label">合算請求</div>
+    <div class="val" style="font-size:clamp(14px,3vw,18px)">愛の治給湯-26<br>に合算済</div>
+    <div class="sub">ARS-T002-260429-01</div>
+  </div>
+  <div class="kpi">
+    <div class="label">対象機材</div>
+    <div class="val" style="font-size:clamp(13px,2.5vw,16px)">タチカワ<br>プリーツ<br>スクリーン</div>
+    <div class="sub">18PSPD 360H1090L</div>
+  </div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="warn">
+  ⚠ <strong>派生案件:</strong> 本案件は元々 松村-整骨外装-26 の見積(2026/4/10発行)に「自宅ロールスクリーン 2箇所 ¥25,000」として含まれていたが、2026/4/29に新設案件として切り出し。請求書は ARS-T002-260429-01 で 松村-愛の治給湯-26 と合算発行済み。
+</div>
+
+<!-- AUTO:CALC:PROFIT_CATEGORIES -->
+<div class="card">
+  <h2>原価・利益サマリー</h2>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
+    <div style="background:#1e2d4a;border-radius:8px;padding:12px;border-left:3px solid #ffa67d">
+      <div style="font-size:12px;color:#b8b8d0;margin-bottom:4px">本案件分(税抜)</div>
+      <div style="font-size:24px;font-weight:700;color:#ffd4a8">&yen;25,000</div>
+      <div style="font-size:11px;color:#a8dadc;margin-top:4px">@12,500&times;2箇所</div>
+    </div>
+    <div style="background:#1e2d4a;border-radius:8px;padding:12px;border-left:3px solid #ffa67d">
+      <div style="font-size:12px;color:#b8b8d0;margin-bottom:4px">本案件分(税込換算)</div>
+      <div style="font-size:24px;font-weight:700;color:#ffd4a8">&yen;27,500</div>
+      <div style="font-size:11px;color:#a8dadc;margin-top:4px">合算請求の按分</div>
+    </div>
+    <div style="background:#1e2d4a;border-radius:8px;padding:12px;border-left:3px solid #ffa67d">
+      <div style="font-size:12px;color:#b8b8d0;margin-bottom:4px">外注費</div>
+      <div style="font-size:20px;font-weight:700;color:#a8ffd4">自社施工</div>
+      <div style="font-size:11px;color:#a8dadc;margin-top:4px">紐交換等</div>
+    </div>
+    <div style="background:#1e2d4a;border-radius:8px;padding:12px;border-left:3px solid #ffa67d">
+      <div style="font-size:12px;color:#b8b8d0;margin-bottom:4px">入金状況</div>
+      <div style="font-size:20px;font-weight:700;color:#ffd4a8">入金待ち</div>
+      <div style="font-size:11px;color:#a8dadc;margin-top:4px">合算で発行</div>
+    </div>
+  </div>
+</div>
+<!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+
+<div class="grid2">
+  <div class="card">
+    <h2>現場調査写真</h2>
+    <p style="font-size:12px;color:#a8dadc;margin-bottom:8px">タチカワブラインド製プリーツスクリーン 18PSPD 360H1090L の点検写真。</p>
+    <div class="photo-grid">
+      <a href="写真/01_現調_ブラインド全体（タチカワ・プリーツスクリーン）.jpg" target="_blank">
+        <img src="写真/01_現調_ブラインド全体（タチカワ・プリーツスクリーン）.jpg" alt="ブラインド全体">
+      </a>
+      <a href="写真/02_現調_ブラインド上部アップ・紐状態.jpg" target="_blank">
+        <img src="写真/02_現調_ブラインド上部アップ・紐状態.jpg" alt="上部アップ">
+      </a>
+      <a href="写真/03_現調_タチカワブラインド型番ラベル_18PSPD_360H1090L.jpg" target="_blank">
+        <img src="写真/03_現調_タチカワブラインド型番ラベル_18PSPD_360H1090L.jpg" alt="型番ラベル">
+      </a>
+    </div>
+    <div class="note" style="margin-top:14px">
+      <strong>機種詳細:</strong><br>
+      ・メーカー: タチカワブラインド<br>
+      ・タイプ: プリーツスクリーン<br>
+      ・型番: 18PSPD 360H1090L<br>
+      ・対象: 自宅2箇所
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>書類・ファイル一覧</h2>
+    <!-- AUTO:FILES:MAIN_DOCS -->
+    <div class="doc-list">
+      <a class="doc inv" href="../松村-愛の治給湯-26/書類/請_合算_松村-愛の治給湯-26.pdf" target="_blank">
+        <div class="doc-icon">📄</div>
+        <div class="doc-info">
+          <div class="doc-name">請_合算_松村-愛の治給湯-26.pdf</div>
+          <div class="doc-meta-s">合算請求書(本案件は&yen;25,000分) / 2026-04-29</div>
+        </div>
+        <div class="doc-st s-ok">合算済</div>
+      </a>
+      <a class="doc photo" href="写真/01_現調_ブラインド全体（タチカワ・プリーツスクリーン）.jpg" target="_blank">
+        <div class="doc-icon">📷</div>
+        <div class="doc-info">
+          <div class="doc-name">01_現調_ブラインド全体.jpg</div>
+          <div class="doc-meta-s">JPG / 56KB</div>
+        </div>
+        <div class="doc-st s-plan">記録</div>
+      </a>
+      <a class="doc photo" href="写真/02_現調_ブラインド上部アップ・紐状態.jpg" target="_blank">
+        <div class="doc-icon">📷</div>
+        <div class="doc-info">
+          <div class="doc-name">02_現調_ブラインド上部アップ・紐状態.jpg</div>
+          <div class="doc-meta-s">JPG / 92KB</div>
+        </div>
+        <div class="doc-st s-plan">記録</div>
+      </a>
+      <a class="doc photo" href="写真/03_現調_タチカワブラインド型番ラベル_18PSPD_360H1090L.jpg" target="_blank">
+        <div class="doc-icon">📷</div>
+        <div class="doc-info">
+          <div class="doc-name">03_現調_タチカワブラインド型番ラベル.jpg</div>
+          <div class="doc-meta-s">JPG / 105KB / 型番18PSPD 360H1090L</div>
+        </div>
+        <div class="doc-st s-plan">記録</div>
+      </a>
+    </div>
+    <!-- /AUTO:FILES:MAIN_DOCS -->
+
+    <h2 style="margin-top:20px">関係者</h2>
+    <table class="dtbl">
+      <tr><th style="width:90px">役割</th><th>詳細</th></tr>
+      <tr><td>発注者</td><td><strong>松村 様 (自宅)</strong> [T-002]<br>大分県別府市</td></tr>
+      <tr><td>施工者</td><td><strong>株式会社アート・レイズ</strong><br>担当: 亀井 悟</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <h2>関連案件 (松村顧客フォルダ内)</h2>
+  <div class="doc-list">
+    <a class="doc ref" href="../松村-愛の治給湯-26/00_サマリー_松村-愛の治給湯-26.html">
+      <div class="doc-icon">📁</div>
+      <div class="doc-info">
+        <div class="doc-name">松村-愛の治給湯-26 (合算先)</div>
+        <div class="doc-meta-s">本案件と合算で請求発行 / 請求済</div>
+      </div>
+      <div class="doc-st s-ok">合算先</div>
+    </a>
+    <a class="doc ref" href="../松村-整骨外装-26/00_サマリー_松村-整骨外装-26.html">
+      <div class="doc-icon">📁</div>
+      <div class="doc-info">
+        <div class="doc-name">松村-整骨外装-26 (切出元)</div>
+        <div class="doc-meta-s">本案件は元見積に含まれていた / 施工中</div>
+      </div>
+      <div class="doc-st s-plan">切出元</div>
+    </a>
+    <a class="doc ref" href="../松村-愛の治外壁-26/00_サマリー_松村-愛の治外壁-26.html">
+      <div class="doc-icon">📁</div>
+      <div class="doc-info">
+        <div class="doc-name">松村-愛の治外壁-26</div>
+        <div class="doc-meta-s">外壁塗装(銀行用+実修繕) / 見積提出済</div>
+      </div>
+      <div class="doc-st s-plan">関連</div>
+    </a>
+  </div>
+</div>
+
+<div class="footer">
+  <!-- AUTO:JSON:FOOTER_META -->
+  松村-自宅ロール-26 ／ 株式会社アート・レイズ ／ Generated: 2026-04-30
+  <!-- /AUTO:JSON:FOOTER_META -->
+</div>
+
+</div>
+</body>
+</html>

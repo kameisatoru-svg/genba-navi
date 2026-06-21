@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>三井E&S 混載BOX回収</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",sans-serif;background:#1a1a2e;color:#e0e0e0;padding:clamp(8px,2vw,24px);line-height:1.6}
+.wrap{max-width:1200px;margin:0 auto}
+.header{background:linear-gradient(135deg,#3b3b6d 0%,#5a5aa3 100%);border-radius:12px;padding:clamp(16px,3vw,24px);margin-bottom:16px;box-shadow:0 4px 20px rgba(0,0,0,.3);display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px}
+.header h1{font-size:clamp(18px,3vw,26px);margin-bottom:6px}
+.header .key{font-size:clamp(11px,1.5vw,13px);color:#cdd6f4;letter-spacing:.5px}
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.badges{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.badge{padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600;color:#fff}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.3);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;transition:background .15s;white-space:nowrap}
+.workflow-link:hover{background:rgba(255,255,255,.2)}
+.updated{font-size:11px;color:#bcc4d8}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:#252544;border-radius:10px;padding:14px 16px;border-left:3px solid #5a5aa3}
+.kpi-label{font-size:11px;color:#9098b8;letter-spacing:.5px;margin-bottom:4px}
+.kpi-val{font-size:clamp(16px,2.4vw,22px);font-weight:700;color:#fff}
+.kpi-sub{font-size:11px;color:#7a7fa0;margin-top:2px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+@media(max-width:768px){.grid{grid-template-columns:1fr}}
+.card{background:#252544;border-radius:10px;padding:16px}
+.card h2{font-size:14px;color:#a5b4fc;border-bottom:1px solid #3b3b6d;padding-bottom:8px;margin-bottom:12px;letter-spacing:.5px}
+.doc-list{display:flex;flex-direction:column;gap:6px}
+.doc{display:flex;align-items:center;gap:10px;background:#2a2a4a;padding:10px 12px;border-radius:8px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;border-left:3px solid #5a5aa3}
+.doc.est{border-left-color:#06b6d4}
+.doc.inv{border-left-color:#16a34a}
+.doc.ord{border-left-color:#a855f7}
+.doc.con{border-left-color:#f59e0b}
+.doc.cmp{border-left-color:#10b981}
+.doc.rcp{border-left-color:#ec4899}
+.doc.rcv{border-left-color:#7c3aed}
+.doc.dwg{border-left-color:#3b82f6}
+.doc.ven{border-left-color:#ef4444}
+.doc.rep{border-left-color:#8b5cf6}
+.doc.pho{border-left-color:#fbbf24}
+.doc.old{opacity:.55}
+a.doc:hover{background:#34345a;transform:translateX(3px)}
+.doc-icon{font-size:20px;flex-shrink:0}
+.doc-info{flex:1;min-width:0}
+.doc-name{font-size:13px;font-weight:600}
+.doc-meta-s{font-size:11px;color:#9098b8;margin-top:2px}
+.doc-st{font-size:10px;padding:2px 6px;border-radius:6px;font-weight:600;flex-shrink:0}
+.s-ok{background:#16a34a;color:#fff}
+.s-warn{background:#f59e0b;color:#fff}
+.s-old{background:#475569;color:#fff}
+.info-list{display:flex;flex-direction:column;gap:8px;font-size:13px}
+.info-row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed #3b3b6d}
+.info-row:last-child{border-bottom:none}
+.info-key{color:#9098b8;flex-shrink:0}
+.info-val{text-align:right;color:#fff;font-weight:500}
+.section{background:#252544;border-radius:10px;padding:16px;margin-bottom:12px}
+.section h2{font-size:14px;color:#a5b4fc;border-bottom:1px solid #3b3b6d;padding-bottom:8px;margin-bottom:12px;letter-spacing:.5px}
+.empty{color:#7a7fa0;font-size:12px;font-style:italic;padding:8px}
+.footer{text-align:center;color:#6b7280;font-size:11px;padding:16px;border-top:1px solid #2a2a4a;margin-top:24px}
+.other-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px}
+.other-item{background:#2a2a4a;padding:8px 10px;border-radius:6px;font-size:11px;display:flex;gap:6px;align-items:center}
+.other-item .ic{flex-shrink:0}
+.other-item .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#cdd6f4}
+.other-item .sf{font-size:9px;color:#7a7fa0;background:#1a1a2e;padding:1px 4px;border-radius:3px;flex-shrink:0}
+@media print{body{background:#fff;color:#000}.header{background:#3b3b6d!important}.card,.section,.kpi{background:#fff!important;border:1px solid #ccc}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="header">
+  <div>
+    <h1>三井E&S 混載BOX回収</h1>
+    <div class="key">案件キー: 三井ES-トイレ-26</div>
+  </div>
+  <div class="header-right">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <div class="badges"><span class="badge" style="background:#16a34a">完了</span><span class="badge" style="background:#16a34a">入金済</span></div>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E4%B8%89%E4%BA%95ES-%E3%83%88%E3%82%A4%E3%83%AC-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+    <!-- AUTO:JSON:LAST_UPDATED -->
+    <div class="updated">最終更新: 2026-05-29</div>
+    <!-- /AUTO:JSON:LAST_UPDATED -->
+  </div>
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">請求金額(税込)</div><div class="kpi-val">¥55,000</div><div class="kpi-sub">1件合計</div></div>
+      <div class="kpi"><div class="kpi-label">入金日</div><div class="kpi-val" style="font-size:16px">2026-05-14</div><div class="kpi-sub">完了</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div class="card">
+    <h2>📋 案件基本情報</h2>
+    <div class="info-list">
+      <div class="info-row"><span class="info-key">工事名</span><span class="info-val">三井E&S 混載BOX回収</span></div>
+      <div class="info-row"><span class="info-key">顧客</span><span class="info-val">ケイズ</span></div>
+      <div class="info-row"><span class="info-key">施工場所</span><span class="info-val">大分県</span></div>
+      <div class="info-row"><span class="info-key">元請</span><span class="info-val">株式会社ケイズ</span></div>
+      <div class="info-row"><span class="info-key">契約書</span><span class="info-val">未締結</span></div>
+      <div class="info-row"><span class="info-key">請求発行日</span><span class="info-val">2026-02-28</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>📁 主要書類</h2>
+    <!-- AUTO:FILES:MAIN_DOCS -->
+    <div class="doc-list">
+      <a class="doc inv" href="%E6%9B%B8%E9%A1%9E/%E8%AB%8B_%E4%B8%89%E4%BA%95ES-%E3%83%88%E3%82%A4%E3%83%AC-26.pdf" target="_blank">
+        <div class="doc-icon">💴</div>
+        <div class="doc-info">
+          <div class="doc-name">請求書</div>
+          <div class="doc-meta-s">2026-02-28 / ¥55,000</div>
+        </div>
+        <div class="doc-st s-ok">採用</div>
+      </a>
+    </div>
+    <!-- /AUTO:FILES:MAIN_DOCS -->
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="section">
+  <h2>📞 通話・打合せ記録</h2>
+  <div class="empty">通話記録は登録されていません。</div>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<!-- AUTO:CALC:PROFIT_CATEGORIES -->
+<div class="section">
+  <h2>💰 原価・利益サマリー</h2>
+  <div class="info-list">
+    <div class="info-row"><span class="info-key">労務費</span><span class="info-val">¥0</span></div>
+    <div class="info-row"><span class="info-key">材料費</span><span class="info-val">¥0</span></div>
+    <div class="info-row"><span class="info-key">外注費</span><span class="info-val">¥0</span></div>
+    <div class="info-row"><span class="info-key">経費</span><span class="info-val">¥0</span></div>
+    <div class="info-row" style="border-top:1px solid #5a5aa3;padding-top:8px;margin-top:4px"><span class="info-key" style="font-weight:600;color:#cdd6f4">原価合計</span><span class="info-val" style="font-size:16px;color:#fbbf24">¥0</span></div>
+    <div class="info-row"><span class="info-key" style="font-weight:600;color:#cdd6f4">粗利益</span><span class="info-val" style="font-size:13px;color:#7a7fa0">原価未集計のため算出不可</span></div>
+  </div>
+</div>
+<!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+
+<!-- AUTO:FILES:GAICHU_TABLE -->
+<div class="section">
+  <h2>🏗️ 外注費・受取請求書</h2>
+  <div class="empty">受取請求書は登録されていません(月次経理ルーティンで自動反映)。</div>
+</div>
+<!-- /AUTO:FILES:GAICHU_TABLE -->
+
+<!-- AUTO:FILES:OTHER_DOCS -->
+<div class="section">
+  <h2>📚 その他資料・参考ファイル</h2>
+  <div class="other-grid">
+    <div class="other-item"><span class="ic">📷</span><span class="sf">写真</span><span class="nm">写真_全体_1113_三井ES-トイレ-26.pdf</span></div>
+  </div>
+</div>
+<!-- /AUTO:FILES:OTHER_DOCS -->
+
+<!-- AUTO:JSON:FOOTER_META -->
+<div class="footer">
+  三井ES-トイレ-26 ｜ 株式会社アートレイズ ｜ 生成日: 2026-05-31 ｜ 最終更新: 2026-05-29
+</div>
+<!-- /AUTO:JSON:FOOTER_META -->
+
+</div>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>森田邸 エアコン設置（現地調査） 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;--alert:#f87171;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header.alert{background:linear-gradient(135deg,#f87171,#fdbb2d);}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card.alert{border:1px solid var(--alert);}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+.card-t.alert{color:var(--alert);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>森田邸 エアコン設置（現地調査）</h1>
+  <div class="sub">公栄水産 紹介案件 ｜ 大分市大字鴛野876-1 ヴィラジオみやざき904</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">🔍 現調済み・見積前</span><span class="badge">🏠 森田奈希沙様</span><span class="badge">🧊 パナソニック CS-225DFL-W</span><span class="badge">⚠️ data.json未登録</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E5%85%AC%E6%A0%84-%E6%A3%AE%E7%94%B0%E3%82%A8%E3%82%A2%E3%82%B3%E3%83%B3-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">⚠️ data.json未登録（案件キー未採番・候補: 公栄-森田エアコン-26）</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">現調済み</div><div class="l">ステータス</div></div>
+  <div class="kpi"><div class="v">見積前</div><div class="l">金額</div></div>
+  <div class="kpi"><div class="v">写真6枚</div><div class="l">現調記録</div></div>
+  <div class="kpi"><div class="v">2026/3</div><div class="l">現地調査</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況</div>
+      <ul>
+        <li><b>3/25 現地調査</b>：ベランダ室外機・配管、室外機架台の錆び、外壁換気口カバー破損、室内（壁天井・カーテンレール周辺）を撮影。</li>
+        <li><b>機種</b>：パナソニック CS-225DFL-W（施主指定）。設置希望は土曜16時以降。</li>
+        <li><b>現在地</b>：見積未作成のまま<b>停滞中（3月〜）</b>。継続するかクローズするかの判断要。</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>施主</td><td>森田奈希沙様</td><td>080-5251-6936／鴛野876-1 ヴィラジオみやざき904</td></tr>
+        <tr><td>紹介</td><td>公栄水産</td><td>顧客フォルダ＝公栄水産配下</td></tr>
+        <tr><td>施工</td><td>株式会社アート・レイズ</td><td>エアコン設置（予定）</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📷</div><div class="doc-info"><div class="doc-name">01_現調_ベランダ室外機・配管.jpg</div><div class="doc-meta-s">エアコン設置状況</div></div><div class="doc-st s-ok">現調</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📷</div><div class="doc-info"><div class="doc-name">02_現調_外壁換気口カバー破損.jpg</div><div class="doc-meta-s">要交換確認</div></div><div class="doc-st s-ok">現調</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📷</div><div class="doc-info"><div class="doc-name">03/04_現調_室外機架台・錆び.jpg</div><div class="doc-meta-s">正面・別角度</div></div><div class="doc-st s-ok">現調</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📷</div><div class="doc-info"><div class="doc-name">05_現調_室内壁天井・カーテンレール周辺.jpg</div><div class="doc-meta-s">室内側</div></div><div class="doc-st s-ok">現調</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📷</div><div class="doc-info"><div class="doc-name">06_LINE連絡_住所・型番CS-225DFL-W.jpg</div><div class="doc-meta-s">施主LINE（住所・連絡先・型番・希望日）</div></div><div class="doc-st s-ok">受領</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+    </div>
+
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話記録から抽出した重要事項</div>
+  <ul>
+    <li>2026/3 施主LINE：住所＝大分市大字鴛野876-1 ヴィラジオみやざき904、連絡先 080-5251-6936、機種＝パナソニック CS-225DFL-W、設置希望＝土曜16時以降。</li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <div class="doc-meta-s">原価未集計（見積前）</div>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <div class="doc-meta-s">受取書類なし</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/3/25（火）</div><div class="tl-text">現地調査実施（室外機・配管・架台錆び・外壁換気口カバー破損・室内）＋施主LINEで型番/希望日確認</div></div>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項</div>
+  <ul>
+    <li>パナソニック CS-225DFL-W（壁掛形）設置想定。既設室外機架台の錆び・外壁換気口カバー破損あり → 交換要否を見積時に確認。</li>
+    <li>⚠️ 3か月停滞。案件化（案件キー採番＝公栄-森田エアコン-26 で data.json 登録）するか、見送り（フォルダ退避）するか、かめさん判断要。</li>
+  </ul>
+</div>
+
+<div class="footer">
+  自動生成: 案件サマリー（AUTOマーカー方式）｜ data.json を真実の源泉とし、Drive同期後にDriveリンクを付与<br>
+  公栄-森田エアコン-26（候補・未登録）
+</div>
+
+</body>
+</html>

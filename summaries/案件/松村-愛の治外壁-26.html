@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>松村-愛の治外壁-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
+.s-old{background:#4a2e2e;color:#f08c8c;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
+td.amt,th.amt{text-align:right;font-family:"Courier New",monospace;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
+details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin:6px 0;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>愛の治療院松村 外壁塗装・雑修繕工事</h1>
+  <div class="sub">松村-愛の治外壁-26 ｜ 大分県別府市（愛の治療院 松村）</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">📋 見積提出済み</span>
+    <span class="badge">🏥 松村整骨院（愛の治療院）T-002</span>
+    <span class="badge">🏦 銀行用・実修繕の2本立て</span>
+    <span class="badge">📅 6/19 14:30 打合せ予定</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E6%9D%BE%E6%9D%91-%E6%84%9B%E3%81%AE%E6%B2%BB%E5%A4%96%E5%A3%81-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-06-17 09:05</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">見積提出済</div><div class="l">ステータス（受注待ち）</div></div>
+  <div class="kpi"><div class="v">&yen;2,001,606</div><div class="l">採用見積・税込（外壁のみ）</div></div>
+  <div class="kpi"><div class="v">&yen;2,552,156</div><div class="l">旧A見積・税込（外壁+屋根）</div></div>
+  <div class="kpi"><div class="v">6/19</div><div class="l">14:30 補修・看板打合せ</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>現在地</b>：2026/04/13に見積（銀行用＋実修繕の2件）送付済み。受注待ち。次アクションは6/19の打合せ反映</li>
+        <li><b>見積2本立て</b>：①銀行用＝旧A版（3/17・外壁+屋根・税込¥2,552,156）スコープ広め ②実修繕＝採用版（4/12・外壁のみ・税込¥2,001,606）</li>
+        <li><b>打合せ予定</b>：2026/06/19（金）14:30〜 外壁コーキング補修・看板シート工事の打ち合わせ</li>
+        <li><b>契約形態</b>：松村整骨院（愛の治療院）T-002と直接契約。紹介経由の顧客</li>
+        <li><b>関連請求の動き</b>：松村-自宅ロール-26（完了・未請求）は本案件に付随して2026年6〜7月に合算請求予定（まとめ払い・松村様依頼）</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>発注者</td><td>松村整骨院（愛の治療院）T-002</td><td>代表/担当: 松村 勝弘／別府市・3拠点（整骨院・愛の治療院・自宅）</td></tr>
+        <tr><td>施工</td><td>株式会社アート・レイズ</td><td>担当: 亀井 悟／外壁塗装・雑修繕</td></tr>
+      </table>
+      <div class="doc-meta-s" style="margin-top:6px;">※ 整骨院・愛の治療院・自宅の3拠点があり現場名の混同に注意（data.json注意点）。</div>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📝</div><div class="doc-info"><div class="doc-name">見_松村-愛の治外壁-26.pdf</div><div class="doc-meta-s">採用案 / 2026-04-13発行 / 税込&yen;2,001,606 / 外壁塗装のみ＋雑修繕</div></div><div class="doc-st s-ok">採用</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📝</div><div class="doc-info"><div class="doc-name">見_旧A_松村-愛の治外壁-26.pdf</div><div class="doc-meta-s">旧版 / 2026-03-17発行 / 税込&yen;2,552,156 / 外壁+屋根（銀行用想定・AR26-T014-M01）</div></div><div class="doc-st s-old">旧A</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ 請求・契約書類は未発行（受注待ち）。Driveリンクは同期後に付与。</div>
+    </div>
+    <div class="card">
+      <div class="card-t">🔗 関連案件（松村フォルダ）</div>
+      <a class="doc" href="../松村-整骨外装-26/00_案件サマリー.html"><div class="doc-icon">📁</div><div class="doc-info"><div class="doc-name">松村-整骨外装-26</div><div class="doc-meta-s">外壁コーキング・看板シート・点検口・漏水調査</div></div><div class="doc-st s-wip">関連</div></a>
+      <a class="doc" href="../松村-愛の治給湯-26/00_案件サマリー.html"><div class="doc-icon">📁</div><div class="doc-info"><div class="doc-name">松村-愛の治給湯-26</div><div class="doc-meta-s">給湯配管漏水調査・天井点検口設置（合算請求済）</div></div><div class="doc-st s-wip">関連</div></a>
+      <a class="doc" href="../松村-自宅ロール-26/00_案件サマリー.html"><div class="doc-icon">📁</div><div class="doc-info"><div class="doc-name">松村-自宅ロール-26</div><div class="doc-meta-s">自宅ロールスクリーン2箇所（完了・本案件と合算請求予定）</div></div><div class="doc-st s-wip">関連</div></a>
+      <div class="doc-meta-s" style="margin-top:4px;">※ Driveリンクは同期後に付与。</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-t">📋 採用見積内訳（4/12版・外壁塗装のみ）</div>
+  <table>
+    <tr><th>工事内容</th><th class="amt">金額（税抜）</th></tr>
+    <tr><td>足場架け払い 204㎡@1,700</td><td class="amt">&yen;346,800</td></tr>
+    <tr><td>飛散防止メッシュシート 204㎡@380</td><td class="amt">&yen;77,520</td></tr>
+    <tr><td>高圧洗浄 170㎡@480</td><td class="amt">&yen;81,600</td></tr>
+    <tr><td>養生費</td><td class="amt">&yen;57,000</td></tr>
+    <tr><td>シーリング打替え 119m@1,700</td><td class="amt">&yen;202,300</td></tr>
+    <tr><td>外壁 下塗り（シーラー）144㎡@1,150</td><td class="amt">&yen;165,600</td></tr>
+    <tr><td>外壁 中塗り（シリコン）144㎡@1,700</td><td class="amt">&yen;244,800</td></tr>
+    <tr><td>外壁 上塗り（シリコン）144㎡@1,700</td><td class="amt">&yen;244,800</td></tr>
+    <tr><td>軒天塗装 20㎡@2,300</td><td class="amt">&yen;46,000</td></tr>
+    <tr><td>破風板・鼻隠し塗装 34m@1,550</td><td class="amt">&yen;52,700</td></tr>
+    <tr><td>雨樋塗装 34m@1,150</td><td class="amt">&yen;39,100</td></tr>
+    <tr><td>廃材運搬処分費</td><td class="amt">&yen;48,000</td></tr>
+    <tr><td>運搬費</td><td class="amt">&yen;48,000</td></tr>
+    <tr style="font-weight:600"><td>小計</td><td class="amt">&yen;1,654,220</td></tr>
+    <tr><td>諸経費（10%）</td><td class="amt">&yen;165,422</td></tr>
+    <tr style="font-weight:700"><td>税抜合計</td><td class="amt">&yen;1,819,642</td></tr>
+    <tr><td>消費税（10%）</td><td class="amt">&yen;181,964</td></tr>
+    <tr style="font-weight:700"><td>税込合計</td><td class="amt">&yen;2,001,606</td></tr>
+  </table>
+  <div class="doc-meta-s" style="margin-top:6px;">※ 旧A版（3/17）は上記に屋根塗装一式（屋根分小計¥455,000）を加えた構成で税込¥2,552,156。詳細は 見_旧A PDF 参照。</div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 確定事項・方針（内部会議 2026-03-16 ほか）</div>
+  <ul>
+    <li>【融資対応】資金調達のため銀行提出用資料として広めスコープ（外壁+屋根）で見積構成 → 旧A版が銀行用見積</li>
+    <li>【劣化状況】サイディング帯回し部にひび割れ・浮き、コーキング劣化、看板破損あり。「直張り」工法のため結露リスクあり</li>
+    <li>【スコープ調整】4/12版で屋根塗装を外し、外壁のみの実修繕スコープに絞り込み（採用版）</li>
+    <li>【2026/06/19 打合せ予定】外壁コーキング補修・看板シート工事について打ち合わせ（14:30〜）</li>
+    <li>【請求方針】松村様依頼によりまとめ払い。自宅ロール案件と本案件に付随して2026年6〜7月に合算請求予定</li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <table>
+    <tr><th>区分</th><th class="amt">金額</th><th>備考</th></tr>
+    <tr><td>労務費</td><td class="amt">&yen;0</td><td>受注後集計</td></tr>
+    <tr><td>材料費</td><td class="amt">&yen;0</td><td>受注後集計</td></tr>
+    <tr><td>外注費</td><td class="amt">&yen;0</td><td>足場・シーリング・塗装は部分外注予定</td></tr>
+    <tr><td>経費</td><td class="amt">&yen;0</td><td>受注後集計</td></tr>
+  </table>
+  <div class="doc-meta-s" style="margin-top:6px;">※ data.json原価合計¥0・件数0（最終集計2026-05-14）。見積提出・受注待ちのため原価未計上。</div>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <div style="margin-top:8px;display:flex;gap:18px;flex-wrap:wrap;">
+    <div><span class="doc-meta-s">売上（採用見積・税込）</span><div style="font-weight:800;color:var(--acc1);">&yen;2,001,606</div></div>
+    <div><span class="doc-meta-s">原価合計</span><div style="font-weight:800;">&yen;0（未計上）</div></div>
+    <div><span class="doc-meta-s">粗利</span><div style="font-weight:800;color:var(--ok);">受注後に確定</div></div>
+  </div>
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <div class="doc-meta-s">受取見積書・受取請求書なし（受注待ち・外注未発注）。足場・シーリング・塗装は受注後に部分外注予定。</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/6/19（金）</div><div class="tl-text">14:30〜 外壁コーキング補修・看板シート工事の打ち合わせ予定（data.json備考）</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/19（金）</div><div class="tl-text">案件サマリー（標準形・9種AUTOマーカー版）を再生成。data.json最新化（6-17 09:05）を反映</div></div>
+    <details class="tl-archive"><summary>過去の経緯を見る（7日超）</summary>
+      <div class="tl-item"><div class="tl-date">2026/4/30（水）</div><div class="tl-text">フォルダ整理・サフィックス見直し（3/17版を旧Aにリネーム）・初版サマリー作成</div></div>
+      <div class="tl-item"><div class="tl-date">2026/4/13（日）</div><div class="tl-text">見積（銀行用＋実修繕の2件）送付。採用版＝外壁塗装のみ 税込¥2,001,606</div></div>
+      <div class="tl-item"><div class="tl-date">2026/3/17（月）</div><div class="tl-text">旧A見積発行（外壁+屋根・税込¥2,552,156・AR26-T014-M01）</div></div>
+      <div class="tl-item"><div class="tl-date">2026/3/16（日）</div><div class="tl-text">内部会議：銀行用に広めスコープで見積方針決定・サイディング劣化/コーキング/看板破損確認</div></div>
+    </details>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li>見積2本立ての位置づけ：旧A（外壁+屋根）＝銀行融資申請を見据えた広めスコープ／採用版（外壁のみ）＝実際の修繕スコープ。</li>
+    <li>3拠点（整骨院・愛の治療院・自宅）があり現場名の混同に注意。本案件は「愛の治療院」の外壁。</li>
+    <li>松村様はまとめ払い希望。自宅ロール・給湯など関連案件と合算請求の調整を要する（6〜7月予定）。</li>
+  </ul>
+</div>
+
+<div class="footer">
+  松村-愛の治外壁-26 ／ 株式会社アート・レイズ ／ Generated: 2026-06-19
+</div>
+
+</body>
+</html>

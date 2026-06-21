@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ネクサスプラザ 案件一覧</title>
+<title>ウインズコーポレーション 案件一覧</title>
 <style>
 :root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -29,6 +29,8 @@ a.doc:hover{background:#34345a;transform:translateX(3px);}
 .doc-name{font-weight:700;font-size:13px;word-break:break-all;} .doc-meta-s{font-size:11px;color:var(--sub);}
 .doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
 .s-ok{background:#14532d;color:var(--ok);} .s-wip{background:#56450c;color:var(--warn);}
+.done-row{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;opacity:.7;}
+.done-row .doc-icon{font-size:18px;}
 table{width:100%;border-collapse:collapse;font-size:12px;}
 th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;} th{color:var(--sub);font-weight:600;}
 .timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
@@ -44,62 +46,50 @@ th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;} th{color
 <body>
 
 <div class="header">
-  <h1>ネクサスプラザ 案件一覧</h1>
-  <div class="sub">株式会社ネクサスプラザ（T-011）｜ 担当：力武太郎さん</div>
+  <h1>ウインズコーポレーション 案件一覧</h1>
+  <div class="sub">有限会社ウインズコーポレーション（T-008）｜ 民泊客家オーナー企業（大村さん）</div>
   <div class="badges">
-    <span class="badge">📒 案件索引（5件）</span>
+    <span class="badge">📒 案件索引（進行1件／完了2件）</span>
     <span class="badge">各案件の詳細は個別サマリーへ</span>
   </div>
 </div>
 
 <div class="card">
-  <div class="card-t">📁 案件一覧（タップで個別サマリーを開く）</div>
-      <a class="doc" href="./ネクサス-ビル漏水修理-26/00_案件サマリー.html" target="_blank">
+  <div class="card-t">📁 進行中の案件（タップで個別サマリーを開く）</div>
+      <a class="doc" href="./ウインズ-大村建具-26/00_案件サマリー.html" target="_blank">
         <div class="doc-icon">📁</div>
         <div class="doc-info">
-          <div class="doc-name">漏水調査・復旧工事</div>
-          <div class="doc-meta-s">ネクサス-ビル漏水修理-26 ｜ 更衣室6/18ボード完了・6/20クロス／2F3Fトイレ別スコープ ｜ ¥275,000〜</div>
-        </div>
-        <div class="doc-st s-wip">施工予定</div>
-      </a>
-      <a class="doc" href="./ネクサス-自家発電-26/00_案件サマリー.html" target="_blank">
-        <div class="doc-icon">📁</div>
-        <div class="doc-info">
-          <div class="doc-name">自家発電設備工事</div>
-          <div class="doc-meta-s">ネクサス-自家発電-26 ｜ 発電機取替＋電気・防水（高額・受注判断待ち） ｜ ¥10,000,000</div>
-        </div>
-        <div class="doc-st s-wip">見積提出済み</div>
-      </a>
-      <a class="doc" href="./ネクサス-プラザ自火報-26/00_案件サマリー.html" target="_blank">
-        <div class="doc-icon">📁</div>
-        <div class="doc-info">
-          <div class="doc-name">自火報制御盤修理・排煙窓金物固定</div>
-          <div class="doc-meta-s">ネクサス-プラザ自火報-26 ｜ 入金待ち ｜ ¥114,180</div>
-        </div>
-        <div class="doc-st s-ok">請求済み</div>
-      </a>
-      <a class="doc" href="./ネクサス-串たつ外壁-26/00_案件サマリー.html" target="_blank">
-        <div class="doc-icon">📁</div>
-        <div class="doc-info">
-          <div class="doc-name">串焼きたつみ 外壁幅木補修</div>
-          <div class="doc-meta-s">ネクサス-串たつ外壁-26 ｜ 入金待ち（4/22施工） ｜ ¥18,634</div>
-        </div>
-        <div class="doc-st s-ok">請求済み</div>
-      </a>
-      <a class="doc" href="./ネクサス-大丸引戸修理-26/00_案件サマリー.html" target="_blank">
-        <div class="doc-icon">📁</div>
-        <div class="doc-info">
-          <div class="doc-name">大丸ホルモン トイレ引戸修理</div>
-          <div class="doc-meta-s">ネクサス-大丸引戸修理-26 ｜ 完了書発行済・入金待ち ｜ ¥13,200</div>
+          <div class="doc-name">大村邸 建具補修工事</div>
+          <div class="doc-meta-s">ウインズ-大村建具-26 ｜ 大分県別府市(大村邸) ｜ 入金待ち（支払期限 6/30・ロール工事と合算請求） ｜ ¥237,200</div>
         </div>
         <div class="doc-st s-ok">請求済み</div>
       </a>
 </div>
 
 <div class="card">
-  <div class="doc-meta-s">※ この画面は索引です。各案件の進行状況・通話決定事項・書類・原価などの詳細は、各案件フォルダ直下の <b>00_案件サマリー.html</b>（個別サマリー）に集約しています。日次更新チェックは個別サマリー側を更新します。</div>
+  <div class="card-t">✅ 完了案件（個別詳細サマリー未生成・参考掲載）</div>
+      <div class="done-row">
+        <div class="doc-icon">✅</div>
+        <div class="doc-info">
+          <div class="doc-name">大村邸 ロールスクリーン取替工事</div>
+          <div class="doc-meta-s">ウインズ-大村RS-26 ｜ 大分県別府市（大村邸） ｜ 2026/5/19施工完了・完了書発行済み。請求は建具側に合算（ARS-T008-260519-01）。</div>
+        </div>
+        <div class="doc-st s-ok">完了</div>
+      </div>
+      <div class="done-row">
+        <div class="doc-icon">✅</div>
+        <div class="doc-info">
+          <div class="doc-name">民泊客家 ロールスクリーン補修</div>
+          <div class="doc-meta-s">ウインズ-民客家ロール-26 ｜ 大分県別府市 ｜ 2026/3/18請求・4/28入金済み（AR-2026-C004-001） ｜ ¥14,520</div>
+        </div>
+        <div class="doc-st s-ok">入金済み</div>
+      </div>
 </div>
 
-<div class="footer">案件索引 ｜ 案件単位サマリーへ移行（2026-06-17・更新 2026-06-19） ｜ data.json最終更新 2026-06-17 09:05</div>
+<div class="card">
+  <div class="doc-meta-s">※ この画面は索引です。各案件の進行状況・通話決定事項・書類・原価などの詳細は、各案件フォルダ直下の <b>00_案件サマリー.html</b>（個別サマリー）に集約しています。完了案件（大村RS-26・民客家ロール-26）は個別詳細サマリー未生成のため、名称のみ参考掲載しています。</div>
+</div>
+
+<div class="footer">案件索引 ｜ 案件単位サマリーへ移行（更新 2026-06-19） ｜ data.json最終更新 2026-06-17 09:05</div>
 </body>
 </html>

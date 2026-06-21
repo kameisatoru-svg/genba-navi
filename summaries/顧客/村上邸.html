@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>村上邸 案件一覧</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+.note{font-size:13px;color:var(--txt);line-height:1.7;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;} .doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;} .doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);} .s-wip{background:#56450c;color:var(--warn);}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>村上邸 案件一覧</h1>
+  <div class="sub">村上信子様（個人宅・T-028）｜ 大分県別府市青山町</div>
+  <div class="badges">
+    <span class="badge">📒 案件索引（4件）</span>
+    <span class="badge">各案件の詳細は個別サマリーへ</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="note">村上信子様（個人宅）の同時進行4件です。サンルーム天窓の雨漏り・雨樋・室内諸修繕・トイレ交換を一緒に進めています。下見・施工は同タイミングでまとめて対応する想定です。</div>
+</div>
+
+<div class="card">
+  <div class="card-t">📁 案件一覧（タップで個別サマリーを開く）</div>
+      <a class="doc" href="./村上-雨漏り修理-26/00_案件サマリー.html" target="_blank">
+        <div class="doc-icon">📁</div>
+        <div class="doc-info">
+          <div class="doc-name">サンルーム天窓雨漏り修理</div>
+          <div class="doc-meta-s">村上-雨漏り修理-26 ｜ 天窓は約20年前にかめさん設置・たつみ板金に調査依頼済み ｜ 金額未定</div>
+        </div>
+        <div class="doc-st s-wip">見積準備</div>
+      </a>
+      <a class="doc" href="./村上-雨樋修理-26/00_案件サマリー.html" target="_blank">
+        <div class="doc-icon">📁</div>
+        <div class="doc-info">
+          <div class="doc-name">雨樋修理工事（駐車場横・道路側テラス）</div>
+          <div class="doc-meta-s">村上-雨樋修理-26 ｜ 腐食2箇所交換・材料はナフサ不足で入手難の可能性 ｜ 金額未定</div>
+        </div>
+        <div class="doc-st s-wip">見積準備</div>
+      </a>
+      <a class="doc" href="./村上-諸修繕相談-26/00_案件サマリー.html" target="_blank">
+        <div class="doc-icon">📁</div>
+        <div class="doc-info">
+          <div class="doc-name">諸修繕相談（洗面丁番・カーテン・椅子カバー）</div>
+          <div class="doc-meta-s">村上-諸修繕相談-26 ｜ ソファ・椅子の生地張替え見積3案を提示済み（最上グレードで決定）｜ ¥232,100〜¥319,000（端数値引後）</div>
+        </div>
+        <div class="doc-st s-ok">見積提出済み</div>
+      </a>
+      <a class="doc" href="./村上-トイレ交換-26/00_案件サマリー.html" target="_blank">
+        <div class="doc-icon">📁</div>
+        <div class="doc-info">
+          <div class="doc-name">トイレ便器取替え工事（節水タンクレス化）</div>
+          <div class="doc-meta-s">村上-トイレ交換-26 ｜ 奥様より依頼・LIXILサティス候補で取替え提案書作成済み ｜ 金額未定</div>
+        </div>
+        <div class="doc-st s-wip">相談</div>
+      </a>
+</div>
+
+<div class="card">
+  <div class="doc-meta-s">※ この画面は索引です。各案件の進行状況・通話決定事項・書類・原価などの詳細は、各案件フォルダ直下の <b>00_案件サマリー.html</b>（個別サマリー）に集約しています。</div>
+</div>
+
+<div class="footer">案件索引（村上信子様）｜ data.json最終更新 2026-06-17 09:05</div>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ウインズ-大村建具-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
+details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin:6px 0;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>大村邸 建具補修工事</h1>
+  <div class="sub">ウインズ-大村建具-26 ｜ 大分県別府市（大村邸）</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">🧾 請求済み</span>
+    <span class="badge">💴 未入金（期限 6/30）</span>
+    <span class="badge">🏠 ウインズ（T-008）</span>
+    <span class="badge">🔗 大村RS-26と合算</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E3%82%A6%E3%82%A4%E3%83%B3%E3%82%BA-%E5%A4%A7%E6%9D%91%E5%BB%BA%E5%85%B7-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-06-17 09:05</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">請求済み</div><div class="l">ステータス</div></div>
+  <div class="kpi"><div class="v">¥92,000</div><div class="l">建具側 税込（合算内）</div></div>
+  <div class="kpi"><div class="v">¥69,300</div><div class="l">外注費（原価合計）</div></div>
+  <div class="kpi"><div class="v">¥22,700</div><div class="l">粗利（建具側概算）</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>工事内容</b>：大村邸 玄関の木製両開き建具補修。表面ベニヤが紫外線で剥離→メラミン化粧合板（4×8・表側2面）を貼替、中央の格子部分はメラミンに合わせて塗装</li>
+        <li><b>現在地</b>：施工完了。2026/5/19にロールスクリーン取替工事（大村RS-26）と<b>合算で見積・請求発行済み</b>。入金待ち（支払期限 6/30）</li>
+        <li><b>合算内訳</b>：建具側 税込¥92,000 ＋ ロール側 税込¥123,636 ＝ 合計 税抜¥215,636／税込¥237,200</li>
+        <li><b>契約形態</b>：ウインズ（T-008）向け。契約書は未締結（少額・継続取引）</li>
+        <li><b>施工体制</b>：塩出木工（建具メラミン貼替）＋古賀美装（格子部分の塗装）</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>発注者</td><td>ウインズ（T-008）</td><td>請求宛先・継続取引先</td></tr>
+        <tr><td>施主・連絡窓口</td><td>大村さん</td><td>別府市・大村邸。連休前完了を要望</td></tr>
+        <tr><td>施工（建具）</td><td>塩出木工</td><td>メラミン化粧合板貼替（原価RC-26-066）</td></tr>
+        <tr><td>施工（塗装）</td><td>古賀美装（古賀さん）</td><td>格子部分の塗装（メラミン同系色）</td></tr>
+        <tr><td>元請</td><td>株式会社アート・レイズ</td><td>取りまとめ・請求</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">🧾</div><div class="doc-info"><div class="doc-name">見_合算_ウインズ-大村建具-26.pdf</div><div class="doc-meta-s">2026/5/19 合算見積 ARM-T008-260519-01／税込¥237,200（建具¥92,000＋RS¥123,636）</div></div><div class="doc-st s-ok">発行済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">🧾</div><div class="doc-info"><div class="doc-name">請_合算_ウインズ-大村建具-26.pdf</div><div class="doc-meta-s">2026/5/19 合算請求 ARS-T008-260519-01／税込¥237,200・期限6/30・未入金</div></div><div class="doc-st s-ok">発行済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">🖼️</div><div class="doc-info"><div class="doc-name">03_1212_仕上材参考_床材カタログ（AN-809KM_JI-10355K）.jpg</div><div class="doc-meta-s">仕上材参考カタログ（現調時）</div></div><div class="doc-st s-wip">参考</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">🖼️</div><div class="doc-info"><div class="doc-name">04_0422_LINE_床材サンプル_メラミン化粧合板ほか単価提示.jpg</div><div class="doc-meta-s">2026/4/22 LINE メラミン化粧合板ほか単価提示</div></div><div class="doc-st s-wip">参考</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ Driveリンクは同期後に付与（href=""）。見積/請求はT-008・大村RS-26との合算1通。</div>
+    </div>
+    <div class="card">
+      <div class="card-t">📷 写真・現調記録</div>
+      <ul>
+        <li><b>2026/2/12 現調2枚</b>：01_玄関 木製両開き建具 正面（ガムテープ補修跡）／02_建具全景（格子窓・ガムテープ補修）</li>
+        <li><b>2026/4/22 LINE 1枚</b>：04_床材サンプル・メラミン化粧合板ほか単価提示</li>
+        <li><b>2026/5/4 1枚</b>：20260504_083526.jpg（施工状況）</li>
+        <li>※ 写真は一覧把握のみ（個別オープンは省略）</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話記録から抽出した重要決定事項</div>
+  <ul>
+    <li>2026/04/14 古賀美装 古賀さん通話：建具表面ベニヤが紫外線で剥がれたため塩出木工がメラミンを貼替。中央格子部分はメラミン同系色（ステンレス調）で塗装する方針。メラミン見本は塩出さんが現場で提示、品番を古賀さんへ共有。翌日午前に現場で色合わせ確認</li>
+    <li>2026/04/23 大村さん通話：建具の月末完了を要望（できれば連休前）。「もう月末になる・見た目が傷んでいる」と早期完了を強く希望。アートレイズ側は建具屋に内容確認済みで月末完了を約束、催促を入れる旨を回答</li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <table>
+    <tr><th>分類</th><th>金額</th><th>備考</th></tr>
+    <tr><td>労務費</td><td>¥0</td><td>—</td></tr>
+    <tr><td>材料費</td><td>¥0</td><td>—</td></tr>
+    <tr><td>外注費</td><td>¥69,300</td><td>塩出木工＋古賀美装（2件）</td></tr>
+    <tr><td>経費</td><td>¥0</td><td>—</td></tr>
+  </table>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <div class="doc-meta-s" style="margin-top:8px;">
+    原価合計 <b>¥69,300</b>（2件・最終集計 2026-05-29）／ 建具側 税込¥92,000（税抜¥83,636）。
+    建具側 税抜売上¥83,636 − 外注費¥69,300 ＝ <b>粗利 ¥14,336</b>（建具単独・概算）。
+    ※ 外注費は建具・ロール案件にまたがる可能性あり。請求は大村RS-26との合算 税込¥237,200（未入金・期限6/30）。
+  </div>
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <table>
+    <tr><th>業者</th><th>内容</th><th>原価ID</th><th>金額</th></tr>
+    <tr><td>塩出木工</td><td>玄関建具 メラミン化粧合板 貼替（表側2面）</td><td>RC-26-066</td><td>—</td></tr>
+    <tr><td>古賀美装</td><td>建具格子部分の塗装（メラミン同系色）</td><td>—</td><td>—</td></tr>
+  </table>
+  <div class="doc-meta-s" style="margin-top:6px;">外注費合計 ¥69,300（data.json 原価・2件）。個別の受取請求書PDFはフォルダ未格納（金額内訳は原価管理Sheets／genka.json側）。</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/5/19（月）</div><div class="tl-text">ロールスクリーン取替（大村RS-26）と合算で見積（ARM-T008-260519-01）・請求（ARS-T008-260519-01）発行。税込¥237,200・支払期限6/30。ステータス「請求済み」</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/5/4（月）</div><div class="tl-text">施工状況写真（20260504_083526.jpg）</div></div>
+    <details class="tl-archive"><summary>過去の経緯を見る（4件・7日超）</summary>
+      <div class="tl-item"><div class="tl-date">2026/4/23（水）</div><div class="tl-text">大村さん通話：連休前〜月末完了を要望。建具屋へ催促・月末完了を約束</div></div>
+      <div class="tl-item"><div class="tl-date">2026/4/22（火）</div><div class="tl-text">LINEで床材サンプル・メラミン化粧合板ほか単価提示</div></div>
+      <div class="tl-item"><div class="tl-date">2026/4/14（火）</div><div class="tl-text">古賀美装通話：塩出木工がメラミン貼替・格子部分は古賀美装が塗装する施工体制を確認。色合わせ・品番共有</div></div>
+      <div class="tl-item"><div class="tl-date">2026/2/12（木）</div><div class="tl-text">現地調査：玄関建具の劣化（ベニヤ剥離・ガムテープ補修跡）を撮影2枚</div></div>
+    </details>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li>請求は大村RS-26（ロールスクリーン）との<b>合算1通</b>。建具側は税込¥92,000、ロール側は税込¥123,636。入金確認時は合算¥237,200で照合すること</li>
+    <li>契約書は未締結。少額・継続取引のため見積／請求運用で完結。</li>
+    <li>履歴ノート（00_履歴_ウインズ-大村建具-26.md）は未作成。タイムラインは通話記録とdata.json日付から構成。</li>
+    <li>外注費¥69,300は建具・ロール双方にまたがる可能性あり。建具単独の粗利はあくまで概算。</li>
+  </ul>
+</div>
+
+<div class="footer">アートレイズ 案件サマリー ｜ ウインズ-大村建具-26 ｜ data.json真実の源泉（最終更新 2026-06-17 09:05）｜ 自動生成（再生成 2026-06-19）</div>
+
+</body>
+</html>

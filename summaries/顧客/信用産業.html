@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>信用産業 案件一覧</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;} .doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;} .doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);} .s-wip{background:#56450c;color:var(--warn);}
+.doc.nolink{cursor:default;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media print{body{background:#fff;color:#000;}.card{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>信用産業 案件一覧</h1>
+  <div class="sub">株式会社信用産業（T-009）｜ 窓口：江田 至 様（代表取締役）｜ うた乃別府本店・総本店（別府市）</div>
+  <div class="badges">
+    <span class="badge">📒 案件索引（5件）</span>
+    <span class="badge">各案件の詳細は個別サマリーへ</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-t">📁 進行中・最近の案件（タップで個別サマリーを開く）</div>
+
+  <a class="doc" href="./信用産業-うた乃厨房-26/00_案件サマリー.html" target="_blank">
+    <div class="doc-icon">📁</div>
+    <div class="doc-info">
+      <div class="doc-name">うた乃別府本店 厨房改装工事</div>
+      <div class="doc-meta-s">信用産業-うた乃厨房-26 ｜ 残工事 A.製麺室塗装 / B.加工室スチコン設置（C項エアコンは分離・完了／タニコー連携） ｜ 見積¥732,776</div>
+    </div>
+    <div class="doc-st s-wip">見積提出済み</div>
+  </a>
+
+  <a class="doc" href="./信用産業-うた乃倉庫-26/00_案件サマリー.html" target="_blank">
+    <div class="doc-icon">📁</div>
+    <div class="doc-info">
+      <div class="doc-name">うた乃総本店 スポットクーラー取替工事</div>
+      <div class="doc-meta-s">信用産業-うた乃倉庫-26 ｜ 5/20施工完了・入金待ち（発行PDF実額¥87,780） ｜ 請求¥87,780</div>
+    </div>
+    <div class="doc-st s-ok">請求済み</div>
+  </a>
+
+  <a class="doc" href="./信用産業-うた乃パントリー-26/00_案件サマリー.html" target="_blank">
+    <div class="doc-icon">📁</div>
+    <div class="doc-info">
+      <div class="doc-name">うた乃 パントリー エアコン水漏れ修理</div>
+      <div class="doc-meta-s">信用産業-うた乃パントリー-26 ｜ 6/12 吉原店長より相談・現地確認待ち ｜ 金額未定（見積前）</div>
+    </div>
+    <div class="doc-st s-wip">相談</div>
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-t">✅ 完了案件</div>
+
+  <a class="doc" href="./信用産業-うた乃エアコン-26/00_サマリー_信用産業-うた乃エアコン-26.html" target="_blank">
+    <div class="doc-icon">📁</div>
+    <div class="doc-info">
+      <div class="doc-name">うた乃 中央加工室 エアコン取替工事</div>
+      <div class="doc-meta-s">信用産業-うた乃エアコン-26 ｜ 6/3施工完了（未来システム）。厨房-26のC項を分離。月末に浄水器取替と合算請求予定 ｜ 見積¥129,800</div>
+    </div>
+    <div class="doc-st s-ok">完了</div>
+  </a>
+
+  <a class="doc" href="./信用産業-うた乃階段-26/00_案件サマリー.html" target="_blank">
+    <div class="doc-icon">📁</div>
+    <div class="doc-info">
+      <div class="doc-name">うた乃別府本店 階段閉鎖工事 他（4件合算）</div>
+      <div class="doc-meta-s">信用産業-うた乃階段-26 ｜ 5/29入金確認済（¥89,100・改1）。外部照明撤去・厨房フィルター納品等の合算 ｜ 請求¥89,100</div>
+    </div>
+    <div class="doc-st s-ok">完了・入金済</div>
+  </a>
+</div>
+
+<div class="card">
+  <div class="doc-meta-s">※ この画面は索引です。各案件の進行状況・通話決定事項・書類・原価などの詳細は、各案件フォルダ直下の <b>00_案件サマリー.html</b>（個別サマリー）に集約しています。日次更新チェックは個別サマリー側を更新します。</div>
+  <div class="doc-meta-s" style="margin-top:6px;">※ 補足：「うた乃エアコン-26」の個別サマリーは旧名 00_サマリー_信用産業-うた乃エアコン-26.html。「うた乃階段-26」は個別サマリー（00_案件サマリー.html）未作成のためリンク先が無い場合があります。配下の「信用産業-うた乃パントリーエアコン-26」は通話記録のみ・data.json未登録のため本索引には掲載していません（本件は「信用産業-うた乃パントリー-26」）。</div>
+</div>
+
+<div class="footer">案件索引 ｜ 顧客単位サマリー（信用産業 T-009）｜ data.json最終更新 2026-06-17 09:05</div>
+</body>
+</html>

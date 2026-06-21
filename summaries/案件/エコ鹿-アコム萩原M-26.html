@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>エコ鹿-アコム萩原M-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
+details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin:6px 0;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>アコム萩原むじんくんコーナー 誘導灯表示板 再取付工事</h1>
+  <div class="sub">エコ鹿-アコム萩原M-26 ｜ 大分県大分市牧2-17-5 牧ロイヤルプラザ2F（アコム萩原むじんくんコーナー）</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">📋 請求済み</span>
+    <span class="badge">🏢 元請：エコサポート鹿児島（T-030）</span>
+    <span class="badge">🎯 実エンド：アコム（むじんくん）</span>
+    <span class="badge">✅ 施工完了（5/23 即日）</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E3%82%A8%E3%82%B3%E9%B9%BF-%E3%82%A2%E3%82%B3%E3%83%A0%E8%90%A9%E5%8E%9FM-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-06-17 09:05</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">請求済み</div><div class="l">ステータス</div></div>
+  <div class="kpi"><div class="v">¥13,200</div><div class="l">請求額（税込・未入金）</div></div>
+  <div class="kpi"><div class="v">完了</div><div class="l">施工（2026/5/23 即日）</div></div>
+  <div class="kpi"><div class="v">前後2枚</div><div class="l">施工写真</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>工事内容</b>：破損した誘導灯表示板の交換（差し込み式・電気工事不要）。表示板＝避難誘導サイン（緑地・走る人マーク）</li>
+        <li><b>現在地</b>：5/23 施工完了 → 6/4 完了報告書・請求書発行・宮園様へメール送付済み → <b>入金待ち</b></li>
+        <li><b>契約形態</b>：元請＝エコサポート鹿児島（宮園様）経由。実エンドはアコム むじんくん。請求宛名はエコ鹿</li>
+        <li><b>次アクション</b>：入金確認後、data.json 請求配列へ 入金状況=nyukin / 入金日 を記録。エコ鹿のインボイス登録番号（T番号）を確認次第マスター補完</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>元請・発注者</td><td>株式会社エコサポート鹿児島（T-030）</td><td>宮園 学 様（代表取締役社長）／請求宛名</td></tr>
+        <tr><td>実エンド</td><td>アコム（むじんくん／自動契約機）</td><td>萩原むじんくんコーナー</td></tr>
+        <tr><td>施工</td><td>株式会社アート・レイズ</td><td>表示板交換施工</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">🧾</div><div class="doc-info"><div class="doc-name">請_エコ鹿-アコム萩原M-26.pdf</div><div class="doc-meta-s">2026/6/4 請求書 ARS-T029-260604-01 ／ 誘導灯サイン取付 一式 ¥12,000（諸経費込・税別）税込¥13,200</div></div><div class="doc-st s-ok">発行済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">完_エコ鹿-アコム萩原M-26.pdf</div><div class="doc-meta-s">2026/6/4 工事完了報告書（現場ナビ仕様・状態JSON埋込）</div></div><div class="doc-st s-ok">発行済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📝</div><div class="doc-info"><div class="doc-name">完_エコ鹿-アコム萩原M-26.state.json</div><div class="doc-meta-s">完了報告書の再編集用状態JSON（preview.htmlで読込→再出力可）</div></div><div class="doc-st s-wip">編集用</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ 見積書・契約書・注文書は無し（即日対応・別途請求）。Driveリンクは同期後に付与。</div>
+    </div>
+    <div class="card">
+      <div class="card-t">📷 写真・施工記録</div>
+      <ul>
+        <li><b>施工前（5/23 10:14）</b>：20260523_1014_前_表示板未装着.jpg（本体・配線状態確認）</li>
+        <li><b>施工後（5/23 10:18）</b>：20260523_1018_後_表示板装着完了.jpg（新品表示板 装着・点灯確認完了）</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話記録から抽出した重要決定事項</div>
+  <div class="doc-meta-s">通話記録フォルダなし。履歴ノート（00_履歴_エコ鹿-アコム萩原M-26.md）の確定事項を以下に記載。</div>
+  <ul>
+    <li>【決定 5/23】電気工事不要（差し込み式・本体側電源は既存のまま）</li>
+    <li>【決定 5/23】請求方針：別途請求（無償対応ではなく工事費として請求）</li>
+    <li>【参考 6/3】宮園様メールにて、同元請の「アコム大分森町むじんくんコーナー 閉鎖工事（2026年10月後半予定）」を予告（別案件として進行中）</li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <div class="doc-meta-s">原価計上なし（労務費・材料費・外注費・経費 すべて¥0 ／ data.json 最終集計 2026-06-05）。表示板はエコ鹿支給品のため材料費発生なし。</div>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <div class="doc-meta-s" style="margin-top:6px;">請求額 ¥12,000（税別）に対し計上原価¥0。粗利は集計反映後に確定。</div>
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <div class="doc-meta-s">受取見積書・受取請求書なし（外注なし・表示板は元請支給）。</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/6/5（金）</div><div class="tl-text">data.json登録を復元（6/4の書込失敗で消失していたため）。T-030採番訂正（当初T-029→採番衝突のためT-030）</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/4（木）</div><div class="tl-text">完了報告書・請求書をHTML作成→PDF化、宮園様へメール送付。フォルダ作成・施工写真2枚を写真/へ移動。T-030 エコサポート鹿児島を取引先マスター登録</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/3（水）</div><div class="tl-text">宮園様メール受領：アコム大分森町閉鎖（10月後半）予告・本案件の品物送付予告</div></div>
+    <details class="tl-archive"><summary>過去の経緯を見る（2件・7日超）</summary>
+      <div class="tl-item"><div class="tl-date">2026/5/23（土）</div><div class="tl-text">施工日。10:14 施工前撮影→新品表示板を差込装着・10:18 点灯確認→固定/カバー閉止確認→即日工事完了。電気工事不要・別途請求を決定</div></div>
+      <div class="tl-item"><div class="tl-date">2026/5/21（木）</div><div class="tl-text">エコ鹿（宮園様）より新品代替誘導灯表示板を受領（破損品の交換用）</div></div>
+    </details>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li>「萩原M」の<b>M はむじんくん（自動契約機）の略</b>。表示板＝避難誘導サイン（緑地・走る人マーク）。</li>
+    <li>完了報告書は<b>現場ナビ仕様（kanryo_houkoku_preview.html）</b>準拠。状態JSON埋込済みのため preview.html の「ファイル読込」で再編集→PDF再出力が可能。</li>
+    <li>請求宛名は「株式会社エコサポート鹿児島」（御中は雛形側で自動付与）。実エンドはアコムだがエコ鹿経由のため宛名はエコ鹿。</li>
+    <li>同元請の<b>アコム大分森町M（10月後半 閉鎖工事）</b>が別案件として進行中。混同注意。履歴ノートは別ファイル。</li>
+    <li>昨年わさだタウンでも同元請（エコ鹿／宮園様）でお世話になっている。</li>
+  </ul>
+</div>
+
+<div class="footer">
+  本サマリーは data.json（真実の源泉）・履歴ノート・案件フォルダを基に自動生成。Driveリンク（href=""）は同期後に付与されます。<br>
+  案件キー：エコ鹿-アコム萩原M-26 ／ 顧客：エコ鹿
+</div>
+
+</body>
+</html>

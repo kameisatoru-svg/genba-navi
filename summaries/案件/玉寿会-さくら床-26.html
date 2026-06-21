@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>玉寿会-さくら床-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
+.num{text-align:right;font-variant-numeric:tabular-nums;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
+details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin:6px 0;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>さくら苑 床工事（第1期〜第3期）</h1>
+  <div class="sub">玉寿会-さくら床-26 ｜ 熊本県玉名市（社会福祉法人 玉寿会 さくら苑）</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">🧾 請求済み</span>
+    <span class="badge">🏢 社会福祉法人 玉寿会（T-001）</span>
+    <span class="badge">💴 第1期・第2期 入金済</span>
+    <span class="badge">⏳ 第3期 入金待ち</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E7%8E%89%E5%AF%BF%E4%BC%9A-%E3%81%95%E3%81%8F%E3%82%89%E5%BA%8A-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-06-17 09:05 ｜ 原価最終集計: 2026-05-29</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">請求済み</div><div class="l">ステータス</div></div>
+  <div class="kpi"><div class="v">¥20,055,200</div><div class="l">受注総額（3期合計・税込）</div></div>
+  <div class="kpi"><div class="v">¥1,204,500</div><div class="l">未入金（第3期）</div></div>
+  <div class="kpi"><div class="v">¥3,299,859</div><div class="l">原価合計（72件）</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>第1期</b>：見積 2/27（¥9,990,200）→ 3/16 契約 → 3/21-22 施工 → 3/24 請求 → <b>4/27 入金済</b></li>
+        <li><b>第2期</b>：見積 2/27（¥8,860,500）→ 4/8 契約 → 4/18-20 施工（夜間作業含む）→ 4/21 請求（完工）→ <b>5/27 入金済</b></li>
+        <li><b>第3期</b>：見積 2/21（¥1,204,500・医務室／ひまわり天井）→ 5/20 契約 → 5/29 請求（西様へメール送信済）→ <b>入金待ち</b></li>
+        <li><b>現場残材</b>：ウッドタイル10ケース・接着剤5ケース・見切り金物8本</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>発注者</td><td>社会福祉法人 玉寿会（さくら苑）（T-001）</td><td>熊本県玉名市伊倉北方1533</td></tr>
+        <tr><td>窓口</td><td>西 俊至 様（事務課長）</td><td>nishi@sakura-en.com／決裁は山田勝徳 理事長</td></tr>
+        <tr><td>紹介者</td><td>平方 聡（平エンジニアリング・T-014）</td><td>さくら苑工事の橋渡し・天井埋設機具脱着</td></tr>
+        <tr><td>下請（床）</td><td>中津屋・いわい装飾 ほか</td><td>第2期 床施工</td></tr>
+        <tr><td>下請（ｺｰｷﾝｸﾞ）</td><td>古長 正則（T-015）</td><td>第2期応援・ガラス/コーキング</td></tr>
+        <tr><td>下請（塗装）</td><td>古賀美装 古賀雄治（T-016）</td><td>塗装下請け主要メンバー</td></tr>
+        <tr><td>下請（クロス）</td><td>梅木内装 河原 様</td><td>第3期 医務室クロス貼り（5/25）</td></tr>
+        <tr><td>仕入先</td><td>佐藤株式会社 與品皓一郎（T-017）</td><td>タイル副資材・接着剤・金物</td></tr>
+        <tr><td>施工</td><td>株式会社アート・レイズ</td><td>元請（直接受注）</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">見_第1期_玉寿会-さくら床-26.pdf</div><div class="doc-meta-s">2026/2/27 見積 ¥9,990,200</div></div><div class="doc-st s-ok">発行済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">見_第2期_玉寿会-さくら床-26.pdf</div><div class="doc-meta-s">2026/2/27 見積 ¥8,860,500</div></div><div class="doc-st s-ok">発行済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">見_第3期_玉寿会-さくら床-26.pdf</div><div class="doc-meta-s">2026/2/21 見積 ¥1,204,500（医務室・ひまわり天井）</div></div><div class="doc-st s-ok">発行済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">🧾</div><div class="doc-info"><div class="doc-name">請_第1期_玉寿会-さくら床-26.pdf</div><div class="doc-meta-s">2026/3/24 請求 ¥9,990,200 → 4/27入金</div></div><div class="doc-st s-ok">入金済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">🧾</div><div class="doc-info"><div class="doc-name">請_第2期_玉寿会-さくら床-26.pdf</div><div class="doc-meta-s">2026/4/21 請求 ¥8,860,500 → 5/27入金</div></div><div class="doc-st s-ok">入金済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">🧾</div><div class="doc-info"><div class="doc-name">請_第3期_玉寿会-さくら床-26.pdf</div><div class="doc-meta-s">2026/5/29 請求 ¥1,204,500（ARS-T001-260529-01）</div></div><div class="doc-st s-wip">入金待ち</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📑</div><div class="doc-info"><div class="doc-name">負_第3期_玉寿会-さくら床-26.pdf</div><div class="doc-meta-s">2026/5/20 工事請負契約（締結済み）¥1,204,500</div></div><div class="doc-st s-ok">締結済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📐</div><div class="doc-info"><div class="doc-name">図面_平面_玉寿会-さくら床-26.pdf</div><div class="doc-meta-s">平面図（工事範囲・第1〜3期範囲図あり）</div></div><div class="doc-st s-ok">作成済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📅</div><div class="doc-info"><div class="doc-name">工程_工程表_玉寿会-さくら床-26.jpg</div><div class="doc-meta-s">工程表・工期（2-5月・第1期夜間段取り）</div></div><div class="doc-st s-ok">作成済</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ 第1期・第2期の見積/契約PDFも案件フォルダに保管。Driveリンクは同期後に付与。</div>
+    </div>
+    <div class="card">
+      <div class="card-t">📷 写真・現調記録</div>
+      <ul>
+        <li><b>現状写真</b>：ホール既存床損傷状況（フローリング割れ・テープ補修跡）等</li>
+        <li><b>工事写真 約45枚</b>：3/22 既存床剥がし・下地調整パテ塗り・フロアタイル貼り・見切り金物取付・夜間作業（接着剤乾燥・送風機）・4/18 第2期施工</li>
+        <li><b>完成写真</b>：ホール フロアタイル完成後（入居者食事風景）</li>
+        <li><b>材料</b>：床PM-24357／PM-24120マーキング・壁紙TH34980-81・動画1本</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話記録から抽出した重要決定事項</div>
+  <ul>
+    <li>2026/04/13 平方さん（紹介者・T-014）通話：第2期の撤去作業を4/17に前倒し検討（西さん塗装と分離する案）。4/18夕方 さくら苑入場の段取り確定</li>
+    <li>2026/04/13 藤原さん（協力会社・天井/岩綿板）通話：立願の森 天井工事の岩綿板（ロックウール化粧吸音板）約40坪・点検口5台・9.5mm厚を確保する方針で打合せ（※別現場の段取り）</li>
+    <li>2026/04/15 西さん（玉寿会）通話：浴室タイル補修は既存タイル剥がし→レベラーでフラット→シート貼りの工法に決定。材料・接着剤・くし目刷毛はアート・レイズ側で用意</li>
+    <li>2026/04/16 佐藤株式会社（與品さん・T-017）通話：第2期タイル・アースシール・金物は当日配送、シール材とシートは福岡在庫から翌日（4/17頃）事務所へ配送と確定</li>
+    <li>2026/04/16 古長さん（T-015）通話：4/18-20の熊本さくら苑 第2期工事へ応援参加で確定（土日月）</li>
+    <li>2026/04/22 河原さん（梅木内装）通話：5/25（月）に玉名市 医務室のクロス貼り応援で確定</li>
+    <li>2026/04/27 古長さん（T-015）通話：コーキング打設後2〜3時間で表面硬化。指で触らなければ当日夜から現場（トイレ）使用可と確認</li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <table>
+    <tr><th>区分</th><th class="num">金額</th><th>内容</th></tr>
+    <tr><td>労務費</td><td class="num">¥0</td><td>自社労務（原価管理に計上なし）</td></tr>
+    <tr><td>材料費</td><td class="num">¥1,509,120</td><td>フロアタイル・接着剤・副資材ほか</td></tr>
+    <tr><td>外注費</td><td class="num">¥1,226,500</td><td>床施工・塗装・コーキング・クロス等の下請</td></tr>
+    <tr><td>経費</td><td class="num">¥564,239</td><td>運搬・宿泊・現場経費ほか</td></tr>
+  </table>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <table style="margin-top:8px;">
+    <tr><td><b>受注総額（税込・3期合計）</b></td><td class="num"><b>¥20,055,200</b></td></tr>
+    <tr><td>原価合計（72件・最終集計 2026-05-29）</td><td class="num">¥3,299,859</td></tr>
+    <tr><td><b>粗利（受注総額−原価）</b></td><td class="num"><b style="color:var(--ok);">¥16,755,341</b></td></tr>
+  </table>
+  <div class="doc-meta-s" style="margin-top:4px;">※ 受注総額は税込見積/請求の3期合計。原価は data.json「原価」プロパティ（税抜集計値）を表示。粗利は参考値。</div>
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <table>
+    <tr><th>区分</th><th>書類／業者</th><th>備考</th></tr>
+    <tr><td>合見積</td><td>見_合_アート_玉寿会-さくら床-26.pdf</td><td>第2/3期 業者比較見積（床）</td></tr>
+    <tr><td>合見積</td><td>見_合_塩出_玉寿会-さくら床-26.pdf</td><td>第2/3期 業者比較見積</td></tr>
+    <tr><td>合見積</td><td>見_合_釘宮_玉寿会-さくら床-26.pdf</td><td>第2/3期 業者比較見積</td></tr>
+    <tr><td>経費</td><td>経費_第1期_玉寿会-さくら床-26.pdf</td><td>第1期 現場経費</td></tr>
+  </table>
+  <div class="doc-meta-s" style="margin-top:4px;">外注費 合計 ¥1,226,500（data.json原価）。主要下請：中津屋・いわい装飾・古長（T-015）・古賀美装（T-016）・梅木内装。受取請求書の個別明細は原価管理Sheets参照。</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/5/29（金）</div><div class="tl-text">第3期 請求書発行（ARS-T001-260529-01・税込¥1,204,500）・西様へメール送信。data.json請求配列に登録。第3期 入金待ち</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/5/27（火）</div><div class="tl-text">第2期 入金確認 ¥8,860,500</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/5/25（月）</div><div class="tl-text">第3期 医務室クロス貼り（梅木内装 河原さん応援）</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/5/20（火）</div><div class="tl-text">負_第3期 契約締結 ¥1,204,500</div></div>
+    <details class="tl-archive"><summary>過去の経緯を見る（7日超）</summary>
+      <div class="tl-item"><div class="tl-date">2026/4/28（火）</div><div class="tl-text">第1期 入金確認 ¥9,990,200</div></div>
+      <div class="tl-item"><div class="tl-date">2026/4/21（火）</div><div class="tl-text">第2期 請求書発行 ¥8,860,500（第2期完工）</div></div>
+      <div class="tl-item"><div class="tl-date">2026/4/18-20</div><div class="tl-text">第2期 施工（中津屋・いわい装飾・古長 ほか／夜間作業含む）</div></div>
+      <div class="tl-item"><div class="tl-date">2026/4/8（火）</div><div class="tl-text">負_第2期 契約締結</div></div>
+      <div class="tl-item"><div class="tl-date">2026/3/24（月）</div><div class="tl-text">第1期 請求書発行 ¥9,990,200（支払期限4/30）</div></div>
+      <div class="tl-item"><div class="tl-date">2026/3/21-22</div><div class="tl-text">第1期 施工（既存床剥がし・下地調整・フロアタイル貼り・夜間作業）</div></div>
+      <div class="tl-item"><div class="tl-date">2026/3/16（月）</div><div class="tl-text">玉寿会と工事契約（契約日：令和8年3月16日）</div></div>
+      <div class="tl-item"><div class="tl-date">2026/2/27（金）</div><div class="tl-text">第1期・第2期 見積提出（¥9,990,200／¥8,860,500）</div></div>
+      <div class="tl-item"><div class="tl-date">2026/2/21（土）</div><div class="tl-text">第3期 見積提出 ¥1,204,500（医務室・ひまわり天井）</div></div>
+    </details>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li>窓口は西俊至（事務課長）・決裁は山田勝徳 理事長の二段構え。さくら苑と立願の森の2施設運営のため現場名の取り違え注意（玉寿会-立願の森-26 と別案件）。</li>
+    <li>残作業・残材：ウッドタイル10ケース・接着剤5ケース・見切り金物8本が現場残材。次回工事や立願の森で転用検討。</li>
+    <li>未回収：第3期 ¥1,204,500（医務室・ひまわり天井）が入金待ち。入金確認後にステータスを「完了」へ前進。</li>
+  </ul>
+</div>
+
+<div class="footer">
+  玉寿会-さくら床-26 案件サマリー ｜ data.json（受注・原価の真実源泉）由来 ｜ 自動生成（無人スケジュール実行）
+</div>
+
+</body>
+</html>

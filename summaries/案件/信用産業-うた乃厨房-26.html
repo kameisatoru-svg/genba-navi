@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>信用産業-うた乃厨房-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
+details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin:6px 0;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>うた乃別府本店 厨房改装工事</h1>
+  <div class="sub">信用産業-うた乃厨房-26 ｜ 大分県別府市石垣東10-1-41（うた乃別府本店・総本店）</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">📝 見積提出済み</span>
+    <span class="badge">🏢 株式会社信用産業（T-009）</span>
+    <span class="badge">🍳 フード工事・電気工事</span>
+    <span class="badge">🤝 タニコー大分営業所 連携</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E4%BF%A1%E7%94%A8%E7%94%A3%E6%A5%AD-%E3%81%86%E3%81%9F%E4%B9%83%E5%8E%A8%E6%88%BF-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-06-17 09:05（原価集計: 2026-05-14）</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">見積提出済み</div><div class="l">ステータス</div></div>
+  <div class="kpi"><div class="v">¥732,776</div><div class="l">見積額（税込・A+B+C）</div></div>
+  <div class="kpi"><div class="v">¥0</div><div class="l">計上原価（合計）</div></div>
+  <div class="kpi"><div class="v">2区分</div><div class="l">残工事 A 塗装 / B スチコン</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>工事内容</b>：A. 製麺室 塗装工事（天井・壁 AEP塗装48㎡）／ B. 加工室 スチコン設置付帯工事（電源配線・天井フード・換気扇・軟水器電源等）／ C. 中央加工室 エアコン取替工事</li>
+        <li><b>現在地</b>：2026/3/26 改定見積（税込¥732,776）を3/27 江田至氏宛に送付済み。見積提出済みフェーズ</li>
+        <li><b>案件分離</b>：C項「中央加工室エアコン取替工事」は <b>信用産業-うた乃エアコン-26</b> として分離・完了（未来システム施工・2026/6/3）。残工事は A. 製麺室塗装 / B. 加工室スチコン設置 を本案件で継続</li>
+        <li><b>付帯対応</b>：2026/6/3 浄水器（湧水栓）再取付依頼を受領。仮取付を本設置へ → 信和冷暖房・関谷氏に取付依頼済み（平日9時〜対応可）</li>
+        <li><b>連携</b>：給排水・厨房機器はタニコー大分営業所（岩尾淳氏）と連携。図面はタニコーより受領（2026/3/26）</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>発注者</td><td>株式会社信用産業（T-009）</td><td>うた乃別府本店・総本店のオーナー企業／TEL 0977-26-5577</td></tr>
+        <tr><td>窓口</td><td>江田 至 様（代表取締役）</td><td>見積送付先（3/27送付済み）</td></tr>
+        <tr><td>厨房連携</td><td>タニコー大分営業所（岩尾 淳氏）</td><td>図面提供・給排水/厨房機器対応</td></tr>
+        <tr><td>協力業者</td><td>信和冷暖房（関谷氏）</td><td>浄水器（湧水栓）本設置取付</td></tr>
+        <tr><td>施工</td><td>株式会社アート・レイズ</td><td>塗装・スチコン付帯・電気工事</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">見_信用産業-うた乃厨房-26.pdf</div><div class="doc-meta-s">2026/3/26 改定見積 税込¥732,776（AR-26-T009-M001）・3/27江田至宛送付済み</div></div><div class="doc-st s-ok">提出済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">見_旧A_信用産業-うた乃厨房-26.pdf</div><div class="doc-meta-s">2026/2/21 改定前(旧A) 税込¥671,000</div></div><div class="doc-st s-wip">旧版</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📐</div><div class="doc-info"><div class="doc-name">うた乃別府本店 改装工事 平面図J+.pdf</div><div class="doc-meta-s">タニコー受領 平面図（同梱: フード位置図・器具表・衛生位置図・電気位置図）</div></div><div class="doc-st s-ok">受領済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">🗂️</div><div class="doc-info"><div class="doc-name">議事_ワークフロー_信用産業-うた乃厨房-26.html</div><div class="doc-meta-s">準備状況ワークフロー（議事/）</div></div><div class="doc-st s-wip">作業用</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ 請求・契約・注文書は未発行。Driveリンクは同期後に付与。</div>
+    </div>
+    <div class="card">
+      <div class="card-t">📷 写真・図面・記録</div>
+      <ul>
+        <li><b>現調写真26枚</b>：加工室2（スチコン/フード/冷蔵庫・タニコーTESC-10R銘板・新スチコン搬入）・中央加工室（製麺機・既存壁掛エアコン 日立RAS-N25S）・製麺室（天カセエアコン・塗装劣化）等</li>
+        <li><b>図面（JWW＋PDF）</b>：平面図 / フード位置図 / 器具表 / 衛生位置図 / 電気位置図（タニコー受領）</li>
+        <li><b>通話記録</b>：信和冷暖房 関谷氏（浄水器設置・本設置交換）3本＋m4a 1本</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話記録から抽出した重要決定事項</div>
+  <ul>
+    <li>2026/04/24 信和冷暖房 関谷氏 通話：うた乃店舗への浄水器（ステンレス製）設置の相談。現場調査を兼ねて訪問する段取りを確認</li>
+    <li>2026/06/03 信和冷暖房 関谷氏 通話【決定】：前回設置した浄水器（湧水栓）が「仮の製品」であったため、本チャン品が届き亀井が交換作業を実施。作業は開店前の午前9時頃が望ましく、水曜（定休日）であれば時間を気にせず対応可。関谷氏も9時頃の訪問で了承</li>
+    <li>2026/06/03【決定】浄水器（湧水栓）の本設置取付を信和冷暖房・関谷氏に依頼済み（平日9時〜対応可）</li>
+    <li>2026/06/03【決定】C項「中央加工室エアコン取替工事」は 信用産業-うた乃エアコン-26 として分離・完了（未来システム施工）。残工事 A.製麺室塗装 / B.加工室スチコン設置 は本案件で継続</li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <table>
+    <tr><th>区分</th><th style="text-align:right;">金額</th></tr>
+    <tr><td>労務費</td><td style="text-align:right;">¥0</td></tr>
+    <tr><td>材料費</td><td style="text-align:right;">¥0</td></tr>
+    <tr><td>外注費</td><td style="text-align:right;">¥0</td></tr>
+    <tr><td>経費</td><td style="text-align:right;">¥0</td></tr>
+  </table>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <table style="margin-top:6px;">
+    <tr><td><b>原価合計</b>（件数0・集計日 2026-05-14）</td><td style="text-align:right;"><b>¥0</b></td></tr>
+    <tr><td>見積額（税込・A+B+C）</td><td style="text-align:right;">¥732,776</td></tr>
+  </table>
+  <div class="doc-meta-s" style="margin-top:6px;">※ 原価は未計上（見積提出済み・施工原価の発生待ち）。data.json集計値。</div>
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <div class="doc-meta-s">受取見積書・受取請求書なし（外注費 ¥0・data.json）。浄水器本設置（信和冷暖房）は対応中・請求未着。</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/6/3（火）</div><div class="tl-text">浄水器（湧水栓）再取付依頼を受領。仮取付→本設置へ。信和冷暖房・関谷氏に取付依頼済み（平日9時〜対応可）</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/3（火）</div><div class="tl-text">C項「中央加工室エアコン取替工事」を 信用産業-うた乃エアコン-26 として分離・完了（未来システム施工）。残工事 A・B を本案件で継続</div></div>
+    <details class="tl-archive"><summary>過去の経緯を見る（4件・7日超）</summary>
+      <div class="tl-item"><div class="tl-date">2026/4/24（木）</div><div class="tl-text">信和冷暖房 関谷氏と浄水器（ステンレス製）設置の相談・現場調査の段取り</div></div>
+      <div class="tl-item"><div class="tl-date">2026/3/27（金）</div><div class="tl-text">改定見積（税込¥732,776）を江田至氏宛に送付</div></div>
+      <div class="tl-item"><div class="tl-date">2026/3/26（木）</div><div class="tl-text">改定見積作成（AR-26-T009-M001・¥732,776）。タニコー大分営業所（岩尾淳氏）より図面受領</div></div>
+      <div class="tl-item"><div class="tl-date">2026/2/21（土）</div><div class="tl-text">旧A版見積作成（税込¥671,000）</div></div>
+    </details>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li>製麺室は天カセエアコン下で天井・壁の塗装劣化あり → AEP塗装48㎡で改修（A項）</li>
+    <li>加工室はスチコン（タニコーTESC-10R 3相200V）設置に伴う電源配線・天井フード加工（GF6・1160×1160）・換気扇・全自動軟水器電源が付帯（B項）</li>
+    <li>給排水・厨房機器はタニコー大分営業所が主管。アート・レイズは塗装＋付帯電気＋フード加工を担当</li>
+    <li>浄水器（湧水栓）本設置は信和冷暖房・関谷氏に依頼済み。日程確定・完了確認がTODO</li>
+  </ul>
+</div>
+
+<div class="footer">
+  信用産業-うた乃厨房-26 ｜ 自動生成サマリー（data.json真実源泉）｜ AR-2026
+</div>
+
+</body>
+</html>

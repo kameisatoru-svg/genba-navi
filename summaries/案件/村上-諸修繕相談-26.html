@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>村上-諸修繕相談-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
+details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin:6px 0;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>村上邸 諸修繕相談（洗面丁番・カーテン・椅子張替え 他）</h1>
+  <div class="sub">村上-諸修繕相談-26 ｜ 大分県別府市青山町 村上邸</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">📋 見積提出済み</span>
+    <span class="badge">👤 村上信子 様（T-028）</span>
+    <span class="badge">🛋 ソファ・椅子張替え3案提示</span>
+    <span class="badge">📑 契約未締結</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E6%9D%91%E4%B8%8A-%E8%AB%B8%E4%BF%AE%E7%B9%95%E7%9B%B8%E8%AB%87-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-06-17 09:05</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">見積提出済み</div><div class="l">ステータス</div></div>
+  <div class="kpi"><div class="v">張替え3案</div><div class="l">見積（生地グレード別）</div></div>
+  <div class="kpi"><div class="v">¥232〜319千</div><div class="l">張替え税込（端数値引後）</div></div>
+  <div class="kpi"><div class="v">27枚</div><div class="l">現調・打合せ写真</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>現在地</b>：ソファ・椅子 生地張替え3パターン見積（生地グレード別）を作成・提出済み。2026-06-16 に端数値引き適用＋張地メーカー表記をシンコールへ訂正して再生成・Canon印刷済み。張地サンプル提案シートも作成済み</li>
+        <li><b>次アクション</b>：村上様が張替え生地を T-9591／T-9593／T-9614 から選定 → 生地確定後にアダル（神崎さん）へ正式発注・引取/設置はアートレイズ施工</li>
+        <li><b>相談項目（6件）</b>：①洗面所物入れ丁番交換 ②ピアノ部屋カーテン交換 ③ソファ・椅子張替え ④2階廊下フローリング張替え ⑤トイレ＋洗面所床CF重ね張り ⑥キッチンTOTOビルトインオーブン不具合</li>
+        <li><b>3件統合見積</b>：雨樋・雨漏り・諸修繕を1本化した ARM-T028-260611-01（税込¥395,670）も別途提出済み（本フォルダ直下HTML）</li>
+        <li><b>契約形態</b>：村上信子様（個人宅・T-028）と直接。契約書 未締結</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>発注者</td><td>村上信子 様（T-028）</td><td>個人宅・大分県別府市青山町／現地窓口はお母様</td></tr>
+        <tr><td>施工</td><td>株式会社アート・レイズ</td><td>引取・設置・内装施工。各見積発行元</td></tr>
+        <tr><td>張替え業者</td><td>株式会社アダル 神崎美光 様（T-029）</td><td>ソファ・椅子張替え施工＆生地仕入元（生地＝シンコール製）。最上グレードで決定・椅子はアダルへ持込</td></tr>
+        <tr><td>建材窓口</td><td>タマイM&S（株）高橋義一 様（T-036）</td><td>TOTO/LIXIL建材窓口。オーブン不具合・トイレ選定の相談先</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">見_T9591_村上-諸修繕相談-26.pdf</div><div class="doc-meta-s">2026/6/11 張替え見積A（張地T-9591 敬紫陽）税込¥319,000 ※端数値引後</div></div><div class="doc-st s-ok">提出済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">見_T9593_村上-諸修繕相談-26.pdf</div><div class="doc-meta-s">2026/6/11 張替え見積B（張地T-9593 ファースト）税込¥281,600 ※端数値引後</div></div><div class="doc-st s-ok">提出済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">見_T9614_村上-諸修繕相談-26.pdf</div><div class="doc-meta-s">2026/6/11 張替え見積C（張地T-9614 フィリップ）税込¥232,100 ※端数値引後</div></div><div class="doc-st s-ok">提出済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📑</div><div class="doc-info"><div class="doc-name">見_村上-諸修繕相談-26+村上-雨樋修理-26+村上-雨漏り修理-26.html</div><div class="doc-meta-s">2026/6/11 3案件統合見積 ARM-T028-260611-01 税込¥395,670（雨樋/雨漏り/諸修繕）</div></div><div class="doc-st s-ok">提出済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">🎨</div><div class="doc-info"><div class="doc-name">資料_ソファ椅子張地サンプル3案(T9591-9593-9614)_村上-諸修繕相談-26.pdf</div><div class="doc-meta-s">2026/6/16 シンコール公式生地画像・A4・生地選定用</div></div><div class="doc-st s-ok">作成済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">⚠️</div><div class="doc-info"><div class="doc-name">報告_オーブン点検のお願い_村上-諸修繕相談-26.pdf</div><div class="doc-meta-s">2026/6/11 ⑥オーブン待機通電の疑い・TOTO修理受付0120-1010-05案内・印刷済</div></div><div class="doc-st s-ok">手渡済</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ Driveリンク（href=""）は同期後に付与。</div>
+    </div>
+    <div class="card">
+      <div class="card-t">📷 写真・現調記録</div>
+      <ul>
+        <li><b>6/3 下見・現調17枚</b>：洗面所物入れ丁番破損・検査証ラベル／ソファ・椅子全景／カーテン現況／2階廊下カーペット／トイレ・洗面所床CF（連番01〜17）</li>
+        <li><b>6/9 打合せ・採寸</b>：張地サンプル帳4種（カモフラ柄/ファースト/フィリップ/紫陽花柄）・採寸メモ・キッチンIH型番KAME063ACB・オーブン全景（18〜27）</li>
+        <li><b>6/17 追加11枚</b>：20260617_* 屋根・枝剪定／追加確認分</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話記録から抽出した重要決定事項</div>
+  <ul>
+    <li>2026/06/02 村上信子様 初回通話：修理相談3件（①洗面所物入れ丁番交換 ②ピアノ部屋カーテン交換 ③椅子カバー業者紹介）を1案件に集約。下見は来週末頃（雨樋と同タイミング）</li>
+    <li>2026/06/03 下見訪問【決定】③はカバー作成→張替えに変更しアダルへ依頼予定。追加④2階廊下カーペット→フローリング張替え・⑤トイレ＋洗面所床CF重ね張りを項目追加</li>
+    <li>2026/06/04【決定】張替え見積依頼先をアダル・神崎美光様（T-029）に確定。3人掛け×1台・1人掛け×2台、座面/背もたれ各カバー計10点。LINEで依頼送付済み</li>
+    <li>2026/06/11【決定】カーテンは2カ所ともサンゲツ SC7626・両開き仕様。張替え見積はアダル単価＋20%・運搬費据置で3パターン提示。ソファ張替えと⑥オーブンは統合見積に含めず別途</li>
+    <li>2026/06/11 ⑥オーブン相談：TOTOビルトインが未使用時も庫内が温かく表示「0」常時点灯。待機通電の疑いで放置不可と判断。まず施主からTOTO（0120-1010-05）へ点検依頼、難しければアートレイズが代理対応</li>
+    <li>2026/06/16【決定】張地メーカーはシンコール（T-9591敬紫陽/T-9593ファースト/T-9614フィリップ）に表記訂正。見積は端数値引き＝税抜1000円単位切下げを適用（税込319,000/281,600/232,100）で再生成・印刷</li>
+    <li>2026/06/17 アダル神崎様通話【決定】椅子張替えは最上グレード生地で決定。引取・設置は亀井が実施し椅子はアダルへ持込。現生地は施主のご友人へ譲るため剥がさず返却（カバー式のため対応可）。施工日確定後に神崎様より連絡</li>
+    <li>2026/06/16 村上様通話：屋根作業時に隣家から伸びた枝の剪定も追加依頼（今週中訪問予定）</li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <table>
+    <tr><th>分類</th><th>金額（税込）</th><th>備考</th></tr>
+    <tr><td>労務費</td><td>—</td><td>data.json 原価未計上</td></tr>
+    <tr><td>材料費</td><td>—</td><td>data.json 原価未計上</td></tr>
+    <tr><td>外注費</td><td>—</td><td>data.json 原価未計上</td></tr>
+    <tr><td>経費</td><td>—</td><td>data.json 原価未計上</td></tr>
+  </table>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <div class="doc-meta-s" style="margin-top:6px;">原価未計上（受注前・生地選定待ち）。アダル仕入参考原価（税込）＝T-9591:270,380／T-9593:239,800／T-9614:198,440（履歴ノート記載・data.json原価には未反映）。</div>
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <table>
+    <tr><th>業者</th><th>内容</th><th>金額（税込）</th><th>状態</th></tr>
+    <tr><td>アダル（T-029）</td><td>ソファ・椅子張替え見積 T-9591</td><td>270,380</td><td>受領（参考原価）</td></tr>
+    <tr><td>アダル（T-029）</td><td>ソファ・椅子張替え見積 T-9593</td><td>239,800</td><td>受領（参考原価）</td></tr>
+    <tr><td>アダル（T-029）</td><td>ソファ・椅子張替え見積 T-9614</td><td>198,440</td><td>受領（参考原価）</td></tr>
+  </table>
+  <div class="doc-meta-s" style="margin-top:4px;">※ アダル神崎様より生地グレード別3枚の張替え見積を受領済み（履歴ノート記載値）。受取請求書はまだ発生していない。data.json「請求」「原価」は空。</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/6/17（火）</div><div class="tl-text">アダル神崎様と張替え打合せ：最上グレード生地で決定・引取/設置は亀井・椅子はアダル持込・現生地は剥がさず返却。屋根作業＋隣家枝剪定の追加対応も調整</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/16（火）</div><div class="tl-text">張替え3見積を端数値引き適用＋張地メーカーをシンコールへ訂正し再生成・Canon再印刷。張地サンプル提案シート（A4）作成</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/11（水）</div><div class="tl-text">ソファ・椅子張替え3パターン見積（T-9591/9593/9614）作成・提出。3案件統合見積 ARM-T028-260611-01（¥395,670）作成。⑥オーブン点検のお願い報告書を手渡し</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/9（月）</div><div class="tl-text">打合せ：張地サンプル帳提示・採寸（ソファ3人用/1人用×2）・キッチンIH型番KAME063ACB確認</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/4（木）</div><div class="tl-text">張替え見積依頼先をアダル・神崎美光様（T-029）に確定・LINE送付</div></div>
+    <div class="tl-item"><div class="tl-date">2026/6/3（火）</div><div class="tl-text">下見訪問・現地調査17枚撮影。④フローリング・⑤CF重ね張りを項目追加</div></div>
+    <details class="tl-archive"><summary>過去の経緯を見る（1件・7日超）</summary>
+      <div class="tl-item"><div class="tl-date">2026/6/2（月）</div><div class="tl-text">村上信子様通話で諸修繕相談3件を発動・data.json登録・フォルダ作成</div></div>
+    </details>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li>本案件はソファ・椅子張替えが中心。生地はシンコール製（アダルが施工＆生地仕入）。当初備考「張地：アダル」は誤記→シンコール表記に訂正済み</li>
+    <li>概算項目（④フローリング・⑤CF・統合見積内の雨樋）は金額未確定。フローリングは明るい白っぽい色希望・水回り床は無地で明るい石目調等を検討中</li>
+    <li>⑥キッチンTOTOビルトインオーブンは待機通電の疑い＝発火リスクあり。点検まで分電盤のオーブン用ブレーカーOFFを案内済み。TOTO点検結果（修理可否/取替）待ち</li>
+    <li>トイレ相談：LIXIL「サティス」タンクレス（約50万/32万）を比較検討中。現トイレは故障なし＝清掃で対応可</li>
+  </ul>
+</div>
+
+<div class="footer">
+  村上-諸修繕相談-26 案件サマリー ｜ 出典: data.json（最終更新 2026-06-17 09:05）・履歴ノート・通話記録 ｜ Driveリンクは同期後に付与
+</div>
+
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>信用産業-うた乃倉庫-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
+td.num,th.num{text-align:right;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
+details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin:6px 0;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>うた乃総本店 スポットクーラー取替工事</h1>
+  <div class="sub">信用産業-うた乃倉庫-26 ｜ 大分県別府市 うた乃総本店 厨房横作業場</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">💴 請求済み</span>
+    <span class="badge">🏢 株式会社信用産業（T-009）</span>
+    <span class="badge">✅ 施工完了（5/20）</span>
+    <span class="badge">⏳ 未入金</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E4%BF%A1%E7%94%A8%E7%94%A3%E6%A5%AD-%E3%81%86%E3%81%9F%E4%B9%83%E5%80%89%E5%BA%AB-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-06-17 09:05（原価集計: 2026-05-18）</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">請求済み</div><div class="l">ステータス</div></div>
+  <div class="kpi"><div class="v">¥87,780</div><div class="l">請求額（税込・発行済PDF）</div></div>
+  <div class="kpi"><div class="v">未入金</div><div class="l">入金状況</div></div>
+  <div class="kpi"><div class="v">2026/5/20</div><div class="l">施工完了日</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>進行フロー</b>：①5/15 江田社長より故障連絡・現地確認 → ②5/18 新機（YAMAZEN SSA-Y25-2）楽天購入 → ③5/20 取替施工・旧機撤去/産廃処分 → ④5/20 請求書・完了報告書発行</li>
+        <li><b>現在地</b>：施工完了・請求書発行済み（ARS-T009-260520-01）。江田社長への請求書・完了報告書提出と入金確認が次アクション</li>
+        <li><b>見積</b>：出来高方式で江田社長了承済み（事前見積なし→施工後に請求）</li>
+        <li><b>原価反映</b>：来月AMEX/楽天明細で機器代¥59,800の原価計上待ち</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>発注者</td><td>株式会社信用産業（T-009）</td><td>うた乃別府本店・うた乃総本店のオーナー企業</td></tr>
+        <tr><td>窓口</td><td>江田 至 様（代表取締役）</td><td>「同じものお願い」「店長には連絡済み」（5/15通話）</td></tr>
+        <tr><td>施工</td><td>株式会社アート・レイズ</td><td>取替施工・旧機撤去・産廃処分</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">💴</div><div class="doc-info"><div class="doc-name">請_信用産業-うた乃倉庫-26.pdf</div><div class="doc-meta-s">請求書 ARS-T009-260520-01／2026/5/20発行／税込¥87,780</div></div><div class="doc-st s-ok">発行済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">完_信用産業-うた乃倉庫-26.pdf</div><div class="doc-meta-s">工事完了報告書／2026/5/20発行／施工前後写真入り</div></div><div class="doc-st s-ok">発行済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">🔧</div><div class="doc-info"><div class="doc-name">01_ワークフロー.html</div><div class="doc-meta-s">準備状況ワークフロー（5種AUTOマーカー版）</div></div><div class="doc-st s-ok">作成済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📞</div><div class="doc-info"><div class="doc-name">通話記録/20260515_江田_144011_transcript.txt</div><div class="doc-meta-s">2026/5/15 江田社長 故障連絡・買替依頼</div></div><div class="doc-st s-ok">文字起こし済</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ Driveリンク（href=""）は同期後に付与。</div>
+    </div>
+    <div class="card">
+      <div class="card-t">🛠 工事内容・機器</div>
+      <ul>
+        <li><b>取替機器</b>：旧機 YAMAZEN YS-422D（単相100V・冷媒R407C）→ 新機 YAMAZEN SSA-Y25-2（単相100V・冷媒R410A・排熱ダクト付き・36.5kg）</li>
+        <li><b>施工内容</b>：①スポットクーラー取替 ②排熱ダクト既存流用・接続 ③旧機撤去・産業廃棄物処分</li>
+        <li><b>新機購入</b>：楽天「くらしのeショップ」¥59,800（税込・送料無料／注文番号 205937-20260518-0343828397）</li>
+        <li><b>設置環境</b>：厨房横の冷蔵庫・冷凍庫密集エリア。排熱ダクト径互換・既存壁穴そのまま使用可。重量物のため2名作業</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話記録から抽出した重要決定事項</div>
+  <ul>
+    <li>2026/05/15 江田 至さん（T-009・代表取締役）通話：うた乃 厨房横作業場（冷蔵庫置場）のスポットクーラーが故障。以前購入したものと同型番（または類似品）を手配する方針で確定</li>
+    <li>2026/05/15【決定】新規エアコン設置（配管工事）ではなく、スポットクーラーの新規購入で対応する方針</li>
+    <li>2026/05/15【決定】店長へは「亀井に依頼済み」と江田社長から連絡済み。亀井が機種を調べて手配・購入を進める段取り</li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <table>
+    <tr><th>分類</th><th class="num">金額</th><th>備考</th></tr>
+    <tr><td>労務費</td><td class="num">¥0</td><td>未集計</td></tr>
+    <tr><td>材料費</td><td class="num">¥0</td><td>未集計（機器代¥59,800は来月AMEX/楽天明細で計上予定）</td></tr>
+    <tr><td>外注費</td><td class="num">¥0</td><td>外注なし</td></tr>
+    <tr><td>経費</td><td class="num">¥0</td><td>未集計</td></tr>
+  </table>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <div class="doc-meta-s" style="margin-top:6px;">原価合計 ¥0（最終集計日 2026-05-18・未集計）／請求額（税抜）¥79,800。原価反映後に粗利確定。</div>
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <div class="doc-meta-s">受取見積書・受取請求書なし（外注なし／機器は楽天直購入）</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/5/20（水）</div><div class="tl-text">施工完了（YAMAZEN SSA-Y25-2 設置・排熱ダクト既存流用）。旧機YS-422D撤去・産廃処分。請求書 ARS-T009-260520-01 発行（税込¥87,780）・工事完了報告書発行（施工前後写真入り）</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/5/18（月）</div><div class="tl-text">新機 YAMAZEN SSA-Y25-2 を楽天「くらしのeショップ」で購入（¥59,800税込）。data.json案件登録・ワークフローHTML生成。見積は出来高でOKと江田社長了承</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/5/15（金）</div><div class="tl-text">江田社長より故障連絡。現地確認（厨房横スポットクーラー故障）。「同じものお願い」の指示・店長へは連絡済み（通話記録あり）</div></div>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li><b>現場名の訂正</b>：正しくは「うた乃総本店」（履歴ノート・発行済PDFで確定）。data.json の施工場所「うた乃別府本店」は旧表記。次回data.json更新時に「うた乃総本店」へ訂正推奨</li>
+    <li><b>金額の差異</b>：data.json請求金額は¥96,558だが、実際の発行済請求書PDFは税込¥87,780（税抜¥79,800＋消費税¥7,980）。本サマリーは発行済PDFの実額を採用。data.jsonの金額・備考（諸経費10%表記）は次回更新で実発行額へ要訂正</li>
+    <li>HIH広瀬には在庫なし→楽天通販で対応。排熱ダクト径互換のため既存壁穴をそのまま使用</li>
+    <li>来月のAMEX/楽天明細で機器代¥59,800を材料費として原価計上し、粗利を確定させる</li>
+    <li>厨房工事は別途タニコー大分営業所（岩尾氏）と連携が必要（T-009共通の注意点）</li>
+  </ul>
+</div>
+
+<div class="footer">株式会社アート・レイズ ｜ 案件サマリー（自動生成）｜ 信用産業-うた乃倉庫-26</div>
+
+</body>
+</html>

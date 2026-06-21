@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>信用産業-うた乃パントリー-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
+details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin:6px 0;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>うた乃別府本店 パントリー エアコン修理工事</h1>
+  <div class="sub">信用産業-うた乃パントリー-26 ｜ 〒874-0919 大分県別府市石垣東10丁目1-41 うた乃総本店 パントリー</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">📋 相談</span>
+    <span class="badge">🏢 信用産業（T-009）</span>
+    <span class="badge">💧 エアコン水漏れ対応</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E4%BF%A1%E7%94%A8%E7%94%A3%E6%A5%AD-%E3%81%86%E3%81%9F%E4%B9%83%E3%83%91%E3%83%B3%E3%83%88%E3%83%AA%E3%83%BC-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-06-17 09:05（原価集計: 2026-06-12）</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">相談</div><div class="l">ステータス</div></div>
+  <div class="kpi"><div class="v">水漏れ</div><div class="l">不具合内容（継続発生）</div></div>
+  <div class="kpi"><div class="v">見積前</div><div class="l">金額（現地確認後に判断）</div></div>
+  <div class="kpi"><div class="v">通話1件</div><div class="l">記録（6/12 入電）</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>進行フロー</b>：①相談受付（6/12 入電）→ ②現地確認（水漏れ原因特定）→ ③修理方針・見積要否判断 → ④必要に応じ施工業者手配・施工</li>
+        <li><b>現在地</b>：6/12 吉原店長より水漏れ相談を受付。<b>現地確認の日程調整が次アクション</b>（吉原店長へ連絡）</li>
+        <li><b>不具合</b>：パントリーのエアコンで水漏れが継続発生。以前の修理時に「送風機からの水漏れでは」と言われたが、以前はそうした事象は無かったとのこと</li>
+        <li><b>別件注意</b>：中央加工室のエアコン取替案件（信用産業-うた乃エアコン-26・2026/06/03完了・未来システム施工）とは<b>別件</b></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>顧客</td><td>株式会社信用産業（T-009）</td><td>窓口: 江田 至 様（代表取締役）／うた乃別府本店・総本店オーナー企業</td></tr>
+        <tr><td>現場窓口</td><td>うた乃 店長 吉原さん</td><td>電話帳の旧表記「うたの吉永」は誤登録・6/12訂正済み</td></tr>
+        <tr><td>施工</td><td>株式会社アート・レイズ</td><td>現地確認・修理対応</td></tr>
+        <tr><td>協力候補</td><td>未来システム</td><td>中央加工室エアコン取替の施工実績あり（必要時手配候補）</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📞</div><div class="doc-info"><div class="doc-name">20260612_うたの吉永_145424_transcript.md</div><div class="doc-meta-s">2026/6/12 吉原店長入電 文字起こし（通話記録/）</div></div><div class="doc-st s-ok">記録済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">🎙️</div><div class="doc-info"><div class="doc-name">通話記録 うたの吉永_260612_145424.m4a</div><div class="doc-meta-s">通話原音（通話記録/）</div></div><div class="doc-st s-ok">記録済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📝</div><div class="doc-info"><div class="doc-name">00_履歴_信用産業-うた乃パントリー-26.md</div><div class="doc-meta-s">案件履歴ノート（経緯・TODO）</div></div><div class="doc-st s-ok">作成済</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ 見積・契約・図面・写真は未取得（相談フェーズ）。書類/・写真/ フォルダは現状空。Driveリンクは同期後に付与。</div>
+    </div>
+    <div class="card">
+      <div class="card-t">📷 写真・現調記録</div>
+      <ul>
+        <li>現地確認は未実施。写真・図面の取得は現地確認時に行う予定（写真/ フォルダは現状空）。</li>
+        <li>確認ポイント候補：ドレン詰まり／送風機（ファン）結露／冷媒系の不具合 等。</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話記録から抽出した重要決定事項</div>
+  <ul>
+    <li>2026/06/12 14:54 吉原店長（うた乃・現場窓口）入電：パントリーのエアコンで水漏れが継続発生。以前の修理対応時に「送風機からの水漏れではないか」と言われたが、以前はそうした事象は無かったとのこと。現在も水漏れが続いており異常事態ではないかと懸念。かめさんが水漏れの件を確認すると回答。</li>
+    <li>※ transcript（Gemini lite生成）内の「井上様」「パンATORY」は誤認識（正：吉原さん／パントリー）。氏名は「吉原」店長が正（6/12かめさん確認）。</li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <div class="doc-meta-s">見積未発行・原価計上なし（相談フェーズ）。原価4分類（労務費・材料費・外注費・経費）はいずれも¥0（data.json最終集計 2026-06-12）。</div>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <div class="doc-meta-s">受取見積書・受取請求書なし（該当なし）</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/6/12（金）</div><div class="tl-text">うた乃店長・吉原さんより入電（14:54）。パントリーエアコンの水漏れ継続発生の相談を受付。かめさんが確認を回答。通話記録保存・案件登録（相談）・履歴ノート作成</div></div>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li>水漏れ原因の切り分けが先決：ドレン排水経路の詰まり・勾配不良が最有力候補。送風機（ファン）結露・冷媒系も要確認。</li>
+    <li>「以前は水漏れが無かった」点から、前回修理後に発生し始めた可能性あり。前回修理の内容・施工者の確認が有用。</li>
+    <li>顧客窓口は江田至様（信用産業 代表）だが、現場の一次窓口は吉原店長。現地確認の日程は吉原店長と調整。</li>
+    <li>同顧客に「信用産業-うた乃パントリーエアコン-26」という別フォルダもあるため混同注意。本件は「信用産業-うた乃パントリー-26」。</li>
+  </ul>
+</div>
+
+<div class="footer">
+  本サマリーは data.json を真実の源泉として自動生成（相談フェーズのため資料は通話記録・履歴ノート中心）。Driveリンクは同期後に付与。
+</div>
+
+</body>
+</html>

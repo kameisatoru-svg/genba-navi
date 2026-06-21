@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>村上-雨漏り修理-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
+details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin:6px 0;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>サンルーム天窓 雨漏り修理</h1>
+  <div class="sub">村上-雨漏り修理-26 ｜ 大分県別府市青山町 村上邸（野口病院裏手）</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">📋 見積準備</span>
+    <span class="badge">👤 村上信子 様（T-028・個人宅）</span>
+    <span class="badge">🔧 たつみ板金（T-035）</span>
+    <span class="badge">🏷️ 簡易規模</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E6%9D%91%E4%B8%8A-%E9%9B%A8%E6%BC%8F%E3%82%8A%E4%BF%AE%E7%90%86-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-06-17 09:05</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">見積準備</div><div class="l">ステータス</div></div>
+  <div class="kpi"><div class="v">¥48,000</div><div class="l">雨漏り修理 計上額（統合見積B・税抜）</div></div>
+  <div class="kpi"><div class="v">¥40,000</div><div class="l">たつみ板金 原価ベース（税抜）</div></div>
+  <div class="kpi"><div class="v">写真3点</div><div class="l">現調記録（6/3）</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>進行フロー</b>：①初回相談（雨漏り発生）→ ②たつみ板金 現地調査 → ③天窓塞ぎ工法決定・板金見積 → ④AR統合見積に計上 → ⑤受注後たつみ板金へ発注・施工</li>
+        <li><b>現在地</b>：6/3 たつみ板金が現地調査済み。6/5 たつみ板金見積（税抜40,000）受領 → 6/11 3件統合見積に「B. 雨漏り修理」として計上済み（48,000・税抜）</li>
+        <li><b>次アクション</b>：統合見積の提出（かめさん確認→PDF化）。受注後にたつみ板金へ天窓塞ぎ工事を正式発注</li>
+        <li><b>未解決</b>：施工日程の調整（梅雨明け・晴天待ち）</li>
+        <li><b>工法</b>：勾配のほぼ無い既存天窓のため雨漏り原因特定が困難 → 天窓を塞ぐ方針（板金加工取付2カ所＋コーキング2カ所）</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>発注者</td><td>村上信子 様（T-028）</td><td>個人宅・別府市青山町／野口病院裏手・寿司屋金太郎裏。玄関屋根等を過去に修理した既存顧客</td></tr>
+        <tr><td>施工（元請）</td><td>株式会社アート・レイズ</td><td>窓口・統合見積・発注管理</td></tr>
+        <tr><td>調査・施工（板金）</td><td>たつみ板金（T-035・たっちゃん）</td><td>天窓塞ぎ工事を担当。過去にカーポート・玄関屋根・テラス着脱工事の実績</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">アートレイズ様　村上邸　天窓塞ぎ工事.pdf</div><div class="doc-meta-s">2026/6/8 たつみ板金 受領（天窓塞ぎ工事 見積・税抜40,000）</div></div><div class="doc-st s-ok">受領済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📝</div><div class="doc-info"><div class="doc-name">見_村上-雨漏り修理-26.html</div><div class="doc-meta-s">2026/6/9 単独版見積（ARM-T028-260609-01）※旧版・統合見積へ移行</div></div><div class="doc-st s-wip">旧版</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">🧾</div><div class="doc-info"><div class="doc-name">見_村上-諸修繕相談-26＋雨樋＋雨漏り（統合見積）.html</div><div class="doc-meta-s">2026/6/11 3件統合見積 ARM-T028-260611-01・税込合計¥395,670。本案件は「B. 雨漏り修理 48,000」で計上（諸修繕相談-26フォルダに格納）</div></div><div class="doc-st s-ok">作成済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📑</div><div class="doc-info"><div class="doc-name">注_カーテン_村上-雨漏り修理-26.html</div><div class="doc-meta-s">2026/6/19 佐藤株式会社へカーテン発注書（AR-注-T017-260619-01・SC7626・金額は御見積による）</div></div><div class="doc-st s-ok">発行済</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ Driveリンクは同期後に付与。本案件の統合見積本体は「村上-諸修繕相談-26」フォルダに格納。</div>
+    </div>
+    <div class="card">
+      <div class="card-t">📷 写真・現調記録</div>
+      <ul>
+        <li><b>6/3 現調写真3点</b>（たつみ板金 調査時）：
+          <ul>
+            <li>01 出窓天窓下クロス雨染み・浮き（サンルーム）</li>
+            <li>02 天窓内側見上げ・網入りガラス（サンルーム）</li>
+            <li>03 天窓内側見上げ広角（サンルーム）</li>
+          </ul>
+        </li>
+        <li>雨漏り箇所：玄関左の既存テラス奥に突き出たサンルーム（ピアノ部屋横）の天窓。約20年前にかめさんが兄の会社時代に設置した網入りガラス天窓</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話記録から抽出した重要決定事項</div>
+  <ul>
+    <li>2026/06/02 村上信子さん（T-028）通話：ピアノ部屋横サンルームの天窓から雨漏り発生。カーテンを開けに行った際に水滴が肩に落ち、バケツで応急処置中。雨が止み晴れ次第すぐ現地対応する旨を約束（梅雨時のため天候回復待ち）</li>
+    <li>2026/06/02 たつみ板金（T-035・たっちゃん）通話：青山町・村上邸（野口病院裏手）の天窓雨漏り調査を依頼。天窓は20年以上前設置・勾配がほぼ無く原因特定が難しい旨を共有。翌6/3朝に現地調査することで合意</li>
+    <li>2026/06/02【決定】たつみ板金に雨漏り調査を依頼。天候次第で6/3に下見。追加依頼として洗面所丁番・雨樋2カ所・カーテン交換・椅子カバー相談を受領（後に別案件へ分離）</li>
+    <li>2026/06/03 たつみ板金（たっちゃん）通話：訪問時間を調整し、当日13時頃に村上邸を訪問（雨漏り調査）することで合意</li>
+    <li>2026/06/03 村上信子さん通話：当日13時頃に雨漏りの件で訪問することを確認・了承</li>
+    <li>2026/06/19【決定】ピアノ部屋カーテン（品番SC7626・2窓）を佐藤株式会社（T-017）へ発注。寸法はW3,900×H1,920／W3,200×H1,850（仕上り）。単価は佐藤の見積・注文請書受領後に確定</li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <table>
+    <tr><th>分類</th><th>金額</th><th>内訳・備考</th></tr>
+    <tr><td>労務費</td><td>¥0</td><td>data.json「原価」未計上（受注前・実績原価なし）</td></tr>
+    <tr><td>材料費</td><td>¥0</td><td>data.json「原価」未計上</td></tr>
+    <tr><td>外注費</td><td>¥0</td><td>data.json「原価」未計上。発注見込み：たつみ板金 天窓塞ぎ工事 税抜40,000（受注後に確定）</td></tr>
+    <tr><td>経費</td><td>¥0</td><td>data.json「原価」未計上</td></tr>
+  </table>
+  <div class="doc-meta-s" style="margin-top:6px;">※ 受注前のため実績原価なし。統合見積上の「B. 雨漏り修理」計上額は税抜48,000（板金原価40,000ベース）。</div>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <div class="doc-meta-s" style="margin-top:4px;"><b>原価合計（data.json実績）：¥0</b>／見積計上額（税抜）：¥48,000・想定外注見込：¥40,000</div>
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <table>
+    <tr><th>業者</th><th>書類</th><th>金額（税抜）</th><th>状態</th></tr>
+    <tr><td>たつみ板金（T-035）</td><td>天窓塞ぎ工事 見積（受取）</td><td>¥40,000</td><td>受領済（2026/6/8）</td></tr>
+    <tr><td>佐藤株式会社（T-017）</td><td>カーテン 注文書（当社発行）</td><td>御見積による</td><td>発注済（2026/6/19）</td></tr>
+  </table>
+  <div class="doc-meta-s" style="margin-top:6px;">※ たつみ板金内訳：板金加工取付2カ所 34,000＋コーキング2カ所 6,000。受取請求書は未受領（施工・受注後）。</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/6/19（金）</div><div class="tl-text">ピアノ部屋カーテン（SC7626・2窓）を佐藤株式会社へ発注（注文書 AR-注-T017-260619-01発行・金額は御見積による）</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/11（木）</div><div class="tl-text">雨樋・雨漏り・諸修繕の3件統合見積に「B. 雨漏り修理（天窓塞ぎ工事 一式 48,000）」として計上（ARM-T028-260611-01・税込合計¥395,670）。6/9単独版は旧版扱い</div></div>
+    <details class="tl-archive"><summary>過去の経緯を見る（4件・7日超）</summary>
+      <div class="tl-item"><div class="tl-date">2026/6/9（月）</div><div class="tl-text">単独版見積（フラット4項目・ARM-T028-260609-01）を作成（後に統合見積へ移行し旧版化）</div></div>
+      <div class="tl-item"><div class="tl-date">2026/6/8（月）</div><div class="tl-text">たつみ板金より「天窓塞ぎ工事」見積（税抜40,000＝板金加工取付2カ所34,000＋コーキング2カ所6,000）受領</div></div>
+      <div class="tl-item"><div class="tl-date">2026/6/3（火）</div><div class="tl-text">たつみ板金が村上邸を現地調査（13時頃訪問）。サンルーム天窓・クロス雨染みを撮影（現調写真3点）</div></div>
+      <div class="tl-item"><div class="tl-date">2026/6/2（月）</div><div class="tl-text">村上信子様から雨漏り相談の電話 → 案件登録（調査中）。たつみ板金に調査依頼・6/3下見決定。追加依頼（洗面丁番・雨樋・カーテン・椅子カバー）受領</div></div>
+    </details>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li>本案件は当初「雨漏り・雨樋・諸修繕」を一括相談で受領したが、雨樋＝「村上-雨樋修理-26」、洗面丁番/椅子カバー/カーテン＝「村上-諸修繕相談-26」として別案件に分離済み。本案件（雨漏り修理-26）はサンルーム天窓の雨漏り修理が本体</li>
+    <li>カーテン交換（ピアノ部屋）は元々③の相談項目だが、6/19に本案件フォルダから佐藤株式会社へ発注（履歴ノートへの統合は次回日次チェックで実施予定）</li>
+    <li>天窓は勾配がほぼ無く雨漏り原因の特定が困難 → 板金で塞ぐ工法を採用。網入りガラス天窓・約20年前設置（かめさんが兄の会社時代に施工した既設）</li>
+    <li>雨樋材料は石油ナフサ不足で入手困難の可能性あり（雨樋-26側の留意点）</li>
+  </ul>
+</div>
+
+<div class="footer">
+  村上-雨漏り修理-26 ｜ data.json（取引先・案件マスター）を真実の源泉として生成 ｜ Driveリンクは同期後に付与
+</div>
+
+</body>
+</html>

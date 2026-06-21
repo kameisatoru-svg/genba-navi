@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>國安-外壁内装-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
+details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin:6px 0;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>國安様邸 外壁シール・内装修繕工事</h1>
+  <div class="sub">國安-外壁内装-26 ｜ 大分県別府市（RC造 地上2階＋PH・陸屋根シート防水／個人宅）</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">📤 見積提出済み</span>
+    <span class="badge">👤 國安 孝貴 様（T-023）</span>
+    <span class="badge">💴 税込¥200,000</span>
+    <span class="badge">🗓️ 7月下旬 工事めど</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E5%9C%8B%E5%AE%89-%E5%A4%96%E5%A3%81%E5%86%85%E8%A3%85-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-06-17 09:05</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">見積提出済み</div><div class="l">ステータス</div></div>
+  <div class="kpi"><div class="v">¥200,000</div><div class="l">見積金額（税込）</div></div>
+  <div class="kpi"><div class="v">7月下旬</div><div class="l">工事めど（梅雨明け）</div></div>
+  <div class="kpi"><div class="v">追加見積</div><div class="l">収納カウンター造作（別途）</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>進行フロー</b>：①現地調査・雨漏り調査（2/21）→ ②見積提出（2/25・税込¥200,000）→ ③クロス色決め（6/6完了）→ ④追加見積（収納カウンター）→ ⑤7月下旬 工事</li>
+        <li><b>現在地</b>：6/6 クロス色決め完了・工事時期確定（7月下旬）。収納カウンター追加依頼を受領（別途見積）。クロス品番の記録待ち</li>
+        <li><b>工事内容（既存見積ベース）</b>：(a)壁クロス張替え（色決め済）／(b)外部ガラスブロック上クラックのコーキング処理／(c)フローリング・巾木腐食部の部分張替</li>
+        <li><b>雨漏り原因</b>：屋上集水桝の木の葉等堆積→オーバーフロー→パラペット取り合い部から浸入し柱ラインを伝って2F梁・壁〜階段室〜1F壁へ（同一水脈による漏水と判断）</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>発注者（施主）</td><td>國安 孝貴 様（T-023）</td><td>住宅・個人。自宅補修工事</td></tr>
+        <tr><td>施工</td><td>株式会社アート・レイズ</td><td>調査・見積・内装/外壁修繕（担当：亀井）</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">見_國安-外壁内装-26.pdf</div><div class="doc-meta-s">2026/2/25 御見積書 税込¥200,000（外壁シール＋内装修繕）※LINEにて送付済み</div></div><div class="doc-st s-ok">提出済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">見_旧A_内装のみ_國安-外壁内装-26.pdf</div><div class="doc-meta-s">内装のみ版（旧A・参考）</div></div><div class="doc-st s-wip">旧版</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📋</div><div class="doc-info"><div class="doc-name">報告_雨漏り調査_國安-外壁内装-26.pdf</div><div class="doc-meta-s">2026/2/21調査 雨漏り調査報告書（原因特定・補修方針・現況写真）※GDoc版あり</div></div><div class="doc-st s-ok">作成済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📷</div><div class="doc-info"><div class="doc-name">報告_写真台帳_内装1F2F／内装PH2F／屋上_國安-外壁内装-26.pdf</div><div class="doc-meta-s">写真台帳3部（内装1F・2F／PH・2F／屋上）</div></div><div class="doc-st s-ok">作成済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📝</div><div class="doc-info"><div class="doc-name">00_履歴_國安-外壁内装-26.md</div><div class="doc-meta-s">案件履歴ノート（現在地・決定事項・通話紐付けメモ）</div></div><div class="doc-st s-ok">運用中</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ 収納カウンターの詳細図面・追加見積は未作成。各書類のDriveリンクは同期後に付与（現状href未設定）。</div>
+    </div>
+    <div class="card">
+      <div class="card-t">📷 写真・現調記録</div>
+      <ul>
+        <li><b>2/21 現調（屋上・外壁・内装）</b>：外壁クラック/室外機周り・梯子設置・屋上排水溝/集水桝目詰まり・1F階段室カビ・2F壁クロスカビ・フローリング腐食 等</li>
+        <li><b>2/25 寸法メモ（DrawNote）</b>：1F階段室・2F廊下天井クロスめくれ/梁下・2F階段フローリング腐食・PH吹抜壁クロス/カビ・屋上階段接合部・キッチンカウンター周り</li>
+        <li><b>動画8本</b>：2F調査（壁クロスカビ）・2F階段（カビ/腐食）・外壁調査（室外機側/梯子周辺）・屋上調査（排水桝周辺）等</li>
+        <li><b>6/6 打合せ</b>：DrawNote追記・室内写真（20260606_*）。6/18 DrawNote追記スクショあり</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話記録から抽出した重要決定事項</div>
+  <ul>
+    <li>2026/06/02 國安孝貴さん（T-023）打合せ：自宅補修工事の着手順を検討。まずクロス張替えから進める方向で合意し、カタログで柄を選定。打合せ日程を調整</li>
+    <li>2026/06/03 國安孝貴さん（T-023）通話：訪問日時を翌日16:00で確定。クロスのカタログ持参・現地で柄選び・部分的なボード補修箇所を確認する段取り。ボードは全交換不要、2階上り口の悪い箇所のみ部分補修で対応可</li>
+    <li>2026/06/06【決定】クロス色決め完了。工事時期は梅雨明けの7月下旬めど。工事内容は既存見積ベース（クロス張替え＋外部ガラスブロック上クラックのコーキング処理）</li>
+    <li>2026/06/06【追加依頼】1階洗面所横の空きスペースに、洗面台の高さに合わせた収納カウンターを造作。詳細図面を起こして別途見積（既存見積には含まれない新規工事）</li>
+    <li>2026/06/08【送付確認】見積書（2/25発行）はLINEにて送付済み（Gmail送信記録が無いのは正常）。以後作業ズレとして扱わない</li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <table>
+    <tr><th>分類</th><th style="text-align:right;">金額</th></tr>
+    <tr><td>労務費</td><td style="text-align:right;">¥0</td></tr>
+    <tr><td>材料費</td><td style="text-align:right;">¥0</td></tr>
+    <tr><td>外注費</td><td style="text-align:right;">¥0</td></tr>
+    <tr><td>経費</td><td style="text-align:right;">¥0</td></tr>
+  </table>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <div class="doc-meta-s" style="margin-top:6px;">原価計上なし（着工前・最終集計日 2026-05-14）。見積税込¥200,000（税抜¥181,818）。利益は原価確定後に算出。</div>
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <div class="doc-meta-s">受取見積書・受取請求書なし（着工前）</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/6/8（月）</div><div class="tl-text">見積書はLINE送付済みと確認（送付ズレ解消）。フォルダ整理・サマリーHTML生成</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/6（土）</div><div class="tl-text">國安邸訪問・クロス色決め完了。工事時期を7月下旬に確定。洗面所横 収納カウンター造作を新規依頼（別途見積）</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/3（水）</div><div class="tl-text">通話で翌日16:00訪問を確定（カタログ持参・現地で柄選び・部分ボード補修確認）</div></div>
+    <div class="tl-item"><div class="tl-date">2026/6/2（火）</div><div class="tl-text">補修工事打合せ。クロス張替えから着手する方向で合意・日程調整</div></div>
+    <details class="tl-archive"><summary>過去の経緯を見る（2件・7日超）</summary>
+      <div class="tl-item"><div class="tl-date">2026/2/25（水）</div><div class="tl-text">御見積書発行（税込¥200,000・外壁シール＋内装修繕）。写真台帳3部作成</div></div>
+      <div class="tl-item"><div class="tl-date">2026/2/21（土）</div><div class="tl-text">現地調査・雨漏り調査実施（屋上集水桝オーバーフローが原因と特定）。調査報告書作成</div></div>
+    </details>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li>雨漏りは防水層の破断ではなく、強風で屋上集水桝に木の葉・枝が堆積→暴雨時にオーバーフローし、パラペット取り合い部から躯体内部を伝播したものと判断。今後の再発防止には集水桝の定期清掃が重要</li>
+    <li>収納カウンターは洗面台高さ合わせのため寸法・仕様が未確定。詳細図面を起こして別途見積が必要</li>
+    <li>クロス品番・色の記録が未着。届き次第 履歴ノートへ追記し本サマリーにも反映</li>
+  </ul>
+</div>
+
+<div class="footer">
+  自動生成: 案件サマリー（AUTOマーカー方式）｜ data.json を真実の源泉とし、Drive同期後にDriveリンクを付与<br>
+  國安-外壁内装-26
+</div>
+
+</body>
+</html>
