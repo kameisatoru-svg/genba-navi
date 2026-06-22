@@ -1,4 +1,23 @@
 @echo off
+rem ===== single-instance guard (added 2026-06-22) =====
+rem Hold an exclusive write handle (9) on a lock file for the whole run.
+rem cmd opens a redirection target without write-sharing, so a second
+rem instance cannot open the same file: its redirection fails, the ( )
+rem block is skipped, and that instance exits via the || branch below.
+rem The lock lives in TEMP (not the Drive-synced repo) so sync never
+rem touches it, and the OS releases the handle on process exit/reboot, so
+rem the lock is self-cleaning: a fresh instance after reboot always wins it.
+set "AUTOPUSH_LOCK=%TEMP%\artrays_autopush.lock"
+9>>"%AUTOPUSH_LOCK%" (
+  call :run
+) || (
+  echo auto_push is already running in another window - this instance exits.
+  exit /b
+)
+exit /b
+
+:run
+title genba-navi auto-push
 cd /d "C:\Users\user\artrays\claude ai\genba-navi"
 
 :loop
