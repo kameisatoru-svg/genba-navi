@@ -3146,13 +3146,14 @@ function renderTopics() {
       ? `<a class="topic-summary-link" href="${sUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()"><svg class="icon"><use href="#icon-document"/></svg>案件サマリーを見る</a>`
       : '';
     return `
-      <button class="topic-item ${meta.cls || ''}" type="button" data-key="${escapeHtml(g.key)}"
-              aria-label="${escapeHtml(g.key)} ${g.type}">
+      <button class="topic-item ${meta.cls || ''} ${g.open ? 'is-open' : ''}" type="button" data-key="${escapeHtml(g.key)}"
+              aria-label="${escapeHtml(g.key)} ${g.type}${g.open ? ' 未完了' : ''}">
         <div class="topic-date"><b>${md}</b>${rel}</div>
         <div class="topic-icon"><svg class="icon"><use href="#${meta.icon || 'icon-clock'}"/></svg></div>
         <div class="topic-body">
           <div class="topic-head">
             <span class="topic-type">${g.type}</span>
+            ${g.open ? '<span class="topic-todo">未完了</span>' : ''}
             ${meta.kpi ? `<span class="topic-kpi">→ ${meta.kpi}</span>` : ''}
             ${moreTag}
             ${statusBadge(g.st)}
