@@ -3165,9 +3165,11 @@ function topicDateLabel(d) {
 function ankenEvents(a) {
   const key = a['案件キー'], st = a['ステータス'];
   const evs = [];
-  const push = (dateStr, type, amt, desc, move, state) => {
+  const push = (dateStr, type, amt, desc, move, state, extra) => {
     const d = parseDate(dateStr);
-    if (d) evs.push({ d, type, key, st, amt: amt || 0, desc: desc || '', move: !!move, state: state || '' });
+    if (d) evs.push({ d, type, key, st, amt: amt || 0, desc: desc || '', move: !!move, state: state || '',
+                      id: (extra && extra.id) || '', mvIdx: (extra && extra.mvIdx != null) ? extra.mvIdx : null,
+                      src: (extra && extra.src) || '' });
   };
   (a['見積']   || []).forEach(e => push(e['発行日'], '見積発行', e['金額']));
   (a['契約書'] || []).forEach(e => push(e['契約日'], '契約締結', e['金額']));
@@ -3175,7 +3177,8 @@ function ankenEvents(a) {
     push(e['発行日'], '請求発行', e['金額']);
     if (e['入金状況'] === 'nyukin') push(e['入金日'], '入金', e['金額']);
   });
-  (a['動き']   || []).forEach(m => push(m['日'], m['種別'] || '更新', 0, m['概要'], true, m['状態']));
+  (a['動き']   || []).forEach((m, i) => push(m['日'], m['種別'] || '更新', 0, m['概要'], true, m['状態'],
+                                            { id: m['id'] || '', mvIdx: i, src: m['由来'] || '' }));
   return evs;
 }
 
