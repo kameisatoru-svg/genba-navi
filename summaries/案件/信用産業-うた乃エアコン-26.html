@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>うた乃総本店 中央加工室 エアコン取替工事 案件サマリー</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI','Meiryo','Noto Sans JP',sans-serif;line-height:1.6;padding:clamp(12px,3vw,32px)}
+.dash{max-width:1100px;margin:0 auto}
+.hdr{text-align:center;padding:clamp(16px,3vw,32px) 0;border-bottom:2px solid rgba(255,255,255,.08)}
+.hdr h1{font-size:clamp(18px,4vw,28px);background:linear-gradient(135deg,#4ade80,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:800;letter-spacing:.05em}
+.hdr .badge{display:inline-block;padding:3px 14px;border-radius:20px;font-size:clamp(10px,1.8vw,12px);font-weight:700;margin-top:8px}
+.s-ok{background:rgba(34,197,94,.2);color:#4ade80;border:1px solid rgba(34,197,94,.4)}
+.s-wait{background:rgba(250,204,21,.2);color:#fbbf24;border:1px solid rgba(250,204,21,.4)}
+.s-prog{background:rgba(59,130,246,.25);color:#60a5fa;border:1px solid rgba(59,130,246,.4)}
+.s-plan{background:rgba(148,163,184,.15);color:#94a3b8;border:1px solid rgba(148,163,184,.3)}
+.hdr .upd{color:#94a3b8;font-size:clamp(10px,1.6vw,12px);margin-top:6px}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(8px,2vw,16px);margin:clamp(16px,3vw,28px) 0}
+.kpi{border-radius:14px;padding:clamp(14px,2.5vw,22px);text-align:center;position:relative;overflow:hidden}
+.kpi1{background:linear-gradient(135deg,rgba(34,197,94,.2),rgba(16,185,129,.15))}
+.kpi2{background:linear-gradient(135deg,rgba(59,130,246,.2),rgba(6,182,212,.15))}
+.kpi3{background:linear-gradient(135deg,rgba(147,51,234,.2),rgba(245,158,11,.15))}
+.kpi4{background:linear-gradient(135deg,rgba(249,115,22,.2),rgba(236,72,153,.15))}
+.kpi .lbl{font-size:clamp(9px,1.5vw,11px);color:#94a3b8;text-transform:uppercase;letter-spacing:.08em}
+.kpi .val{font-size:clamp(20px,3.5vw,30px);font-weight:800;margin:4px 0}
+.kpi1 .val{color:#4ade80}.kpi2 .val{color:#38bdf8}.kpi3 .val{color:#c084fc}.kpi4 .val{color:#fb923c}
+.kpi .sub{font-size:clamp(9px,1.4vw,11px);color:#94a3b8}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(12px,2.5vw,20px);margin-bottom:clamp(12px,2.5vw,20px)}
+.card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:clamp(14px,2.5vw,22px)}
+.card h2{font-size:clamp(13px,2vw,16px);font-weight:700;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.08)}
+.tl{position:relative;padding-left:20px}
+.tl::before{content:'';position:absolute;left:6px;top:4px;bottom:4px;width:2px;background:rgba(255,255,255,.1)}
+.tl-item{position:relative;margin-bottom:14px}
+.tl-item::before{content:'';position:absolute;left:-17px;top:6px;width:10px;height:10px;border-radius:50%;border:2px solid}
+.tl-item.done::before{border-color:#4ade80;background:#4ade80}
+.tl-item.prog::before{border-color:#60a5fa;background:rgba(96,165,250,.3)}
+.tl-item.plan::before{border-color:#94a3b8;background:transparent}
+.tl-date{font-size:clamp(9px,1.4vw,11px);color:#94a3b8}
+.tl-text{font-size:clamp(11px,1.8vw,13px);color:#e0e0e0}
+.doc-list{list-style:none}
+.doc-list li{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:clamp(11px,1.8vw,13px)}
+.doc-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.di-pdf{background:rgba(239,68,68,.2);color:#f87171}
+.di-md{background:rgba(34,197,94,.2);color:#4ade80}
+.di-img{background:rgba(168,85,247,.2);color:#c084fc}
+.doc-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dtbl{width:100%;border-collapse:collapse;font-size:clamp(10px,1.6vw,12px)}
+.dtbl th{background:rgba(255,255,255,.06);padding:8px 10px;text-align:left;font-weight:600;border-bottom:1px solid rgba(255,255,255,.08)}
+.dtbl td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)}
+.dtbl .r{text-align:right;font-variant-numeric:tabular-nums}
+.dtbl tfoot td{font-weight:700;border-top:2px solid rgba(255,255,255,.12)}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:clamp(11px,1.7vw,13px)}
+.info-lbl{color:#94a3b8;font-size:clamp(9px,1.4vw,11px)}
+.note{background:rgba(34,197,94,.08);border-left:3px solid #4ade80;padding:10px 14px;border-radius:0 8px 8px 0;font-size:clamp(10px,1.6vw,12px);color:#4ade80;margin-top:12px}
+.ftr{text-align:center;padding:clamp(16px,3vw,28px) 0;color:#64748b;font-size:clamp(9px,1.4vw,11px);border-top:1px solid rgba(255,255,255,.06);margin-top:clamp(12px,2vw,20px)}
+@media(max-width:768px){.kpi-row{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}.info-grid{grid-template-columns:1fr}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="dash">
+
+<div class="hdr">
+  <h1>うた乃総本店 中央加工室 エアコン取替工事</h1>
+  <div><span class="badge s-ok">施工完了</span></div>
+  <div class="upd">最終更新: 2026年6月3日 ｜ 案件キー: 信用産業-うた乃エアコン-26</div>
+</div>
+
+<div class="kpi-row">
+  <div class="kpi kpi1">
+    <div class="lbl">施工状況</div>
+    <div class="val">完了</div>
+    <div class="sub">2026/06/03 取替完了</div>
+  </div>
+  <div class="kpi kpi2">
+    <div class="lbl">見積金額（税抜）</div>
+    <div class="val">&yen;118,000</div>
+    <div class="sub">元見積 AR-26-T009-M001 C項分離</div>
+  </div>
+  <div class="kpi kpi3">
+    <div class="lbl">施工業者</div>
+    <div class="val" style="font-size:clamp(14px,2.2vw,20px)">未来システム</div>
+    <div class="sub">エアコン取替施工</div>
+  </div>
+  <div class="kpi kpi4">
+    <div class="lbl">機種</div>
+    <div class="val" style="font-size:clamp(14px,2.2vw,20px)">10畳壁掛</div>
+    <div class="sub">既設: 日立RAS-N25S</div>
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <h2>📋 工事タイムライン</h2>
+    <div class="tl">
+      <div class="tl-item done">
+        <div class="tl-date">2026/01/23</div>
+        <div class="tl-text">現場調査・既存エアコン（日立RAS-N25S）撮影</div>
+      </div>
+      <div class="tl-item done">
+        <div class="tl-date">2026/03/26</div>
+        <div class="tl-text">御見積書 AR-26-T009-M001 発行（A+B+C一括 税込&yen;732,776）</div>
+      </div>
+      <div class="tl-item done">
+        <div class="tl-date">2026/06/03</div>
+        <div class="tl-text">C項エアコン取替を先行分離・未来システムへ発注</div>
+      </div>
+      <div class="tl-item done">
+        <div class="tl-date">2026/06/03</div>
+        <div class="tl-text">🎯 <strong>エアコン取替工事 完了</strong> <span class="badge s-ok" style="font-size:10px">完了</span></div>
+      </div>
+      <div class="tl-item plan">
+        <div class="tl-date">後続</div>
+        <div class="tl-text">未来システムからの請求書受領待ち（エアコン分）</div>
+      </div>
+      <div class="tl-item plan">
+        <div class="tl-date">月内</div>
+        <div class="tl-text">厨房浄水器取替工事の案件登録</div>
+      </div>
+      <div class="tl-item plan">
+        <div class="tl-date">月末</div>
+        <div class="tl-text"><strong>合算請求書発行</strong>（エアコン + 厨房浄水器）</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📁 書類一覧</h2>
+    <ul class="doc-list">
+      <li><span class="doc-icon di-pdf">PDF</span><span class="doc-name">完_信用産業-うた乃エアコン-26.pdf（工事完了報告書）</span><span class="badge s-ok" style="font-size:10px">発行済</span></li>
+      <li><span class="doc-icon di-html">HTML</span><span class="doc-name">完_信用産業-うた乃エアコン-26.html</span><span class="badge s-ok" style="font-size:10px">発行済</span></li>
+      <li><span class="doc-icon di-md">MD</span><span class="doc-name">00_履歴_信用産業-うた乃エアコン-26.md</span><span class="badge s-ok" style="font-size:10px">作成</span></li>
+      <li><span class="doc-icon di-pdf">PDF</span><span class="doc-name">元見積 見_信用産業-うた乃厨房-26.pdf（C項該当）</span><span class="badge s-plan" style="font-size:10px">参照</span></li>
+      <li><span class="doc-icon di-img">写真</span><span class="doc-name">23_中央加工室_既存壁掛エアコン（日立）.jpg</span><span class="badge s-ok" style="font-size:10px">施工前</span></li>
+      <li><span class="doc-icon di-img">写真</span><span class="doc-name">24_中央加工室_エアコン銘板（日立RAS-N25S）.jpg</span><span class="badge s-ok" style="font-size:10px">施工前</span></li>
+      <li><span class="doc-icon di-img">写真</span><span class="doc-name">25_中央加工室_エアコンリモコン（日立）.jpg</span><span class="badge s-ok" style="font-size:10px">施工前</span></li>
+      <li><span class="doc-icon di-img">写真</span><span class="doc-name">26_中央加工室_別角度エアコン全景.jpg</span><span class="badge s-ok" style="font-size:10px">施工前</span></li>
+      <li><span class="doc-icon di-img">写真</span><span class="doc-name">07_中央加工室_全景.jpg</span><span class="badge s-ok" style="font-size:10px">施工前</span></li>
+      <li><span class="doc-icon di-img">写真</span><span class="doc-name">27_0603_新エアコン室内機（日立白くまくん）.jpg</span><span class="badge s-ok" style="font-size:10px">施工後</span></li>
+      <li><span class="doc-icon di-img">写真</span><span class="doc-name">28_0603_新エアコン室外機（日立）.jpg</span><span class="badge s-ok" style="font-size:10px">施工後</span></li>
+      <li><span class="doc-icon di-img">写真</span><span class="doc-name">29_0603_新エアコン室外機（別角度）.jpg</span><span class="badge s-ok" style="font-size:10px">施工後</span></li>
+      <li><span class="doc-icon di-pdf">PDF</span><span class="doc-name">未来システム 請求書</span><span class="badge s-wait" style="font-size:10px">受領待ち</span></li>
+      <li><span class="doc-icon di-pdf">PDF</span><span class="doc-name">信用産業向け C項単体 請求書</span><span class="badge s-wait" style="font-size:10px">未発行</span></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card">
+  <h2>💰 見積内訳（元見積 AR-26-T009-M001 C項）</h2>
+  <table class="dtbl">
+    <thead><tr><th>項目</th><th class="r">数量</th><th class="r">単位</th><th class="r">金額（税抜）</th></tr></thead>
+    <tbody>
+      <tr><td>10畳用壁掛ルームエアコン</td><td class="r">1</td><td class="r">台</td><td class="r">&yen;85,000</td></tr>
+      <tr><td>取付工事費</td><td class="r">1</td><td class="r">式</td><td class="r">&yen;25,000</td></tr>
+      <tr><td>既存エアコン撤去処分費</td><td class="r">1</td><td class="r">式</td><td class="r">&yen;8,000</td></tr>
+    </tbody>
+    <tfoot>
+      <tr><td colspan="3">C. 小計（税抜）</td><td class="r">&yen;118,000</td></tr>
+    </tfoot>
+  </table>
+  <div class="note">
+    ※ 諸経費・消費税は元見積 AR-26-T009-M001 に按分された割合で計算可能。<br>
+    ※ <strong>請求方針</strong>: 単体請求は行わず、月末に <strong>厨房浄水器取替工事と合算請求書</strong>を発行する。
+  </div>
+</div>
+
+<div class="ftr">
+  株式会社アート・レイズ © 2026 ｜ 元案件: <a href="../00_サマリー_信用産業-うた乃厨房-26.html" style="color:#60a5fa">信用産業-うた乃厨房-26</a>
+</div>
+
+</div>
+</body>
+</html>

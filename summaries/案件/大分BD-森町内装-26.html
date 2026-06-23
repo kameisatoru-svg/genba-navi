@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大分BD-森町内装-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
+details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin:6px 0;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>買取大吉 森町店 内装工事</h1>
+  <div class="sub">大分BD-森町内装-26 ｜ 大分県大分市森町（買取大吉FC・2店舗同時出店の1店目）</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">📋 相談</span>
+    <span class="badge">🏢 大分ビルダー（T-027）</span>
+    <span class="badge">🎯 11月オープン目標</span>
+    <span class="badge">🏬 2店舗同時出店・1店目</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E5%A4%A7%E5%88%86BD-%E6%A3%AE%E7%94%BA%E5%86%85%E8%A3%85-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-06-17 09:05</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">相談</div><div class="l">ステータス</div></div>
+  <div class="kpi"><div class="v">退去待ち</div><div class="l">実測（サラダ館退去後）</div></div>
+  <div class="kpi"><div class="v">見積前</div><div class="l">金額（本部承認後に見積）</div></div>
+  <div class="kpi"><div class="v">11月</div><div class="l">オープン目標</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>進行フロー</b>：①AR実測・図面制作 → 大吉本部送付 ②本部デザイン案作成 ③オーナー（大分ビルダー）承認 ④承認内容でAR見積作成</li>
+        <li><b>現在地</b>：相談フェーズ。T-027大分ビルダー採番・data.json登録済み。進行フロー確定。実測・図面制作が次アクション</li>
+        <li><b>森町固有の制約</b>：森町はシャトレーゼ系（サラダ館）が入居中で<b>退去時期未定</b>。退去後に実測予定（同時進行の日出店は退去済みで実測済み）。本部の最終判断待ち</li>
+        <li><b>契約形態</b>：大分ビルダー（T-027）と直接契約（本部契約ではない）／大分ビルダーは買取大吉FCとして萩原店を経営中、森町・日出を加え3店舗体制へ</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>発注者</td><td>株式会社大分ビルダー（T-027）</td><td>代表: 古宮純一／買取大吉FC 3店舗体制へ（萩原・森町・日出）</td></tr>
+        <tr><td>担当</td><td>戸田大輔</td><td>不動産事業部部長・買取大吉大分牧店店長兼務（森町・日出両案件の実務担当）</td></tr>
+        <tr><td>施工</td><td>株式会社アート・レイズ</td><td>実測・図面・内装工事</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📝</div><div class="doc-info"><div class="doc-name">00_履歴_大分BD-森町内装-26.md</div><div class="doc-meta-s">案件履歴ノート（現在地・決定事項・通話紐付けメモ）</div></div><div class="doc-st s-ok">運用中</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ 図面・受領・見積・契約書類は未作成／未発行（相談フェーズ・サラダ館退去待ち）。Driveリンクは同期後に付与。</div>
+    </div>
+    <div class="card">
+      <div class="card-t">📷 写真・現調記録</div>
+      <ul>
+        <li>該当なし（サラダ館入居中・退去時期未定のため現地調査・実測は未着手）</li>
+        <li>退去後に現地調査・実測を実施予定（担当：戸田大輔氏と日程調整）</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話記録から抽出した重要決定事項</div>
+  <ul>
+    <li>2026/06/01 古宮純一さん（T-027）通話：森町店内装の相談発生。11月オープン目標・2店舗同時出店の1店目。図面作成は亀井さん担当で本部へ送付する段取り。平面図作成後に本部提出予定</li>
+    <li>2026/06/04【決定】森町・日出両案件の実務担当は戸田大輔氏（大分ビルダー不動産事業部部長・買取大吉大分牧店店長兼務）に確定</li>
+    <li>2026/06/04【決定】進行フロー確定：①AR実測・図面制作→大吉本部送付 ②本部デザイン案作成 ③オーナー（大分ビルダー）承認 ④承認内容でAR見積作成。契約相手は大分ビルダー（T-027）との直接契約</li>
+    <li>2026/06/15 古宮純一さん（T-027）通話：森町はシャトレーゼ系（サラダ館）が入居中で退去時期未定・11月オープン目標。退去後に実測予定。本部の最終判断待ち（2店舗同時出店の通話のため日出案件と内容が重複・要点のみ抜粋）</li>
+  </ul>
+  <div class="doc-meta-s" style="margin-top:4px;">※ 通話実ファイルは日出内装案件側に保存（2店舗同時出店の通話のため両案件にまたがる）：20260601_ごっち・20260608_ごっち。未確定事項・個人情報は除外。</div>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <div class="doc-meta-s">見積未発行・原価計上なし（相談フェーズ）。data.jsonの原価4分類（労務費・材料費・外注費・経費）はいずれも未計上</div>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <div class="doc-meta-s">受取見積書・受取請求書なし（相談フェーズ・外注未発注）</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/6/15（月）</div><div class="tl-text">「森町／日出テナント」通話を本案件に紐付け（実ファイルは日出側に保存）。森町はサラダ館入居中で退去時期未定・退去後に実測予定・本部最終判断待ち</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/4（木）</div><div class="tl-text">実務担当を戸田大輔氏に確定（名刺2枚をT-027 contactsに登録）。進行フロー確定（実測→本部→承認→見積）・大分ビルダー直接契約と確定</div></div>
+    <details class="tl-archive"><summary>過去の経緯を見る（1件・7日超）</summary>
+      <div class="tl-item"><div class="tl-date">2026/6/1（月）</div><div class="tl-text">古宮純一さん（T-027）通話で案件発生・data.json登録（相談）。11月オープン目標・2店舗同時出店の1店目</div></div>
+    </details>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li>2店舗同時出店（日出＋森町）の通話が多く、進展が両案件にまたがる。森町は「退去待ち」が最大のボトルネック（サラダ館退去時期未定）。日出店が先行し、森町は退去後に追従する見込み</li>
+    <li>未解決：物件住所詳細・実測日程調整（担当：戸田大輔氏）</li>
+    <li>同じ顧客の「大分BD-日出内装-26」とは別案件。混同しないこと</li>
+  </ul>
+</div>
+
+<div class="footer">
+  自動生成: 案件サマリー（AUTOマーカー方式）｜ data.json を真実の源泉とし、同期後にDriveリンクを付与<br>
+  大分BD-森町内装-26
+</div>
+
+</body>
+</html>

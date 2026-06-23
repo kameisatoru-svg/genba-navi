@@ -469,6 +469,98 @@ a { color: inherit; text-decoration: none; }
   padding: 0 6px;
   white-space: nowrap;
 }
+/* 未完了(依頼中)タスク: AIに振った仕事の振りっぱなし検知用 */
+.topic-todo {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--warn);
+  border-radius: 9px;
+  padding: 1px 7px;
+  white-space: nowrap;
+  letter-spacing: .02em;
+}
+.topic-item.is-open { border-left-color: var(--warn); }
+.topic-item.is-open .topic-date b { color: var(--warn); }
+
+/* ----- Section 2.4: するべきこと(次のアクション ToDo) ----- */
+.todos-list { display: flex; flex-direction: column; gap: 8px; }
+.todo-card {
+  display: flex;
+  align-items: stretch;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--todo-color, var(--warn));
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: var(--transition);
+}
+.todo-card:hover { box-shadow: var(--shadow); }
+.todo-card.saving { opacity: .5; pointer-events: none; }
+.todo-st-todo  { --todo-color: var(--warn); }
+.todo-st-req   { --todo-color: var(--info); }
+.todo-st-doing { --todo-color: var(--status-mitsumori); }
+.todo-check {
+  flex: 0 0 auto;
+  width: 46px;
+  border: none;
+  border-right: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-mute);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+}
+.todo-check .icon { width: 24px; height: 24px; }
+.todo-check:hover { background: var(--success); color: #fff; }
+.todo-check:focus-visible { outline: 2px solid var(--success); outline-offset: -2px; }
+.todo-body {
+  flex: 1; min-width: 0;
+  text-align: left;
+  background: none; border: none; font: inherit; color: var(--text);
+  cursor: pointer;
+  padding: 10px 12px;
+}
+.todo-action { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.4; }
+.todo-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.todo-state { font-size: 11px; font-weight: 700; color: #fff; background: var(--todo-color, var(--warn)); border-radius: 9px; padding: 1px 8px; white-space: nowrap; }
+.todo-kind { font-size: 12px; color: var(--text-mute); }
+.todo-age { font-size: 12px; font-family: var(--font-mono); color: var(--text-sub); }
+.todo-age.stale { color: var(--danger); font-weight: 700; }
+.todo-anken { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-top: 3px; }
+.todo-anken-key { font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--primary); word-break: break-all; }
+.todo-anken-koji { font-size: 12px; color: var(--text-sub); }
+.todo-src { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-mute); margin-top: 4px; }
+.todo-src .icon { width: 13px; height: 13px; }
+.todos-empty { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text-mute); font-style: italic; padding: 16px; }
+.todos-empty .icon { width: 20px; height: 20px; color: var(--success); }
+
+/* 案件モーダル: するべきこと追加フォーム + 動き履歴の状態/完了 */
+.anken-todo-add { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.anken-todo-input {
+  flex: 1 1 180px; min-width: 0;
+  padding: 7px 10px; font: inherit; font-size: 14px;
+  border: 1px solid var(--border); border-radius: 6px; background: var(--card); color: var(--text);
+}
+.anken-todo-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(212,165,116,.2); }
+.anken-todo-kind { flex: 0 0 auto; padding: 7px 8px; font: inherit; font-size: 13px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); color: var(--text); }
+.anken-todo-add-btn {
+  flex: 0 0 auto; padding: 7px 14px; font: inherit; font-weight: 700; font-size: 14px;
+  border: none; border-radius: 6px; background: var(--accent); color: #fff; cursor: pointer;
+}
+.anken-todo-add-btn:hover { filter: brightness(1.05); }
+.anken-todo-add-btn:disabled { opacity: .5; cursor: default; }
+.anken-hist-state { font-size: 10px; font-weight: 700; border-radius: 8px; padding: 0 6px; white-space: nowrap; margin-left: 6px; }
+.anken-hist-state.open { background: var(--warn); color: #fff; }
+.anken-hist-state.done { background: var(--success); color: #fff; }
+.anken-hist-done {
+  margin-left: auto; flex: 0 0 auto; align-self: center;
+  font-size: 11px; font-weight: 700; padding: 3px 9px;
+  border: 1px solid var(--success); border-radius: 12px; background: var(--card); color: var(--success); cursor: pointer;
+  white-space: nowrap;
+}
+.anken-hist-done:hover { background: var(--success); color: #fff; }
+.anken-hist-item.is-open { border-left-color: var(--warn); background: rgba(243,156,18,.06); }
 
 /* 案件モーダル: 動き履歴 */
 .anken-hist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
@@ -2290,6 +2382,15 @@ a { color: inherit; text-decoration: none; }
     <div class="placeholder">Phase 2で実装予定</div>
   </section>
 
+  <!-- Section 2.4: するべきこと(次のアクション ToDo) -->
+  <section class="dash-section" id="sec-todos" aria-label="するべきこと">
+    <h2 class="section-title">
+      <svg class="icon" aria-hidden="true"><use href="#icon-check-box"/></svg>
+      するべきこと <span class="badge" id="todos-badge"></span>
+    </h2>
+    <div class="placeholder">読み込み中…</div>
+  </section>
+
   <!-- Section 2.5: 最近の動き(トピック) -->
   <section class="dash-section" id="sec-topics" aria-label="最近の動き">
     <h2 class="section-title">
@@ -3064,9 +3165,11 @@ function topicDateLabel(d) {
 function ankenEvents(a) {
   const key = a['案件キー'], st = a['ステータス'];
   const evs = [];
-  const push = (dateStr, type, amt, desc, move) => {
+  const push = (dateStr, type, amt, desc, move, state, extra) => {
     const d = parseDate(dateStr);
-    if (d) evs.push({ d, type, key, st, amt: amt || 0, desc: desc || '', move: !!move });
+    if (d) evs.push({ d, type, key, st, amt: amt || 0, desc: desc || '', move: !!move, state: state || '',
+                      id: (extra && extra.id) || '', mvIdx: (extra && extra.mvIdx != null) ? extra.mvIdx : null,
+                      src: (extra && extra.src) || '' });
   };
   (a['見積']   || []).forEach(e => push(e['発行日'], '見積発行', e['金額']));
   (a['契約書'] || []).forEach(e => push(e['契約日'], '契約締結', e['金額']));
@@ -3074,28 +3177,36 @@ function ankenEvents(a) {
     push(e['発行日'], '請求発行', e['金額']);
     if (e['入金状況'] === 'nyukin') push(e['入金日'], '入金', e['金額']);
   });
-  (a['動き']   || []).forEach(m => push(m['日'], m['種別'] || '更新', 0, m['概要'], true));
+  (a['動き']   || []).forEach((m, i) => push(m['日'], m['種別'] || '更新', 0, m['概要'], true, m['状態'],
+                                            { id: m['id'] || '', mvIdx: i, src: m['由来'] || '' }));
   return evs;
 }
 
+// 動きの「状態」が未完了系か(=AIに振った/対応待ちの仕事で、まだ終わっていない)
+function isOpenState(s) { return s === '未完了' || s === '依頼中' || s === '対応中'; }
+
 // 「最近の動き」フィード: 全案件の最新イベントを1案件1行に集約(積み重ねない)。
+// 新しい順で TOPIC_WINDOW_DAYS の窓内を表示、足りなければ直近 TOPIC_MIN 件まで補完。
 // 同一案件の過去イベント数は moreCount として保持し、行クリックで案件モーダルの履歴に誘導。
+// ※ 未完了(状態付き)の動き＝「するべきこと」は専用セクション(#sec-todos)が担うため、
+//   ここではピン留めせず、確定した過去の動き・財務イベントの時系列ログに徹する。
 function collectTopics() {
   const all = [];
   (STATE.案件 || []).forEach(a => ankenEvents(a).forEach(e => all.push(e)));
-  all.sort((x, y) => y.d - x.d);
+  all.sort((x, y) => y.d - x.d);                       // 新しい順
   const byCase = new Map();
   all.forEach(ev => {
-    const c = byCase.get(ev.key);
-    if (!c) byCase.set(ev.key, { ...ev, moreCount: 0 });  // 最新(先頭)を採用
-    else c.moreCount += 1;                                  // 以降は履歴件数に積む
+    let c = byCase.get(ev.key);
+    if (!c) { c = { rep: ev, count: 0 }; byCase.set(ev.key, c); }  // rep=最新イベント
+    c.count += 1;
   });
-  const cases = Array.from(byCase.values()).sort((x, y) => y.d - x.d);
-  // 直近 TOPIC_WINDOW_DAYS 以内に動いた案件。少なければ TOPIC_MIN 件まで直近で補完。
+  const cases = [];
+  byCase.forEach(c => cases.push({ ...c.rep, moreCount: c.count - 1 }));
   const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+  cases.sort((x, y) => y.d - x.d);                     // 新しい順
   const within = cases.filter(c => (t0 - c.d) / 86400000 <= TOPIC_WINDOW_DAYS);
-  const out = within.length >= TOPIC_MIN ? within : cases.slice(0, TOPIC_MIN);
-  return out.slice(0, TOPIC_MAX);
+  const recent = within.length >= TOPIC_MIN ? within : cases.slice(0, TOPIC_MIN);
+  return recent.slice(0, TOPIC_MAX);
 }
 
 function renderTopics() {
@@ -3144,6 +3255,203 @@ function renderTopics() {
       if (a) showAnkenModal(a);
     });
   });
+}
+
+/* ============================================================
+   Section 2.4: するべきこと(次のアクション ToDo)
+   案件オブジェクトの「動き」配列のうち、状態が未完了系(未完了/依頼中/対応中)の
+   ものを「するべきこと」として横断収集し、ワンタップ完了ボタン付きで表示する。
+   出どころは通話文字起こし(call-transcriber)が想定する次アクション、または手動追加。
+   完了/追加は data.json を GitHub PUT して反映(auto_push 経由で全端末へ配信)。
+   ============================================================ */
+const TODO_STATE_META = {
+  '未完了': { cls: 'todo-st-todo',  label: '未完了' },
+  '依頼中': { cls: 'todo-st-req',   label: '依頼中' },
+  '対応中': { cls: 'todo-st-doing', label: '対応中' }
+};
+
+// 今日を YYYY-MM-DD で返す
+function isoToday() {
+  const d = new Date();
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+// 全案件の open な「動き」(=するべきこと)を集約。古い順(放置ほど上)。
+function collectTodos() {
+  const todos = [];
+  (STATE.案件 || []).forEach(a => {
+    (a['動き'] || []).forEach((m, idx) => {
+      if (!isOpenState(m['状態'])) return;
+      todos.push({
+        key: a['案件キー'], anken: a, idx,
+        id: m['id'] || '', 日: m['日'] || '', d: parseDate(m['日']),
+        種別: m['種別'] || '対応', 状態: m['状態'], 概要: m['概要'] || '', 由来: m['由来'] || ''
+      });
+    });
+  });
+  // 古い順(放置されているものほど上)。日付なしは末尾。
+  todos.sort((x, y) => (!x.d && !y.d) ? 0 : !x.d ? 1 : !y.d ? -1 : x.d - y.d);
+  return todos;
+}
+
+function renderTodos() {
+  const todos = collectTodos();
+  const badge = $('#todos-badge');
+  if (badge) badge.textContent = todos.length ? `${todos.length}件` : '';
+  if (!todos.length) {
+    replaceSectionBody('#sec-todos',
+      `<div class="todos-empty"><svg class="icon"><use href="#icon-check-circle"/></svg>するべきことはありません</div>`);
+    return;
+  }
+  const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+  const rows = todos.map(t => {
+    const a = t.anken;
+    const koji = a ? (a['正式工事名'] || a['現場+工事'] || '') : '';
+    const sm = TODO_STATE_META[t.状態] || { cls: 'todo-st-todo', label: t.状態 };
+    let age = '';
+    if (t.d) {
+      const days = Math.round((t0 - t.d) / 86400000);
+      const md = `${t.d.getMonth() + 1}/${t.d.getDate()}`;
+      const rel = days <= 0 ? '今日' : days === 1 ? '昨日' : `${days}日経過`;
+      age = `<span class="todo-age${days >= 7 ? ' stale' : ''}">${md}・${rel}</span>`;
+    }
+    const tm = TOPIC_META[t.種別] || {};
+    const src = t.由来
+      ? `<span class="todo-src"><svg class="icon"><use href="#${tm.icon || 'icon-phone'}"/></svg>${escapeHtml(t.由来)}</span>`
+      : '';
+    return `
+      <div class="todo-card ${sm.cls}" data-key="${escapeHtml(t.key)}" data-id="${escapeHtml(t.id)}" data-idx="${t.idx}">
+        <button class="todo-check" type="button" title="完了にする" aria-label="${escapeHtml(t.概要 || t.key)} を完了にする">
+          <svg class="icon"><use href="#icon-check-box"/></svg>
+        </button>
+        <button class="todo-body" type="button" aria-label="${escapeHtml(t.key)} の案件を開く">
+          <div class="todo-action">${escapeHtml(t.概要) || '(内容未記入)'}</div>
+          <div class="todo-meta">
+            <span class="todo-state ${sm.cls}">${sm.label}</span>
+            <span class="todo-kind">${escapeHtml(t.種別)}</span>
+            ${age}
+          </div>
+          <div class="todo-anken">
+            <span class="todo-anken-key">${escapeHtml(t.key)}</span>
+            ${koji ? `<span class="todo-anken-koji">${escapeHtml(koji)}</span>` : ''}
+          </div>
+          ${src}
+        </button>
+      </div>`;
+  }).join('');
+  replaceSectionBody('#sec-todos', `<div class="todos-list">${rows}</div>`);
+  $$('#sec-todos .todo-check').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const card = btn.closest('.todo-card');
+      completeTodo(card.dataset.key, card.dataset.id, parseInt(card.dataset.idx, 10), card);
+    });
+  });
+  $$('#sec-todos .todo-body').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const a = findAnken(btn.closest('.todo-card').dataset.key);
+      if (a) showAnkenModal(a);
+    });
+  });
+}
+
+// 案件オブジェクトを 案件/中止案件 から探す(PUT対象を最新JSON内で再特定するため)
+function findAnkenObjIn(cj, key) {
+  for (const b of ['案件', '中止案件']) {
+    const hit = (cj[b] || []).find(x => x['案件キー'] === key);
+    if (hit) return hit;
+  }
+  return null;
+}
+
+// data.json を取得→mutate(currentJson)で書き換え→PUT する汎用ヘルパー。
+// mutate は currentJson を直接編集し true(成功)/false(対象なし)を返す。成功時はローカルSTATEも更新。
+async function putDataJson(mutate, message) {
+  const pat = getPAT();
+  if (!pat) throw new Error('NO_PAT');
+  const res = await fetch(GH_API, { headers: { Authorization: `token ${pat}`, 'Accept': 'application/vnd.github.v3+json' } });
+  if (res.status === 401) { localStorage.removeItem(PAT_KEY); throw new Error('PAT_INVALID'); }
+  if (!res.ok) throw new Error('取得失敗 ' + res.status);
+  const fileData = await res.json();
+  const sha = fileData.sha;
+  const raw = atob(fileData.content.replace(/\n/g, ''));
+  const bytes = new Uint8Array(raw.length).map((_, i) => raw.charCodeAt(i));
+  const currentJson = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+  if (!mutate(currentJson)) throw new Error('対象が見つかりません');
+  const jsonStr = JSON.stringify(currentJson, null, 2);
+  const encBytes = new TextEncoder().encode(jsonStr);
+  const encChars = Array.from(encBytes).map(b => String.fromCharCode(b)).join('');
+  const putRes = await fetch(GH_API, {
+    method: 'PUT',
+    headers: { Authorization: `token ${pat}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+    body: JSON.stringify({ message, content: btoa(encChars), sha })
+  });
+  if (!putRes.ok) throw new Error('保存失敗 ' + putRes.status);
+  STATE['案件']     = currentJson['案件']     || [];
+  STATE['中止案件'] = currentJson['中止案件'] || [];
+  return currentJson;
+}
+
+// モーダルが対象案件で開いていれば履歴を再描画
+function refreshOpenAnkenModal(ankenKey) {
+  const modal = $('#anken-modal');
+  if (modal && modal.classList.contains('show')) {
+    const a = findAnken(ankenKey);
+    if (a) showAnkenModal(a);
+  }
+}
+
+// するべきこと(動き)を完了にする。id優先、無ければ配列indexで照合。状態を「完了」にし履歴は残す。
+async function completeTodo(ankenKey, todoId, idx, cardEl) {
+  if (!getPAT()) { showPATModal(() => completeTodo(ankenKey, todoId, idx, cardEl)); return; }
+  if (cardEl) cardEl.classList.add('saving');
+  try {
+    await putDataJson((cj) => {
+      const a = findAnkenObjIn(cj, ankenKey);
+      if (!a) return false;
+      const moves = a['動き'] || [];
+      let m = todoId ? moves.find(x => x['id'] === todoId) : null;
+      if (!m && Number.isInteger(idx) && moves[idx]) m = moves[idx];
+      if (!m) return false;
+      m['状態'] = '完了';
+      return true;
+    }, `dashboard: するべきこと完了 ${ankenKey}`);
+    showToast('✓ 完了にしました');
+    renderTodos(); renderTopics(); renderKanban();
+    refreshOpenAnkenModal(ankenKey);
+  } catch (err) {
+    if (err.message === 'PAT_INVALID' || err.message === 'NO_PAT') { showPATModal(() => completeTodo(ankenKey, todoId, idx, cardEl)); return; }
+    logError('completeTodo failed', err);
+    showToast('エラー: ' + err.message);
+    if (cardEl) cardEl.classList.remove('saving');
+  }
+}
+
+// するべきこと(次のアクション)を手動追加。今日の日付で動き配列に未完了として積む。
+async function addTodo(ankenKey, text, kind, btnEl) {
+  text = (text || '').trim();
+  if (!text) { showToast('内容を入力してください'); return; }
+  if (!getPAT()) { showPATModal(() => addTodo(ankenKey, text, kind)); return; }
+  if (btnEl) btnEl.disabled = true;
+  const id = 'todo_' + Date.now().toString(36);
+  try {
+    await putDataJson((cj) => {
+      const a = findAnkenObjIn(cj, ankenKey);
+      if (!a) return false;
+      if (!Array.isArray(a['動き'])) a['動き'] = [];
+      a['動き'].push({ 日: isoToday(), 種別: kind || '対応', 概要: text, 状態: '未完了', id });
+      return true;
+    }, `dashboard: するべきこと追加 ${ankenKey}`);
+    showToast('✓ 追加しました');
+    renderTodos(); renderTopics();
+    refreshOpenAnkenModal(ankenKey);
+  } catch (err) {
+    if (err.message === 'PAT_INVALID' || err.message === 'NO_PAT') { showPATModal(() => addTodo(ankenKey, text, kind)); return; }
+    logError('addTodo failed', err);
+    showToast('エラー: ' + err.message);
+    if (btnEl) btnEl.disabled = false;
+  }
 }
 
 // 指定セクションへスムーズスクロールし、一瞬ハイライトして視線を誘導
@@ -3964,25 +4272,43 @@ function showAnkenModal(a) {
        </div>`
     : '';
 
-  // 動き履歴(財務マイルストーン＋現場活動「動き」を時系列降順で表示)
+  // するべきこと(次のアクション)追加フォーム + 動き履歴(財務＋現場活動を時系列降順で表示)
   const histEvents = ankenEvents(a).sort((x, y) => y.d - x.d);
-  const histHtml = histEvents.length
-    ? `<div class="modal-section">
-         <div class="modal-section-title">動き履歴 <span style="color:var(--text-mute);font-weight:400;letter-spacing:normal;text-transform:none;">(${histEvents.length}件)</span></div>
-         <ul class="anken-hist">
-           ${histEvents.map(e => {
-             const m = TOPIC_META[e.type] || (e.move ? { icon: 'icon-refresh' } : {});
-             const md = `${e.d.getMonth() + 1}/${e.d.getDate()}`;
-             const right = e.move ? escapeHtml(e.desc || '') : (e.amt ? formatYen(e.amt) : '');
-             return `<li class="anken-hist-item ${e.move ? 'is-move' : 'is-fin'}">
-               <span class="anken-hist-date">${e.d.getFullYear()}<b>${md}</b></span>
-               <svg class="icon anken-hist-icon"><use href="#${m.icon || 'icon-clock'}"/></svg>
-               <span class="anken-hist-main"><span class="anken-hist-type">${escapeHtml(e.type)}</span>${right ? `<span class="anken-hist-desc">${right}</span>` : ''}</span>
-             </li>`;
-           }).join('')}
-         </ul>
-       </div>`
-    : '';
+  const histListHtml = histEvents.map(e => {
+    const m = TOPIC_META[e.type] || (e.move ? { icon: 'icon-refresh' } : {});
+    const md = `${e.d.getMonth() + 1}/${e.d.getDate()}`;
+    const right = e.move ? escapeHtml(e.desc || '') : (e.amt ? formatYen(e.amt) : '');
+    const open = e.move && isOpenState(e.state);
+    const done = e.move && e.state === '完了';
+    const stateChip = open ? `<span class="anken-hist-state open">${escapeHtml(e.state)}</span>`
+                    : done ? `<span class="anken-hist-state done">完了</span>` : '';
+    const doneBtn = open
+      ? `<button class="anken-hist-done" type="button" data-key="${escapeHtml(a['案件キー'])}" data-id="${escapeHtml(e.id)}" data-idx="${e.mvIdx == null ? '' : e.mvIdx}">完了にする</button>`
+      : '';
+    return `<li class="anken-hist-item ${e.move ? 'is-move' : 'is-fin'} ${open ? 'is-open' : ''}">
+      <span class="anken-hist-date">${e.d.getFullYear()}<b>${md}</b></span>
+      <svg class="icon anken-hist-icon"><use href="#${m.icon || 'icon-clock'}"/></svg>
+      <span class="anken-hist-main"><span class="anken-hist-type">${escapeHtml(e.type)}${stateChip}</span>${right ? `<span class="anken-hist-desc">${right}</span>` : ''}</span>
+      ${doneBtn}
+    </li>`;
+  }).join('');
+  const histHtml = `<div class="modal-section">
+       <div class="modal-section-title">するべきこと・動き履歴 ${histEvents.length ? `<span style="color:var(--text-mute);font-weight:400;letter-spacing:normal;text-transform:none;">(${histEvents.length}件)</span>` : ''}</div>
+       <div class="anken-todo-add">
+         <input type="text" class="anken-todo-input" id="anken-todo-input" placeholder="次にやること（例：塗装屋に色番号を確認）" maxlength="120">
+         <select class="anken-todo-kind" id="anken-todo-kind">
+           <option value="連絡">連絡</option>
+           <option value="対応" selected>対応</option>
+           <option value="見積依頼">見積依頼</option>
+           <option value="現地調査">現地調査</option>
+           <option value="図面">図面</option>
+           <option value="打合せ">打合せ</option>
+           <option value="工程確定">工程確定</option>
+         </select>
+         <button class="anken-todo-add-btn" id="anken-todo-add-btn" type="button">＋ 追加</button>
+       </div>
+       ${histEvents.length ? `<ul class="anken-hist">${histListHtml}</ul>` : `<div style="color:var(--text-mute);font-size:13px;padding:2px 0;">動きはまだありません</div>`}
+     </div>`;
 
   // チェックセクション(看板のチェック状態を編集)
   const checkHtml = renderModalCheckSection(a);
@@ -4084,6 +4410,21 @@ function showAnkenModal(a) {
 
   // チェックセクションのイベント
   bindModalCheckHandlers(a);
+
+  // するべきこと: 追加フォーム
+  $('#anken-todo-add-btn')?.addEventListener('click', () => {
+    addTodo(a['案件キー'], $('#anken-todo-input')?.value, $('#anken-todo-kind')?.value, $('#anken-todo-add-btn'));
+  });
+  $('#anken-todo-input')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); addTodo(a['案件キー'], e.target.value, $('#anken-todo-kind')?.value, $('#anken-todo-add-btn')); }
+  });
+  // するべきこと: 履歴内の「完了にする」
+  $$('#anken-modal-body .anken-hist-done').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = btn.dataset.idx === '' ? NaN : parseInt(btn.dataset.idx, 10);
+      completeTodo(btn.dataset.key, btn.dataset.id, idx, null);
+    });
+  });
 
   // 顧客リンク → 取引先モーダル
   $$('#anken-modal-body .anken-partner-link').forEach(el => {
@@ -4777,6 +5118,7 @@ async function loadData() {
 
     // セクションレンダリング
     renderKpi();
+    renderTodos();
     renderTopics();
     renderKanban();
     renderReminders();

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>エコ鹿-アコム大分森町M-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
+details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin:6px 0;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>アコム大分森町むじんくんコーナー 閉鎖工事</h1>
+  <div class="sub">エコ鹿-アコム大分森町M-26 ｜ 大分県大分市森町586-1（アコム大分森町むじんくんコーナー）</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">📋 相談</span>
+    <span class="badge">🏢 元請: エコサポート鹿児島（T-030）</span>
+    <span class="badge">🎯 実エンド: アコム</span>
+    <span class="badge">🗓 2026年10月後半 予定</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E3%82%A8%E3%82%B3%E9%B9%BF-%E3%82%A2%E3%82%B3%E3%83%A0%E5%A4%A7%E5%88%86%E6%A3%AE%E7%94%BAM-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-06-17 09:05</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">相談</div><div class="l">ステータス</div></div>
+  <div class="kpi"><div class="v">閉鎖工事</div><div class="l">工事種別（撤去・原状回復）</div></div>
+  <div class="kpi"><div class="v">見積前</div><div class="l">金額（作業範囲確定後）</div></div>
+  <div class="kpi"><div class="v">10月後半</div><div class="l">施工予定（2026年）</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>進行フロー</b>：①宮園様より閉鎖予告受領 → ②現場打合せ日程の連絡待ち → ③打合せで作業範囲確定 → ④現調・寸法確認 → ⑤見積作成 → ⑥施工計画（10月後半・期間/人員手配）</li>
+        <li><b>現在地</b>：6/3 宮園様メールで閉鎖予告受領（時期2026年10月後半）。現場打合せ日程の連絡待ち。日程確定し次第Googleカレンダー登録</li>
+        <li><b>元請構造</b>：エコ鹿（株式会社エコサポート鹿児島・T-030）が元請、実エンド=アコム。昨年わさだタウン施工と同じ元請ライン</li>
+        <li><b>作業範囲（要確定）</b>：内装撤去・原状回復・備品撤去・サイン撤去等。打合せ時に確定する必要あり</li>
+        <li><b>注記</b>：「大分森町M」のMはむじんくん（自動契約機）の略。同元請のアコム萩原M（誘導灯表示板再取付）は別案件で5/23完了済（混同注意）</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>元請</td><td>株式会社エコサポート鹿児島（T-030）</td><td>宮園 学 様（代表取締役社長）／連絡窓口</td></tr>
+        <tr><td>実エンド</td><td>アコム株式会社</td><td>大分森町むじんくんコーナー（閉鎖対象）</td></tr>
+        <tr><td>施工</td><td>株式会社アート・レイズ</td><td>内装撤去・原状回復・備品/サイン撤去</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📝</div><div class="doc-info"><div class="doc-name">00_履歴_エコ鹿-アコム大分森町M-26.md</div><div class="doc-meta-s">2026/6/5 案件履歴ノート（経緯・所見・特記事項）</div></div><div class="doc-st s-ok">作成済</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ 見積・契約・図面・写真は未取得（相談フェーズ・現調前）。Driveリンクは同期後に付与。</div>
+    </div>
+    <div class="card">
+      <div class="card-t">📷 写真・現調記録</div>
+      <ul>
+        <li>現調未実施（現場打合せ日程の連絡待ち）。打合せ後に現調を実施し、撤去対象（内装・備品・サイン）を記録予定</li>
+        <li>該当写真なし（相談フェーズ）</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話・連絡から抽出した重要決定事項</div>
+  <ul>
+    <li>2026/06/03 宮園様（T-030）メール受領：「アコム大分森町が閉鎖になります。時期は10月後半です」「現場打合せ日程が決まりましたら連絡いたします」</li>
+    <li>2026/06/03【決定】施工時期：2026年10月後半 予定</li>
+    <li>2026/06/03【決定】元請：エコ鹿（株式会社エコサポート鹿児島）、実エンド=アコム</li>
+    <li>2026/06/04【決定】data.json新規登録（ステータス：相談）・案件フォルダ作成（書類・通話記録サブフォルダ）</li>
+    <li>2026/06/05【訂正】顧客T番号をT-029→T-030に訂正（T-029はアダルに採番済みのため）</li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <div class="doc-meta-s">見積未発行・原価計上なし（相談フェーズ）。data.json原価4分類はすべて0（労務費0／材料費0／外注費0／経費0・最終集計日2026-06-05）</div>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <div class="doc-meta-s" style="margin-top:4px;">原価合計：¥0（件数0）</div>
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <div class="doc-meta-s">受取見積書・受取請求書なし（相談フェーズ・外注未発生）</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/6/5（木）</div><div class="tl-text">data.json登録を復元（6/4の書込失敗で消失していたため）。顧客T番号をT-030に訂正。履歴ノート作成</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/4（木）</div><div class="tl-text">data.json新規追加（相談）・案件フォルダ作成（書類/通話記録）・顧客サマリーに相談カード掲載</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/3（水）</div><div class="tl-text">宮園様メールで閉鎖予告受領（10月後半）。元請=エコ鹿・実エンド=アコムを確定。現場打合せ日程の連絡待ち</div></div>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li>「大分森町M」のMはむじんくん（自動契約機）の略（萩原Mと同じパターン）。</li>
+    <li>アコム公式店舗情報：大分県大分市森町586-1。最寄JR鶴崎駅 徒歩約26分。</li>
+    <li>同元請のアコム萩原M（誘導灯表示板再取付・5/23完了・請求書発行済）は別案件。今回は大分森町Mのみ（混同注意）。</li>
+    <li>昨年わさだタウン施工と同じ元請ライン。</li>
+    <li>工事種別は「閉鎖工事」のため、内装撤去・原状回復・備品撤去・サイン撤去等の作業範囲を打合せ時に確定する必要あり。</li>
+  </ul>
+</div>
+
+<div class="footer">
+  自動生成：案件サマリー（data.json真実源泉）／エコ鹿-アコム大分森町M-26
+</div>
+
+</body>
+</html>

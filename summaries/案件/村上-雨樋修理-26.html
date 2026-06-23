@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>村上-雨樋修理-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
+details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin:6px 0;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>雨樋修理工事（駐車場横・道路側テラス）</h1>
+  <div class="sub">村上-雨樋修理-26 ｜ 大分県別府市青山町 村上邸</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">📋 見積準備</span>
+    <span class="badge">🏠 村上信子 様（T-028）</span>
+    <span class="badge">🔧 施工候補：小串アルミ（T-033）</span>
+    <span class="badge">📑 3件統合見積に掲載</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E6%9D%91%E4%B8%8A-%E9%9B%A8%E6%A8%8B%E4%BF%AE%E7%90%86-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-06-17 09:05</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">見積準備</div><div class="l">ステータス</div></div>
+  <div class="kpi"><div class="v">¥34,000</div><div class="l">雨樋工事 概算（統合見積A項）</div></div>
+  <div class="kpi"><div class="v">2箇所</div><div class="l">修理対象（駐車場横・道路側テラス）</div></div>
+  <div class="kpi"><div class="v">19枚</div><div class="l">現調写真（6/3・6/9）</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>進行フロー</b>：①初回相談（6/2） → ②下見・現地調査（6/3） → ③部材調査依頼（小串アルミ 6/9） → ④部材特定・概算確定 → ⑤統合見積の改訂</li>
+        <li><b>現在地</b>：3件統合見積に「A. 雨樋工事 一式 34,000（概算）」として掲載済み。<b>小串アルミの部材特定・見積回答待ち</b></li>
+        <li><b>次アクション</b>：小串アルミの代用品可否・正式単価の回答を受けて概算を確定 → 統合見積を改訂</li>
+        <li><b>未解決</b>：部材（約30年前・メーカー不明／角型トイ廃番・エルボ40φ）の代用品可否と正式見積。雨樋材料はナフサ不足で入手困難の可能性ありと事前説明済み</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>発注者</td><td>村上信子 様（T-028）</td><td>個人宅・別府市青山町（野口病院裏手）</td></tr>
+        <tr><td>施工（候補）</td><td>小串アルミ（T-033）</td><td>豊後高田のサッシ屋／電話帳表記「おぐしアルミ」・部材調査中</td></tr>
+        <tr><td>元請</td><td>株式会社アート・レイズ</td><td>直接受注（元請）</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📝</div><div class="doc-info"><div class="doc-name">00_履歴_村上-雨樋修理-26.md</div><div class="doc-meta-s">2026/6/11 案件履歴ノート（現在地・経緯・決定事項）</div></div><div class="doc-st s-ok">最新</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📑</div><div class="doc-info"><div class="doc-name">見_村上-諸修繕相談-26+村上-雨樋修理-26+村上-雨漏り修理-26.html</div><div class="doc-meta-s">2026/6/11 3件統合見積（ARM-T028-260611-01・税込合計 ¥395,670／A. 雨樋工事 34,000 概算）※村上-諸修繕相談-26 配下に保管</div></div><div class="doc-st s-wip">概算</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📞</div><div class="doc-info"><div class="doc-name">通話記録/通話_20260602_村上信子_修理相談.md</div><div class="doc-meta-s">2026/6/2 初回相談（雨樋2箇所ほか）</div></div><div class="doc-st s-ok">保管済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📞</div><div class="doc-info"><div class="doc-name">通話記録/20260609_おぐしアルミ_081800_transcript.md</div><div class="doc-meta-s">2026/6/9 小串アルミ部材調査の通話文字起こし</div></div><div class="doc-st s-ok">保管済</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ 当案件の正式見積・請求・契約書は未発行（概算のみ）。Driveリンクは同期後に付与。</div>
+    </div>
+    <div class="card">
+      <div class="card-t">📷 写真・現調記録</div>
+      <ul>
+        <li><b>6/3 現調10枚</b>：カーポート/サンルーフのトイ接続部破損・縦樋エルボ破損アップ・テラス縦樋全景・角樋断面/エルボ径の採寸（材料手配用）→ 連番01〜10でリネーム済み</li>
+        <li><b>6/9 追加11枚</b>：20260609_*（部材調査時の現況写真・小串アルミとの確認用）</li>
+        <li><b>採寸メモ</b>：角樋断面・エルボ40φをスケール採寸（廃番部材の代用品検討用）</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話記録から抽出した重要決定事項</div>
+  <ul>
+    <li>2026/06/02 村上信子さん（T-028）初回相談：雨樋2箇所が腐食で破損（①駐車場横の細い屋根から降りる雨樋 ②道路側テラスの雨樋）。雨樋材料はナフサ不足で入手困難の可能性ありとかめさんから事前説明。来週いっぱい熊本工事のため下見は来週末頃・日程確定後にこちらから電話する段取り</li>
+    <li>2026/06/03【決定】下見・現地調査実施。カーポートとサンルーフのトイ接続部の破損を確認 → <b>トイ接続部は交換工事で対応</b>。工事は<b>小串アルミ（豊後高田のサッシ屋）に依頼予定</b></li>
+    <li>2026/06/09 小串アルミ（T-033）通話：部材のメーカー特定が困難（約30年前部材・寸法だけでは不可、メーカー名＋タイプが必要）。角型トイは廃番（ネット在庫あり）、エルボは40φ。<b>キャップは代用が合わない／トイ差込部のフランジを外して交換する方法を確認</b>。丸トイ側（カーポート）は問題なし。小串さん側で代用品を再度探して持ち帰り検討</li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <div class="doc-meta-s">原価未計上（見積準備フェーズ）。当案件は3件統合見積に「A. 雨樋工事 一式 34,000（概算）」として掲載。data.json の「原価」は空（労務費・材料費・外注費・経費とも計上なし）。小串アルミの部材確定後に外注費・材料費が発生見込み。</div>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <div class="doc-meta-s">受取見積書・受取請求書なし（小串アルミ（T-033）からの部材見積回答待ち。回答後に外注費として計上予定）。</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/6/11（木）</div><div class="tl-text">3件統合見積に「A. 雨樋工事 一式 34,000（概算）」として掲載（ARM-T028-260611-01・税込合計 ¥395,670）。履歴ノート更新</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/9（火）</div><div class="tl-text">小串アルミ（T-033）と通話し部材調査を依頼（縦樋・エルボ・キャップ／約30年前・メーカー不明）。追加現況写真11枚撮影。小串アルミを data.json に採番登録（6/10）</div></div>
+    <div class="tl-item"><div class="tl-date">2026/6/3（火）</div><div class="tl-text">下見・現地調査。トイ接続部破損を確認→交換工事で対応決定。現況写真10枚・角樋断面/エルボ径を採寸。施工は小串アルミに依頼予定</div></div>
+    <details class="tl-archive"><summary>過去の経緯を見る（1件・7日超）</summary>
+      <div class="tl-item"><div class="tl-date">2026/6/2（月）</div><div class="tl-text">村上信子さんから修理相談の電話→案件「村上-雨樋修理-26」を data.json 登録（相談）。フォルダ作成・通話記録保存。ナフサ不足リスクを共有</div></div>
+    </details>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li>同顧客（村上邸・T-028）には別案件あり：村上-雨漏り修理-26／村上-諸修繕相談-26／村上-トイレ交換-26。当サマリーは「村上-雨樋修理-26」専用</li>
+    <li>見積は3件（諸修繕・雨樋・雨漏り）を1本に統合して提出済み。雨樋分はあくまで概算34,000で、部材確定後に改訂が必要</li>
+    <li>廃番部材（角型トイ・横キャップ）の代用品が見つからない場合、施工方法（フランジ交換）や部材手配で工期・金額が変動する可能性あり</li>
+  </ul>
+</div>
+
+<div class="footer">
+  村上-雨樋修理-26 案件サマリー ｜ 真実の源泉=data.json（最終更新 2026-06-17 09:05）｜ AUTOマーカー部分は日次チェックで自動更新
+</div>
+
+</body>
+</html>

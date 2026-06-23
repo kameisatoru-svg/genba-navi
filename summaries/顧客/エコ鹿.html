@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ネクサスプラザ 案件一覧</title>
+<title>エコサポート鹿児島 案件一覧</title>
 <style>
 :root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -13,8 +13,6 @@ body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic Pro
 .header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
 .badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
 .badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
-.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
-.workflow-link:hover{background:rgba(16,16,42,.8);}
 .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
 .kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
 .kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
@@ -31,10 +29,6 @@ a.doc:hover{background:#34345a;transform:translateX(3px);}
 .s-ok{background:#14532d;color:var(--ok);} .s-wip{background:#56450c;color:var(--warn);}
 table{width:100%;border-collapse:collapse;font-size:12px;}
 th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;} th{color:var(--sub);font-weight:600;}
-.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
-.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
-.timeline .tl-item.recent::before{background:var(--ok);}
-.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;} .tl-text{font-size:13px;}
 .footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
 @media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
 @media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
@@ -44,55 +38,31 @@ th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;} th{color
 <body>
 
 <div class="header">
-  <h1>ネクサスプラザ 案件一覧</h1>
-  <div class="sub">株式会社ネクサスプラザ（T-011）｜ 担当：力武太郎さん</div>
+  <h1>エコサポート鹿児島 案件一覧</h1>
+  <div class="sub">株式会社エコサポート鹿児島（T-030）｜ 元請（実エンド＝アコム）｜ ご担当：宮園様</div>
   <div class="badges">
-    <span class="badge">📒 案件索引（5件）</span>
+    <span class="badge">📒 案件索引（2件）</span>
     <span class="badge">各案件の詳細は個別サマリーへ</span>
   </div>
 </div>
 
 <div class="card">
   <div class="card-t">📁 案件一覧（タップで個別サマリーを開く）</div>
-      <a class="doc" href="./ネクサス-ビル漏水修理-26/00_案件サマリー.html" target="_blank">
+      <a class="doc" href="./エコ鹿-アコム萩原M-26/00_案件サマリー.html" target="_blank">
         <div class="doc-icon">📁</div>
         <div class="doc-info">
-          <div class="doc-name">漏水調査・復旧工事</div>
-          <div class="doc-meta-s">ネクサス-ビル漏水修理-26 ｜ 更衣室6/18ボード完了・6/20クロス／2F3Fトイレ別スコープ ｜ ¥275,000〜</div>
-        </div>
-        <div class="doc-st s-wip">施工予定</div>
-      </a>
-      <a class="doc" href="./ネクサス-自家発電-26/00_案件サマリー.html" target="_blank">
-        <div class="doc-icon">📁</div>
-        <div class="doc-info">
-          <div class="doc-name">自家発電設備工事</div>
-          <div class="doc-meta-s">ネクサス-自家発電-26 ｜ 発電機取替＋電気・防水（高額・受注判断待ち） ｜ ¥10,000,000</div>
-        </div>
-        <div class="doc-st s-wip">見積提出済み</div>
-      </a>
-      <a class="doc" href="./ネクサス-プラザ自火報-26/00_案件サマリー.html" target="_blank">
-        <div class="doc-icon">📁</div>
-        <div class="doc-info">
-          <div class="doc-name">自火報制御盤修理・排煙窓金物固定</div>
-          <div class="doc-meta-s">ネクサス-プラザ自火報-26 ｜ 入金待ち ｜ ¥114,180</div>
+          <div class="doc-name">アコム萩原むじんくんコーナー 誘導灯表示板 再取付工事</div>
+          <div class="doc-meta-s">エコ鹿-アコム萩原M-26 ｜ 大分市牧2-17-5 牧ロイヤルプラザ2F ｜ 5/23即日施工完了・6/4完了報告書＋請求書発行・入金待ち ｜ ¥13,200</div>
         </div>
         <div class="doc-st s-ok">請求済み</div>
       </a>
-      <a class="doc" href="./ネクサス-串たつ外壁-26/00_案件サマリー.html" target="_blank">
+      <a class="doc" href="./エコ鹿-アコム大分森町M-26/00_案件サマリー.html" target="_blank">
         <div class="doc-icon">📁</div>
         <div class="doc-info">
-          <div class="doc-name">串焼きたつみ 外壁幅木補修</div>
-          <div class="doc-meta-s">ネクサス-串たつ外壁-26 ｜ 入金待ち（4/22施工） ｜ ¥18,634</div>
+          <div class="doc-name">アコム大分森町むじんくんコーナー 閉鎖工事</div>
+          <div class="doc-meta-s">エコ鹿-アコム大分森町M-26 ｜ 大分市森町586-1 ｜ 2026年10月後半に閉鎖予告・現場打合せ日程の連絡待ち（作業範囲は打合せで確定） ｜ 金額未定</div>
         </div>
-        <div class="doc-st s-ok">請求済み</div>
-      </a>
-      <a class="doc" href="./ネクサス-大丸引戸修理-26/00_案件サマリー.html" target="_blank">
-        <div class="doc-icon">📁</div>
-        <div class="doc-info">
-          <div class="doc-name">大丸ホルモン トイレ引戸修理</div>
-          <div class="doc-meta-s">ネクサス-大丸引戸修理-26 ｜ 完了書発行済・入金待ち ｜ ¥13,200</div>
-        </div>
-        <div class="doc-st s-ok">請求済み</div>
+        <div class="doc-st s-wip">相談</div>
       </a>
 </div>
 
@@ -100,6 +70,6 @@ th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;} th{color
   <div class="doc-meta-s">※ この画面は索引です。各案件の進行状況・通話決定事項・書類・原価などの詳細は、各案件フォルダ直下の <b>00_案件サマリー.html</b>（個別サマリー）に集約しています。日次更新チェックは個別サマリー側を更新します。</div>
 </div>
 
-<div class="footer">案件索引 ｜ 案件単位サマリーへ移行（2026-06-17・更新 2026-06-19） ｜ data.json最終更新 2026-06-17 09:05</div>
+<div class="footer">案件索引（エコサポート鹿児島）｜ 再生成 2026-06-19 ｜ data.json最終更新 2026-06-17 09:05</div>
 </body>
 </html>

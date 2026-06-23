@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ウインズ-大村RS-26 案件サマリー</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI','Yu Gothic','Meiryo',sans-serif;background:#1a1a2e;color:#e0e0e0;line-height:1.6;padding:clamp(1rem,3vw,2rem)}
+.dash{max-width:1400px;margin:0 auto}
+.hdr{background:linear-gradient(135deg,#16213e 0%,#0f3460 100%);padding:clamp(1.5rem,4vw,2.5rem);border-radius:8px;margin-bottom:clamp(1.5rem,4vw,2rem);box-shadow:0 4px 6px rgba(0,0,0,0.3)}
+.hdr h1{font-size:clamp(1.8rem,5vw,2.5rem);font-weight:700;margin-bottom:0.5rem;background:linear-gradient(135deg,#e8b4f8,#7eb8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hdr p{font-size:clamp(0.9rem,2vw,1rem);color:#a8dadc;margin-bottom:0.3rem}
+.badge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;background:#2d6a4f;color:#95d5b2;margin-top:6px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:clamp(1rem,3vw,1.5rem);margin-bottom:clamp(1.5rem,4vw,2rem)}
+@media(max-width:768px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:400px){.kpi-grid{grid-template-columns:1fr}}
+.kpi{padding:clamp(1rem,3vw,1.5rem);border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.3);border-left:4px solid;text-align:center}
+.kpi.amt{background:linear-gradient(135deg,#2d1b69 0%,#4a2a7f 100%);border-left-color:#d4a574}
+.kpi.dim{background:linear-gradient(135deg,#0f3460 0%,#16517e 100%);border-left-color:#457b9d}
+.kpi.cnt{background:linear-gradient(135deg,#1b4d2e 0%,#2d7a4a 100%);border-left-color:#52b788}
+.kpi-lbl{font-size:clamp(0.75rem,2vw,0.85rem);color:#a8dadc;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.5rem;font-weight:500}
+.kpi-val{font-size:clamp(1.5rem,4vw,2rem);font-weight:700;color:#fff;margin-bottom:0.3rem}
+.kpi-unit{font-size:clamp(0.8rem,2vw,0.9rem);color:#b0b0b0}
+.card{background:#16213e;border:1px solid #2a3f5f;border-radius:6px;padding:clamp(1.5rem,3vw,2rem);margin-bottom:clamp(1rem,3vw,1.5rem);box-shadow:0 2px 4px rgba(0,0,0,0.2)}
+.card h2{font-size:clamp(1.2rem,3vw,1.5rem);color:#d4a574;margin-bottom:1rem;border-bottom:2px solid #2a3f5f;padding-bottom:0.75rem}
+.dtbl{width:100%;border-collapse:collapse;font-size:clamp(0.85rem,2vw,0.95rem)}
+.dtbl th{background:#0f3460;color:#d4a574;padding:clamp(0.5rem,2vw,0.75rem);text-align:left;font-weight:600;border-bottom:2px solid #2a3f5f}
+.dtbl td{padding:clamp(0.5rem,2vw,0.75rem);border-bottom:1px solid #2a3f5f;color:#e0e0e0}
+.stat{display:inline-block;background:#2d6a4f;color:#95d5b2;padding:0.3rem 0.75rem;border-radius:4px;font-size:clamp(0.8rem,2vw,0.9rem);font-weight:700;margin:0.2rem}
+.stat.wait{background:#4a3f2e;color:#f0c674}
+.timeline{list-style:none;padding-left:0}
+.timeline li{padding:8px 0 8px 22px;border-left:2px solid #457b9d;margin-left:8px;position:relative;font-size:clamp(0.85rem,2vw,0.95rem)}
+.timeline li::before{content:'';position:absolute;left:-7px;top:14px;width:12px;height:12px;border-radius:50%;background:#457b9d}
+.timeline li.done::before{background:#52b788}
+.timeline li.now::before{background:#d4a574;box-shadow:0 0 0 4px rgba(212,165,116,0.25)}
+.timeline li.pend::before{background:#5a5a7a}
+.timeline .ts{display:block;font-size:11px;color:#a8a8c8;margin-bottom:2px}
+.doc-list{display:flex;flex-direction:column;gap:8px}
+a.doc{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:8px;background:#2a2a4a;text-decoration:none;color:inherit;transition:background 0.15s,transform 0.15s;border-left:3px solid #7eb8ff}
+a.doc:hover{background:#34345a;transform:translateX(3px)}
+.doc-icon{font-size:1.5rem;min-width:32px;text-align:center}
+.doc-info{flex:1;min-width:0}
+.doc-name{font-size:clamp(0.85rem,2vw,0.95rem);font-weight:600;color:#e0e0e0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.doc-meta-s{font-size:clamp(0.7rem,1.5vw,0.8rem);color:#a8a8c8;margin-top:2px}
+.doc-st{font-size:10px;font-weight:700;padding:3px 10px;border-radius:12px;white-space:nowrap}
+.doc-st.s-ok{background:#2d6a4f;color:#95d5b2}
+.doc-st.s-wait{background:#4a3f2e;color:#f0c674}
+.doc-st.s-plan{background:#2d4a6a;color:#7eb8ff}
+a.doc.est{border-left-color:#d4a574}
+a.doc.inv{border-left-color:#f0c674}
+a.doc.cont{border-left-color:#95d5b2}
+a.doc.kanr{border-left-color:#52b788}
+a.doc.draw{border-left-color:#c77dff}
+a.doc.ref{border-left-color:#7eb8ff}
+a.doc.photo{border-left-color:#48cae4}
+.ftr{border-top:1px solid #2a3f5f;padding-top:clamp(1rem,3vw,1.5rem);margin-top:clamp(1.5rem,4vw,2rem);text-align:center;font-size:clamp(0.75rem,2vw,0.85rem);color:#b8b8d0}
+</style>
+</head>
+<body>
+<div class="dash">
+
+<div class="hdr">
+<h1>大村邸 ロールスクリーン取替工事</h1>
+<p>顧客：T-008 有限会社ウインズコーポレーション（請求宛）／施主：大村 勝美 様</p>
+<p>ウインズ-大村RS-26｜大分県別府市上原町11-12</p>
+<!-- AUTO:JSON:STATUS_BADGES:START -->
+<span class="badge">請求済み（請求書発行待ち）</span>
+<!-- AUTO:JSON:STATUS_BADGES:END -->
+</div>
+
+<div class="kpi-grid">
+<div class="kpi amt"><div class="kpi-lbl">請求予定額（税込）</div><div class="kpi-val">¥136,000</div></div>
+<div class="kpi amt"><div class="kpi-lbl">税抜小計</div><div class="kpi-val">¥123,636</div></div>
+<div class="kpi cnt"><div class="kpi-lbl">施工日</div><div class="kpi-val" style="font-size:1.2rem">R8.5.19</div></div>
+<div class="kpi dim"><div class="kpi-lbl">見積発行日</div><div class="kpi-val" style="font-size:1.2rem">R8.5.8</div></div>
+</div>
+
+<div class="card">
+<h2>工事概要</h2>
+<table class="dtbl">
+<tr><th>項目</th><th>内容</th></tr>
+<tr><td>工事名</td><td>ロールスクリーン取替工事</td></tr>
+<tr><td>施工場所</td><td>大分県別府市上原町11-12（大村邸）</td></tr>
+<tr><td>施工日</td><td>令和8年5月19日（13:00〜15:00）</td></tr>
+<tr><td>協力</td><td>古長氏（T-015）2名体制</td></tr>
+<tr><td>仕様</td><td>タチカワブラインド RS-1194・ワンチェーン式・ダークブラウン</td></tr>
+<tr><td>内訳</td><td>左窓 W1220×H1640（右操作）／中窓 W2680×H1640（右操作）／右窓 W1220×H1640（左操作）</td></tr>
+<tr><td>処分</td><td>撤去した旧ロールスクリーンは事務所産廃ボックスへ</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h2>進捗タイムライン</h2>
+<ul class="timeline">
+<li class="done"><span class="ts">2026/04/30</span>現調（リビング全景・既存RS確認・採寸）</li>
+<li class="done"><span class="ts">2026/05/08</span>大村氏と仕様確定通話（W2450〜2500中央チェーン式・両サイド自動巻き上げ・ダークブラウン）</li>
+<li class="done"><span class="ts">2026/05/08</span>見積書発行（ARM-T021-260508-01・¥136,000税込）</li>
+<li class="done"><span class="ts">2026/05/18</span>施工予定登録（Googleカレンダー・5/19 13:00〜15:00 Basil緑）</li>
+<li class="done"><span class="ts">2026/05/19</span>施工完了・お客様立会い確認・完了書発行</li>
+<li class="now"><span class="ts">後日</span>請求書発行（ウインズコーポレーション宛）</li>
+<li class="pend"><span class="ts">後日</span>入金確認・原価集計・案件クローズ</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>金額内訳（見積ベース）</h2>
+<table class="dtbl">
+<tr><th>区分</th><th>数量</th><th>単価</th><th>金額（税抜）</th></tr>
+<tr><td>ロールスクリーン 左窓 W1220×H1640 右操作</td><td>1台</td><td>¥23,030</td><td>¥23,030</td></tr>
+<tr><td>ロールスクリーン 中窓 W2680×H1640 右操作</td><td>1台</td><td>¥30,380</td><td>¥30,380</td></tr>
+<tr><td>ロールスクリーン 右窓 W1220×H1640 左操作</td><td>1台</td><td>¥23,030</td><td>¥23,030</td></tr>
+<tr><td>既存ロールスクリーン撤去・配線処理・処分</td><td>1式</td><td>¥20,000</td><td>¥20,000</td></tr>
+<tr><td>取付費</td><td>1式</td><td>¥16,000</td><td>¥16,000</td></tr>
+<tr><td>諸経費</td><td>1式</td><td>¥11,196</td><td>¥11,196</td></tr>
+<tr><td colspan="3">小計（税抜）</td><td>¥123,636</td></tr>
+<tr><td colspan="3">消費税（10%）</td><td>¥12,364</td></tr>
+<tr><td colspan="3" style="font-weight:700">税込合計</td><td style="font-weight:700;color:#d4a574">¥136,000</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h2>ステータス・次アクション</h2>
+<p style="margin-bottom:1rem"><span class="stat">施工完了</span><span class="stat">完了書発行済</span><span class="stat wait">請求書発行待ち</span></p>
+<ul style="padding-left:1.5rem;font-size:clamp(0.85rem,2vw,0.95rem);color:#a8dadc">
+<li>請求書を mitsumori-seikyu-create で作成（ウィンズコーポレーション宛・¥136,000）</li>
+<li>施工後写真を撮影できれば完了書に追加して再印刷</li>
+<li>data.json は 請求済み 状態に更新済み</li>
+<li>レガシーフォルダ「大村邸ロールスクリーン取替工事」の中身を ウインズ-大村RS-26 配下の {書類/写真/図面} に整理（anken-summary）</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>書類・ファイル一覧</h2>
+<div class="doc-list">
+<a class="doc est" href="../大村邸ロールスクリーン取替工事/見_大村-自宅RS-26.pdf"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">見_大村-自宅RS-26.pdf</div><div class="doc-meta-s">見積書｜ARM-T021-260508-01｜¥136,000</div></div><div class="doc-st s-ok">発行済</div></a>
+<a class="doc kanr" href="書類/完_ウインズ-大村RS-26.html"><div class="doc-icon">📋</div><div class="doc-info"><div class="doc-name">完_ウインズ-大村RS-26.html</div><div class="doc-meta-s">工事完了報告書（HTML・PDF化前）｜施工写真追加待ち</div></div><div class="doc-st s-wait">写真追加待ち</div></a>
+<a class="doc ref" href="00_履歴_ウインズ-大村RS-26.md"><div class="doc-icon">📝</div><div class="doc-info"><div class="doc-name">00_履歴_ウインズ-大村RS-26.md</div><div class="doc-meta-s">案件履歴ノート</div></div><div class="doc-st s-plan">記録</div></a>
+<a class="doc draw" href="../大村邸ロールスクリーン取替工事/図面_採寸_大村邸ロールスクリーン取替.jpg"><div class="doc-icon">📐</div><div class="doc-info"><div class="doc-name">図面_採寸_大村邸ロールスクリーン取替.jpg</div><div class="doc-meta-s">採寸図面</div></div><div class="doc-st s-plan">参考</div></a>
+<a class="doc photo" href="../大村邸ロールスクリーン取替工事/"><div class="doc-icon">📷</div><div class="doc-info"><div class="doc-name">現調写真 6枚（4/30）</div><div class="doc-meta-s">リビング全景・既存RS操作チェーン・小窓側・大窓側</div></div><div class="doc-st s-plan">記録</div></a>
+<a class="doc ref" href="通話記録/"><div class="doc-icon">📞</div><div class="doc-info"><div class="doc-name">通話記録/</div><div class="doc-meta-s">5/8大村氏 仕様確定通話 ほか</div></div><div class="doc-st s-plan">記録</div></a>
+</div>
+</div>
+
+<div class="ftr">
+<p>株式会社アート・レイズ｜ウインズ-大村RS-26｜最終更新: 2026年5月19日（施工完了・完了書発行）</p>
+</div>
+
+</div>
+</body>
+</html>

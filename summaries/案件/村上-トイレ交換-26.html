@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>村上-トイレ交換-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
+details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin:6px 0;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>トイレ便器取替え工事（節水タンクレス化）</h1>
+  <div class="sub">村上-トイレ交換-26 ｜ 大分県別府市青山町 村上邸</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">📋 相談</span>
+    <span class="badge">🏠 村上信子 様（T-028）</span>
+    <span class="badge">🚽 第一候補：LIXIL サティスS</span>
+    <span class="badge">📐 現調前（提案書作成済み）</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E6%9D%91%E4%B8%8A-%E3%83%88%E3%82%A4%E3%83%AC%E4%BA%A4%E6%8F%9B-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-06-17 09:05</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">相談</div><div class="l">ステータス</div></div>
+  <div class="kpi"><div class="v">サティスS</div><div class="l">第一候補機種（LIXIL）</div></div>
+  <div class="kpi"><div class="v">見積前</div><div class="l">金額（現調後に見積）</div></div>
+  <div class="kpi"><div class="v">3条件</div><div class="l">節水・タンクレス・色選択</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>進行フロー</b>：①取替え提案書作成（済）→ ②紙カタログ持参で訪問・機種/カラー打合せ → ③現地調査（水圧・排水芯・電源・採寸）→ ④機種確定後に正式見積</li>
+        <li><b>現在地</b>：提案書作成済み・現調前。26サティス紙カタログ（セ-CW29-27）が事務所宛に郵送請求済み（6/16頃着予定）→ 到着後に提案書とともに持参して訪問</li>
+        <li><b>次アクション</b>：カタログ到着待ち → 訪問で機種・カラー打合せ → 現調実施</li>
+        <li><b>未解決</b>：機種・カラー未確定／水圧・電源・排水芯未確認／正式見積は現調後</li>
+        <li><b>同時施工提案</b>：床CF重ね張り（村上-諸修繕相談-26 ⑤）と同時施工を強く推奨（便器脱着1回で済み・便器跡が残らない）</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>顧客（施主）</td><td>村上信子 様（T-028）</td><td>別府市青山町・村上邸／奥様より便器取替えご依頼</td></tr>
+        <tr><td>施工</td><td>株式会社アート・レイズ</td><td>提案・現調・取替え工事</td></tr>
+        <tr><td>建材窓口</td><td>タマイM&amp;S（株）（T-036）</td><td>担当: 高橋義一 様／TOTO・LIXIL（サティス）窓口実績</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">提案_トイレ取替えご提案書_村上邸.html</div><div class="doc-meta-s">2026/6/11 高齢者向け大文字版・主要3メーカー比較／おすすめプラン／現調確認事項</div></div><div class="doc-st s-ok">作成済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📘</div><div class="doc-info"><div class="doc-name">26サティスカタログ（セ-CW29-27）紙版</div><div class="doc-meta-s">LIXIL郵送請求済み・事務所宛・6/16頃着予定（持参用）</div></div><div class="doc-st s-wip">到着待ち</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ 見積・契約書類は未発行（相談フェーズ）。Driveリンクは同期後に付与。</div>
+    </div>
+    <div class="card">
+      <div class="card-t">🚽 候補機種・提案要点</div>
+      <ul>
+        <li><b>第一候補 LIXIL サティスS</b>：節水・タンクレス・本体色選択（4色：ピュアホワイト/オフホワイト/ピンク/ブルーグレー）の3条件をすべて満たす唯一の機種。黒ずみ対策のアクアセラミック素材</li>
+        <li><b>上位色希望なら サティスG</b>（5色：ノーブルブラック/トープ/グレー/ピュアホワイト/オフホワイト）</li>
+        <li><b>節水最優先 TOTO ネオレストRS</b>（大3.8L最節水・パステル系は受注生産）</li>
+        <li><b>掃除最小 Panasonic アラウーノL150</b>（泡洗浄・本体白のみ・便フタのみカラー+16,500円）</li>
+        <li>既設便器はTOTO製 → サティスはリモデルタイプ（リトイレ）で床工事なし対応可</li>
+        <li>手洗いは前室洗面所があるためタンクレス化で問題なし</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話・打合せからの確定事項</div>
+  <ul>
+    <li>2026/06/11【ご依頼内容】奥様より便器取替えのご依頼。お困りごと：①水の流れが悪い ②黒い汚れが定期的に付く ③便器が古い</li>
+    <li>2026/06/11【ご要望】①節水型 ②タンクレス ③色が選べる商品（メーカーこだわりなし）</li>
+    <li>2026/06/11【決定】第一候補をLIXILサティスSに確定（3条件を満たす唯一機種）。上位色希望ならサティスGを提示</li>
+    <li>2026/06/11【決定】既設便器はTOTO製 → サティスのリモデルタイプ（リトイレ）で床工事なし対応の方針</li>
+    <li>2026/06/11【決定】床CF重ね張り（村上-諸修繕相談-26 ⑤）との同時施工を提案</li>
+    <li>2026/06/11【決定】現調確認事項を確定：水圧（タンクレスは目安0.05MPa以上）・トイレ内電源コンセント・排水芯位置・採寸</li>
+    <li>2026/06/11【段取り】26サティス紙カタログ（セ-CW29-27）をLIXILへ無料郵送請求完了。事務所宛・6/16頃着予定</li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <div class="doc-meta-s">見積未発行・原価計上なし（相談フェーズ）。労務費・材料費・外注費・経費とも該当なし（data.json「原価」空）。</div>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <div class="doc-meta-s" style="margin-top:4px;">原価合計：該当なし（現調後の正式見積で確定予定）</div>
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <div class="doc-meta-s">受取見積書・受取請求書なし（相談フェーズ）。建材調達はタマイM&amp;S（T-036）窓口を想定。</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/6/16（予）</div><div class="tl-text">26サティス紙カタログ（セ-CW29-27）事務所着予定 → 提案書とともに持参して訪問・機種/カラー打合せへ</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/11（木）</div><div class="tl-text">提案書を高齢者向けに改訂（文字拡大）・既設TOTO情報追記（リモデルタイプで対応）・持参カタログ特定し紙版を郵送請求完了。MyLIXIL会員新規登録</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/6/11（木）</div><div class="tl-text">案件登録（相談）・取替え提案書作成。主要3メーカー比較／第一候補サティスS／床CF同時施工提案／現調確認事項を整理</div></div>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li>同邸では他に <b>村上-雨漏り修理-26</b> / <b>村上-雨樋修理-26</b> / <b>村上-諸修繕相談-26</b> が並行。本件は便器取替えのみ（混同注意）</li>
+    <li>奥様が高齢のため、提案・打合せ資料は大文字版で統一する</li>
+    <li>タンクレス化は水圧が条件。現調で必ず水圧・電源・排水芯を確認してから機種を最終確定すること</li>
+  </ul>
+</div>
+
+<div class="footer">案件サマリー（自動生成）｜ 真実の源泉：data.json ｜ 村上-トイレ交換-26</div>
+
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laugh-もみもみ雨漏-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
+details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin:6px 0;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>momimomi Laugh 雨漏り補修工事</h1>
+  <div class="sub">Laugh-もみもみ雨漏-26 ｜ 大分県別府市（momimomi Laugh 物件）</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">📋 相談</span>
+    <span class="badge">🏢 有限会社Laugh（T-020）</span>
+    <span class="badge">🔧 雨漏り再発・要現地調査</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=Laugh-%E3%82%82%E3%81%BF%E3%82%82%E3%81%BF%E9%9B%A8%E6%BC%8F-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-06-17 09:05</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">相談</div><div class="l">ステータス</div></div>
+  <div class="kpi"><div class="v">見積前</div><div class="l">金額（現地調査後に判断）</div></div>
+  <div class="kpi"><div class="v">未実施</div><div class="l">現地調査（屋根構造未確認）</div></div>
+  <div class="kpi"><div class="v">1件</div><div class="l">通話記録（5/11）</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>現在地</b>：相談フェーズ。2026/5/11 入居者（工藤麻美さん）より雨漏り再発・天井から白い粉（モルタル層）落下の応急処置相談を受電</li>
+        <li><b>次アクション</b>：屋根構造が未確認のため、まず現地調査が必要。入居者が大家へ再交渉中で、その結果次第で対応方針を決める段取り</li>
+        <li><b>論点</b>：屋上はスケルトン状態・大家が防水コーティング未実施。室内側からの応急処置は不可。ベランダ側からの応急処置可否を要確認</li>
+        <li><b>背景</b>：建物が古く根本補修が必要な可能性大。大家が動かない場合、入居者は家賃交渉（雨漏り分の減額）も検討</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>発注者</td><td>有限会社Laugh（T-020）</td><td>代表: 工藤麻美様／momimomi Laugh（リラクゼーション）運営</td></tr>
+        <tr><td>相談者</td><td>工藤麻美さん</td><td>momimomi 物件の入居者・運営者</td></tr>
+        <tr><td>大家</td><td>（物件オーナー）</td><td>防水コーティング未実施・対応消極的</td></tr>
+        <tr><td>施工</td><td>株式会社アート・レイズ</td><td>現地調査・補修対応（予定）</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📞</div><div class="doc-info"><div class="doc-name">20260511_工藤麻美_111452_transcript.txt</div><div class="doc-meta-s">2026/5/11 雨漏り再発・天井白粉落下の応急処置相談（通話文字起こし）</div></div><div class="doc-st s-ok">記録済</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ 見積・契約・図面・写真等は未作成（相談フェーズ）。DriveリンクはDrive同期後に付与（現状href未設定）。</div>
+    </div>
+    <div class="card">
+      <div class="card-t">📷 写真・現調記録</div>
+      <ul>
+        <li>該当なし（現地調査未実施・屋根構造未確認）</li>
+        <li>現調時に取得予定：屋上スケルトン部・室内天井のモルタル粉落下箇所・一番手前ベッド側（使用不能箇所）・ベランダからの屋根アクセス</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話記録から抽出した重要事項</div>
+  <ul>
+    <li>2026/05/11 工藤麻美さん（入居者）通話：momimomi 物件で以前の雨漏りが再発。屋上がスケルトン状態で、4月の長雨により悪化。天井から白い粉（乾いたモルタル層の粉）が落下している</li>
+    <li>大家は防水コーティングを未実施のまま。入居者から再三依頼しているが根本対応されておらず、水が溜まらない程度の処置に留まっている</li>
+    <li>一番手前のベッド側が雨漏りで使用不能（雨後も数日溜まり、その後に白い粉が落ちる状態）</li>
+    <li>室内側からの応急処置は不可。ベランダに上がっての応急処置（防水テープ等）の可否を相談されたが、アート・レイズ側は屋根を未確認のため要現地調査と回答</li>
+    <li>入居者は大家へ再度交渉予定。改善されない場合は応急処置＋家賃交渉も検討。建物が古く簡単には直らない見込みとの認識を共有</li>
+  </ul>
+  <div class="doc-meta-s" style="margin-top:6px;">※ 確定事項はなし（相談段階・現地調査前）。個人情報・未確定の金額交渉内容は記載していません。</div>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <table>
+    <tr><th>分類</th><th>金額</th></tr>
+    <tr><td>労務費</td><td>¥0</td></tr>
+    <tr><td>材料費</td><td>¥0</td></tr>
+    <tr><td>外注費</td><td>¥0</td></tr>
+    <tr><td>経費</td><td>¥0</td></tr>
+  </table>
+  <div class="doc-meta-s" style="margin-top:6px;">見積未発行・原価計上なし（相談フェーズ）。data.json原価最終集計日: 2026-05-18</div>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <div class="doc-meta-s">原価合計: ¥0（0件）</div>
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <div class="doc-meta-s">受取見積書・受取請求書なし（該当なし）</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/5/18（月）</div><div class="tl-text">data.json原価最終集計（計上なし・相談フェーズ継続）</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/5/11（日）</div><div class="tl-text">入居者・工藤麻美さんより雨漏り再発・天井から白い粉落下の応急処置相談を受電。屋根構造未確認のため要現地調査と回答（通話記録 文字起こし保存）</div></div>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li>屋上がスケルトン＝防水層が機能していない状態。応急処置（防水テープ等）では一時しのぎにしかならず、根本的には防水改修が必要な可能性が高い</li>
+    <li>大家の対応待ち案件。アート・レイズの動きは「入居者→大家交渉」の結果次第。先行して屋根を一度確認しておくと提案精度が上がる</li>
+    <li>同一顧客の「Laugh-もみアーチ-26」（アーチ開口工事・見積発行済み）とは別案件。混同しないこと</li>
+  </ul>
+</div>
+
+<div class="footer">
+  自動生成: 案件サマリー（AUTOマーカー方式）｜ data.json を真実の源泉とし、Drive同期後にDriveリンクを付与<br>
+  Laugh-もみもみ雨漏-26
+</div>
+
+</body>
+</html>
