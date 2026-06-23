@@ -4868,12 +4868,47 @@ async function saveToAnkenLedger(opts){
 
   // ── data.json への変更を適用する関数（リトライ時に最新JSONへ再適用するため関数化）──
   // 戻り値: {actionLabel, statusChange:''|'A→B'}
+  let _autoCreateDecision = null; // null=未判定 / true=新規作成して保存 / false=中止
   const applyMutations = (currentJson) => {
     const findIn = (list) => Array.isArray(list) ? list.findIndex(p => p['案件キー'] === ankenKey) : -1;
     let bucket = '案件';
     let idx = findIn(currentJson['案件']);
     if(idx === -1){ idx = findIn(currentJson['中止案件']); bucket = '中止案件'; }
-    if(idx === -1) throw new Error('案件が見つかりません: ' + ankenKey + '\n案件台帳に登録済みの案件キーを入力してください。');
+    if(idx === -1){
+      // 案件台帳に未登録 → この書類から新規案件を作成して保存するか確認（初回のみ・リトライ時は再確認しない）
+      if(_autoCreateDecision === null){
+        _autoCreateDecision = confirm(
+          '案件台帳に「' + ankenKey + '」が未登録です。\n' +
+          'この書類から新規案件を作成して保存しますか？\n\n' +
+          'OK＝新規案件を作成して保存／キャンセル＝中止'
+        );
+      }
+      if(!_autoCreateDecision){
+        throw new Error('案件が見つかりません: ' + ankenKey + '\n案件台帳に登録済みの案件キーを入力してください。');
+      }
+      // 案件キー「顧客略-現場+工事-26」を分解（顧客略=先頭、現場+工事=中間、末尾は年度等）
+      const _p = String(ankenKey).split('-');
+      const _kgaku = _p[0] || '';
+      const _genba = _p.length >= 3 ? _p.slice(1, -1).join('-') : (_p[1] || '');
+      const _newAnken = {
+        '案件キー': ankenKey,
+        '顧客略': _kgaku,
+        '現場+工事': _genba,
+        '正式工事名': (document.getElementById('kojimei')?.value || '').trim(),
+        '施工場所': (document.getElementById('seshubasho')?.value || '').trim(),
+        'ステータス': targetStatus,
+        '元請フラグ': false,
+        '元請名': '',
+        '備考': '見積書プレビューから新規作成（' + new Date().toISOString().slice(0,10) + '）。',
+        '旧案件番号': '',
+        '見積': [], '請求': [], '注文書': [], '契約書': [],
+        '原価': {'労務費':0,'材料費':0,'外注費':0,'経費':0,'合計':0,'件数':0,'最終集計日':''}
+      };
+      if(!Array.isArray(currentJson['案件'])) currentJson['案件'] = [];
+      currentJson['案件'].push(_newAnken);
+      bucket = '案件';
+      idx = currentJson['案件'].length - 1;
+    }
     const target = currentJson[bucket][idx];
 
     // 見積/請求 配列へ追記（同一 書類番号 は上書き更新）
