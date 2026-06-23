@@ -3186,9 +3186,10 @@ function ankenEvents(a) {
 function isOpenState(s) { return s === '未完了' || s === '依頼中' || s === '対応中'; }
 
 // 「最近の動き」フィード: 全案件の最新イベントを1案件1行に集約(積み重ねない)。
-// 未完了(依頼中)の動きがある案件は、その動きを代表イベントに昇格して最上部にピン留めし、
-// TOPIC_WINDOW_DAYS の窓に関係なく常時表示する(振りっぱなしのタスクを埋もれさせない)。
+// 新しい順で TOPIC_WINDOW_DAYS の窓内を表示、足りなければ直近 TOPIC_MIN 件まで補完。
 // 同一案件の過去イベント数は moreCount として保持し、行クリックで案件モーダルの履歴に誘導。
+// ※ 未完了(状態付き)の動き＝「するべきこと」は専用セクション(#sec-todos)が担うため、
+//   ここではピン留めせず、確定した過去の動き・財務イベントの時系列ログに徹する。
 function collectTopics() {
   const all = [];
   (STATE.案件 || []).forEach(a => ankenEvents(a).forEach(e => all.push(e)));
@@ -3196,23 +3197,16 @@ function collectTopics() {
   const byCase = new Map();
   all.forEach(ev => {
     let c = byCase.get(ev.key);
-    if (!c) { c = { rep: ev, open: null, count: 0 }; byCase.set(ev.key, c); }  // rep=最新イベント
+    if (!c) { c = { rep: ev, count: 0 }; byCase.set(ev.key, c); }  // rep=最新イベント
     c.count += 1;
-    if (isOpenState(ev.state) && !c.open) c.open = ev;  // open=最新の未完了イベント
   });
   const cases = [];
-  byCase.forEach(c => {
-    const base = c.open || c.rep;                       // 未完了があれば代表に昇格
-    cases.push({ ...base, open: !!c.open, moreCount: c.count - 1 });
-  });
+  byCase.forEach(c => cases.push({ ...c.rep, moreCount: c.count - 1 }));
   const t0 = new Date(); t0.setHours(0, 0, 0, 0);
-  // 未完了は常時表示・古い順(放置検知を上に)。それ以外は窓内を新しい順、足りなければ直近で補完。
-  const openCases  = cases.filter(c => c.open).sort((x, y) => x.d - y.d);
-  const otherCases = cases.filter(c => !c.open).sort((x, y) => y.d - x.d);
-  const within = otherCases.filter(c => (t0 - c.d) / 86400000 <= TOPIC_WINDOW_DAYS);
-  const recent = within.length >= TOPIC_MIN ? within : otherCases.slice(0, TOPIC_MIN);
-  const fill = recent.slice(0, Math.max(0, TOPIC_MAX - openCases.length));
-  return [...openCases, ...fill];
+  cases.sort((x, y) => y.d - x.d);                     // 新しい順
+  const within = cases.filter(c => (t0 - c.d) / 86400000 <= TOPIC_WINDOW_DAYS);
+  const recent = within.length >= TOPIC_MIN ? within : cases.slice(0, TOPIC_MIN);
+  return recent.slice(0, TOPIC_MAX);
 }
 
 function renderTopics() {
