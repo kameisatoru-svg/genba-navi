@@ -121,7 +121,7 @@
   <!-- ===== W1 中連窓（W850×H850・腰下860） cx=1037 ===== -->
   <circle cx="960" cy="98" r="14" fill="#fff" stroke="#1a2a3a" stroke-width="1.4"/>
   <text x="960" y="103" font-size="12" font-weight="bold" text-anchor="middle">W1</text>
-  <text x="1055" y="93" font-size="12" fill="#222" text-anchor="middle">中連窓（引違い）</text>
+  <text x="1055" y="93" font-size="12" fill="#222" text-anchor="middle">監視窓（中連・引違）</text>
   <text x="1055" y="111" font-size="11" fill="#222" text-anchor="middle">数量 1</text>
   <!-- 窓: 腰下860→y=335, H850→上y=241 -->
   <rect x="990" y="241" width="94" height="94" fill="#eef4f8" stroke="#2c3e50" stroke-width="2"/>
@@ -147,6 +147,6 @@
   <g font-size="10.5" fill="#222">
     <text x="105" y="665">○ 本工事は内装（クロス・床シート・巾木）。建具は既存のため、本リストは開口・寸法の記録（養生・取合い確認用）。</text>
     <text x="105" y="685">○ 寸法・開き勝手・吊元は清書/展開図に一致。記号 D=ドア／W=窓。FL＝床仕上面。姿図の<tspan fill="#2c3e50">一点鎖線（くの字・吊元側センターで折返）＝開き勝手</tspan>、<tspan fill="#1a2a3a">●—＝レバーハンドル位置</tspan>（親子の子扉はハンドル無）。</text>
-    <text x="105" y="705" fill="#c0392b">○ 塗装：撮影室付随の鋼製建具（扉3＝D1/D2/D3・監視窓枠1＝W1想定）を撮影室側片面・枠片面塗装。色 白 G25-90A。塗装日 2026/7/11(土)9時（古賀美装）。本体工事(7/18-19)より前倒しの別日。</text>
+    <text x="105" y="705" fill="#c0392b">○ 塗装：撮影室付随の鋼製建具（扉3＝D1/D2/D3・監視窓枠1＝W1（監視用窓枠））を撮影室側片面・枠片面塗装。色 白 G25-90A。塗装日 2026/7/11(土)9時（古賀美装）。本体工事(7/18-19)より前倒しの別日。</text>
   </g>
 </svg>
