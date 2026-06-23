@@ -3861,7 +3861,14 @@
         "survey.sumpo": "done",
         "survey.memo": "done",
         "prep.tanka": "done",
-        "prep.mat": "done"
+        "prep.mat": "done",
+        "prep.spec": "done",
+        "prep.gyousha": "done",
+        "compose.breakdown": "done",
+        "compose.amount": "done",
+        "compose.review": "done",
+        "submit.send": "done",
+        "submit.followup": "done"
       },
       "動き": [
         {
