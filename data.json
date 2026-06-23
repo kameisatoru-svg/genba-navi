@@ -3363,12 +3363,284 @@
       "現場+工事": "豊後大野市民",
       "正式工事名": "豊後大野市民病院（相談）",
       "施工場所": "大分県豊後大野市",
-      "ステータス": "相談",
+      "ステータス": "見積提出済み",
       "元請フラグ": false,
       "元請名": "",
       "備考": "図面のみ受領。初期段階。2026-06-03 A-1未登録より遡及登録。",
       "旧案件番号": "",
-      "見積": [],
+      "見積": [
+        {
+          "書類番号": "見_第1撮影室_島津-豊後大野市民-26",
+          "発行日": "2026-06-22",
+          "金額": 1851300,
+          "備考": "豊後大野市民病院　第1撮影室　内装工事",
+          "ファイル": "見_第1撮影室_島津-豊後大野市民-26.pdf",
+          "お客様向け番号": "ARM-T013-260622-01",
+          "_genbaDoc": {
+            "v": 1,
+            "savedAt": "2026-06-23T01:30:57.863Z",
+            "docType": "mitsumori",
+            "mode": "group",
+            "shokeihiRate": 10,
+            "shokeihiMode": "rate",
+            "shokeihiFixed": 0,
+            "nebiki": 737,
+            "nebikiLabel": "端数値引き",
+            "hasuNebikiAuto": true,
+            "hasuChousei": 0,
+            "header": {
+              "atena": "株式会社 島津製作所 大分営業所",
+              "mitsumoriNo": "ARM-T013-260622-01",
+              "hakkoDate": "2026-06-22",
+              "shiharaiDate": "",
+              "kojimei": "豊後大野市民病院　第1撮影室　内装工事",
+              "seshubasho": "大分県豊後大野市（豊後大野市民病院）",
+              "koki": "",
+              "ankenKey": "島津-豊後大野市民-26",
+              "fileSuffix": "第1撮影室"
+            },
+            "flatItems": [
+              {
+                "name": "",
+                "qty": "",
+                "unit": "",
+                "price": "",
+                "note": "",
+                "pageBreak": false
+              },
+              {
+                "name": "",
+                "qty": "",
+                "unit": "",
+                "price": "",
+                "note": "",
+                "pageBreak": false
+              },
+              {
+                "name": "",
+                "qty": "",
+                "unit": "",
+                "price": "",
+                "note": "",
+                "pageBreak": false
+              }
+            ],
+            "groupItems": [
+              {
+                "name": "仮設工事",
+                "pageBreak": false,
+                "middleItems": [],
+                "items": [
+                  {
+                    "name": "仮設養生費",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 31000,
+                    "note": ""
+                  },
+                  {
+                    "name": "操作室扉開口部 仮囲い費",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 66000,
+                    "note": "軽鉄下地＋防炎シート"
+                  },
+                  {
+                    "name": "工事発生材処分費",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 35000,
+                    "note": "仮設ボード共"
+                  },
+                  {
+                    "name": "完工クリーニング",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 29000,
+                    "note": ""
+                  }
+                ]
+              },
+              {
+                "name": "解体工事",
+                "pageBreak": false,
+                "middleItems": [],
+                "items": [
+                  {
+                    "name": "床長尺シート剥取",
+                    "qty": 24.1,
+                    "unit": "㎡",
+                    "price": 2200,
+                    "note": "天井は現状のまま"
+                  },
+                  {
+                    "name": "ソフト巾木撤去",
+                    "qty": 18.5,
+                    "unit": "ｍ",
+                    "price": 400,
+                    "note": ""
+                  },
+                  {
+                    "name": "片開き鉛ドア撤去（操作室扉）",
+                    "qty": 1,
+                    "unit": "ヶ所",
+                    "price": 45000,
+                    "note": "枠共"
+                  },
+                  {
+                    "name": "新規操作室扉部分 壁開口費",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 30000,
+                    "note": ""
+                  },
+                  {
+                    "name": "廃材運搬処分費",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 50000,
+                    "note": ""
+                  },
+                  {
+                    "name": "雑材消耗品費",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 12000,
+                    "note": ""
+                  }
+                ]
+              },
+              {
+                "name": "内装仕上げ工事",
+                "pageBreak": false,
+                "middleItems": [],
+                "items": [
+                  {
+                    "name": "床下地調整費",
+                    "qty": 24.1,
+                    "unit": "㎡",
+                    "price": 1500,
+                    "note": ""
+                  },
+                  {
+                    "name": "床長尺シート貼",
+                    "qty": 24.1,
+                    "unit": "㎡",
+                    "price": 6000,
+                    "note": ""
+                  },
+                  {
+                    "name": "壁GP塗装（4面）",
+                    "qty": 73,
+                    "unit": "㎡",
+                    "price": 2800,
+                    "note": "操作室部分補修含む"
+                  },
+                  {
+                    "name": "ソフト巾木貼",
+                    "qty": 23,
+                    "unit": "ｍ",
+                    "price": 700,
+                    "note": "操作室部分補修含む"
+                  },
+                  {
+                    "name": "操作室扉部分 下地補修・鉛入れの上ボード貼",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 105000,
+                    "note": "新規扉廻り補修共"
+                  },
+                  {
+                    "name": "資材運搬費",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 40000,
+                    "note": ""
+                  },
+                  {
+                    "name": "雑材消耗品費",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 12000,
+                    "note": ""
+                  }
+                ]
+              },
+              {
+                "name": "鉛入鋼製建具工事",
+                "pageBreak": false,
+                "middleItems": [],
+                "items": [
+                  {
+                    "name": "鉛入り片開きドア 1.5mmPB（操作室扉）",
+                    "qty": 1,
+                    "unit": "ヶ所",
+                    "price": 389000,
+                    "note": "800×2000"
+                  },
+                  {
+                    "name": "現場取付費",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 90000,
+                    "note": ""
+                  },
+                  {
+                    "name": "資材運搬・搬入費",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 60000,
+                    "note": ""
+                  },
+                  {
+                    "name": "雑材消耗品費",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 10000,
+                    "note": ""
+                  }
+                ]
+              },
+              {
+                "name": "電気設備工事",
+                "pageBreak": false,
+                "middleItems": [],
+                "items": [
+                  {
+                    "name": "スイッチ・コンセント等モール配線脱着費",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 30000,
+                    "note": "概算"
+                  },
+                  {
+                    "name": "操作室用電源移設工事",
+                    "qty": 1,
+                    "unit": "ヶ所",
+                    "price": 26000,
+                    "note": ""
+                  },
+                  {
+                    "name": "資材運搬・搬入費",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 4000,
+                    "note": ""
+                  },
+                  {
+                    "name": "雑材消耗品費",
+                    "qty": 1,
+                    "unit": "式",
+                    "price": 5000,
+                    "note": ""
+                  }
+                ]
+              }
+            ],
+            "groupSummaryItems": []
+          }
+        }
+      ],
       "請求": [],
       "注文書": [],
       "契約書": [],
