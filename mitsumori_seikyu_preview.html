@@ -4870,7 +4870,9 @@ async function saveToAnkenLedger(opts){
   // 戻り値: {actionLabel, statusChange:''|'A→B'}
   let _autoCreateDecision = null; // null=未判定 / true=新規作成して保存 / false=中止
   const applyMutations = (currentJson) => {
-    const findIn = (list) => Array.isArray(list) ? list.findIndex(p => p['案件キー'] === ankenKey) : -1;
+    // 案件キー照合の正規化：前後空白除去＋各種ダッシュをASCIIハイフンに統一（長音符ー/ｰは対象外）
+    const _normKey = s => String(s==null?'':s).trim().replace(/[‐‑‒–—―−－]/g,'-');
+    const findIn = (list) => Array.isArray(list) ? list.findIndex(p => _normKey(p['案件キー']) === _normKey(ankenKey)) : -1;
     let bucket = '案件';
     let idx = findIn(currentJson['案件']);
     if(idx === -1){ idx = findIn(currentJson['中止案件']); bucket = '中止案件'; }
