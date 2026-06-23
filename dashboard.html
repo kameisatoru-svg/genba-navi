@@ -3257,6 +3257,203 @@ function renderTopics() {
   });
 }
 
+/* ============================================================
+   Section 2.4: するべきこと(次のアクション ToDo)
+   案件オブジェクトの「動き」配列のうち、状態が未完了系(未完了/依頼中/対応中)の
+   ものを「するべきこと」として横断収集し、ワンタップ完了ボタン付きで表示する。
+   出どころは通話文字起こし(call-transcriber)が想定する次アクション、または手動追加。
+   完了/追加は data.json を GitHub PUT して反映(auto_push 経由で全端末へ配信)。
+   ============================================================ */
+const TODO_STATE_META = {
+  '未完了': { cls: 'todo-st-todo',  label: '未完了' },
+  '依頼中': { cls: 'todo-st-req',   label: '依頼中' },
+  '対応中': { cls: 'todo-st-doing', label: '対応中' }
+};
+
+// 今日を YYYY-MM-DD で返す
+function isoToday() {
+  const d = new Date();
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+// 全案件の open な「動き」(=するべきこと)を集約。古い順(放置ほど上)。
+function collectTodos() {
+  const todos = [];
+  (STATE.案件 || []).forEach(a => {
+    (a['動き'] || []).forEach((m, idx) => {
+      if (!isOpenState(m['状態'])) return;
+      todos.push({
+        key: a['案件キー'], anken: a, idx,
+        id: m['id'] || '', 日: m['日'] || '', d: parseDate(m['日']),
+        種別: m['種別'] || '対応', 状態: m['状態'], 概要: m['概要'] || '', 由来: m['由来'] || ''
+      });
+    });
+  });
+  // 古い順(放置されているものほど上)。日付なしは末尾。
+  todos.sort((x, y) => (!x.d && !y.d) ? 0 : !x.d ? 1 : !y.d ? -1 : x.d - y.d);
+  return todos;
+}
+
+function renderTodos() {
+  const todos = collectTodos();
+  const badge = $('#todos-badge');
+  if (badge) badge.textContent = todos.length ? `${todos.length}件` : '';
+  if (!todos.length) {
+    replaceSectionBody('#sec-todos',
+      `<div class="todos-empty"><svg class="icon"><use href="#icon-check-circle"/></svg>するべきことはありません</div>`);
+    return;
+  }
+  const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+  const rows = todos.map(t => {
+    const a = t.anken;
+    const koji = a ? (a['正式工事名'] || a['現場+工事'] || '') : '';
+    const sm = TODO_STATE_META[t.状態] || { cls: 'todo-st-todo', label: t.状態 };
+    let age = '';
+    if (t.d) {
+      const days = Math.round((t0 - t.d) / 86400000);
+      const md = `${t.d.getMonth() + 1}/${t.d.getDate()}`;
+      const rel = days <= 0 ? '今日' : days === 1 ? '昨日' : `${days}日経過`;
+      age = `<span class="todo-age${days >= 7 ? ' stale' : ''}">${md}・${rel}</span>`;
+    }
+    const tm = TOPIC_META[t.種別] || {};
+    const src = t.由来
+      ? `<span class="todo-src"><svg class="icon"><use href="#${tm.icon || 'icon-phone'}"/></svg>${escapeHtml(t.由来)}</span>`
+      : '';
+    return `
+      <div class="todo-card ${sm.cls}" data-key="${escapeHtml(t.key)}" data-id="${escapeHtml(t.id)}" data-idx="${t.idx}">
+        <button class="todo-check" type="button" title="完了にする" aria-label="${escapeHtml(t.概要 || t.key)} を完了にする">
+          <svg class="icon"><use href="#icon-check-box"/></svg>
+        </button>
+        <button class="todo-body" type="button" aria-label="${escapeHtml(t.key)} の案件を開く">
+          <div class="todo-action">${escapeHtml(t.概要) || '(内容未記入)'}</div>
+          <div class="todo-meta">
+            <span class="todo-state ${sm.cls}">${sm.label}</span>
+            <span class="todo-kind">${escapeHtml(t.種別)}</span>
+            ${age}
+          </div>
+          <div class="todo-anken">
+            <span class="todo-anken-key">${escapeHtml(t.key)}</span>
+            ${koji ? `<span class="todo-anken-koji">${escapeHtml(koji)}</span>` : ''}
+          </div>
+          ${src}
+        </button>
+      </div>`;
+  }).join('');
+  replaceSectionBody('#sec-todos', `<div class="todos-list">${rows}</div>`);
+  $$('#sec-todos .todo-check').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const card = btn.closest('.todo-card');
+      completeTodo(card.dataset.key, card.dataset.id, parseInt(card.dataset.idx, 10), card);
+    });
+  });
+  $$('#sec-todos .todo-body').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const a = findAnken(btn.closest('.todo-card').dataset.key);
+      if (a) showAnkenModal(a);
+    });
+  });
+}
+
+// 案件オブジェクトを 案件/中止案件 から探す(PUT対象を最新JSON内で再特定するため)
+function findAnkenObjIn(cj, key) {
+  for (const b of ['案件', '中止案件']) {
+    const hit = (cj[b] || []).find(x => x['案件キー'] === key);
+    if (hit) return hit;
+  }
+  return null;
+}
+
+// data.json を取得→mutate(currentJson)で書き換え→PUT する汎用ヘルパー。
+// mutate は currentJson を直接編集し true(成功)/false(対象なし)を返す。成功時はローカルSTATEも更新。
+async function putDataJson(mutate, message) {
+  const pat = getPAT();
+  if (!pat) throw new Error('NO_PAT');
+  const res = await fetch(GH_API, { headers: { Authorization: `token ${pat}`, 'Accept': 'application/vnd.github.v3+json' } });
+  if (res.status === 401) { localStorage.removeItem(PAT_KEY); throw new Error('PAT_INVALID'); }
+  if (!res.ok) throw new Error('取得失敗 ' + res.status);
+  const fileData = await res.json();
+  const sha = fileData.sha;
+  const raw = atob(fileData.content.replace(/\n/g, ''));
+  const bytes = new Uint8Array(raw.length).map((_, i) => raw.charCodeAt(i));
+  const currentJson = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+  if (!mutate(currentJson)) throw new Error('対象が見つかりません');
+  const jsonStr = JSON.stringify(currentJson, null, 2);
+  const encBytes = new TextEncoder().encode(jsonStr);
+  const encChars = Array.from(encBytes).map(b => String.fromCharCode(b)).join('');
+  const putRes = await fetch(GH_API, {
+    method: 'PUT',
+    headers: { Authorization: `token ${pat}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+    body: JSON.stringify({ message, content: btoa(encChars), sha })
+  });
+  if (!putRes.ok) throw new Error('保存失敗 ' + putRes.status);
+  STATE['案件']     = currentJson['案件']     || [];
+  STATE['中止案件'] = currentJson['中止案件'] || [];
+  return currentJson;
+}
+
+// モーダルが対象案件で開いていれば履歴を再描画
+function refreshOpenAnkenModal(ankenKey) {
+  const modal = $('#anken-modal');
+  if (modal && modal.classList.contains('show')) {
+    const a = findAnken(ankenKey);
+    if (a) showAnkenModal(a);
+  }
+}
+
+// するべきこと(動き)を完了にする。id優先、無ければ配列indexで照合。状態を「完了」にし履歴は残す。
+async function completeTodo(ankenKey, todoId, idx, cardEl) {
+  if (!getPAT()) { showPATModal(() => completeTodo(ankenKey, todoId, idx, cardEl)); return; }
+  if (cardEl) cardEl.classList.add('saving');
+  try {
+    await putDataJson((cj) => {
+      const a = findAnkenObjIn(cj, ankenKey);
+      if (!a) return false;
+      const moves = a['動き'] || [];
+      let m = todoId ? moves.find(x => x['id'] === todoId) : null;
+      if (!m && Number.isInteger(idx) && moves[idx]) m = moves[idx];
+      if (!m) return false;
+      m['状態'] = '完了';
+      return true;
+    }, `dashboard: するべきこと完了 ${ankenKey}`);
+    showToast('✓ 完了にしました');
+    renderTodos(); renderTopics(); renderKanban();
+    refreshOpenAnkenModal(ankenKey);
+  } catch (err) {
+    if (err.message === 'PAT_INVALID' || err.message === 'NO_PAT') { showPATModal(() => completeTodo(ankenKey, todoId, idx, cardEl)); return; }
+    logError('completeTodo failed', err);
+    showToast('エラー: ' + err.message);
+    if (cardEl) cardEl.classList.remove('saving');
+  }
+}
+
+// するべきこと(次のアクション)を手動追加。今日の日付で動き配列に未完了として積む。
+async function addTodo(ankenKey, text, kind, btnEl) {
+  text = (text || '').trim();
+  if (!text) { showToast('内容を入力してください'); return; }
+  if (!getPAT()) { showPATModal(() => addTodo(ankenKey, text, kind)); return; }
+  if (btnEl) btnEl.disabled = true;
+  const id = 'todo_' + Date.now().toString(36);
+  try {
+    await putDataJson((cj) => {
+      const a = findAnkenObjIn(cj, ankenKey);
+      if (!a) return false;
+      if (!Array.isArray(a['動き'])) a['動き'] = [];
+      a['動き'].push({ 日: isoToday(), 種別: kind || '対応', 概要: text, 状態: '未完了', id });
+      return true;
+    }, `dashboard: するべきこと追加 ${ankenKey}`);
+    showToast('✓ 追加しました');
+    renderTodos(); renderTopics();
+    refreshOpenAnkenModal(ankenKey);
+  } catch (err) {
+    if (err.message === 'PAT_INVALID' || err.message === 'NO_PAT') { showPATModal(() => addTodo(ankenKey, text, kind)); return; }
+    logError('addTodo failed', err);
+    showToast('エラー: ' + err.message);
+    if (btnEl) btnEl.disabled = false;
+  }
+}
+
 // 指定セクションへスムーズスクロールし、一瞬ハイライトして視線を誘導
 function jumpToSection(sel) {
   const el = document.querySelector(sel);
