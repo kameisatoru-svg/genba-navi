@@ -483,6 +483,85 @@ a { color: inherit; text-decoration: none; }
 .topic-item.is-open { border-left-color: var(--warn); }
 .topic-item.is-open .topic-date b { color: var(--warn); }
 
+/* ----- Section 2.4: するべきこと(次のアクション ToDo) ----- */
+.todos-list { display: flex; flex-direction: column; gap: 8px; }
+.todo-card {
+  display: flex;
+  align-items: stretch;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--todo-color, var(--warn));
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: var(--transition);
+}
+.todo-card:hover { box-shadow: var(--shadow); }
+.todo-card.saving { opacity: .5; pointer-events: none; }
+.todo-st-todo  { --todo-color: var(--warn); }
+.todo-st-req   { --todo-color: var(--info); }
+.todo-st-doing { --todo-color: var(--status-mitsumori); }
+.todo-check {
+  flex: 0 0 auto;
+  width: 46px;
+  border: none;
+  border-right: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-mute);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+}
+.todo-check .icon { width: 24px; height: 24px; }
+.todo-check:hover { background: var(--success); color: #fff; }
+.todo-check:focus-visible { outline: 2px solid var(--success); outline-offset: -2px; }
+.todo-body {
+  flex: 1; min-width: 0;
+  text-align: left;
+  background: none; border: none; font: inherit; color: var(--text);
+  cursor: pointer;
+  padding: 10px 12px;
+}
+.todo-action { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.4; }
+.todo-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.todo-state { font-size: 11px; font-weight: 700; color: #fff; background: var(--todo-color, var(--warn)); border-radius: 9px; padding: 1px 8px; white-space: nowrap; }
+.todo-kind { font-size: 12px; color: var(--text-mute); }
+.todo-age { font-size: 12px; font-family: var(--font-mono); color: var(--text-sub); }
+.todo-age.stale { color: var(--danger); font-weight: 700; }
+.todo-anken { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-top: 3px; }
+.todo-anken-key { font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--primary); word-break: break-all; }
+.todo-anken-koji { font-size: 12px; color: var(--text-sub); }
+.todo-src { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-mute); margin-top: 4px; }
+.todo-src .icon { width: 13px; height: 13px; }
+.todos-empty { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text-mute); font-style: italic; padding: 16px; }
+.todos-empty .icon { width: 20px; height: 20px; color: var(--success); }
+
+/* 案件モーダル: するべきこと追加フォーム + 動き履歴の状態/完了 */
+.anken-todo-add { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.anken-todo-input {
+  flex: 1 1 180px; min-width: 0;
+  padding: 7px 10px; font: inherit; font-size: 14px;
+  border: 1px solid var(--border); border-radius: 6px; background: var(--card); color: var(--text);
+}
+.anken-todo-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(212,165,116,.2); }
+.anken-todo-kind { flex: 0 0 auto; padding: 7px 8px; font: inherit; font-size: 13px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); color: var(--text); }
+.anken-todo-add-btn {
+  flex: 0 0 auto; padding: 7px 14px; font: inherit; font-weight: 700; font-size: 14px;
+  border: none; border-radius: 6px; background: var(--accent); color: #fff; cursor: pointer;
+}
+.anken-todo-add-btn:hover { filter: brightness(1.05); }
+.anken-todo-add-btn:disabled { opacity: .5; cursor: default; }
+.anken-hist-state { font-size: 10px; font-weight: 700; border-radius: 8px; padding: 0 6px; white-space: nowrap; margin-left: 6px; }
+.anken-hist-state.open { background: var(--warn); color: #fff; }
+.anken-hist-state.done { background: var(--success); color: #fff; }
+.anken-hist-done {
+  margin-left: auto; flex: 0 0 auto; align-self: center;
+  font-size: 11px; font-weight: 700; padding: 3px 9px;
+  border: 1px solid var(--success); border-radius: 12px; background: var(--card); color: var(--success); cursor: pointer;
+  white-space: nowrap;
+}
+.anken-hist-done:hover { background: var(--success); color: #fff; }
+.anken-hist-item.is-open { border-left-color: var(--warn); background: rgba(243,156,18,.06); }
+
 /* 案件モーダル: 動き履歴 */
 .anken-hist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .anken-hist-item {
