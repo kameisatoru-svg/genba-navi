@@ -4272,25 +4272,43 @@ function showAnkenModal(a) {
        </div>`
     : '';
 
-  // 動き履歴(財務マイルストーン＋現場活動「動き」を時系列降順で表示)
+  // するべきこと(次のアクション)追加フォーム + 動き履歴(財務＋現場活動を時系列降順で表示)
   const histEvents = ankenEvents(a).sort((x, y) => y.d - x.d);
-  const histHtml = histEvents.length
-    ? `<div class="modal-section">
-         <div class="modal-section-title">動き履歴 <span style="color:var(--text-mute);font-weight:400;letter-spacing:normal;text-transform:none;">(${histEvents.length}件)</span></div>
-         <ul class="anken-hist">
-           ${histEvents.map(e => {
-             const m = TOPIC_META[e.type] || (e.move ? { icon: 'icon-refresh' } : {});
-             const md = `${e.d.getMonth() + 1}/${e.d.getDate()}`;
-             const right = e.move ? escapeHtml(e.desc || '') : (e.amt ? formatYen(e.amt) : '');
-             return `<li class="anken-hist-item ${e.move ? 'is-move' : 'is-fin'}">
-               <span class="anken-hist-date">${e.d.getFullYear()}<b>${md}</b></span>
-               <svg class="icon anken-hist-icon"><use href="#${m.icon || 'icon-clock'}"/></svg>
-               <span class="anken-hist-main"><span class="anken-hist-type">${escapeHtml(e.type)}</span>${right ? `<span class="anken-hist-desc">${right}</span>` : ''}</span>
-             </li>`;
-           }).join('')}
-         </ul>
-       </div>`
-    : '';
+  const histListHtml = histEvents.map(e => {
+    const m = TOPIC_META[e.type] || (e.move ? { icon: 'icon-refresh' } : {});
+    const md = `${e.d.getMonth() + 1}/${e.d.getDate()}`;
+    const right = e.move ? escapeHtml(e.desc || '') : (e.amt ? formatYen(e.amt) : '');
+    const open = e.move && isOpenState(e.state);
+    const done = e.move && e.state === '完了';
+    const stateChip = open ? `<span class="anken-hist-state open">${escapeHtml(e.state)}</span>`
+                    : done ? `<span class="anken-hist-state done">完了</span>` : '';
+    const doneBtn = open
+      ? `<button class="anken-hist-done" type="button" data-key="${escapeHtml(a['案件キー'])}" data-id="${escapeHtml(e.id)}" data-idx="${e.mvIdx == null ? '' : e.mvIdx}">完了にする</button>`
+      : '';
+    return `<li class="anken-hist-item ${e.move ? 'is-move' : 'is-fin'} ${open ? 'is-open' : ''}">
+      <span class="anken-hist-date">${e.d.getFullYear()}<b>${md}</b></span>
+      <svg class="icon anken-hist-icon"><use href="#${m.icon || 'icon-clock'}"/></svg>
+      <span class="anken-hist-main"><span class="anken-hist-type">${escapeHtml(e.type)}${stateChip}</span>${right ? `<span class="anken-hist-desc">${right}</span>` : ''}</span>
+      ${doneBtn}
+    </li>`;
+  }).join('');
+  const histHtml = `<div class="modal-section">
+       <div class="modal-section-title">するべきこと・動き履歴 ${histEvents.length ? `<span style="color:var(--text-mute);font-weight:400;letter-spacing:normal;text-transform:none;">(${histEvents.length}件)</span>` : ''}</div>
+       <div class="anken-todo-add">
+         <input type="text" class="anken-todo-input" id="anken-todo-input" placeholder="次にやること（例：塗装屋に色番号を確認）" maxlength="120">
+         <select class="anken-todo-kind" id="anken-todo-kind">
+           <option value="連絡">連絡</option>
+           <option value="対応" selected>対応</option>
+           <option value="見積依頼">見積依頼</option>
+           <option value="現地調査">現地調査</option>
+           <option value="図面">図面</option>
+           <option value="打合せ">打合せ</option>
+           <option value="工程確定">工程確定</option>
+         </select>
+         <button class="anken-todo-add-btn" id="anken-todo-add-btn" type="button">＋ 追加</button>
+       </div>
+       ${histEvents.length ? `<ul class="anken-hist">${histListHtml}</ul>` : `<div style="color:var(--text-mute);font-size:13px;padding:2px 0;">動きはまだありません</div>`}
+     </div>`;
 
   // チェックセクション(看板のチェック状態を編集)
   const checkHtml = renderModalCheckSection(a);
@@ -4392,6 +4410,21 @@ function showAnkenModal(a) {
 
   // チェックセクションのイベント
   bindModalCheckHandlers(a);
+
+  // するべきこと: 追加フォーム
+  $('#anken-todo-add-btn')?.addEventListener('click', () => {
+    addTodo(a['案件キー'], $('#anken-todo-input')?.value, $('#anken-todo-kind')?.value, $('#anken-todo-add-btn'));
+  });
+  $('#anken-todo-input')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); addTodo(a['案件キー'], e.target.value, $('#anken-todo-kind')?.value, $('#anken-todo-add-btn')); }
+  });
+  // するべきこと: 履歴内の「完了にする」
+  $$('#anken-modal-body .anken-hist-done').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = btn.dataset.idx === '' ? NaN : parseInt(btn.dataset.idx, 10);
+      completeTodo(btn.dataset.key, btn.dataset.id, idx, null);
+    });
+  });
 
   // 顧客リンク → 取引先モーダル
   $$('#anken-modal-body .anken-partner-link').forEach(el => {
