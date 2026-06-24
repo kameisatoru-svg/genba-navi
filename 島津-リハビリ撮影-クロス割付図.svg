@@ -239,7 +239,7 @@
 
   <!-- ============ 合計・注記 ============ -->
   <g>
-    <text x="290" y="903" font-size="12" fill="#333">○ 壁クロス正味 ≒ <tspan font-weight="bold">49㎡</tspan>（見_改2）／天井 ≒ <tspan font-weight="bold">20㎡</tspan>。切寸計の発注目安 計 ≒ <tspan font-weight="bold">81m</tspan>。各品番は <tspan font-weight="bold">50m乱×1本</tspan>で充足（切売りなら上表m）。</text>
+    <text x="290" y="903" font-size="12" fill="#333">○ 壁クロス正味 ≒ <tspan font-weight="bold">49㎡</tspan>（見_改2）／天井 ≒ <tspan font-weight="bold">20㎡</tspan>。切寸計 ≒ <tspan font-weight="bold">83m</tspan>（壁61＋天井22）／発注目安 計 ≒ <tspan font-weight="bold">91m</tspan>。各品番とも <tspan font-weight="bold">50m乱×1本</tspan>で充足（切売りなら上表m）。</text>
 
     <text x="290" y="930" font-size="11.5" font-weight="bold" fill="#9a5a00">※ 発注前の確認事項</text>
     <text x="290" y="949" font-size="11" fill="#9a5a00">・柄合わせ要：A面 FE-76751(タテ642)・D面 FE-76728(タテ321ステップ)＝各短冊の切寸をリピート倍数へ切上済（上表に反映）。</text>
