@@ -1,197 +1,92 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1485 1050" font-family="'Noto Sans CJK JP','Noto Sans JP','Yu Gothic','Meiryo',sans-serif">
-<defs>
-<marker id="dimS" markerWidth="10" markerHeight="10" refX="2" refY="5" orient="auto"><path d="M8,2 L2,5 L8,8" fill="none" stroke="#c0392b" stroke-width="1"/></marker>
-<marker id="dimE" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M2,2 L8,5 L2,8" fill="none" stroke="#c0392b" stroke-width="1"/></marker>
-<pattern id="col" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="#d4dde4"/><line x1="0" y1="0" x2="0" y2="7" stroke="#7e98a8" stroke-width="1.4"/></pattern>
-<pattern id="colside" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="7" height="7" fill="#e7eef3"/><line x1="0" y1="0" x2="0" y2="7" stroke="#9bb3c2" stroke-width="1.1"/></pattern>
-</defs>
-<text x="32" y="40" font-size="22" font-weight="bold" fill="#1a2a3a">大分リハビリテーション病院 一般撮影室 壁・天井クロス割付図（サンゲツ FE）</text>
-<text x="32" y="61" font-size="12.5" fill="#555">壁＝縦貼り（短冊 巾920×高さCH2790＋上下しろ）／天井＝横流れ／開口控除・各面FE品番／B面は壁柱を両側面とも巻込んで展開／寸法mm　A4横</text>
-<text x="32.0" y="97.0" font-size="11.5" font-weight="bold" fill="#a8600a">A面 操作室側　FE-76751</text>
-<text x="32.0" y="111.0" font-size="9.5" fill="#9a6a1a">縦貼り4短冊／柄合わせ要(タテ642)</text>
-<rect x="32.0" y="120.0" width="264.1" height="203.7" fill="#eaf3fa" stroke="#2c3e50" stroke-width="2.2"/>
-<rect x="99.2" y="120.0" width="67.2" height="203.7" fill="#dceaf5"/>
-<rect x="233.5" y="120.0" width="62.6" height="203.7" fill="#dceaf5"/>
-<line x1="99.2" y1="120.0" x2="99.2" y2="323.7" stroke="#c0392b" stroke-width="1" stroke-dasharray="6 3"/>
-<line x1="166.3" y1="120.0" x2="166.3" y2="323.7" stroke="#c0392b" stroke-width="1" stroke-dasharray="6 3"/>
-<line x1="233.5" y1="120.0" x2="233.5" y2="323.7" stroke="#c0392b" stroke-width="1" stroke-dasharray="6 3"/>
-<rect x="111.4" y="198.8" width="62.0" height="62.0" fill="#fff" stroke="#2a6da3" stroke-width="1.3"/>
-<text x="142.4" y="232.9" font-size="8" fill="#2a6da3" text-anchor="middle">中連窓850</text>
-<rect x="218.0" y="175.8" width="70.8" height="147.8" fill="#fff" stroke="#e8932e" stroke-width="1.3"/>
-<text x="253.4" y="252.8" font-size="8" fill="#e8932e" text-anchor="middle">ドア970</text>
-<text x="65.6" y="132.0" font-size="8.5" fill="#c0392b" text-anchor="middle">①</text>
-<text x="132.7" y="132.0" font-size="8.5" fill="#c0392b" text-anchor="middle">②</text>
-<text x="199.9" y="132.0" font-size="8.5" fill="#c0392b" text-anchor="middle">③</text>
-<text x="264.8" y="132.0" font-size="8.5" fill="#c0392b" text-anchor="middle">④</text>
-<line x1="32.0" y1="343.7" x2="296.1" y2="343.7" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
-<text x="164.1" y="339.7" font-size="9.5" fill="#c0392b" text-anchor="middle">3618</text>
-<line x1="308.1" y1="120.0" x2="308.1" y2="323.7" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
-<text x="301.1" y="221.8" font-size="9.5" fill="#c0392b" transform="rotate(-90 301.1 221.8)" text-anchor="middle">2790</text>
-<text x="322.1" y="97.0" font-size="11.5" font-weight="bold" fill="#a8600a">B面 空室側　FE-76109</text>
-<text x="322.1" y="111.0" font-size="9.5" fill="#9a6a1a">縦貼り7短冊／壁柱を両側面とも巻込→展開5991</text>
-<rect x="322.1" y="120.0" width="437.3" height="203.7" fill="#eaf3fa" stroke="#2c3e50" stroke-width="2.2"/>
-<rect x="389.3" y="120.0" width="67.2" height="203.7" fill="#dceaf5"/>
-<rect x="523.6" y="120.0" width="67.2" height="203.7" fill="#dceaf5"/>
-<rect x="657.9" y="120.0" width="67.2" height="203.7" fill="#dceaf5"/>
-<line x1="389.3" y1="120.0" x2="389.3" y2="323.7" stroke="#c0392b" stroke-width="1" stroke-dasharray="6 3"/>
-<line x1="456.4" y1="120.0" x2="456.4" y2="323.7" stroke="#c0392b" stroke-width="1" stroke-dasharray="6 3"/>
-<line x1="523.6" y1="120.0" x2="523.6" y2="323.7" stroke="#c0392b" stroke-width="1" stroke-dasharray="6 3"/>
-<line x1="590.8" y1="120.0" x2="590.8" y2="323.7" stroke="#c0392b" stroke-width="1" stroke-dasharray="6 3"/>
-<line x1="657.9" y1="120.0" x2="657.9" y2="323.7" stroke="#c0392b" stroke-width="1" stroke-dasharray="6 3"/>
-<line x1="725.1" y1="120.0" x2="725.1" y2="323.7" stroke="#c0392b" stroke-width="1" stroke-dasharray="6 3"/>
-<rect x="416.2" y="120.0" width="33.5" height="203.7" fill="url(#colside)" stroke="#2c3e50" stroke-width="0.8"/>
-<rect x="449.7" y="120.0" width="48.9" height="203.7" fill="url(#col)" stroke="#2c3e50" stroke-width="0.8"/>
-<rect x="498.6" y="120.0" width="33.5" height="203.7" fill="url(#colside)" stroke="#2c3e50" stroke-width="0.8"/>
-<text x="474.2" y="201.5" font-size="8.5" fill="#2c3e50" text-anchor="middle" font-weight="bold">壁柱</text>
-<text x="474.2" y="212.5" font-size="7.5" fill="#2c3e50" text-anchor="middle">前面670</text>
-<text x="433.0" y="266.6" font-size="7" fill="#5b6f80" text-anchor="middle" transform="rotate(-90 433.0 266.6)">側面459</text>
-<text x="515.4" y="266.6" font-size="7" fill="#5b6f80" text-anchor="middle" transform="rotate(-90 515.4 266.6)">側面459</text>
-<rect x="441.3" y="175.8" width="65.7" height="147.8" fill="#fff" fill-opacity="0.92" stroke="#e8932e" stroke-width="1.3"/>
-<text x="474.2" y="264.5" font-size="8" fill="#e8932e" text-anchor="middle">ドア900</text>
-<text x="355.7" y="132.0" font-size="8.5" fill="#c0392b" text-anchor="middle">①</text>
-<text x="422.9" y="132.0" font-size="8.5" fill="#c0392b" text-anchor="middle">②</text>
-<text x="490.0" y="132.0" font-size="8.5" fill="#c0392b" text-anchor="middle">③</text>
-<text x="557.2" y="132.0" font-size="8.5" fill="#c0392b" text-anchor="middle">④</text>
-<text x="624.3" y="132.0" font-size="8.5" fill="#c0392b" text-anchor="middle">⑤</text>
-<text x="691.5" y="132.0" font-size="8.5" fill="#c0392b" text-anchor="middle">⑥</text>
-<text x="742.3" y="132.0" font-size="8.5" fill="#c0392b" text-anchor="middle">⑦</text>
-<line x1="322.1" y1="343.7" x2="759.5" y2="343.7" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
-<text x="540.8" y="339.7" font-size="9.5" fill="#c0392b" text-anchor="middle">5991</text>
-<text x="785.5" y="97.0" font-size="11.5" font-weight="bold" fill="#a8600a">C面 廊下側　FE-76251</text>
-<text x="785.5" y="111.0" font-size="9.5" fill="#9a6a1a">縦貼り4短冊／無地貼可</text>
-<rect x="785.5" y="120.0" width="264.1" height="203.7" fill="#eaf3fa" stroke="#2c3e50" stroke-width="2.2"/>
-<rect x="852.6" y="120.0" width="67.2" height="203.7" fill="#dceaf5"/>
-<rect x="986.9" y="120.0" width="62.6" height="203.7" fill="#dceaf5"/>
-<line x1="852.6" y1="120.0" x2="852.6" y2="323.7" stroke="#c0392b" stroke-width="1" stroke-dasharray="6 3"/>
-<line x1="919.8" y1="120.0" x2="919.8" y2="323.7" stroke="#c0392b" stroke-width="1" stroke-dasharray="6 3"/>
-<line x1="986.9" y1="120.0" x2="986.9" y2="323.7" stroke="#c0392b" stroke-width="1" stroke-dasharray="6 3"/>
-<rect x="949.0" y="175.8" width="93.4" height="147.8" fill="#fff" stroke="#e8932e" stroke-width="1.3"/>
-<text x="995.8" y="252.8" font-size="8" fill="#e8932e" text-anchor="middle">親子ドア1280</text>
-<text x="819.0" y="132.0" font-size="8.5" fill="#c0392b" text-anchor="middle">①</text>
-<text x="886.2" y="132.0" font-size="8.5" fill="#c0392b" text-anchor="middle">②</text>
-<text x="953.4" y="132.0" font-size="8.5" fill="#c0392b" text-anchor="middle">③</text>
-<text x="1018.3" y="132.0" font-size="8.5" fill="#c0392b" text-anchor="middle">④</text>
-<line x1="785.5" y1="343.7" x2="1049.6" y2="343.7" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
-<text x="917.5" y="339.7" font-size="9.5" fill="#c0392b" text-anchor="middle">3618</text>
-<text x="1075.6" y="97.0" font-size="11.5" font-weight="bold" fill="#a8600a">D面 受付側　FE-76728</text>
-<text x="1075.6" y="111.0" font-size="9.5" fill="#9a6a1a">縦貼り6短冊／ステップ柄合わせ要(タテ321)</text>
-<rect x="1075.6" y="120.0" width="370.3" height="203.7" fill="#eaf3fa" stroke="#2c3e50" stroke-width="2.2"/>
-<rect x="1142.7" y="120.0" width="67.2" height="203.7" fill="#dceaf5"/>
-<rect x="1277.1" y="120.0" width="67.2" height="203.7" fill="#dceaf5"/>
-<rect x="1411.4" y="120.0" width="34.5" height="203.7" fill="#dceaf5"/>
-<line x1="1142.7" y1="120.0" x2="1142.7" y2="323.7" stroke="#c0392b" stroke-width="1" stroke-dasharray="6 3"/>
-<line x1="1209.9" y1="120.0" x2="1209.9" y2="323.7" stroke="#c0392b" stroke-width="1" stroke-dasharray="6 3"/>
-<line x1="1277.1" y1="120.0" x2="1277.1" y2="323.7" stroke="#c0392b" stroke-width="1" stroke-dasharray="6 3"/>
-<line x1="1344.2" y1="120.0" x2="1344.2" y2="323.7" stroke="#c0392b" stroke-width="1" stroke-dasharray="6 3"/>
-<line x1="1411.4" y1="120.0" x2="1411.4" y2="323.7" stroke="#c0392b" stroke-width="1" stroke-dasharray="6 3"/>
-<text x="1109.2" y="132.0" font-size="8.5" fill="#c0392b" text-anchor="middle">①</text>
-<text x="1176.3" y="132.0" font-size="8.5" fill="#c0392b" text-anchor="middle">②</text>
-<text x="1243.5" y="132.0" font-size="8.5" fill="#c0392b" text-anchor="middle">③</text>
-<text x="1310.6" y="132.0" font-size="8.5" fill="#c0392b" text-anchor="middle">④</text>
-<text x="1377.8" y="132.0" font-size="8.5" fill="#c0392b" text-anchor="middle">⑤</text>
-<text x="1428.6" y="132.0" font-size="8.5" fill="#c0392b" text-anchor="middle">⑥</text>
-<line x1="1075.6" y1="343.7" x2="1445.9" y2="343.7" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
-<text x="1260.7" y="339.7" font-size="9.5" fill="#c0392b" text-anchor="middle">5073</text>
-<text x="32" y="456" font-size="13" font-weight="bold" fill="#a8600a">天井　FE-76202（横流れ）</text>
-<rect x="32" y="470" width="171.9" height="241.0" fill="#eef6f0" stroke="#2c3e50" stroke-width="2"/>
-<rect x="32" y="513.7" width="171.9" height="43.7" fill="#e2efe5"/>
-<rect x="32" y="601.1" width="171.9" height="43.7" fill="#e2efe5"/>
-<rect x="32" y="688.5" width="171.9" height="22.5" fill="#e2efe5"/>
-<line x1="32" y1="513.7" x2="203.9" y2="513.7" stroke="#7aa37d" stroke-width="1" stroke-dasharray="5 3"/>
-<line x1="32" y1="557.4" x2="203.9" y2="557.4" stroke="#7aa37d" stroke-width="1" stroke-dasharray="5 3"/>
-<line x1="32" y1="601.1" x2="203.9" y2="601.1" stroke="#7aa37d" stroke-width="1" stroke-dasharray="5 3"/>
-<line x1="32" y1="644.8" x2="203.9" y2="644.8" stroke="#7aa37d" stroke-width="1" stroke-dasharray="5 3"/>
-<line x1="32" y1="688.5" x2="203.9" y2="688.5" stroke="#7aa37d" stroke-width="1" stroke-dasharray="5 3"/>
-<text x="25" y="494.9" font-size="8" fill="#5a7a5d" text-anchor="end">①</text>
-<text x="25" y="538.6" font-size="8" fill="#5a7a5d" text-anchor="end">②</text>
-<text x="25" y="582.2" font-size="8" fill="#5a7a5d" text-anchor="end">③</text>
-<text x="25" y="626.0" font-size="8" fill="#5a7a5d" text-anchor="end">④</text>
-<text x="25" y="669.6" font-size="8" fill="#5a7a5d" text-anchor="end">⑤</text>
-<text x="25" y="702.7" font-size="8" fill="#5a7a5d" text-anchor="end">⑥</text>
-<line x1="32.0" y1="729.0" x2="203.9" y2="729.0" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
-<text x="117.9" y="725.0" font-size="9.5" fill="#c0392b" text-anchor="middle">3618</text>
-<line x1="215.9" y1="470.0" x2="215.9" y2="711.0" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
-<text x="208.9" y="590.5" font-size="9.5" fill="#c0392b" transform="rotate(-90 208.9 590.5)" text-anchor="middle">5073</text>
-<text x="117.9" y="751.0" font-size="9.5" fill="#555" text-anchor="middle">920×6帯（3618方向＝横に通す）</text>
-<text x="32" y="788" font-size="11.5" font-weight="bold" fill="#2c3e50">B面 壁柱の巻込（平面）</text>
-<line x1="32" y1="818" x2="252" y2="818" stroke="#2c3e50" stroke-width="3"/>
-<rect x="127" y="818" width="50" height="38" fill="url(#col)" stroke="#2c3e50" stroke-width="1.2"/>
-<path d="M32,814 L127,814 L127,860 L177,860 L177,814 L252,814" fill="none" stroke="#c0392b" stroke-width="1.6"/>
-<text x="152.0" y="840.0" font-size="8" fill="#2c3e50" text-anchor="middle">柱670</text>
-<text x="124.0" y="872.0" font-size="8" fill="#c0392b" text-anchor="end">側459</text>
-<text x="180.0" y="872.0" font-size="8" fill="#c0392b" text-anchor="start">側459</text>
-<text x="32" y="890" font-size="9.5" fill="#333">展開長 ＝ 5073 ＋ 459×2 ＝ <tspan font-weight="bold" fill="#c0392b">5991</tspan></text>
-<text x="32" y="906" font-size="9.5" fill="#333">920巾 → ceil(5991/920) ＝ <tspan font-weight="bold" fill="#c0392b">7短冊</tspan>（6→7）</text>
-<text x="32" y="922" font-size="8.5" fill="#888">赤線＝クロスが柱を巻込んで通る面</text>
-<text x="330" y="418" font-size="14" font-weight="bold" fill="#a8600a">■ 品番別 クロス発注数量（920巾／切寸＝CH2790＋上下しろ100・柄ありはリピート倍数に切上）</text>
-<rect x="330" y="430" width="1123" height="254" fill="#fff" stroke="#a8600a" stroke-width="1.2"/>
-<rect x="330" y="430" width="1123" height="34" fill="#fdf0e2"/>
-<line x1="442.0" y1="430" x2="442.0" y2="684" stroke="#caa36a" stroke-width="0.8"/>
-<line x1="592.0" y1="430" x2="592.0" y2="684" stroke="#caa36a" stroke-width="0.8"/>
-<line x1="672.0" y1="430" x2="672.0" y2="684" stroke="#caa36a" stroke-width="0.8"/>
-<line x1="754.0" y1="430" x2="754.0" y2="684" stroke="#caa36a" stroke-width="0.8"/>
-<line x1="922.0" y1="430" x2="922.0" y2="684" stroke="#caa36a" stroke-width="0.8"/>
-<line x1="1030.0" y1="430" x2="1030.0" y2="684" stroke="#caa36a" stroke-width="0.8"/>
-<line x1="1146.0" y1="430" x2="1146.0" y2="684" stroke="#caa36a" stroke-width="0.8"/>
-<line x1="330" y1="464" x2="1453" y2="464" stroke="#caa36a" stroke-width="0.8"/>
-<line x1="330" y1="508" x2="1453" y2="508" stroke="#caa36a" stroke-width="0.8"/>
-<line x1="330" y1="552" x2="1453" y2="552" stroke="#caa36a" stroke-width="0.8"/>
-<line x1="330" y1="596" x2="1453" y2="596" stroke="#caa36a" stroke-width="0.8"/>
-<line x1="330" y1="640" x2="1453" y2="640" stroke="#caa36a" stroke-width="0.8"/>
-<text x="386.0" y="452" font-size="10.5" font-weight="bold" fill="#7a4a00" text-anchor="middle">品番</text>
-<text x="517.0" y="452" font-size="10.5" font-weight="bold" fill="#7a4a00" text-anchor="middle">面・隣接室</text>
-<text x="632.0" y="452" font-size="10.5" font-weight="bold" fill="#7a4a00" text-anchor="middle">貼り方</text>
-<text x="713.0" y="452" font-size="10.5" font-weight="bold" fill="#7a4a00" text-anchor="middle">短冊/帯</text>
-<text x="838.0" y="452" font-size="10.5" font-weight="bold" fill="#7a4a00" text-anchor="middle">1本切寸(柄込)</text>
-<text x="976.0" y="452" font-size="10.5" font-weight="bold" fill="#7a4a00" text-anchor="middle">切寸計</text>
-<text x="1088.0" y="452" font-size="10.5" font-weight="bold" fill="#7a4a00" text-anchor="middle">発注目安</text>
-<text x="1299.5" y="452" font-size="10.5" font-weight="bold" fill="#7a4a00" text-anchor="middle">柄合わせ</text>
-<text x="386.0" y="490.0" font-size="11" fill="#333" font-weight="bold" text-anchor="middle">FE-76751</text>
-<text x="517.0" y="490.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">A面 操作室側</text>
-<text x="632.0" y="490.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">縦貼り</text>
-<text x="713.0" y="490.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">4</text>
-<text x="838.0" y="490.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">642×5＝3,210</text>
-<text x="976.0" y="490.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">12.8m</text>
-<text x="1088.0" y="490.0" font-size="11" fill="#333" font-weight="bold" text-anchor="middle">14m</text>
-<text x="1299.5" y="490.0" font-size="11" fill="#c0392b" font-weight="normal" text-anchor="middle">要（タテ642）</text>
-<text x="386.0" y="534.0" font-size="11" fill="#333" font-weight="bold" text-anchor="middle">FE-76109</text>
-<text x="517.0" y="534.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">B面 空室側</text>
-<text x="632.0" y="534.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">縦貼り</text>
-<text x="713.0" y="534.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">7</text>
-<text x="838.0" y="534.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">2,890</text>
-<text x="976.0" y="534.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">20.2m</text>
-<text x="1088.0" y="534.0" font-size="11" fill="#333" font-weight="bold" text-anchor="middle">22m</text>
-<text x="1299.5" y="534.0" font-size="11" fill="#666" font-weight="normal" text-anchor="middle">不要（柱巻込含む）</text>
-<text x="386.0" y="578.0" font-size="11" fill="#333" font-weight="bold" text-anchor="middle">FE-76251</text>
-<text x="517.0" y="578.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">C面 廊下側</text>
-<text x="632.0" y="578.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">縦貼り</text>
-<text x="713.0" y="578.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">4</text>
-<text x="838.0" y="578.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">2,890</text>
-<text x="976.0" y="578.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">11.6m</text>
-<text x="1088.0" y="578.0" font-size="11" fill="#333" font-weight="bold" text-anchor="middle">13m</text>
-<text x="1299.5" y="578.0" font-size="11" fill="#666" font-weight="normal" text-anchor="middle">不要（無地貼可）</text>
-<text x="386.0" y="622.0" font-size="11" fill="#333" font-weight="bold" text-anchor="middle">FE-76728</text>
-<text x="517.0" y="622.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">D面 受付側</text>
-<text x="632.0" y="622.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">縦貼り</text>
-<text x="713.0" y="622.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">6</text>
-<text x="838.0" y="622.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">321×10＝3,210</text>
-<text x="976.0" y="622.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">19.3m</text>
-<text x="1088.0" y="622.0" font-size="11" fill="#333" font-weight="bold" text-anchor="middle">21m</text>
-<text x="1299.5" y="622.0" font-size="11" fill="#c0392b" font-weight="normal" text-anchor="middle">要（ステップ321）</text>
-<text x="386.0" y="666.0" font-size="11" fill="#333" font-weight="bold" text-anchor="middle">FE-76202</text>
-<text x="517.0" y="666.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">天井</text>
-<text x="632.0" y="666.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">横流れ</text>
-<text x="713.0" y="666.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">6帯</text>
-<text x="838.0" y="666.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">帯長3,618</text>
-<text x="976.0" y="666.0" font-size="11" fill="#333" font-weight="normal" text-anchor="middle">21.7m</text>
-<text x="1088.0" y="666.0" font-size="11" fill="#333" font-weight="bold" text-anchor="middle">24m</text>
-<text x="1299.5" y="666.0" font-size="11" fill="#666" font-weight="normal" text-anchor="middle">不要</text>
-<text x="330" y="714" font-size="12" fill="#333">○ 壁クロス正味 ≒ <tspan font-weight="bold">49㎡</tspan>（見_改2）＋柱巻込分 ≒ +2.6㎡／天井 ≒ <tspan font-weight="bold">20㎡</tspan>。切寸計 ≒ <tspan font-weight="bold">86m</tspan>／発注目安 計 ≒ <tspan font-weight="bold">94m</tspan>。各品番とも <tspan font-weight="bold">50m乱×1本</tspan>で充足（切売りなら上表m）。</text>
-<text x="330" y="736.0" font-size="11.5" font-weight="bold" fill="#9a5a00">※ 発注前の確認事項</text>
-<text x="330" y="755.0" font-size="10.8" fill="#9a5a00">★ B面 壁柱：柱(670幅・室内へ突出459)を両側面ごと巻き込むため、展開長＝5073＋459×2＝5991。920巾で 6→7短冊 に増加（本図反映済）。柱前面670＋両側面459×2＝計1588を1面のクロスで通し貼り。</text>
-<text x="330" y="774.0" font-size="10.8" fill="#9a5a00">・柄合わせ要：A面 FE-76751(タテ642)・D面 FE-76728(タテ321ステップ)＝各短冊の切寸をリピート倍数へ切上済（上表に反映）。</text>
-<text x="330" y="793.0" font-size="10.8" fill="#9a5a00">・FE-76728 はステップ(半割れ)柄＝隣接短冊を½リピートずらすため、端短冊で +½リピート程度のロスを別途見込む。</text>
-<text x="330" y="812.0" font-size="10.8" fill="#9a5a00">・短冊本数は開口(窓・ドア)上も通しで取り、開口部は現場カット＝保守的な通し本数。端短冊は入隅で回す/逃がす。</text>
-<text x="330" y="831.0" font-size="10.8" fill="#9a5a00">・入隅/出隅の回し分、天井ルーバー(エアー吹出)まわりの開口控除・カットは別途加減。無地貼可：C面 FE-76251／リピート無：B面 FE-76109・天井 FE-76202＝柄合わせ不要。</text>
-<text x="330" y="854.0" font-size="10.5" fill="#888">寸法は清書基準・概略。割付・数量は発注前にサンゲツ在庫・ロット・巾(92cm)・50m乱単位を最終確認すること。</text>
+<defs><marker id="dimS" markerWidth="11" markerHeight="11" refX="2" refY="5" orient="auto"><path d="M8,2 L2,5 L8,8" fill="none" stroke="#c0392b" stroke-width="1.1"/></marker><marker id="dimE" markerWidth="11" markerHeight="11" refX="8" refY="5" orient="auto"><path d="M2,2 L8,5 L2,8" fill="none" stroke="#c0392b" stroke-width="1.1"/></marker><pattern id="col" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#d4dde4"/><line x1="0" y1="0" x2="0" y2="8" stroke="#5f7c8c" stroke-width="1.6"/></pattern><pattern id="colside" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="8" height="8" fill="#e7eef3"/><line x1="0" y1="0" x2="0" y2="8" stroke="#7e98a8" stroke-width="1.3"/></pattern></defs>
+<text x="32" y="42" font-size="22" font-weight="bold" fill="#1a2a3a">大分リハビリテーション病院 一般撮影室 壁・天井クロス割付図① 展開図（サンゲツ FE）</text>
+<text x="32" y="65" font-size="13" fill="#555">壁＝縦貼り（短冊 巾920×高さCH2790＋上下しろ）／開口は控除し現場カット／B面は壁柱を両側面とも巻込んで展開（→数量・詳細は②）</text>
+<text x="32.0" y="110.0" font-size="15" font-weight="bold" fill="#a8600a">A面 操作室側　FE-76751</text>
+<text x="32.0" y="128.0" font-size="12.5" fill="#7a4a00">縦貼り4短冊／柄合わせ要(タテ642)</text>
+<rect x="32.0" y="140.0" width="488.4" height="376.7" fill="#eaf3fa" stroke="#2c3e50" stroke-width="2.4"/>
+<rect x="156.2" y="140.0" width="124.2" height="376.7" fill="#dceaf5"/>
+<rect x="404.6" y="140.0" width="115.8" height="376.7" fill="#dceaf5"/>
+<line x1="156.2" y1="140.0" x2="156.2" y2="516.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
+<line x1="280.4" y1="140.0" x2="280.4" y2="516.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
+<line x1="404.6" y1="140.0" x2="404.6" y2="516.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
+<rect x="178.9" y="285.8" width="114.8" height="114.8" fill="#fff" stroke="#2a6da3" stroke-width="1.6"/>
+<text x="236.3" y="347.2" font-size="12" fill="#2a6da3" text-anchor="middle">中連窓850</text>
+<rect x="376.0" y="243.3" width="131.0" height="273.4" fill="#fff" stroke="#d77f1a" stroke-width="1.6"/>
+<text x="441.5" y="384.0" font-size="12" fill="#d77f1a" text-anchor="middle">操作室ドア970</text>
+<text x="94.1" y="156.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">①</text>
+<text x="218.3" y="156.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">②</text>
+<text x="342.5" y="156.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">③</text>
+<text x="462.5" y="156.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">④</text>
+<line x1="32.0" y1="538.7" x2="520.4" y2="538.7" stroke="#c0392b" stroke-width="0.9" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="276.2" y="533.7" font-size="13" fill="#c0392b" text-anchor="middle">3618</text>
+<text x="560.4" y="110.0" font-size="15" font-weight="bold" fill="#a8600a">B面 空室側　FE-76109</text>
+<text x="560.4" y="128.0" font-size="12.5" fill="#7a4a00">縦貼り7短冊／壁柱を両側面とも巻込→展開5991</text>
+<rect x="560.4" y="140.0" width="808.8" height="376.7" fill="#eaf3fa" stroke="#2c3e50" stroke-width="2.4"/>
+<rect x="684.6" y="140.0" width="124.2" height="376.7" fill="#dceaf5"/>
+<rect x="933.0" y="140.0" width="124.2" height="376.7" fill="#dceaf5"/>
+<rect x="1181.4" y="140.0" width="124.2" height="376.7" fill="#dceaf5"/>
+<line x1="684.6" y1="140.0" x2="684.6" y2="516.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
+<line x1="808.8" y1="140.0" x2="808.8" y2="516.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
+<line x1="933.0" y1="140.0" x2="933.0" y2="516.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
+<line x1="1057.2" y1="140.0" x2="1057.2" y2="516.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
+<line x1="1181.4" y1="140.0" x2="1181.4" y2="516.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
+<line x1="1305.6" y1="140.0" x2="1305.6" y2="516.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
+<rect x="734.4" y="140.0" width="62.0" height="376.7" fill="url(#colside)" stroke="#2c3e50" stroke-width="1"/>
+<rect x="796.4" y="140.0" width="90.5" height="376.7" fill="url(#col)" stroke="#2c3e50" stroke-width="1"/>
+<rect x="886.9" y="140.0" width="62.0" height="376.7" fill="url(#colside)" stroke="#2c3e50" stroke-width="1"/>
+<text x="841.6" y="275.6" font-size="12.5" fill="#2c3e50" text-anchor="middle" font-weight="bold">壁柱</text>
+<text x="841.6" y="290.6" font-size="11" fill="#2c3e50" text-anchor="middle">前面670</text>
+<text x="765.4" y="418.7" font-size="10.5" fill="#3d5260" text-anchor="middle" transform="rotate(-90 765.4 418.7)">側面459</text>
+<text x="917.8" y="418.7" font-size="10.5" fill="#3d5260" text-anchor="middle" transform="rotate(-90 917.8 418.7)">側面459</text>
+<rect x="780.9" y="243.3" width="121.5" height="273.4" fill="#fff" fill-opacity="0.92" stroke="#e8932e" stroke-width="1.6"/>
+<text x="841.6" y="412.8" font-size="12" fill="#d77f1a" text-anchor="middle">ドア900</text>
+<text x="622.5" y="156.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">①</text>
+<text x="746.7" y="156.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">②</text>
+<text x="870.9" y="156.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">③</text>
+<text x="995.1" y="156.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">④</text>
+<text x="1119.3" y="156.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">⑤</text>
+<text x="1243.5" y="156.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">⑥</text>
+<text x="1337.4" y="156.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">⑦</text>
+<line x1="560.4" y1="538.7" x2="1369.2" y2="538.7" stroke="#c0392b" stroke-width="0.9" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="964.8" y="533.7" font-size="13" fill="#c0392b" text-anchor="middle">5991</text>
+<line x1="540.4" y1="140.0" x2="540.4" y2="516.7" stroke="#c0392b" stroke-width="0.9" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="532.4" y="328.3" font-size="13" fill="#c0392b" transform="rotate(-90 532.4 328.3)" text-anchor="middle">2790</text>
+<text x="32.0" y="580.0" font-size="15" font-weight="bold" fill="#a8600a">C面 廊下側　FE-76251</text>
+<text x="32.0" y="598.0" font-size="12.5" fill="#7a4a00">縦貼り4短冊／無地貼可</text>
+<rect x="32.0" y="610.0" width="488.4" height="376.7" fill="#eaf3fa" stroke="#2c3e50" stroke-width="2.4"/>
+<rect x="156.2" y="610.0" width="124.2" height="376.7" fill="#dceaf5"/>
+<rect x="404.6" y="610.0" width="115.8" height="376.7" fill="#dceaf5"/>
+<line x1="156.2" y1="610.0" x2="156.2" y2="986.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
+<line x1="280.4" y1="610.0" x2="280.4" y2="986.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
+<line x1="404.6" y1="610.0" x2="404.6" y2="986.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
+<rect x="334.5" y="713.3" width="172.8" height="273.4" fill="#fff" stroke="#d77f1a" stroke-width="1.6"/>
+<text x="420.9" y="854.0" font-size="12" fill="#d77f1a" text-anchor="middle">親子ドア1280</text>
+<text x="94.1" y="626.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">①</text>
+<text x="218.3" y="626.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">②</text>
+<text x="342.5" y="626.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">③</text>
+<text x="462.5" y="626.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">④</text>
+<line x1="32.0" y1="1008.7" x2="520.4" y2="1008.7" stroke="#c0392b" stroke-width="0.9" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="276.2" y="1003.7" font-size="13" fill="#c0392b" text-anchor="middle">3618</text>
+<text x="560.4" y="580.0" font-size="15" font-weight="bold" fill="#a8600a">D面 受付側　FE-76728</text>
+<text x="560.4" y="598.0" font-size="12.5" fill="#7a4a00">縦貼り6短冊／ステップ柄合わせ要(タテ321)</text>
+<rect x="560.4" y="610.0" width="684.9" height="376.7" fill="#eaf3fa" stroke="#2c3e50" stroke-width="2.4"/>
+<rect x="684.6" y="610.0" width="124.2" height="376.7" fill="#dceaf5"/>
+<rect x="933.0" y="610.0" width="124.2" height="376.7" fill="#dceaf5"/>
+<rect x="1181.4" y="610.0" width="63.9" height="376.7" fill="#dceaf5"/>
+<line x1="684.6" y1="610.0" x2="684.6" y2="986.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
+<line x1="808.8" y1="610.0" x2="808.8" y2="986.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
+<line x1="933.0" y1="610.0" x2="933.0" y2="986.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
+<line x1="1057.2" y1="610.0" x2="1057.2" y2="986.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
+<line x1="1181.4" y1="610.0" x2="1181.4" y2="986.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
+<text x="622.5" y="626.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">①</text>
+<text x="746.7" y="626.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">②</text>
+<text x="870.9" y="626.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">③</text>
+<text x="995.1" y="626.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">④</text>
+<text x="1119.3" y="626.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">⑤</text>
+<text x="1213.4" y="626.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">⑥</text>
+<line x1="560.4" y1="1008.7" x2="1245.3" y2="1008.7" stroke="#c0392b" stroke-width="0.9" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="902.9" y="1003.7" font-size="13" fill="#c0392b" text-anchor="middle">5073</text>
+<line x1="540.4" y1="610.0" x2="540.4" y2="986.7" stroke="#c0392b" stroke-width="0.9" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="532.4" y="798.3" font-size="13" fill="#c0392b" transform="rotate(-90 532.4 798.3)" text-anchor="middle">2790</text>
 </svg>
