@@ -102,8 +102,8 @@
   </g>
   <!-- レバーハンドルは親のみ(先側=境界・親側) -->
   <circle cx="803" cy="318" r="2.6" fill="#1a2a3a"/><line x1="805" y1="318" x2="815" y2="318" stroke="#1a2a3a" stroke-width="1.7"/>
-  <text x="817" y="225" font-size="8" fill="#777" text-anchor="middle">親</text>
-  <text x="747" y="225" font-size="8" fill="#777" text-anchor="middle">子</text>
+  <text x="817" y="225" font-size="8" fill="#555" text-anchor="middle">親</text>
+  <text x="747" y="225" font-size="8" fill="#555" text-anchor="middle">子</text>
   <line x1="770" y1="430" x2="905" y2="430" stroke="#2c3e50" stroke-width="1"/>
   <path d="M700,427 l8,0 l-4,7 z" fill="#2c3e50"/><text x="693" y="425" font-size="8" fill="#555" text-anchor="end">FL</text>
   <line x1="700" y1="448" x2="841" y2="448" stroke="#c0392b" stroke-width="0.8" marker-start="url(#dimS)" marker-end="url(#dimE)"/>

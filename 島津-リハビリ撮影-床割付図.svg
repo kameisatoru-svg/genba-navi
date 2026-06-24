@@ -52,9 +52,9 @@
   </g>
 
   <!-- 開口ラベル(床は建具下まで通し張り) -->
-  <text x="497" y="165" font-size="9" fill="#888" text-anchor="middle">操作室ドア</text>
-  <text x="551" y="332" font-size="9" fill="#888" text-anchor="middle" transform="rotate(90 551 332)">ドアW900</text>
-  <text x="487" y="514" font-size="9" fill="#888" text-anchor="middle">親子ドア</text>
+  <text x="497" y="165" font-size="9" fill="#555" text-anchor="middle">操作室ドア</text>
+  <text x="551" y="332" font-size="9" fill="#555" text-anchor="middle" transform="rotate(90 551 332)">ドアW900</text>
+  <text x="487" y="514" font-size="9" fill="#555" text-anchor="middle">親子ドア</text>
 
   <!-- 流れ(縦) -->
   <line x1="359" y1="225" x2="359" y2="445" stroke="#2a6da3" stroke-width="1.6" marker-start="url(#ar)" marker-end="url(#ar)"/>
@@ -78,10 +78,10 @@
   <text x="269" y="335" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold" transform="rotate(-90 269 335)">5073</text>
 
   <!-- 面記号 -->
-  <text x="417" y="183" font-size="10" fill="#aaa" text-anchor="middle">A</text>
-  <text x="544" y="240" font-size="10" fill="#aaa">B</text>
-  <text x="417" y="494" font-size="10" fill="#aaa" text-anchor="middle">C</text>
-  <text x="290" y="335" font-size="10" fill="#aaa">D</text>
+  <text x="417" y="183" font-size="10" fill="#555" text-anchor="middle">A</text>
+  <text x="544" y="240" font-size="10" fill="#555">B</text>
+  <text x="417" y="494" font-size="10" fill="#555" text-anchor="middle">C</text>
+  <text x="290" y="335" font-size="10" fill="#555">D</text>
 
   <!-- ===== 数量メモ ===== -->
   <g transform="translate(610,150)">
@@ -95,10 +95,10 @@
     <text x="0" y="126" font-size="12" fill="#333">○ 施工面積：約 <tspan font-weight="bold">18.35㎡</tspan>（見積18㎡）</text>
     <text x="0" y="150" font-size="12" fill="#333">○ 発注長：2列×5073 ＝ 10,146mm</text>
     <text x="16" y="168" font-size="12" fill="#333">＋ロス10% ≒ <tspan font-weight="bold">11.2m</tspan>（巾1820）</text>
-    <text x="0" y="192" font-size="11" fill="#9a5a00">※ 壁柱・建具下は通し張り後カット。継ぎ位置は</text>
-    <text x="0" y="206" font-size="11" fill="#9a5a00">　 撮影台・動線を見て現場調整可。</text>
-    <text x="0" y="226" font-size="10.5" fill="#888">寸法は清書基準・概略／発注前に最終確認。</text>
+    <text x="0" y="192" font-size="11" fill="#7a4a00">※ 壁柱・建具下は通し張り後カット。継ぎ位置は</text>
+    <text x="0" y="206" font-size="11" fill="#7a4a00">　 撮影台・動線を見て現場調整可。</text>
+    <text x="0" y="226" font-size="10.5" fill="#555">寸法は清書基準・概略／発注前に最終確認。</text>
   </g>
 
-  <text x="30" y="628" font-size="11" fill="#888">施工：7/18(土)・19(日)。床は既存撤去後、長尺シート貼替（巾木＝田島No.80共）。</text>
+  <text x="30" y="628" font-size="11" fill="#555">施工：7/18(土)・19(日)。床は既存撤去後、長尺シート貼替（巾木＝田島No.80共）。</text>
 </svg>

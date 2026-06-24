@@ -157,10 +157,10 @@
   <text x="539" y="603" font-size="10" fill="#c0392b" text-anchor="middle">1280</text>
 
   <!-- 面記号 -->
-  <text x="450" y="143" font-size="11" fill="#888" text-anchor="middle">A</text>
-  <text x="610" y="240" font-size="11" fill="#888">B</text>
-  <text x="450" y="566" font-size="11" fill="#888" text-anchor="middle">C</text>
-  <text x="289" y="300" font-size="11" fill="#888">D</text>
+  <text x="450" y="143" font-size="11" fill="#555" text-anchor="middle">A</text>
+  <text x="610" y="240" font-size="11" fill="#555">B</text>
+  <text x="450" y="566" font-size="11" fill="#555" text-anchor="middle">C</text>
+  <text x="289" y="300" font-size="11" fill="#555">D</text>
 
   <!-- ===== 流れ方向 ===== -->
   <g transform="translate(140,470)">
@@ -213,9 +213,9 @@
     <text x="16" y="172" font-size="12" fill="#333">中連窓 W850・H850（腰下860）　ドアは内開き（実線=扉/点線=軌道）</text>
     <text x="0" y="194" font-size="12" fill="#333">○ 壁柱 670（B面）／ CH＝2790 ／ W3618×D5073</text>
     <text x="0" y="214" font-size="11.5" fill="#333">○ 数量（見_改２）：床 18㎡ ／ 壁クロス 49㎡</text>
-    <text x="0" y="230" font-size="10" fill="#9a5a00">※ 壁品番は島津図(操作室=下)を180°回転し各壁へ対応。形状・数量は概略。</text>
+    <text x="0" y="230" font-size="10" fill="#7a4a00">※ 壁品番は島津図(操作室=下)を180°回転し各壁へ対応。形状・数量は概略。</text>
   </g>
 
   <!-- 工程メモ -->
-  <text x="30" y="715" font-size="11" fill="#888">施工：7/18(土)・19(日) 土日施工（剥取・貼替・清掃／騒音発生）。設置工程表7/17-21・使用開始7/21。</text>
+  <text x="30" y="715" font-size="11" fill="#555">施工：7/18(土)・19(日) 土日施工（剥取・貼替・清掃／騒音発生）。設置工程表7/17-21・使用開始7/21。</text>
 </svg>

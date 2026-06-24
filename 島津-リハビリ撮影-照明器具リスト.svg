@@ -37,11 +37,11 @@
     <circle cx="50" cy="140" r="13" fill="#f6e6a8" stroke="#c8a93e" stroke-width="1.3"/><text x="50" y="144" font-weight="bold">L1</text>
     <text x="150" y="144">一般撮影室</text>
     <text x="325" y="144">ベースライト（蛍光灯 40W×2）</text>
-    <text x="485" y="138" fill="#999">既存</text><text x="485" y="153" fill="#999">（要確認）</text>
-    <text x="620" y="144" fill="#999">既存</text>
+    <text x="485" y="138" fill="#555">既存</text><text x="485" y="153" fill="#555">（要確認）</text>
+    <text x="620" y="144" fill="#555">既存</text>
     <text x="730" y="144" font-weight="bold">4</text>
     <text x="830" y="144">FL40W×2</text>
-    <text x="950" y="144" fill="#999">既存</text>
+    <text x="950" y="144" fill="#555">既存</text>
   </g>
   <text x="1008" y="138" font-size="10" fill="#222">既存利用・本工事対象外。</text>
   <text x="1008" y="153" font-size="10" fill="#c0392b">クロス施工時は養生／脱着要確認。</text>
@@ -51,11 +51,11 @@
     <circle cx="50" cy="210" r="13" fill="#ead3ee" stroke="#9a4a9a" stroke-width="1.3"/><text x="50" y="214" font-weight="bold">E1</text>
     <text x="150" y="214">一般撮影室</text>
     <text x="325" y="214">非常照明（非常灯）</text>
-    <text x="485" y="214" fill="#999">既存</text>
-    <text x="620" y="214" fill="#999">既存</text>
+    <text x="485" y="214" fill="#555">既存</text>
+    <text x="620" y="214" fill="#555">既存</text>
     <text x="730" y="214" font-weight="bold">1</text>
-    <text x="830" y="214" fill="#999">―</text>
-    <text x="950" y="214" fill="#999">―</text>
+    <text x="830" y="214" fill="#555">―</text>
+    <text x="950" y="214" fill="#555">―</text>
   </g>
   <text x="1008" y="214" font-size="10" fill="#222">既存。位置は清書参照。</text>
 
@@ -69,6 +69,6 @@
     <text x="34" y="388" font-weight="bold">【新築・改修で器具を選定する場合のテンプレート列】</text>
     <text x="34" y="408" fill="#555">符号／場所／器具種別／メーカー／品番・型番／数量／ランプ・W／色温(例2700K)／単価／姿図・写真／備考</text>
     <text x="34" y="430" fill="#555">各器具に製品写真または姿図、定格(lm/W)、ランプ種別、調光要否を添付。復活・変更は赤字＋日付で明示。</text>
-    <text x="34" y="452" fill="#999">※グレー字＝支給品（お見積り不要）。</text>
+    <text x="34" y="452" fill="#555">※グレー字＝支給品（お見積り不要）。</text>
   </g>
 </svg>
