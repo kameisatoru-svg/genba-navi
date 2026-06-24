@@ -121,7 +121,7 @@
 
   <!-- ============ 天井 (3618×5073) FE-76202 横流れ6帯 ============ -->
   <g>
-    <text x="70" y="668" font-size="13" font-weight="bold" fill="#a8600a">天井　FE-76202（3618×5073・横流れ＝3618方向に通す）</text>
+    <text x="70" y="668" font-size="13" font-weight="bold" fill="#a8600a">天井　FE-76202（3618×5073・横流れ）</text>
     <!-- plan 3618->143(s=0.0395), 5073->200 -->
     <rect x="70" y="685" width="143" height="200" fill="#eef6f0" stroke="#2c3e50" stroke-width="2"/>
     <rect x="70" y="721.3" width="143" height="36.3" fill="#e2efe5"/>
