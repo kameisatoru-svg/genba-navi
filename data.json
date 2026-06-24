@@ -3980,7 +3980,14 @@
         }
       ],
       "原価": {},
-      "規模": "簡易"
+      "規模": "簡易",
+      "チェック": {
+        "nyukin.kakunin": "wip",
+        "nyukin.register": "wip",
+        "genka.amex": "wip",
+        "genka.aggregate": "wip",
+        "genka.archive": "wip"
+      }
     },
     {
       "案件キー": "ネクサス-ビル漏水修理-26",
