@@ -51,6 +51,18 @@ body{
 .ai-skill:active{background:rgba(200,169,110,0.15);}
 .ai-skill svg{flex-shrink:0;color:var(--navy);}
 
+/* モデル選択（スキルバー先頭に固定表示） */
+.ai-model-sel{
+  flex-shrink:0;height:40px;position:sticky;left:0;z-index:2;
+  border:1px solid rgba(30,45,64,0.18);
+  background:var(--navy);color:#fff;border-radius:var(--radius-md);
+  font-size:12px;font-weight:700;font-family:inherit;
+  padding:0 26px 0 10px;cursor:pointer;outline:none;
+  -webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23fff' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 9px center;
+}
+
 /* チャット領域 */
 .ai-messages{
   flex:1 1 0;min-height:0;          /* min-height:0 がないとflex子要素が内容で居座って下段を押し出す */
@@ -287,6 +299,7 @@ body{
 
 <!-- スキルボタン -->
 <div class="ai-skills">
+  <select class="ai-model-sel" id="ai-model" title="使用するAIモデル" aria-label="使用するAIモデル"></select>
   <button class="ai-skill" onclick="aiPresetFill('checklist')">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
@@ -309,6 +322,27 @@ body{
       <path d="m9 13 2 2 4-4"/>
     </svg>
     <span>完了報告書</span>
+  </button>
+  <button class="ai-skill" onclick="aiPresetFill('genka')">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="1" x2="12" y2="23"/>
+      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+    </svg>
+    <span>原価・粗利</span>
+  </button>
+  <button class="ai-skill" onclick="aiPresetFill('ugoki')">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+      <polyline points="17 6 23 6 23 12"/>
+    </svg>
+    <span>最近の動き</span>
+  </button>
+  <button class="ai-skill" onclick="aiPresetFill('nyukin')">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="1" y="4" width="22" height="16" rx="2"/>
+      <line x1="1" y1="10" x2="23" y2="10"/>
+    </svg>
+    <span>未入金</span>
   </button>
   <button class="ai-skill" onclick="aiPresetFill('callmemo')">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -343,7 +377,7 @@ body{
 
 <!-- メッセージリスト -->
 <div class="ai-messages" id="ai-messages">
-  <div class="ai-msg ai-msg-system">アートレイズ現場管理AIです。案件・取引先・命名ルールを参照して答えます。上のボタンで定型プロンプトを呼び出せます。</div>
+  <div class="ai-msg ai-msg-system">アート・レイズ現場管理AI（現場ナビAI）です。案件・取引先・書類・原価明細・現場の動き・段取りチェックまで参照して答えます。左上でモデルを選べます。上のボタンで定型プロンプトを呼び出せます。</div>
 </div>
 
 <!-- 入力エリア -->
@@ -364,21 +398,38 @@ function goBack(){
 /* ====== AIアシスト ====== */
 (function(){
   var ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
-  var AI_MODEL = 'claude-sonnet-4-20250514';
   var STORAGE_KEY = 'ANTHROPIC_API_KEY';
+  var MODEL_KEY   = 'ai_assist_model';          // 選択中のモデル
   var CURRENT_KEY = 'ai_assist_current_chat';   // 自動保存中の会話
   var SAVED_KEY   = 'ai_assist_saved_chats';    // ユーザーが名前を付けて保存した会話リスト
   var MAX_SAVED   = 50;                          // 保存リスト最大件数
 
+  // 選択可能なモデル（旧 claude-sonnet-4-20250514 は 2026-06-15 退役→404 のため廃止）
+  var MODELS = [
+    { id: 'claude-opus-4-8',   label: 'Opus 4.8（高精度）' },
+    { id: 'claude-sonnet-4-6', label: 'Sonnet 4.6（高速・低コスト）' }
+  ];
+  var DEFAULT_MODEL = 'claude-opus-4-8';
+  function getModel(){
+    var m = (localStorage.getItem(MODEL_KEY) || '').trim();
+    for(var i=0;i<MODELS.length;i++){ if(MODELS[i].id === m) return m; }
+    return DEFAULT_MODEL;
+  }
+  function setModel(id){ localStorage.setItem(MODEL_KEY, id); }
+
   var aiHistory = [];       // {role, content}
   var aiDataCache = null;
+  var aiGenkaCache = null;  // genka.json（原価明細）
 
   var PRESETS = {
-    checklist: '現在の案件一覧から、施工準備が不足していそうな案件を洗い出して、不足書類・TODO一覧をマークダウンで出してください。',
+    checklist: '[案件名]の段取りチェック（チェック項目）を見て、まだ「done」になっていない工程を洗い出し、不足している準備・書類・TODOをマークダウンで出してください。案件名を省略した場合は施工予定・進行中の全案件を対象にしてください。',
     mitsumori: '[案件名]の見積書の品目ドラフトを作ってください。工事種別と概算金額も提案してください。',
     kanryo:    '[案件名]の工事完了報告書のドラフトを作ってください。案件情報・備考・完了書履歴を参照し、(1)宛名（会社名＋御中/様）、(2)工事名、(3)工事場所、(4)工事期間（分かる範囲で）、(5)工事内容（番号付き箇条書き）、(6)担当者 をまとめてください。出力は工事完了報告書アプリ（kanryo_houkoku_preview.html）にそのまま転記できる形でお願いします。',
-    callmemo:  '以下の通話メモを整理して、決定事項・TODO・確認事項に分けてください：\n\n[ここに貼り付け]',
-    torihiki:  '[業者名または顧客名]の連絡先・担当者・関係性を教えてください。',
+    genka:     '[案件名]の原価（労務費・材料費・外注費・経費）と、見積/請求金額に対する粗利・粗利率を計算してください。原価明細（genka.json）があれば主な支出も挙げてください。',
+    ugoki:     '最近2週間で動きのあった案件を、動き（時系列フィード）をもとに新しい順にまとめてください。各案件の直近の状況と、次にやるべきことも添えてください。',
+    nyukin:    '請求済みで未入金（入金状況が入金済みでない）の請求を、金額・支払期限の近い順に一覧にしてください。期限超過があれば目立たせてください。',
+    callmemo:  '以下の通話メモを整理して、決定事項・TODO・確認事項に分けてください。関係する案件キーが分かれば紐付けてください：\n\n[ここに貼り付け]',
+    torihiki:  '[業者名または顧客名]の連絡先・担当者・関係性・注意点を教えてください。',
     genbamemo: '以下の現場メモから、工事仕様・寸法・材料のポイントをまとめてください：\n\n[ここに貼り付け]'
   };
 
@@ -584,38 +635,81 @@ function goBack(){
       var res = await fetch('data.json', {cache:'no-store'});
       if(!res.ok) throw new Error('HTTP '+res.status);
       aiDataCache = await res.json();
-      return aiDataCache;
     }catch(e){
       return null;
     }
+    // genka.json（原価明細）は任意。取得できなくても続行する。
+    try{
+      var gres = await fetch('genka.json', {cache:'no-store'});
+      aiGenkaCache = gres.ok ? await gres.json() : null;
+    }catch(e){
+      aiGenkaCache = null;
+    }
+    return aiDataCache;
   }
 
   function buildSystemPrompt(data){
     var torihiki = data['取引先マスター'] || [];
     var anken    = data['案件'] || [];
+    var chushi   = data['中止案件'] || [];
     var meimei   = data['命名ルール'] || {};
-    return [
-      'あなたはアートレイズ（株式会社アートレイズ、大分県別府市の建設・内装仕上げ会社）の現場管理AIアシスタントです。',
-      '以下の情報を参照して回答してください：',
+    var lines = [
+      'あなたは株式会社アート・レイズ（大分県別府市の建設・内装仕上げ会社）の現場管理AIアシスタント「現場ナビAI」です。',
+      '社長のかめさん（亀井 悟）の片腕として、案件・取引先・原価・書類・段取りの質問に実務的に即答します。',
       '',
-      '【取引先マスター】',
+      '# 回答スタイル',
+      '- 日本語で、結論から簡潔に。マークダウン（見出し・箇条書き・表）で整理する。',
+      '- 思考の途中経過や前置きは書かず、最終回答だけを返す。冗長にしない。',
+      '- 金額は円・カンマ区切り（例: 9,990,200円）。日付は YYYY-MM-DD。',
+      '- データに無いことは「データに記載なし」と明示。推測する場合は推測と断る。',
+      '- 案件を特定するときは案件キーで示す（例: 玉寿会-さくら床-26）。',
+      '',
+      '# 命名ルール',
+      JSON.stringify(meimei),
+      '案件キー = [顧客4文字以内]-[現場+工事8文字以内]-26 形式。',
+      '書類短縮: 見=見積書 / 請=請求書 / 負=工事請負契約書 / 注=注文書 / 完=工事完了報告書 / 納=納品書 / 領=領収書。',
+      '',
+      '# 取引先マスター（顧客・業者, id=T-xxx, 全' + torihiki.length + '件）',
+      '各社のフィールド: 略称 / 正式名称 / rel(顧客|業者 等) / type / basic{contact:担当, rep:代表} / contact{tel,mobile,fax,mail,address,touroku,furikomi} / memo / 注意点 / search。',
       JSON.stringify(torihiki),
       '',
-      '【進行中の案件一覧】',
-      JSON.stringify(anken),
+      '# 案件（進行中・完了, 全' + anken.length + '件）',
+      '各案件の主なフィールド:',
+      '- 案件キー / 顧客略 / 現場+工事 / 正式工事名 / 施工場所 / ステータス / 元請フラグ・元請名 / 規模 / 備考 / 旧案件番号',
+      '- ステータスの流れ: 相談 → 見積準備 → 見積提出済み → 施工予定 → 完了 → 完了(請求書作成済み) → 請求済み → 入金済み。ほかに 保守管理(継続) / 中止。',
+      '- 見積[] / 請求[] / 注文書[] / 契約書[] / 完了書[] / 納品書[]: 各書類 {書類番号, 発行日, 金額, 支払期限, 入金状況, 入金日, ステータス, ファイル, 備考}。',
+      '  - 請求の 入金状況: "nyukin"=入金済み、それ以外（"mi" 等・空）=未入金。入金日・支払期限あり。',
+      '- 原価{}: {労務費, 材料費, 外注費, 経費, 合計, 件数, 最終集計日}。4費目の集計値。粗利＝見積(または請求)金額 − 原価合計。',
+      '- 動き[]: 現場活動の時系列フィード {日, 種別(現地調査/図面/見積依頼/見積更新/工程確定/連絡 等), 概要}。「最近の動き」「進捗」「次にやること」はここを根拠にする。',
+      '- チェック{}: 施工準備〜完了のワークフロー進捗。キー=工程ID、値"done"=完了。プレフィックスの意味: contact.*=連絡, survey.*=現地調査, prep.*=段取り(仕様/材料/単価/業者), compose.*=見積作成, submit.*=提出, followup.*=追客, doc_k.*=書類, dandori.*=段取り, taisei.*=施工体制, shinkou.*=進行(着工前写真/日報/調整), kanryou.*=完了(完成写真/立会)。"done"でない＝その工程がまだ未了。',
+      JSON.stringify(anken)
+    ];
+    if(chushi && chushi.length){
+      lines.push('', '# 中止案件（参考・全' + chushi.length + '件）', JSON.stringify(chushi));
+    }
+    if(aiGenkaCache){
+      lines.push(
+        '',
+        '# 原価明細 genka.json（案件別・ソース別の支出明細）',
+        '構造: { 最終集計日, 案件: { "案件キー": { 旧案件番号, 分類{労務費,材料費,外注費,経費}, 合計, 件数, 明細[]{id(RC-26-xxx), 日付, 店舗, 品目, 金額, 勘定科目, 原価区分, 支払方法, ソース(受取請求書/領収書/カード), 備考} } } }',
+        '原価の内訳や「何にいくら使ったか」を聞かれたらここを参照する。分類の合計は案件.原価とほぼ一致する。',
+        JSON.stringify(aiGenkaCache)
+      );
+    }
+    lines.push(
       '',
-      '【命名ルール】',
-      JSON.stringify(meimei),
+      '# 関連アプリ（必要なら案内する）',
+      '- 見積書/請求書: mitsumori_seikyu_preview.html ／ 工事完了報告書: kanryo_houkoku_preview.html',
+      '- 図面: zumen_app.html ／ 材料割付: 材料割付_app_.html ／ 平面図: floor_plan.html',
+      '- ステータス看板: workflow.html ／ 工程表: gantt.html ／ ダッシュボード: dashboard.html',
+      '- 各種台帳: 案件 / 取引先 / 見積 / 請求 / 原価 / 工事請負契約書 / 注文書 / 部材 / 工具',
       '',
-      '回答は日本語で、簡潔かつ実務的に答えてください。マークダウン形式（見出し・箇条書き・表）で整理して出力してください。',
-      '案件キーは [顧客4文字以内]-[現場+工事8文字以内]-26 形式（例: 玉寿会-さくら床-26）です。',
-      '',
-      '【工事完了報告書の作成支援】',
-      '・各案件の「完了書」配列は、発行済み完了報告書の履歴です（書類番号は 完_案件キー 形式）。',
-      '・完了報告書のドラフトを依頼されたら、案件情報（顧客略→取引先マスターの正式名称・工事名・施工場所）と備考から、宛名・工事名・工事場所・工事期間・工事内容（番号付き）・担当者を組み立ててください。',
-      '・宛名は法人なら「正式名称 御中」、個人なら「氏名 様」。工事内容は備考や合算工事の内訳を番号付き箇条書きで。',
-      '・出力は工事完了報告書アプリ（kanryo_houkoku_preview.html）にそのまま転記できるよう、項目を明確にラベル付けしてください。'
-    ].join('\n');
+      '# 工事完了報告書の作成支援',
+      '完了報告書のドラフトを依頼されたら、案件情報（顧客略→取引先マスターの正式名称・正式工事名・施工場所）と備考・完了書履歴・動きから次を組み立てる:',
+      '(1)宛名（法人=「正式名称 御中」/個人=「氏名 様」） (2)工事名 (3)工事場所 (4)工事期間（分かる範囲で） (5)工事内容（番号付き箇条書き。合算工事は内訳ごとに） (6)担当者。',
+      '出力は工事完了報告書アプリ（kanryo_houkoku_preview.html）にそのまま転記できるよう、項目を明確にラベル付けする。'
+    );
+    return lines.join('\n');
   }
 
   function appendMsg(role, text, asLoading){
@@ -734,9 +828,11 @@ function goBack(){
           'anthropic-dangerous-direct-browser-access':'true'
         },
         body: JSON.stringify({
-          model: AI_MODEL,
+          model: getModel(),
           max_tokens: 4096,
-          system: sysPrompt,
+          // システムプロンプト（取引先・案件・原価の大きなコンテキスト）はキャッシュして
+          // 2回目以降のやり取りのコストを抑える（プロンプトキャッシュ）。
+          system: [{ type:'text', text: sysPrompt, cache_control:{ type:'ephemeral' } }],
           messages: aiHistory
         })
       });
@@ -773,6 +869,20 @@ function goBack(){
   };
 
   document.addEventListener('DOMContentLoaded', function(){
+    // モデル選択の初期化
+    var sel = document.getElementById('ai-model');
+    if(sel){
+      sel.innerHTML = MODELS.map(function(m){
+        return '<option value="'+m.id+'">'+escapeHtml(m.label)+'</option>';
+      }).join('');
+      sel.value = getModel();
+      sel.addEventListener('change', function(){
+        setModel(sel.value);
+        var lbl = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : sel.value;
+        appendMsg('system', 'モデルを「'+lbl+'」に切り替えました。');
+      });
+    }
+
     var ta = document.getElementById('ai-input-text');
     if(!ta) return;
     ta.addEventListener('input', function(){
