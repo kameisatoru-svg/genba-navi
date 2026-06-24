@@ -37,6 +37,34 @@ if exist ".git\index.lock" (
   if exist ".git\.lock_seen" del /f /q ".git\.lock_seen" >nul 2>&1
 )
 
+rem ===== data.json integrity gate (added 2026-06-25) =====
+rem Never publish a truncated/partial data.json: GitHub Pages serves it as the
+rem source of truth for every app, so a half-written file becomes everyone's
+rem corruption. Validate it as JSON first. Two-pass guard mirrors the index.lock
+rem logic above: a normal in-flight write is invalid for only milliseconds and is
+rem valid again by the next 15s pass (so it never triggers a restore), while
+rem corruption that survives two passes is healed from the last-known-good copy.
+python -c "import json; json.load(open('data.json',encoding='utf-8'))" >nul 2>&1
+if errorlevel 1 (
+  if exist ".git\data.json.goodbak" (
+    if exist ".git\.json_bad_seen" (
+      copy /y ".git\data.json.goodbak" "data.json" >nul 2>&1
+      del /f /q ".git\.json_bad_seen" >nul 2>&1
+      echo data.json was CORRUPT - restored from last-known-good backup
+    ) else (
+      echo seen> ".git\.json_bad_seen"
+      echo data.json invalid this pass - waiting one cycle before healing
+      goto wait
+    )
+  ) else (
+    echo data.json invalid and no goodbak yet - skipping commit/push this cycle
+    goto wait
+  )
+) else (
+  copy /y "data.json" ".git\data.json.goodbak" >nul 2>&1
+  if exist ".git\.json_bad_seen" del /f /q ".git\.json_bad_seen" >nul 2>&1
+)
+
 rem commit local changes first so they do not block the pull/merge
 git add -A
 git commit -m "auto-push" >nul 2>&1
