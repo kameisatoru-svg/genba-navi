@@ -101,7 +101,7 @@
 <text x="911.0" y="647.5" font-size="12" fill="#c0392b" transform="rotate(-90 911.0 647.5)" text-anchor="middle">側459</text>
 <text x="490" y="730" font-size="13.5" fill="#222">クロスは柱の <tspan font-weight="bold" fill="#c0392b">前面670 ＋ 両側面459×2</tspan> を1面で通し貼り。</text>
 <text x="490" y="758" font-size="16" fill="#222">展開長 ＝ 5073 ＋ 459×2 ＝ <tspan font-weight="bold" fill="#c0392b">5991mm</tspan></text>
-<text x="490" y="783" font-size="16" fill="#222">920巾 → <tspan font-weight="bold" fill="#c0392b">7短冊</tspan>（柱が無ければ6短冊）</text>
+<text x="490" y="783" font-size="16" fill="#222">920巾 → <tspan font-weight="bold" fill="#c0392b">実材7短冊</tspan>（①の正面は見かけ6面・柱側面分で+1本）</text>
 <text x="32" y="850" font-size="14.5" font-weight="bold" fill="#7a4a00">※ 発注前の確認事項</text>
 <text x="32" y="874" font-size="13" fill="#7a4a00">・柄合わせ要：A面 FE-76751(タテ642)・D面 FE-76728(タテ321ステップ)＝各短冊の切寸をリピート倍数へ切上済（表に反映）。</text>
 <text x="32" y="898" font-size="13" fill="#7a4a00">・FE-76728 はステップ(半割れ)柄＝隣接短冊を½リピートずらすため、端短冊で +½リピート程度のロスを別途見込む。</text>
