@@ -179,6 +179,22 @@ python3 -c "import cairosvg; cairosvg.svg2png(url='<f>.svg', write_to='<f>.png',
 
 ---
 
+## 12. 出力品質（印刷前提・最重要）
+
+提出物は印刷して現場で使う前提。以下を必ず守る（かめさん指摘 2026-06-24）。
+
+- **A4横比率に固定**：viewBox 縦横比 √2≒1.414（例 1485×1050・1188×840）。PNG/PDFも同比率。内容過多なら**ページ分割**し1枚に詰めない。実例＝クロス割付は①壁展開（2×2大判）＋②品番別数量表・壁柱巻込詳細 の2枚に分割。
+- **PDFはベクター出力**（ラスタ厳禁）：cairosvg はWindowsでcairo DLL無く不可、Pillow/PNG埋込は約180dpiで**A4印刷時に文字がぼやける**。→ Chromeの印刷エンジンでSVGを線・文字のままPDF化：
+  - 各SVGをHTMLに包む：`@page{size:297mm 210mm;margin:0} html,body{margin:0;padding:0} svg{width:297mm;height:210mm}`。
+  - `chrome --headless --disable-gpu --no-sandbox --user-data-dir=<tmp> --no-pdf-header-footer --print-to-pdf=<out.pdf> <in.html>`。
+  - 複数ページは**1ページずつPDF化して `pypdf`(PdfWriter.append)で結合**。※1つのHTMLに全SVGを並べると marker/pattern の id 重複で誤描画＝必ず分離。
+  - 検証：`fitz` で `page.get_text()` が文字を返せばベクター成功（ラスタなら0）。各ページ 842×595pt＝A4横。
+- **フォントは印刷可読サイズ**：viewBox 1485幅＝297mm（1単位≒0.2mm）なら本文≧13単位(≒7pt)・見出し≧15。極小ラベル（7〜8単位＝4pt級）は判読不可＝禁止。パネルが小さく文字が入らないなら分割か拡大。
+- **文字グレーは #555 以上**（薄いと印刷で消える）。[[feedback_print_gray_minimum]]の #666 が下限・既定は #555、注記の薄茶は #7a4a00。線/枠の `stroke` は薄くてもよいが `fill` の文字は濃く。
+- **Chromeの出力先**：日本語パス/Drive仮想FSへ直接 `--screenshot`/`--print-to-pdf` するとアクセス拒否。出力は**ASCII名で %TEMP% に書き**→`cp` で案件/genba-naviへ。`--user-data-dir` 指定必須（無いと "Missing headless user data directory"）。
+
+---
+
 ## 付録：本案件の実例（大分リハビリ 一般撮影室）
 
 室 W3618 × D5073、CH2790、操作室=上、面 A=上/B=右/C=下/D=左。
@@ -188,7 +204,8 @@ python3 -c "import cairosvg; cairosvg.svg2png(url='<f>.svg', write_to='<f>.png',
 - C面（廊下側 FE-76251）：親子ドアW1280（内開き・親=右/子=左、左端から2241）
 - D面（受付側 FE-76728）：開口なし
 - 縦内訳：1289＋670（壁柱）＋3125＝5073。天井 FE-76202（ルーバー有）。床 PT-105M（流れ=縦）。巾木 田島No.80（品番）。
-- 割付：床=巾1820縦割り2列(1820+1798)/縦継ぎ1本。壁=縦貼り(A/C=4短冊・B/D=6短冊)。天井=横流れ920×6帯。
+- 割付：床=巾1820縦割り2列(1820+1798)/縦継ぎ1本。壁=縦貼り(A/C=4短冊・D=6短冊・**B=7短冊**)。天井=横流れ920×6帯。
+  - ※**壁柱はクロスで両側面とも巻き込む**＝B面の展開長は壁長5073でなく 5073＋(突出459)×2＝**5991**→920巾で6→7短冊。柱の見込(突出)寸法が短冊数を左右する（境界6.5付近）ので発注前に実測確認。
 
 ---
 
