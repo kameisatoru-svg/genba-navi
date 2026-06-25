@@ -1,13 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1485 1050" font-family="'Noto Sans CJK JP','Noto Sans JP','Yu Gothic','Meiryo',sans-serif">
 <defs><marker id="dimS" markerWidth="11" markerHeight="11" refX="2" refY="5" orient="auto"><path d="M8,2 L2,5 L8,8" fill="none" stroke="#c0392b" stroke-width="1.1"/></marker><marker id="dimE" markerWidth="11" markerHeight="11" refX="8" refY="5" orient="auto"><path d="M2,2 L8,5 L2,8" fill="none" stroke="#c0392b" stroke-width="1.1"/></marker><pattern id="col" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#d4dde4"/><line x1="0" y1="0" x2="0" y2="8" stroke="#5f7c8c" stroke-width="1.6"/></pattern><pattern id="colside" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="8" height="8" fill="#e7eef3"/><line x1="0" y1="0" x2="0" y2="8" stroke="#7e98a8" stroke-width="1.3"/></pattern></defs>
 <text x="32" y="42" font-size="22" font-weight="bold" fill="#1a2a3a">大分リハビリテーション病院 一般撮影室 壁・天井クロス割付図① 展開図（サンゲツ FE）</text>
-<text x="32" y="65" font-size="13" fill="#555">壁＝縦貼り・<tspan font-weight="bold">貼り出しは右から左（各面とも右角スタート）</tspan>／開口は控除し現場カット／点線は正面視（B面は奥行=柱側面の巻込を投影。実材増の根拠は②）</text>
+<text x="32" y="63" font-size="13" fill="#555">壁＝縦貼り・<tspan font-weight="bold">貼り出しは右から左（各面とも右角スタート）</tspan>／点線は正面視（B面は奥行=柱側面の巻込を投影。実材増の根拠は②）</text>
+<text x="32" y="83" font-size="11.5" fill="#7a4a00"><tspan font-weight="bold" fill="#2e8b46">緑＝端材流用</tspan>：ドア脇等の小幅(≒10cm)は縦1本取らず、ドア上で横1枚＋脇は端材(内)を横継ぎ流用＝総m圧縮（無地面で有効／リピート柄A・Dは柄合わせで限定）</text>
 <text x="32.0" y="110.0" font-size="15" font-weight="bold" fill="#a8600a">A面 操作室側　FE-76751</text>
-<text x="32.0" y="128.0" font-size="12.5" fill="#7a4a00">縦貼り4短冊／柄合わせ要(タテ642)</text>
+<text x="32.0" y="128.0" font-size="12.5" fill="#7a4a00">縦貼り4短冊／柄合わせ要(タテ642)・柄物=端材流用は限定</text>
 <text x="520.4" y="110.0" font-size="11" font-weight="bold" fill="#2c3e50" text-anchor="end">◀ 貼り出し（右→左）</text>
 <rect x="32.0" y="140.0" width="488.4" height="376.7" fill="#eaf3fa" stroke="#2c3e50" stroke-width="2.4"/>
 <rect x="272.0" y="140.0" width="124.2" height="376.7" fill="#dceaf5"/>
 <rect x="32.0" y="140.0" width="115.8" height="376.7" fill="#dceaf5"/>
+<rect x="506.9" y="140.0" width="13.5" height="376.7" fill="#bfe6c2" fill-opacity="0.85"/>
 <line x1="147.8" y1="140.0" x2="147.8" y2="516.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
 <line x1="272.0" y1="140.0" x2="272.0" y2="516.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
 <line x1="396.2" y1="140.0" x2="396.2" y2="516.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
@@ -15,6 +17,9 @@
 <text x="236.3" y="347.2" font-size="12" fill="#2a6da3" text-anchor="middle">中連窓850</text>
 <rect x="376.0" y="243.3" width="131.0" height="273.4" fill="#fff" stroke="#d77f1a" stroke-width="1.6"/>
 <text x="441.5" y="384.0" font-size="12" fill="#d77f1a" text-anchor="middle">操作室ドア970</text>
+<line x1="376.0" y1="243.3" x2="506.9" y2="243.3" stroke="#2e8b46" stroke-width="1.6" stroke-dasharray="4 3"/>
+<text x="441.5" y="238.3" font-size="9.5" fill="#2e8b46" text-anchor="middle">ドア上＝横1枚</text>
+<text x="513.7" y="328.3" font-size="9.5" font-weight="bold" fill="#2e8b46" text-anchor="middle" transform="rotate(-90 513.7 328.3)">端材流用</text>
 <text x="458.3" y="156.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">①</text>
 <text x="334.1" y="156.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">②</text>
 <text x="209.9" y="156.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">③</text>
@@ -36,6 +41,8 @@
 <line x1="1121.1" y1="140.0" x2="1121.1" y2="516.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
 <rect x="827.7" y="243.3" width="121.5" height="273.4" fill="#fff" stroke="#d77f1a" stroke-width="1.6"/>
 <text x="888.5" y="384.0" font-size="12" fill="#d77f1a" text-anchor="middle">ドア900</text>
+<line x1="827.7" y1="243.3" x2="949.2" y2="243.3" stroke="#2e8b46" stroke-width="1.6" stroke-dasharray="4 3"/>
+<text x="888.5" y="238.3" font-size="9.5" fill="#2e8b46" text-anchor="middle">ドア上＝横1枚</text>
 <text x="779.7" y="253.0" font-size="13" fill="#2c3e50" text-anchor="middle" font-weight="bold">壁柱</text>
 <text x="779.7" y="268.0" font-size="11" fill="#2c3e50" text-anchor="middle">670</text>
 <text x="1183.2" y="156.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">①</text>
@@ -50,16 +57,20 @@
 <line x1="540.4" y1="140.0" x2="540.4" y2="516.7" stroke="#c0392b" stroke-width="0.9" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
 <text x="532.4" y="328.3" font-size="13" fill="#c0392b" transform="rotate(-90 532.4 328.3)" text-anchor="middle">2790</text>
 <text x="32.0" y="580.0" font-size="15" font-weight="bold" fill="#a8600a">C面 廊下側　FE-76251</text>
-<text x="32.0" y="598.0" font-size="12.5" fill="#7a4a00">縦貼り4短冊／無地貼可</text>
+<text x="32.0" y="598.0" font-size="12.5" fill="#7a4a00">縦貼り4短冊／無地貼可・端材流用が有効</text>
 <text x="520.4" y="580.0" font-size="11" font-weight="bold" fill="#2c3e50" text-anchor="end">◀ 貼り出し（右→左）</text>
 <rect x="32.0" y="610.0" width="488.4" height="376.7" fill="#eaf3fa" stroke="#2c3e50" stroke-width="2.4"/>
 <rect x="272.0" y="610.0" width="124.2" height="376.7" fill="#dceaf5"/>
 <rect x="32.0" y="610.0" width="115.8" height="376.7" fill="#dceaf5"/>
+<rect x="507.3" y="610.0" width="13.1" height="376.7" fill="#bfe6c2" fill-opacity="0.85"/>
 <line x1="147.8" y1="610.0" x2="147.8" y2="986.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
 <line x1="272.0" y1="610.0" x2="272.0" y2="986.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
 <line x1="396.2" y1="610.0" x2="396.2" y2="986.7" stroke="#c0392b" stroke-width="1.1" stroke-dasharray="7 4"/>
 <rect x="334.5" y="713.3" width="172.8" height="273.4" fill="#fff" stroke="#d77f1a" stroke-width="1.6"/>
 <text x="420.9" y="854.0" font-size="12" fill="#d77f1a" text-anchor="middle">親子ドア1280</text>
+<line x1="334.5" y1="713.3" x2="507.3" y2="713.3" stroke="#2e8b46" stroke-width="1.6" stroke-dasharray="4 3"/>
+<text x="420.9" y="708.3" font-size="9.5" fill="#2e8b46" text-anchor="middle">ドア上＝横1枚</text>
+<text x="513.9" y="798.3" font-size="9.5" font-weight="bold" fill="#2e8b46" text-anchor="middle" transform="rotate(-90 513.9 798.3)">端材流用</text>
 <text x="458.3" y="626.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">①</text>
 <text x="334.1" y="626.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">②</text>
 <text x="209.9" y="626.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">③</text>
