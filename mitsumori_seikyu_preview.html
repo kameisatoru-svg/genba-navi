@@ -177,7 +177,7 @@ tr.dragging{opacity:0.4;}
 .doc-page .estimate-table .subtotal-row td{background:#e8e8e8!important;font-weight:700;font-size:13px;}
 .doc-page .estimate-table .section-header td{background:#444!important;color:#fff!important;font-weight:700;font-size:11.5px;padding:4px 8px;}
 .doc-page .bottom-section{display:flex;gap:14px;align-items:flex-start;margin-top:10px;margin-bottom:10px;}
-.doc-page .note-box{flex:1;border:1px solid #888;border-radius:3px;padding:8px 12px;background:#f8f8f8;font-size:11px;color:#444;line-height:1.8;min-height:80px;}
+.doc-page .note-box{flex:1;border:1px solid #888;border-radius:3px;padding:8px 12px;background:#f8f8f8;font-size:13px;color:#111;line-height:1.8;min-height:80px;}
 .doc-page .note-title{font-size:11.5px;font-weight:700;color:#111;margin-bottom:4px;letter-spacing:0.06em;border-bottom:1px solid #bbb;padding-bottom:4px;}
 .doc-page .totals-wrap{flex-shrink:0;}
 .doc-page .totals-table{width:300px;border-collapse:collapse;font-size:12px;border:1px solid #888;}
@@ -186,8 +186,8 @@ tr.dragging{opacity:0.4;}
 .doc-page .totals-table .t-subtotal td{background:#e8e8e8!important;font-weight:600;}
 .doc-page .totals-table .t-final{background:#444!important;}
 .doc-page .totals-table .t-final td{padding:8px 12px;font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:14px;font-weight:700;color:#fff!important;border-bottom:none;}
-.doc-page .footer{margin-top:10px;border-top:1px solid #888;padding-top:6px;display:flex;justify-content:space-between;font-size:11px;color:#444;}
-.doc-page .validity{font-size:11px;color:#444;text-align:left;margin-bottom:8px;margin-top:4px;}
+.doc-page .footer{margin-top:10px;border-top:1px solid #888;padding-top:6px;display:flex;justify-content:space-between;font-size:11px;color:#111;}
+.doc-page .validity{font-size:12px;color:#111;text-align:left;margin-bottom:8px;margin-top:4px;}
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    スマートフォン対応（768px以下）
@@ -573,7 +573,7 @@ const TMPL_CSS = `
   .estimate-table tbody td:not(:first-child){text-align:right;}
   .estimate-table .subtotal-row td{background:var(--subtotal-bg)!important;font-weight:700;font-size:13px;}
   .bottom-section{display:flex;gap:14px;align-items:flex-start;margin-top:10px;margin-bottom:10px;}
-  .note-box{flex:1;border:1px solid var(--border-dark);border-radius:3px;padding:8px 12px;background:var(--light);font-size:11px;color:var(--text-sub);line-height:1.8;min-height:80px;}
+  .note-box{flex:1;border:1px solid var(--border-dark);border-radius:3px;padding:8px 12px;background:var(--light);font-size:13px;color:var(--text);line-height:1.8;min-height:80px;}
   .note-title{font-size:11.5px;font-weight:700;color:var(--text);margin-bottom:4px;letter-spacing:0.06em;border-bottom:1px solid var(--border);padding-bottom:4px;}
   .totals-wrap{flex-shrink:0;}
   .totals-table{width:300px;border-collapse:collapse;font-size:12px;border:1px solid var(--border-dark);}
@@ -582,8 +582,8 @@ const TMPL_CSS = `
   .totals-table .t-subtotal td{background:var(--subtotal-bg)!important;font-weight:600;}
   .totals-table .t-final{background:var(--band-dark)!important;}
   .totals-table .t-final td{padding:8px 12px;font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:14px;font-weight:700;color:var(--white)!important;border-bottom:none;}
-  .footer{margin-top:16px;border-top:1px solid var(--border-dark);padding-top:8px;display:flex;justify-content:space-between;font-size:11px;color:var(--text-sub);}
-  .validity{font-size:11px;color:var(--text-sub);text-align:left;margin-bottom:8px;margin-top:4px;}
+  .footer{margin-top:16px;border-top:1px solid var(--border-dark);padding-top:8px;display:flex;justify-content:space-between;font-size:11px;color:var(--text);}
+  .validity{font-size:12px;color:var(--text);text-align:left;margin-bottom:8px;margin-top:4px;}
   .page-break{page-break-before:always;}
   .detail-table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:8px;border:1px solid var(--border-dark);}
   .detail-table thead th{background:var(--band)!important;color:var(--white)!important;padding:5px 8px;font-weight:700;border-right:1px solid var(--band-mid);}
@@ -1382,7 +1382,7 @@ function render(){
       const p=it.price!==''&&parseFloat(it.price)?fmtN(it.price):'';
       const a=(it.qty!==''&&it.price!==''&&parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
       return `<tr>
-        <td>${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+        <td>${it.name||''}${it.note?'<br><span style="font-size:11px;color:#111">'+it.note+'</span>':''}</td>
         <td>${q}</td><td>${it.unit||''}</td>
         <td>${p}</td><td>${a}</td>
       </tr>`;
@@ -1407,7 +1407,7 @@ function render(){
       const priceCell=p?fmtN(p):'';
       const amtCell=(q&&p)?fmtN(q*p):'';
       return `<tr${pbClass}>
-        <td>${it.name}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+        <td>${it.name}${it.note?'<br><span style="font-size:11px;color:#111">'+it.note+'</span>':''}</td>
         <td>${it.qty===''||it.qty==null?'':it.qty}</td><td>${it.unit||''}</td>
         <td>${priceCell}</td><td>${amtCell}</td>
       </tr>`;
@@ -1442,7 +1442,7 @@ function render(){
       const p=it.price!==''&&parseFloat(it.price)?fmtN(it.price):'';
       const a=(it.qty!==''&&it.price!==''&&parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
       return `<tr>
-        <td>${it.name}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+        <td>${it.name}${it.note?'<br><span style="font-size:11px;color:#111">'+it.note+'</span>':''}</td>
         <td>${q}</td><td>${it.unit||''}</td>
         <td>${p}</td><td>${a}</td>
       </tr>`;
@@ -1554,7 +1554,7 @@ function render(){
           m.items.forEach(it=>{
             const amt=(it.qty&&it.price)?fmtN(it.qty*it.price):'';
             allRows+=`<tr class="group-item-row" data-gi="${gi}">
-              <td style="padding-left:20px">${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+              <td style="padding-left:20px">${it.name||''}${it.note?'<br><span style="font-size:11px;color:#111">'+it.note+'</span>':''}</td>
               <td>${it.qty||''}</td><td>${it.unit||''}</td>
               <td>${(it.price&&it.price!='0'&&it.price!==0)?fmtN(it.price):''}</td>
               <td>${amt}</td>
@@ -1570,7 +1570,7 @@ function render(){
         g.items.forEach(it=>{
           const amt=(it.qty&&it.price)?fmtN(it.qty*it.price):'';
           allRows+=`<tr class="group-item-row" data-gi="${gi}">
-            <td>${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+            <td>${it.name||''}${it.note?'<br><span style="font-size:11px;color:#111">'+it.note+'</span>':''}</td>
             <td>${it.qty||''}</td><td>${it.unit||''}</td>
             <td>${(it.price&&it.price!='0'&&it.price!==0)?fmtN(it.price):''}</td>
             <td>${amt}</td>
@@ -2057,7 +2057,7 @@ function buildDocHTML(){
       const p=it.price!==''&&parseFloat(it.price)?fmtN(it.price):'';
       const a=(it.qty!==''&&it.price!==''&&parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
       return `<tr>
-        <td ${tdStyleL}>${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+        <td ${tdStyleL}>${it.name||''}${it.note?'<br><span style="font-size:11px;color:#111">'+it.note+'</span>':''}</td>
         <td ${tdStyle}>${q}</td><td ${tdStyle}>${it.unit||''}</td>
         <td ${tdStyle}>${p}</td><td ${tdStyle}>${a}</td>
       </tr>`;
@@ -2080,7 +2080,7 @@ function buildDocHTML(){
     const rows=flatItems.map(it=>{
       const isEmpty=!it.name&&!it.unit&&(!it.qty||it.qty==0)&&(!it.price||it.price==0);
       return `<tr>
-        <td ${tdStyleL}>${it.name}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+        <td ${tdStyleL}>${it.name}${it.note?'<br><span style="font-size:11px;color:#111">'+it.note+'</span>':''}</td>
         <td ${tdStyle}>${isEmpty?'':it.qty}</td><td ${tdStyle}>${it.unit||''}</td>
         <td ${tdStyle}>${isEmpty||!it.price||it.price==0?'':fmtN(it.price)}</td>
         <td ${tdStyle}>${isEmpty||!it.qty||!it.price||it.price==0?'':fmtN(it.qty*it.price)}</td>
@@ -2119,7 +2119,7 @@ function buildDocHTML(){
       const p=it.price!==''&&parseFloat(it.price)?fmtN(it.price):'';
       const a=(it.qty!==''&&it.price!==''&&parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
       return `<tr>
-        <td ${tdStyleL}>${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+        <td ${tdStyleL}>${it.name||''}${it.note?'<br><span style="font-size:11px;color:#111">'+it.note+'</span>':''}</td>
         <td ${tdStyle}>${q}</td><td ${tdStyle}>${it.unit||''}</td>
         <td ${tdStyle}>${p}</td><td ${tdStyle}>${a}</td>
       </tr>`;
@@ -2322,7 +2322,7 @@ ${(()=>{
         m.items.forEach(it=>{
           const amt=(it.qty&&it.price&&it.price!='0'&&it.price!==0)?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
           rows+=`<tr>
-            <td style="text-align:left;padding-left:20px;">${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+            <td style="text-align:left;padding-left:20px;">${it.name||''}${it.note?'<br><span style="font-size:11px;color:#111">'+it.note+'</span>':''}</td>
             <td style="text-align:right;">${it.qty||''}</td>
             <td style="text-align:right;">${it.unit||''}</td>
             <td style="text-align:right;">${(it.price&&it.price!='0'&&it.price!==0)?fmtN(it.price):''}</td>
@@ -2344,7 +2344,7 @@ ${(()=>{
       g.items.forEach(it=>{
         const amt=(it.qty&&it.price&&it.price!='0'&&it.price!==0)?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
         rows+=`<tr>
-          <td style="text-align:left;">${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
+          <td style="text-align:left;">${it.name||''}${it.note?'<br><span style="font-size:11px;color:#111">'+it.note+'</span>':''}</td>
           <td style="text-align:right;">${it.qty||''}</td>
           <td style="text-align:right;">${it.unit||''}</td>
           <td style="text-align:right;">${(it.price&&it.price!='0'&&it.price!==0)?fmtN(it.price):''}</td>
