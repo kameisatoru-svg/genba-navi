@@ -1726,35 +1726,61 @@ function checkAndPaginateGroup(){
     return cl.contains('middle-subtotal-row')||cl.contains('group-subtotal-row')||cl.contains('spacer-row');
   };
 
+  // ── 中項目（セクション）単位のブロック改ページ ──
+  // 1ブロック＝「セクション見出し＋その明細＋セクション計」。大項目見出しは直後のセクションへ結合し、
+  // 大項目計・空白行は直前ブロックへ付随させる。ブロックが現ページに収まらなければ丸ごと次ページへ送り、
+  // ページ末尾のキリのいいところ（セクションの切れ目）で「次ページへ続く」とする。
+  // 1ブロックが1ページに収まらない場合のみ、そのブロック内を行単位で分割（見出し末尾単独・小計先頭単独は回避）。
+  const hasCls=(idx,c)=> idx>=0 && idx<allRows.length && allRows[idx].classList.contains(c);
+  const isGrpHeader=(idx)=> hasCls(idx,'group-section-header');
+  const isMidHeader=(idx)=> hasCls(idx,'middle-section-header');
+
   allSegEnds.forEach(segEnd=>{
-    let cumH=0;
-    let i=segStart;
-    while(i<segEnd){
-      cumH+=allRows[i].offsetHeight;
-      if(cumH>availH){
-        // 現在の行 i がはみ出した → 行 i の手前で分割
-        // ただし segStart からの最低1行は確保（segStart+1）
-        let bp=Math.max(segStart+1, i);
-        const origBp=bp;
-        // 境界補正：ページ末尾の見出し単独 / ページ先頭の小計単独 を回避
-        let guard=0;
-        while(guard<10 && bp>segStart+1 && (isHeader(bp-1)||isSubtotal(bp))){
-          bp--;
-          guard++;
-        }
-        // 補正しきれない（依然として見出し末尾 or 小計先頭 かつ最小セグメントに到達）場合は補正を諦める
-        if(bp<=segStart+1 && (isHeader(bp-1)||isSubtotal(bp))){
-          bp=origBp;
-        }
-        autoBreakPoints.push(bp);
-        // 新セグメント開始：i を bp に巻き戻し、cumH をリセット
-        segStart=bp;
-        i=bp;
-        cumH=0;
-        continue;
-      }
-      i++;
+    if(segStart>=segEnd){ segStart=segEnd; return; }
+
+    // セグメント内をセクションブロックに分割
+    const blocks=[];
+    let cur=null;
+    for(let i=segStart;i<segEnd;i++){
+      const prevIsGrp = (i>segStart) && isGrpHeader(i-1);
+      // ブロック境界＝中項目見出し（直前が大項目見出しなら結合）または大項目見出し
+      const boundary = isGrpHeader(i) || (isMidHeader(i) && !prevIsGrp);
+      if(boundary && cur && cur.length){ blocks.push(cur); cur=[]; }
+      if(!cur) cur=[];
+      cur.push(i);
     }
+    if(cur && cur.length) blocks.push(cur);
+
+    // ブロックをページ高さに詰める（収まらなければブロック手前で改ページ）
+    let pageH=0;
+    blocks.forEach(blk=>{
+      const blkH=blk.reduce((s,idx)=>s+allRows[idx].offsetHeight,0);
+      if(pageH>0 && (pageH+blkH)>availH){
+        autoBreakPoints.push(blk[0]);   // このブロックの手前で改ページ
+        pageH=0;
+      }
+      if(blkH>availH){
+        // 1ブロックが1ページに収まらない → ブロック内を行単位で分割
+        let h=0;
+        for(let k=0;k<blk.length;k++){
+          const idx=blk[k];
+          const rowH=allRows[idx].offsetHeight;
+          if(h>0 && (h+rowH)>availH){
+            let bp=idx, guard=0;
+            while(guard<10 && bp>blk[0]+1 && (isHeader(bp-1)||isSubtotal(bp))){ bp--; guard++; }
+            autoBreakPoints.push(bp);
+            // bp以降を次ページ分として高さを積み直す
+            h=0;
+            for(let j=blk.indexOf(bp); j>=0 && j<=k; j++){ h+=allRows[blk[j]].offsetHeight; }
+          } else {
+            h+=rowH;
+          }
+        }
+        pageH=h;
+      } else {
+        pageH+=blkH;
+      }
+    });
     segStart=segEnd;
   });
 
