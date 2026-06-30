@@ -1500,7 +1500,7 @@ function render(){
     </div>
     <div class="info-section">
       <div class="info-left">
-        <div class="client-name">${atena}　御中</div>
+        <div class="client-name">${atena}${honorificFor(atena)}</div>
         ${bandHtml}
       </div>
       <div class="summary-box">
@@ -2295,7 +2295,7 @@ function buildDocHTML(){
   </div>
   <div class="info-section">
     <div class="info-left">
-      <div class="client-name">${atena}　御中</div>
+      <div class="client-name">${atena}${honorificFor(atena)}</div>
       ${bandHtmlP}
     </div>
     <div class="summary-box">
@@ -2507,10 +2507,24 @@ async function savePDF(){
 // ━━━ 再編集用：編集状態の収集／復元 ━━━
 function _gv(id){const e=document.getElementById(id);return e?e.value:'';}
 function _sv(id,v){const e=document.getElementById(id);if(e)e.value=(v==null?'':v);}
+// 宛名の敬称を決定（敬称セレクタ：空=自動／様・御中・殿=明示／none=なし）
+function honorificFor(atena){
+  const name=String(atena||'').trim();
+  if(!name) return '';
+  const k=(document.getElementById('keishou')||{}).value||'';
+  if(k==='none') return '';
+  if(k==='様'||k==='御中'||k==='殿'){
+    return /(様|御中|殿)\s*$/.test(name) ? '' : '　'+k;   // 既に敬称付きなら二重付与しない
+  }
+  // 自動：既に敬称付きはそのまま／法人は御中／個人は様
+  if(/(様|御中|殿)\s*$/.test(name)) return '';
+  const isCompany=/(株式会社|有限会社|合同会社|合資会社|社会福祉法人|医療法人|学校法人|宗教法人|一般社団法人|一般財団法人|NPO|協同組合|組合|公社|事業団|大学|学園|病院|クリニック|工務店|建設|工業|産業|商事|商会)/.test(name);
+  return '　'+(isCompany?'御中':'様');
+}
 function collectReeditState(){
   return {
     _type:'mitsumori_seikyu', _v:1, savedAt:new Date().toISOString(),
-    docType:docType, mode:mode,
+    docType:docType, mode:mode, keishou:_gv('keishou'),
     shokeihiRate:shokeihiRate, shokeihiMode:shokeihiMode, shokeihiFixed:shokeihiFixed, nebiki:nebiki, nebikiLabel:nebikiLabel, hasuNebikiAuto:hasuNebikiAuto, hasuChousei:hasuChousei,
     fields:{
       atena:_gv('atena'), mitsumoriNo:_gv('mitsumoriNo'), hakkoDate:_gv('hakkoDate'),
