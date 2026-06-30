@@ -2557,6 +2557,7 @@ function applyReeditState(s){
   _sv('atena',f.atena); _sv('mitsumoriNo',f.mitsumoriNo); _sv('hakkoDate',f.hakkoDate);
   _sv('shiharaiDate',f.shiharaiDate); _sv('kojimei',f.kojimei); _sv('seshubasho',f.seshubasho);
   _sv('koki',f.koki); _sv('ankenKey',f.ankenKey); _sv('fileSuffix',f.fileSuffix); _sv('bikou',f.bikou);
+  { const _k=document.getElementById('keishou'); if(_k) _k.value=(s.keishou!=null?s.keishou:''); }  // 敬称（自動/様/御中/殿/なし）を復元
   _sv('shokeihiRateInput',shokeihiRate); _sv('shokeihiFixedInput',Math.round(shokeihiFixed||0)); _sv('nebikiInput',nebiki); _sv('nebikiLabelInput',nebikiLabel); _sv('hasuChouseiInput',hasuChousei);
   { const _c=document.getElementById('hasuAutoChk'); if(_c) _c.checked=hasuNebikiAuto; }
   if(typeof setShokeihiMode==='function') setShokeihiMode(shokeihiMode,{silent:true});
