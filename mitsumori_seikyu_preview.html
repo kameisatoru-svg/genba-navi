@@ -488,10 +488,10 @@ tr.dragging{opacity:0.4;}
             <option value="rate">諸経費率（%）</option>
             <option value="fixed">諸経費（金額固定）</option>
           </select>
-          <input id="shokeihiRateInput" type="number" value="15" min="0" max="100" step="0.1"
+          <input id="shokeihiRateInput" type="text" inputmode="decimal" value="15" min="0" max="100" step="0.1"
             style="width:100%;border:1px solid var(--border);border-radius:3px;padding:4px 8px;font-size:12px;font-family:inherit;"
             oninput="shokeihiRate=parseFloat(this.value)||0;render()">
-          <input id="shokeihiFixedInput" type="number" value="0" min="0" step="1"
+          <input id="shokeihiFixedInput" type="text" inputmode="decimal" value="0" min="0" step="1"
             title="諸経費を金額で固定（円）"
             style="display:none;width:100%;border:1px solid var(--border);border-radius:3px;padding:4px 8px;font-size:12px;font-family:inherit;"
             oninput="shokeihiFixed=parseFloat(this.value)||0;render()">
@@ -981,7 +981,7 @@ function initDragRows(tbody, getArr, setArr, onDone){
 function updateAmt(inputEl){
   const tr=inputEl.closest('tr');
   if(!tr)return;
-  const inputs=tr.querySelectorAll('input[type="number"]:not([readonly])');
+  const inputs=tr.querySelectorAll('input.r:not([readonly]):not(.amt-cell)');
   if(inputs.length<2)return;
   const qty=parseFloat(inputs[0].value)||0;
   const price=parseFloat(inputs[1].value)||0;
