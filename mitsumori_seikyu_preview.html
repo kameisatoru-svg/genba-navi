@@ -1796,10 +1796,15 @@ function checkAndPaginateGroup(){
   const firstBreak=allBreaks[0];
 
   // 1ページ目の末尾に「次ページへ続く」
-  const noticeRow=document.createElement('tr');
-  noticeRow.className='next-page-notice';
-  noticeRow.innerHTML='<td colspan="5" style="text-align:center;padding:5px 8px;font-size:11px;color:#666;background:#f0f2f4;border-top:1px dashed #aaa;font-style:italic;">―　次ページへ続く　―</td>';
-  allRows[firstBreak-1].after(noticeRow);
+  // ★ 同じ工事項目がページを跨いで継続する場合のみ表示（既定）。
+  //   次ページ先頭が新しい大項目（group-section-header）＝当該工事はこのページで
+  //   完結しているので「次ページへ続く」は省く。
+  if(!isGrpHeader(firstBreak)){
+    const noticeRow=document.createElement('tr');
+    noticeRow.className='next-page-notice';
+    noticeRow.innerHTML='<td colspan="5" style="text-align:center;padding:5px 8px;font-size:11px;color:#666;background:#f0f2f4;border-top:1px dashed #aaa;font-style:italic;">―　次ページへ続く　―</td>';
+    allRows[firstBreak-1].after(noticeRow);
+  }
 
   // 分割ページを生成
   const segments=[];
@@ -1842,7 +1847,8 @@ function checkAndPaginateGroup(){
     });
 
     // 最終ページ以外は「次ページへ続く」
-    if(si<segments.length-1){
+    // ★ 次ページ先頭が新しい大項目なら当該工事は完結しているので省略（既定）。
+    if(si<segments.length-1 && !isGrpHeader(seg.end)){
       const nr=document.createElement('tr');
       nr.className='next-page-notice';
       nr.innerHTML='<td colspan="5" style="text-align:center;padding:5px 8px;font-size:11px;color:#666;background:#f0f2f4;border-top:1px dashed #aaa;font-style:italic;">―　次ページへ続く　―</td>';
