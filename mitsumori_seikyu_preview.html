@@ -506,14 +506,14 @@ tr.dragging{opacity:0.4;}
               <input type="checkbox" id="hasuAutoChk" checked style="margin:0;" onchange="hasuNebikiAuto=this.checked;render()">端数自動
             </label>
           </div>
-          <input id="nebikiInput" type="number" value="0" min="0"
+          <input id="nebikiInput" type="text" inputmode="decimal" value="0" min="0"
             title="端数自動ON時は自動算出（税抜を1000円単位に切下げ）。手入力すると自動OFF・その額で固定。"
             style="width:100%;border:1px solid var(--border);border-radius:3px;padding:4px 8px;font-size:12px;font-family:inherit;"
             oninput="hasuNebikiAuto=false;var _c=document.getElementById('hasuAutoChk');if(_c)_c.checked=false;nebiki=parseFloat(this.value)||0;render()">
         </div>
         <div class="fgroup" style="flex:2;margin:0;" title="BCS.CSV出力にのみ反映される端数調整。プラス/マイナス両方可。">
           <label style="font-size:10px;color:var(--sub);">端数調整（円・BCS用）</label>
-          <input id="hasuChouseiInput" type="number" value="0" step="1"
+          <input id="hasuChouseiInput" type="text" inputmode="decimal" value="0" step="1"
             style="width:100%;border:1px solid var(--border);border-radius:3px;padding:4px 8px;font-size:12px;font-family:inherit;"
             oninput="hasuChousei=parseFloat(this.value)||0">
         </div>
