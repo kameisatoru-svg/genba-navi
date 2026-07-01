@@ -1744,18 +1744,11 @@ function checkAndPaginateGroup(){
   allSegEnds.forEach(segEnd=>{
     if(segStart>=segEnd){ segStart=segEnd; return; }
 
-    // セグメント内をセクションブロックに分割
+    // ★連続出力モード（かめさん指示・既定）★
+    // 大項目単位でまとめて改ページせず、各行を独立ブロックとしてページ高さいっぱいまで
+    // 連続で詰める。自動のセクション改ページはしない。改ページは手動フラグ（改頁ボタン）のみ。
     const blocks=[];
-    let cur=null;
-    for(let i=segStart;i<segEnd;i++){
-      const prevIsGrp = (i>segStart) && isGrpHeader(i-1);
-      // ブロック境界＝中項目見出し（直前が大項目見出しなら結合）または大項目見出し
-      const boundary = isGrpHeader(i) || (isMidHeader(i) && !prevIsGrp);
-      if(boundary && cur && cur.length){ blocks.push(cur); cur=[]; }
-      if(!cur) cur=[];
-      cur.push(i);
-    }
-    if(cur && cur.length) blocks.push(cur);
+    for(let i=segStart;i<segEnd;i++){ blocks.push([i]); }
 
     // ブロックをページ高さに詰める（収まらなければブロック手前で改ページ）
     let pageH=0;
