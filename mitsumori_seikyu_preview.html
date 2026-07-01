@@ -926,9 +926,9 @@ function renderFlatRows(){
     tr.innerHTML=`
       <td style="width:18px;padding:2px 0;cursor:grab" class="drag-handle" title="ドラッグで並び替え">⠿</td>
       <td><input value="${it.name}" oninput="flatItems[${i}].name=this.value;render()" onkeydown="enterNav(event)"></td>
-      <td><input class="r" type="number" value="${it.qty}" oninput="flatItems[${i}].qty=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
+      <td><input class="r" type="text" inputmode="decimal" value="${it.qty}" oninput="flatItems[${i}].qty=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
       <td><input value="${it.unit}" oninput="flatItems[${i}].unit=this.value;render()" style="max-width:34px" onkeydown="enterNav(event)"></td>
-      <td><input class="r" type="number" value="${it.price}" oninput="flatItems[${i}].price=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
+      <td><input class="r" type="text" inputmode="decimal" value="${it.price}" oninput="flatItems[${i}].price=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
       <td><input class="r amt-cell" readonly value="${(parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):''}" style="color:var(--sub)"></td>
       <td><input value="${it.note}" oninput="flatItems[${i}].note=this.value;render()" onkeydown="enterNav(event)"></td>
       <td style="white-space:nowrap;padding:2px 2px;">
@@ -1056,9 +1056,9 @@ function renderGroupSummaryRows(){
     tr.innerHTML=`
       <td style="width:18px;padding:2px 0;cursor:grab" class="drag-handle" title="ドラッグで並び替え">⠿</td>
       <td><input value="${it.name}" oninput="groupSummaryItems[${i}].name=this.value;render()" onkeydown="enterNav(event)"></td>
-      <td><input class="r" type="number" value="${it.qty}" oninput="groupSummaryItems[${i}].qty=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
+      <td><input class="r" type="text" inputmode="decimal" value="${it.qty}" oninput="groupSummaryItems[${i}].qty=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
       <td><input value="${it.unit}" oninput="groupSummaryItems[${i}].unit=this.value;render()" style="max-width:34px" onkeydown="enterNav(event)"></td>
-      <td><input class="r" type="number" value="${it.price}" oninput="groupSummaryItems[${i}].price=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
+      <td><input class="r" type="text" inputmode="decimal" value="${it.price}" oninput="groupSummaryItems[${i}].price=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
       <td><input class="r amt-cell" readonly value="${(parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):''}" style="color:var(--sub)"></td>
       <td><input value="${it.note}" oninput="groupSummaryItems[${i}].note=this.value;render()" onkeydown="enterNav(event)"></td>
       <td><button class="del-btn" onclick="groupSummaryDelRow(${i})">✕</button></td>`;
@@ -1101,9 +1101,9 @@ function renderGroupBlocks(){
           mRows+=`<tr>
             <td style="width:18px;padding:2px 0;cursor:grab" class="drag-handle" title="ドラッグで並び替え">⠿</td>
             <td><input value="${it.name}" oninput="groupItems[${gi}].middleItems[${mi}].items[${ii}].name=this.value;render()" onkeydown="enterNav(event)"></td>
-            <td><input class="r" type="number" value="${it.qty||''}" oninput="groupItems[${gi}].middleItems[${mi}].items[${ii}].qty=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
+            <td><input class="r" type="text" inputmode="decimal" value="${it.qty||''}" oninput="groupItems[${gi}].middleItems[${mi}].items[${ii}].qty=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
             <td><input value="${it.unit||''}" oninput="groupItems[${gi}].middleItems[${mi}].items[${ii}].unit=this.value;render()" style="max-width:32px" onkeydown="enterNav(event)"></td>
-            <td><input class="r" type="number" value="${it.price||''}" oninput="groupItems[${gi}].middleItems[${mi}].items[${ii}].price=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
+            <td><input class="r" type="text" inputmode="decimal" value="${it.price||''}" oninput="groupItems[${gi}].middleItems[${mi}].items[${ii}].price=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
             <td><input class="r amt-cell" readonly value="${(parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):''}" style="color:var(--sub)"></td>
             <td><input value="${it.note}" oninput="groupItems[${gi}].middleItems[${mi}].items[${ii}].note=this.value;render()" onkeydown="enterNav(event)"></td>
             <td><button class="del-btn" onclick="groupDelMiddleItem(${gi},${mi},${ii})">✕</button></td>
@@ -1143,9 +1143,9 @@ function renderGroupBlocks(){
         rowsHtml+=`<tr>
           <td style="width:18px;padding:2px 0;cursor:grab" class="drag-handle" title="ドラッグで並び替え">⠿</td>
           <td><input value="${it.name}" oninput="groupItems[${gi}].items[${ii}].name=this.value;render()" onkeydown="enterNav(event)"></td>
-          <td><input class="r" type="number" value="${it.qty||''}" oninput="groupItems[${gi}].items[${ii}].qty=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
+          <td><input class="r" type="text" inputmode="decimal" value="${it.qty||''}" oninput="groupItems[${gi}].items[${ii}].qty=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
           <td><input value="${it.unit||''}" oninput="groupItems[${gi}].items[${ii}].unit=this.value;render()" style="max-width:32px" onkeydown="enterNav(event)"></td>
-          <td><input class="r" type="number" value="${it.price||''}" oninput="groupItems[${gi}].items[${ii}].price=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
+          <td><input class="r" type="text" inputmode="decimal" value="${it.price||''}" oninput="groupItems[${gi}].items[${ii}].price=parseFloat(this.value)||0;updateAmt(this);render()" onkeydown="enterNav(event)"></td>
           <td><input class="r amt-cell" readonly value="${(parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):''}" style="color:var(--sub)"></td>
           <td><input value="${it.note}" oninput="groupItems[${gi}].items[${ii}].note=this.value;render()" onkeydown="enterNav(event)"></td>
           <td><button class="del-btn" onclick="groupDelItem(${gi},${ii})">✕</button></td>
