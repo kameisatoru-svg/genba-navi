@@ -3371,6 +3371,72 @@
             ],
             "groupSummaryItems": []
           }
+        },
+        {
+          "書類番号": "見_座布団カバー_村上-諸修繕相談-26",
+          "発行日": "2026-06-22",
+          "金額": 36300,
+          "備考": "村上邸 座布団カバー製作（W560×D550）5個。2026-07-01 発注いただき済み。生地は椅子張替え（アダル）と共通のため本見積では製作費＋運搬費のみ計上",
+          "ファイル": "見_座布団カバー_村上-諸修繕相談-26.pdf",
+          "お客様向け番号": "ARM-T028-260622-01",
+          "_genbaDoc": {
+            "v": 1,
+            "savedAt": "2026-06-26T00:00:00.000Z",
+            "docType": "mitsumori",
+            "mode": "flat",
+            "shokeihiRate": 0,
+            "shokeihiMode": "rate",
+            "shokeihiFixed": 0,
+            "nebiki": 0,
+            "nebikiLabel": "端数値引き",
+            "hasuChousei": 0,
+            "header": {
+              "atena": "村上信子 様",
+              "mitsumoriNo": "ARM-T028-260622-01",
+              "hakkoDate": "2026-06-22",
+              "shiharaiDate": "",
+              "kojimei": "座布団カバー製作（W560×D550）",
+              "seshubasho": "大分県別府市青山町",
+              "koki": "",
+              "ankenKey": "村上-諸修繕相談-26",
+              "fileSuffix": "座布団カバー"
+            },
+            "flatItems": [
+              {
+                "name": "座布団カバー 製作費（縫製・ファスナー仕様）W560×D550",
+                "qty": 5,
+                "unit": "個",
+                "price": 6000,
+                "note": "※製作単価は仮（アダル確認後確定）",
+                "pageBreak": false
+              },
+              {
+                "name": "運搬費",
+                "qty": 1,
+                "unit": "式",
+                "price": 3000,
+                "note": "",
+                "pageBreak": false
+              }
+            ],
+            "groupItems": [
+              {
+                "name": "",
+                "pageBreak": false,
+                "middleItems": [],
+                "items": [
+                  {
+                    "name": "",
+                    "qty": "",
+                    "unit": "",
+                    "price": "",
+                    "note": ""
+                  }
+                ]
+              }
+            ],
+            "groupSummaryItems": []
+          }
         }
       ],
       "請求": [],
@@ -3425,7 +3491,7 @@
         {
           "日": "2026-07-01",
           "種別": "見積",
-          "概要": "座布団カバーを新規見積提出し、発注いただいた",
+          "概要": "座布団カバーを新規見積提出（税込¥36,300／5個）し、発注いただいた",
           "状態": "完了"
         },
         {
