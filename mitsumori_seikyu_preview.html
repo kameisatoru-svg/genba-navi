@@ -307,7 +307,7 @@ tr.dragging{opacity:0.4;}
       <option value="lump" id="mode-lump" style="display:none;">1式表記</option>
     </select>
     <!-- 主要ボタン3つ（常駐：印刷・貼付・⋮） -->
-    <button class="tb-btn tb-btn-gold" onclick="printHTMLWithSave()" title="印刷・PDF保存">
+    <button class="tb-btn tb-btn-gold" onclick="printHTML()" title="印刷・PDF保存">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
         <rect x="6" y="3" width="12" height="6" rx="1"/>
         <path d="M6 18 L4 18 Q3 18 3 17 L3 11 Q3 9 5 9 L19 9 Q21 9 21 11 L21 17 Q21 18 20 18 L18 18"/>
@@ -316,7 +316,7 @@ tr.dragging{opacity:0.4;}
       </svg>
       <span class="tb-label">印刷</span>
     </button>
-    <button class="tb-btn tb-btn-pdf" id="tb-savepdf-btn" onclick="savePDFWithSave()" title="PDFファイルとして保存（スマホ推奨）">
+    <button class="tb-btn tb-btn-pdf" id="tb-savepdf-btn" onclick="savePDF()" title="PDFファイルとして保存（スマホ推奨）">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
         <path d="M14 3 L7 3 Q5 3 5 5 L5 19 Q5 21 7 21 L17 21 Q19 21 19 19 L19 11"/>
         <path d="M14 3 L14 8 L19 8 L19 11"/>
@@ -455,7 +455,7 @@ tr.dragging{opacity:0.4;}
 <div class="sp-bottom-nav" style="display:none" id="sp-bottom-nav">
   <button class="sp-nav-btn sp-nav-back" id="sp-nav-back" style="display:none" onclick="spGoTab('edit')">◀ 入力</button>
   <button class="sp-nav-btn sp-nav-next" id="sp-nav-next" onclick="spGoTab('preview')">確認へ ▶</button>
-  <button class="sp-nav-btn sp-nav-print" id="sp-nav-print" style="display:none" onclick="printHTMLWithSave()">印刷・PDF保存</button>
+  <button class="sp-nav-btn sp-nav-print" id="sp-nav-print" style="display:none" onclick="printHTML()">印刷・PDF保存</button>
 </div>
 <div class="main" id="main-area">
   <div class="editor">
