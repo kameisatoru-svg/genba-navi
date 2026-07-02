@@ -15,7 +15,7 @@
 </defs>
 <rect x="0" y="0" width="1485" height="1050" fill="#ffffff"/>
 <text x="30.0" y="42.0" font-size="24" fill="#1a2a3a" text-anchor="start" font-weight="bold">洗面所 収納カウンター設置 計画図（清書）</text>
-<text x="30.0" y="68.0" font-size="13" fill="#555" text-anchor="start">冷蔵庫・カラーBOX上部にミルクスパイン積層カウンター（t30×W500）を設置 ／ 手書きスケッチ清書 2026-07-02 ／ 単位mm・現地実測ベース（施工前要確認）</text>
+<text x="30.0" y="68.0" font-size="13" fill="#555" text-anchor="start">冷蔵庫・カラーBOX上部にメルクシパイン積層カウンター（t30×W500）を設置 ／ 手書きスケッチ清書 2026-07-02 ／ 単位mm・現地実測ベース（施工前要確認）</text>
 <line x1="30" y1="80" x2="1455" y2="80" stroke="#888" stroke-width="1"/>
 <text x="70.0" y="140.0" font-size="18" fill="#1a2a3a" text-anchor="start" font-weight="bold">■ 平面図</text>
 <text x="160.0" y="140.0" font-size="13" fill="#555" text-anchor="start">（笠木壁・洗面化粧台＝既存、点線＝新設カウンター）</text>
@@ -29,14 +29,15 @@
 <line x1="641.2" y1="236.0" x2="661.0" y2="255.8" stroke="#2c3e50" stroke-width="1"/>
 <line x1="661.0" y1="236.0" x2="641.2" y2="255.8" stroke="#2c3e50" stroke-width="1"/>
 <rect x="647.8" y="255.8" width="13.2" height="214.5" fill="url(#col)" stroke="#2c3e50" stroke-width="1.5"/>
-<text x="654.4" y="481.9" font-size="12" fill="#555" text-anchor="middle">既存壁</text>
+<text x="654.4" y="481.9" font-size="12" fill="#555" text-anchor="middle">既存壁（中間間仕切り）</text>
+<text x="654.4" y="496.7" font-size="12" fill="#555" text-anchor="middle">天端H1925・笠木t30</text>
 <rect x="105.0" y="245.9" width="94.1" height="151.8" fill="#f6e6a8" stroke="#a8862a" stroke-width="1.5"/>
 <line x1="109.0" y1="245.9" x2="109.0" y2="397.7" stroke="#a8862a" stroke-width="1"/>
 <text x="152.8" y="335.0" font-size="13" fill="#6b5510" text-anchor="middle" font-weight="bold" transform="rotate(-90 152.8 335.0)">カラーBOX</text>
 <text x="103.3" y="425.8" font-size="12" fill="#6b5510" text-anchor="start" font-weight="bold">◀ 引出側</text>
 <rect x="212.2" y="245.9" width="165.0" height="188.1" fill="#bcd8f0" stroke="#4a7aa8" stroke-width="1.5"/>
 <text x="294.7" y="328.4" font-size="14" fill="#1e4e79" text-anchor="middle" font-weight="bold">冷蔵庫</text>
-<text x="294.7" y="348.2" font-size="12" fill="#1e4e79" text-anchor="middle">W約500(要実測)</text>
+<text x="294.7" y="348.2" font-size="12" fill="#1e4e79" text-anchor="middle">W500×D570</text>
 <rect x="413.5" y="249.2" width="231.0" height="217.8" fill="#f9e4ef" stroke="#c48ab0" stroke-width="1.5"/>
 <rect x="459.7" y="278.9" width="138.6" height="108.9" rx="14" fill="#ffffff" stroke="#c48ab0" stroke-width="1.3"/>
 <circle cx="529.0" cy="272.3" r="4" fill="#c48ab0"/>
@@ -44,7 +45,7 @@
 <text x="529.0" y="440.6" font-size="12" fill="#8a4a6e" text-anchor="middle">既存</text>
 <rect x="100.0" y="245.9" width="323.4" height="165.0" fill="#e8c99a" stroke="#a8600a" stroke-width="2.0" stroke-dasharray="7 4" fill-opacity="0.25"/>
 <line x1="265.0" y1="410.9" x2="450.0" y2="508.0" stroke="#555" stroke-width="0.9"/>
-<text x="280.0" y="504.0" font-size="13" fill="#a8600a" text-anchor="start" font-weight="bold">新設：ミルクスパイン積層カウンター</text>
+<text x="280.0" y="504.0" font-size="13" fill="#a8600a" text-anchor="start" font-weight="bold">新設：メルクシパイン積層カウンター</text>
 <text x="280.0" y="520.0" font-size="12" fill="#a8600a" text-anchor="start">t30×D500×L約980（500幅板を現場カット）</text>
 <line x1="401.9" y1="470.3" x2="700.0" y2="530.0" stroke="#555" stroke-width="0.9"/>
 <text x="660.0" y="526.0" font-size="13" fill="#2c3e50" text-anchor="start" font-weight="bold">L型笠木壁（既存）</text>
@@ -116,7 +117,7 @@
 <text x="48.0" y="710.0" font-size="13" fill="#333" text-anchor="start" font-weight="bold">1.</text>
 <text x="72.0" y="710.0" font-size="13" fill="#333" text-anchor="start">本図は手書きスケッチ（2026-07-02）の清書。寸法は現地実測メモに基づく。施工前に再実測のこと。</text>
 <text x="48.0" y="740.0" font-size="13" fill="#333" text-anchor="start" font-weight="bold">2.</text>
-<text x="72.0" y="740.0" font-size="13" fill="#333" text-anchor="start">新設カウンター＝ミルクスパイン積層材 t30 × W500 × L約980。手持ちの500幅板を現場カットして使用。</text>
+<text x="72.0" y="740.0" font-size="13" fill="#333" text-anchor="start">新設カウンター＝メルクシパイン積層材 t30 × W500 × L約980。手持ちの500幅板を現場カットして使用。</text>
 <text x="48.0" y="770.0" font-size="13" fill="#333" text-anchor="start" font-weight="bold">3.</text>
 <text x="72.0" y="770.0" font-size="13" fill="#333" text-anchor="start">冷蔵庫天端とカウンター下端の間に放熱クリアランス 10〜20mm を確保（冷蔵庫に熱をこもらせない）。</text>
 <text x="48.0" y="800.0" font-size="13" fill="#333" text-anchor="start" font-weight="bold">4.</text>
@@ -124,14 +125,14 @@
 <text x="48.0" y="830.0" font-size="13" fill="#333" text-anchor="start" font-weight="bold">5.</text>
 <text x="72.0" y="830.0" font-size="13" fill="#333" text-anchor="start">カラーBOX上はゲタ高さ分（約60）の隙間 → 引出側（左）からトレイ等を差し込んで使用可。</text>
 <text x="48.0" y="860.0" font-size="13" fill="#333" text-anchor="start" font-weight="bold">6.</text>
-<text x="72.0" y="860.0" font-size="13" fill="#333" text-anchor="start">レーザー実測より：笠木天端930（=900+笠木30）／冷蔵庫天端 約967（笠木+37）／カラーBOX天端 約922。</text>
+<text x="72.0" y="860.0" font-size="13" fill="#333" text-anchor="start">レーザー実測より：笠木天端930（=壁900+笠木t30）／冷蔵庫天端 約967（笠木+37）／カラーBOX天端 約922。</text>
 <text x="48.0" y="890.0" font-size="13" fill="#333" text-anchor="start" font-weight="bold">7.</text>
-<text x="72.0" y="890.0" font-size="13" fill="#c0392b" text-anchor="start">※要確認：FL〜900が「笠木含む/含まない」の別、冷蔵庫の実幅、手書きメモ「H1925（既存壁天端?）」・束位置455/910/1465。</text>
-<text x="48.0" y="928.0" font-size="12" fill="#7a4a00" text-anchor="start">（高さの計算基準：笠木天端=930 とした場合。実際は現地レーザー基準で墨出しすること）</text>
+<text x="72.0" y="890.0" font-size="13" fill="#333" text-anchor="start">既存壁（右側）＝天井まで達しない中間間仕切り。天端（笠木天板）まで FL+1925・笠木t30。</text>
+<text x="48.0" y="928.0" font-size="12" fill="#7a4a00" text-anchor="start">（笠木天端930・冷蔵庫W500・既存壁H1925は 2026-07-02 確認済。施工時は現地レーザー基準で墨出しすること）</text>
 <rect x="960" y="648" width="495" height="372" fill="#fbfbf8" stroke="#888" stroke-width="1"/>
 <text x="978.0" y="678.0" font-size="16" fill="#1a2a3a" text-anchor="start" font-weight="bold">■ 凡例</text>
 <rect x="978.0" y="690.0" width="34.0" height="18.0" fill="#e8c99a" stroke="#a8600a" stroke-width="1.2"/>
-<text x="1022.0" y="704.0" font-size="13" fill="#333" text-anchor="start">新設：ミルクスパイン積層カウンター t30</text>
+<text x="1022.0" y="704.0" font-size="13" fill="#333" text-anchor="start">新設：メルクシパイン積層カウンター t30</text>
 <rect x="978.0" y="722.0" width="34.0" height="18.0" fill="#c4e3c0" stroke="#4e8a48" stroke-width="1.2"/>
 <text x="1022.0" y="736.0" font-size="13" fill="#333" text-anchor="start">新設：ゲタ（パッキン材）</text>
 <rect x="978.0" y="754.0" width="34.0" height="18.0" fill="#f6e6a8" stroke="#a8862a" stroke-width="1.2"/>
@@ -143,7 +144,7 @@
 <rect x="978.0" y="850.0" width="34.0" height="18.0" fill="#cfd8e0" stroke="#2c3e50" stroke-width="1.2"/>
 <text x="1022.0" y="864.0" font-size="13" fill="#333" text-anchor="start">L型笠木壁（既存）H900＋笠木t30</text>
 <rect x="978.0" y="882.0" width="34.0" height="18.0" fill="url(#col)" stroke="#2c3e50" stroke-width="1.2"/>
-<text x="1022.0" y="896.0" font-size="13" fill="#333" text-anchor="start">既存壁・柱</text>
+<text x="1022.0" y="896.0" font-size="13" fill="#333" text-anchor="start">既存壁・柱（中間間仕切り 天端H1925）</text>
 <line x1="978" y1="922" x2="1022" y2="922" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
 <text x="1030.0" y="928.0" font-size="13" fill="#333" text-anchor="start">寸法（mm）</text>
 <line x1="978" y1="954" x2="1022" y2="954" stroke="#2a6da3" stroke-width="1.4" stroke-dasharray="8 4"/>
