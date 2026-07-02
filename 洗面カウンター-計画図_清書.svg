@@ -33,8 +33,16 @@
 <text x="654.4" y="496.7" font-size="12" fill="#555" text-anchor="middle">天端H1925・笠木t30</text>
 <rect x="105.0" y="245.9" width="94.1" height="151.8" fill="#f6e6a8" stroke="#a8862a" stroke-width="1.5"/>
 <line x1="109.0" y1="245.9" x2="109.0" y2="397.7" stroke="#a8862a" stroke-width="1"/>
+<rect x="105.0" y="245.9" width="94.1" height="7.3" fill="#d9c37a" stroke="#a8862a" stroke-width="1.0"/>
+<rect x="105.0" y="390.4" width="94.1" height="7.3" fill="#d9c37a" stroke="#a8862a" stroke-width="1.0"/>
 <text x="152.8" y="335.0" font-size="13" fill="#6b5510" text-anchor="middle" font-weight="bold" transform="rotate(-90 152.8 335.0)">カラーBOX</text>
+<rect x="113.2" y="255.8" width="72.6" height="13.2" fill="#c4e3c0" stroke="#4e8a48" stroke-width="1.5"/>
+<rect x="113.2" y="368.0" width="72.6" height="13.2" fill="#c4e3c0" stroke="#4e8a48" stroke-width="1.5"/>
+<rect x="172.6" y="269.0" width="13.2" height="99.0" fill="#c4e3c0" stroke="#4e8a48" stroke-width="1.5"/>
 <text x="103.3" y="425.8" font-size="12" fill="#6b5510" text-anchor="start" font-weight="bold">◀ 引出側</text>
+<line x1="100.0" y1="556.0" x2="129.7" y2="380.5" stroke="#555" stroke-width="0.9"/>
+<text x="30.0" y="568.0" font-size="12" fill="#4e8a48" text-anchor="start" font-weight="bold">カラーBOX側の下駄＝コの字型（引出側オープン）</text>
+<text x="30.0" y="584.0" font-size="12" fill="#4e8a48" text-anchor="start">側板(t22・天板+3mm)を避けて ひと回り小さく／背面突起なし</text>
 <rect x="212.2" y="245.9" width="165.0" height="188.1" fill="#bcd8f0" stroke="#4a7aa8" stroke-width="1.5"/>
 <text x="294.7" y="328.4" font-size="14" fill="#1e4e79" text-anchor="middle" font-weight="bold">冷蔵庫</text>
 <text x="294.7" y="348.2" font-size="12" fill="#1e4e79" text-anchor="middle">W500×D570</text>
@@ -88,8 +96,7 @@
 <rect x="1177.0" y="283.0" width="9.9" height="297.0" fill="#cfd8e0" stroke="#2c3e50" stroke-width="2.0"/>
 <rect x="1173.0" y="273.1" width="17.8" height="9.9" fill="url(#kasagi)" stroke="#2c3e50" stroke-width="1.5"/>
 <rect x="1175.3" y="255.9" width="13.2" height="17.2" fill="#c4e3c0" stroke="#4e8a48" stroke-width="1.5"/>
-<rect x="893.2" y="255.9" width="23.1" height="19.8" fill="#c4e3c0" stroke="#4e8a48" stroke-width="1.5"/>
-<rect x="946.0" y="255.9" width="23.1" height="19.8" fill="#c4e3c0" stroke="#4e8a48" stroke-width="1.5"/>
+<rect x="893.2" y="255.9" width="72.6" height="19.8" fill="#c4e3c0" stroke="#4e8a48" stroke-width="1.5"/>
 <rect x="880.0" y="246.0" width="323.4" height="9.9" fill="#e8c99a" stroke="#a8600a" stroke-width="2.0"/>
 <line x1="1158.8" y1="260.9" x2="1158.8" y2="255.9" stroke="#c0392b" stroke-width="1.2"/>
 <line x1="1204.0" y1="196.5" x2="1201.8" y2="246.0" stroke="#a8600a" stroke-width="0.9"/>
@@ -97,7 +104,7 @@
 <line x1="1204.0" y1="221.2" x2="1159.8" y2="258.2" stroke="#c0392b" stroke-width="0.9"/>
 <text x="1210.0" y="225.2" font-size="13" fill="#c0392b" text-anchor="start" font-weight="bold">放熱クリア 10〜20</text>
 <line x1="1204.0" y1="244.3" x2="1189.5" y2="264.5" stroke="#4e8a48" stroke-width="0.9"/>
-<text x="1210.0" y="248.3" font-size="13" fill="#4e8a48" text-anchor="start" font-weight="bold">ゲタ h約52（笠木上）</text>
+<text x="1210.0" y="248.3" font-size="13" fill="#4e8a48" text-anchor="start" font-weight="bold">笠木側の下駄 h約52</text>
 <line x1="1204.0" y1="269.1" x2="1191.5" y2="278.1" stroke="#2c3e50" stroke-width="0.9"/>
 <text x="1210.0" y="273.1" font-size="13" fill="#2c3e50" text-anchor="start">笠木天端930（=900+笠木t30）</text>
 <line x1="856.9" y1="226.2" x2="1195.2" y2="226.2" stroke="#2a6da3" stroke-width="1.4" stroke-dasharray="10 5"/>
@@ -111,7 +118,7 @@
 <line x1="1201.8" y1="283.0" x2="1201.8" y2="580.0" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
 <text x="1196.8" y="431.5" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold" transform="rotate(-90 1196.8 431.5)">900</text>
 <path d="M 984.9,268.1 L 984.9,598.0" stroke="#4e8a48" stroke-width="0.9" stroke-dasharray="4 3"/>
-<text x="899.8" y="614.0" font-size="12" fill="#4e8a48" text-anchor="start" font-weight="bold">カラーBOX上 すき間約60 → 引出側(左)からトレイ収納可</text>
+<text x="889.9" y="614.0" font-size="12" fill="#4e8a48" text-anchor="start" font-weight="bold">カラーBOX側の下駄 h約63（コの字型・平面図参照）→ 引出側からトレイ収納可</text>
 <rect x="30" y="648" width="900" height="372" fill="#fbfbf8" stroke="#888" stroke-width="1"/>
 <text x="48.0" y="678.0" font-size="16" fill="#1a2a3a" text-anchor="start" font-weight="bold">■ 注記</text>
 <text x="48.0" y="710.0" font-size="13" fill="#333" text-anchor="start" font-weight="bold">1.</text>
@@ -121,20 +128,22 @@
 <text x="48.0" y="770.0" font-size="13" fill="#333" text-anchor="start" font-weight="bold">3.</text>
 <text x="72.0" y="770.0" font-size="13" fill="#333" text-anchor="start">冷蔵庫天端とカウンター下端の間に放熱クリアランス 10〜20mm を確保（冷蔵庫に熱をこもらせない）。</text>
 <text x="48.0" y="800.0" font-size="13" fill="#333" text-anchor="start" font-weight="bold">4.</text>
-<text x="72.0" y="800.0" font-size="13" fill="#333" text-anchor="start">カウンター支持＝右：笠木上ゲタ（h約52）／ 左：カラーBOX上ゲタ（h約60）。固定方法は現場判断。</text>
+<text x="72.0" y="800.0" font-size="13" fill="#333" text-anchor="start">カウンター支持＝笠木側の下駄 h約52 ／ カラーBOX側の下駄 h約63（天板面から。側板天端からは60）。固定方法は現場判断。</text>
 <text x="48.0" y="830.0" font-size="13" fill="#333" text-anchor="start" font-weight="bold">5.</text>
-<text x="72.0" y="830.0" font-size="13" fill="#333" text-anchor="start">カラーBOX上はゲタ高さ分（約60）の隙間 → 引出側（左）からトレイ等を差し込んで使用可。</text>
+<text x="72.0" y="830.0" font-size="13" fill="#333" text-anchor="start">カラーBOX側の下駄＝引出側オープンの「コの字型」。側板（t22・天板+3mm）を避けて ひと回り小さく天板凹み内に設置。背面突起なし。</text>
 <text x="48.0" y="860.0" font-size="13" fill="#333" text-anchor="start" font-weight="bold">6.</text>
-<text x="72.0" y="860.0" font-size="13" fill="#333" text-anchor="start">レーザー実測より：笠木天端930（=壁900+笠木t30）／冷蔵庫天端 約967（笠木+37）／カラーBOX天端 約922。</text>
+<text x="72.0" y="860.0" font-size="13" fill="#333" text-anchor="start">コの字の開口（引出側＝左）からカラーBOX上へトレイ等を差し込んで使用可（側板天端上の有効すき間 約60）。</text>
 <text x="48.0" y="890.0" font-size="13" fill="#333" text-anchor="start" font-weight="bold">7.</text>
-<text x="72.0" y="890.0" font-size="13" fill="#333" text-anchor="start">既存壁（右側）＝天井まで達しない中間間仕切り。天端（笠木天板）まで FL+1925・笠木t30。</text>
-<text x="48.0" y="928.0" font-size="12" fill="#7a4a00" text-anchor="start">（笠木天端930・冷蔵庫W500・既存壁H1925は 2026-07-02 確認済。施工時は現地レーザー基準で墨出しすること）</text>
+<text x="72.0" y="890.0" font-size="13" fill="#333" text-anchor="start">レーザー実測より：笠木天端930（=壁900+笠木t30）／冷蔵庫天端 約967（笠木+37）／カラーBOX天端（側板）約922。</text>
+<text x="48.0" y="920.0" font-size="13" fill="#333" text-anchor="start" font-weight="bold">8.</text>
+<text x="72.0" y="920.0" font-size="13" fill="#333" text-anchor="start">既存壁（右側）＝天井まで達しない中間間仕切り。天端（笠木天板）まで FL+1925・笠木t30。</text>
+<text x="48.0" y="958.0" font-size="12" fill="#7a4a00" text-anchor="start">（笠木天端930・冷蔵庫W500・既存壁H1925は 2026-07-02 確認済。施工時は現地レーザー基準で墨出しすること）</text>
 <rect x="960" y="648" width="495" height="372" fill="#fbfbf8" stroke="#888" stroke-width="1"/>
 <text x="978.0" y="678.0" font-size="16" fill="#1a2a3a" text-anchor="start" font-weight="bold">■ 凡例</text>
 <rect x="978.0" y="690.0" width="34.0" height="18.0" fill="#e8c99a" stroke="#a8600a" stroke-width="1.2"/>
 <text x="1022.0" y="704.0" font-size="13" fill="#333" text-anchor="start">新設：メルクシパイン積層カウンター t30</text>
 <rect x="978.0" y="722.0" width="34.0" height="18.0" fill="#c4e3c0" stroke="#4e8a48" stroke-width="1.2"/>
-<text x="1022.0" y="736.0" font-size="13" fill="#333" text-anchor="start">新設：ゲタ（パッキン材）</text>
+<text x="1022.0" y="736.0" font-size="13" fill="#333" text-anchor="start">新設：下駄（笠木側／BOX側＝コの字型）</text>
 <rect x="978.0" y="754.0" width="34.0" height="18.0" fill="#f6e6a8" stroke="#a8862a" stroke-width="1.2"/>
 <text x="1022.0" y="768.0" font-size="13" fill="#333" text-anchor="start">カラーBOX 285×460×H約880＋下駄</text>
 <rect x="978.0" y="786.0" width="34.0" height="18.0" fill="#bcd8f0" stroke="#4a7aa8" stroke-width="1.2"/>
