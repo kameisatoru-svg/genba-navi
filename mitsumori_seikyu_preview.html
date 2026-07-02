@@ -2639,35 +2639,11 @@ function printHTML(preWin){
   setTimeout(()=>URL.revokeObjectURL(url),5000);
 }
 
-// ── 印刷/PDFの前に必ず案件台帳(data.json)へ保存する（印刷物と台帳の食い違い防止）──
-// 仕様：印刷・PDFボタンは「①先にdata.jsonへ保存 → ②その後で印刷/PDF」の順で実行する。
-// 保存は silent（確認ダイアログ省略）で行い、現在の編集内容をそのまま台帳へ書き込む。
-// 保存が成功しなかった場合（案件キー未入力・中止・通信失敗等）は、印刷/PDFを続けるか確認する。
-async function _saveLedgerThenRun(action, actionName, winToCloseOnCancel){
-  let ok = false;
-  try { ok = await saveToAnkenLedger({silent:true}); }
-  catch(e){ console.error(e); ok = false; }
-  if(ok !== true){
-    const go = confirm('案件台帳(data.json)への保存が完了していません。\n（案件キー未入力・保存中止・通信失敗などの可能性）\n\nこのまま' + actionName + 'を続けますか？\n「キャンセル」を押すと' + actionName + 'も中止します。');
-    if(!go){
-      // 中止時：印刷用に先行オープンした空ウィンドウがあれば閉じる
-      if(winToCloseOnCancel){ try{ winToCloseOnCancel.close(); }catch(e){} }
-      return;
-    }
-  }
-  await action();
-}
-function printHTMLWithSave(){
-  // クリック直後（=ユーザー操作中・await前）に同期でウィンドウを開く＝ポップアップブロック回避。
-  // 台帳保存(await)後に開くと user-activation を失いブロックされるため、ここで先行して開く。
-  let win = null;
-  try { win = window.open('', '_blank'); }catch(e){ win = null; }
-  if(win){
-    try{ win.document.write('<!doctype html><meta charset="utf-8"><title>準備中…</title><body style="font:14px sans-serif;padding:24px;color:#555">PDFを準備しています…</body>'); }catch(e){}
-  }
-  return _saveLedgerThenRun(()=>printHTML(win), '印刷', win);
-}
-function savePDFWithSave(){ return _saveLedgerThenRun(savePDF, 'PDF保存'); }
+// ── 印刷/PDFと台帳保存の分離（2026/7/2 簡素化）──
+// 旧仕様「印刷・PDFの前に必ず data.json へ保存（失敗時は確認→キャンセルで印刷中止）」は、
+// PAT未設定・通信失敗のたびに印刷が止まるため廃止。印刷・PDFボタンは印刷/PDFのみ行う。
+// 台帳への保存は ⋮メニュー「台帳へ保存」(saveToAnkenLedger) から任意で実行する
+// （発行PDFからの台帳整合は日次チェック ar2026-daily-update-check が自動で行う運用）。
 
 // 再編集用HTMLを保存（ダウンロード）
 function saveReeditHTML(){
