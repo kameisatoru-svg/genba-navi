@@ -1,0 +1,152 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1485 1050" font-family="'Noto Sans CJK JP','Noto Sans JP',sans-serif">
+<defs>
+  <marker id="dimS" markerWidth="10" markerHeight="10" refX="2" refY="5" orient="auto">
+    <path d="M8,2 L2,5 L8,8" fill="none" stroke="#c0392b" stroke-width="1"/></marker>
+  <marker id="dimE" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+    <path d="M2,2 L8,5 L2,8" fill="none" stroke="#c0392b" stroke-width="1"/></marker>
+  <marker id="dimSb" markerWidth="10" markerHeight="10" refX="2" refY="5" orient="auto">
+    <path d="M8,2 L2,5 L8,8" fill="none" stroke="#2a6da3" stroke-width="1"/></marker>
+  <marker id="dimEb" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+    <path d="M2,2 L8,5 L2,8" fill="none" stroke="#2a6da3" stroke-width="1"/></marker>
+  <pattern id="col" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <rect width="7" height="7" fill="#dfe7ec"/><line x1="0" y1="0" x2="0" y2="7" stroke="#9bb3c2" stroke-width="1.3"/></pattern>
+  <pattern id="kasagi" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <rect width="6" height="6" fill="#eef2f6"/><line x1="0" y1="0" x2="0" y2="6" stroke="#7d94a6" stroke-width="1"/></pattern>
+</defs>
+<rect x="0" y="0" width="1485" height="1050" fill="#ffffff"/>
+<text x="30.0" y="42.0" font-size="24" fill="#1a2a3a" text-anchor="start" font-weight="bold">洗面所 収納カウンター設置 計画図（清書）</text>
+<text x="30.0" y="68.0" font-size="13" fill="#555" text-anchor="start">冷蔵庫・カラーBOX上部にミルクスパイン積層カウンター（t30×W500）を設置 ／ 手書きスケッチ清書 2026-07-02 ／ 単位mm・現地実測ベース（施工前要確認）</text>
+<line x1="30" y1="80" x2="1455" y2="80" stroke="#888" stroke-width="1"/>
+<text x="70.0" y="140.0" font-size="18" fill="#1a2a3a" text-anchor="start" font-weight="bold">■ 平面図</text>
+<text x="160.0" y="140.0" font-size="13" fill="#555" text-anchor="start">（笠木壁・洗面化粧台＝既存、点線＝新設カウンター）</text>
+<rect x="80.2" y="233.4" width="19.8" height="15.2" fill="url(#col)" stroke="#2c3e50" stroke-width="1.2"/>
+<rect x="100.0" y="236.0" width="561.0" height="9.9" fill="#cfd8e0" stroke="#2c3e50" stroke-width="2.2"/>
+<rect x="243.6" y="234.7" width="13.2" height="12.5" fill="#ffffff" stroke="#2c3e50" stroke-width="1.0"/>
+<rect x="393.7" y="234.7" width="13.2" height="12.5" fill="#ffffff" stroke="#2c3e50" stroke-width="1.0"/>
+<rect x="576.9" y="234.7" width="13.2" height="12.5" fill="#ffffff" stroke="#2c3e50" stroke-width="1.0"/>
+<rect x="397.0" y="245.9" width="9.9" height="224.4" fill="#cfd8e0" stroke="#2c3e50" stroke-width="2.2"/>
+<rect x="641.2" y="236.0" width="19.8" height="19.8" fill="url(#col)" stroke="#2c3e50" stroke-width="1.5"/>
+<line x1="641.2" y1="236.0" x2="661.0" y2="255.8" stroke="#2c3e50" stroke-width="1"/>
+<line x1="661.0" y1="236.0" x2="641.2" y2="255.8" stroke="#2c3e50" stroke-width="1"/>
+<rect x="647.8" y="255.8" width="13.2" height="214.5" fill="url(#col)" stroke="#2c3e50" stroke-width="1.5"/>
+<text x="654.4" y="481.9" font-size="12" fill="#555" text-anchor="middle">既存壁</text>
+<rect x="105.0" y="245.9" width="94.1" height="151.8" fill="#f6e6a8" stroke="#a8862a" stroke-width="1.5"/>
+<line x1="109.0" y1="245.9" x2="109.0" y2="397.7" stroke="#a8862a" stroke-width="1"/>
+<text x="152.8" y="335.0" font-size="13" fill="#6b5510" text-anchor="middle" font-weight="bold" transform="rotate(-90 152.8 335.0)">カラーBOX</text>
+<text x="103.3" y="425.8" font-size="12" fill="#6b5510" text-anchor="start" font-weight="bold">◀ 引出側</text>
+<rect x="212.2" y="245.9" width="165.0" height="188.1" fill="#bcd8f0" stroke="#4a7aa8" stroke-width="1.5"/>
+<text x="294.7" y="328.4" font-size="14" fill="#1e4e79" text-anchor="middle" font-weight="bold">冷蔵庫</text>
+<text x="294.7" y="348.2" font-size="12" fill="#1e4e79" text-anchor="middle">W約500(要実測)</text>
+<rect x="413.5" y="249.2" width="231.0" height="217.8" fill="#f9e4ef" stroke="#c48ab0" stroke-width="1.5"/>
+<rect x="459.7" y="278.9" width="138.6" height="108.9" rx="14" fill="#ffffff" stroke="#c48ab0" stroke-width="1.3"/>
+<circle cx="529.0" cy="272.3" r="4" fill="#c48ab0"/>
+<text x="529.0" y="420.8" font-size="13" fill="#8a4a6e" text-anchor="middle" font-weight="bold">洗面化粧台（手洗い）</text>
+<text x="529.0" y="440.6" font-size="12" fill="#8a4a6e" text-anchor="middle">既存</text>
+<rect x="100.0" y="245.9" width="323.4" height="165.0" fill="#e8c99a" stroke="#a8600a" stroke-width="2.0" stroke-dasharray="7 4" fill-opacity="0.25"/>
+<line x1="265.0" y1="410.9" x2="450.0" y2="508.0" stroke="#555" stroke-width="0.9"/>
+<text x="280.0" y="504.0" font-size="13" fill="#a8600a" text-anchor="start" font-weight="bold">新設：ミルクスパイン積層カウンター</text>
+<text x="280.0" y="520.0" font-size="12" fill="#a8600a" text-anchor="start">t30×D500×L約980（500幅板を現場カット）</text>
+<line x1="401.9" y1="470.3" x2="700.0" y2="530.0" stroke="#555" stroke-width="0.9"/>
+<text x="660.0" y="526.0" font-size="13" fill="#2c3e50" text-anchor="start" font-weight="bold">L型笠木壁（既存）</text>
+<text x="660.0" y="542.0" font-size="12" fill="#2c3e50" text-anchor="start">H900＋笠木t30・壁t30</text>
+<text x="410.2" y="267.4" font-size="12" fill="#2c3e50" text-anchor="start">t30</text>
+<line x1="100.0" y1="203.0" x2="661.0" y2="203.0" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="380.5" y="199.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">1,700（全長・実測）</text>
+<line x1="100.0" y1="221.2" x2="250.2" y2="221.2" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="175.1" y="217.2" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold">455</text>
+<line x1="250.2" y1="221.2" x2="400.3" y2="221.2" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="325.2" y="217.2" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold">455</text>
+<line x1="400.3" y1="221.2" x2="583.5" y2="221.2" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="491.9" y="217.2" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold">555</text>
+<line x1="583.5" y1="221.2" x2="661.0" y2="221.2" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="622.2" y="217.2" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold">235</text>
+<text x="673.0" y="225.2" font-size="11" fill="#c0392b" text-anchor="start">束位置(実測メモ)</text>
+<line x1="100.0" y1="486.8" x2="397.0" y2="486.8" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="248.5" y="482.8" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">900（内法）</text>
+<line x1="105.0" y1="448.9" x2="199.0" y2="448.9" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="152.0" y="444.9" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold">285</text>
+<line x1="85.2" y1="245.9" x2="85.2" y2="397.7" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="80.2" y="321.8" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold" transform="rotate(-90 80.2 321.8)">460</text>
+<line x1="386.4" y1="245.9" x2="386.4" y2="434.0" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="381.4" y="339.9" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold" transform="rotate(-90 381.4 339.9)">570</text>
+<line x1="674.9" y1="245.9" x2="674.9" y2="470.3" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="669.9" y="358.1" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold" transform="rotate(-90 669.9 358.1)">680</text>
+<text x="880.0" y="140.0" font-size="18" fill="#1a2a3a" text-anchor="start" font-weight="bold">■ 立面図（左スペース正面）</text>
+<line x1="853.6" y1="580.0" x2="1249.6" y2="580.0" stroke="#2c3e50" stroke-width="3"/>
+<text x="1252.9" y="584.0" font-size="14" fill="#2c3e50" text-anchor="start" font-weight="bold">FL</text>
+<rect x="885.0" y="275.7" width="94.1" height="304.3" fill="#f6e6a8" stroke="#a8862a" stroke-width="1.5"/>
+<text x="931.8" y="438.1" font-size="13" fill="#6b5510" text-anchor="middle" font-weight="bold" transform="rotate(-90 931.8 438.1)">カラーBOX</text>
+<text x="931.8" y="291.7" font-size="11" fill="#6b5510" text-anchor="middle">天端 約922</text>
+<rect x="992.2" y="260.9" width="165.0" height="319.1" fill="#bcd8f0" stroke="#4a7aa8" stroke-width="1.5"/>
+<line x1="992.2" y1="362.2" x2="1157.2" y2="362.2" stroke="#4a7aa8" stroke-width="1.2"/>
+<text x="1074.7" y="278.9" font-size="11" fill="#1e4e79" text-anchor="middle">天端 約967(実測)</text>
+<text x="1074.7" y="322.6" font-size="14" fill="#1e4e79" text-anchor="middle" font-weight="bold">凍</text>
+<text x="1074.7" y="474.4" font-size="14" fill="#1e4e79" text-anchor="middle" font-weight="bold">冷</text>
+<rect x="1140.7" y="372.1" width="6" height="14" fill="#4a7aa8"/>
+<rect x="1140.7" y="273.1" width="6" height="14" fill="#4a7aa8"/>
+<rect x="1177.0" y="283.0" width="9.9" height="297.0" fill="#cfd8e0" stroke="#2c3e50" stroke-width="2.0"/>
+<rect x="1173.0" y="273.1" width="17.8" height="9.9" fill="url(#kasagi)" stroke="#2c3e50" stroke-width="1.5"/>
+<rect x="1175.3" y="255.9" width="13.2" height="17.2" fill="#c4e3c0" stroke="#4e8a48" stroke-width="1.5"/>
+<rect x="893.2" y="255.9" width="23.1" height="19.8" fill="#c4e3c0" stroke="#4e8a48" stroke-width="1.5"/>
+<rect x="946.0" y="255.9" width="23.1" height="19.8" fill="#c4e3c0" stroke="#4e8a48" stroke-width="1.5"/>
+<rect x="880.0" y="246.0" width="323.4" height="9.9" fill="#e8c99a" stroke="#a8600a" stroke-width="2.0"/>
+<line x1="1158.8" y1="260.9" x2="1158.8" y2="255.9" stroke="#c0392b" stroke-width="1.2"/>
+<line x1="1204.0" y1="196.5" x2="1201.8" y2="246.0" stroke="#a8600a" stroke-width="0.9"/>
+<text x="1210.0" y="200.5" font-size="13" fill="#a8600a" text-anchor="start" font-weight="bold">新設カウンター t30／天端 約1012</text>
+<line x1="1204.0" y1="221.2" x2="1159.8" y2="258.2" stroke="#c0392b" stroke-width="0.9"/>
+<text x="1210.0" y="225.2" font-size="13" fill="#c0392b" text-anchor="start" font-weight="bold">放熱クリア 10〜20</text>
+<line x1="1204.0" y1="244.3" x2="1189.5" y2="264.5" stroke="#4e8a48" stroke-width="0.9"/>
+<text x="1210.0" y="248.3" font-size="13" fill="#4e8a48" text-anchor="start" font-weight="bold">ゲタ h約52（笠木上）</text>
+<line x1="1204.0" y1="269.1" x2="1191.5" y2="278.1" stroke="#2c3e50" stroke-width="0.9"/>
+<text x="1210.0" y="273.1" font-size="13" fill="#2c3e50" text-anchor="start">笠木天端930（=900+笠木t30）</text>
+<line x1="856.9" y1="226.2" x2="1195.2" y2="226.2" stroke="#2a6da3" stroke-width="1.4" stroke-dasharray="10 5"/>
+<text x="856.9" y="218.2" font-size="13" fill="#2a6da3" text-anchor="start" font-weight="bold">水平レーザー（現地基準）／青寸法＝実測下がり</text>
+<line x1="936.1" y1="226.2" x2="936.1" y2="275.7" stroke="#2a6da3" stroke-width="1" marker-start="url(#dimSb)" marker-end="url(#dimEb)"/>
+<text x="931.1" y="251.0" font-size="12" fill="#2a6da3" text-anchor="middle" font-weight="bold" transform="rotate(-90 931.1 251.0)">150</text>
+<line x1="1091.2" y1="226.2" x2="1091.2" y2="260.9" stroke="#2a6da3" stroke-width="1" marker-start="url(#dimSb)" marker-end="url(#dimEb)"/>
+<text x="1086.2" y="243.6" font-size="12" fill="#2a6da3" text-anchor="middle" font-weight="bold" transform="rotate(-90 1086.2 243.6)">105</text>
+<line x1="1165.8" y1="226.2" x2="1165.8" y2="273.1" stroke="#2a6da3" stroke-width="1" marker-start="url(#dimSb)" marker-end="url(#dimEb)"/>
+<text x="1160.8" y="249.7" font-size="12" fill="#2a6da3" text-anchor="middle" font-weight="bold" transform="rotate(-90 1160.8 249.7)">142</text>
+<line x1="1201.8" y1="283.0" x2="1201.8" y2="580.0" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="1196.8" y="431.5" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold" transform="rotate(-90 1196.8 431.5)">900</text>
+<path d="M 984.9,268.1 L 984.9,598.0" stroke="#4e8a48" stroke-width="0.9" stroke-dasharray="4 3"/>
+<text x="899.8" y="614.0" font-size="12" fill="#4e8a48" text-anchor="start" font-weight="bold">カラーBOX上 すき間約60 → 引出側(左)からトレイ収納可</text>
+<rect x="30" y="648" width="900" height="372" fill="#fbfbf8" stroke="#888" stroke-width="1"/>
+<text x="48.0" y="678.0" font-size="16" fill="#1a2a3a" text-anchor="start" font-weight="bold">■ 注記</text>
+<text x="48.0" y="710.0" font-size="13" fill="#333" text-anchor="start" font-weight="bold">1.</text>
+<text x="72.0" y="710.0" font-size="13" fill="#333" text-anchor="start">本図は手書きスケッチ（2026-07-02）の清書。寸法は現地実測メモに基づく。施工前に再実測のこと。</text>
+<text x="48.0" y="740.0" font-size="13" fill="#333" text-anchor="start" font-weight="bold">2.</text>
+<text x="72.0" y="740.0" font-size="13" fill="#333" text-anchor="start">新設カウンター＝ミルクスパイン積層材 t30 × W500 × L約980。手持ちの500幅板を現場カットして使用。</text>
+<text x="48.0" y="770.0" font-size="13" fill="#333" text-anchor="start" font-weight="bold">3.</text>
+<text x="72.0" y="770.0" font-size="13" fill="#333" text-anchor="start">冷蔵庫天端とカウンター下端の間に放熱クリアランス 10〜20mm を確保（冷蔵庫に熱をこもらせない）。</text>
+<text x="48.0" y="800.0" font-size="13" fill="#333" text-anchor="start" font-weight="bold">4.</text>
+<text x="72.0" y="800.0" font-size="13" fill="#333" text-anchor="start">カウンター支持＝右：笠木上ゲタ（h約52）／ 左：カラーBOX上ゲタ（h約60）。固定方法は現場判断。</text>
+<text x="48.0" y="830.0" font-size="13" fill="#333" text-anchor="start" font-weight="bold">5.</text>
+<text x="72.0" y="830.0" font-size="13" fill="#333" text-anchor="start">カラーBOX上はゲタ高さ分（約60）の隙間 → 引出側（左）からトレイ等を差し込んで使用可。</text>
+<text x="48.0" y="860.0" font-size="13" fill="#333" text-anchor="start" font-weight="bold">6.</text>
+<text x="72.0" y="860.0" font-size="13" fill="#333" text-anchor="start">レーザー実測より：笠木天端930（=900+笠木30）／冷蔵庫天端 約967（笠木+37）／カラーBOX天端 約922。</text>
+<text x="48.0" y="890.0" font-size="13" fill="#333" text-anchor="start" font-weight="bold">7.</text>
+<text x="72.0" y="890.0" font-size="13" fill="#c0392b" text-anchor="start">※要確認：FL〜900が「笠木含む/含まない」の別、冷蔵庫の実幅、手書きメモ「H1925（既存壁天端?）」・束位置455/910/1465。</text>
+<text x="48.0" y="928.0" font-size="12" fill="#7a4a00" text-anchor="start">（高さの計算基準：笠木天端=930 とした場合。実際は現地レーザー基準で墨出しすること）</text>
+<rect x="960" y="648" width="495" height="372" fill="#fbfbf8" stroke="#888" stroke-width="1"/>
+<text x="978.0" y="678.0" font-size="16" fill="#1a2a3a" text-anchor="start" font-weight="bold">■ 凡例</text>
+<rect x="978.0" y="690.0" width="34.0" height="18.0" fill="#e8c99a" stroke="#a8600a" stroke-width="1.2"/>
+<text x="1022.0" y="704.0" font-size="13" fill="#333" text-anchor="start">新設：ミルクスパイン積層カウンター t30</text>
+<rect x="978.0" y="722.0" width="34.0" height="18.0" fill="#c4e3c0" stroke="#4e8a48" stroke-width="1.2"/>
+<text x="1022.0" y="736.0" font-size="13" fill="#333" text-anchor="start">新設：ゲタ（パッキン材）</text>
+<rect x="978.0" y="754.0" width="34.0" height="18.0" fill="#f6e6a8" stroke="#a8862a" stroke-width="1.2"/>
+<text x="1022.0" y="768.0" font-size="13" fill="#333" text-anchor="start">カラーBOX 285×460×H約880＋下駄</text>
+<rect x="978.0" y="786.0" width="34.0" height="18.0" fill="#bcd8f0" stroke="#4a7aa8" stroke-width="1.2"/>
+<text x="1022.0" y="800.0" font-size="13" fill="#333" text-anchor="start">冷蔵庫（上:冷凍 下:冷蔵）D570</text>
+<rect x="978.0" y="818.0" width="34.0" height="18.0" fill="#f9e4ef" stroke="#c48ab0" stroke-width="1.2"/>
+<text x="1022.0" y="832.0" font-size="13" fill="#333" text-anchor="start">洗面化粧台（手洗い・既存）</text>
+<rect x="978.0" y="850.0" width="34.0" height="18.0" fill="#cfd8e0" stroke="#2c3e50" stroke-width="1.2"/>
+<text x="1022.0" y="864.0" font-size="13" fill="#333" text-anchor="start">L型笠木壁（既存）H900＋笠木t30</text>
+<rect x="978.0" y="882.0" width="34.0" height="18.0" fill="url(#col)" stroke="#2c3e50" stroke-width="1.2"/>
+<text x="1022.0" y="896.0" font-size="13" fill="#333" text-anchor="start">既存壁・柱</text>
+<line x1="978" y1="922" x2="1022" y2="922" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="1030.0" y="928.0" font-size="13" fill="#333" text-anchor="start">寸法（mm）</text>
+<line x1="978" y1="954" x2="1022" y2="954" stroke="#2a6da3" stroke-width="1.4" stroke-dasharray="8 4"/>
+<text x="1030.0" y="960.0" font-size="13" fill="#333" text-anchor="start">水平レーザー基準線</text>
+<text x="30.0" y="1040.0" font-size="11" fill="#666" text-anchor="start">洗面カウンター-計画図_清書 ／ A4横 ／ 原図：手書きスケッチ（平面・立面・パース）</text>
+</svg>
