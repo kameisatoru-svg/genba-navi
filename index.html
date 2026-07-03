@@ -25,12 +25,15 @@ body{display:flex;flex-direction:column;}
 /* スクロールエリア */
 .scroll-area{padding:20px 16px max(24px,env(safe-area-inset-bottom));}
 
-/* 今日の日付カード */
-.today-card{background:var(--navy2);border-radius:16px;padding:16px 18px;margin-bottom:16px;display:flex;align-items:center;gap:14px;}
+/* 今日の日付カード（タップで朝ブリーフィング） */
+.today-card{background:var(--navy2);border-radius:16px;padding:16px 18px;margin-bottom:16px;display:flex;align-items:center;gap:14px;text-decoration:none;cursor:pointer;transition:transform 0.15s,background 0.15s;}
+.today-card:active{transform:scale(0.98);background:#33496a;}
 .today-icon{width:44px;height:44px;border-radius:12px;background:rgba(200,169,110,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.today-body{flex:1;}
+.today-body{flex:1;min-width:0;}
 .today-label{font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:2px;}
 .today-val{font-size:14px;font-weight:700;color:var(--white);line-height:1.4;}
+.today-hint{font-size:11px;color:var(--accent);font-weight:600;margin-top:4px;display:flex;align-items:center;gap:4px;}
+.today-chev{color:rgba(255,255,255,0.5);flex-shrink:0;}
 
 /* セクションタイトル */
 .sec-title{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:0.08em;margin-bottom:10px;padding-left:2px;}
