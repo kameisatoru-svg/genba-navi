@@ -11,8 +11,7 @@
   <pattern id="col" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
     <rect width="7" height="7" fill="#dfe7ec"/><line x1="0" y1="0" x2="0" y2="7" stroke="#9bb3c2" stroke-width="1.3"/></pattern>
   <pattern id="kasagi" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-    <rect width="6" height="6" fill="#eef2f6"/><line x1="0" y1="0" x2="0" y2="6" stroke="#7d94a6" stroke-width="1"/></pattern>
-</defs>
+    <rect width="6" height="6" fill="#eef2f6"/><line x1="0" y1="0" x2="0" y2="6" stroke="#7d94a6" stroke-width="1"/></pattern><marker id="la555" markerWidth="9" markerHeight="9" refX="8" refY="5" orient="auto"><path d="M1.5,1.5 L8.5,5 L1.5,8.5 Z" fill="#555"/></marker><marker id="laCTR" markerWidth="9" markerHeight="9" refX="8" refY="5" orient="auto"><path d="M1.5,1.5 L8.5,5 L1.5,8.5 Z" fill="#a8600a"/></marker><marker id="laWALL" markerWidth="9" markerHeight="9" refX="8" refY="5" orient="auto"><path d="M1.5,1.5 L8.5,5 L1.5,8.5 Z" fill="#2c3e50"/></marker><marker id="laGRN" markerWidth="9" markerHeight="9" refX="8" refY="5" orient="auto"><path d="M1.5,1.5 L8.5,5 L1.5,8.5 Z" fill="#4e8a48"/></marker><marker id="laDIM" markerWidth="9" markerHeight="9" refX="8" refY="5" orient="auto"><path d="M1.5,1.5 L8.5,5 L1.5,8.5 Z" fill="#c0392b"/></marker><marker id="laBRN" markerWidth="9" markerHeight="9" refX="8" refY="5" orient="auto"><path d="M1.5,1.5 L8.5,5 L1.5,8.5 Z" fill="#6b5510"/></marker></defs>
 <rect x="0" y="0" width="1485" height="1050" fill="#ffffff"/>
 <text x="30.0" y="42.0" font-size="24" fill="#1a2a3a" text-anchor="start" font-weight="bold">洗面所 収納カウンター設置 計画図（清書）</text>
 <text x="30.0" y="68.0" font-size="13" fill="#555" text-anchor="start">冷蔵庫・カラーBOX上部にメルクシパイン積層カウンター（t30×W500）を設置 ／ 手書きスケッチ清書 2026-07-02 ／ 単位mm・現地実測ベース（施工前要確認）</text>
@@ -40,7 +39,7 @@
 <rect x="113.2" y="368.0" width="72.6" height="13.2" fill="#c4e3c0" stroke="#4e8a48" stroke-width="1.5"/>
 <rect x="172.6" y="269.0" width="13.2" height="99.0" fill="#c4e3c0" stroke="#4e8a48" stroke-width="1.5"/>
 <text x="103.3" y="425.8" font-size="12" fill="#6b5510" text-anchor="start" font-weight="bold">◀ 引出側</text>
-<line x1="100.0" y1="556.0" x2="129.7" y2="380.5" stroke="#555" stroke-width="0.9"/>
+<line x1="100.0" y1="556.0" x2="129.7" y2="380.5" stroke="#4e8a48" stroke-width="0.9" marker-end="url(#laGRN)"/>
 <text x="30.0" y="568.0" font-size="12" fill="#4e8a48" text-anchor="start" font-weight="bold">カラーBOX側の下駄＝コの字型（引出側オープン）</text>
 <text x="30.0" y="584.0" font-size="12" fill="#4e8a48" text-anchor="start">側板(t22・天板+3mm)を避けて ひと回り小さく／背面突起なし</text>
 <rect x="212.2" y="245.9" width="165.0" height="188.1" fill="#bcd8f0" stroke="#4a7aa8" stroke-width="1.5"/>
@@ -52,34 +51,31 @@
 <text x="529.0" y="420.8" font-size="13" fill="#8a4a6e" text-anchor="middle" font-weight="bold">洗面化粧台（手洗い）</text>
 <text x="529.0" y="440.6" font-size="12" fill="#8a4a6e" text-anchor="middle">既存</text>
 <rect x="100.0" y="245.9" width="323.4" height="165.0" fill="#e8c99a" stroke="#a8600a" stroke-width="2.0" stroke-dasharray="7 4" fill-opacity="0.25"/>
-<line x1="265.0" y1="410.9" x2="450.0" y2="508.0" stroke="#555" stroke-width="0.9"/>
+<line x1="450.0" y1="508.0" x2="265.0" y2="410.9" stroke="#a8600a" stroke-width="0.9" marker-end="url(#laCTR)"/>
 <text x="280.0" y="504.0" font-size="13" fill="#a8600a" text-anchor="start" font-weight="bold">新設：メルクシパイン積層カウンター</text>
 <text x="280.0" y="520.0" font-size="12" fill="#a8600a" text-anchor="start">t30×D500×L約980（500幅板を現場カット）</text>
-<line x1="401.9" y1="470.3" x2="700.0" y2="530.0" stroke="#555" stroke-width="0.9"/>
+<line x1="700.0" y1="530.0" x2="401.9" y2="470.3" stroke="#2c3e50" stroke-width="0.9" marker-end="url(#laWALL)"/>
 <text x="660.0" y="526.0" font-size="13" fill="#2c3e50" text-anchor="start" font-weight="bold">L型笠木壁（既存）</text>
 <text x="660.0" y="542.0" font-size="12" fill="#2c3e50" text-anchor="start">H900＋笠木t30・壁t30</text>
-<text x="410.2" y="267.4" font-size="12" fill="#2c3e50" text-anchor="start">t30</text>
-<line x1="100.0" y1="203.0" x2="661.0" y2="203.0" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
-<text x="380.5" y="199.0" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">1,700（全長・実測）</text>
-<line x1="100.0" y1="221.2" x2="250.2" y2="221.2" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
-<text x="175.1" y="217.2" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold">455</text>
-<line x1="250.2" y1="221.2" x2="400.3" y2="221.2" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
-<text x="325.2" y="217.2" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold">455</text>
-<line x1="400.3" y1="221.2" x2="583.5" y2="221.2" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
-<text x="491.9" y="217.2" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold">555</text>
-<line x1="583.5" y1="221.2" x2="661.0" y2="221.2" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
-<text x="622.2" y="217.2" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold">235</text>
-<text x="673.0" y="225.2" font-size="11" fill="#c0392b" text-anchor="start">束位置(実測メモ)</text>
+<line x1="100.0" y1="191.4" x2="661.0" y2="191.4" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="380.5" y="187.4" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">1,700（全長・実測）</text>
+<line x1="100.0" y1="212.9" x2="250.2" y2="212.9" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="175.1" y="208.9" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold">455</text>
+<line x1="250.2" y1="212.9" x2="400.3" y2="212.9" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="325.2" y="208.9" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold">455</text>
+<line x1="400.3" y1="212.9" x2="583.5" y2="212.9" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="491.9" y="208.9" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold">555</text>
+<line x1="583.5" y1="212.9" x2="661.0" y2="212.9" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="622.2" y="208.9" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold">235</text>
+<text x="673.0" y="216.9" font-size="11" fill="#c0392b" text-anchor="start">束位置(実測メモ)</text>
 <line x1="100.0" y1="486.8" x2="397.0" y2="486.8" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
 <text x="248.5" y="482.8" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold">900（内法）</text>
 <line x1="105.0" y1="448.9" x2="199.0" y2="448.9" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
 <text x="152.0" y="444.9" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold">285</text>
-<line x1="85.2" y1="245.9" x2="85.2" y2="397.7" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
-<text x="80.2" y="321.8" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold" transform="rotate(-90 80.2 321.8)">460</text>
-<line x1="386.4" y1="245.9" x2="386.4" y2="434.0" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
-<text x="381.4" y="339.9" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold" transform="rotate(-90 381.4 339.9)">570</text>
-<line x1="674.9" y1="245.9" x2="674.9" y2="470.3" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
-<text x="669.9" y="358.1" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold" transform="rotate(-90 669.9 358.1)">680</text>
+<line x1="80.2" y1="245.9" x2="80.2" y2="397.7" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="75.2" y="321.8" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold" transform="rotate(-90 75.2 321.8)">460</text>
+<line x1="685.8" y1="245.9" x2="685.8" y2="470.3" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
+<text x="680.8" y="358.1" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold" transform="rotate(-90 680.8 358.1)">680</text>
 <text x="880.0" y="140.0" font-size="18" fill="#1a2a3a" text-anchor="start" font-weight="bold">■ 立面図（左スペース正面）</text>
 <line x1="853.6" y1="580.0" x2="1249.6" y2="580.0" stroke="#2c3e50" stroke-width="3"/>
 <text x="1252.9" y="584.0" font-size="14" fill="#2c3e50" text-anchor="start" font-weight="bold">FL</text>
@@ -99,13 +95,13 @@
 <rect x="893.2" y="255.9" width="72.6" height="19.8" fill="#c4e3c0" stroke="#4e8a48" stroke-width="1.5"/>
 <rect x="880.0" y="246.0" width="323.4" height="9.9" fill="#e8c99a" stroke="#a8600a" stroke-width="2.0"/>
 <line x1="1158.8" y1="260.9" x2="1158.8" y2="255.9" stroke="#c0392b" stroke-width="1.2"/>
-<line x1="1204.0" y1="196.5" x2="1201.8" y2="246.0" stroke="#a8600a" stroke-width="0.9"/>
+<line x1="1204.0" y1="196.5" x2="1201.8" y2="246.0" stroke="#a8600a" stroke-width="0.9" marker-end="url(#laCTR)"/>
 <text x="1210.0" y="200.5" font-size="13" fill="#a8600a" text-anchor="start" font-weight="bold">新設カウンター t30／天端 約1012</text>
-<line x1="1204.0" y1="221.2" x2="1159.8" y2="258.2" stroke="#c0392b" stroke-width="0.9"/>
+<line x1="1204.0" y1="221.2" x2="1159.8" y2="258.2" stroke="#c0392b" stroke-width="0.9" marker-end="url(#laDIM)"/>
 <text x="1210.0" y="225.2" font-size="13" fill="#c0392b" text-anchor="start" font-weight="bold">放熱クリア 10〜20</text>
-<line x1="1204.0" y1="244.3" x2="1189.5" y2="264.5" stroke="#4e8a48" stroke-width="0.9"/>
+<line x1="1204.0" y1="244.3" x2="1189.5" y2="264.5" stroke="#4e8a48" stroke-width="0.9" marker-end="url(#laGRN)"/>
 <text x="1210.0" y="248.3" font-size="13" fill="#4e8a48" text-anchor="start" font-weight="bold">笠木側の下駄 h約52</text>
-<line x1="1204.0" y1="269.1" x2="1191.5" y2="278.1" stroke="#2c3e50" stroke-width="0.9"/>
+<line x1="1204.0" y1="269.1" x2="1191.5" y2="278.1" stroke="#2c3e50" stroke-width="0.9" marker-end="url(#laWALL)"/>
 <text x="1210.0" y="273.1" font-size="13" fill="#2c3e50" text-anchor="start">笠木天端930（=900+笠木t30）</text>
 <line x1="856.9" y1="226.2" x2="1195.2" y2="226.2" stroke="#2a6da3" stroke-width="1.4" stroke-dasharray="10 5"/>
 <text x="856.9" y="218.2" font-size="13" fill="#2a6da3" text-anchor="start" font-weight="bold">水平レーザー（現地基準）／青寸法＝実測下がり</text>
@@ -117,7 +113,7 @@
 <text x="1160.8" y="249.7" font-size="12" fill="#2a6da3" text-anchor="middle" font-weight="bold" transform="rotate(-90 1160.8 249.7)">142</text>
 <line x1="1201.8" y1="283.0" x2="1201.8" y2="580.0" stroke="#c0392b" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
 <text x="1196.8" y="431.5" font-size="13" fill="#c0392b" text-anchor="middle" font-weight="bold" transform="rotate(-90 1196.8 431.5)">900</text>
-<path d="M 984.9,268.1 L 984.9,598.0" stroke="#4e8a48" stroke-width="0.9" stroke-dasharray="4 3"/>
+<line x1="984.9" y1="600.0" x2="984.9" y2="269.8" stroke="#4e8a48" stroke-width="0.9" marker-end="url(#laGRN)"/>
 <text x="889.9" y="614.0" font-size="12" fill="#4e8a48" text-anchor="start" font-weight="bold">カラーBOX側の下駄 h約63（コの字型・平面図参照）→ 引出側からトレイ収納可</text>
 <rect x="30" y="648" width="900" height="372" fill="#fbfbf8" stroke="#888" stroke-width="1"/>
 <text x="48.0" y="678.0" font-size="16" fill="#1a2a3a" text-anchor="start" font-weight="bold">■ 注記</text>
