@@ -1883,6 +1883,34 @@ function getA4ContentH(){
   return Math.floor(a4H - padV - safety);
 }
 
+// プレビューは scalePreview() の transform:scale で縮小表示される。
+// getBoundingClientRect() は縮小後の値を返す一方、offsetHeight は縮小前の値なので、
+// 両者をそのまま引き算すると改ページ位置が画面幅に依存してブレる。rect側はこの倍率で割って揃える。
+function getPageScale(page){
+  if(!page||!page.offsetWidth)return 1;
+  const rw=page.getBoundingClientRect().width;
+  return rw>0 ? rw/page.offsetWidth : 1;
+}
+
+// 明細テーブルの下端から、ページ最終要素（備考・合計欄／フッター）の下端までの実高さ。
+// margin も含めた実測値なので、固定の下駄（旧版の +50 等）を足す必要がない。
+function getBelowTableH(page, tbl){
+  const scale=getPageScale(page);
+  const last=page.querySelector('.footer')||page.querySelector('.bottom-section');
+  if(!last)return 0;
+  const tblBottom=tbl.getBoundingClientRect().bottom;
+  const lastBottom=last.getBoundingClientRect().bottom;
+  return Math.max(0,(lastBottom-tblBottom)/scale);
+}
+
+// ページ上端（padding内側）から明細テーブル上端までの実高さ
+function getTableTopH(page, tbl){
+  const scale=getPageScale(page);
+  const padTop=parseFloat(getComputedStyle(page).paddingTop)||0;
+  const d=(tbl.getBoundingClientRect().top - page.getBoundingClientRect().top)/scale;
+  return d - padTop;
+}
+
 function checkAndPaginate(){
   document.querySelectorAll('.overflow-page').forEach(el=>el.remove());
   // 「次ページへ続く」行も削除してリセット
