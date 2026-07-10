@@ -1690,13 +1690,11 @@ function checkAndPaginateGroup(){
   const mno=document.getElementById('mitsumoriNo').value;
   const kojimei=document.getElementById('kojimei').value;
 
-  // ページヘッダー高さを取得
-  const pageRect=detailPage.getBoundingClientRect();
-  const tblTop=tbl.getBoundingClientRect().top - pageRect.top;
+  // ページヘッダー高さを取得（transform:scale補正済みの実測値）
+  const tblTop=getTableTopH(detailPage, tbl);
   const thead=tbl.querySelector('thead');
   const theadH=thead?thead.offsetHeight:30;
-  const footer=detailPage.querySelector('.footer');
-  const footerH=footer?footer.offsetHeight+20:40;
+  const footerH=getBelowTableH(detailPage, tbl);
 
   const availH=getA4ContentH() - tblTop - theadH - footerH;
   if(availH<=0)return;
@@ -1920,17 +1918,12 @@ function checkAndPaginate(){
   const tbl=document.getElementById('est-tbl');
   if(!tbl||!page)return;
 
-  const pageRect=page.getBoundingClientRect();
-  const tblTop=tbl.getBoundingClientRect().top - pageRect.top;
+  const tblTop=getTableTopH(page, tbl);
   const thead=tbl.querySelector('thead');
   const theadH=thead?thead.offsetHeight:30;
 
-  const bottomSection=page.querySelector('.bottom-section');
-  const footer=page.querySelector('.footer');
-  // 明細テーブルと備考／合計欄の間隔ぶんのみ確保（旧版は+50の過大マージンで1行余計に溢れていた）
-  const fixedH=(bottomSection?bottomSection.offsetHeight:0)
-              +(footer?footer.offsetHeight:0)
-              +16;
+  // 備考／合計欄・フッターはmargin込みで実測（旧版は offsetHeight の単純和＋50 の下駄で過大に見積もっていた）
+  const fixedH=getBelowTableH(page, tbl);
 
   const availH=getA4ContentH() - tblTop - theadH - fixedH;
 
