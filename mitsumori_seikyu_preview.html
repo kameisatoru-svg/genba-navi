@@ -1870,15 +1870,17 @@ function checkAndPaginateGroup(){
 
 // ── 自動改ページ処理 ──
 // A4縦横比（297/210）からdoc-pageの実幅を使って動的に高さを算出
-// 横を5%大きく見なすことで印刷時のはみ出しを防ぐ
 function getA4ContentH(){
   const page=document.getElementById('doc-page');
   if(!page)return 1031;
-  const pageW=page.offsetWidth;
-  const a4H=Math.round(pageW*(297/(210*1.05)));
-  // padding上下(13mm+13mm=26mm) → 26/210 の比率分を引く
-  const padV=Math.round(pageW*(26/210));
-  return a4H - padV;
+  // .doc-page は box-sizing:border-box・width:210mm なので offsetWidth = A4横幅ちょうど
+  const pxPerMm=page.offsetWidth/210;
+  const a4H=297*pxPerMm;
+  // 余白は実測値。画面13mmに対し印刷は @media print で11mmへ縮むので、画面基準なら印刷は必ず収まる
+  const cs=getComputedStyle(page);
+  const padV=parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom);
+  const safety=2*pxPerMm; // サブピクセル誤差の吸収のみ
+  return Math.floor(a4H - padV - safety);
 }
 
 function checkAndPaginate(){
@@ -1897,9 +1899,10 @@ function checkAndPaginate(){
 
   const bottomSection=page.querySelector('.bottom-section');
   const footer=page.querySelector('.footer');
+  // 明細テーブルと備考／合計欄の間隔ぶんのみ確保（旧版は+50の過大マージンで1行余計に溢れていた）
   const fixedH=(bottomSection?bottomSection.offsetHeight:0)
               +(footer?footer.offsetHeight:0)
-              +50;
+              +16;
 
   const availH=getA4ContentH() - tblTop - theadH - fixedH;
 
