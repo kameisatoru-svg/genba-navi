@@ -1941,11 +1941,15 @@ function checkAndPaginate(){
   const dataRowsH=dataRows.reduce((s,tr)=>s+tr.offsetHeight,0);
   if(dataRowsH+fixedRowsH<=availH)return; // 全行収まる→分割不要
 
+  // ここから先は必ず分割される＝1ページ目末尾に「―　次ページへ続く　―」行が入るので、その高さを先に確保する
+  const NOTICE_ROW_H=32;
+  const capH=availH-NOTICE_ROW_H;
+
   let cumH=0;
   let splitIdx=-1;
   for(let i=0;i<dataRows.length;i++){
     cumH+=dataRows[i].offsetHeight;
-    if(cumH>availH){
+    if(cumH>capH){
       splitIdx=Math.max(0,i-1);
       break;
     }
