@@ -686,6 +686,9 @@ function fmtN(n){return Math.round(n).toLocaleString();}
 // 全角数字→半角変換＋カンマ除去してから数値化（IMEで全角確定してもNaN→0にならない保険）
 function _z2h(s){return String(s==null?'':s).replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)).replace(/[．｡。]/g,'.').replace(/[，､、]/g,',');}
 function _pnum(v){const n=parseFloat(_z2h(v).replace(/,/g,''));return isNaN(n)?0:n;}
+// 数量は小数第1位に四捨五入して表示・金額計算に用いる（ひな形デフォルト 2026/7/14）
+function qRound(q){const n=_pnum(q);return Math.round(Number((n*10).toPrecision(12)))/10;}
+function fmtQty(q){const s=String(q==null?'':q).trim();return s===''?'':String(qRound(s));}
 function today(){const d=new Date();return d.toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'});}
 function addDays(n){const d=new Date();d.setDate(d.getDate()+n);return d.toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'});}
 
@@ -932,7 +935,7 @@ function renderFlatRows(){
       <td><input class="r" type="text" inputmode="decimal" value="${it.qty}" oninput="flatItems[${i}].qty=_pnum(this.value);updateAmt(this);render()" onkeydown="enterNav(event)"></td>
       <td><input value="${it.unit}" oninput="flatItems[${i}].unit=this.value;render()" style="max-width:34px" onkeydown="enterNav(event)"></td>
       <td><input class="r" type="text" inputmode="decimal" value="${it.price}" oninput="flatItems[${i}].price=_pnum(this.value);updateAmt(this);render()" onkeydown="enterNav(event)"></td>
-      <td><input class="r amt-cell" readonly value="${(parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):''}" style="color:var(--sub)"></td>
+      <td><input class="r amt-cell" readonly value="${(parseFloat(it.qty)&&parseFloat(it.price))?fmtN(qRound(it.qty)*parseFloat(it.price)):''}" style="color:var(--sub)"></td>
       <td><input value="${it.note}" oninput="flatItems[${i}].note=this.value;render()" onkeydown="enterNav(event)"></td>
       <td style="white-space:nowrap;padding:2px 2px;">
         <button class="pb-btn${it.pageBreak?' on':''}" title="この行の前で改ページ" onclick="flatTogglePageBreak(${i})">改頁</button>
@@ -1062,7 +1065,7 @@ function renderGroupSummaryRows(){
       <td><input class="r" type="text" inputmode="decimal" value="${it.qty}" oninput="groupSummaryItems[${i}].qty=_pnum(this.value);updateAmt(this);render()" onkeydown="enterNav(event)"></td>
       <td><input value="${it.unit}" oninput="groupSummaryItems[${i}].unit=this.value;render()" style="max-width:34px" onkeydown="enterNav(event)"></td>
       <td><input class="r" type="text" inputmode="decimal" value="${it.price}" oninput="groupSummaryItems[${i}].price=_pnum(this.value);updateAmt(this);render()" onkeydown="enterNav(event)"></td>
-      <td><input class="r amt-cell" readonly value="${(parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):''}" style="color:var(--sub)"></td>
+      <td><input class="r amt-cell" readonly value="${(parseFloat(it.qty)&&parseFloat(it.price))?fmtN(qRound(it.qty)*parseFloat(it.price)):''}" style="color:var(--sub)"></td>
       <td><input value="${it.note}" oninput="groupSummaryItems[${i}].note=this.value;render()" onkeydown="enterNav(event)"></td>
       <td><button class="del-btn" onclick="groupSummaryDelRow(${i})">✕</button></td>`;
     body.appendChild(tr);
@@ -1107,7 +1110,7 @@ function renderGroupBlocks(){
             <td><input class="r" type="text" inputmode="decimal" value="${it.qty||''}" oninput="groupItems[${gi}].middleItems[${mi}].items[${ii}].qty=_pnum(this.value);updateAmt(this);render()" onkeydown="enterNav(event)"></td>
             <td><input value="${it.unit||''}" oninput="groupItems[${gi}].middleItems[${mi}].items[${ii}].unit=this.value;render()" style="max-width:32px" onkeydown="enterNav(event)"></td>
             <td><input class="r" type="text" inputmode="decimal" value="${it.price||''}" oninput="groupItems[${gi}].middleItems[${mi}].items[${ii}].price=_pnum(this.value);updateAmt(this);render()" onkeydown="enterNav(event)"></td>
-            <td><input class="r amt-cell" readonly value="${(parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):''}" style="color:var(--sub)"></td>
+            <td><input class="r amt-cell" readonly value="${(parseFloat(it.qty)&&parseFloat(it.price))?fmtN(qRound(it.qty)*parseFloat(it.price)):''}" style="color:var(--sub)"></td>
             <td><input value="${it.note}" oninput="groupItems[${gi}].middleItems[${mi}].items[${ii}].note=this.value;render()" onkeydown="enterNav(event)"></td>
             <td><button class="del-btn" onclick="groupDelMiddleItem(${gi},${mi},${ii})">✕</button></td>
           </tr>`;
@@ -1149,7 +1152,7 @@ function renderGroupBlocks(){
           <td><input class="r" type="text" inputmode="decimal" value="${it.qty||''}" oninput="groupItems[${gi}].items[${ii}].qty=_pnum(this.value);updateAmt(this);render()" onkeydown="enterNav(event)"></td>
           <td><input value="${it.unit||''}" oninput="groupItems[${gi}].items[${ii}].unit=this.value;render()" style="max-width:32px" onkeydown="enterNav(event)"></td>
           <td><input class="r" type="text" inputmode="decimal" value="${it.price||''}" oninput="groupItems[${gi}].items[${ii}].price=_pnum(this.value);updateAmt(this);render()" onkeydown="enterNav(event)"></td>
-          <td><input class="r amt-cell" readonly value="${(parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):''}" style="color:var(--sub)"></td>
+          <td><input class="r amt-cell" readonly value="${(parseFloat(it.qty)&&parseFloat(it.price))?fmtN(qRound(it.qty)*parseFloat(it.price)):''}" style="color:var(--sub)"></td>
           <td><input value="${it.note}" oninput="groupItems[${gi}].items[${ii}].note=this.value;render()" onkeydown="enterNav(event)"></td>
           <td><button class="del-btn" onclick="groupDelItem(${gi},${ii})">✕</button></td>
         </tr>`;
@@ -1245,14 +1248,14 @@ function calcGroupTotal(g){
   if(g.middleItems && g.middleItems.length>0){
     let s=0;
     g.middleItems.forEach(m=>{
-      m.items.forEach(it=>{ s+=(parseFloat(it.qty)||0)*(parseFloat(it.price)||0); });
+      m.items.forEach(it=>{ s+=qRound(it.qty)*(parseFloat(it.price)||0); });
     });
     return s;
   }
-  return g.items.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0),0);
+  return g.items.reduce((s,it)=>s+qRound(it.qty)*(parseFloat(it.price)||0),0);
 }
 function calcMiddleTotal(m){
-  return m.items.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0),0);
+  return m.items.reduce((s,it)=>s+qRound(it.qty)*(parseFloat(it.price)||0),0);
 }
 
 // ── 階層プレフィックス生成（2026/5/9、建築みつも朗互換）──
@@ -1286,21 +1289,21 @@ function calcHasuNebiki(baseZeinuki){
 function calcTotals(){
   let subtotal=0;
   if(mode==='flat'){
-    subtotal=flatItems.reduce((s,it)=>s+it.qty*it.price,0);
+    subtotal=flatItems.reduce((s,it)=>s+qRound(it.qty)*parseFloat(it.price),0);
   } else if(mode==='lump'){
     // 1式表記モード：groupSummaryItemsのみ合計（大項目は使わない）
-    groupSummaryItems.forEach(it=>subtotal+=(parseFloat(it.qty)||0)*(parseFloat(it.price)||0));
+    groupSummaryItems.forEach(it=>subtotal+=qRound(it.qty)*(parseFloat(it.price)||0));
   } else {
     groupItems.forEach(g=>{
       if(g.middleItems && g.middleItems.length>0){
         g.middleItems.forEach(m=>{
-          m.items.forEach(it=>subtotal+=(parseFloat(it.qty)||0)*(parseFloat(it.price)||0));
+          m.items.forEach(it=>subtotal+=qRound(it.qty)*(parseFloat(it.price)||0));
         });
       } else {
-        g.items.forEach(it=>subtotal+=(parseFloat(it.qty)||0)*(parseFloat(it.price)||0));
+        g.items.forEach(it=>subtotal+=qRound(it.qty)*(parseFloat(it.price)||0));
       }
     });
-    groupSummaryItems.forEach(it=>subtotal+=(parseFloat(it.qty)||0)*(parseFloat(it.price)||0));
+    groupSummaryItems.forEach(it=>subtotal+=qRound(it.qty)*(parseFloat(it.price)||0));
   }
   // 1式表記（請求書）・請求書の他モード時は諸経費・値引きを適用しない
   const applyShokeihi = docType==='mitsumori';
@@ -1384,9 +1387,9 @@ function render(){
   if(mode==='lump'){
     // 1式表記モード：groupSummaryItemsのみ表示（大項目なし）
     const summaryRows=groupSummaryItems.map(it=>{
-      const q=it.qty!==''?it.qty:'';
+      const q=it.qty!==''?fmtQty(it.qty):'';
       const p=it.price!==''&&parseFloat(it.price)?fmtN(it.price):'';
-      const a=(it.qty!==''&&it.price!==''&&parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
+      const a=(it.qty!==''&&it.price!==''&&parseFloat(it.qty)&&parseFloat(it.price))?fmtN(qRound(it.qty)*parseFloat(it.price)):'';
       return `<tr>
         <td>${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
         <td>${q}</td><td>${it.unit||''}</td>
@@ -1414,7 +1417,7 @@ function render(){
       const amtCell=(q&&p)?fmtN(q*p):'';
       return `<tr${pbClass}>
         <td>${it.name}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
-        <td>${it.qty===''||it.qty==null?'':it.qty}</td><td>${it.unit||''}</td>
+        <td>${it.qty===''||it.qty==null?'':fmtQty(it.qty)}</td><td>${it.unit||''}</td>
         <td>${priceCell}</td><td>${amtCell}</td>
       </tr>`;
     }).join('');
@@ -1444,9 +1447,9 @@ function render(){
       </tr>`;
     }).join('');
     const summaryRows=groupSummaryItems.map(it=>{
-      const q=it.qty!==''?it.qty:'';
+      const q=it.qty!==''?fmtQty(it.qty):'';
       const p=it.price!==''&&parseFloat(it.price)?fmtN(it.price):'';
-      const a=(it.qty!==''&&it.price!==''&&parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
+      const a=(it.qty!==''&&it.price!==''&&parseFloat(it.qty)&&parseFloat(it.price))?fmtN(qRound(it.qty)*parseFloat(it.price)):'';
       return `<tr>
         <td>${it.name}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
         <td>${q}</td><td>${it.unit||''}</td>
@@ -1558,10 +1561,10 @@ function render(){
           allRows+=`<tr class="middle-section-header"><td colspan="5" style="background:#d8d8d8;color:#222;font-weight:700;font-size:11px;padding:4px 8px 4px 16px;text-align:left;">▸ ${prefixedMiddleName(gi,mi,m)}</td></tr>`;
           // 明細行
           m.items.forEach(it=>{
-            const amt=(it.qty&&it.price)?fmtN(it.qty*it.price):'';
+            const amt=(it.qty&&it.price)?fmtN(qRound(it.qty)*parseFloat(it.price)):'';
             allRows+=`<tr class="group-item-row" data-gi="${gi}">
               <td style="padding-left:20px">${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
-              <td>${it.qty||''}</td><td>${it.unit||''}</td>
+              <td>${fmtQty(it.qty)}</td><td>${it.unit||''}</td>
               <td>${(it.price&&it.price!='0'&&it.price!==0)?fmtN(it.price):''}</td>
               <td>${amt}</td>
             </tr>`;
@@ -1574,10 +1577,10 @@ function render(){
       } else {
         // 従来モード：小項目行
         g.items.forEach(it=>{
-          const amt=(it.qty&&it.price)?fmtN(it.qty*it.price):'';
+          const amt=(it.qty&&it.price)?fmtN(qRound(it.qty)*parseFloat(it.price)):'';
           allRows+=`<tr class="group-item-row" data-gi="${gi}">
             <td>${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
-            <td>${it.qty||''}</td><td>${it.unit||''}</td>
+            <td>${fmtQty(it.qty)}</td><td>${it.unit||''}</td>
             <td>${(it.price&&it.price!='0'&&it.price!==0)?fmtN(it.price):''}</td>
             <td>${amt}</td>
           </tr>`;
@@ -2112,9 +2115,9 @@ function buildDocHTML(){
   if(mode==='lump'){
     // 1式表記モード（請求書専用）：groupSummaryItemsのみ表示（大項目なし）
     const summaryRows=groupSummaryItems.map(it=>{
-      const q=it.qty!==''&&it.qty!=null?it.qty:'';
+      const q=it.qty!==''&&it.qty!=null?fmtQty(it.qty):'';
       const p=it.price!==''&&parseFloat(it.price)?fmtN(it.price):'';
-      const a=(it.qty!==''&&it.price!==''&&parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
+      const a=(it.qty!==''&&it.price!==''&&parseFloat(it.qty)&&parseFloat(it.price))?fmtN(qRound(it.qty)*parseFloat(it.price)):'';
       return `<tr>
         <td ${tdStyleL}>${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
         <td ${tdStyle}>${q}</td><td ${tdStyle}>${it.unit||''}</td>
@@ -2140,9 +2143,9 @@ function buildDocHTML(){
       const isEmpty=!it.name&&!it.unit&&(!it.qty||it.qty==0)&&(!it.price||it.price==0);
       return `<tr>
         <td ${tdStyleL}>${it.name}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
-        <td ${tdStyle}>${isEmpty?'':it.qty}</td><td ${tdStyle}>${it.unit||''}</td>
+        <td ${tdStyle}>${isEmpty?'':fmtQty(it.qty)}</td><td ${tdStyle}>${it.unit||''}</td>
         <td ${tdStyle}>${isEmpty||!it.price||it.price==0?'':fmtN(it.price)}</td>
-        <td ${tdStyle}>${isEmpty||!it.qty||!it.price||it.price==0?'':fmtN(it.qty*it.price)}</td>
+        <td ${tdStyle}>${isEmpty||!it.qty||!it.price||it.price==0?'':fmtN(qRound(it.qty)*parseFloat(it.price))}</td>
       </tr>`;
     }).join('');
     tableHtml=`<table class="estimate-table" ${tblStyle}>
@@ -2174,9 +2177,9 @@ function buildDocHTML(){
     }).join('');
     // 空白欄（1ページ目の余白埋め）
     const summaryRows=groupSummaryItems.map(it=>{
-      const q=it.qty!==''&&it.qty!=null?it.qty:'';
+      const q=it.qty!==''&&it.qty!=null?fmtQty(it.qty):'';
       const p=it.price!==''&&parseFloat(it.price)?fmtN(it.price):'';
-      const a=(it.qty!==''&&it.price!==''&&parseFloat(it.qty)&&parseFloat(it.price))?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
+      const a=(it.qty!==''&&it.price!==''&&parseFloat(it.qty)&&parseFloat(it.price))?fmtN(qRound(it.qty)*parseFloat(it.price)):'';
       return `<tr>
         <td ${tdStyleL}>${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
         <td ${tdStyle}>${q}</td><td ${tdStyle}>${it.unit||''}</td>
@@ -2379,10 +2382,10 @@ ${(()=>{
           <td colspan="5" style="padding:4px 8px 4px 16px;text-align:left;">▸ ${m.name||'中項目'}</td>
         </tr>`;
         m.items.forEach(it=>{
-          const amt=(it.qty&&it.price&&it.price!='0'&&it.price!==0)?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
+          const amt=(it.qty&&it.price&&it.price!='0'&&it.price!==0)?fmtN(qRound(it.qty)*parseFloat(it.price)):'';
           rows+=`<tr>
             <td style="text-align:left;padding-left:20px;">${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
-            <td style="text-align:right;">${it.qty||''}</td>
+            <td style="text-align:right;">${fmtQty(it.qty)}</td>
             <td style="text-align:right;">${it.unit||''}</td>
             <td style="text-align:right;">${(it.price&&it.price!='0'&&it.price!==0)?fmtN(it.price):''}</td>
             <td style="text-align:right;">${amt}</td>
@@ -2401,10 +2404,10 @@ ${(()=>{
       </tr>`;
     } else {
       g.items.forEach(it=>{
-        const amt=(it.qty&&it.price&&it.price!='0'&&it.price!==0)?fmtN(parseFloat(it.qty)*parseFloat(it.price)):'';
+        const amt=(it.qty&&it.price&&it.price!='0'&&it.price!==0)?fmtN(qRound(it.qty)*parseFloat(it.price)):'';
         rows+=`<tr>
           <td style="text-align:left;">${it.name||''}${it.note?'<br><span style="font-size:10px;color:#111">'+it.note+'</span>':''}</td>
-          <td style="text-align:right;">${it.qty||''}</td>
+          <td style="text-align:right;">${fmtQty(it.qty)}</td>
           <td style="text-align:right;">${it.unit||''}</td>
           <td style="text-align:right;">${(it.price&&it.price!='0'&&it.price!==0)?fmtN(it.price):''}</td>
           <td style="text-align:right;">${amt}</td>
@@ -2951,23 +2954,23 @@ function applyDiscount(){
   // ── 合計を計算 ──
   let subtotal = 0;
   if(mode==='flat'){
-    subtotal = flatItems.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0), 0);
+    subtotal = flatItems.reduce((s,it)=>s+qRound(it.qty)*(parseFloat(it.price)||0), 0);
   } else if(mode==='group'){
     groupItems.forEach(g=>{
       if(g.middleItems && g.middleItems.length>0){
         g.middleItems.forEach(m=>{
           m.items.forEach(it=>{
-            subtotal += (parseFloat(it.qty)||0)*(parseFloat(it.price)||0);
+            subtotal += qRound(it.qty)*(parseFloat(it.price)||0);
           });
         });
       } else {
         g.items.forEach(it=>{
-          subtotal += (parseFloat(it.qty)||0)*(parseFloat(it.price)||0);
+          subtotal += qRound(it.qty)*(parseFloat(it.price)||0);
         });
       }
     });
   } else if(mode==='lump'){
-    subtotal = groupSummaryItems.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0), 0);
+    subtotal = groupSummaryItems.reduce((s,it)=>s+qRound(it.qty)*(parseFloat(it.price)||0), 0);
   }
   
   // ── 諸経費・値引きも考慮した「BCS出力時の総額」を予測 ──
@@ -4361,7 +4364,7 @@ async function exportBCS_CSV(){
         alert('明細が空です。1行以上入力してください。');
         return;
       }
-      const subtotal = validItems.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0),0);
+      const subtotal = validItems.reduce((s,it)=>s+qRound(it.qty)*(parseFloat(it.price)||0),0);
       grandTotal += subtotal;
       
       const colA = nextColA++;
@@ -4395,14 +4398,14 @@ async function exportBCS_CSV(){
           g.middleItems.forEach(m=>{
             m.items.forEach(it=>{
               if(it.name&&(it.qty||0)>0){
-                groupTotal += (parseFloat(it.qty)||0)*(parseFloat(it.price)||0);
+                groupTotal += qRound(it.qty)*(parseFloat(it.price)||0);
               }
             });
           });
         } else {
           g.items.forEach(it=>{
             if(it.name&&(it.qty||0)>0){
-              groupTotal += (parseFloat(it.qty)||0)*(parseFloat(it.price)||0);
+              groupTotal += qRound(it.qty)*(parseFloat(it.price)||0);
             }
           });
         }
@@ -4417,7 +4420,7 @@ async function exportBCS_CSV(){
           g.middleItems.forEach(m=>{
             const validMItems = m.items.filter(it=>it.name&&(it.qty||0)>0);
             if(validMItems.length===0) return;
-            const middleTotal = validMItems.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0),0);
+            const middleTotal = validMItems.reduce((s,it)=>s+qRound(it.qty)*(parseFloat(it.price)||0),0);
             const seqMid = seqRef.value++;
             // 中項目P行（c8=2でサブ階層を表現）
             rows.push(bcsRow(colA,'','','','','','',2,seqMid,'P',m.name||'中項目','',1,'式',middleTotal,'','','',''));
@@ -4464,7 +4467,7 @@ async function exportBCS_CSV(){
         alert('1式表記の明細が空です。');
         return;
       }
-      const subtotal = validItems.reduce((s,it)=>s+(parseFloat(it.qty)||0)*(parseFloat(it.price)||0),0);
+      const subtotal = validItems.reduce((s,it)=>s+qRound(it.qty)*(parseFloat(it.price)||0),0);
       grandTotal += subtotal;
       
       const colA = nextColA++;
