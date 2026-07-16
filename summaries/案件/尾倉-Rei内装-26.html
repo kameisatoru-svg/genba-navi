@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>尾倉-Rei内装-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#e8a33d;--acc2:#7fb069;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
+details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin:6px 0;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>スマイルランチ Rei 内装工事（日出町テナント）</h1>
+  <div class="sub">尾倉-Rei内装-26 ｜ 大分県速見郡日出町（日出町役場裏手・旧「ピキ」看板の店舗）</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">📐 見積準備</span>
+    <span class="badge">🏢 尾倉さん（T-042・光陽自動車）</span>
+    <span class="badge">🎯 2026/8/6 オープン目標</span>
+    <span class="badge">🪧 看板・のれん 発注済</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E5%B0%BE%E5%80%89-Rei%E5%86%85%E8%A3%85-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-07-17 07:18</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">見積準備</div><div class="l">ステータス</div></div>
+  <div class="kpi"><div class="v">8/6</div><div class="l">オープン目標（残り20日）</div></div>
+  <div class="kpi"><div class="v">見積前</div><div class="l">内装本体（未作成）</div></div>
+  <div class="kpi"><div class="v">2件</div><div class="l">確定＝看板シート／のれん</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>店舗概要</b>：日替わりランチとお弁当の店「スマイルランチ Rei（lunch &amp; lunch box）」。日出町テナントへ新規出店</li>
+        <li><b>現在地</b>：今回工事の内容は<b>2件に確定</b>＝①電飾看板シート貼替（サンアートへ正式発注済）②のれん取付（ハクロマーク製作所へ発注済・納期待ち）</li>
+        <li><b>看板</b>：デザイン最終確認済（7/16）＝ロゴ中央配置・背景色ベタ塗り。既存シートは経年で現場剥離不可のため、<b>看板本体を外して持ち帰り薬液処理</b>。内部蛍光灯は現状のまま（夜間非営業・切れていれば交換）。現場の既存看板は随時撤去可</li>
+        <li><b>のれん</b>：入口暖簾 <b>W950×H600</b>（サンアート図面・図番1／2026.7.16）。ロゴ中央・中央割れ</li>
+        <li><b>⚠️ 内装本体は未見積</b>：案件名は「内装工事」だが、現時点で確定＝看板・のれんのみ。採寸・仕様を整理して内装見積を作成するタスクが<b>未完了</b>のまま</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>発注者</td><td>尾倉さん（T-042）</td><td>光陽自動車／店舗オーナー</td></tr>
+        <tr><td>店長</td><td>大谷さん</td><td>店舗Rei 店長</td></tr>
+        <tr><td>看板</td><td>有限会社サンアート（T-043）</td><td>担当: 橋本さん／別府市石垣西5丁目4-11。電飾看板シート貼替・ポール看板・ロゴai変換・暖簾図面</td></tr>
+        <tr><td>のれん</td><td>ハクロマーク製作所</td><td>オーダーのれんドットコム（ネット発注）。<b>data.json 取引先マスター未登録</b>＝名刺／請求書入手後にT番号採番・登録要</td></tr>
+        <tr><td>施工</td><td>株式会社アート・レイズ</td><td>内装工事・とりまとめ</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📄 主要書類・データ</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank">
+        <div class="doc-icon">🧾</div>
+        <div class="doc-info">
+          <div class="doc-name">業者_見積_サンアート_ポール看板_尾倉-Rei内装-26.pdf</div>
+          <div class="doc-meta-s">受取見積 7/15・No.124／税込 ¥66,000（税抜 ¥60,000）／電照式 W580×H840 2面</div>
+        </div>
+        <div class="doc-st s-wip">検討中</div>
+      </a>
+      <a class="doc" href="" target="_blank">
+        <div class="doc-icon">📐</div>
+        <div class="doc-info">
+          <div class="doc-name">図面_入口暖簾_尾倉-Rei内装-26.ai</div>
+          <div class="doc-meta-s">サンアート作成 2026.7.16・図番1／W950×H600</div>
+        </div>
+        <div class="doc-st s-ok">確認済</div>
+      </a>
+      <a class="doc" href="" target="_blank">
+        <div class="doc-icon">🎨</div>
+        <div class="doc-info">
+          <div class="doc-name">業者_ロゴaiデータ_サンアート_尾倉-Rei内装-26.ai</div>
+          <div class="doc-meta-s">7/15 サンアート提供・のれん入稿に使用（元＝ロゴ_採用_高画質）</div>
+        </div>
+        <div class="doc-st s-ok">入稿済</div>
+      </a>
+      <a class="doc" href="" target="_blank">
+        <div class="doc-icon">🖼️</div>
+        <div class="doc-info">
+          <div class="doc-name">ロゴ_採用_高画質_尾倉-Rei内装-26.pdf</div>
+          <div class="doc-meta-s">採用ロゴ＝円形Rei（ミモザ・スマイル）／ほかベクター・300dpi・4000px各版あり</div>
+        </div>
+        <div class="doc-st s-ok">採用</div>
+      </a>
+      <a class="doc" href="" target="_blank">
+        <div class="doc-icon">📁</div>
+        <div class="doc-info">
+          <div class="doc-name">ロゴ_旧B_麗漢字_尾倉-Rei内装-26.pdf</div>
+          <div class="doc-meta-s">7/13 提案案B（「麗」漢字ロゴ）＝不採用</div>
+        </div>
+        <div class="doc-st s-wip">不採用</div>
+      </a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+    </div>
+    <div class="card">
+      <div class="card-t">🗂 フォルダ構成</div>
+      <ul>
+        <li><b>書類/</b>：アートレイズ発行の見積・請求（<b>未発行</b>のため現時点なし）</li>
+        <li><b>図面/</b>：入口暖簾図面（1件）</li>
+        <li><b>業者/</b>：サンアート受取見積・提供aiデータ（2件）</li>
+        <li><b>ロゴ/</b>：ロゴ案A／旧B／参考イメージ／採用版・各解像度（9件）</li>
+        <li><b>通話記録/</b>：尾倉さん2件・サンアート橋本さん3件（計5通話）</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話記録から抽出した重要決定事項</div>
+  <ul>
+    <li><b>2026/07/16 サンアート橋本さん</b>：電飾看板シート貼替のデザインを最終確認＝<b>ロゴ中央配置・背景色はベタ塗り</b>で作成。現場採寸済み。既存シートは経年で<b>現場では剥がせない</b>ため、<b>看板本体を外して持ち帰り薬液処理</b>する。内部の蛍光灯は現状のまま（夜間非営業のため。切れていれば交換）</li>
+    <li><b>2026/07/15 サンアート橋本さん</b>：デザインデータ確認完了、<b>製作着手OK</b>（8/6オープンに合わせ、確定寸法で製作）。現場の既存看板は<b>いつ外してもよい</b>。場所＝日出町役場裏手、現在「ピキ」の看板が立っている店舗。あわせて<b>ロゴデータを .ai へ変換して送付を依頼</b>（かめさんがネットでのれんを発注するため）</li>
+    <li><b>2026/07/13 サンアート橋本さん</b>：電飾看板の既存フィルムは<b>剥離可能</b>と確認。製品＝W600×H450程度・両面・アルミ既製フレーム＋既製アクリルベース、周囲R・約5mm巻き込み仕上げ。設置高さは脚立で届く低位置。夜間非営業のため<b>ベタ貼りで可</b>。デザインデータ受領後にインクジェット出力して貼替。電飾／不透明どちらでも仕上がりは同等</li>
+    <li><b>2026/07/08 尾倉さん</b>：現地待ち合わせの行き違い（尾倉さんがアートレイズ来社／かめさんは現地）→ <b>現地集合に変更</b>（採寸のため現地の方が良いと判断）</li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <div class="doc-meta-s">原価計上なし（data.json 原価＝0円・0件）。発注済の外注費は下表参照。アートレイズ発行の見積は未作成のため売上未確定</div>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <table>
+    <tr><th>業者</th><th>内容</th><th>金額（税込）</th><th>状態</th></tr>
+    <tr><td>サンアート（T-043）</td><td>電飾看板シート貼替（W600×H450程度・両面）</td><td>—（見積未受領）</td><td>正式発注済（7/15）</td></tr>
+    <tr><td>サンアート（T-043）</td><td>ポール看板 出力シート製作 電照式 W580×H840 2面＋現場既存看板面 剥がし・新規貼り仕上工事</td><td>¥66,000</td><td>見積受領のみ（7/15・No.124）</td></tr>
+    <tr><td>ハクロマーク製作所<br><span class="doc-meta-s">※取引先マスター未登録</span></td><td>のれん本体＋のれん棒＋木製のれん掛け（注文番号 59313・カード払い）</td><td>¥30,294</td><td>発注済（7/15）・納期未定</td></tr>
+  </table>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/7/16（木）</div><div class="tl-text">サンアート橋本さんと看板デザイン最終確認（ロゴ中央・背景ベタ）。既存シートは持ち帰り薬液剥離で対応。のれん図面データ（W950×H600・図番1）を受領</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/7/15（水）</div><div class="tl-text">工事内容を2件に確定＝①電飾看板シート貼替をサンアートへ正式発注（8/6オープン向け・寸法確定）②のれんをハクロマーク製作所へネット発注（注文番号59313・税込¥30,294・カード払い）。ポール看板の見積（¥66,000）も受領。ロゴの.ai変換を依頼→Rei.ai受領</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/7/14（火）</div><div class="tl-text">ロゴ高画質版（SmileLunch_Rei_Logo_HighQuality）を作成＝のちにサンアートが.ai化して入稿データの元になる</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/7/13（日）</div><div class="tl-text">ロゴ案A（円形Rei・ミモザ）／案B（「麗」漢字）を作成し案Aで方向確定。各解像度（ベクター／300dpi／4000px）を展開。サンアート橋本さんへ電飾看板のフィルム貼替を相談＝剥離可・ベタ貼り可・データ受領後インクジェット出力で貼替</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/7/10（金）</div><div class="tl-text">data.json へ新規案件登録（尾倉-Rei内装-26）。内装見積作成タスクを起票（※未完了）</div></div>
+    <div class="tl-item"><div class="tl-date">2026/7/8（火）</div><div class="tl-text">日出町テナント（店舗Rei）で尾倉さんと現地待ち合わせ・現況確認（当初アートレイズ来社と行き違い→現地集合に変更）</div></div>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">⚠️ 未確定・要対応</div>
+  <ul>
+    <li><b>内装本体の見積が未作成</b>（7/10起票・状態=未完了）。採寸・仕様を整理し、8/6オープンに間に合う内装見積の作成要否を確定する</li>
+    <li><b>ポール看板（¥66,000）の採否が未確定</b>。見積受領のみで発注判断が保留</li>
+    <li><b>のれんの納期が未定</b>（最短指定・先方確認待ち）。8/6オープンに間に合うか要確認</li>
+    <li><b>ハクロマーク製作所が取引先マスター未登録</b>。名刺／請求書の入手後にT番号を採番して data.json へ登録</li>
+    <li>電飾看板シート貼替は<b>サンアート見積が未受領</b>（正式発注は済み）</li>
+  </ul>
+</div>
+
+<div class="footer">
+  尾倉-Rei内装-26 ｜ 株式会社アート・レイズ ｜ 2026-07-17 生成（anken-summary 改訂4）
+</div>
+
+</body>
+</html>
