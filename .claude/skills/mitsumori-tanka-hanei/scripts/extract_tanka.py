@@ -204,10 +204,11 @@ def match_master(name, unit, sections, cutoff=0.82):
             mkey = norm(row["名称"])
             if not mkey:
                 continue
+            # 単位が違うものは別物（㎡単価と箇所単価を混ぜると単価表が壊れる）。
+            # 「壁開口(箇所)」に「壁開口補強W-65(m)」がぶら下がった実害があった。
             if row["単位"] and unit and row["単位"] != unit:
-                ratio = difflib.SequenceMatcher(None, key, mkey).ratio() * 0.7
-            else:
-                ratio = difflib.SequenceMatcher(None, key, mkey).ratio()
+                continue
+            ratio = difflib.SequenceMatcher(None, key, mkey).ratio()
             if key == mkey:
                 ratio = 1.0
             elif key in mkey or mkey in key:
@@ -344,6 +345,11 @@ def main():
                 c["判定"] = "要確認"       # 「実費」等
             elif lo <= latest["単価"] <= hi:
                 c["判定"] = "レンジ内"
+            elif latest["単価"] < lo / 3 or latest["単価"] > hi * 3:
+                # 桁が違うほどの乖離は同義語の誤マッチを疑う。自動で広げると
+                # レンジが「1,350〜20,000円」のような使えない幅に壊れる。
+                c["判定"] = "要確認"
+                c["理由"] = "マスターと3倍以上の乖離（別項目の可能性）"
             else:
                 c["判定"] = "レンジ外"
                 c["新レンジ案"] = fmt_range(min(lo, latest["単価"]),
