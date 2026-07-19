@@ -23,14 +23,35 @@ import re
 import sys
 import unicodedata
 
+MARKER = "単価マスター_アートレイズ.html"
+
+
 def _find_navi():
-    """スクリプト位置から genba-navi（単価マスターのある階層）まで遡る。"""
+    """genba-navi（単価マスターのある階層）を探す。
+
+    リポジトリ内から実行する場合は親を遡って見つかる。Coworkのプラグイン配下
+    （AppData）に複製したコピーから実行される場合は遡っても届かないので、
+    既知の場所と GENBA_NAVI 環境変数もあたる。
+    """
+    cands = []
     p = os.path.dirname(os.path.abspath(__file__))
     for _ in range(8):
-        if os.path.exists(os.path.join(p, "単価マスター_アートレイズ.html")):
-            return p
+        cands.append(p)
         p = os.path.dirname(p)
-    raise SystemExit("genba-navi が見つかりません（単価マスター_アートレイズ.html 不在）")
+    if os.environ.get("GENBA_NAVI"):
+        cands.insert(0, os.environ["GENBA_NAVI"])
+    cands += [
+        os.path.expanduser(r"~\artrays\claude ai\genba-navi"),
+        r"C:\Users\user\artrays\claude ai\genba-navi",
+    ]
+    import glob
+    cands += sorted(glob.glob("/sessions/*/mnt/artrays/claude ai/genba-navi"))
+    for c in cands:
+        if c and os.path.exists(os.path.join(c, MARKER)):
+            return c
+    raise SystemExit(
+        "genba-navi が見つかりません（{} 不在）。GENBA_NAVI 環境変数で指定してください"
+        .format(MARKER))
 
 
 NAVI = _find_navi()                                        # ...\genba-navi
