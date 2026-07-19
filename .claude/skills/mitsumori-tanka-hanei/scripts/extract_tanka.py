@@ -292,6 +292,8 @@ def main():
     ap.add_argument("--files", nargs="*")
     ap.add_argument("--since")
     ap.add_argument("--include-seikyu", action="store_true")
+    ap.add_argument("--include-isshiki", action="store_true",
+                    help="「式」計上の行もマスター反映候補に含める（既定は記録のみ）")
     ap.add_argument("--cutoff", type=float, default=0.82)
     args = ap.parse_args()
 
@@ -348,9 +350,12 @@ def main():
         else:
             c.update({"判定": "未登録", "工種": guess_section(latest["名称"], sections),
                       "新レンジ案": fmt_range(min(prices), max(prices))})
+        # 「式」の行は案件固有の一括計上で単価表に馴染まない。既定では記録のみ。
+        if bucket == "一式" and not args.include_isshiki:
+            c["判定"] = "一式記録"
         teian["候補"].append(c)
 
-    order = {"レンジ外": 0, "未登録": 1, "要確認": 2, "レンジ内": 3}
+    order = {"レンジ外": 0, "未登録": 1, "要確認": 2, "レンジ内": 3, "一式記録": 4}
     teian["候補"].sort(key=lambda c: (order.get(c["判定"], 9), -c["出現数"]))
 
     with io.open(TEIAN, "w", encoding="utf-8", newline="\n") as f:
