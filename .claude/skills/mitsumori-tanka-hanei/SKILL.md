@@ -141,7 +141,17 @@ python ".claude/skills/mitsumori-tanka-hanei/scripts/apply_tanka.py" --all-range
 
 ---
 
-## 5. 関連
+## 5. スクリプトの置き場所（触るときの注意）
+
+**正本は `genba-navi\.claude\skills\mitsumori-tanka-hanei\scripts\` の1箇所だけ**。
+Cowork のプラグイン配下（AppData）にはこの SKILL.md しか置かない。
+理由：プラグイン配下はパスが長く、`scripts\extract_tanka.py` まで並べると **Windows の
+260文字上限を超えて Python がファイルを開けない**（実測261文字で `Errno 2` になった）。
+スキルを直す場合も、コードは常にリポジトリ側を編集し、SKILL.md だけ両方に反映する。
+
+---
+
+## 6. 関連
 
 - 単価マスター本体：`単価マスター_アートレイズ.html`（工種別・ver.2・14工種）
 - 過去工事参考単価：`sanko_tanka.json` ＋ `過去工事参考単価_アートレイズ.html`（別レイヤー）
