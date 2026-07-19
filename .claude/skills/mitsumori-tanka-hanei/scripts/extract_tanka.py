@@ -187,7 +187,7 @@ def parse_master_html(html):
                          "区分": cells[3] if len(cells) > 3 else "",
                          "備考": cells[4] if len(cells) > 4 else ""})
         sections.append({"工種": title, "キーワード": kw, "行": rows})
-    return html, sections
+    return sections
 
 
 def parse_price_cell(txt):
@@ -307,7 +307,7 @@ def main():
     if os.path.exists(JISSEKI):
         jisseki = json.load(io.open(JISSEKI, encoding="utf-8"))
 
-    _, sections = parse_master(MASTER)
+    sections = parse_master(MASTER)[1]
     targets = find_targets(args, jisseki)
 
     items, files_meta = [], []

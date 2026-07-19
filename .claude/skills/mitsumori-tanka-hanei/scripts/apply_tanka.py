@@ -25,8 +25,9 @@ import shutil
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from extract_tanka import (NAVI, MASTER, JISSEKI, TEIAN, AR2026,   # noqa: E402
-                           parse_master, norm, norm_unit, fmt_range)
+from extract_tanka import (NAVI, MASTER, JISSEKI, TEIAN,          # noqa: E402
+                           parse_master, parse_master_html,
+                           norm, norm_unit, fmt_range)
 
 BACKUP_DIR = os.path.join(NAVI, "_アーカイブ", "単価マスター_バックアップ")
 
