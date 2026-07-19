@@ -108,6 +108,12 @@ def update_master(html, sections, picked, today):
             if sec is None:
                 skipped.append((c, "工種が未確定（要手動分類）"))
                 continue
+            # 冪等性：同名・同単位が既にあれば追加しない（再実行での二重登録防止）
+            if any(norm(r["名称"]) == norm(c["名称"])
+                   and norm_unit(r["単位"]) == norm_unit(c["単位"])
+                   for s in parse_master_html(html) for r in s["行"]):
+                skipped.append((c, "既に登録済み"))
+                continue
             row = ROW_TMPL.format(
                 name=esc(c["名称"]), unit=esc(c["単位"]),
                 price=c.get("新レンジ案") or fmt_range(c["実績単価"], c["実績単価"]),

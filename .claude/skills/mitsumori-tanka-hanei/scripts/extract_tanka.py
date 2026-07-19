@@ -163,6 +163,10 @@ PRICE_CELL = re.compile(r'<td class="price-range">(.*?)</td>')
 def parse_master(path):
     """工種セクションごとの行を読む。行は (工種, 名称, 単位, 最小, 最大, 生文字列)。"""
     html = io.open(path, encoding="utf-8", errors="replace").read()
+    return html, parse_master_html(html)
+
+
+def parse_master_html(html):
     sections = []
     for sm in re.finditer(
             r'<div class="section-wrap[^"]*" data-section="(?P<kw>[^"]*)">(?P<body>.*?)'
