@@ -373,10 +373,11 @@ def report(teian):
     n = len(teian["対象ファイル"])
     c = teian["候補"]
     cnt = {k: sum(1 for x in c if x["判定"] == k)
-           for k in ("レンジ外", "未登録", "要確認", "レンジ内")}
+           for k in ("レンジ外", "未登録", "要確認", "レンジ内", "一式記録")}
     out.write("# 単価反映 提案（対象見積 {} 件 / 明細 {} 種）\n\n".format(n, len(c)))
     out.write("- レンジ外(要更新) **{レンジ外}** / 未登録(新規追加) **{未登録}** / "
-              "要確認 {要確認} / レンジ内(変更不要) {レンジ内}\n\n".format(**cnt))
+              "要確認 {要確認} / レンジ内(変更不要) {レンジ内} / "
+              "一式記録(マスター対象外) {一式記録}\n\n".format(**cnt))
     for label in ("レンジ外", "未登録", "要確認"):
         rows = [x for x in c if x["判定"] == label]
         if not rows:
