@@ -165,8 +165,8 @@ def parse_master(path):
     html = io.open(path, encoding="utf-8", errors="replace").read()
     sections = []
     for sm in re.finditer(
-            r'<div class="section-wrap" data-section="(?P<kw>[^"]*)">(?P<body>.*?)'
-            r'(?=<div class="section-wrap"|</body>)', html, re.S):
+            r'<div class="section-wrap[^"]*" data-section="(?P<kw>[^"]*)">(?P<body>.*?)'
+            r'(?=<div class="section-wrap|</body>)', html, re.S):
         kw = sm.group("kw")
         body = sm.group("body")
         tm = re.search(r'<span class="section-title-text">(.*?)</span>', body)
@@ -222,8 +222,9 @@ def match_master(name, unit, sections, cutoff=0.82):
 # 工種の優先ルール（上から順に評価。data-section のキーワードは互いに重複するため、
 # 「撤去なのに02でなく04に落ちる」等の誤分類をここで先に潰す）
 SECTION_RULES = [
+    (r"(足場|仮設)", "01"),
     (r"(撤去|解体|斫り|はつり|剥取|剥がし|処分|廃材|産廃|発生材)", "02"),
-    (r"(足場|養生|仮設|運搬|搬入|搬出|階段設置)", "01"),
+    (r"(養生|運搬|搬入|搬出|階段設置)", "01"),
     (r"(モルタル|漆喰|珪藻土|ジョリパット|左官|セルフレベリング|土間仕上)", "03"),
     (r"(軽量鉄骨|軽天|lgs|石膏ボード|プラスターボード|pb|捨て貼り|下地組|造作|手すり|コンパネ|木下地)", "04"),
     (r"(建具|扉|ドア枠|襖|障子|サッシ|内窓|ガラス|網戸|アンダーカット)", "05"),
