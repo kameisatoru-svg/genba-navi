@@ -23,8 +23,17 @@ import re
 import sys
 import unicodedata
 
-NAVI = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
-    os.path.abspath(__file__)))))          # ...\genba-navi
+def _find_navi():
+    """スクリプト位置から genba-navi（単価マスターのある階層）まで遡る。"""
+    p = os.path.dirname(os.path.abspath(__file__))
+    for _ in range(8):
+        if os.path.exists(os.path.join(p, "単価マスター_アートレイズ.html")):
+            return p
+        p = os.path.dirname(p)
+    raise SystemExit("genba-navi が見つかりません（単価マスター_アートレイズ.html 不在）")
+
+
+NAVI = _find_navi()                                        # ...\genba-navi
 AR2026 = os.path.join(os.path.dirname(os.path.dirname(NAVI)), "AR-2026")
 MASTER = os.path.join(NAVI, "単価マスター_アートレイズ.html")
 JISSEKI = os.path.join(NAVI, "jisseki_tanka.json")
