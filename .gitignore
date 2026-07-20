@@ -1,2 +1,6 @@
 # push.bat が pull 前に作成する data.json の退避バックアップ（コミット不要）
 data.json.autobak
+
+# スキルのPythonキャッシュ（auto-push が拾わないように）
+__pycache__/
+*.pyc
