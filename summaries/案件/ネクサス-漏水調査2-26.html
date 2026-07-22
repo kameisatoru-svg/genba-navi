@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ネクサス-漏水調査2-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
+details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin:6px 0;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>ネクサスプラザビル 漏水調査（第2次）</h1>
+  <div class="sub">ネクサス-漏水調査2-26 ｜ 大分県大分市府内町3丁目7番7号（旧セントラルビル）</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">📐 見積準備</span>
+    <span class="badge">🏢 ネクサスプラザ（T-011）</span>
+    <span class="badge">🌧 漏水調査・複数箇所</span>
+    <span class="badge">🔗 ビル漏水修理-26と分離管理</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E3%83%8D%E3%82%AF%E3%82%B5%E3%82%B9-%E6%BC%8F%E6%B0%B4%E8%AA%BF%E6%9F%BB2-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-07-23 06:36</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">見積準備</div><div class="l">ステータス</div></div>
+  <div class="kpi"><div class="v">見積3本</div><div class="l">仮単価・確認待ち</div></div>
+  <div class="kpi"><div class="v">写真60枚</div><div class="l">7/3現地調査</div></div>
+  <div class="kpi"><div class="v">庇¥597,300</div><div class="l">辰美板金実額（税込）</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>現在地</b>：見積準備。7/3現地調査→調査報告書＋見積3本（テラス応急／南面補修／庇板金）を作成。庇板金は保険（棚尾さん）見積待ちで一旦保留、裏側・西面コーキングを先行する方向で7/21合意</li>
+        <li><b>提出セット</b>：調査報告書1本＋見積3本。いずれも<b>仮単価</b>でかめさん確認・修正待ち</li>
+        <li><b>庇板金の方針</b>：7/13たっちゃん通話「足場必須」を受けカバー工法＋足場案（間口15m×高さ7m）に全面改定＝下書き税込¥566,500。7/21辰美板金より正式見積受領＝<b>税抜¥543,000・税込¥597,300</b>（足場別途・隣地借用要）→差額（税込＋約3万円）を反映し顧客提出用に再作成が必要</li>
+        <li><b>分離管理</b>：既存の <b>ネクサス-ビル漏水修理-26</b>（保険スコープ進行中）とは書類・請求・保険申請の混在を避けて別案件管理</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>発注者</td><td>株式会社ネクサスプラザ（T-011）</td><td>代表: 力武太郎 様</td></tr>
+        <tr><td>物件</td><td>ネクサスプラザビル（旧セントラルビル）</td><td>大分市府内町3-7-7／映画館閉鎖・ほぼ無人</td></tr>
+        <tr><td>協力業者</td><td>辰美板金（たっちゃん）</td><td>北面3階庇板金・窓板金の見積・施工</td></tr>
+        <tr><td>保険</td><td>棚尾さん（保険会社側）</td><td>庇板金の保険見積を今週中回答予定（7/21時点）</td></tr>
+        <tr><td>施工</td><td>株式会社アート・レイズ</td><td>漏水調査・報告書・見積・コーキング補修</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">報_ネクサス-漏水調査2-26.pdf</div><div class="doc-meta-s">漏水調査報告書（全6ページ・写真19枚・面別総括表）</div></div><div class="doc-st s-ok">作成済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📝</div><div class="doc-info"><div class="doc-name">見_テラス応急_ネクサス-漏水調査2-26.pdf</div><div class="doc-meta-s">東面テラス応急処置・税込¥66,000（7/13かめさん編集値・仮単価）</div></div><div class="doc-st s-wip">仮単価</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📝</div><div class="doc-info"><div class="doc-name">見_南面補修_ネクサス-漏水調査2-26.pdf</div><div class="doc-meta-s">南面1〜3階雨漏り補修・税込¥138,600（仮単価）</div></div><div class="doc-st s-wip">仮単価</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📝</div><div class="doc-info"><div class="doc-name">見_庇板金_ネクサス-漏水調査2-26.pdf</div><div class="doc-meta-s">北面3階庇板金カバー工法＋足場案・下書き税込¥566,500（辰美実額¥597,300で要差替）</div></div><div class="doc-st s-wip">下書き</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📥</div><div class="doc-info"><div class="doc-name">アートレイズ様　大分市　府内町　セントラル.pdf</div><div class="doc-meta-s">辰美板金 受領見積（R08/7/13・庇板金＋窓板金 税抜¥543,000/税込¥597,300・足場別途）</div></div><div class="doc-st s-ok">受領</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📝</div><div class="doc-info"><div class="doc-name">00_履歴_ネクサス-漏水調査2-26.md</div><div class="doc-meta-s">案件履歴ノート（調査所見・見積改定・通話紐付け）</div></div><div class="doc-st s-ok">運用中</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ 見積は仮単価・提出前（見積準備フェーズ）。DriveリンクはDrive同期後に付与（現状href未設定）。</div>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話記録から抽出した重要決定事項</div>
+  <ul>
+    <li>2026/07/06 辰美板金（たっちゃん）現地確認：北面3階庇板金＝センター箱樋＋平折板金（幅約1m）が約5m分へこみ・壁から浮き。施主要望の「上から被せ工法」に対し『へこんだ下地のまま被せても再度へこむ→コンパネ等の下地補修が必須』との見解。作業は3階ベランダ越えで親綱＋安全帯が必要</li>
+    <li>2026/07/13 辰巳（辰美）板金 通話：庇板金は足場を組まないと施工が厳しい。工法＝既存板金は剥がさず、上に木下地→コンパネ→板金カバー張り→コーキング処理。これを受け庇板金見積をカバー工法＋足場案（間口15m×高さ7m）に全面改定</li>
+    <li>2026/07/21 力武さん通話（12:53）：保険会社側（棚尾さん）の見積がまだ出ておらず、今週中に返事があるかもとのこと</li>
+    <li>2026/07/21 力武さん通話（13:53）：庇板金は保険見積の回答待ちで一旦保留、裏側・西面はコーキングのみのため先行して残作業を進める方向で合意</li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <div class="doc-meta-s">見積提出前・原価計上なし（見積準備フェーズ）。data.jsonの原価4分類はいずれも未計上。庇板金は辰美板金へ外注予定（見積受領済み・未発注）。</div>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <div class="doc-meta-s">受取見積：辰美板金『アートレイズ様 大分市 府内町 セントラル.pdf』（庇板金＋窓板金・税抜¥543,000/税込¥597,300・R08/7/13）。※受取請求書一覧Excel未反映（未発注のため）</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/7/22（水）</div><div class="tl-text">辰美板金より3F庇板金＋窓板金の正式見積を受領（間口16m×高さ3F・針葉樹合板2枚重ね下地＋新規板金カバー・唐草・ルーフィング・コーキング／高所作業車共・税抜¥543,000・税込¥597,300）。足場別途・隣地借用が必要。下書き見積¥566,500から差額反映し顧客提出用に再作成が必要</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/7/21（火）</div><div class="tl-text">力武さんと通話2件。保険（棚尾さん）見積を今週中回答予定・庇板金は保留、西面コーキング等の残作業を先行する方向で合意</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/7/13（月）</div><div class="tl-text">庇板金見積をカバー工法＋足場案（15m×7m）に全面改定（下書き税込¥566,500・辰巳板金見積待ち）。見積書3本を現行雛形で再生成、テラス応急はかめさん編集値で税込¥66,000に改定</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/7/6（日）</div><div class="tl-text">辰美板金へ現地確認依頼（通話）。北面庇板金は下地補修必須の見解、作業安全対策を確認</div></div>
+    <details class="tl-archive"><summary>過去の経緯を見る（2件・7日超）</summary>
+      <div class="tl-item"><div class="tl-date">2026/7/5（土）</div><div class="tl-text">調査報告書（全6ページ）＋見積3本（庇板金¥132,000／テラス応急¥41,800／南面補修¥138,600・仮単価）を作成。7/3撮影の現調写真60枚を場所別に登録</div></div>
+      <div class="tl-item"><div class="tl-date">2026/7/5（土）</div><div class="tl-text">案件登録。既存ネクサス-ビル漏水修理-26（保険スコープ）とは別箇所の新規漏水のため独立案件として新規登録</div></div>
+    </details>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li>漏水箇所は多岐（南面＝2階カラオケ天井落下・3階映画館通路天井落ち＋窓周り・非常口ベランダALC笠木/排水・螺旋階段取合い、北面＝3階庇板金たわみ、東面＝1階焼肉店テラス止水、西面＝コーキング）。既存のビル漏水修理-26（保険スコープ）とは分離管理</li>
+    <li>見積3本はいずれも仮単価。庇板金は辰美板金の正式見積（税込¥597,300・足場別途・隣地借用要）を反映して顧客提出用に再作成が必要（要かめさん確認）</li>
+    <li>更衣室絡みの写真9枚はビル漏水修理-26側に登録済み（本案件では欠番）</li>
+    <li>1階焼肉店テラス止水：2階からの雨漏りでテラス屋根腐食・床に水たまり→店内浸水の恐れ。アルミLアングル止水＋下段ブロック一部解体で開口部作成を予定</li>
+  </ul>
+</div>
+
+<div class="footer">
+  自動生成: 案件サマリー（AUTOマーカー方式）｜ data.json を真実の源泉とし、Drive同期後にDriveリンクを付与<br>
+  ネクサス-漏水調査2-26
+</div>
+
+</body>
+</html>

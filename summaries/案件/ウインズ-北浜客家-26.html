@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ウインズ-北浜客家-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
+details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin:6px 0;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>北浜 客家（はっか） スナック入口扉 施錠加工</h1>
+  <div class="sub">ウインズ-北浜客家-26 ｜ 大分県別府市北浜（客家）</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">🧾 請求済み</span>
+    <span class="badge">🏢 ウインズコーポレーション（T-008）</span>
+    <span class="badge">🔑 施錠加工・直請け</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E3%82%A6%E3%82%A4%E3%83%B3%E3%82%BA-%E5%8C%97%E6%B5%9C%E5%AE%A2%E5%AE%B6-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-07-23 06:36</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">請求済み</div><div class="l">ステータス</div></div>
+  <div class="kpi"><div class="v">¥14,300</div><div class="l">請求額（税込）</div></div>
+  <div class="kpi"><div class="v">入金待ち</div><div class="l">ARS-T008-260722-01</div></div>
+  <div class="kpi"><div class="v">7/22 完了</div><div class="l">施工完了</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>現在地</b>：施工完了・請求済み。伸縮蛇腹扉（ステン製）に施錠金具を取付、請求書発行（ARS-T008-260722-01・税込¥14,300）。入金待ち</li>
+        <li><b>内容</b>：1階スナック「客家（はっか）」入口のステン製ジャラジャラ扉が無施錠で、侵入・放尿被害あり。南京錠対応の掛け金（施錠金具）を扉に取付</li>
+        <li><b>採用方法</b>：当初はステン扉への南京錠用穴あけ加工を検討→Amazonで鍵付き丁番を購入し取付する方式に変更</li>
+        <li><b>契約形態</b>：見積書なしの直請け（大村さんからの相談→即施工）</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>発注者</td><td>有限会社ウインズコーポレーション（T-008）</td><td>担当: 大村さん</td></tr>
+        <tr><td>施工場所</td><td>別府市北浜 スナック「客家（はっか）」</td><td>1階スナック入口扉</td></tr>
+        <tr><td>施工</td><td>株式会社アート・レイズ</td><td>施錠加工</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">🧾</div><div class="doc-info"><div class="doc-name">請_ウインズ-北浜客家-26.pdf</div><div class="doc-meta-s">2026/7/22 請求書 ARS-T008-260722-01・税込¥14,300</div></div><div class="doc-st s-ok">発行済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">🧾</div><div class="doc-info"><div class="doc-name">請_ウインズ-北浜客家-26.html</div><div class="doc-meta-s">請求書の再編集用HTML（現場ナビ出力）</div></div><div class="doc-st s-ok">保存済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📞</div><div class="doc-info"><div class="doc-name">通話記録／20260713_大村_124130</div><div class="doc-meta-s">2026/7/13 大村さん 施錠相談（m4a＋transcript）</div></div><div class="doc-st s-ok">保管</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ 見積書なしの直請け。DriveリンクはDrive同期後に付与（現状href未設定）。</div>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話記録から抽出した重要決定事項</div>
+  <ul>
+    <li>2026/07/13 大村さん通話：北浜のスナック「客家」1階入口のステン製ジャラジャラ扉（伸縮蛇腹扉）が無施錠で、店内へ侵入し放尿する被害あり。施錠したいがステン扉に南京錠を掛ける穴・金具が無い。南京錠は客先で用意するので、掛け金を取り付ける細工を依頼</li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <div class="doc-meta-s">原価4分類（労務費・材料費・外注費・経費）はdata.json未計上。材料費＝施錠金具¥1,000相当（請求明細ベース）。</div>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <div class="doc-meta-s">受取見積書・受取請求書なし（外注なし・自社施工）</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/7/22（水）</div><div class="tl-text">伸縮蛇腹扉（ステン製）に施錠金具を取付・施錠加工完了。請求書発行 ARS-T008-260722-01 税込¥14,300（施錠加工手間¥12,000＋材料費¥1,000）</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/7/14（月）</div><div class="tl-text">Amazonで鍵付き丁番を購入。到着次第、北浜客家のスナック扉に取付施工する段取り</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/7/13（日）</div><div class="tl-text">大村さんより北浜客家スナック入口扉の施錠相談（ステン扉・穴なし）を受領</div></div>
+
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li>南京錠本体は客先（大村さん）で用意。アートレイズは掛け金（施錠金具）取付の手間＋金具材料費のみ請求</li>
+    <li>ステン（ステンレス）製の伸縮蛇腹扉は端が突き合わせで穴が無いため、当初検討の穴あけ加工から鍵付き金具取付方式に変更した</li>
+    <li>見積書は発行せず直請けで施工→請求。入金確認をもって案件クローズ予定</li>
+  </ul>
+</div>
+
+<div class="footer">
+  自動生成: 案件サマリー（AUTOマーカー方式）｜ data.json を真実の源泉とし、Drive同期後にDriveリンクを付与<br>
+  ウインズ-北浜客家-26
+</div>
+
+</body>
+</html>
