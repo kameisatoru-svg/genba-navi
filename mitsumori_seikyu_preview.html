@@ -2619,7 +2619,10 @@ function buildReeditHTML(forPrint){
 ${styles}
 <style>
   /* 印刷用追加CSS：transform解除・余白整理 */
-  body{background:#fff!important;margin:0;padding:0;}
+  /* アプリ画面用の body 制約（height:100vh / overflow:hidden / flex）を必ず解除する。
+     残ると保存HTMLを単体で開いたとき1画面分で切れ、下部（税込合計・備考・フッター）が
+     スクロールしても出てこない＋複数ページ印刷も途中で欠ける。 */
+  body{background:#fff!important;margin:0;padding:0;height:auto!important;min-height:0!important;display:block!important;overflow:visible!important;}
   #preview-inner{transform:none!important;width:auto!important;margin:0!important;}
   .doc-page,.page{box-shadow:none!important;margin:0 auto!important;}
   .group-overflow-page,.overflow-page,.page-break{page-break-before:always;break-before:page;}
