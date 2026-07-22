@@ -1289,7 +1289,8 @@ function calcHasuNebiki(baseZeinuki){
 function calcTotals(){
   let subtotal=0;
   if(mode==='flat'){
-    subtotal=flatItems.reduce((s,it)=>s+qRound(it.qty)*parseFloat(it.price),0);
+    // 空行（price:""）は parseFloat が NaN になり小計以降が全部 NaN になるので ||0 で潰す
+    subtotal=flatItems.reduce((s,it)=>s+qRound(it.qty)*(parseFloat(it.price)||0),0);
   } else if(mode==='lump'){
     // 1式表記モード：groupSummaryItemsのみ合計（大項目は使わない）
     groupSummaryItems.forEach(it=>subtotal+=qRound(it.qty)*(parseFloat(it.price)||0));
