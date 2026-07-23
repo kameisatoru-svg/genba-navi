@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ウインズ-北浜モニター-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
+details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin:6px 0;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>北浜客家 廊下モニター交換</h1>
+  <div class="sub">ウインズ-北浜モニター-26 ｜ 北浜客家（民泊）廊下・テレビカメラ表示用モニター</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">💬 相談</span>
+    <span class="badge">🏢 有限会社ウインズコーポレーション（T-008）</span>
+    <span class="badge">👤 大村さん</span>
+    <span class="badge">🔁 安価な代替品へ交換で了承済み</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E3%82%A6%E3%82%A4%E3%83%B3%E3%82%BA-%E5%8C%97%E6%B5%9C%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%BC-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-07-23</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">相談</div><div class="l">ステータス</div></div>
+  <div class="kpi"><div class="v">モニター1台</div><div class="l">対象（廊下・つけっぱなし表示用）</div></div>
+  <div class="kpi"><div class="v">見積前</div><div class="l">金額（少額・現物手配後）</div></div>
+  <div class="kpi"><div class="v">未購入</div><div class="l">交換用モニターの手配</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>進行フロー</b>：①不具合連絡（7/22 大村さん） → ②交換方針合意（安価な代替品でOK） → ③モニター購入 → ④現地取付 → ⑤請求</li>
+        <li><b>現在地</b>：相談。安価な代替モニターへの交換で大村さん了承済み。現物の手配待ち</li>
+        <li><b>症状</b>：廊下のテレビカメラ表示用モニターが真っ黒のまま映らない。配線を触っても改善せず、経年の焼き付きと思われる</li>
+        <li><b>要件</b>：録画等の実用機能はなく形上の設置のため、映れば可。高機能・高価格の機種は不要</li>
+        <li><b>注意</b>：同じ北浜客家現場の「ウインズ-北浜客家-26」（施錠加工・請求済み）とは別案件</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>発注者</td><td>有限会社ウインズコーポレーション（T-008）</td><td>北浜客家（民泊）運営</td></tr>
+        <tr><td>担当</td><td>大村さん</td><td>7/22 電話で交換依頼・方針了承</td></tr>
+        <tr><td>施工</td><td>株式会社アート・レイズ</td><td>モニター手配・取付</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📝</div><div class="doc-info"><div class="doc-name">00_履歴_ウインズ-北浜モニター-26.md</div><div class="doc-meta-s">案件履歴ノート（現在地・決定事項・通話紐付けメモ）</div></div><div class="doc-st s-ok">運用中</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📞</div><div class="doc-info"><div class="doc-name">通話記録/20260722_大村さん_142055_transcript.md</div><div class="doc-meta-s">2026/7/22 14:20 大村さん通話（約50秒・モニター不良の相談）</div></div><div class="doc-st s-ok">文字起こし済</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ 見積・請求書類は未発行（相談フェーズ）。DriveリンクはDrive同期後に付与（現状href未設定）。</div>
+    </div>
+    <div class="card">
+      <div class="card-t">📷 写真・現調記録</div>
+      <ul>
+        <li>写真なし（現地写真未撮影）。取付時に現況・完成写真を撮っておくと次回の型番選定が楽になる</li>
+        <li>手配前に確認したい項目：既存モニターのサイズ・入力端子（HDMI/RCA等）・設置金具（VESA有無）</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話記録から抽出した重要決定事項</div>
+  <ul>
+    <li>2026/07/22 大村さん（T-008）通話：北浜客家（民泊）の廊下モニター（テレビカメラ表示用）が真っ黒のまま映らない。配線を触っても改善せず、つけっぱなしによる経年焼き付きと推定</li>
+    <li>2026/07/22【決定】録画等はしておらず形上の設置のため、安価なモニターへの交換で対応する（大村さん了承済み）</li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <div class="doc-meta-s">見積未発行・原価計上なし（相談フェーズ）。data.jsonの原価4分類（労務費・材料費・外注費・経費）はいずれも未計上</div>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <div class="doc-meta-s">受取見積書・受取請求書なし（相談フェーズ・外注未発注。モニターは現物購入予定）</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/7/23（木）</div><div class="tl-text">かめさん確認のうえ data.json へ新規登録（ステータス＝相談）・案件フォルダ作成。動き「北浜客家の廊下モニターを安価な代替品に交換（購入→取付）」を未完了で登録</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/7/22（火）</div><div class="tl-text">大村さんより電話。廊下モニターが映らない旨の相談を受け、安価な代替モニターへの交換で対応することに合意</div></div>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li>少額・単発の交換対応。訪問1回で完結する見込みのため、北浜客家で別作業が発生する場合は同日にまとめると効率的</li>
+    <li>「形上の設置」との顧客言明あり。カメラ映像が実際に映る必要はあるが、録画機能・高解像度は不要</li>
+    <li>未解決：交換用モニターの機種・購入先の決定、取付日の調整</li>
+  </ul>
+</div>
+
+<div class="footer">
+  自動生成: 案件サマリー（AUTOマーカー方式）｜ data.json を真実の源泉とし、Drive同期後にDriveリンクを付与<br>
+  ウインズ-北浜モニター-26
+</div>
+
+</body>
+</html>
