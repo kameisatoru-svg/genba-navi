@@ -123,7 +123,9 @@ JSON として読めるかだけでなく **中身の整合性まで**広げた�
 
 | スキル | 置き換え先 |
 |---|---|
-| `genka-aggregate` | 案件ごとの4費目書き戻し → `set_genka`（合計の手計算が不要になる） |
+| `genka-aggregate` | 丸ごと `artrays-genka` の `genka_aggregate` → `genka_sync_to_data_json` に置換（[README_genka.md](README_genka.md)） |
+| `amex-categorizer-post` | TSVの手貼り → `genka_import_tsv`（RC採番・重複検知つき） |
+| `receipt-processor` | 同上 |
 | `meishi-to-data-json` | 取引先の新規登録 → `upsert_torihikisaki`（T番号の採番が自動） |
 | `invoice-checker-part2` | 未登録業者の追加 → `upsert_torihikisaki` |
 | `receipt-processor` | 案件名の解決 → `search_anken` / `get_anken`（全文読み込み不要） |

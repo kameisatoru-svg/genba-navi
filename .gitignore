@@ -7,3 +7,6 @@ __pycache__/
 
 # artrays-data MCP サーバーが書き込み直前に退避する data.json のバックアップ
 _backups/
+
+# artrays-genka MCP サーバーの接続先（Apps Script のURLとトークン）
+mcp/.genka_config.json

@@ -21,6 +21,7 @@
 | `工具台帳登録_SKILL_v20260611.md` | 工具台帳に商品を登録する手順スキル（取扱説明書・商品画像を一緒に保管） |
 | `mitsumori_preview.html` | 見積書プレビュー・PDF出力 |
 | `mcp/artrays_data_server.py` | data.json 専用のMCPサーバー（部分読み書き・検証・自動バックアップ・原子的書き込み）。詳細は [`mcp/README.md`](mcp/README.md) |
+| `mcp/artrays_genka_server.py` | 原価管理SheetsのMCPサーバー（TSV取り込み・RC排他採番・4費目集計・data.json書き戻し）。詳細は [`mcp/README_genka.md`](mcp/README_genka.md) |
 
 ## data.json の構造
 
