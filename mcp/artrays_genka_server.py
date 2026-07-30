@@ -245,9 +245,12 @@ def validate_input_rows(rows):
 
 def t_genka_ping(_args):
     res = api("ping")
-    return {"接続": "OK", "スプレッドシート": res.get("spreadsheet"),
-            "シート": res.get("sheet"), "明細行数": res.get("rows"),
-            "最終RC": res.get("lastRC"), "次のRC": res.get("nextRC")}
+    out = {"接続": "OK", "スプレッドシート": res.get("spreadsheet"),
+           "シート": res.get("sheet"), "明細行数": res.get("rows"),
+           "最終RC": res.get("lastRC"), "次のRC": res.get("nextRC")}
+    if res.get("tabs"):
+        out["タブ一覧"] = res["tabs"]
+    return out
 
 
 def t_genka_next_rc(_args):

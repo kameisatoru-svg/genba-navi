@@ -11,7 +11,9 @@
  *  - トークンが一致しないリクエストは一切処理しない
  */
 
-var SHEET_NAME = '原価管理';
+// タブ名。スクリプトプロパティ SHEET_NAME があればそちらが優先される
+// （タブ名を変えるときに、コードを直して再デプロイする必要がなくなる）
+var SHEET_NAME_DEFAULT = '原価管理';
 var HEADER_ROWS = 1;          // 1行目はヘッダー
 var COL_COUNT = 13;           // A〜M
 var RC_PREFIX = 'RC-26-';
@@ -65,9 +67,25 @@ function json(obj) {
 
 // ---------------------------------------------------------------- helpers
 
+function sheetName() {
+  return PropertiesService.getScriptProperties().getProperty('SHEET_NAME')
+      || SHEET_NAME_DEFAULT;
+}
+
+function tabNames() {
+  return SpreadsheetApp.getActive().getSheets().map(function (s) { return s.getName(); });
+}
+
 function getSheet() {
-  var sh = SpreadsheetApp.getActive().getSheetByName(SHEET_NAME);
-  if (!sh) throw new Error('シート『' + SHEET_NAME + '』が見つかりません');
+  var name = sheetName();
+  var sh = SpreadsheetApp.getActive().getSheetByName(name);
+  if (!sh) {
+    throw new Error(
+      'シート『' + name + '』が見つかりません。' +
+      'このスプレッドシートのタブ: ' + tabNames().join(' / ') + ' ／ ' +
+      '正しいタブ名をスクリプトプロパティ SHEET_NAME に設定してください' +
+      '（設定すれば再デプロイは不要です）');
+  }
   return sh;
 }
 
@@ -101,7 +119,8 @@ function actionPing() {
   var rows = readAll(sh);
   return {
     ok: true,
-    sheet: SHEET_NAME,
+    sheet: sheetName(),
+    tabs: tabNames(),
     spreadsheet: SpreadsheetApp.getActive().getName(),
     rows: rows.length,
     lastRC: rows.length ? RC_PREFIX + ('000' + maxRc(rows)).slice(-3) : null,
