@@ -13,6 +13,7 @@ import copy
 import importlib.util
 import json
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -288,6 +289,27 @@ class TestProtocol(Base):
     def test_通知にはレスポンスを返さない(self):
         self.assertIsNone(srv.handle_request({"jsonrpc": "2.0",
                                               "method": "notifications/initialized"}))
+
+    def test_スキーマのプロパティ名はASCIIのみ(self):
+        """Anthropic API は ^[a-zA-Z0-9_.-]{1,64}$ 以外のプロパティ名を 400 で弾く。
+        日本語の引数名を書くとツールが一切呼べなくなるので、ここで止める。"""
+        pat = re.compile(r"^[a-zA-Z0-9_.-]{1,64}$")
+        for t in srv.TOOLS:
+            schema = t["inputSchema"]
+            for k in (schema.get("properties") or {}):
+                self.assertRegex(k, pat, f"{t['name']} のプロパティ名『{k}』がASCIIでない")
+            for k in (schema.get("required") or []):
+                self.assertRegex(k, pat, f"{t['name']} の required『{k}』がASCIIでない")
+
+    def test_日本語の引数名でも受け付ける(self):
+        """既存の呼び出しやスキル側の記述が日本語名でも壊れないこと"""
+        key = self.any_anken_key()
+        res = srv.t_search_anken({"キーワード": "床", "limit": 3})
+        self.assertIn("件数", res)
+        r = srv.t_set_genka({"key": key, "材料費": 100, "外注費": 200})
+        self.assertEqual(r["変更後"]["合計"], 300)
+        r2 = srv.t_set_genka({"key": key, "zairyouhi": 100, "gaichuhi": 200})
+        self.assertEqual(r2["変更後"]["合計"], 300)
 
     def test_tools_listが全ツールを返す(self):
         resp = srv.handle_request({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})

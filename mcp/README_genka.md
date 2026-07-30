@@ -34,10 +34,15 @@ genka_import_tsv → genka_aggregate → genka_sync_to_data_json
 
 ## ツール一覧（8個）
 
+> 引数名は英字。Anthropic API がツール定義のプロパティ名に
+> `^[a-zA-Z0-9_.-]{1,64}$` を要求するため、日本語の引数名は使えない
+> （使うと 400 エラーでツールが一切呼べなくなる）。
+> ただしハンドラ側は日本語名で渡されても受け付ける。
+
 | ツール | 用途 |
 |---|---|
 | `genka_ping` | 疎通確認。シート名・明細行数・最終RC・次のRCを返す |
-| `genka_read` | 明細を読む（案件番号・年月・勘定科目で絞込） |
+| `genka_read` | 明細を読む（`anken_no` 案件番号 / `month` 年月 / `kamoku` 勘定科目 で絞込） |
 | `genka_next_rc` | 次に採番されるRC番号（確認用） |
 | `genka_append_rows` | 行を追記。RCは渡さない（シート側で排他採番） |
 | `genka_import_tsv` | 貼付用TSVを取り込んで追記。**手貼りの置き換え** |
@@ -56,7 +61,7 @@ genka_import_tsv → genka_aggregate → genka_sync_to_data_json
 **書き戻しを中止する**。シートを部分的にしか読めていない事故（読み取り失敗・
 年月で絞った集計を全体に適用）を、data.json を壊す前に止めるため。
 
-意図通りなら `ゼロ化を許可: true` を付けて再実行する。
+意図通りなら `allow_zeroing: true` を付けて再実行する。
 
 ---
 
@@ -185,6 +190,7 @@ claude mcp add artrays-genka -- python "C:\Users\user\artrays\claude ai\genba-na
 4. genka_aggregate             案件別4費目集計・警告を確認
 5. genka_sync_to_data_json     差分プレビュー
 6. genka_sync_to_data_json dry_run=false   data.json へ書き戻し
+   （原価が0になる案件があると中止される。意図通りなら allow_zeroing=true）
 ```
 
 `data.json` への書き戻しは `artrays-data` の安全な書き込み機構

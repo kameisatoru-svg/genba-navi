@@ -261,9 +261,12 @@ def t_genka_next_rc(_args):
 
 def t_genka_read(args):
     params = {}
-    for k, p in (("案件番号", "anken"), ("年月", "month"), ("勘定科目", "kamoku")):
-        if args.get(k):
-            params[p] = args[k]
+    for names, p in ((("anken_no", "案件番号"), "anken"),
+                     (("month", "年月"), "month"),
+                     (("kamoku", "勘定科目"), "kamoku")):
+        v = ds.pick(args, *names)
+        if v:
+            params[p] = v
     res = api("read", **params)
     rows = res["rows"]
     limit = int(args.get("limit") or 50)
@@ -316,7 +319,8 @@ def t_genka_import_tsv(args):
 
 
 def t_genka_aggregate(args):
-    res = api("read", **({"month": args["年月"]} if args.get("年月") else {}))
+    month = ds.pick(args, "month", "年月")
+    res = api("read", **({"month": month} if month else {}))
     agg, warnings = aggregate_rows(res["rows"])
 
     data = ds.load_data()
@@ -380,10 +384,10 @@ def t_genka_sync_to_data_json(args):
                 "ゼロ化される案件": zeroed, "変更内容": changes,
                 "警告": warn_zero + agg["警告"],
                 "次の操作": ("ゼロ化される案件を確認のうえ、意図通りなら "
-                             "dry_run=false, ゼロ化を許可=true で実行してください"
+                             "dry_run=false, allow_zeroing=true で実行してください"
                              if zeroed else "dry_run=false で data.json に書き戻します")}
 
-    if zeroed and not args.get("ゼロ化を許可"):
+    if zeroed and not ds.pick(args, "allow_zeroing", "ゼロ化を許可"):
         lines = "\n".join(f"- {z['案件キー']}: {z['消える原価']:,}円 → 0"
                           for z in zeroed[:15])
         more = f"\n…ほか{len(zeroed) - 15}件" if len(zeroed) > 15 else ""
@@ -391,7 +395,7 @@ def t_genka_sync_to_data_json(args):
             f"原価が入っている {len(zeroed)}件の案件が0にリセットされるため、書き戻しを中止しました。\n"
             f"{lines}{more}\n\n"
             "原価管理Sheets を全期間読めていない可能性があります（年月で絞った集計や読み取り失敗）。\n"
-            "内容を確認して意図通りであれば ゼロ化を許可=true を付けて再実行してください。")
+            "内容を確認して意図通りであれば allow_zeroing=true を付けて再実行してください。")
 
     meta = ds.save_data(data, "genka_sync")
     return {"実行": "data.json へ書き戻し完了", "変更のある案件": len(changes),
@@ -446,8 +450,10 @@ TOOLS = [
     {"name": "genka_read",
      "description": "原価管理Sheets の明細を読む。案件番号（AR-26-xxx）・年月（YYYY-MM）・勘定科目で絞り込める。",
      "inputSchema": {"type": "object", "properties": {
-         "案件番号": {"type": "string"}, "年月": {"type": "string", "description": "YYYY-MM"},
-         "勘定科目": {"type": "string"}, "limit": {"type": "integer", "description": "既定50"}}},
+         "anken_no": {"type": "string", "description": "案件番号（AR-26-xxx）"},
+         "month": {"type": "string", "description": "年月 YYYY-MM"},
+         "kamoku": {"type": "string", "description": "勘定科目（材料費・外注費 など）"},
+         "limit": {"type": "integer", "description": "既定50"}}},
      "handler": t_genka_read},
     {"name": "genka_append_rows",
      "description": "原価管理Sheets に行を追記する。A列のRC番号はスプレッドシート側で排他採番するため渡さない。日付・店舗名・金額・品目が同じ行は二重計上として自動スキップする。既定は dry_run=true（プレビュー）。",
@@ -467,14 +473,14 @@ TOOLS = [
     {"name": "genka_aggregate",
      "description": "原価管理Sheets を案件別に4費目（労務費・材料費・外注費・経費）で集計する。案件番号は data.json の旧案件番号で案件キーに解決する。書き込みはしない。",
      "inputSchema": {"type": "object", "properties": {
-         "年月": {"type": "string", "description": "YYYY-MM。省略時は全期間"}}},
+         "month": {"type": "string", "description": "年月 YYYY-MM。省略時は全期間"}}},
      "handler": t_genka_aggregate},
     {"name": "genka_sync_to_data_json",
      "description": "集計結果を data.json の各案件の『原価』へ書き戻す。合計はサーバーが計算し、書き込みは検証・バックアップ・原子的差し替えを経由する。既定は dry_run=true（差分プレビュー）。原価が入っている案件が0にリセットされる場合は、シートを部分的にしか読めていない兆候として書き戻しを中止する。",
      "inputSchema": {"type": "object", "properties": {
          "dry_run": {"type": "boolean", "description": "既定 true。false で実際に書き戻す"},
-         "ゼロ化を許可": {"type": "boolean", "description":
-                          "原価が入っている案件を0にリセットしてよい場合のみ true。既定 false"}}},
+         "allow_zeroing": {"type": "boolean", "description":
+                           "原価が入っている案件を0にリセットしてよい場合のみ true。既定 false"}}},
      "handler": t_genka_sync_to_data_json},
     {"name": "genka_validate",
      "description": "原価管理Sheets を点検する。RC番号の重複・案件番号の欠落・原価区分の不正・金額の読み取り不能・data.json に無い案件番号を報告する。",

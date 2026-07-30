@@ -51,6 +51,20 @@ GENKA_KEYS = ["労務費", "材料費", "外注費", "経費"]
 ID_RE = re.compile(r"^T-\d{3}$")
 
 
+def pick(args: dict, *names, default=None):
+    """引数を別名込みで取り出す。
+
+    MCP のツール定義（inputSchema）のプロパティ名は ASCII しか使えないため
+    （API が ^[a-zA-Z0-9_.-]{1,64}$ を要求する）、正式名は英字にしている。
+    ただし日本語名で呼ばれても通るようにしておく。
+    """
+    for n in names:
+        v = args.get(n)
+        if v is not None:
+            return v
+    return default
+
+
 class ToolError(Exception):
     """ツール実行時のユーザー向けエラー（スタックトレースは出さない）"""
 
@@ -381,17 +395,18 @@ def t_get_anken(args):
 
 def t_search_anken(args):
     data = load_data()
-    rows = all_anken(data, bool(args.get("中止含む")))
-    kw = (args.get("キーワード") or "").strip()
-    cust = (args.get("顧客") or "").strip()
-    status = (args.get("ステータス") or "").strip()
+    rows = all_anken(data, bool(pick(args, "include_chushi", "中止含む")))
+    kw = str(pick(args, "keyword", "キーワード", default="")).strip()
+    cust = str(pick(args, "customer", "顧客", default="")).strip()
+    status = str(pick(args, "status", "ステータス", default="")).strip()
+    motouke_only = pick(args, "motouke_only", "元請のみ")
 
     def match(a):
         if cust and cust not in str(a.get("顧客略", "")):
             return False
         if status and status not in str(a.get("ステータス", "")):
             return False
-        if args.get("元請のみ") and not a.get("元請フラグ"):
+        if motouke_only and not a.get("元請フラグ"):
             return False
         if kw:
             blob = json.dumps({k: a.get(k) for k in
@@ -428,8 +443,8 @@ def t_list_mishuukin(_args):
 
 def t_search_torihikisaki(args):
     data = load_data()
-    kw = (args.get("キーワード") or "").strip().lower()
-    rel = (args.get("rel") or "").strip()
+    kw = str(pick(args, "keyword", "キーワード", default="")).strip().lower()
+    rel = str(args.get("rel") or "").strip()
     hits = []
     for t in data["取引先マスター"]:
         if rel and rel not in (t.get("rel") or []):
@@ -485,7 +500,7 @@ def t_list_backups(_args):
 
 def t_create_anken(args):
     data = load_data()
-    key = (args.get("案件キー") or "").strip()
+    key = str(pick(args, "anken_key", "案件キー", default="")).strip()
     if not key:
         raise ToolError("案件キーは必須です（例: 玉寿会-さくら床-26）")
     existing, _ = find_anken(data, key)
@@ -493,15 +508,16 @@ def t_create_anken(args):
         raise ToolError(f"案件キー『{key}』は既に存在します。")
     anken = {
         "案件キー": key,
-        "顧客略": args.get("顧客略") or key.split("-")[0],
-        "現場+工事": args.get("現場+工事") or (key.split("-")[1] if "-" in key else ""),
-        "正式工事名": args.get("正式工事名") or "",
-        "施工場所": args.get("施工場所") or "",
-        "ステータス": args.get("ステータス") or "相談",
-        "元請フラグ": bool(args.get("元請フラグ")),
-        "元請名": args.get("元請名") or "",
-        "備考": args.get("備考") or "",
-        "旧案件番号": args.get("旧案件番号") or "",
+        "顧客略": pick(args, "kyaku_ryaku", "顧客略") or key.split("-")[0],
+        "現場+工事": pick(args, "genba_kouji", "現場+工事")
+                     or (key.split("-")[1] if "-" in key else ""),
+        "正式工事名": pick(args, "seishiki_koujimei", "正式工事名", default=""),
+        "施工場所": pick(args, "sekou_basho", "施工場所", default=""),
+        "ステータス": pick(args, "status", "ステータス") or "相談",
+        "元請フラグ": bool(pick(args, "motouke_flag", "元請フラグ")),
+        "元請名": pick(args, "motouke_mei", "元請名", default=""),
+        "備考": pick(args, "bikou", "備考", default=""),
+        "旧案件番号": pick(args, "kyu_anken_no", "旧案件番号", default=""),
         "見積": [], "請求": [], "注文書": [], "契約書": [],
         "原価": {"労務費": 0, "材料費": 0, "外注費": 0, "経費": 0,
                  "合計": 0, "件数": 0, "最終集計日": ""},
@@ -532,7 +548,7 @@ def t_patch_anken(args):
 def t_append_document(args):
     data = load_data()
     a = require_anken(data, args.get("key", ""))
-    kind = args.get("種別")
+    kind = pick(args, "kind", "種別")
     if kind not in DOC_KINDS:
         raise ToolError(f"種別は {', '.join(DOC_KINDS)} のいずれかです（指定: {kind}）")
     rec = args.get("record")
@@ -551,10 +567,10 @@ def t_append_document(args):
 def t_update_document(args):
     data = load_data()
     a = require_anken(data, args.get("key", ""))
-    kind = args.get("種別")
+    kind = pick(args, "kind", "種別")
     if kind not in DOC_KINDS:
         raise ToolError(f"種別は {', '.join(DOC_KINDS)} のいずれかです（指定: {kind}）")
-    num = args.get("書類番号")
+    num = pick(args, "doc_no", "書類番号")
     fields = args.get("fields") or {}
     if not isinstance(fields, dict) or not fields:
         raise ToolError("fields に更新内容を指定してください")
@@ -573,15 +589,18 @@ def t_update_document(args):
 def t_set_genka(args):
     data = load_data()
     a = require_anken(data, args.get("key", ""))
+    ascii_names = {"労務費": "roumuhi", "材料費": "zairyouhi",
+                   "外注費": "gaichuhi", "経費": "keihi"}
     vals = {}
     for gk in GENKA_KEYS:
-        v = args.get(gk, 0) or 0
+        v = pick(args, ascii_names[gk], gk, default=0) or 0
         if not isinstance(v, (int, float)):
             raise ToolError(f"{gk} は数値で指定してください（指定: {v!r}）")
         vals[gk] = v
     genka = {**vals, "合計": sum(vals.values()),
-             "件数": int(args.get("件数") or 0),
-             "最終集計日": args.get("最終集計日") or datetime.now().strftime("%Y-%m-%d")}
+             "件数": int(pick(args, "kensu", "件数", default=0) or 0),
+             "最終集計日": pick(args, "shukei_bi", "最終集計日")
+                           or datetime.now().strftime("%Y-%m-%d")}
     before = a.get("原価")
     a["原価"] = genka
     meta = save_data(data, f"set_genka_{a['案件キー']}")
@@ -590,8 +609,14 @@ def t_set_genka(args):
 
 def t_upsert_torihikisaki(args):
     data = load_data()
-    ryaku = (args.get("略称") or "").strip()
-    tid = (args.get("id") or "").strip()
+    args = dict(args)
+    # ASCII名で来たものを内部の日本語フィールド名に寄せる
+    for ascii_name, jp in (("ryakusho", "略称"), ("seishiki_meisho", "正式名称"),
+                           ("chuiten", "注意点")):
+        if args.get(ascii_name) is not None and args.get(jp) is None:
+            args[jp] = args[ascii_name]
+    ryaku = str(args.get("略称") or "").strip()
+    tid = str(args.get("id") or "").strip()
     if not ryaku and not tid:
         raise ToolError("略称 または id のどちらかは必須です")
 
@@ -657,11 +682,11 @@ TOOLS = [
         "inputSchema": {
             "type": "object",
             "properties": {
-                "キーワード": {"type": "string"},
-                "顧客": {"type": "string"},
-                "ステータス": {"type": "string"},
-                "元請のみ": {"type": "boolean"},
-                "中止含む": {"type": "boolean"},
+                "keyword": {"type": "string", "description": "キーワード（工事名・備考・場所などを対象）"},
+                "customer": {"type": "string", "description": "顧客略（例: 玉寿会）"},
+                "status": {"type": "string", "description": "ステータス（例: 施工予定・入金済み）"},
+                "motouke_only": {"type": "boolean", "description": "元請案件のみ"},
+                "include_chushi": {"type": "boolean", "description": "中止案件も含める"},
                 "limit": {"type": "integer", "description": "既定30"},
             },
         },
@@ -679,7 +704,7 @@ TOOLS = [
         "inputSchema": {
             "type": "object",
             "properties": {
-                "キーワード": {"type": "string"},
+                "keyword": {"type": "string", "description": "略称・正式名称・search・memo を対象に検索"},
                 "rel": {"type": "string", "description": "顧客 / 業者 / 仕入先 / 元請 など"},
                 "limit": {"type": "integer", "description": "既定30"},
             },
@@ -714,18 +739,18 @@ TOOLS = [
         "inputSchema": {
             "type": "object",
             "properties": {
-                "案件キー": {"type": "string", "description": "[顧客4文字以内]-[現場+工事8文字以内]-26"},
-                "顧客略": {"type": "string"},
-                "現場+工事": {"type": "string"},
-                "正式工事名": {"type": "string"},
-                "施工場所": {"type": "string"},
-                "ステータス": {"type": "string", "description": "既定は『相談』"},
-                "元請フラグ": {"type": "boolean"},
-                "元請名": {"type": "string"},
-                "備考": {"type": "string"},
-                "旧案件番号": {"type": "string"},
+                "anken_key": {"type": "string", "description": "案件キー [顧客4文字以内]-[現場+工事8文字以内]-26"},
+                "kyaku_ryaku": {"type": "string", "description": "顧客略"},
+                "genba_kouji": {"type": "string", "description": "現場+工事"},
+                "seishiki_koujimei": {"type": "string", "description": "正式工事名"},
+                "sekou_basho": {"type": "string", "description": "施工場所"},
+                "status": {"type": "string", "description": "ステータス。既定は『相談』"},
+                "motouke_flag": {"type": "boolean", "description": "元請フラグ"},
+                "motouke_mei": {"type": "string", "description": "元請名"},
+                "bikou": {"type": "string", "description": "備考"},
+                "kyu_anken_no": {"type": "string", "description": "旧案件番号（AR-26-xxx）"},
             },
-            "required": ["案件キー"],
+            "required": ["anken_key"],
         },
         "handler": t_create_anken,
     },
@@ -749,10 +774,10 @@ TOOLS = [
             "type": "object",
             "properties": {
                 "key": {"type": "string"},
-                "種別": {"type": "string", "enum": DOC_KINDS},
+                "kind": {"type": "string", "enum": DOC_KINDS, "description": "書類の種別"},
                 "record": {"type": "object", "description": "書類番号・発行日・金額・ファイル・備考など"},
             },
-            "required": ["key", "種別", "record"],
+            "required": ["key", "kind", "record"],
         },
         "handler": t_append_document,
     },
@@ -763,11 +788,11 @@ TOOLS = [
             "type": "object",
             "properties": {
                 "key": {"type": "string"},
-                "種別": {"type": "string", "enum": DOC_KINDS},
-                "書類番号": {"type": "string"},
-                "fields": {"type": "object"},
+                "kind": {"type": "string", "enum": DOC_KINDS, "description": "書類の種別"},
+                "doc_no": {"type": "string", "description": "書類番号"},
+                "fields": {"type": "object", "description": "更新する項目（例: 入金状況・入金日）"},
             },
-            "required": ["key", "種別", "書類番号", "fields"],
+            "required": ["key", "kind", "doc_no", "fields"],
         },
         "handler": t_update_document,
     },
@@ -778,12 +803,12 @@ TOOLS = [
             "type": "object",
             "properties": {
                 "key": {"type": "string"},
-                "労務費": {"type": "number"},
-                "材料費": {"type": "number"},
-                "外注費": {"type": "number"},
-                "経費": {"type": "number"},
-                "件数": {"type": "integer"},
-                "最終集計日": {"type": "string", "description": "YYYY-MM-DD。省略時は本日"},
+                "roumuhi": {"type": "number", "description": "労務費"},
+                "zairyouhi": {"type": "number", "description": "材料費"},
+                "gaichuhi": {"type": "number", "description": "外注費"},
+                "keihi": {"type": "number", "description": "経費"},
+                "kensu": {"type": "integer", "description": "件数"},
+                "shukei_bi": {"type": "string", "description": "最終集計日 YYYY-MM-DD。省略時は本日"},
             },
             "required": ["key"],
         },
@@ -796,15 +821,15 @@ TOOLS = [
             "type": "object",
             "properties": {
                 "id": {"type": "string", "description": "更新時のみ。新規は省略（自動採番）"},
-                "略称": {"type": "string"},
-                "正式名称": {"type": "string"},
+                "ryakusho": {"type": "string", "description": "略称"},
+                "seishiki_meisho": {"type": "string", "description": "正式名称"},
                 "rel": {"type": "array", "items": {"type": "string"}, "description": "顧客 / 業者 / 仕入先 / 元請 など"},
-                "type": {"type": "array", "items": {"type": "string"}},
-                "basic": {"type": "object"},
+                "type": {"type": "array", "items": {"type": "string"}, "description": "業種（内装・塗装・材料仕入先 など）"},
+                "basic": {"type": "object", "description": "contact（担当者）/ rep（代表者）"},
                 "contact": {"type": "object", "description": "tel / mobile / fax / mail / address / touroku / furikomi"},
                 "memo": {"type": "string"},
-                "注意点": {"type": "string"},
-                "search": {"type": "string"},
+                "chuiten": {"type": "string", "description": "注意点"},
+                "search": {"type": "string", "description": "検索用の語。省略時は自動生成"},
             },
         },
         "handler": t_upsert_torihikisaki,

@@ -14,6 +14,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
+import re
 import shutil
 import tempfile
 import threading
@@ -494,6 +495,24 @@ class TestValidate(Base):
 
 
 class TestProtocol(Base):
+    def test_スキーマのプロパティ名はASCIIのみ(self):
+        """日本語の引数名は Anthropic API に 400 で弾かれ、ツールが呼べなくなる"""
+        pat = re.compile(r"^[a-zA-Z0-9_.-]{1,64}$")
+        for t in gk.TOOLS:
+            schema = t["inputSchema"]
+            for k in (schema.get("properties") or {}):
+                self.assertRegex(k, pat, f"{t['name']} のプロパティ名『{k}』がASCIIでない")
+            for k in (schema.get("required") or []):
+                self.assertRegex(k, pat, f"{t['name']} の required『{k}』がASCIIでない")
+
+    def test_日本語の引数名でも受け付ける(self):
+        self.assertEqual(gk.t_genka_read({"案件番号": "AR-26-004"})["該当"],
+                         gk.t_genka_read({"anken_no": "AR-26-004"})["該当"])
+        self.assertEqual(gk.t_genka_aggregate({"年月": "2026-04"})["対象行数"],
+                         gk.t_genka_aggregate({"month": "2026-04"})["対象行数"])
+        r = gk.t_genka_sync_to_data_json({"dry_run": False, "ゼロ化を許可": True})
+        self.assertIn("完了", r["実行"])
+
     def test_tools_listが8件返る(self):
         resp = gk.handle_request({"jsonrpc": "2.0", "id": 1, "method": "tools/list"})
         tools = resp["result"]["tools"]
