@@ -62,6 +62,21 @@ genka_import_tsv → genka_aggregate → genka_sync_to_data_json
 
 ## セットアップ
 
+### いちばん簡単な方法
+
+```powershell
+cd "C:\Users\user\artrays\claude ai\genba-navi"
+python mcp\setup_genka.py
+```
+
+トークン生成・接続先の保存・疎通確認をこれが全部やる。
+人がやるのは**ブラウザでの2操作だけ**（コードを貼る／デプロイする）で、
+必要なタイミングで画面に指示が出る。
+
+うまくいかないときや、手順を自分で追いたいときは以下を参照。
+
+---
+
 ### 1. Apps Script を貼る
 
 1. 原価管理スプレッドシートを開く
@@ -118,8 +133,10 @@ Apps Script エディタで **プロジェクトの設定（歯車）→ スク�
 ### 5. 疎通確認
 
 ```powershell
-python mcp\artrays_genka_server.py --ping
+python mcp\setup_genka.py --check
 ```
+
+（サーバー単体でも見られる: `python mcp\artrays_genka_server.py --ping`）
 
 こう出れば成功:
 
