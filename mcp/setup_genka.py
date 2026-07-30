@@ -28,6 +28,10 @@ HERE = Path(__file__).resolve().parent
 CONFIG_PATH = Path(os.environ.get("ARTRAYS_GENKA_CONFIG") or (HERE / ".genka_config.json"))
 GS_PATH = HERE / "appsscript" / "genka_api.gs"
 
+# 既存の原価管理台帳。新規スプレッドシートは作らない
+SHEET_ID = "1f_SXMlN07czsI7YsPMvv8bQhsWpU5Aiyg_HtM9L0LdM"
+SHEET_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/edit"
+
 
 def hr(title=""):
     print("\n" + "=" * 68)
@@ -108,7 +112,11 @@ def interactive() -> int:
         print("\nトークンを生成しました。")
 
     hr("手順1  スプレッドシートに Apps Script を貼る")
-    print("1. 原価管理スプレッドシートを開く")
+    print("★ 新しいスプレッドシートは作りません。いま使っている原価管理台帳を開きます。")
+    print("   スクリプトは『開いたスプレッドシート自身』に紐づきます（コンテナバインド）。")
+    print(f"\n1. 原価管理スプレッドシートを開く\n     {SHEET_URL}")
+    print("     （タブ名が『原価管理』であること。違う場合は genka_api.gs の")
+    print("       SHEET_NAME を実際のタブ名に直してください）")
     print("2. 上部メニュー  拡張機能 → Apps Script")
     print("3. 「コード.gs」の中身を全部消して、次のファイルの中身を貼り付ける")
     print(f"     {GS_PATH}")
