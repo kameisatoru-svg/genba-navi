@@ -86,8 +86,16 @@ python mcp\setup_genka.py
 1. 原価管理スプレッドシートを開く
    （`1f_SXMlN07czsI7YsPMvv8bQhsWpU5Aiyg_HtM9L0LdM` / タブ名 `原価管理`）
 2. **拡張機能 → Apps Script**
-3. `コード.gs` の中身を消して、[`appsscript/genka_api.gs`](appsscript/genka_api.gs) を全部貼る
-4. 保存
+3. エディタ上で **Ctrl+A → Delete** で中身を空にする
+   > 既定で入っている `function myFunction() { }` も消すこと。
+   > 残したままその中に貼ると `doGet` / `doPost` が入れ子になり、
+   > ウェブアプリとして呼び出せない。
+4. [`appsscript/genka_api.gs`](appsscript/genka_api.gs) の中身を全部貼る
+5. 保存（Ctrl+S）
+
+貼れたかの確認は、エディタ上部の**関数ドロップダウン**を見るのが早い。
+`doGet` / `doPost` / `actionPing` などが並べばOK。`myFunction` しか出ないなら
+まだ入れ子になっている。
 
 既存の行は一切書き換えない。このスクリプトがするのは**最終行への追記だけ**で、
 読み取りは表示値の取得のみ。列構成（A〜M）も現状のまま使う。

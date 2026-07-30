@@ -118,13 +118,19 @@ def interactive() -> int:
     print("     （タブ名が『原価管理』であること。違う場合は genka_api.gs の")
     print("       SHEET_NAME を実際のタブ名に直してください）")
     print("2. 上部メニュー  拡張機能 → Apps Script")
-    print("3. 「コード.gs」の中身を全部消して、次のファイルの中身を貼り付ける")
+    print("3. エディタ上で Ctrl+A（全選択）→ Delete で中身を空にする")
+    print("     ★ 既定で入っている function myFunction() { } も消すこと。")
+    print("       残したまま中に貼ると doGet/doPost が入れ子になって動きません。")
+    print("4. 次のファイルの中身を貼り付ける")
     print(f"     {GS_PATH}")
     if GS_PATH.exists():
-        print(f"     （{len(GS_PATH.read_text(encoding='utf-8').splitlines())} 行）")
+        lines = GS_PATH.read_text(encoding="utf-8").splitlines()
+        print(f"     （{len(lines)} 行 / 1行目は {lines[0].strip()!r}）")
     else:
         print("     ⚠ ファイルが見つかりません。git pull してください。")
-    print("4. 保存（Ctrl+S）")
+    print("5. 保存（Ctrl+S）")
+    print("\n   確認: エディタ上部の関数ドロップダウンに doGet / doPost / actionPing が")
+    print("         並べばOK。myFunction しか出ないなら入れ子のままです。")
 
     hr("手順2  トークンを設定する")
     print("Apps Script エディタの左側  歯車（プロジェクトの設定）")
