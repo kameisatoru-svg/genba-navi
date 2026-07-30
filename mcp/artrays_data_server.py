@@ -113,7 +113,9 @@ def make_backup(reason: str):
     if not DATA_PATH.exists():
         return None
     BACKUP_DIR.mkdir(parents=True, exist_ok=True)
-    safe = re.sub(r"[^0-9A-Za-z_.-]+", "_", reason)[:40] or "write"
+    # Windows で使えない文字と空白だけを潰す。案件キーの日本語は残す
+    # （復旧時に「どの操作の直前か」をファイル名で選べるようにするため）
+    safe = re.sub(r'[\\/:*?"<>|\s\x00-\x1f]+', "_", reason).strip("._")[:60] or "write"
     dest = BACKUP_DIR / f"data.json.{datetime.now():%Y%m%d_%H%M%S}.{safe}.bak"
     shutil.copy2(DATA_PATH, dest)
     backups = sorted(BACKUP_DIR.glob("data.json.*.bak"))

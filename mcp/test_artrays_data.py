@@ -143,6 +143,21 @@ class TestSafeWrite(Base):
         self.assertEqual(json.loads(backups[0].read_text(encoding="utf-8"))["最終更新"],
                          self.data["最終更新"], "バックアップは書き込み前の内容であるべき")
 
+    def test_バックアップ名に案件キーが残る(self):
+        key = self.any_anken_key()
+        srv.t_patch_anken({"key": key, "fields": {"備考": "名前確認"}})
+        names = [p.name for p in Path(os.environ["ARTRAYS_BACKUP_DIR"]).glob("data.json.*.bak")]
+        self.assertTrue(any(key in n for n in names),
+                        f"バックアップ名に案件キーが含まれない: {names}")
+
+    def test_バックアップ名にWindowsで使えない文字を残さない(self):
+        srv.make_backup('set_genka_a/b:c*d?e"f<g>h|i j')
+        names = [p.name for p in Path(os.environ["ARTRAYS_BACKUP_DIR"]).glob("data.json.*.bak")]
+        self.assertTrue(names)
+        for n in names:
+            for bad in '\\/:*?"<>| ':
+                self.assertNotIn(bad, n.replace("data.json.", ""), f"禁止文字 {bad!r} が残っている: {n}")
+
     def test_バックアップは上限で間引かれる(self):
         key = self.any_anken_key()
         for i in range(5):
