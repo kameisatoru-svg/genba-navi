@@ -276,6 +276,76 @@ def t_genka_read(args):
             "打ち切り": max(0, res["count"] - limit)}
 
 
+def loose_key(anken, date, amount) -> str:
+    """店舗名・品目の表記ゆれを跨ぐ重複の疑い判定。
+
+    実際に起きた事故（AMEX 2026-04 の14件が RC-26-029〜042 と 043〜056 に
+    二重登録）では、日付と金額は完全一致だが店舗名の表記だけが違っていた。
+    厳密キー（日付|店舗名|金額|品目）では素通りしてしまうため、
+    案件番号・日付・金額の3点でも突き合わせる。
+    """
+    try:
+        n = int(round(to_amount(amount)))
+    except ValueError:
+        n = str(amount).strip()
+    return f"{str(anken).strip()}|{str(date).strip()}|{n}"
+
+
+def find_duplicate_groups(rows):
+    """明細行から、厳密重複と『疑い』をそれぞれ抽出する。"""
+    strict, loose = {}, {}
+    for r in rows:
+        r = list(r) + [""] * (len(COLUMNS) - len(r))
+        rc = str(r[IDX["レコードID"]]).strip()
+        sk = "|".join([str(r[IDX["日付"]]).strip(), str(r[IDX["店舗名・業者名"]]).strip(),
+                       str(r[IDX["金額"]]).strip(), str(r[IDX["品目・内容"]]).strip()])
+        strict.setdefault(sk, []).append(r)
+        loose.setdefault(loose_key(r[IDX["案件番号"]], r[IDX["日付"]], r[IDX["金額"]]),
+                         []).append(r)
+
+    def fmt(group):
+        return {
+            "RC": [str(x[IDX["レコードID"]]).strip() for x in group],
+            "案件番号": str(group[0][IDX["案件番号"]]).strip(),
+            "日付": str(group[0][IDX["日付"]]).strip(),
+            "金額": str(group[0][IDX["金額"]]).strip(),
+            "店舗名": sorted({str(x[IDX["店舗名・業者名"]]).strip() for x in group}),
+            "品目": sorted({str(x[IDX["品目・内容"]]).strip() for x in group}),
+        }
+
+    strict_groups = [fmt(g) for g in strict.values() if len(g) > 1]
+    strict_rcs = {rc for g in strict_groups for rc in g["RC"]}
+    loose_groups = [fmt(g) for g in loose.values()
+                    if len(g) > 1 and not strict_rcs.issuperset(
+                        {str(x[IDX["レコードID"]]).strip() for x in g})]
+    return strict_groups, loose_groups
+
+
+def t_genka_find_duplicates(args):
+    res = api("read", **({"month": ds.pick(args, "month", "年月")}
+                         if ds.pick(args, "month", "年月") else {}))
+    strict_groups, loose_groups = find_duplicate_groups(res["rows"])
+
+    def total(groups):
+        s = 0
+        for g in groups:
+            try:
+                s += int(round(to_amount(g["金額"]))) * (len(g["RC"]) - 1)
+            except ValueError:
+                pass
+        return s
+
+    return {
+        "対象行数": res["count"],
+        "完全重複": {"組数": len(strict_groups), "余分な金額": total(strict_groups),
+                     "明細": strict_groups},
+        "重複の疑い": {"組数": len(loose_groups), "余分な金額": total(loose_groups),
+                       "説明": "案件番号・日付・金額が同じ。店舗名や品目の表記だけが違う二重登録の可能性",
+                       "明細": loose_groups},
+        "注意": "このツールは読み取りだけ。行の削除はスプレッドシート側で人が行う",
+    }
+
+
 def t_genka_append_rows(args):
     rows = args.get("rows")
     if not isinstance(rows, list) or not rows:
@@ -298,16 +368,53 @@ def t_genka_append_rows(args):
     if errors:
         raise ToolError("追記前の検証で問題が見つかりました:\n- " + "\n- ".join(errors))
 
+    # 厳密キーでは拾えない重複（店舗名の表記だけ違う二重登録）を先に警告する。
+    # 判断は人に委ねるので、ここでは弾かずに報告だけする。
+    existing = api("read")["rows"]
+    existing_loose = {}
+    for r in existing:
+        r = list(r) + [""] * (len(COLUMNS) - len(r))
+        existing_loose.setdefault(
+            loose_key(r[IDX["案件番号"]], r[IDX["日付"]], r[IDX["金額"]]), []
+        ).append(str(r[IDX["レコードID"]]).strip())
+
+    suspects = []
+    for i, r in enumerate(checked):
+        k = loose_key(r[INPUT_COLUMNS.index("案件番号")],
+                      r[INPUT_COLUMNS.index("日付")],
+                      r[INPUT_COLUMNS.index("金額")])
+        if k in existing_loose:
+            suspects.append({
+                "行": i + 1,
+                "案件番号": r[INPUT_COLUMNS.index("案件番号")],
+                "日付": r[INPUT_COLUMNS.index("日付")],
+                "金額": r[INPUT_COLUMNS.index("金額")],
+                "店舗名": r[INPUT_COLUMNS.index("店舗名・業者名")],
+                "同じ案件・日付・金額の既存行": existing_loose[k],
+            })
+
     dry = bool(args.get("dry_run", True))
     res = api("append", rows=checked, dryRun=dry)
-    return {
+    out = {
         "実行": "プレビュー（未書き込み）" if dry else "書き込み完了",
         "採番": res["assigned"],
         "重複でスキップ": res["skipped"],
         "追記行数": res["appended"],
         "書き込み後の行数": res["rowsAfter"],
-        "次の操作": "dry_run=false で実行すると書き込みます" if dry else "genka_aggregate で集計してください",
     }
+    if suspects:
+        out["⚠ 重複の疑い"] = {
+            "件数": len(suspects),
+            "説明": ("案件番号・日付・金額が既存行と同じです。店舗名の表記が違うだけの"
+                     "二重登録かもしれません（過去にAMEX 2026-04分で14件¥118,974の"
+                     "二重登録が起きています）。弾いてはいないので、内容を確認してください。"),
+            "明細": suspects,
+        }
+    out["次の操作"] = (
+        ("⚠ 重複の疑いを確認してから dry_run=false で実行してください" if suspects
+         else "dry_run=false で実行すると書き込みます") if dry
+        else "genka_aggregate で集計してください")
+    return out
 
 
 def t_genka_import_tsv(args):
@@ -482,6 +589,11 @@ TOOLS = [
          "allow_zeroing": {"type": "boolean", "description":
                            "原価が入っている案件を0にリセットしてよい場合のみ true。既定 false"}}},
      "handler": t_genka_sync_to_data_json},
+    {"name": "genka_find_duplicates",
+     "description": "原価管理Sheets の中にある二重登録を探す。日付・店舗名・金額・品目が全部同じ『完全重複』と、案件番号・日付・金額だけが同じ『重複の疑い』（店舗名の表記違いによる二重登録）の両方を返す。読み取りだけで、行の削除はしない。",
+     "inputSchema": {"type": "object", "properties": {
+         "month": {"type": "string", "description": "年月 YYYY-MM。省略時は全期間"}}},
+     "handler": t_genka_find_duplicates},
     {"name": "genka_validate",
      "description": "原価管理Sheets を点検する。RC番号の重複・案件番号の欠落・原価区分の不正・金額の読み取り不能・data.json に無い案件番号を報告する。",
      "inputSchema": {"type": "object", "properties": {}},

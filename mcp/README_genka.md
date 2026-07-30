@@ -28,11 +28,17 @@ genka_import_tsv → genka_aggregate → genka_sync_to_data_json
 あわせて、手作業では防げなかった2つを構造的に潰す。
 
 - **RC-26-NNN の二重採番** … 採番をスプレッドシート側で `LockService` 排他にした
-- **貼り直しによる二重計上** … 日付・店舗名・金額・品目が同じ行は自動でスキップする
+- **貼り直しによる二重計上** … 日付・店舗名・金額・品目が同じ行は自動でスキップする。
+  加えて、案件番号・日付・金額が同じで**店舗名の表記だけが違う**行は「重複の疑い」として
+  警告する（弾きはしない。往復の高速代など正当な同額2件を落とさないため）
+
+> 実際に AMEX 2026-04 分で 14件 ¥118,974 の二重登録が起きている
+> （RC-26-029〜042 と RC-26-043〜056）。店舗名の表記が違ったため厳密キーでは
+> 素通りする事例で、これを機に「疑い」の警告を追加した。
 
 ---
 
-## ツール一覧（8個）
+## ツール一覧（9個）
 
 > 引数名は英字。Anthropic API がツール定義のプロパティ名に
 > `^[a-zA-Z0-9_.-]{1,64}$` を要求するため、日本語の引数名は使えない
@@ -48,6 +54,7 @@ genka_import_tsv → genka_aggregate → genka_sync_to_data_json
 | `genka_import_tsv` | 貼付用TSVを取り込んで追記。**手貼りの置き換え** |
 | `genka_aggregate` | 案件別に4費目集計（案件番号→案件キーは旧案件番号で解決） |
 | `genka_sync_to_data_json` | 集計結果を data.json の『原価』へ書き戻す |
+| `genka_find_duplicates` | 二重登録を探す（完全重複と、店舗名の表記違いによる『重複の疑い』） |
 | `genka_validate` | RC重複・案件番号欠落・原価区分の不正・金額の読み取り不能を点検 |
 
 ### 書き込み系は既定でプレビュー
@@ -214,7 +221,7 @@ claude mcp add artrays-genka -- python "C:\Users\user\artrays\claude ai\genba-na
 ## テスト
 
 ```bash
-python mcp/test_artrays_genka.py   # 44件
+python mcp/test_artrays_genka.py   # 51件
 ```
 
 本物のスプレッドシートは使わない。Apps Script と同じ契約を実装したスタブを

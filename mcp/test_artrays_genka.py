@@ -481,6 +481,52 @@ class TestSync(Base):
                              sum(a["原価"][k] for k in gk.GENKA_KEYS))
 
 
+class TestDuplicates(Base):
+    # 実際に起きた二重登録の再現：同じ取引だが店舗名・品目の表記が違う
+    DUP_ROW = ["RC-26-007", "AR-26-004", "さくら苑", "2026-04-02", "コメリＨ＆Ｇ",
+               "ビス、接着剤", "12000", "材料費", "直接原価", "カード", "AMEX明細",
+               "", "2026-04-30"]
+
+    def setUp(self):
+        super().setUp()
+        STUB.rows.append(list(self.DUP_ROW))
+
+    def test_表記違いの二重登録を疑いとして検出する(self):
+        r = gk.t_genka_find_duplicates({})
+        self.assertEqual(r["完全重複"]["組数"], 0, "厳密キーでは拾えないはず")
+        self.assertEqual(r["重複の疑い"]["組数"], 1)
+        g = r["重複の疑い"]["明細"][0]
+        self.assertEqual(sorted(g["RC"]), ["RC-26-001", "RC-26-007"])
+        self.assertEqual(r["重複の疑い"]["余分な金額"], 12000)
+
+    def test_完全重複も検出する(self):
+        STUB.rows.append(list(SEED_ROWS[1]))
+        STUB.rows[-1][0] = "RC-26-008"
+        r = gk.t_genka_find_duplicates({})
+        self.assertEqual(r["完全重複"]["組数"], 1)
+        self.assertEqual(r["完全重複"]["余分な金額"], 220000)
+
+    def test_追記時に表記違いの重複を警告する(self):
+        row = self.row(案件番号="AR-26-004", 日付="2026-04-05",
+                       金額="220000", **{"店舗名・業者名": "川原内装(株)"})
+        r = gk.t_genka_append_rows({"rows": [row]})
+        self.assertIn("⚠ 重複の疑い", r)
+        self.assertEqual(r["⚠ 重複の疑い"]["件数"], 1)
+        self.assertIn("RC-26-002",
+                      r["⚠ 重複の疑い"]["明細"][0]["同じ案件・日付・金額の既存行"])
+
+    def test_疑いがあっても弾かずに書ける(self):
+        """判断は人がする。自動で落とすと正当な往復高速代などを失う"""
+        row = self.row(案件番号="AR-26-004", 日付="2026-04-05",
+                       金額="220000", **{"店舗名・業者名": "川原内装(株)"})
+        r = gk.t_genka_append_rows({"rows": [row], "dry_run": False})
+        self.assertEqual(r["追記行数"], 1)
+
+    def test_無関係な行では警告しない(self):
+        r = gk.t_genka_append_rows({"rows": [self.row()]})
+        self.assertNotIn("⚠ 重複の疑い", r)
+
+
 class TestValidate(Base):
     def test_問題を種類ごとに報告する(self):
         r = gk.t_genka_validate({})
@@ -513,10 +559,10 @@ class TestProtocol(Base):
         r = gk.t_genka_sync_to_data_json({"dry_run": False, "ゼロ化を許可": True})
         self.assertIn("完了", r["実行"])
 
-    def test_tools_listが8件返る(self):
+    def test_tools_listが9件返る(self):
         resp = gk.handle_request({"jsonrpc": "2.0", "id": 1, "method": "tools/list"})
         tools = resp["result"]["tools"]
-        self.assertEqual(len(tools), 8)
+        self.assertEqual(len(tools), 9)
         for t in tools:
             self.assertEqual(set(t), {"name", "description", "inputSchema"})
 
