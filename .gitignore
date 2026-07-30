@@ -4,3 +4,6 @@ data.json.autobak
 # スキルのPythonキャッシュ（auto-push が拾わないように）
 __pycache__/
 *.pyc
+
+# artrays-data MCP サーバーが書き込み直前に退避する data.json のバックアップ
+_backups/

@@ -20,6 +20,7 @@
 | `領収書/` | 経費・カード(AMEX)等の領収書・レシートのスキャンPDF保存先（原価管理台帳の「精算領収書・レシート／カード」証跡） |
 | `工具台帳登録_SKILL_v20260611.md` | 工具台帳に商品を登録する手順スキル（取扱説明書・商品画像を一緒に保管） |
 | `mitsumori_preview.html` | 見積書プレビュー・PDF出力 |
+| `mcp/artrays_data_server.py` | data.json 専用のMCPサーバー（部分読み書き・検証・自動バックアップ・原子的書き込み）。詳細は [`mcp/README.md`](mcp/README.md) |
 
 ## data.json の構造
 
@@ -44,6 +45,12 @@
 - `持込リスト`：案件ごとの現場持込工具チェックリスト（工具台帳用）
   - 各要素：`案件キー` / `items`([{`id`(工具id), `持出`, `返却`, `返却日`}]) / `更新日`
 - `単価マスタ`：天井・壁・床の材料単価（材料割付_app_/floor_plan用）
+
+### data.json の読み書き
+
+スキル・Claudeから触るときは、Read/Writeで全文を扱わず `artrays-data` MCPサーバーを使う。
+書き込みは 検証 →`_backups/`へ退避 → 原子的差し替え の順で行われ、途中で失敗しても壊れない。
+検証だけなら `python mcp/artrays_data_server.py --check`。セットアップは [`mcp/README.md`](mcp/README.md)。
 
 ## ホスティング
 
