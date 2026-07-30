@@ -425,6 +425,99 @@ def t_genka_import_tsv(args):
     return t_genka_append_rows({"rows": rows, "dry_run": args.get("dry_run", True)})
 
 
+def t_genka_delete_rows(args):
+    rcs = ds.pick(args, "rc_ids", "rcs")
+    if isinstance(rcs, str):
+        rcs = [r.strip() for r in rcs.replace(",", " ").split() if r.strip()]
+    if not rcs:
+        raise ToolError("rc_ids に削除する RC-26-xxx の配列を指定してください")
+    dry = bool(args.get("dry_run", True))
+    res = api("delete", rcs=rcs, dryRun=dry)
+    if dry:
+        return {"実行": "プレビュー（未削除）",
+                "削除予定": res["削除予定"],
+                "件数": len(res["削除予定"]),
+                "合計金額": sum(_amount_or_0(t["金額"]) for t in res["削除予定"]),
+                "次の操作": "内容を確認して dry_run=false で実行してください。"
+                            "実行時は削除前の状態が隠しタブに保存されます"}
+    return {"実行": "削除完了", "削除": res["削除"], "件数": res["deleted"],
+            "合計金額": sum(_amount_or_0(t["金額"]) for t in res["削除"]),
+            "削除後の行数": res["rowsAfter"],
+            "復元用スナップショット": res["snapshot"],
+            "次の操作": "genka_aggregate → genka_sync_to_data_json で原価を反映してください。"
+                        f"戻すときは genka_restore_snapshot に {res['snapshot']} を渡します"}
+
+
+def _amount_or_0(v):
+    try:
+        return int(round(to_amount(v)))
+    except ValueError:
+        return 0
+
+
+def t_genka_update_rows(args):
+    updates = args.get("updates")
+    if not isinstance(updates, list) or not updates:
+        raise ToolError(
+            "updates に [{\"rc\": \"RC-26-071\", \"fields\": {\"原価区分\": \"一般経費\"}}] "
+            "の形の配列を指定してください")
+    norm = []
+    for i, u in enumerate(updates, start=1):
+        if not isinstance(u, dict) or not u.get("rc") or not isinstance(u.get("fields"), dict):
+            raise ToolError(f"{i}件目の形式が不正です（rc と fields が必要）")
+        bad = [c for c in u["fields"] if c not in COLUMNS[1:]]
+        if bad:
+            raise ToolError(f"{i}件目に使えない列名: {', '.join(bad)}\n"
+                            f"使える列: {' / '.join(COLUMNS[1:])}")
+        norm.append({"rc": str(u["rc"]).strip(), "fields": u["fields"]})
+
+    dry = bool(args.get("dry_run", True))
+    res = api("update", updates=norm, dryRun=dry)
+    if dry:
+        return {"実行": "プレビュー（未更新）", "変更予定": res["変更予定"],
+                "件数": len(res["変更予定"]),
+                "次の操作": "内容を確認して dry_run=false で実行してください。"
+                            "実行時は更新前の状態が隠しタブに保存されます"}
+    return {"実行": "更新完了", "変更": res["変更"], "件数": res["updated"],
+            "復元用スナップショット": res["snapshot"],
+            "次の操作": "genka_aggregate → genka_sync_to_data_json で原価を反映してください"}
+
+
+def t_genka_snapshot(args):
+    res = api("snapshot", label=args.get("label") or "manual")
+    return {"作成": res["snapshot"], "行数": res["rows"],
+            "説明": "隠しタブとして保存されます。genka_list_snapshots で一覧できます"}
+
+
+def t_genka_list_snapshots(_args):
+    res = api("snapshots")
+    return {"件数": res["count"], "スナップショット": res["snapshots"],
+            "説明": f"新しい順。削除・更新・復元の直前に自動で作られます（最大{10}世代）"}
+
+
+def t_genka_restore_snapshot(args):
+    name = args.get("name")
+    if not name:
+        raise ToolError("name にスナップショット名を指定してください"
+                        "（genka_list_snapshots で確認できます）")
+    if not args.get("confirm"):
+        res = api("snapshots")
+        target = next((s for s in res["snapshots"] if s["name"] == name), None)
+        if target is None:
+            raise ToolError(f"『{name}』が見つかりません。存在するのは: "
+                            + ", ".join(s["name"] for s in res["snapshots"]))
+        cur = api("ping")
+        return {"実行": "確認待ち（未復元）",
+                "復元元": target, "現在の行数": cur["rows"],
+                "警告": f"シート全体が『{name}』の内容（{target['rows']}行）で置き換わります。"
+                        f"現在の {cur['rows']}行 は復元直前にスナップショットされます",
+                "次の操作": "confirm=true を付けて再実行してください"}
+    res = api("restore", name=name)
+    return {"実行": "復元完了", "復元元": res["restoredFrom"],
+            "復元前の行数": res["復元前の行数"], "復元後の行数": res["復元後の行数"],
+            "復元前のスナップショット": res["復元前のスナップショット"]}
+
+
 def t_genka_aggregate(args):
     month = ds.pick(args, "month", "年月")
     res = api("read", **({"month": month} if month else {}))
@@ -589,6 +682,40 @@ TOOLS = [
          "allow_zeroing": {"type": "boolean", "description":
                            "原価が入っている案件を0にリセットしてよい場合のみ true。既定 false"}}},
      "handler": t_genka_sync_to_data_json},
+    {"name": "genka_delete_rows",
+     "description": "原価管理Sheets から指定した RC-26-xxx の行を削除する。二重登録の是正に使う。実行時は削除前のシート全体が隠しタブにスナップショットされ、genka_restore_snapshot で元に戻せる。既定は dry_run=true（削除対象と合計金額のプレビュー）。存在しないRCが1つでもあれば何も削除せず中止する。",
+     "inputSchema": {"type": "object", "properties": {
+         "rc_ids": {"type": "array", "items": {"type": "string"},
+                    "description": "削除する RC 番号の配列（例: [\"RC-26-043\", \"RC-26-044\"]）"},
+         "dry_run": {"type": "boolean", "description": "既定 true。false で実際に削除する"}},
+         "required": ["rc_ids"]},
+     "handler": t_genka_delete_rows},
+    {"name": "genka_update_rows",
+     "description": "原価管理Sheets の既存行のセルを更新する。勘定科目や原価区分の付け替え（汎用工具を直接原価から一般経費へ、など）に使う。実行時は更新前のシート全体が隠しタブにスナップショットされる。既定は dry_run=true（変更前後のプレビュー）。レコードID（A列）は変更できない。",
+     "inputSchema": {"type": "object", "properties": {
+         "updates": {"type": "array", "description":
+                     "[{\"rc\": \"RC-26-071\", \"fields\": {\"勘定科目\": \"消耗品費\", \"原価区分\": \"一般経費\"}}] の形。"
+                     "使える列: " + " / ".join(COLUMNS[1:]),
+                     "items": {"type": "object"}},
+         "dry_run": {"type": "boolean", "description": "既定 true。false で実際に更新する"}},
+         "required": ["updates"]},
+     "handler": t_genka_update_rows},
+    {"name": "genka_snapshot",
+     "description": "いまのシート全体を隠しタブに保存する。まとまった修正の前に手動で取っておくと安心。削除・更新・復元の直前には自動で取られるので通常は不要。",
+     "inputSchema": {"type": "object", "properties": {
+         "label": {"type": "string", "description": "スナップショット名に付ける短いラベル"}}},
+     "handler": t_genka_snapshot},
+    {"name": "genka_list_snapshots",
+     "description": "保存されているスナップショット（隠しタブ）を新しい順に一覧する。復元先を選ぶために使う。",
+     "inputSchema": {"type": "object", "properties": {}},
+     "handler": t_genka_list_snapshots},
+    {"name": "genka_restore_snapshot",
+     "description": "シートをスナップショットの内容に戻す。シート全体が置き換わるため、confirm=true を付けるまで実行しない。復元の直前にも現在の状態がスナップショットされるので、復元自体も取り消せる。",
+     "inputSchema": {"type": "object", "properties": {
+         "name": {"type": "string", "description": "genka_list_snapshots で確認したスナップショット名"},
+         "confirm": {"type": "boolean", "description": "true で実際に復元する。既定 false（内容の確認のみ）"}},
+         "required": ["name"]},
+     "handler": t_genka_restore_snapshot},
     {"name": "genka_find_duplicates",
      "description": "原価管理Sheets の中にある二重登録を探す。日付・店舗名・金額・品目が全部同じ『完全重複』と、案件番号・日付・金額だけが同じ『重複の疑い』（店舗名の表記違いによる二重登録）の両方を返す。読み取りだけで、行の削除はしない。",
      "inputSchema": {"type": "object", "properties": {

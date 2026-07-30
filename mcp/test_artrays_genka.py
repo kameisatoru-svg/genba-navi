@@ -77,6 +77,7 @@ class Stub:
     def reset(self):
         self.rows = [list(r) for r in SEED_ROWS]
         self.calls = []
+        self.snapshots = {}
 
     @staticmethod
     def _rc_num(v):
@@ -146,6 +147,98 @@ class Stub:
                     "appended": 0 if p.get("dryRun") else len(to_write),
                     "assigned": assigned, "skipped": skipped,
                     "rowsAfter": len(self.rows)}
+
+        if action == "snapshot":
+            name = f"_bak_{len(self.snapshots):04d}_{p.get('label', 'manual')}"
+            self.snapshots[name] = [list(r) for r in self.rows]
+            return {"ok": True, "snapshot": name, "rows": len(self.rows)}
+
+        if action == "snapshots":
+            return {"ok": True, "count": len(self.snapshots),
+                    "snapshots": [{"name": n, "rows": len(v)}
+                                  for n, v in sorted(self.snapshots.items(), reverse=True)]}
+
+        if action == "restore":
+            name = p.get("name")
+            if name not in self.snapshots:
+                return {"ok": False, "error": f"スナップショット『{name}』がありません",
+                        "利用可能": list(self.snapshots)}
+            before = len(self.rows)
+            pre = f"_bak_{len(self.snapshots):04d}_before_restore"
+            self.snapshots[pre] = [list(r) for r in self.rows]
+            self.rows = [list(r) for r in self.snapshots[name]]
+            return {"ok": True, "restoredFrom": name, "復元前の行数": before,
+                    "復元後の行数": len(self.rows), "復元前のスナップショット": pre}
+
+        if action == "delete":
+            rcs = [str(x).strip() for x in (p.get("rcs") or [])]
+            if not rcs:
+                return {"ok": False, "error": "rcs が空です"}
+            by = {str(r[0]).strip(): (i, r) for i, r in enumerate(self.rows)}
+            targets, missing = [], []
+            for rc in rcs:
+                if rc in by:
+                    i, r = by[rc]
+                    targets.append({"RC": rc, "行番号": i + 2, "日付": r[3],
+                                    "店舗名": r[4], "金額": r[6], "案件番号": r[1]})
+                else:
+                    missing.append(rc)
+            if missing:
+                return {"ok": False,
+                        "error": "見つからないRCがあるため中止しました: " + ", ".join(missing),
+                        "対象": targets}
+            if p.get("dryRun"):
+                return {"ok": True, "dryRun": True, "削除予定": targets,
+                        "deleted": 0, "rowsAfter": len(self.rows)}
+            snap = f"_bak_{len(self.snapshots):04d}_before_delete"
+            self.snapshots[snap] = [list(r) for r in self.rows]
+            keep = {t["RC"] for t in targets}
+            self.rows = [r for r in self.rows if str(r[0]).strip() not in keep]
+            return {"ok": True, "dryRun": False, "削除": targets,
+                    "deleted": len(targets), "rowsAfter": len(self.rows),
+                    "snapshot": snap}
+
+        if action == "update":
+            updates = p.get("updates") or []
+            if not updates:
+                return {"ok": False, "error": "updates が空です"}
+            cols = ["レコードID", "案件番号", "現場名", "日付", "店舗名・業者名",
+                    "品目・内容", "金額", "勘定科目", "原価区分", "支払方法",
+                    "ソース", "備考", "登録日"]
+            by = {str(r[0]).strip(): (i, r) for i, r in enumerate(self.rows)}
+            planned, missing, bad = [], [], []
+            for u in updates:
+                rc = str(u.get("rc", "")).strip()
+                if rc not in by:
+                    missing.append(rc or "(空)")
+                    continue
+                i, r = by[rc]
+                changes = []
+                for col, val in (u.get("fields") or {}).items():
+                    if col not in cols or col == "レコードID":
+                        bad.append(col)
+                        continue
+                    j = cols.index(col)
+                    changes.append({"列": col, "列番号": j + 1,
+                                    "変更前": r[j], "変更後": val})
+                if changes:
+                    planned.append({"RC": rc, "行番号": i + 2, "変更": changes})
+            if missing or bad:
+                return {"ok": False, "error": "中止しました。"
+                        + (f"見つからないRC: {', '.join(missing)}。" if missing else "")
+                        + (f"不正な列名: {', '.join(bad)}" if bad else "")}
+            if not planned:
+                return {"ok": False, "error": "変更対象がありません"}
+            if p.get("dryRun"):
+                return {"ok": True, "dryRun": True, "変更予定": planned, "updated": 0}
+            snap = f"_bak_{len(self.snapshots):04d}_before_update"
+            self.snapshots[snap] = [list(r) for r in self.rows]
+            for pl in planned:
+                i = pl["行番号"] - 2
+                for c in pl["変更"]:
+                    self.rows[i][c["列番号"] - 1] = c["変更後"]
+            return {"ok": True, "dryRun": False, "変更": planned,
+                    "updated": len(planned), "snapshot": snap}
 
         return {"ok": False, "error": f"未知の action: {action}"}
 
@@ -527,6 +620,88 @@ class TestDuplicates(Base):
         self.assertNotIn("⚠ 重複の疑い", r)
 
 
+class TestMutations(Base):
+    def test_削除はプレビューでは消さない(self):
+        r = gk.t_genka_delete_rows({"rc_ids": ["RC-26-003"]})
+        self.assertIn("プレビュー", r["実行"])
+        self.assertEqual(r["件数"], 1)
+        self.assertEqual(r["合計金額"], 8500)
+        self.assertEqual(len(STUB.rows), len(SEED_ROWS))
+
+    def test_削除の本実行とスナップショット(self):
+        r = gk.t_genka_delete_rows({"rc_ids": ["RC-26-003", "RC-26-005"],
+                                    "dry_run": False})
+        self.assertEqual(r["件数"], 2)
+        self.assertEqual(r["合計金額"], 13500)
+        self.assertEqual(len(STUB.rows), len(SEED_ROWS) - 2)
+        self.assertTrue(r["復元用スナップショット"])
+        self.assertIn(r["復元用スナップショット"], STUB.snapshots)
+
+    def test_存在しないRCが混ざれば何も消さない(self):
+        with self.assertRaises(gk.ToolError) as cm:
+            gk.t_genka_delete_rows({"rc_ids": ["RC-26-003", "RC-26-999"],
+                                    "dry_run": False})
+        self.assertIn("RC-26-999", str(cm.exception))
+        self.assertEqual(len(STUB.rows), len(SEED_ROWS), "1行でも消えている")
+
+    def test_削除を取り消せる(self):
+        r = gk.t_genka_delete_rows({"rc_ids": ["RC-26-003"], "dry_run": False})
+        snap = r["復元用スナップショット"]
+        self.assertEqual(len(STUB.rows), len(SEED_ROWS) - 1)
+        gk.t_genka_restore_snapshot({"name": snap, "confirm": True})
+        self.assertEqual(len(STUB.rows), len(SEED_ROWS))
+        self.assertIn("RC-26-003", [r[0] for r in STUB.rows])
+
+    def test_復元はconfirmなしでは実行しない(self):
+        gk.t_genka_delete_rows({"rc_ids": ["RC-26-003"], "dry_run": False})
+        name = gk.t_genka_list_snapshots({})["スナップショット"][0]["name"]
+        before = len(STUB.rows)
+        r = gk.t_genka_restore_snapshot({"name": name})
+        self.assertIn("確認待ち", r["実行"])
+        self.assertEqual(len(STUB.rows), before)
+
+    def test_更新はプレビューでは変えない(self):
+        r = gk.t_genka_update_rows({"updates": [
+            {"rc": "RC-26-001", "fields": {"原価区分": "一般経費"}}]})
+        self.assertIn("プレビュー", r["実行"])
+        self.assertEqual(r["変更予定"][0]["変更"][0]["変更前"], "直接原価")
+        self.assertEqual(STUB.rows[0][8], "直接原価")
+
+    def test_更新の本実行(self):
+        r = gk.t_genka_update_rows({"updates": [
+            {"rc": "RC-26-001", "fields": {"勘定科目": "消耗品費",
+                                           "原価区分": "一般経費"}}],
+            "dry_run": False})
+        self.assertEqual(r["件数"], 1)
+        self.assertEqual(STUB.rows[0][7], "消耗品費")
+        self.assertEqual(STUB.rows[0][8], "一般経費")
+        self.assertTrue(r["復元用スナップショット"])
+
+    def test_更新は集計に反映される(self):
+        """汎用工具を直接原価から一般経費へ移すと、その分だけ現場原価が減る"""
+        before = gk.t_genka_aggregate({})["全件"]["玉寿会-さくら床-26"]
+        gk.t_genka_update_rows({"updates": [
+            {"rc": "RC-26-002", "fields": {"原価区分": "一般経費"}}],
+            "dry_run": False})
+        after = gk.t_genka_aggregate({})["全件"]["玉寿会-さくら床-26"]
+        self.assertEqual(before["外注費"] - after["外注費"], 220000)
+        self.assertEqual(after["経費"] - before["経費"], 220000)
+
+    def test_使えない列名は通信前に弾く(self):
+        n = len(STUB.calls)
+        with self.assertRaises(gk.ToolError) as cm:
+            gk.t_genka_update_rows({"updates": [
+                {"rc": "RC-26-001", "fields": {"レコードID": "RC-26-999"}}]})
+        self.assertIn("使えない列名", str(cm.exception))
+        self.assertEqual(len(STUB.calls), n, "検証前にAPIを呼んでいる")
+
+    def test_手動スナップショットと一覧(self):
+        r = gk.t_genka_snapshot({"label": "経理前"})
+        self.assertIn("経理前", r["作成"])
+        lst = gk.t_genka_list_snapshots({})
+        self.assertEqual(lst["件数"], 1)
+
+
 class TestValidate(Base):
     def test_問題を種類ごとに報告する(self):
         r = gk.t_genka_validate({})
@@ -559,10 +734,10 @@ class TestProtocol(Base):
         r = gk.t_genka_sync_to_data_json({"dry_run": False, "ゼロ化を許可": True})
         self.assertIn("完了", r["実行"])
 
-    def test_tools_listが9件返る(self):
+    def test_tools_listが14件返る(self):
         resp = gk.handle_request({"jsonrpc": "2.0", "id": 1, "method": "tools/list"})
         tools = resp["result"]["tools"]
-        self.assertEqual(len(tools), 9)
+        self.assertEqual(len(tools), 14)
         for t in tools:
             self.assertEqual(set(t), {"name", "description", "inputSchema"})
 

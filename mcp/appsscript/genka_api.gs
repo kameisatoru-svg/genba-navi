@@ -20,6 +20,14 @@ var COL_COUNT = 13;           // A〜M
 var RC_PREFIX = 'RC-26-';
 var LOCK_WAIT_MS = 30000;
 
+// A〜M の論理名（クライアント側の COLUMNS と一致させること）
+var COL_NAMES = ['レコードID', '案件番号', '現場名', '日付', '店舗名・業者名', '品目・内容',
+                 '金額', '勘定科目', '原価区分', '支払方法', 'ソース', '備考', '登録日'];
+
+// 変更前スナップショット（隠しタブ）
+var SNAP_PREFIX = '_bak_';
+var SNAP_KEEP = 10;
+
 // ---------------------------------------------------------------- entry
 
 function doGet(e) {
@@ -56,10 +64,15 @@ function handle(e, params) {
       });
     }
     switch (params.action) {
-      case 'ping':     return json(actionPing());
-      case 'read':     return json(actionRead(params));
-      case 'next_rc':  return json(actionNextRc());
-      case 'append':   return json(actionAppend(params));
+      case 'ping':      return json(actionPing());
+      case 'read':      return json(actionRead(params));
+      case 'next_rc':   return json(actionNextRc());
+      case 'append':    return json(actionAppend(params));
+      case 'update':    return json(actionUpdate(params));
+      case 'delete':    return json(actionDelete(params));
+      case 'snapshot':  return json(actionSnapshot(params));
+      case 'snapshots': return json(actionSnapshots());
+      case 'restore':   return json(actionRestore(params));
       default:
         return json({ ok: false, error: '未知の action: ' + params.action });
     }
@@ -118,6 +131,88 @@ function maxRc(rows) {
 function dupKey(date, shop, amount, item) {
   var n = String(amount).replace(/[^0-9.-]/g, '');
   return [String(date).trim(), String(shop).trim(), n, String(item).trim()].join('|');
+}
+
+// ---------------------------------------------------------- スナップショット
+
+function stamp() {
+  return Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyyMMdd_HHmmss');
+}
+
+function snapshotSheets() {
+  return SpreadsheetApp.getActive().getSheets().filter(function (s) {
+    return s.getName().indexOf(SNAP_PREFIX) === 0;
+  });
+}
+
+/**
+ * 変更前の状態を隠しタブへ丸ごと複製する。
+ * 削除・更新・復元の直前に必ず呼ぶ（間違えても戻せるようにするため）。
+ */
+function takeSnapshot(label) {
+  var ss = SpreadsheetApp.getActive();
+  var src = getSheet();
+  var name = SNAP_PREFIX + stamp() + (label ? '_' + String(label).slice(0, 40) : '');
+  name = name.replace(/[\[\]\*\/\\\?:]/g, '_').slice(0, 95);
+  var copy = src.copyTo(ss).setName(name);
+  copy.hideSheet();
+
+  var olds = snapshotSheets().sort(function (a, b) {
+    return a.getName() < b.getName() ? -1 : 1;
+  });
+  while (olds.length > SNAP_KEEP) {
+    ss.deleteSheet(olds.shift());
+  }
+  return name;
+}
+
+function actionSnapshot(params) {
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(LOCK_WAIT_MS)) return { ok: false, error: 'ロックを取得できませんでした' };
+  try {
+    var name = takeSnapshot(params.label || 'manual');
+    return { ok: true, snapshot: name, rows: readAll(getSheet()).length };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function actionSnapshots() {
+  var out = snapshotSheets().map(function (s) {
+    return { name: s.getName(), rows: Math.max(0, s.getLastRow() - HEADER_ROWS) };
+  });
+  out.sort(function (a, b) { return a.name < b.name ? 1 : -1; });   // 新しい順
+  return { ok: true, count: out.length, snapshots: out };
+}
+
+function actionRestore(params) {
+  var name = params.name;
+  if (!name) return { ok: false, error: 'name（スナップショット名）を指定してください' };
+  var ss = SpreadsheetApp.getActive();
+  var snap = ss.getSheetByName(name);
+  if (!snap) {
+    return { ok: false, error: 'スナップショット『' + name + '』がありません',
+             利用可能: snapshotSheets().map(function (s) { return s.getName(); }) };
+  }
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(LOCK_WAIT_MS)) return { ok: false, error: 'ロックを取得できませんでした' };
+  try {
+    var sh = getSheet();
+    var before = readAll(sh).length;
+    var pre = takeSnapshot('before_restore');       // 復元自体も取り消せるように
+
+    var lastRow = snap.getLastRow();
+    var values = lastRow ? snap.getRange(1, 1, lastRow, COL_COUNT).getValues() : [];
+    sh.clearContents();
+    if (values.length) sh.getRange(1, 1, values.length, COL_COUNT).setValues(values);
+    SpreadsheetApp.flush();
+
+    return { ok: true, restoredFrom: name, 復元前の行数: before,
+             復元後の行数: Math.max(0, values.length - HEADER_ROWS),
+             復元前のスナップショット: pre };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 // ---------------------------------------------------------------- actions
@@ -218,6 +313,127 @@ function actionAppend(params) {
       skipped: skipped,
       rowsAfter: params.dryRun ? existing.length : existing.length + toWrite.length
     };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * 指定した RC の行を削除する。
+ * params.rcs    … ['RC-26-043', ...]
+ * params.dryRun … true なら対象を返すだけ
+ * 実行前に必ずスナップショットを取る（actionSnapshot と同じ隠しタブ）。
+ */
+function actionDelete(params) {
+  var rcs = params.rcs;
+  if (!rcs || !rcs.length) return { ok: false, error: 'rcs が空です' };
+
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(LOCK_WAIT_MS)) {
+    return { ok: false, error: '他の処理が書き込み中のためロックを取得できませんでした' };
+  }
+  try {
+    var sh = getSheet();
+    var rows = readAll(sh);
+    var byRc = {};
+    for (var i = 0; i < rows.length; i++) {
+      byRc[String(rows[i][0]).trim()] = { row: i + HEADER_ROWS + 1, data: rows[i] };
+    }
+
+    var targets = [], missing = [];
+    for (var j = 0; j < rcs.length; j++) {
+      var rc = String(rcs[j]).trim();
+      if (byRc[rc]) {
+        targets.push({ RC: rc, 行番号: byRc[rc].row, 日付: byRc[rc].data[3],
+                       店舗名: byRc[rc].data[4], 金額: byRc[rc].data[6],
+                       案件番号: byRc[rc].data[1] });
+      } else {
+        missing.push(rc);
+      }
+    }
+    if (missing.length) {
+      return { ok: false, error: '見つからないRCがあるため中止しました: ' + missing.join(', '),
+               対象: targets };
+    }
+
+    if (params.dryRun) {
+      return { ok: true, dryRun: true, 削除予定: targets, deleted: 0,
+               rowsAfter: rows.length };
+    }
+
+    var snap = takeSnapshot('before_delete');
+    targets.sort(function (a, b) { return b.行番号 - a.行番号; });   // 下から消す
+    for (var k = 0; k < targets.length; k++) sh.deleteRow(targets[k].行番号);
+    SpreadsheetApp.flush();
+
+    return { ok: true, dryRun: false, 削除: targets, deleted: targets.length,
+             rowsAfter: rows.length - targets.length, snapshot: snap };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * 指定した RC の行のセルを更新する。
+ * params.updates … [{ rc: 'RC-26-071', fields: { '勘定科目': '消耗品費',
+ *                                                '原価区分': '一般経費' } }, ...]
+ * params.dryRun  … true なら変更前後を返すだけ
+ */
+function actionUpdate(params) {
+  var updates = params.updates;
+  if (!updates || !updates.length) return { ok: false, error: 'updates が空です' };
+
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(LOCK_WAIT_MS)) {
+    return { ok: false, error: '他の処理が書き込み中のためロックを取得できませんでした' };
+  }
+  try {
+    var sh = getSheet();
+    var rows = readAll(sh);
+    var byRc = {};
+    for (var i = 0; i < rows.length; i++) {
+      byRc[String(rows[i][0]).trim()] = { row: i + HEADER_ROWS + 1, data: rows[i] };
+    }
+
+    var planned = [], missing = [], badCols = [];
+    for (var j = 0; j < updates.length; j++) {
+      var u = updates[j] || {};
+      var rc = String(u.rc || '').trim();
+      if (!byRc[rc]) { missing.push(rc || '(空)'); continue; }
+      var changes = [];
+      for (var col in (u.fields || {})) {
+        var idx = COL_NAMES.indexOf(col);
+        if (idx < 0) { badCols.push(col); continue; }
+        if (idx === 0) { badCols.push(col + '（レコードIDは変更不可）'); continue; }
+        changes.push({ 列: col, 列番号: idx + 1,
+                       変更前: byRc[rc].data[idx], 変更後: u.fields[col] });
+      }
+      if (changes.length) planned.push({ RC: rc, 行番号: byRc[rc].row, 変更: changes });
+    }
+    if (missing.length || badCols.length) {
+      return { ok: false,
+               error: '中止しました。' +
+                      (missing.length ? '見つからないRC: ' + missing.join(', ') + '。' : '') +
+                      (badCols.length ? '不正な列名: ' + badCols.join(', ') +
+                       '（使える列: ' + COL_NAMES.slice(1).join(' / ') + '）' : '') };
+    }
+    if (!planned.length) return { ok: false, error: '変更対象がありません' };
+
+    if (params.dryRun) {
+      return { ok: true, dryRun: true, 変更予定: planned, updated: 0 };
+    }
+
+    var snap = takeSnapshot('before_update');
+    for (var m = 0; m < planned.length; m++) {
+      var p = planned[m];
+      for (var n = 0; n < p.変更.length; n++) {
+        sh.getRange(p.行番号, p.変更[n].列番号).setValue(p.変更[n].変更後);
+      }
+    }
+    SpreadsheetApp.flush();
+
+    return { ok: true, dryRun: false, 変更: planned, updated: planned.length,
+             snapshot: snap };
   } finally {
     lock.releaseLock();
   }

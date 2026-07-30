@@ -38,7 +38,7 @@ genka_import_tsv → genka_aggregate → genka_sync_to_data_json
 
 ---
 
-## ツール一覧（9個）
+## ツール一覧（14個）
 
 > 引数名は英字。Anthropic API がツール定義のプロパティ名に
 > `^[a-zA-Z0-9_.-]{1,64}$` を要求するため、日本語の引数名は使えない
@@ -56,11 +56,32 @@ genka_import_tsv → genka_aggregate → genka_sync_to_data_json
 | `genka_sync_to_data_json` | 集計結果を data.json の『原価』へ書き戻す |
 | `genka_find_duplicates` | 二重登録を探す（完全重複と、店舗名の表記違いによる『重複の疑い』） |
 | `genka_validate` | RC重複・案件番号欠落・原価区分の不正・金額の読み取り不能を点検 |
+| `genka_delete_rows` | 指定RCの行を削除（二重登録の是正） |
+| `genka_update_rows` | 既存行のセルを更新（勘定科目・原価区分の付け替え） |
+| `genka_snapshot` | いまのシート全体を隠しタブに保存 |
+| `genka_list_snapshots` | スナップショットを新しい順に一覧 |
+| `genka_restore_snapshot` | スナップショットの内容に戻す（`confirm: true` が必要） |
 
 ### 書き込み系は既定でプレビュー
 
 `genka_append_rows` / `genka_import_tsv` / `genka_sync_to_data_json` は
 **既定が `dry_run: true`**。何が起きるかを見てから `dry_run: false` で実行する。
+
+### 元に戻せること
+
+シートを変更する `genka_delete_rows` / `genka_update_rows` / `genka_restore_snapshot` は、
+**実行の直前にシート全体を隠しタブへ複製する**（`_bak_<日時>_<理由>`・最大10世代）。
+data.json 側の `_backups/` と同じ考え方で、間違えたら戻せる。
+
+```
+genka_delete_rows dry_run=false   → 応答に 復元用スナップショット が入る
+genka_list_snapshots              → 一覧
+genka_restore_snapshot confirm=true → その時点に戻す（復元前の状態も保存される）
+```
+
+`genka_delete_rows` は、指定したRCが1つでも見つからなければ**何も削除せず中止**する。
+`genka_restore_snapshot` はシート全体が置き換わるため、`confirm: true` を付けるまで
+内容の確認だけを返す。
 
 ### ゼロ化ガード
 
@@ -221,9 +242,10 @@ claude mcp add artrays-genka -- python "C:\Users\user\artrays\claude ai\genba-na
 ## テスト
 
 ```bash
-python mcp/test_artrays_genka.py   # 51件
+python mcp/test_artrays_genka.py   # 61件
 ```
 
 本物のスプレッドシートは使わない。Apps Script と同じ契約を実装したスタブを
 localhost に立てて、採番・重複スキップ・4分類マッピング・TSV取り込み・
-data.json 書き戻し・ゼロ化ガード・302リダイレクト追従までを検証する。
+data.json 書き戻し・ゼロ化ガード・削除と更新のスナップショット/復元・
+302リダイレクト追従までを検証する。
