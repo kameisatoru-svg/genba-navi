@@ -13,7 +13,8 @@
 
 // タブ名。スクリプトプロパティ SHEET_NAME があればそちらが優先される
 // （タブ名を変えるときに、コードを直して再デプロイする必要がなくなる）
-var SHEET_NAME_DEFAULT = '原価管理';
+// 注意: ファイル名は「原価管理」だが、タブ名は既定の「シート1」のまま運用されている
+var SHEET_NAME_DEFAULT = 'シート1';
 var HEADER_ROWS = 1;          // 1行目はヘッダー
 var COL_COUNT = 13;           // A〜M
 var RC_PREFIX = 'RC-26-';
