@@ -64,7 +64,7 @@ def load_config() -> dict:
         except json.JSONDecodeError as e:
             raise ToolError(f"{CONFIG_PATH} が JSON として読めません: {e}")
         if cfg.get("url") and cfg.get("token"):
-            return cfg
+            return {"url": str(cfg["url"]).strip(), "token": str(cfg["token"]).strip()}
     raise ToolError(
         "接続先が未設定です。次のどちらかを行ってください。\n"
         f"  1) {CONFIG_PATH} に {{\"url\": \"<ウェブアプリURL>\", \"token\": \"<トークン>\"}}\n"
@@ -110,7 +110,9 @@ def api(action: str, **payload):
             "Apps Script の応答が JSON ではありません。デプロイ設定（アクセスできるユーザー＝"
             f"全員 / 実行するユーザー＝自分）を確認してください。\n応答の先頭: {head}")
     if not data.get("ok"):
-        raise ToolError(f"Apps Script 側でエラー: {data.get('error')}")
+        extra = {k: v for k, v in data.items() if k not in ("ok", "error")}
+        detail = ("\n" + json.dumps(extra, ensure_ascii=False)) if extra else ""
+        raise ToolError(f"Apps Script 側でエラー: {data.get('error')}{detail}")
     return data
 
 

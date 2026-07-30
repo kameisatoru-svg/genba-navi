@@ -44,8 +44,15 @@ function handle(e, params) {
     if (!expected) {
       return json({ ok: false, error: 'スクリプトプロパティ API_TOKEN が未設定です' });
     }
-    if (params.token !== expected) {
-      return json({ ok: false, error: '認証に失敗しました' });
+    // 前後の空白・改行は無視する（貼り付け時に紛れ込みやすいため）
+    if (String(params.token || '').trim() !== String(expected).trim()) {
+      return json({
+        ok: false,
+        error: '認証に失敗しました（スクリプトプロパティ API_TOKEN と、' +
+               'mcp/.genka_config.json の token が一致していません）',
+        受け取ったトークンの長さ: String(params.token || '').trim().length,
+        設定されているトークンの長さ: String(expected).trim().length
+      });
     }
     switch (params.action) {
       case 'ping':     return json(actionPing());

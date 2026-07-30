@@ -165,10 +165,26 @@ def main():
     ap.add_argument("--token", help="API_TOKEN と同じ文字列")
     ap.add_argument("--check", action="store_true", help="保存済みの設定で疎通だけ確認する")
     ap.add_argument("--gen-token", action="store_true", help="トークンだけ生成して表示する")
+    ap.add_argument("--show", action="store_true",
+                    help="保存されている接続先とトークンを表示する（貼り直し用）")
     args = ap.parse_args()
 
     if args.gen_token:
         print(secrets.token_urlsafe(32))
+        return 0
+
+    if args.show:
+        cfg = load_existing()
+        if not cfg:
+            print(f"{CONFIG_PATH} がまだありません。")
+            return 1
+        print(f"設定ファイル : {CONFIG_PATH}")
+        print(f"URL          : {cfg.get('url', '(未設定)')}")
+        print(f"API_TOKEN    : {cfg.get('token', '(未設定)')}")
+        print(f"             （{len(str(cfg.get('token', '')))} 文字）")
+        print("\n↑ この API_TOKEN を、Apps Script の")
+        print("  歯車 → スクリプト プロパティ → API_TOKEN の値 に貼り付けてください。")
+        print("  前後に空白が入らないよう、値だけを選択してコピーすること。")
         return 0
 
     if args.check:
