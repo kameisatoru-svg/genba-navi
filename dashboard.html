@@ -3193,6 +3193,7 @@ function ankenEvents(a) {
   (a['請求']   || []).forEach(e => {
     push(e['発行日'], '請求発行', e['金額']);
     if (e['入金状況'] === 'nyukin') push(e['入金日'], '入金', e['金額']);
+    else if (isIchibuNyukin(e)) push(e['入金日'], '入金', e['入金額']);  // 一部入金も入金イベントとして拾う
   });
   (a['動き']   || []).forEach((m, i) => push(m['日'], m['種別'] || '更新', 0, m['概要'], true, m['状態'],
                                             { id: m['id'] || '', mvIdx: i, src: m['由来'] || '' }));
@@ -3737,6 +3738,7 @@ function renderReminders() {
             book:  inv['書類番号'] || '',
             days,
             meta:  `請求発行: ${inv['発行日']} / ${formatYen(inv['金額'] || 0)}`
+                   + (isIchibuNyukin(inv) ? `（一部入金 ${formatYen(inv['入金額'])}・残 ${formatYen(invoiceZangaku(inv))}）` : '')
           });
         }
       }
