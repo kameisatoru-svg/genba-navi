@@ -3002,9 +3002,15 @@ function statusBadge(status) {
 // 入金状況マークHTML
 function nyukinMark(anken) {
   const s = nyukinStatus(anken);
+  const arr = anken['請求'] || [];
   if (s === 'ok')    return `<span class="nyukin-mark ok"><svg class="icon"><use href="#icon-check-circle"/></svg>入金済</span>`;
-  if (s === 'ng')    return `<span class="nyukin-mark ng"><svg class="icon"><use href="#icon-warning-triangle"/></svg>未入金</span>`;
-  if (s === 'mixed') return `<span class="nyukin-mark ng"><svg class="icon"><use href="#icon-warning-triangle"/></svg>一部未入金</span>`;
+  if (s === 'ng' || s === 'mixed') {
+    // 一部入金があれば残額を出す（例: スポットクーラーで税抜額だけ振り込まれた等）
+    const zan = arr.reduce((t, inv) => t + invoiceZangaku(inv), 0);
+    const label = arr.some(isIchibuNyukin) ? `一部入金（残 ${formatYen(zan)}）`
+                : s === 'mixed' ? '一部未入金' : '未入金';
+    return `<span class="nyukin-mark ng"><svg class="icon"><use href="#icon-warning-triangle"/></svg>${label}</span>`;
+  }
   return `<span class="nyukin-mark none">-</span>`;
 }
 
@@ -3041,12 +3047,12 @@ function renderKpi() {
     return sum + ms.reduce((s, e) => s + (e['金額'] || 0), 0);
   }, 0);
 
-  // 未入金合計: 入金状況=minyukinの請求金額合計（件数も集計）
+  // 未入金合計: 入金状況=minyukinの請求の「残額」合計（一部入金は既入金分を差し引く／件数も集計）
   let unpaidCount = 0;
   const unpaid = all.reduce((sum, a) => {
     const us = (a['請求'] || []).filter(inv => inv['入金状況'] === 'minyukin');
     unpaidCount += us.length;
-    return sum + us.reduce((s, inv) => s + (inv['金額'] || 0), 0);
+    return sum + us.reduce((s, inv) => s + invoiceZangaku(inv), 0);
   }, 0);
 
   // 施工予定: ステータス=施工予定の件数（月に依らない全件）
