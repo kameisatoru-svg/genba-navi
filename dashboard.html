@@ -2698,6 +2698,17 @@ function latestAmount(anken) {
 function totalInvoiced(anken) {
   return (anken['請求'] || []).reduce((s, x) => s + (x['金額'] || 0), 0);
 }
+// 請求1件の入金残額（一部入金に対応）: 金額 −「入金額」。入金状況=nyukin なら残0
+// 「入金額」は一部だけ振り込まれたときに実額を入れるフィールド（未設定=0）
+function invoiceZangaku(inv) {
+  if (!inv) return 0;
+  if (inv['入金状況'] === 'nyukin') return 0;
+  return Math.max(0, (inv['金額'] || 0) - (inv['入金額'] || 0));
+}
+// 一部入金（満額に届いていないが入金あり）か
+function isIchibuNyukin(inv) {
+  return !!inv && inv['入金状況'] !== 'nyukin' && (inv['入金額'] || 0) > 0;
+}
 // 入金状況サマリー: 'ok'=全件入金 / 'ng'=未入金あり / 'mixed'=混在 / 'none'=請求なし
 function nyukinStatus(anken) {
   const arr = anken['請求'] || [];
