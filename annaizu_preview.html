@@ -461,14 +461,14 @@ function annoSVG(which){
   return s;
 }
 
-function mapCanvasHTML(){
-  const m=S.map;
+function mapCanvasHTML(which){
+  const m = (which==='sub' && S.sub2.bg) ? S.sub2 : S.map;
   let bg='';
   if(m.bgType==='img') bg=`<img src="${m.bg}" style="object-fit:${m.fit}">`;
   else if(m.bgType==='svg') bg=m.bg;
-  const empty = m.bg?'':`<div class="map-empty"><div>地図が未設定です</div><div style="font-size:9.5pt">左の「地図を自動生成」か「画像を読込」で入れてください</div></div>`;
+  const empty = m.bg?'':`<div class="map-empty"><div>地図が未設定です</div><div style="font-size:9.5pt">左の「地図を読込」で入れてください</div></div>`;
   return `<div class="mapcanvas"><div class="bg">${bg}</div>${empty}
-    <svg class="anno" viewBox="0 0 ${MAP_VB.w} ${MAP_VB.h}" preserveAspectRatio="none">${annoSVG()}</svg></div>`;
+    <svg class="anno" viewBox="0 0 ${MAP_VB.w} ${MAP_VB.h}" preserveAspectRatio="none">${annoSVG(which)}</svg></div>`;
 }
 
 function renderPage(){
