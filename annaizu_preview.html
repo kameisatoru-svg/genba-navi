@@ -370,22 +370,42 @@ function renderNoteList(){
   wrap.querySelector('.add-btn').addEventListener('click',()=>{ S.notes.push(''); renderNoteList(); renderPage(); });
 }
 
-const ANNO_LABEL={star:'★ 集合',arrow:'➜ 矢印',label:'あ 文字'};
-function renderAnnoList(){
-  const wrap=$('annoList'); if(!wrap) return;
-  if(!S.anno.length){ wrap.innerHTML='<div class="hint">目印がありません。上のボタンで追加してください。</div>'; return; }
-  wrap.innerHTML = S.anno.map((a,i)=>`
+const ANNO_LABEL={star:'★ 集合',arrow:'➜ 矢印',label:'あ 文字',area:'◻ 囲み'};
+function annoRowHTML(a,i){
+  const hint = a.type==='arrow' ? '両端を地図上でドラッグ'
+             : a.type==='area'  ? '角のつまみをドラッグ' : '';
+  return `
     <div class="anno-row">
       <div class="anno-head">
         <span class="anno-badge ${a.type}">${ANNO_LABEL[a.type]}</span>
-        ${a.type!=='arrow'?`<input type="text" data-i="${i}" data-f="text" value="${esc(a.text||'')}" placeholder="${a.type==='star'?'中央防災センター前の駐車場':'ラベル文字'}">`:'<span style="flex:1;font-size:11px;color:#666">両端を地図上でドラッグ</span>'}
+        ${a.type!=='arrow'
+          ? `<input type="text" data-i="${i}" data-f="text" value="${esc(a.text||'')}" placeholder="${a.type==='star'?'集合場所':(a.type==='area'?'囲みの中の文字（空でも可）':'ラベル文字')}">`
+          : `<span style="flex:1;font-size:11px;color:#666">${hint}</span>`}
         <button class="del-btn" data-del="${i}">×</button>
       </div>
+      ${a.type==='area'?`
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
+        <span style="font-size:10px;color:#666;flex:1">角 ${a.pts.length} 個（${hint}）</span>
+        <button class="mini-btn" data-vtx="${i}" data-op="+">角を増やす</button>
+        <button class="mini-btn" data-vtx="${i}" data-op="-">減らす</button>
+      </div>`:''}
       <div style="display:flex;align-items:center;gap:6px">
-        <span style="font-size:10px;color:#666;flex:0 0 34px">大きさ</span>
+        <span style="font-size:10px;color:#666;flex:0 0 34px">${a.type==='area'?'線の太さ':'大きさ'}</span>
         <input type="range" data-i="${i}" data-f="size" min="0.6" max="2.2" step="0.05" value="${a.size||1}">
       </div>
-    </div>`).join('');
+    </div>`;
+}
+
+function renderAnnoList(){
+  const wrap=$('annoList'); if(!wrap) return;
+  if(!S.anno.length){ wrap.innerHTML='<div class="hint">目印がありません。上のボタンで追加してください。</div>'; return; }
+  const grp=(lab,pred)=>{
+    const rows=S.anno.map((a,i)=>[a,i]).filter(([a])=>pred(a));
+    if(!rows.length) return '';
+    return (S.sub2.bg?`<div style="font-size:10px;color:#666;margin:4px 0 3px">${lab}</div>`:'')
+         + rows.map(([a,i])=>annoRowHTML(a,i)).join('');
+  };
+  wrap.innerHTML = grp('本図',a=>a.layer!=='sub') + grp('拡大図',a=>a.layer==='sub');
   wrap.querySelectorAll('input').forEach(inp=>inp.addEventListener('input',e=>{
     const i=+e.target.dataset.i, f=e.target.dataset.f;
     S.anno[i][f] = (f==='size')?parseFloat(e.target.value):e.target.value;
@@ -394,15 +414,31 @@ function renderAnnoList(){
   wrap.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',e=>{
     S.anno.splice(+e.target.dataset.del,1); renderAnnoList(); renderPage();
   }));
+  wrap.querySelectorAll('[data-vtx]').forEach(b=>b.addEventListener('click',e=>{
+    const a=S.anno[+e.target.dataset.vtx];
+    if(e.target.dataset.op==='+'){          // いちばん長い辺の中点に角を足す
+      let bi=0,bd=-1;
+      for(let i=0;i<a.pts.length;i++){
+        const q=a.pts[(i+1)%a.pts.length], p=a.pts[i];
+        const d=(q[0]-p[0])**2+(q[1]-p[1])**2;
+        if(d>bd){bd=d;bi=i;}
+      }
+      const p=a.pts[bi], q=a.pts[(bi+1)%a.pts.length];
+      a.pts.splice(bi+1,0,[(p[0]+q[0])/2,(p[1]+q[1])/2]);
+    } else if(a.pts.length>3){ a.pts.pop(); }
+    renderAnnoList(); renderPage();
+  }));
 }
 
-function addAnno(type){
+function addAnno(type,layer){
   const a={id:uid(),type,size:1};
+  if(layer==='sub') a.layer='sub';
   if(type==='star'){ a.x=.45; a.y=.45; a.text='集合場所'; }
   else if(type==='arrow'){ a.x=.25; a.y=.75; a.x2=.44; a.y2=.5; }
+  else if(type==='area'){ a.pts=[[.34,.36],[.66,.36],[.66,.64],[.34,.64]]; a.text=''; }
   else { a.x=.5; a.y=.2; a.text='ラベル'; }
   S.anno.push(a); renderAnnoList(); renderPage();
-  toast('地図の上でドラッグして位置を決めてください');
+  toast(type==='area'?'角のつまみをドラッグして形を合わせてください':'地図の上でドラッグして位置を決めてください');
 }
 
 /* =========================================================
