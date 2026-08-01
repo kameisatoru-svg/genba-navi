@@ -365,4 +365,13 @@
 <text x="834.5" y="103.6" font-size="17" font-weight="700" text-anchor="middle" font-family="Meiryo,'Yu Gothic',sans-serif" fill="#000">ナフコ</text>
 <text x="922.6" y="153.7" font-size="15" font-weight="400" text-anchor="middle" font-family="Meiryo,'Yu Gothic',sans-serif" stroke="#fff" stroke-width="4.6" stroke-linejoin="round" fill="none">松岡日岡線</text>
 <text x="922.6" y="153.7" font-size="15" font-weight="400" text-anchor="middle" font-family="Meiryo,'Yu Gothic',sans-serif" fill="#000">松岡日岡線</text>
+<g font-family="Meiryo,'Yu Gothic',sans-serif">
+<rect x="823.1" y="595.0" width="176.9" height="30" fill="#fff" fill-opacity="0.82"/>
+<rect x="841.1" y="612.0" width="66.5" height="6" fill="#000"/>
+<rect x="907.5" y="612.0" width="66.5" height="6" fill="#fff" stroke="#000" stroke-width="1"/>
+<text x="841.1" y="607.0" font-size="14" text-anchor="middle" fill="#000">0</text>
+<text x="974.0" y="607.0" font-size="14" text-anchor="middle" fill="#000">100m</text>
+<path d="M 970,16 L 962,42 L 970,36 L 978,42 Z" fill="#000"/>
+<text x="970" y="59" font-size="15" font-weight="700" text-anchor="middle" fill="#000">N</text>
+</g>
 </svg>

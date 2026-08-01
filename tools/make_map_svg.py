@@ -177,6 +177,29 @@ def build_svg(els, lat0, lon0, rng, max_labels=22, plain=False):
                          'font-family="Meiryo,\'Yu Gothic\',sans-serif" %s>%s</text>'
                          % (x, y, fs, wt, st, esc(name)))
 
+    # 縮尺バーと方位は SVG 自身に焼き込む（実距離を知っているのは生成側だけなので）
+    width_m = 2 * half_w
+    step = 10
+    for cand in (10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000):
+        if cand <= width_m / 4:
+            step = cand
+    bar = step / width_m * VB_W
+    bx, by = VB_W - 26 - bar, VB_H - 26
+    o.append('<g font-family="Meiryo,\'Yu Gothic\',sans-serif">')
+    o.append('<rect x="%.1f" y="%.1f" width="%.1f" height="30" fill="#fff" fill-opacity="0.82"/>'
+             % (bx - 18, by - 17, bar + 44))
+    o.append('<rect x="%.1f" y="%.1f" width="%.1f" height="6" fill="#000"/>' % (bx, by, bar / 2))
+    o.append('<rect x="%.1f" y="%.1f" width="%.1f" height="6" fill="#fff" stroke="#000" stroke-width="1"/>'
+             % (bx + bar / 2, by, bar / 2))
+    o.append('<text x="%.1f" y="%.1f" font-size="14" text-anchor="middle" fill="#000">0</text>' % (bx, by - 5))
+    o.append('<text x="%.1f" y="%.1f" font-size="14" text-anchor="middle" fill="#000">%dm</text>'
+             % (bx + bar, by - 5, step))
+    nx, ny = VB_W - 30, 32                      # 方位（この図は常に北が上）
+    o.append('<path d="M %.0f,%.0f L %.0f,%.0f L %.0f,%.0f L %.0f,%.0f Z" fill="#000"/>'
+             % (nx, ny - 16, nx - 8, ny + 10, nx, ny + 4, nx + 8, ny + 10))
+    o.append('<text x="%.0f" y="%.0f" font-size="15" font-weight="700" text-anchor="middle" fill="#000">N</text>'
+             % (nx, ny + 27))
+    o.append('</g>')
     o.append('</svg>')
     return '\n'.join(o)
 
