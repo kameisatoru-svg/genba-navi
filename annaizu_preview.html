@@ -266,7 +266,7 @@ function renderEditor(){
     <hr class="section-sep">
     <div class="section-label">地図</div>
     <div class="btnbar">
-      <button class="mini-btn primary" onclick="$('imgFile').click()">🖼 地図を読込（SVG / 画像）</button>
+      <button class="mini-btn primary" onclick="pickMap('main')">🖼 地図を読込（SVG / 画像）</button>
       <button class="mini-btn" onclick="openOsm()">🗺 自動生成を試す</button>
       ${m.bg?'<button class="mini-btn" onclick="clearBg()">✕ 地図を外す</button>':''}
     </div>
@@ -287,7 +287,15 @@ function renderEditor(){
       <button class="mini-btn" onclick="addAnno('star')">★ 集合マーカー</button>
       <button class="mini-btn" onclick="addAnno('arrow')">➜ 矢印</button>
       <button class="mini-btn" onclick="addAnno('label')">あ 文字</button>
+      <button class="mini-btn" onclick="addAnno('area')">◻ 囲み</button>
     </div>
+    ${S.sub2.bg?`<div class="btnbar" style="margin-top:-2px">
+      <span style="font-size:10px;color:#666;align-self:center">拡大図へ：</span>
+      <button class="mini-btn" onclick="addAnno('star','sub')">★</button>
+      <button class="mini-btn" onclick="addAnno('arrow','sub')">➜</button>
+      <button class="mini-btn" onclick="addAnno('label','sub')">あ</button>
+      <button class="mini-btn" onclick="addAnno('area','sub')">◻ 囲み</button>
+    </div>`:''}
     <div id="annoList"></div>
 
     <hr class="section-sep">
@@ -300,9 +308,15 @@ function renderEditor(){
     <div class="section-label"><span>拡大図（メイン地図の一部を拡大）</span>
       <label class="chk"><input type="checkbox" id="f_showSub" ${S.showSub?'checked':''}> 表示</label></div>
     <div class="fgroup"><label>見出し</label><input id="f_subTitle" value="${esc(S.subTitle)}"></div>
-    <div class="fgroup"><label>倍率</label><input type="range" id="f_zoomZ" min="1.2" max="6" step="0.1" value="${m.zoom.z}"></div>
-    <div class="fgroup"><label>注記（拡大図の下）</label><input id="f_subNote" value="${esc(S.subNote)}" placeholder="※ 建物の南側に面しています"></div>
-    <div class="hint">拡大したい場所は、右のプレビューの<b>拡大図の中をドラッグ</b>すると動かせます。</div>
+    <div class="btnbar">
+      <button class="mini-btn" onclick="pickMap('sub')">🛩 拡大図に別の地図を使う</button>
+      ${S.sub2.bg?'<button class="mini-btn" onclick="clearSub2()">✕ 解除（本図の切り出しに戻す）</button>':''}
+    </div>
+    ${S.sub2.bg
+      ? `<div class="hint">航空写真などを別に読み込み中。目印は上の「拡大図へ」ボタンで追加し、<b>拡大図の上で直接ドラッグ</b>できます。</div>`
+      : `<div class="fgroup"><label>倍率</label><input type="range" id="f_zoomZ" min="1.2" max="6" step="0.1" value="${m.zoom.z}"></div>
+         <div class="hint">拡大したい場所は、右のプレビューの<b>拡大図の中をドラッグ</b>すると動かせます。</div>`}
+    <div class="fgroup" style="margin-top:8px"><label>注記（拡大図の下）</label><input id="f_subNote" value="${esc(S.subNote)}" placeholder="※ 建物の南側に面しています／出典など"></div>
 
     <hr class="section-sep">
     <div class="section-label"><span>連絡先</span>
@@ -333,7 +347,7 @@ function renderEditor(){
   });
   $('f_fit').addEventListener('change',e=>{ S.map.fit=e.target.value; renderPage(); });
   $('f_north').addEventListener('change',e=>{ S.map.north=e.target.checked; renderPage(); });
-  $('f_zoomZ').addEventListener('input',e=>{ S.map.zoom.z=parseFloat(e.target.value); renderPage(); });
+  if($('f_zoomZ')) $('f_zoomZ').addEventListener('input',e=>{ S.map.zoom.z=parseFloat(e.target.value); renderPage(); });
   setupDropzone();
   renderAnnoList(); renderRows('sumList','summary',true); renderRows('telList','tel',true); renderNoteList();
 }
@@ -659,13 +673,20 @@ document.addEventListener('paste',e=>{
   const txt=cd.getData('text/plain')||'';
   if(/^\s*<svg[\s>]/i.test(txt)){ setSVG(txt); e.preventDefault(); }
 });
+let _mapTarget='main';
+function pickMap(t){ _mapTarget=t||'main'; $('imgFile').click(); }
+function clearSub2(){ S.sub2={bg:null,bgType:null,fit:'cover'}; renderEditor(); renderPage(); }
 function onImgFile(e){ const f=e.target.files[0]; e.target.value=''; if(f) readMapFile(f); }
 function readMapFile(file){
   const isSvg = /svg/i.test(file.type) || /\.svg$/i.test(file.name||'');
   const r=new FileReader();
   r.onload=()=>{
     if(isSvg){ setSVG(String(r.result)); }
-    else { S.map.bg=r.result; S.map.bgType='img'; renderEditor(); renderPage(); toast('🖼 地図画像を読み込みました'); }
+    else {
+      const t=(_mapTarget==='sub')?S.sub2:S.map;
+      t.bg=r.result; t.bgType='img'; if(_mapTarget==='sub') t.fit='cover';
+      _mapTarget='main'; renderEditor(); renderPage(); toast('🖼 地図画像を読み込みました');
+    }
   };
   if(isSvg) r.readAsText(file); else r.readAsDataURL(file);
 }
@@ -680,8 +701,9 @@ function setSVG(txt){
     if(!/preserveAspectRatio/i.test(tag)) tag=tag.replace(/^<svg/i,'<svg preserveAspectRatio="none"');
     svg=tag+svg.slice(open[0].length);
   }
-  S.map.bg=svg; S.map.bgType='svg'; S.map.fit='fill';
-  renderEditor(); renderPage(); toast('🗺 地図SVGを読み込みました');
+  const t=(_mapTarget==='sub')?S.sub2:S.map;
+  t.bg=svg; t.bgType='svg'; t.fit='fill';
+  _mapTarget='main'; renderEditor(); renderPage(); toast('🗺 地図SVGを読み込みました');
 }
 function clearBg(){ S.map.bg=null; S.map.bgType=null; renderEditor(); renderPage(); }
 
@@ -865,6 +887,7 @@ async function loadDocFile(ev){
   S=Object.assign(defaultState(),st);
   S.map=Object.assign(defaultState().map,st.map||{});
   S.map.zoom=Object.assign({cx:.5,cy:.5,z:2.4},(st.map&&st.map.zoom)||{});
+  S.sub2=Object.assign({bg:null,bgType:null,fit:'cover'},st.sub2||{});
   renderAll(); toast('✅ 「'+(S.site||S.title)+'」を読み込みました');
 }
 
@@ -878,6 +901,7 @@ function restoreAutosave(){
     S=Object.assign(defaultState(),st);
     S.map=Object.assign(defaultState().map,st.map||{});
     S.map.zoom=Object.assign({cx:.5,cy:.5,z:2.4},(st.map&&st.map.zoom)||{});
+    S.sub2=Object.assign({bg:null,bgType:null,fit:'cover'},st.sub2||{});
     return true;
   }catch(e){ return false; }
 }
