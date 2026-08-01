@@ -7,11 +7,12 @@ annaizu_preview.html の地図キャンバス（viewBox 0 0 1000 681）にぴっ
 SVG を1枚出力する。出力SVGはそのままアプリの「画像を読込」にドロップすればよい。
 
 使い方:
-    python make_map_svg.py 33.194743 131.657121 --range 420 --out map.svg
+    python make_map_svg.py 33.194743 131.657121 --range 240 --out map.svg
     python make_map_svg.py "33.194743, 131.657121"            # 貼り付けそのままでも可
     python make_map_svg.py "https://www.google.com/maps/...@33.19,131.65,17z"
 
-    --range  中心から上下方向の距離(m)。既定420。広域なら700〜1000
+    --range  中心から上下の距離(m)＝図の高さの半分。既定240。
+             敷地1つなら200〜260、街区ごと入れるなら400〜600
     --label  ラベルを出す最大件数（既定22）。0でラベル無し
     --plain  建物と道路だけの素っ気ない図（ラベル無し・淡色）
 
@@ -128,17 +129,32 @@ def build_svg(els, lat0, lon0, rng, max_labels=22, plain=False):
                      % (d(g, True), '#dfe3e8' if plain else '#ccd2da', '#9aa3ae' if plain else '#8a939f'))
 
     if not plain and max_labels:
-        placed, n = [], 0
-        # 面積の大きい建物・名前付き施設を優先
-        def weight(e):
+        MAJOR = ('motorway', 'trunk', 'primary', 'secondary')
+
+        def labelable(e):
+            t = e.get('tags') or {}
+            if not t.get('name'):
+                return False
+            if t.get('place') or t.get('boundary'):       # 町名・字名は案内図に不要
+                return False
+            if t.get('public_transport') or t.get('highway') == 'bus_stop':
+                return False
+            if 'highway' in t:                            # 道路は幹線だけ
+                return t['highway'] in MAJOR
+            return True
+
+        def weight(e):                                    # 大きい建物・施設を優先
             t = e.get('tags', {})
-            g = e.get('geometry') or []
-            return (0 if 'highway' in t else 1, len(g))
-        cands = [e for e in els if (e.get('tags') or {}).get('name')]
-        for e in sorted(cands, key=weight, reverse=True):
+            return (0 if 'highway' in t else 1, len(e.get('geometry') or []))
+
+        placed, used, n = [], set(), 0
+        for e in sorted([x for x in els if labelable(x)], key=weight, reverse=True):
             if n >= max_labels:
                 break
             t = e['tags']
+            name = t['name']
+            if name in used:                              # 同名は1回だけ
+                continue
             g = e.get('geometry')
             if g:
                 x = sum(P(p['lat'], p['lon'])[0] for p in g) / len(g)
@@ -147,17 +163,19 @@ def build_svg(els, lat0, lon0, rng, max_labels=22, plain=False):
                 x, y = P(e['lat'], e['lon'])
             else:
                 continue
-            if x < 14 or x > VB_W - 14 or y < 16 or y > VB_H - 8:
+            if x < 14 or x > VB_W - 14 or y < 18 or y > VB_H - 10:
                 continue
-            if any(abs(px - x) < 78 and abs(py - y) < 24 for px, py in placed):
-                continue
-            placed.append((x, y)); n += 1
             road = 'highway' in t
-            fs, wt = (15, '400') if road else (17, '700')
+            fs = 15 if road else 17
+            half = len(name) * fs * 0.55                  # 文字幅ぶんの衝突半径
+            if any(abs(px - x) < (half + pw) and abs(py - y) < 22 for px, py, pw in placed):
+                continue
+            placed.append((x, y, half)); used.add(name); n += 1
+            wt = '400' if road else '700'
             for st in ('stroke="#fff" stroke-width="4.6" stroke-linejoin="round" fill="none"', 'fill="#000"'):
                 o.append('<text x="%.1f" y="%.1f" font-size="%d" font-weight="%s" text-anchor="middle" '
                          'font-family="Meiryo,\'Yu Gothic\',sans-serif" %s>%s</text>'
-                         % (x, y, fs, wt, st, esc(t['name'])))
+                         % (x, y, fs, wt, st, esc(name)))
 
     o.append('</svg>')
     return '\n'.join(o)
@@ -166,7 +184,7 @@ def build_svg(els, lat0, lon0, rng, max_labels=22, plain=False):
 def main():
     ap = argparse.ArgumentParser(description='集合場所案内図用の地図SVGを作る')
     ap.add_argument('point', nargs='+', help='緯度 経度 / "33.19,131.65" / GoogleマップURL')
-    ap.add_argument('--range', type=float, default=420.0, help='中心から上下の距離(m)。既定420')
+    ap.add_argument('--range', type=float, default=240.0, help='中心から上下の距離(m)。既定240')
     ap.add_argument('--out', default='map.svg', help='出力SVGパス')
     ap.add_argument('--label', type=int, default=22, help='ラベル最大件数（0で無し）')
     ap.add_argument('--plain', action='store_true', help='ラベル無し・淡色の素図')
