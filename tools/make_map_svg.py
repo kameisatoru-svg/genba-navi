@@ -21,7 +21,7 @@ SVG を1枚出力する。出力SVGはそのままアプリの「画像を読込
 Overpass が混んでいる時は数十秒かかる。失敗したらしばらく置いて再実行するか、
 --endpoint で別ミラーを指定する。
 """
-import argparse, json, math, re, sys, urllib.error, urllib.parse, urllib.request
+import argparse, json, math, re, sys, time, urllib.error, urllib.parse, urllib.request
 
 VB_W, VB_H = 1000.0, 681.0          # annaizu_preview.html の地図キャンバス
 ENDPOINTS = [
@@ -171,6 +171,9 @@ def main():
     ap.add_argument('--label', type=int, default=22, help='ラベル最大件数（0で無し）')
     ap.add_argument('--plain', action='store_true', help='ラベル無し・淡色の素図')
     ap.add_argument('--endpoint', action='append', help='Overpassのミラーを指定（複数可）')
+    ap.add_argument('--from-json', dest='from_json', action='append',
+                    help='取得済みのOverpass JSONを使う（複数指定でマージ）。混雑時の再利用に')
+    ap.add_argument('--save-json', dest='save_json', help='取得したJSONを保存しておく')
     a = ap.parse_args()
 
     pt = parse_point(' '.join(a.point))
@@ -178,9 +181,23 @@ def main():
         raise SystemExit('緯度経度を読み取れませんでした。例: 33.194743 131.657121')
     lat, lon = pt
     print('中心 %.6f, %.6f ／ 範囲 ±%.0fm' % (lat, lon, a.range))
-    data = fetch(lat, lon, a.range, a.endpoint or ENDPOINTS)
-    els = data.get('elements', [])
-    print('取得 %d 要素' % len(els))
+    if a.from_json:
+        seen, els = set(), []
+        for path in a.from_json:
+            with open(path, encoding='utf-8') as f:
+                for e in json.load(f).get('elements', []):
+                    if e.get('id') in seen:
+                        continue
+                    seen.add(e.get('id')); els.append(e)
+        print('既存JSONから %d 要素' % len(els))
+    else:
+        data = fetch(lat, lon, a.range, a.endpoint or ENDPOINTS)
+        els = data.get('elements', [])
+        print('取得 %d 要素' % len(els))
+        if a.save_json:
+            with open(a.save_json, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False)
+            print('JSONを保存 %s' % a.save_json)
     svg = build_svg(els, lat, lon, a.range, 0 if a.plain else a.label, a.plain)
     with open(a.out, 'w', encoding='utf-8') as f:
         f.write(svg)
