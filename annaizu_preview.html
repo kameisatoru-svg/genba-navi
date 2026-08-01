@@ -263,12 +263,12 @@ function renderEditor(){
     <hr class="section-sep">
     <div class="section-label">地図</div>
     <div class="btnbar">
-      <button class="mini-btn primary" onclick="openOsm()">🗺 地図を自動生成</button>
-      <button class="mini-btn" onclick="$('imgFile').click()">🖼 画像を読込</button>
+      <button class="mini-btn primary" onclick="$('imgFile').click()">🖼 地図を読込（SVG / 画像）</button>
+      <button class="mini-btn" onclick="openOsm()">🗺 自動生成を試す</button>
       ${m.bg?'<button class="mini-btn" onclick="clearBg()">✕ 地図を外す</button>':''}
     </div>
-    <input type="file" id="imgFile" accept="image/*" style="display:none" onchange="onImgFile(event)">
-    <div class="dropzone" id="dz">ここに画像をドロップ／Ctrl+V で貼り付け<br><span style="font-size:10px">Googleマップのスクショ・館内図・航空写真・手書き図など</span></div>
+    <input type="file" id="imgFile" accept="image/*,.svg" style="display:none" onchange="onImgFile(event)">
+    <div class="dropzone" id="dz">ここに地図をドロップ／Ctrl+V で貼り付け<br><span style="font-size:10px">Googleマップのスクショ・館内図・航空写真・手書き図／Claudeが作ったSVG</span></div>
     <div class="frow" style="margin-top:8px">
       <div class="fgroup"><label>画像の収め方</label>
         <select id="f_fit"><option value="contain"${m.fit==='contain'?' selected':''}>全体を収める（余白可）</option><option value="cover"${m.fit==='cover'?' selected':''}>枠いっぱい（はみ出しは切る）</option><option value="fill"${m.fit==='fill'?' selected':''}>枠に合わせて伸縮</option></select>
