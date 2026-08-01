@@ -115,18 +115,17 @@ body{font-family:"Meiryo","Yu Gothic",sans-serif;background:var(--bg);height:100
 .dp-date .d2{font-size:22pt;font-weight:700;line-height:1.1;}
 
 .dp-map{grid-column:1;grid-row:2;border:.5mm solid #000;position:relative;overflow:hidden;background:#fcfcfa;}
-.dp-side{grid-column:2;grid-row:2;display:flex;flex-direction:column;gap:3mm;min-height:0;}
-.dp-notes{grid-column:1/3;grid-row:3;border:.5mm solid #000;display:flex;flex-direction:column;overflow:hidden;}
-.doc-page.side-full .dp-side{grid-row:2/4;}
-.doc-page.side-full .dp-notes{grid-column:1;}
+.dp-side{grid-column:2;grid-row:2/4;display:flex;flex-direction:column;gap:3mm;min-height:0;}
+.dp-notes{grid-column:1;grid-row:3;border:.5mm solid #000;display:flex;flex-direction:column;overflow:hidden;}
+.doc-page.no-notes .dp-side{grid-row:2;}
 
 .card{border:.5mm solid #000;display:flex;flex-direction:column;overflow:hidden;background:#fff;}
 .card-h{background:#000;color:#fff;font-size:11pt;font-weight:700;padding:1.1mm 2.2mm;flex-shrink:0;}
 .card-b{padding:2mm 2.4mm;flex:1;min-height:0;overflow:hidden;}
-.kv{display:grid;grid-template-columns:20mm 1fr;gap:.6mm 2mm;font-size:10.5pt;line-height:1.45;}
+.kv{display:grid;grid-template-columns:20mm 1fr;gap:.4mm 2mm;font-size:10.5pt;line-height:1.38;}
 .kv .k{font-weight:700;border-right:.2mm solid #bbb;padding-right:1.5mm;}
-.tel{display:flex;justify-content:space-between;align-items:baseline;font-size:10.5pt;margin-bottom:1.2mm;gap:2mm;}
-.tel .tn{font-size:13pt;font-weight:700;white-space:nowrap;}
+.tel{display:flex;justify-content:space-between;align-items:baseline;font-size:10.5pt;margin-bottom:.7mm;gap:2mm;}
+.tel .tn{font-size:12.5pt;font-weight:700;white-space:nowrap;}
 .notes-h{background:#000;color:#fff;font-size:11pt;font-weight:700;padding:1.1mm 2.4mm;flex-shrink:0;}
 .notes-b{padding:2mm 3mm;font-size:11.5pt;line-height:1.56;flex:1;overflow:hidden;}
 .notes-b .nfoot{font-size:10pt;color:#666;margin-top:1.4mm;line-height:1.5;}
@@ -140,8 +139,6 @@ body{font-family:"Meiryo","Yu Gothic",sans-serif;background:var(--bg);height:100
 .map-empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#666;font-size:11pt;gap:2mm;text-align:center;padding:6mm;}
 .submap-vp{position:relative;width:100%;height:100%;overflow:hidden;background:#fcfcfa;}
 .submap-inner{position:absolute;top:0;left:0;transform-origin:0 0;}
-.mapscale{position:absolute;right:2mm;bottom:1.6mm;font-size:9.5pt;display:flex;align-items:center;gap:1.2mm;background:rgba(255,255,255,.85);padding:.4mm 1.2mm;border-radius:.6mm;}
-.mapscale .bar{height:1.4mm;width:16mm;background:linear-gradient(90deg,#000 0 50%,#fff 50% 100%);border:.2mm solid #000;}
 .northrose{position:absolute;right:2.4mm;top:2mm;text-align:center;font-size:10pt;font-weight:700;line-height:1;}
 
 /* 編集時のドラッグ可視化（印刷では消す） */
@@ -231,7 +228,7 @@ function defaultState(){
     notesTitle:'当日の段取り・確認事項',
     notes:[''],
     notesFoot:'',
-    map:{ bg:null, bgType:null, fit:'contain', scaleText:'', north:false,
+    map:{ bg:null, bgType:null, fit:'contain', north:false,
           zoom:{cx:0.5, cy:0.5, z:2.4} },
     anno:[]
   };
