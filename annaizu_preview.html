@@ -565,17 +565,34 @@ function setupDropzone(){
   dz.addEventListener('click',()=>$('imgFile').click());
   ['dragenter','dragover'].forEach(t=>dz.addEventListener(t,e=>{e.preventDefault();dz.classList.add('over');}));
   ['dragleave','drop'].forEach(t=>dz.addEventListener(t,e=>{e.preventDefault();dz.classList.remove('over');}));
-  dz.addEventListener('drop',e=>{ const f=e.dataTransfer.files[0]; if(f) readImg(f); });
+  dz.addEventListener('drop',e=>{ const f=e.dataTransfer.files[0]; if(f) readMapFile(f); });
 }
 document.addEventListener('paste',e=>{
-  const items=e.clipboardData&&e.clipboardData.items; if(!items) return;
-  for(const it of items){ if(it.type.indexOf('image')===0){ readImg(it.getAsFile()); e.preventDefault(); return; } }
+  const cd=e.clipboardData; if(!cd) return;
+  for(const it of (cd.items||[])){
+    if(it.type.indexOf('image')===0){ readMapFile(it.getAsFile()); e.preventDefault(); return; }
+  }
+  // SVGソースをそのまま貼った場合（Claudeが作った地図など）
+  const txt=cd.getData('text/plain')||'';
+  if(/^\s*<svg[\s>]/i.test(txt)){ setSVG(txt); e.preventDefault(); }
 });
-function onImgFile(e){ const f=e.target.files[0]; e.target.value=''; if(f) readImg(f); }
-function readImg(file){
+function onImgFile(e){ const f=e.target.files[0]; e.target.value=''; if(f) readMapFile(f); }
+function readMapFile(file){
+  const isSvg = /svg/i.test(file.type) || /\.svg$/i.test(file.name||'');
   const r=new FileReader();
-  r.onload=()=>{ S.map.bg=r.result; S.map.bgType='img'; renderEditor(); renderPage(); toast('🖼 地図画像を読み込みました'); };
-  r.readAsDataURL(file);
+  r.onload=()=>{
+    if(isSvg){ setSVG(String(r.result)); }
+    else { S.map.bg=r.result; S.map.bgType='img'; renderEditor(); renderPage(); toast('🖼 地図画像を読み込みました'); }
+  };
+  if(isSvg) r.readAsText(file); else r.readAsDataURL(file);
+}
+function setSVG(txt){
+  // <svg> だけを取り出し、枠にぴったり貼るため寸法指定を落とす
+  const m=txt.match(/<svg[\s\S]*<\/svg>/i); if(!m){ alert('SVGを読み取れませんでした。'); return; }
+  let svg=m[0].replace(/\s(width|height)\s*=\s*"[^"]*"/gi,'');
+  if(!/preserveAspectRatio/i.test(svg)) svg=svg.replace(/<svg/i,'<svg preserveAspectRatio="none"');
+  S.map.bg=svg; S.map.bgType='svg'; S.map.fit='fill';
+  renderEditor(); renderPage(); toast('🗺 地図SVGを読み込みました');
 }
 function clearBg(){ S.map.bg=null; S.map.bgType=null; renderEditor(); renderPage(); }
 
@@ -610,15 +627,27 @@ async function buildOsmMap(lat,lon,range){
   const dLat=range/110574, dLon=range/(111320*Math.cos(lat*Math.PI/180));
   const bb=[(lat-dLat).toFixed(6),(lon-dLon).toFixed(6),(lat+dLat).toFixed(6),(lon+dLon).toFixed(6)].join(',');
   const q=`[out:json][timeout:45];(way["building"](${bb});way["highway"](${bb});way["amenity"="parking"](${bb});way["landuse"~"retail|commercial"](${bb});node["name"]["amenity"](${bb});node["name"]["shop"](${bb}););out body geom;`;
-  let data;
-  try{
-    const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),50000);
-    const res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:q,signal:ctrl.signal});
-    clearTimeout(to);
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    data=await res.json();
-  }catch(err){
-    alert('地図データの取得に失敗しました：'+(err.message||err)+'\n\n通信状況を確認するか、「画像を読込」でスクショを使ってください。');
+  const EPS=['https://overpass-api.de/api/interpreter',
+             'https://overpass.kumi.systems/api/interpreter',
+             'https://overpass.private.coffee/api/interpreter'];
+  let data=null, lastErr='';
+  for(const ep of EPS){
+    try{
+      const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),25000);
+      const res=await fetch(ep,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+                               body:'data='+encodeURIComponent(q),signal:ctrl.signal});
+      clearTimeout(to);
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      data=await res.json(); break;
+    }catch(err){ lastErr=(err.message||String(err)); }
+  }
+  if(!data){
+    alert('地図データを取得できませんでした（'+lastErr+'）。\n\n'+
+          'ブラウザから直接取れない環境のことがあります。その場合は次のどちらかで。\n\n'+
+          '① Claudeに「この座標で案内図用の地図SVGを作って」と頼む\n'+
+          '　（tools/make_map_svg.py が同じ地図を生成します）\n'+
+          '　→ できたSVGを「地図を読込」にドロップ\n\n'+
+          '② Googleマップのスクショを「地図を読込」にドロップ');
     return;
   }
   S.map.bg=osmToSVG(data.elements||[],lat,lon,range);
