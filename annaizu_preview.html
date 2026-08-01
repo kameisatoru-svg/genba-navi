@@ -434,6 +434,21 @@ function annoSVG(which){
       s+=`<line x1="${x}" y1="${y}" x2="${x2}" y2="${y2}" stroke="#cc0022" stroke-width="${9*k}" stroke-linecap="round" marker-end="url(#ahead)"/>`;
       s+=`<circle class="hit handle" data-id="${a.id}" data-part="p1" cx="${x}" cy="${y}" r="${16*k}"/>`;
       s+=`<circle class="hit handle" data-id="${a.id}" data-part="p2" cx="${x2}" cy="${y2}" r="${16*k}"/>`;
+    } else if(a.type==='area'){
+      const pts=(a.pts||[]).map(p=>[p[0]*W,p[1]*H]);
+      if(pts.length>=3){
+        const d='M '+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' L ')+' Z';
+        s+=`<path d="${d}" fill="#cc0022" fill-opacity="0.14" stroke="#cc0022" stroke-width="${6*k}" stroke-linejoin="round" stroke-linecap="round"/>`;
+        if(a.text){
+          const cx=pts.reduce((t,p)=>t+p[0],0)/pts.length, cy=pts.reduce((t,p)=>t+p[1],0)/pts.length;
+          const fs=20*k;
+          s+=`<text x="${cx}" y="${cy}" font-size="${fs}" font-weight="700" text-anchor="middle" font-family="Meiryo,'Yu Gothic',sans-serif" stroke="#fff" stroke-width="${5.5*k}" stroke-linejoin="round" fill="none">${esc(a.text)}</text>`;
+          s+=`<text x="${cx}" y="${cy}" font-size="${fs}" font-weight="700" text-anchor="middle" font-family="Meiryo,'Yu Gothic',sans-serif" fill="#cc0022">${esc(a.text)}</text>`;
+        }
+      }
+      pts.forEach((p,i)=>{
+        s+=`<circle class="hit handle vtx" data-id="${a.id}" data-part="v${i}" cx="${p[0]}" cy="${p[1]}" r="${13*k}"/>`;
+      });
     } else {
       const fs=20*k;
       s+=`<g data-id="${a.id}" data-part="p1" class="handle">`;
