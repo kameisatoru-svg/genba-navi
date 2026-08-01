@@ -21,7 +21,7 @@ SVG を1枚出力する。出力SVGはそのままアプリの「画像を読込
 Overpass が混んでいる時は数十秒かかる。失敗したらしばらく置いて再実行するか、
 --endpoint で別ミラーを指定する。
 """
-import argparse, json, math, re, sys, urllib.request, urllib.error
+import argparse, json, math, re, sys, urllib.error, urllib.parse, urllib.request
 
 VB_W, VB_H = 1000.0, 681.0          # annaizu_preview.html の地図キャンバス
 ENDPOINTS = [
@@ -182,5 +182,4 @@ def main():
 
 
 if __name__ == '__main__':
-    import urllib.parse  # noqa: F401  (fetch内で使用)
     main()
