@@ -484,7 +484,7 @@ function renderPage(){
   const subHTML = S.showSub ? `
     <div class="card" style="flex:1;min-height:0"><div class="card-h">${esc(S.subTitle)}</div>
       <div class="card-b" style="display:flex;flex-direction:column;gap:1.2mm;padding:1.6mm">
-        <div style="flex:1;min-height:0;border:.3mm solid #888"><div class="submap-vp" id="submapVp"><div class="submap-inner" id="submapInner">${mapCanvasHTML()}</div></div></div>
+        <div style="flex:1;min-height:0;border:.3mm solid #888"><div class="submap-vp" id="submapVp"><div class="submap-inner" id="submapInner">${mapCanvasHTML('sub')}</div></div></div>
         ${S.subNote?`<div style="font-size:10pt">${esc(S.subNote)}</div>`:''}
       </div></div>` : '';
   const telHTML = S.showTel ? `
@@ -511,7 +511,7 @@ function renderPage(){
         ${S.dateSub?`<div class="d2">${esc(S.dateSub)}</div>`:''}
       </div>
     </div>
-    <div class="dp-map" id="mainMap">${mapCanvasHTML()}${north}</div>
+    <div class="dp-map" id="mainMap">${mapCanvasHTML('main')}${north}</div>
     <div class="dp-side">${sumHTML}${subHTML}${telHTML}</div>
     ${notesHTML}`;
 
@@ -539,7 +539,13 @@ function fitNotes(){
 /* 拡大図：メイン地図と同じ内容を、指定中心・倍率で切り出す */
 function layoutSubmap(){
   const vp=$('submapVp'), inner=$('submapInner'), main=$('mainMap');
-  if(!vp||!inner||!main) return;
+  if(!vp||!inner) return;
+  if(S.sub2.bg){                       // 別地図モード：等倍で枠いっぱい
+    inner.style.width='100%'; inner.style.height='100%'; inner.style.transform='none';
+    vp.style.cursor='default';
+    return;
+  }
+  if(!main) return;
   const mw=main.clientWidth, mh=main.clientHeight;
   if(!mw||!mh) return;
   inner.style.width=mw+'px'; inner.style.height=mh+'px';
@@ -553,28 +559,33 @@ function layoutSubmap(){
 /* =========================================================
    ドラッグ操作
    ========================================================= */
-function bindMapDrag(){
-  const main=$('mainMap');
-  if(main){
-    const svg=main.querySelector('.anno');
-    svg.querySelectorAll('.handle').forEach(el=>{
-      el.addEventListener('pointerdown',ev=>{
-        ev.preventDefault();
-        const id=el.dataset.id, part=el.dataset.part;
-        const a=S.anno.find(x=>x.id===id); if(!a) return;
-        const rect=main.getBoundingClientRect();
-        const move=e=>{
-          const nx=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));
-          const ny=Math.max(0,Math.min(1,(e.clientY-rect.top)/rect.height));
-          if(part==='p2'){ a.x2=nx; a.y2=ny; } else { a.x=nx; a.y=ny; }
-          renderPage();
-        };
-        const up=()=>{ window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',up); };
-        window.addEventListener('pointermove',move); window.addEventListener('pointerup',up);
-      });
+function bindHandles(box){
+  if(!box) return;
+  const svg=box.querySelector('.anno'); if(!svg) return;
+  svg.querySelectorAll('.handle').forEach(el=>{
+    el.addEventListener('pointerdown',ev=>{
+      ev.preventDefault(); ev.stopPropagation();
+      const id=el.dataset.id, part=el.dataset.part;
+      const a=S.anno.find(x=>x.id===id); if(!a) return;
+      const rect=box.getBoundingClientRect();
+      const move=e=>{
+        const nx=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));
+        const ny=Math.max(0,Math.min(1,(e.clientY-rect.top)/rect.height));
+        if(part[0]==='v'){ a.pts[+part.slice(1)]=[nx,ny]; }
+        else if(part==='p2'){ a.x2=nx; a.y2=ny; }
+        else { a.x=nx; a.y=ny; }
+        renderPage();
+      };
+      const up=()=>{ window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',up); autosave(); };
+      window.addEventListener('pointermove',move); window.addEventListener('pointerup',up);
     });
-  }
+  });
+}
+
+function bindMapDrag(){
+  bindHandles($('mainMap'));
   const vp=$('submapVp');
+  if(vp && S.sub2.bg){ bindHandles(vp); return; }
   if(vp){
     vp.style.cursor='move';
     vp.addEventListener('pointerdown',ev=>{
