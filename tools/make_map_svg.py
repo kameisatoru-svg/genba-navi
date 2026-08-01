@@ -204,6 +204,103 @@ def build_svg(els, lat0, lon0, rng, max_labels=22, plain=False):
     return '\n'.join(o)
 
 
+# =============================================================================
+# 航空写真（国土地理院 空中写真タイル）
+#   Googleマップの衛星画像は配布・印刷に制約があるため使わない。
+#   地理院タイルは出典を明示すれば自由に利用できる（本関数が出典を焼き込む）。
+# =============================================================================
+GSI_TILE = 'https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/%d/%d/%d.jpg'
+GSI_MAX_Z = 18
+
+
+def _tile_xy(lat, lon, z):
+    n = 2 ** z
+    r = math.radians(lat)
+    return ((lon + 180.0) / 360.0 * n,
+            (1.0 - math.log(math.tan(r) + 1 / math.cos(r)) / math.pi) / 2.0 * n)
+
+
+def build_aerial_svg(lat0, lon0, rng, aspect=1.30, zoom=None):
+    """中心と範囲から空中写真を切り出し、data URI で埋めたSVGを返す"""
+    from io import BytesIO
+    import base64
+    from PIL import Image
+
+    vb_w = 1000.0
+    vb_h = round(vb_w / aspect)
+    half_h, half_w = float(rng), rng * aspect
+
+    # 目標 1600px 相当の解像度になるズームを選ぶ（地理院は z18 が上限）
+    if zoom is None:
+        res_want = (2 * half_w) / 1600.0                       # m/px
+        zoom = GSI_MAX_Z
+        for z in range(14, GSI_MAX_Z + 1):
+            if 156543.03392 * math.cos(math.radians(lat0)) / (2 ** z) <= res_want:
+                zoom = z
+                break
+    m_per_px = 156543.03392 * math.cos(math.radians(lat0)) / (2 ** zoom)
+
+    cx, cy = _tile_xy(lat0, lon0, zoom)                          # タイル座標(小数)
+    px_w, px_h = (2 * half_w) / m_per_px, (2 * half_h) / m_per_px
+    left, top = cx * 256 - px_w / 2, cy * 256 - px_h / 2
+    tx0, ty0 = int(left // 256), int(top // 256)
+    tx1, ty1 = int((left + px_w) // 256), int((top + px_h) // 256)
+
+    canvas = Image.new('RGB', ((tx1 - tx0 + 1) * 256, (ty1 - ty0 + 1) * 256), (230, 230, 230))
+    got = miss = 0
+    for tx in range(tx0, tx1 + 1):
+        for ty in range(ty0, ty1 + 1):
+            try:
+                req = urllib.request.Request(GSI_TILE % (zoom, tx, ty),
+                                             headers={'User-Agent': 'artrays-annaizu/1.0'})
+                with urllib.request.urlopen(req, timeout=25) as r:
+                    canvas.paste(Image.open(BytesIO(r.read())), ((tx - tx0) * 256, (ty - ty0) * 256))
+                got += 1
+            except Exception:                                    # noqa: BLE001
+                miss += 1
+    if not got:
+        raise SystemExit('空中写真タイルを取得できませんでした（通信 or 範囲外）。')
+    print('空中写真 z=%d ／ タイル %d枚取得' % (zoom, got) + ('（%d枚欠測）' % miss if miss else ''))
+
+    img = canvas.crop((int(left - tx0 * 256), int(top - ty0 * 256),
+                       int(left - tx0 * 256 + px_w), int(top - ty0 * 256 + px_h)))
+    buf = BytesIO(); img.save(buf, 'JPEG', quality=86)
+    b64 = base64.b64encode(buf.getvalue()).decode('ascii')
+
+    o = ['<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" '
+         'viewBox="0 0 %d %d">' % (vb_w, vb_h),
+         '<image x="0" y="0" width="%d" height="%d" preserveAspectRatio="none" '
+         'xlink:href="data:image/jpeg;base64,%s"/>' % (vb_w, vb_h, b64)]
+
+    width_m = 2 * half_w                                          # 縮尺バー
+    step = 10
+    for cand in (10, 20, 25, 50, 100, 200, 250, 500):
+        if cand <= width_m / 4:
+            step = cand
+    bar = step / width_m * vb_w
+    bx, by = vb_w - 26 - bar, vb_h - 26
+    o.append('<g font-family="Meiryo,\'Yu Gothic\',sans-serif">')
+    o.append('<rect x="%.1f" y="%.1f" width="%.1f" height="30" fill="#fff" fill-opacity="0.85"/>'
+             % (bx - 18, by - 17, bar + 44))
+    o.append('<rect x="%.1f" y="%.1f" width="%.1f" height="6" fill="#000"/>' % (bx, by, bar / 2))
+    o.append('<rect x="%.1f" y="%.1f" width="%.1f" height="6" fill="#fff" stroke="#000" stroke-width="1"/>'
+             % (bx + bar / 2, by, bar / 2))
+    o.append('<text x="%.1f" y="%.1f" font-size="14" text-anchor="middle" fill="#000">0</text>' % (bx, by - 5))
+    o.append('<text x="%.1f" y="%.1f" font-size="14" text-anchor="middle" fill="#000">%dm</text>'
+             % (bx + bar, by - 5, step))
+    nx, ny = vb_w - 30, 34                                        # 方位（北が上）
+    o.append('<circle cx="%.0f" cy="%.0f" r="22" fill="#fff" fill-opacity="0.85"/>' % (nx, ny + 4))
+    o.append('<path d="M %.0f,%.0f L %.0f,%.0f L %.0f,%.0f L %.0f,%.0f Z" fill="#000"/>'
+             % (nx, ny - 14, nx - 8, ny + 10, nx, ny + 4, nx + 8, ny + 10))
+    o.append('<text x="%.0f" y="%.0f" font-size="14" font-weight="700" text-anchor="middle" fill="#000">N</text>'
+             % (nx, ny + 24))
+    # 出典表示（地理院タイル利用規約により必須）
+    o.append('<rect x="0" y="%.1f" width="196" height="20" fill="#fff" fill-opacity="0.8"/>' % (vb_h - 20))
+    o.append('<text x="5" y="%.1f" font-size="13" fill="#000">出典：国土地理院 空中写真</text>' % (vb_h - 6))
+    o.append('</g></svg>')
+    return '\n'.join(o)
+
+
 def main():
     ap = argparse.ArgumentParser(description='集合場所案内図用の地図SVGを作る')
     ap.add_argument('point', nargs='+', help='緯度 経度 / "33.19,131.65" / GoogleマップURL')
@@ -211,6 +308,10 @@ def main():
     ap.add_argument('--out', default='map.svg', help='出力SVGパス')
     ap.add_argument('--label', type=int, default=22, help='ラベル最大件数（0で無し）')
     ap.add_argument('--plain', action='store_true', help='ラベル無し・淡色の素図')
+    ap.add_argument('--aerial', action='store_true',
+                    help='国土地理院の空中写真で作る（拡大図向け。Overpass不要）')
+    ap.add_argument('--aspect', type=float, default=None,
+                    help='横÷縦。既定は本図1.567／--aerial時は拡大図枠の1.30')
     ap.add_argument('--endpoint', action='append', help='Overpassのミラーを指定（複数可）')
     ap.add_argument('--from-json', dest='from_json', action='append',
                     help='取得済みのOverpass JSONを使う（複数指定でマージ）。混雑時の再利用に')
