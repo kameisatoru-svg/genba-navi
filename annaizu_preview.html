@@ -163,11 +163,12 @@ body{font-family:"Meiryo","Yu Gothic",sans-serif;background:var(--bg);height:100
 /* ── 印刷 ── */
 @media print{
   @page{size:A4 landscape;margin:5mm;}
-  html,body{height:auto;overflow:visible;background:#fff;}
+  /* 画面用の flex レイアウトを解除しないと、印刷時に高さ0に潰れて白紙になる */
+  html,body{height:auto!important;overflow:visible!important;background:#fff!important;display:block!important;}
   .topbar,.editor,.resizer,.sp-tabs{display:none!important;}
-  .main{display:block;}
-  .preview{padding:0;background:#fff;display:block;overflow:visible;}
-  .page-wrap{transform:none!important;}
+  .main{display:block!important;overflow:visible!important;flex:none!important;}
+  .preview{padding:0!important;background:#fff!important;display:block!important;overflow:visible!important;flex:none!important;}
+  .page-wrap{transform:none!important;height:auto!important;}
   .doc-page{box-shadow:none;width:287mm;height:200mm;page-break-after:avoid;}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 }
