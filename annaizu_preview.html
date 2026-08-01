@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>集合場所案内図プレビュー</title>
+<!--
+  ============================================================
+  集合場所案内図プレビュー（annaizu_preview.html） v1.0
+  株式会社アート・レイズ ／ 2026-08-01
+
+  ■ 用途
+    現場ごとの「集合場所案内図」をA4横1枚で作る汎用ひな形。
+    どの現場でも使えるように、地図の入手手段を3通り用意している。
+      (1) 地図を自動生成 … 緯度経度 or GoogleマップURLを貼る → OpenStreetMapから実データで作図
+      (2) 画像を読み込み … スクショ・館内図・航空写真・手書き図をドロップ / Ctrl+V
+      (3) 地図なし　　　 … 文字だけの連絡票としても成立
+
+  ■ 印刷規約（社内ルール準拠）
+    - A4横・@page margin 5mm（外周枠が切れないため 0 にしない）
+    - 文字は黒 #000 基準。グレーは #666 が下限
+    - 実寸：地図ラベル10pt=3.53mm／カード本文10.5pt=3.70mm／注記11.5pt=4.06mm
+      （JIS Z 8313 漢字3.5mm・注記4mm以上を満たす）
+    - 業者・社内向け実務図。案件キー・単価は載せない
+
+  ■ 再編集
+    「再編集用に保存」で出力したHTMLには <script id="artrays-doc-state"> が埋まる。
+    それを「読込」に投げれば、マーカー位置ごと復元して直せる。
+  ============================================================
+-->
+<style>
+:root{
+  --navy:#1e2d40;--navy2:#2a3f5a;--gold:#c8a96e;--beige:#eeebe5;
+  --border:#ddd;--bg:#f5f4f0;--white:#fff;--text:#111;--sub:#666;--red:#c0392b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"Meiryo","Yu Gothic",sans-serif;background:var(--bg);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+/* ── トップバー ── */
+.topbar{background:var(--navy);color:#fff;padding:0 16px;height:48px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-title{font-size:14px;font-weight:500;letter-spacing:.05em;}
+.topbar-actions{display:flex;gap:8px;align-items:center;}
+.tb-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;height:36px;border-radius:6px;border:1px solid transparent;font-size:12px;font-family:inherit;cursor:pointer;background:transparent;color:#fff;transition:background .15s;}
+.tb-btn:hover{background:rgba(255,255,255,.08);}
+.tb-btn:active{background:rgba(255,255,255,.16);}
+.tb-btn-gold{background:var(--gold);color:var(--navy);font-weight:700;}
+.tb-btn-gold:hover{background:#d4b97e;}
+.tb-btn-line{border-color:rgba(255,255,255,.22);}
+
+/* ── レイアウト ── */
+.main{display:flex;flex:1;overflow:hidden;}
+.resizer{width:5px;background:var(--border);cursor:col-resize;flex-shrink:0;}
+.resizer:hover,.resizer.dragging{background:var(--navy);}
+.editor{width:430px;min-width:320px;max-width:70vw;background:var(--white);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;}
+.editor-head{padding:10px 14px;border-bottom:1px solid var(--border);background:var(--beige);}
+.editor-head h2{font-size:12px;color:var(--navy);font-weight:700;letter-spacing:.06em;}
+.editor-body{flex:1;overflow-y:auto;padding:12px 14px 40px;}
+.preview{flex:1;overflow:auto;background:#6b6f75;padding:20px;display:flex;justify-content:center;align-items:flex-start;}
+
+/* ── フォーム ── */
+.fgroup{margin-bottom:9px;}
+.fgroup label{display:block;font-size:11px;color:var(--sub);margin-bottom:3px;font-weight:500;}
+.fgroup input,.fgroup select,.fgroup textarea{width:100%;border:1px solid var(--border);border-radius:3px;padding:5px 8px;font-size:12px;font-family:inherit;color:var(--text);background:#fff;}
+.fgroup input:focus,.fgroup select:focus,.fgroup textarea:focus{outline:none;border-color:var(--navy);}
+.fgroup textarea{resize:vertical;min-height:44px;}
+.frow{display:flex;gap:8px;}
+.frow .fgroup{flex:1;}
+.section-sep{border:none;border-top:1px solid var(--border);margin:14px 0 9px;}
+.section-label{font-size:11px;font-weight:700;color:var(--navy);letter-spacing:.06em;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;}
+.chk{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--sub);font-weight:400;cursor:pointer;}
+.chk input{width:auto;}
+.row{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.row .num{font-size:11px;color:var(--sub);width:16px;text-align:right;flex-shrink:0;}
+.row input{flex:1;border:1px solid var(--border);border-radius:3px;padding:5px 8px;font-size:12px;font-family:inherit;color:var(--text);}
+.row input:focus{outline:none;border-color:var(--navy);}
+.row input.k{flex:0 0 108px;}
+.add-btn{margin-top:5px;width:100%;padding:5px;border:1px dashed var(--border);border-radius:3px;background:transparent;font-size:11px;color:var(--sub);cursor:pointer;font-family:inherit;}
+.add-btn:hover{border-color:var(--navy);color:var(--navy);}
+.del-btn{background:none;border:none;cursor:pointer;color:#ccc;font-size:14px;padding:2px 5px;border-radius:2px;flex-shrink:0;}
+.del-btn:hover{color:var(--red);background:#fff0f0;}
+.mini-btn{padding:5px 10px;border:1px solid var(--border);border-radius:4px;background:#fff;font-size:11px;font-family:inherit;color:var(--navy);cursor:pointer;}
+.mini-btn:hover{background:#f0f2f4;border-color:var(--navy);}
+.mini-btn.primary{background:var(--navy);color:#fff;border-color:var(--navy);}
+.mini-btn.primary:hover{background:var(--navy2);}
+.btnbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.hint{font-size:10.5px;color:var(--sub);line-height:1.6;margin-top:5px;}
+.dropzone{border:2px dashed var(--border);border-radius:6px;padding:16px 10px;text-align:center;font-size:11px;color:var(--sub);cursor:pointer;background:#fafafa;}
+.dropzone.over{border-color:var(--navy);background:#eef2f7;color:var(--navy);}
+.anno-row{border:1px solid var(--border);border-radius:5px;padding:7px 8px;margin-bottom:6px;background:#fafafa;}
+.anno-row .anno-head{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.anno-badge{font-size:10px;font-weight:700;color:#fff;background:var(--navy);border-radius:3px;padding:2px 6px;flex-shrink:0;}
+.anno-badge.star{background:var(--red);}
+.anno-row input[type=text]{flex:1;border:1px solid var(--border);border-radius:3px;padding:4px 7px;font-size:12px;font-family:inherit;}
+.anno-row input[type=range]{width:100%;}
+
+/* ── ページ（A4横・印刷実寸） ── */
+.page-wrap{transform-origin:top center;}
+.doc-page{
+  width:287mm;height:200mm;background:#fff;position:relative;
+  box-shadow:0 4px 20px rgba(0,0,0,.35);
+  font-family:"Meiryo","Yu Gothic",sans-serif;color:#000;
+  display:grid;grid-template-columns:188mm 96mm;grid-template-rows:22mm 128mm 44mm;
+  gap:3mm;align-content:start;
+}
+.doc-page.no-notes{grid-template-rows:22mm 175mm;}
+.dp-head{grid-column:1/3;border:.6mm solid #000;display:flex;align-items:stretch;overflow:hidden;}
+.dp-head-bar{width:2.6mm;background:var(--red);flex-shrink:0;}
+.dp-head-main{flex:1;padding:2.4mm 4mm;display:flex;flex-direction:column;justify-content:center;min-width:0;}
+.dp-title{font-size:17pt;font-weight:700;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dp-sub{font-size:10pt;margin-top:1.2mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dp-date{flex:0 0 78mm;background:var(--red);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1mm;}
+.dp-date .d1{font-size:12pt;font-weight:700;}
+.dp-date .d2{font-size:22pt;font-weight:700;line-height:1.1;}
+
+.dp-map{grid-column:1;grid-row:2;border:.5mm solid #000;position:relative;overflow:hidden;background:#fcfcfa;}
+.dp-side{grid-column:2;grid-row:2;display:flex;flex-direction:column;gap:3mm;min-height:0;}
+.dp-notes{grid-column:1/3;grid-row:3;border:.5mm solid #000;display:flex;flex-direction:column;overflow:hidden;}
+.doc-page.side-full .dp-side{grid-row:2/4;}
+.doc-page.side-full .dp-notes{grid-column:1;}
+
+.card{border:.5mm solid #000;display:flex;flex-direction:column;overflow:hidden;background:#fff;}
+.card-h{background:#000;color:#fff;font-size:11pt;font-weight:700;padding:1.1mm 2.2mm;flex-shrink:0;}
+.card-b{padding:2mm 2.4mm;flex:1;min-height:0;overflow:hidden;}
+.kv{display:grid;grid-template-columns:20mm 1fr;gap:.6mm 2mm;font-size:10.5pt;line-height:1.45;}
+.kv .k{font-weight:700;border-right:.2mm solid #bbb;padding-right:1.5mm;}
+.tel{display:flex;justify-content:space-between;align-items:baseline;font-size:10.5pt;margin-bottom:1.2mm;gap:2mm;}
+.tel .tn{font-size:13pt;font-weight:700;white-space:nowrap;}
+.notes-h{background:#000;color:#fff;font-size:11pt;font-weight:700;padding:1.1mm 2.4mm;flex-shrink:0;}
+.notes-b{padding:2mm 3mm;font-size:11.5pt;line-height:1.62;flex:1;overflow:hidden;}
+.notes-b .nfoot{font-size:10pt;color:#666;margin-top:1.4mm;line-height:1.5;}
+
+/* 地図キャンバス */
+.mapcanvas{position:absolute;inset:0;}
+.mapcanvas .bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.mapcanvas .bg img{width:100%;height:100%;}
+.mapcanvas .bg svg{width:100%;height:100%;}
+.mapcanvas .anno{position:absolute;inset:0;width:100%;height:100%;}
+.map-empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#666;font-size:11pt;gap:2mm;text-align:center;padding:6mm;}
+.submap-vp{position:relative;width:100%;height:100%;overflow:hidden;background:#fcfcfa;}
+.submap-inner{position:absolute;top:0;left:0;transform-origin:0 0;}
+.mapscale{position:absolute;right:2mm;bottom:1.6mm;font-size:9.5pt;display:flex;align-items:center;gap:1.2mm;background:rgba(255,255,255,.85);padding:.4mm 1.2mm;border-radius:.6mm;}
+.mapscale .bar{height:1.4mm;width:16mm;background:linear-gradient(90deg,#000 0 50%,#fff 50% 100%);border:.2mm solid #000;}
+.northrose{position:absolute;right:2.4mm;top:2mm;text-align:center;font-size:10pt;font-weight:700;line-height:1;}
+
+/* 編集時のドラッグ可視化（印刷では消す） */
+.editing .anno .handle{cursor:grab;}
+.editing .anno .hit{fill:rgba(0,0,0,0);}
+
+/* ── モバイル ── */
+.sp-tabs{display:none;}
+@media(max-width:820px){
+  .resizer{display:none;}
+  .sp-tabs{display:flex;background:var(--navy2);}
+  .sp-tabs button{flex:1;padding:9px;background:none;border:none;color:rgba(255,255,255,.6);font-size:12px;font-family:inherit;cursor:pointer;border-bottom:2px solid transparent;}
+  .sp-tabs button.on{color:#fff;border-bottom-color:var(--gold);}
+  .editor{width:100%;max-width:none;}
+  .main.sp-preview .editor{display:none;}
+  .main:not(.sp-preview) .preview{display:none;}
+}
+
+/* ── 印刷 ── */
+@media print{
+  @page{size:A4 landscape;margin:5mm;}
+  html,body{height:auto;overflow:visible;background:#fff;}
+  .topbar,.editor,.resizer,.sp-tabs{display:none!important;}
+  .main{display:block;}
+  .preview{padding:0;background:#fff;display:block;overflow:visible;}
+  .page-wrap{transform:none!important;}
+  .doc-page{box-shadow:none;width:287mm;height:200mm;page-break-after:avoid;}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+}
+#toast{position:fixed;bottom:20px;right:20px;background:#3a5070;color:#fff;padding:10px 16px;border-radius:6px;font-size:12px;box-shadow:0 4px 16px rgba(0,0,0,.2);z-index:10000;opacity:0;transition:opacity .2s;pointer-events:none;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-title">集合場所案内図プレビュー</div>
+  <div class="topbar-actions">
+    <button class="tb-btn tb-btn-line" onclick="document.getElementById('loadFile').click()">📂 読込</button>
+    <button class="tb-btn tb-btn-line" onclick="saveHTML()">💾 再編集用に保存</button>
+    <button class="tb-btn tb-btn-line" onclick="savePNG()">🖼 PNG</button>
+    <button class="tb-btn tb-btn-gold" onclick="window.print()">🖨 印刷 / PDF</button>
+    <input type="file" id="loadFile" accept=".html,.json" style="display:none" onchange="loadDocFile(event)">
+  </div>
+</div>
+
+<div class="sp-tabs">
+  <button id="sptab-e" class="on" onclick="spTab(0)">編集</button>
+  <button id="sptab-p" onclick="spTab(1)">プレビュー</button>
+</div>
+
+<div class="main" id="main">
+  <div class="editor">
+    <div class="editor-head"><h2>入力</h2></div>
+    <div class="editor-body" id="ed"></div>
+  </div>
+  <div class="resizer" id="resizer"></div>
+  <div class="preview" id="preview">
+    <div class="page-wrap" id="pageWrap">
+      <div class="doc-page editing" id="page"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* =========================================================
+   状態
+   ========================================================= */
+const MAP_VB = {w:1000, h:681};   // 地図キャンバスの論理座標（188mm×128mmと同比）
+
+function defaultState(){
+  return {
+    _type:'annaizu', _v:1, savedAt:null,
+    title:'集合場所 案内図',
+    site:'',                       // 現場名（例：warawa パークプレイス大分店）
+    sub:'',                        // 副題（集合場所／工事名）
+    dateMain:'', dateSub:'',       // 日付・時刻
+    showSummary:true, showSub:true, showTel:true, showNotes:true,
+    summaryTitle:'集合概要',
+    summary:[ {k:'日　時',v:''}, {k:'場　所',v:''}, {k:'参　加',v:''}, {k:'作　業',v:''} ],
+    telTitle:'連絡先',
+    tel:[ {k:'',v:''} ],
+    subTitle:'集合場所 周辺（拡大）',
+    subNote:'',
+    notesTitle:'当日の段取り・確認事項',
+    notes:[''],
+    notesFoot:'',
+    map:{ bg:null, bgType:null, fit:'contain', scaleText:'', north:false,
+          zoom:{cx:0.5, cy:0.5, z:2.4} },
+    anno:[]
+  };
+}
+let S = defaultState();
+let selected = null;
+
+/* =========================================================
+   ユーティリティ
+   ========================================================= */
+const $ = id => document.getElementById(id);
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.style.opacity='1'; clearTimeout(t._t); t._t=setTimeout(()=>t.style.opacity='0',2600); }
+function uid(){ return 'a'+Math.random().toString(36).slice(2,9); }
+
+/* =========================================================
+   エディタ描画
+   ========================================================= */
+function renderEditor(){
+  const m=S.map;
+  $('ed').innerHTML = `
+    <div class="section-label">見出し</div>
+    <div class="fgroup"><label>タイトル</label><input id="f_title" value="${esc(S.title)}"></div>
+    <div class="fgroup"><label>現場名（タイトル右に続けて表示）</label><input id="f_site" value="${esc(S.site)}" placeholder="warawa パークプレイス大分店"></div>
+    <div class="fgroup"><label>副題（集合場所・工事名）</label><input id="f_sub" value="${esc(S.sub)}" placeholder="集合＝○○前 駐車場　／　○○工事"></div>
+    <div class="frow">
+      <div class="fgroup"><label>日付（赤枠 上段）</label><input id="f_dateMain" value="${esc(S.dateMain)}" placeholder="2026年 8月4日（火）"></div>
+      <div class="fgroup"><label>時刻（赤枠 下段・大）</label><input id="f_dateSub" value="${esc(S.dateSub)}" placeholder="6:30 集合"></div>
+    </div>
+
+    <hr class="section-sep">
+    <div class="section-label">地図</div>
+    <div class="btnbar">
+      <button class="mini-btn primary" onclick="openOsm()">🗺 地図を自動生成</button>
+      <button class="mini-btn" onclick="$('imgFile').click()">🖼 画像を読込</button>
+      ${m.bg?'<button class="mini-btn" onclick="clearBg()">✕ 地図を外す</button>':''}
+    </div>
+    <input type="file" id="imgFile" accept="image/*" style="display:none" onchange="onImgFile(event)">
+    <div class="dropzone" id="dz">ここに画像をドロップ／Ctrl+V で貼り付け<br><span style="font-size:10px">Googleマップのスクショ・館内図・航空写真・手書き図など</span></div>
+    <div class="frow" style="margin-top:8px">
+      <div class="fgroup"><label>画像の収め方</label>
+        <select id="f_fit"><option value="contain"${m.fit==='contain'?' selected':''}>全体を収める（余白可）</option><option value="cover"${m.fit==='cover'?' selected':''}>枠いっぱい（はみ出しは切る）</option><option value="fill"${m.fit==='fill'?' selected':''}>枠に合わせて伸縮</option></select>
+      </div>
+      <div class="fgroup"><label>スケール表記</label><input id="f_scaleText" value="${esc(m.scaleText)}" placeholder="100m など・空欄で非表示"></div>
+    </div>
+    <label class="chk" style="margin-bottom:6px"><input type="checkbox" id="f_north" ${m.north?'checked':''}> 方位（N）を表示する</label>
+
+    <hr class="section-sep">
+    <div class="section-label">
+      <span>目印（地図の上でドラッグして移動）</span>
+    </div>
+    <div class="btnbar">
+      <button class="mini-btn" onclick="addAnno('star')">★ 集合マーカー</button>
+      <button class="mini-btn" onclick="addAnno('arrow')">➜ 矢印</button>
+      <button class="mini-btn" onclick="addAnno('label')">あ 文字</button>
+    </div>
+    <div id="annoList"></div>
+
+    <hr class="section-sep">
+    <div class="section-label"><span>集合概要</span>
+      <label class="chk"><input type="checkbox" id="f_showSummary" ${S.showSummary?'checked':''}> 表示</label></div>
+    <div class="fgroup"><label>見出し</label><input id="f_summaryTitle" value="${esc(S.summaryTitle)}"></div>
+    <div id="sumList"></div>
+
+    <hr class="section-sep">
+    <div class="section-label"><span>拡大図（メイン地図の一部を拡大）</span>
+      <label class="chk"><input type="checkbox" id="f_showSub" ${S.showSub?'checked':''}> 表示</label></div>
+    <div class="fgroup"><label>見出し</label><input id="f_subTitle" value="${esc(S.subTitle)}"></div>
+    <div class="fgroup"><label>倍率</label><input type="range" id="f_zoomZ" min="1.2" max="6" step="0.1" value="${m.zoom.z}"></div>
+    <div class="fgroup"><label>注記（拡大図の下）</label><input id="f_subNote" value="${esc(S.subNote)}" placeholder="※ 建物の南側に面しています"></div>
+    <div class="hint">拡大したい場所は、右のプレビューの<b>拡大図の中をドラッグ</b>すると動かせます。</div>
+
+    <hr class="section-sep">
+    <div class="section-label"><span>連絡先</span>
+      <label class="chk"><input type="checkbox" id="f_showTel" ${S.showTel?'checked':''}> 表示</label></div>
+    <div class="fgroup"><label>見出し</label><input id="f_telTitle" value="${esc(S.telTitle)}"></div>
+    <div id="telList"></div>
+
+    <hr class="section-sep">
+    <div class="section-label"><span>段取り・確認事項</span>
+      <label class="chk"><input type="checkbox" id="f_showNotes" ${S.showNotes?'checked':''}> 表示</label></div>
+    <div class="fgroup"><label>見出し</label><input id="f_notesTitle" value="${esc(S.notesTitle)}"></div>
+    <div id="noteList"></div>
+    <div class="fgroup" style="margin-top:8px"><label>末尾の小さい注（出典・但し書き）</label><textarea id="f_notesFoot">${esc(S.notesFoot)}</textarea></div>
+
+    <hr class="section-sep">
+    <div class="btnbar"><button class="mini-btn" onclick="if(confirm('入力内容をすべて消して新規作成します。よろしいですか？')){S=defaultState();renderAll();}">新規（全消去）</button></div>
+    <div class="hint">※ 業者・社内向けの実務図です。案件キー・単価は載せない運用にしています。</div>
+  `;
+  // 単純フィールドのバインド
+  [['f_title','title'],['f_site','site'],['f_sub','sub'],['f_dateMain','dateMain'],['f_dateSub','dateSub'],
+   ['f_summaryTitle','summaryTitle'],['f_telTitle','telTitle'],['f_subTitle','subTitle'],['f_subNote','subNote'],
+   ['f_notesTitle','notesTitle'],['f_notesFoot','notesFoot']].forEach(([id,key])=>{
+    $(id).addEventListener('input',e=>{ S[key]=e.target.value; renderPage(); });
+  });
+  [['f_showSummary','showSummary'],['f_showSub','showSub'],['f_showTel','showTel'],['f_showNotes','showNotes']].forEach(([id,key])=>{
+    $(id).addEventListener('change',e=>{ S[key]=e.target.checked; renderPage(); });
+  });
+  $('f_fit').addEventListener('change',e=>{ S.map.fit=e.target.value; renderPage(); });
+  $('f_scaleText').addEventListener('input',e=>{ S.map.scaleText=e.target.value; renderPage(); });
+  $('f_north').addEventListener('change',e=>{ S.map.north=e.target.checked; renderPage(); });
+  $('f_zoomZ').addEventListener('input',e=>{ S.map.zoom.z=parseFloat(e.target.value); renderPage(); });
+  setupDropzone();
+  renderAnnoList(); renderRows('sumList','summary',true); renderRows('telList','tel',true); renderNoteList();
+}
+
+function renderRows(elId, key, kv){
+  const wrap=$(elId); if(!wrap) return;
+  wrap.innerHTML = S[key].map((r,i)=>`
+    <div class="row">
+      <span class="num">${i+1}</span>
+      <input class="k" data-i="${i}" data-f="k" value="${esc(r.k)}" placeholder="${kv?'項目':''}">
+      <input data-i="${i}" data-f="v" value="${esc(r.v)}" placeholder="内容">
+      <button class="del-btn" data-i="${i}">×</button>
+    </div>`).join('') +
+    `<button class="add-btn">＋ 行を追加</button>`;
+  wrap.querySelectorAll('input').forEach(inp=>inp.addEventListener('input',e=>{
+    S[key][+e.target.dataset.i][e.target.dataset.f]=e.target.value; renderPage();
+  }));
+  wrap.querySelectorAll('.del-btn').forEach(b=>b.addEventListener('click',e=>{
+    S[key].splice(+e.target.dataset.i,1); renderRows(elId,key,kv); renderPage();
+  }));
+  wrap.querySelector('.add-btn').addEventListener('click',()=>{ S[key].push({k:'',v:''}); renderRows(elId,key,kv); renderPage(); });
+}
+
+function renderNoteList(){
+  const wrap=$('noteList'); if(!wrap) return;
+  wrap.innerHTML = S.notes.map((n,i)=>`
+    <div class="row">
+      <span class="num">${i+1}</span>
+      <input data-i="${i}" value="${esc(n)}" placeholder="確認事項・持ち物・段取りなど">
+      <button class="del-btn" data-i="${i}">×</button>
+    </div>`).join('') + `<button class="add-btn">＋ 行を追加</button>`;
+  wrap.querySelectorAll('input').forEach(inp=>inp.addEventListener('input',e=>{ S.notes[+e.target.dataset.i]=e.target.value; renderPage(); }));
+  wrap.querySelectorAll('.del-btn').forEach(b=>b.addEventListener('click',e=>{ S.notes.splice(+e.target.dataset.i,1); renderNoteList(); renderPage(); }));
+  wrap.querySelector('.add-btn').addEventListener('click',()=>{ S.notes.push(''); renderNoteList(); renderPage(); });
+}
+
+const ANNO_LABEL={star:'★ 集合',arrow:'➜ 矢印',label:'あ 文字'};
+function renderAnnoList(){
+  const wrap=$('annoList'); if(!wrap) return;
+  if(!S.anno.length){ wrap.innerHTML='<div class="hint">目印がありません。上のボタンで追加してください。</div>'; return; }
+  wrap.innerHTML = S.anno.map((a,i)=>`
+    <div class="anno-row">
+      <div class="anno-head">
+        <span class="anno-badge ${a.type}">${ANNO_LABEL[a.type]}</span>
+        ${a.type!=='arrow'?`<input type="text" data-i="${i}" data-f="text" value="${esc(a.text||'')}" placeholder="${a.type==='star'?'中央防災センター前の駐車場':'ラベル文字'}">`:'<span style="flex:1;font-size:11px;color:#666">両端を地図上でドラッグ</span>'}
+        <button class="del-btn" data-del="${i}">×</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:10px;color:#666;flex:0 0 34px">大きさ</span>
+        <input type="range" data-i="${i}" data-f="size" min="0.6" max="2.2" step="0.05" value="${a.size||1}">
+      </div>
+    </div>`).join('');
+  wrap.querySelectorAll('input').forEach(inp=>inp.addEventListener('input',e=>{
+    const i=+e.target.dataset.i, f=e.target.dataset.f;
+    S.anno[i][f] = (f==='size')?parseFloat(e.target.value):e.target.value;
+    renderPage();
+  }));
+  wrap.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',e=>{
+    S.anno.splice(+e.target.dataset.del,1); renderAnnoList(); renderPage();
+  }));
+}
+
+function addAnno(type){
+  const a={id:uid(),type,size:1};
+  if(type==='star'){ a.x=.45; a.y=.45; a.text='集合場所'; }
+  else if(type==='arrow'){ a.x=.25; a.y=.75; a.x2=.44; a.y2=.5; }
+  else { a.x=.5; a.y=.2; a.text='ラベル'; }
+  S.anno.push(a); renderAnnoList(); renderPage();
+  toast('地図の上でドラッグして位置を決めてください');
+}
+
+/* =========================================================
+   ページ描画
+   ========================================================= */
+function annoSVG(){
+  const W=MAP_VB.w,H=MAP_VB.h;
+  let s='';
+  s+=`<defs><marker id="ahead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#cc0022"/></marker></defs>`;
+  S.anno.forEach(a=>{
+    const k=(a.size||1), x=a.x*W, y=a.y*H;
+    if(a.type==='star'){
+      const r=26*k;
+      s+=`<g data-id="${a.id}" data-part="p1" class="handle">`;
+      s+=`<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="#cc0022" stroke-width="${5*k}"/>`;
+      s+=`<circle cx="${x}" cy="${y}" r="${8*k}" fill="#cc0022"/>`;
+      s+=`<circle class="hit" cx="${x}" cy="${y}" r="${r+10}"/>`;
+      s+=`</g>`;
+      if(a.text){
+        const fs=19*k;
+        s+=`<g data-id="${a.id}" data-part="p1" class="handle"><text x="${x}" y="${y+r+fs+2}" font-size="${fs}" font-weight="700" text-anchor="middle" font-family="Meiryo,'Yu Gothic',sans-serif" stroke="#fff" stroke-width="${5*k}" stroke-linejoin="round" fill="none">${esc(a.text)}</text><text x="${x}" y="${y+r+fs+2}" font-size="${fs}" font-weight="700" text-anchor="middle" font-family="Meiryo,'Yu Gothic',sans-serif" fill="#cc0022">${esc(a.text)}</text></g>`;
+      }
+    } else if(a.type==='arrow'){
+      const x2=a.x2*W, y2=a.y2*H;
+      s+=`<line x1="${x}" y1="${y}" x2="${x2}" y2="${y2}" stroke="#cc0022" stroke-width="${9*k}" stroke-linecap="round" marker-end="url(#ahead)"/>`;
+      s+=`<circle class="hit handle" data-id="${a.id}" data-part="p1" cx="${x}" cy="${y}" r="${16*k}"/>`;
+      s+=`<circle class="hit handle" data-id="${a.id}" data-part="p2" cx="${x2}" cy="${y2}" r="${16*k}"/>`;
+    } else {
+      const fs=20*k;
+      s+=`<g data-id="${a.id}" data-part="p1" class="handle">`;
+      s+=`<text x="${x}" y="${y}" font-size="${fs}" font-weight="700" text-anchor="middle" font-family="Meiryo,'Yu Gothic',sans-serif" stroke="#fff" stroke-width="${5.5*k}" stroke-linejoin="round" fill="none">${esc(a.text||'')}</text>`;
+      s+=`<text x="${x}" y="${y}" font-size="${fs}" font-weight="700" text-anchor="middle" font-family="Meiryo,'Yu Gothic',sans-serif" fill="#000">${esc(a.text||'')}</text>`;
+      s+=`<rect class="hit" x="${x-70*k}" y="${y-fs}" width="${140*k}" height="${fs*1.4}"/>`;
+      s+=`</g>`;
+    }
+  });
+  return s;
+}
+
+function mapCanvasHTML(){
+  const m=S.map;
+  let bg='';
+  if(m.bgType==='img') bg=`<img src="${m.bg}" style="object-fit:${m.fit}">`;
+  else if(m.bgType==='svg') bg=m.bg;
+  const empty = m.bg?'':`<div class="map-empty"><div>地図が未設定です</div><div style="font-size:9.5pt">左の「地図を自動生成」か「画像を読込」で入れてください</div></div>`;
+  return `<div class="mapcanvas"><div class="bg">${bg}</div>${empty}
+    <svg class="anno" viewBox="0 0 ${MAP_VB.w} ${MAP_VB.h}" preserveAspectRatio="none">${annoSVG()}</svg></div>`;
+}
+
+function renderPage(){
+  const p=$('page');
+  const cls=['doc-page','editing'];
+  if(!S.showNotes) cls.push('no-notes');
+  p.className=cls.join(' ');
+
+  const sumHTML = S.showSummary ? `
+    <div class="card"><div class="card-h">${esc(S.summaryTitle)}</div><div class="card-b">
+      <div class="kv">${S.summary.filter(r=>r.k||r.v).map(r=>`<div class="k">${esc(r.k)}</div><div>${esc(r.v)}</div>`).join('')}</div>
+    </div></div>` : '';
+  const subHTML = S.showSub ? `
+    <div class="card" style="flex:1;min-height:0"><div class="card-h">${esc(S.subTitle)}</div>
+      <div class="card-b" style="display:flex;flex-direction:column;gap:1.2mm;padding:1.6mm">
+        <div style="flex:1;min-height:0;border:.3mm solid #888"><div class="submap-vp" id="submapVp"><div class="submap-inner" id="submapInner">${mapCanvasHTML()}</div></div></div>
+        ${S.subNote?`<div style="font-size:10pt">${esc(S.subNote)}</div>`:''}
+      </div></div>` : '';
+  const telHTML = S.showTel ? `
+    <div class="card"><div class="card-h">${esc(S.telTitle)}</div><div class="card-b">
+      ${S.tel.filter(r=>r.k||r.v).map(r=>`<div class="tel"><span>${esc(r.k)}</span><span class="tn">${esc(r.v)}</span></div>`).join('')}
+    </div></div>` : '';
+  const notesHTML = S.showNotes ? `
+    <div class="dp-notes"><div class="notes-h">${esc(S.notesTitle)}</div><div class="notes-b">
+      ${S.notes.filter(n=>n.trim()).map(n=>`<div>${esc(n)}</div>`).join('')}
+      ${S.notesFoot?`<div class="nfoot">${esc(S.notesFoot)}</div>`:''}
+    </div></div>` : '';
+
+  const scale = S.map.scaleText ? `<div class="mapscale"><span>0</span><span class="bar"></span><span>${esc(S.map.scaleText)}</span></div>` : '';
+  const north = S.map.north ? `<div class="northrose">▲<br>N</div>` : '';
+
+  p.innerHTML = `
+    <div class="dp-head">
+      <div class="dp-head-bar"></div>
+      <div class="dp-head-main">
+        <div class="dp-title">${esc(S.title)}${S.site?'　—　'+esc(S.site):''}</div>
+        ${S.sub?`<div class="dp-sub">${esc(S.sub)}</div>`:''}
+      </div>
+      <div class="dp-date">
+        ${S.dateMain?`<div class="d1">${esc(S.dateMain)}</div>`:''}
+        ${S.dateSub?`<div class="d2">${esc(S.dateSub)}</div>`:''}
+      </div>
+    </div>
+    <div class="dp-map" id="mainMap">${mapCanvasHTML()}${scale}${north}</div>
+    <div class="dp-side">${sumHTML}${subHTML}${telHTML}</div>
+    ${notesHTML}`;
+
+  layoutSubmap();
+  bindMapDrag();
+  scalePreview();
+  autosave();
+}
+
+/* 拡大図：メイン地図と同じ内容を、指定中心・倍率で切り出す */
+function layoutSubmap(){
+  const vp=$('submapVp'), inner=$('submapInner'), main=$('mainMap');
+  if(!vp||!inner||!main) return;
+  const mw=main.clientWidth, mh=main.clientHeight;
+  if(!mw||!mh) return;
+  inner.style.width=mw+'px'; inner.style.height=mh+'px';
+  const z=S.map.zoom.z, cx=S.map.zoom.cx, cy=S.map.zoom.cy;
+  const tx=vp.clientWidth/2 - cx*mw*z;
+  const ty=vp.clientHeight/2 - cy*mh*z;
+  inner.style.transform=`translate(${tx}px,${ty}px) scale(${z})`;
+}
+
+/* =========================================================
+   ドラッグ操作
+   ========================================================= */
+function bindMapDrag(){
+  const main=$('mainMap');
+  if(main){
+    const svg=main.querySelector('.anno');
+    svg.querySelectorAll('.handle').forEach(el=>{
+      el.addEventListener('pointerdown',ev=>{
+        ev.preventDefault();
+        const id=el.dataset.id, part=el.dataset.part;
+        const a=S.anno.find(x=>x.id===id); if(!a) return;
+        const rect=main.getBoundingClientRect();
+        const move=e=>{
+          const nx=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));
+          const ny=Math.max(0,Math.min(1,(e.clientY-rect.top)/rect.height));
+          if(part==='p2'){ a.x2=nx; a.y2=ny; } else { a.x=nx; a.y=ny; }
+          renderPage();
+        };
+        const up=()=>{ window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',up); };
+        window.addEventListener('pointermove',move); window.addEventListener('pointerup',up);
+      });
+    });
+  }
+  const vp=$('submapVp');
+  if(vp){
+    vp.style.cursor='move';
+    vp.addEventListener('pointerdown',ev=>{
+      ev.preventDefault();
+      const main=$('mainMap'); if(!main) return;
+      const mw=main.clientWidth, mh=main.clientHeight, z=S.map.zoom.z;
+      const sx=ev.clientX, sy=ev.clientY, ocx=S.map.zoom.cx, ocy=S.map.zoom.cy;
+      const move=e=>{
+        S.map.zoom.cx=Math.max(0,Math.min(1,ocx-(e.clientX-sx)/(mw*z)));
+        S.map.zoom.cy=Math.max(0,Math.min(1,ocy-(e.clientY-sy)/(mh*z)));
+        layoutSubmap();
+      };
+      const up=()=>{ window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',up); autosave(); };
+      window.addEventListener('pointermove',move); window.addEventListener('pointerup',up);
+    });
+  }
+}
+
+/* =========================================================
+   背景画像
+   ========================================================= */
+function setupDropzone(){
+  const dz=$('dz'); if(!dz) return;
+  dz.addEventListener('click',()=>$('imgFile').click());
+  ['dragenter','dragover'].forEach(t=>dz.addEventListener(t,e=>{e.preventDefault();dz.classList.add('over');}));
+  ['dragleave','drop'].forEach(t=>dz.addEventListener(t,e=>{e.preventDefault();dz.classList.remove('over');}));
+  dz.addEventListener('drop',e=>{ const f=e.dataTransfer.files[0]; if(f) readImg(f); });
+}
+document.addEventListener('paste',e=>{
+  const items=e.clipboardData&&e.clipboardData.items; if(!items) return;
+  for(const it of items){ if(it.type.indexOf('image')===0){ readImg(it.getAsFile()); e.preventDefault(); return; } }
+});
+function onImgFile(e){ const f=e.target.files[0]; e.target.value=''; if(f) readImg(f); }
+function readImg(file){
+  const r=new FileReader();
+  r.onload=()=>{ S.map.bg=r.result; S.map.bgType='img'; renderEditor(); renderPage(); toast('🖼 地図画像を読み込みました'); };
+  r.readAsDataURL(file);
+}
+function clearBg(){ S.map.bg=null; S.map.bgType=null; renderEditor(); renderPage(); }
+
+/* =========================================================
+   OpenStreetMap から地図を自動生成
+   ========================================================= */
+function openOsm(){
+  const v=prompt(
+    '地図の中心を指定してください。\n\n'+
+    '・Googleマップで集合場所を右クリック →「35.123456, 139.123456」をコピーして貼り付け\n'+
+    '・GoogleマップのURLをそのまま貼り付けてもOK\n\n'+
+    '（末尾に半角スペースで範囲(m)を付けられます。例：33.1947,131.6571 400）',
+    ''
+  );
+  if(!v) return;
+  const p=parseLatLng(v);
+  if(!p){ alert('緯度経度を読み取れませんでした。\n「33.194743, 131.657121」の形式で貼り付けてください。'); return; }
+  buildOsmMap(p.lat,p.lon,p.range||400);
+}
+function parseLatLng(s){
+  let range=null;
+  const rm=s.match(/[\s,]([0-9]{2,4})\s*$/); if(rm && !/\./.test(rm[1])) range=parseInt(rm[1],10);
+  let m=s.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);           // GoogleマップURL（place）
+  if(!m) m=s.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);            // GoogleマップURL（@）
+  if(!m) m=s.match(/(-?\d{1,3}\.\d{3,})[,\s]+(-?\d{1,3}\.\d{3,})/); // 数値ペタ貼り
+  if(!m) return null;
+  return {lat:parseFloat(m[1]), lon:parseFloat(m[2]), range};
+}
+
+async function buildOsmMap(lat,lon,range){
+  toast('🗺 地図データを取得しています…');
+  const dLat=range/110574, dLon=range/(111320*Math.cos(lat*Math.PI/180));
+  const bb=[(lat-dLat).toFixed(6),(lon-dLon).toFixed(6),(lat+dLat).toFixed(6),(lon+dLon).toFixed(6)].join(',');
+  const q=`[out:json][timeout:45];(way["building"](${bb});way["highway"](${bb});way["amenity"="parking"](${bb});way["landuse"~"retail|commercial"](${bb});node["name"]["amenity"](${bb});node["name"]["shop"](${bb}););out body geom;`;
+  let data;
+  try{
+    const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),50000);
+    const res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:q,signal:ctrl.signal});
+    clearTimeout(to);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    data=await res.json();
+  }catch(err){
+    alert('地図データの取得に失敗しました：'+(err.message||err)+'\n\n通信状況を確認するか、「画像を読込」でスクショを使ってください。');
+    return;
+  }
+  S.map.bg=osmToSVG(data.elements||[],lat,lon,range);
+  S.map.bgType='svg'; S.map.fit='fill'; S.map.north=true;
+  S.map.scaleText=(range>=600?'200m':'100m');
+  renderEditor(); renderPage();
+  toast('🗺 地図を生成しました（目印を置いてください）');
+}
+
+function osmToSVG(els,lat0,lon0,range){
+  const W=MAP_VB.w,H=MAP_VB.h;
+  const mLon=111320*Math.cos(lat0*Math.PI/180), mLat=110574;
+  // 表示範囲：横 = range*2*(W/H比補正)
+  const halfH=range, halfW=range*(W/H);
+  const P=(la,lo)=>{
+    const x=(lo-lon0)*mLon, y=(la-lat0)*mLat;
+    return [ (x+halfW)/(2*halfW)*W, (halfH-y)/(2*halfH)*H ];
+  };
+  const d=(g,close)=>'M '+g.map(p=>{const q=P(p.lat,p.lon);return q[0].toFixed(1)+','+q[1].toFixed(1);}).join(' L ')+(close?' Z':'');
+  const RD=[[['motorway','trunk','primary'],11,'#f2cb98','#c98b32'],
+            [['secondary','tertiary'],8,'#f6ead3','#bfa878'],
+            [['residential','unclassified','living_street'],5.5,'#ffffff','#cfcfcf'],
+            [['service','footway','path'],2.6,'#ffffff','#dcdcdc']];
+  let s=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" fill="#fcfcfa"/>`;
+  els.forEach(e=>{ const t=e.tags||{}; if(e.geometry&&/retail|commercial/.test(t.landuse||'')) s+=`<path d="${d(e.geometry,true)}" fill="#f6f3ec" stroke="#d8cfb8" stroke-width="1.2"/>`; });
+  els.forEach(e=>{ const t=e.tags||{}; if(e.geometry&&t.amenity==='parking') s+=`<path d="${d(e.geometry,true)}" fill="#dcead6" stroke="#6f9169" stroke-width="1.2"/>`; });
+  RD.forEach(([cls,w,col,ec])=>{
+    els.forEach(e=>{ const t=e.tags||{}; if(!e.geometry||!t.highway||cls.indexOf(t.highway)<0) return;
+      const p=d(e.geometry,false);
+      s+=`<path d="${p}" fill="none" stroke="${ec}" stroke-width="${w+1.8}" stroke-linecap="round" stroke-linejoin="round"/>`;
+      s+=`<path d="${p}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
+    });
+  });
+  els.forEach(e=>{ const t=e.tags||{}; if(e.geometry&&t.building) s+=`<path d="${d(e.geometry,true)}" fill="#ccd2da" stroke="#8a939f" stroke-width="1.1"/>`; });
+  // 名前ラベル（面の重心／ノード）
+  const put=[];
+  els.forEach(e=>{
+    const t=e.tags||{}; const n=t.name; if(!n) return;
+    let x,y;
+    if(e.geometry){ const c=e.geometry.reduce((a,p)=>[a[0]+p.lat,a[1]+p.lon],[0,0]); const q=P(c[0]/e.geometry.length,c[1]/e.geometry.length); x=q[0];y=q[1]; }
+    else if(e.lat!=null){ const q=P(e.lat,e.lon); x=q[0];y=q[1]; }
+    else return;
+    if(x<10||x>W-10||y<14||y>H-6) return;
+    if(put.some(p=>Math.abs(p[0]-x)<70&&Math.abs(p[1]-y)<22)) return;
+    put.push([x,y]);
+    const fs=t.highway?15:17;
+    s+=`<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="${fs}" font-weight="${t.highway?'400':'700'}" text-anchor="middle" font-family="Meiryo,'Yu Gothic',sans-serif" stroke="#fff" stroke-width="4.5" stroke-linejoin="round" fill="none">${esc(n)}</text>`;
+    s+=`<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="${fs}" font-weight="${t.highway?'400':'700'}" text-anchor="middle" font-family="Meiryo,'Yu Gothic',sans-serif" fill="#000">${esc(n)}</text>`;
+  });
+  return s+'</svg>';
+}
+
+/* =========================================================
+   プレビュー拡大縮小
+   ========================================================= */
+function scalePreview(){
+  const pv=$('preview'), wrap=$('pageWrap'), page=$('page');
+  if(!pv||!wrap||!page) return;
+  wrap.style.transform='none';
+  const pw=page.offsetWidth||1;
+  const avail=pv.clientWidth-40;
+  const s=Math.min(1,avail/pw);
+  wrap.style.transform=`scale(${s})`;
+  wrap.style.height=(page.offsetHeight*s)+'px';
+  layoutSubmap();
+}
+window.addEventListener('resize',()=>{ scalePreview(); });
+
+/* =========================================================
+   保存 / 読込
+   ========================================================= */
+function collectState(){ S.savedAt=new Date().toISOString(); return S; }
+function docName(){
+  const base=(S.site||S.title||'集合場所案内図').replace(/[\\\/:*?"<>|]/g,'_');
+  return '集合場所案内図_'+base;
+}
+function buildExportHTML(){
+  const styles=Array.from(document.querySelectorAll('style')).map(x=>x.outerHTML).join('\n');
+  const json=JSON.stringify(collectState()).replace(/</g,'\\u003c');
+  const SO='<scr'+'ipt', SC='</scr'+'ipt>';
+  const page=$('page').cloneNode(true);
+  page.classList.remove('editing');
+  return `<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>${esc(docName())}</title>${styles}
+<style>body{background:#fff!important;display:block;height:auto;overflow:visible;}
+.doc-page{box-shadow:none!important;margin:0 auto;}
+@media print{@page{size:A4 landscape;margin:5mm;}}</style></head>
+<body>${page.outerHTML}
+${SO} id="artrays-doc-state" type="application/json">${json}${SC}
+</body></html>`;
+}
+function saveHTML(){
+  const blob=new Blob([buildExportHTML()],{type:'text/html;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=docName()+'.html'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+  toast('💾 再編集用HTMLを保存しました');
+}
+async function savePNG(){
+  // 画面のプレビューをそのまま画像化（外部ライブラリ不使用：SVG foreignObject 経由）
+  const page=$('page').cloneNode(true); page.classList.remove('editing');
+  const styles=Array.from(document.querySelectorAll('style')).map(x=>x.textContent).join('\n');
+  const W=$('page').offsetWidth, H=$('page').offsetHeight;
+  const html=`<div xmlns="http://www.w3.org/1999/xhtml"><style>${styles}</style>${page.outerHTML}</div>`;
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${W*2}" height="${H*2}" viewBox="0 0 ${W} ${H}"><foreignObject width="100%" height="100%">${html}</foreignObject></svg>`;
+  try{
+    const img=new Image();
+    img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+    await new Promise((ok,ng)=>{img.onload=ok;img.onerror=()=>ng(new Error('描画に失敗'));});
+    const cv=document.createElement('canvas'); cv.width=W*2; cv.height=H*2;
+    const cx=cv.getContext('2d'); cx.fillStyle='#fff'; cx.fillRect(0,0,cv.width,cv.height);
+    cx.drawImage(img,0,0);
+    const a=document.createElement('a'); a.href=cv.toDataURL('image/png'); a.download=docName()+'.png'; a.click();
+    toast('🖼 PNGを保存しました');
+  }catch(err){
+    alert('PNG化に失敗しました。「印刷 / PDF」からPDFで保存してください。\n（'+(err.message||err)+'）');
+  }
+}
+async function loadDocFile(ev){
+  const f=ev.target.files[0]; ev.target.value=''; if(!f) return;
+  let st=null;
+  try{
+    const txt=await f.text();
+    if(/^\s*[\{\[]/.test(txt)) st=JSON.parse(txt);
+    else{ const doc=new DOMParser().parseFromString(txt,'text/html'); const el=doc.getElementById('artrays-doc-state'); if(el) st=JSON.parse(el.textContent); }
+  }catch(e){ alert('読み込みに失敗しました：'+(e.message||e)); return; }
+  if(!st||st._type!=='annaizu'){ alert('このファイルには案内図の編集データが見つかりませんでした。\nこのアプリの「再編集用に保存」で出したHTMLを選んでください。'); return; }
+  S=Object.assign(defaultState(),st);
+  S.map=Object.assign(defaultState().map,st.map||{});
+  S.map.zoom=Object.assign({cx:.5,cy:.5,z:2.4},(st.map&&st.map.zoom)||{});
+  renderAll(); toast('✅ 「'+(S.site||S.title)+'」を読み込みました');
+}
+
+/* 自動保存（ブラウザ内） */
+let _sv=null;
+function autosave(){ clearTimeout(_sv); _sv=setTimeout(()=>{ try{ localStorage.setItem('annaizu_autosave',JSON.stringify(S)); }catch(e){} },600); }
+function restoreAutosave(){
+  try{
+    const raw=localStorage.getItem('annaizu_autosave'); if(!raw) return false;
+    const st=JSON.parse(raw); if(!st||st._type!=='annaizu') return false;
+    S=Object.assign(defaultState(),st);
+    S.map=Object.assign(defaultState().map,st.map||{});
+    S.map.zoom=Object.assign({cx:.5,cy:.5,z:2.4},(st.map&&st.map.zoom)||{});
+    return true;
+  }catch(e){ return false; }
+}
+
+/* =========================================================
+   その他UI
+   ========================================================= */
+function spTab(i){
+  $('main').classList.toggle('sp-preview',i===1);
+  $('sptab-e').classList.toggle('on',i===0);
+  $('sptab-p').classList.toggle('on',i===1);
+  if(i===1) setTimeout(scalePreview,50);
+}
+(function(){
+  const rz=$('resizer'), ed=document.querySelector('.editor');
+  let on=false,sx=0,sw=0;
+  rz.addEventListener('mousedown',e=>{on=true;sx=e.clientX;sw=ed.offsetWidth;rz.classList.add('dragging');document.body.style.userSelect='none';});
+  document.addEventListener('mousemove',e=>{ if(!on)return; ed.style.width=Math.max(320,Math.min(innerWidth*.7,sw+(e.clientX-sx)))+'px'; scalePreview(); });
+  document.addEventListener('mouseup',()=>{ if(!on)return; on=false; rz.classList.remove('dragging'); document.body.style.userSelect=''; });
+})();
+
+function renderAll(){ renderEditor(); renderPage(); }
+
+/* 起動 */
+if(!restoreAutosave()){
+  S.title='集合場所 案内図';
+  S.summary=[{k:'日　時',v:''},{k:'場　所',v:''},{k:'参　加',v:''},{k:'作　業',v:''}];
+  S.tel=[{k:'',v:''}];
+  S.notes=[''];
+}
+renderAll();
+setTimeout(scalePreview,120);
+</script>
+</body>
+</html>
