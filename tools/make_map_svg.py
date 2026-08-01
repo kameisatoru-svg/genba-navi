@@ -323,6 +323,15 @@ def main():
         raise SystemExit('緯度経度を読み取れませんでした。例: 33.194743 131.657121')
     lat, lon = pt
     print('中心 %.6f, %.6f ／ 範囲 ±%.0fm' % (lat, lon, a.range))
+
+    if a.aerial:
+        svg = build_aerial_svg(lat, lon, a.range, a.aspect or 1.30)
+        with open(a.out, 'w', encoding='utf-8') as f:
+            f.write(svg)
+        print('出力 %s（%.0f KB）' % (a.out, len(svg) / 1024))
+        print('→ annaizu_preview.html の「拡大図に別の地図を使う」に読み込んでください。')
+        return
+
     if a.from_json:
         seen, els = set(), []
         for path in a.from_json:
