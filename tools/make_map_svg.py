@@ -3,7 +3,7 @@
 make_map_svg.py  —  集合場所案内図プレビュー（annaizu_preview.html）用の地図SVGを作る
 
 OpenStreetMap（Overpass API）から建物・道路・駐車場を取得し、
-annaizu_preview.html の地図キャンバス（viewBox 0 0 1000 681）にぴったり収まる
+annaizu_preview.html の地図キャンバス（viewBox 0 0 1000 638）にぴったり収まる
 SVG を1枚出力する。出力SVGはそのままアプリの「画像を読込」にドロップすればよい。
 
 使い方:
@@ -24,7 +24,7 @@ Overpass が混んでいる時は数十秒かかる。失敗したらしばら�
 """
 import argparse, json, math, re, sys, time, urllib.error, urllib.parse, urllib.request
 
-VB_W, VB_H = 1000.0, 681.0          # annaizu_preview.html の地図キャンバス
+VB_W, VB_H = 1000.0, 638.0          # annaizu_preview.html の地図キャンバス（188mm×120mm）
 ENDPOINTS = [
     'https://overpass-api.de/api/interpreter',
     'https://overpass.kumi.systems/api/interpreter',
