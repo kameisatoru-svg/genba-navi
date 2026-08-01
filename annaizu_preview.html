@@ -142,9 +142,11 @@ body{font-family:"Meiryo","Yu Gothic",sans-serif;background:var(--bg);height:100
 .submap-inner{position:absolute;top:0;left:0;transform-origin:0 0;}
 .northrose{position:absolute;right:2.4mm;top:2mm;text-align:center;font-size:10pt;font-weight:700;line-height:1;}
 
-/* 編集時のドラッグ可視化（印刷では消す） */
+/* ドラッグ用の当たり判定は常に透明。頂点つまみは編集中だけ見せる */
+.anno .hit{fill:transparent;}
 .editing .anno .handle{cursor:grab;}
-.editing .anno .hit{fill:rgba(0,0,0,0);}
+.editing .anno .vtx{fill:rgba(204,0,34,.55);stroke:#fff;stroke-width:2;}
+@media print{.anno .vtx{display:none;}}
 
 /* ── モバイル ── */
 .sp-tabs{display:none;}
@@ -231,7 +233,8 @@ function defaultState(){
     notesFoot:'',
     map:{ bg:null, bgType:null, fit:'contain', north:false,
           zoom:{cx:0.5, cy:0.5, z:2.4} },
-    anno:[]
+    sub2:{ bg:null, bgType:null, fit:'cover' },   // 拡大図に別の地図（航空写真など）を使う場合
+    anno:[]   // 各要素の layer:'main'|'sub' で配置先を持つ
   };
 }
 let S = defaultState();
@@ -405,11 +408,15 @@ function addAnno(type){
 /* =========================================================
    ページ描画
    ========================================================= */
-function annoSVG(){
+function annoSVG(which){
   const W=MAP_VB.w,H=MAP_VB.h;
+  // 拡大図が「本図の切り出し」のときは本図の目印もそのまま映す
+  const list = (which==='sub' && S.sub2.bg) ? S.anno.filter(a=>a.layer==='sub')
+             : (which==='sub')              ? S.anno.filter(a=>a.layer!=='sub')
+             :                                S.anno.filter(a=>a.layer!=='sub');
   let s='';
   s+=`<defs><marker id="ahead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#cc0022"/></marker></defs>`;
-  S.anno.forEach(a=>{
+  list.forEach(a=>{
     const k=(a.size||1), x=a.x*W, y=a.y*H;
     if(a.type==='star'){
       const r=26*k;
