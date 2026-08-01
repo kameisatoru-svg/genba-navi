@@ -63,19 +63,26 @@ def fetch(lat, lon, rng, endpoints):
          'node["name"]["amenity"](%s);'
          'node["name"]["shop"](%s);'
          ');out body geom;' % (bb, bb, bb, bb, bb, bb))
+    # Overpass は時間帯によって混む。ミラーを順に、間隔を空けて2巡試す。
     last = None
-    for url in endpoints:
-        try:
-            req = urllib.request.Request(
-                url, data=('data=' + urllib.parse.quote(q)).encode('utf-8'),
-                headers={'Content-Type': 'application/x-www-form-urlencoded',
-                         'User-Agent': 'artrays-annaizu/1.0 (construction site guide map)'})
-            with urllib.request.urlopen(req, timeout=90) as r:
-                return json.loads(r.read().decode('utf-8'))
-        except Exception as e:                                  # noqa: BLE001
-            last = '%s: %s' % (url, e)
-            print('  … %s で失敗、次を試します' % url, file=sys.stderr)
-    raise SystemExit('Overpass からデータを取得できませんでした。\n  最後のエラー: %s' % last)
+    for attempt in range(2):
+        for url in endpoints:
+            try:
+                req = urllib.request.Request(
+                    url, data=('data=' + urllib.parse.quote(q)).encode('utf-8'),
+                    headers={'Content-Type': 'application/x-www-form-urlencoded',
+                             'User-Agent': 'artrays-annaizu/1.0 (construction site guide map)'})
+                with urllib.request.urlopen(req, timeout=90) as r:
+                    return json.loads(r.read().decode('utf-8'))
+            except Exception as e:                              # noqa: BLE001
+                last = '%s: %s' % (url, e)
+                print('  ... %s で失敗、次を試します' % url, file=sys.stderr)
+        if attempt == 0:
+            print('  ... 15秒待って再試行します', file=sys.stderr)
+            time.sleep(15)
+    raise SystemExit('Overpass からデータを取得できませんでした（混雑時は数分後に再実行）。\n'
+                     '  最後のエラー: %s\n'
+                     '  取得済みJSONがあるなら --from-json で再利用できます。' % last)
 
 
 def build_svg(els, lat0, lon0, rng, max_labels=22, plain=False):
