@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>加藤-実家相談-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
+details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin:6px 0;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>加藤様ご実家 現地調査・相談</h1>
+  <div class="sub">加藤-実家相談-26 ｜ 大分県別府市（詳細未確定・加藤様ご実家）</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">💬 相談</span>
+    <span class="badge">👤 加藤博和様（T-047・個人）</span>
+    <span class="badge">📏 規模：簡易</span>
+    <span class="badge">🚩 現地調査 未実施</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E5%8A%A0%E8%97%A4-%E5%AE%9F%E5%AE%B6%E7%9B%B8%E8%AB%87-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-08-04 06:30 </div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">相談</div><div class="l">ステータス</div></div>
+  <div class="kpi"><div class="v">未確定</div><div class="l">工事内容</div></div>
+  <div class="kpi"><div class="v">見積前</div><div class="l">金額（内容確定後）</div></div>
+  <div class="kpi"><div class="v">8月第2週</div><div class="l">現地調査 予定</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・現在地</div>
+      <ul>
+        <li><b>現在地</b>：<b>現地調査の実施待ち</b>。2026/8/1 にかめさんより「来週中には調査に伺います」と返信済み＝<b>8月第2週が目安</b>。</li>
+        <li><b>相談内容</b>：加藤様ご本人の<b>ご実家</b>について。工事種別・範囲とも<b>未確定</b>。5/19に地図と写真を受領済み。</li>
+        <li><b>次のアクション</b>：①現地調査の日時を加藤様と確定 → ②現地調査 → ③内容確定次第、正式な工事名へ改称し見積へ進める。</li>
+        <li><b>⚠️ 対応経緯の注意</b>：5/19の初回連絡から<b>約2ヶ月半 対応が滞留</b>し、7/31に加藤様より進捗確認をいただいている。優先度を上げて日程を確定すること。</li>
+        <li><b>駐車</b>：隣地で公共下水接続工事中のため作業車が停まっている可能性あり。<b>2台駐車可・路駐も可</b>との案内を受領済み（8/2）。</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>施主</td><td>加藤博和 様（T-047）</td><td>個人依頼。連絡先: h-katou@ctb.ne.jp</td></tr>
+        <tr><td>関連</td><td>株式会社信和（T-003）</td><td>加藤様の勤務先。<b>信和の会社案件とは別人格</b>＝混同しないこと</td></tr>
+        <tr><td>施工</td><td>株式会社アート・レイズ</td><td>現地調査・相談対応</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📝</div><div class="doc-info"><div class="doc-name">00_履歴_加藤-実家相談-26.md</div><div class="doc-meta-s">案件履歴ノート（登録経緯・メール経緯・TODO）</div></div><div class="doc-st s-ok">運用中</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ 見積・請求・図面は未着手（相談フェーズ）。5/19にメールで受領した<b>地図・写真は案件フォルダに未保存</b>＝Gmailから 受領/ へ取り込むこと。</div>
+    </div>
+    <div class="card">
+      <div class="card-t">📷 写真・現調記録</div>
+      <ul>
+        <li><b>未取得</b>。現地調査が未実施のため撮影データなし。</li>
+        <li>5/19に加藤様よりメールで<b>地図・ご実家の写真</b>を受領しているが、案件フォルダ（<code>写真/</code>・<code>受領/</code>）には未保存。</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話記録から抽出した重要決定事項</div>
+  <ul>
+    <li>通話記録なし（やり取りはすべてメール）。</li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <div class="doc-meta-s">見積未発行・原価計上なし（相談フェーズ）。data.jsonの原価4分類（労務費・材料費・外注費・経費）はいずれも0</div>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <div class="doc-meta-s">受取見積書・受取請求書なし（相談フェーズ・外注未発注）</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/8/3（月）</div><div class="tl-text">案件フォルダを新規作成し履歴ノートを配置。daily-gmail-check 処理1.7 で検知したメールスレッド「RE: 加藤邸」が<b>信和の会社案件ではなく加藤様個人のご実家の相談</b>と判明したため、かめさんの指示により信和（T-003）とは別に<b>個人顧客 T-047</b> として新規登録。</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/8/2（日）</div><div class="tl-text">加藤様より<b>駐車場所の案内</b>。隣地が公共下水接続工事中で車が停まっている可能性があるが、<b>2台駐車可・路駐も可</b>とのこと。</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/8/1（土）</div><div class="tl-text">かめさんより返信。「完全に忘れていました。<b>来週中には調査に伺います</b>。」＝現地調査は<b>8月第2週が目安</b>。</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/7/31（金）</div><div class="tl-text">加藤様より<b>進捗確認の連絡</b>「連絡おまちしてますが。いかがでしょうか。」＝5/19の初回連絡から対応が滞留していた。</div></div>
+    <details class="tl-archive"><summary>過去の経緯を見る（1件・7日超）</summary>
+      <div class="tl-item"><div class="tl-date">2026/5/19（月）</div><div class="tl-text">加藤様より「先ほどの実家の件、<b>地図と写真送ります</b>」と初回連絡。かめさんより「承知しました 追ってご連絡いたします」と返信。</div></div>
+    </details>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li>案件キー「加藤-実家相談-26」は内容未確定のための<b>仮称</b>。現地調査で工事内容が固まったら正式な工事名へ改称を検討する（既存キーのリネームは影響が大きいため、かめさん判断で）。</li>
+    <li>顧客は信和（T-003）の加藤様だが<b>個人依頼（T-047）</b>。請求先・宛名を信和にしないこと。</li>
+    <li>未解決：現地調査の具体的な日時、ご実家の所在地詳細、相談内容（工事種別・範囲）。</li>
+  </ul>
+</div>
+
+<div class="footer">
+  自動生成: 案件サマリー（AUTOマーカー方式）｜ data.json を真実の源泉とし、Drive同期後にDriveリンクを付与<br>
+  加藤-実家相談-26
+</div>
+
+</body>
+</html>
