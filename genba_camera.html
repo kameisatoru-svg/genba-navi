@@ -310,8 +310,13 @@ const S = {
   anken:'', kubun:'現調', room:'', tplKey:'room',
   shots:[], idx:0, photos:[], stream:null, track:null,
   roll:null, elev:null, focal35:guessFocal35(), seq:1,
-  camId:null, cams:[], camIdx:0        // 背面レンズ（超広角/標準/望遠）の切替用
+  camId:null, cams:[], camIdx:0, defaultCamId:null   // 背面レンズ（超広角/標準/望遠）の切替用
 };
+
+/* 焦点距離が分かるのは既定レンズだけ（UserAgent由来の推定値）。
+   超広角や望遠に切り替えたら分からないので null で正直に残す。
+   ※ 4点補正（射影変換）に焦点距離は不要なので、寸法拾いには支障ない。 */
+function focalNow(){ return S.camId === S.defaultCamId ? S.focal35 : null; }
 
 const $ = id => document.getElementById(id);
 const toast = (m) => { const t=$('toast'); t.textContent=m; t.classList.add('show');
@@ -427,6 +432,7 @@ async function startCamera(){
   S.track = S.stream.getVideoTracks()[0];
   const st = S.track.getSettings();
   S.camId = st.deviceId || S.camId;
+  if (!S.defaultCamId) S.defaultCamId = S.camId;       // 最初に開いたレンズ＝既定（標準）とみなす
   if (!S.cams.length) S.cams = await listCams();       // 権限取得後でないとラベルが取れない
   const i = S.cams.findIndex(d=>d.deviceId===S.camId);
   if (i>=0) S.camIdx = i;
@@ -657,7 +663,7 @@ async function capture(){
     elev: S.elev===null?null:+S.elev.toFixed(2),
     targetElev: sh.targetElev, tol: sh.tol, measure: sh.measure,
     group: sh.group||null, panel: sh.panel||null, lens: lensName(S.camId, S.camIdx),
-    w:cv.width, h:cv.height, focal35:S.focal35,
+    w:cv.width, h:cv.height, focal35:focalNow(),
     at: now.toISOString()
   };
 
@@ -702,7 +708,7 @@ function renderReview(){
         <div class="rev-title">${p.label}</div>
         <div class="rev-file">${p.file}</div>
         <div>${tag}<span class="rev-tag" style="background:#eee;color:#555">水平 ${rs} ／ 仰角 ${es}</span></div>
-        <div style="font-size:10px;color:var(--text3);margin-top:4px">${p.w}×${p.h}px ／ ${p.focal35}mm相当</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:4px">${p.w}×${p.h}px ／ ${p.lens||'—'}${p.focal35?' ('+p.focal35+'mm相当)':''}${p.panel>1?' ／ 分割'+p.panel+'枚目':''}</div>
         <button class="rev-del" data-i="${i}">この1枚を削除</button>
       </div></div>`;
   }).join('');
