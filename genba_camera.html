@@ -503,11 +503,20 @@ $('btnLens').addEventListener('pointerdown', ()=>{ lensHold=setTimeout(renameLen
 ['pointerup','pointerleave','pointercancel'].forEach(ev=>
   $('btnLens').addEventListener(ev, ()=>clearTimeout(lensHold)));
 function renameLens(){
-  const v = prompt('このレンズの名前（例：0.5x／1x／2x）', lensName(S.camId,S.camIdx));
-  if (!v) return;
-  let m={}; try{ m=JSON.parse(localStorage.getItem('gc_lensNames')||'{}'); }catch(e){}
-  m[S.camId]=v; localStorage.setItem('gc_lensNames', JSON.stringify(m));
-  $('btnLens').textContent=v; toast('「'+v+'」で覚えました');
+  const cur = lensCfg(S.camId) || {};
+  const name = prompt('このレンズの名前（例：0.5x／1x／2x）', cur.name || '');
+  if (!name) return;
+  const f = prompt(
+    '35mm換算の焦点距離（mm）\n\n' +
+    '純正カメラアプリで1枚撮り、その写真の詳細情報にある「35mm換算焦点距離」を入れてください。\n' +
+    'あとで傾きを補正して平面図に起こすときに必要です。\n' +
+    '（Z Fold5 の実績値：超広角=13／標準=23／望遠=69）',
+    cur.f35 || '');
+  const all = lensCfgAll();
+  all[S.camId] = { name: name, f35: f ? parseFloat(f) : null };
+  localStorage.setItem('gc_lensCfg', JSON.stringify(all));
+  $('btnLens').textContent = lensName(S.camId, S.camIdx);
+  toast(f ? `「${name}」${f}mm相当で覚えました` : `「${name}」で覚えました（焦点距離は未登録）`);
 }
 
 /* ═══ 姿勢計算 ═══
