@@ -579,7 +579,8 @@ function renderInstruct(){
   const sh = S.shots[S.idx];
   if (!sh){ $('insTitle').textContent='すべて撮影しました'; $('insHint').textContent='「確認」から保存へ';
     $('insStep').textContent=''; return; }
-  $('insStep').textContent = `${S.idx+1} / ${S.shots.length}` + (sh.measure?'　寸法用':'　記録用');
+  $('insStep').textContent = `${S.idx+1} / ${S.shots.length}` + (sh.measure?'　寸法用':'　記録用')
+    + (sh.lens ? '　推奨：'+LENS_HINT[sh.lens] : '');
   $('insTitle').textContent = sh.label;
   $('insHint').textContent = sh.hint;
   drawGrid(); updateGauge();
@@ -655,6 +656,7 @@ async function capture(){
     rollDev: rd===null?null:+rd.toFixed(2),
     elev: S.elev===null?null:+S.elev.toFixed(2),
     targetElev: sh.targetElev, tol: sh.tol, measure: sh.measure,
+    group: sh.group||null, panel: sh.panel||null, lens: lensName(S.camId, S.camIdx),
     w:cv.width, h:cv.height, focal35:S.focal35,
     at: now.toISOString()
   };
