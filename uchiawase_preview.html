@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>打合せ資料プレビュー</title>
+<link rel="stylesheet" href="common.css">
+<style>
+/* ============================================================
+   アプリ画面（トップバー・エディタ・プレビュー枠）
+   ※ここは画面用。保存HTMLには doc-css だけが効く形にしてある
+   ============================================================ */
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;background:var(--bg,#eeebe5);
+  font-family:"Yu Gothic UI","Yu Gothic","Meiryo","Hiragino Kaku Gothic ProN",sans-serif;
+  color:var(--text,#1e2d40);display:flex;flex-direction:column;overflow:hidden;
+}
+.topbar{
+  flex:0 0 auto;display:flex;align-items:center;gap:8px;
+  padding:8px 12px;background:var(--navy,#1e2d40);color:#fff;
+}
+.topbar-title{font-weight:700;letter-spacing:.04em;font-size:15px;white-space:nowrap;}
+.topbar-actions{margin-left:auto;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.tb-btn{
+  display:inline-flex;align-items:center;gap:5px;border:0;border-radius:6px;
+  padding:6px 11px;font-size:13px;font-weight:700;cursor:pointer;
+  background:rgba(255,255,255,.14);color:#fff;font-family:inherit;
+}
+.tb-btn:hover{background:rgba(255,255,255,.26);}
+.tb-btn-gold{background:var(--accent,#c8a96e);color:#1e2d40;}
+.tb-btn-gold:hover{background:#d8bd85;}
+.mode-select{
+  border:0;border-radius:6px;padding:6px 8px;font-size:13px;font-family:inherit;
+  background:rgba(255,255,255,.14);color:#fff;cursor:pointer;
+}
+.mode-select option{color:#1e2d40;}
+
+.main{flex:1 1 auto;display:flex;min-height:0;}
+.editor{
+  flex:0 0 400px;max-width:46vw;overflow-y:auto;background:#fff;
+  border-right:1px solid var(--border,#ddd);padding:12px 12px 80px;
+}
+.preview{flex:1 1 auto;overflow:auto;padding:18px 10px 60px;background:#dcd8d1;}
+.preview-inner{transform-origin:top center;}
+
+.ed-card{border:1px solid var(--border,#ddd);border-radius:8px;margin-bottom:10px;background:#fff;}
+.ed-head{
+  display:flex;align-items:center;gap:6px;padding:7px 9px;
+  background:var(--surface2,#f8f8f8);border-bottom:1px solid var(--border,#ddd);
+  border-radius:8px 8px 0 0;
+}
+.ed-kind{font-size:10px;font-weight:700;color:#fff;background:var(--navy,#1e2d40);
+  border-radius:4px;padding:1px 6px;white-space:nowrap;}
+.ed-title{flex:1 1 auto;border:0;background:transparent;font-size:13px;font-weight:700;
+  font-family:inherit;color:var(--text,#1e2d40);min-width:0;padding:2px;}
+.ed-title:focus{outline:1px solid var(--accent,#c8a96e);border-radius:4px;}
+.ed-body{padding:9px;}
+.ico-btn{border:0;background:transparent;cursor:pointer;font-size:14px;line-height:1;
+  padding:3px 4px;color:#5a6a7a;border-radius:4px;}
+.ico-btn:hover{background:#eee;color:#c0392b;}
+
+label.fl{display:block;font-size:11px;font-weight:700;color:#5a6a7a;margin:7px 0 2px;}
+label.fl:first-child{margin-top:0;}
+input.f,textarea.f,select.f{
+  width:100%;border:1px solid var(--border,#ddd);border-radius:5px;padding:5px 7px;
+  font-size:12.5px;font-family:inherit;color:var(--text,#1e2d40);background:#fff;
+}
+textarea.f{resize:vertical;line-height:1.55;}
+input.f:focus,textarea.f:focus,select.f:focus{outline:0;border-color:var(--accent,#c8a96e);}
+.hint{font-size:10.5px;color:#5a6a7a;margin:3px 0 0;line-height:1.45;}
+
+.kvrow,.trow{display:flex;gap:4px;margin-bottom:4px;align-items:flex-start;}
+.kvrow input:first-child{flex:0 0 96px;}
+.kvrow input,.trow input,.trow textarea{flex:1 1 auto;min-width:0;}
+.add-btn{
+  width:100%;border:1px dashed var(--border-strong,#aaa);background:#fff;border-radius:6px;
+  padding:5px;font-size:12px;font-weight:700;color:#5a6a7a;cursor:pointer;font-family:inherit;margin-top:4px;
+}
+.add-btn:hover{border-color:var(--accent,#c8a96e);color:var(--navy,#1e2d40);}
+.blk-adder{display:flex;flex-wrap:wrap;gap:5px;margin:12px 0 0;}
+.blk-adder button{
+  border:1px solid var(--border,#ddd);background:#fff;border-radius:6px;padding:5px 9px;
+  font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--navy,#1e2d40);
+}
+.blk-adder button:hover{background:var(--bg,#eeebe5);}
+.pb-card{border:1px dashed var(--navy,#1e2d40);background:#f4f2ee;border-radius:8px;
+  padding:7px 9px;margin-bottom:10px;display:flex;align-items:center;gap:8px;
+  font-size:12px;font-weight:700;color:var(--navy,#1e2d40);}
+.warn{background:#f7e7e4;border:1px solid #c0392b;color:#8e2b20;border-radius:6px;
+  padding:6px 9px;font-size:11.5px;font-weight:700;margin-bottom:8px;line-height:1.5;}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:9999;
+  background:var(--navy,#1e2d40);color:#fff;padding:9px 18px;border-radius:8px;
+  font-size:13px;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.25);}
+@media (max-width:860px){
+  .main{flex-direction:column;}
+  .editor{flex:1 1 auto;max-width:100%;border-right:0;border-bottom:1px solid #ddd;}
+  .preview{flex:1 1 auto;}
+}
+</style>
+
+<!-- ============================================================
+     doc-css：出力ドキュメント（A4）のスタイル。
+     保存HTML・印刷・PDFに引き継がれるのはこの style だけで完結する。
+     ============================================================ -->
+<style id="doc-css">
+@page{size:A4 portrait;margin:12mm 13mm;}
+.page{
+  width:210mm;min-height:297mm;padding:12mm 13mm;margin:0 auto 14px;background:#fff;
+  box-shadow:0 3px 14px rgba(0,0,0,.22);
+  font-family:"Yu Gothic UI","Yu Gothic","Meiryo","Hiragino Kaku Gothic ProN",sans-serif;
+  font-size:10pt;line-height:1.55;color:#000;position:relative;
+}
+.page + .page{page-break-before:always;break-before:page;}
+.page *{box-sizing:border-box;}
+
+.d-head{border-bottom:2pt solid #000;padding-bottom:2.5mm;margin-bottom:4mm;}
+.d-head .row{display:flex;justify-content:space-between;align-items:flex-end;gap:6mm;}
+.d-doc{font-size:15pt;font-weight:700;letter-spacing:.04em;}
+.d-doc small{display:block;font-size:10pt;font-weight:400;margin-top:1mm;}
+.d-meta{font-size:9.5pt;text-align:right;line-height:1.5;white-space:pre-line;}
+
+.page h2{
+  font-size:11.5pt;margin:4mm 0 2mm;padding:1.2mm 2.5mm;background:#e8e8e8;
+  border-left:3.5pt solid #000;letter-spacing:.03em;font-weight:700;
+}
+.page h2.first{margin-top:0;}
+.page h3{font-size:10.5pt;margin:3.5mm 0 1.2mm;padding-bottom:.8mm;border-bottom:.75pt solid #666;font-weight:700;}
+.page p{margin:0 0 2.5mm;}
+.page ol,.page ul{margin:0 0 2.5mm;padding-left:6mm;}
+.page li{margin-bottom:.9mm;}
+.page .q li{margin-bottom:1.6mm;}
+
+.page table{width:100%;border-collapse:collapse;font-size:9.5pt;}
+.page tr{page-break-inside:avoid;break-inside:avoid;}
+.page thead{display:table-header-group;}
+.page th,.page td{border:.75pt solid #666;padding:1mm 1.4mm;vertical-align:top;text-align:left;}
+.page thead th{background:#e8e8e8;font-weight:700;}
+.page td.c{text-align:center;white-space:nowrap;}
+.page td.mk{background:#f2f2f2;font-weight:700;}
+.page td.fill{background:#fafafa;}
+.page table.kv td:first-child{background:#f2f2f2;font-weight:700;white-space:nowrap;width:30mm;}
+
+.d-note{font-size:9.5pt;line-height:1.5;margin-top:2.5mm;}
+.d-note li{margin-bottom:.6mm;}
+.d-foot{margin-top:4mm;padding-top:1.5mm;border-top:.75pt solid #666;font-size:9pt;}
+.d-cont{margin-top:3mm;text-align:right;font-size:9.5pt;font-weight:700;}
+.tag{display:inline-block;border:.75pt solid #000;padding:0 1.2mm;font-size:8.5pt;
+  font-weight:700;margin-right:1.5mm;vertical-align:1px;}
+
+/* ブランド配色（顧客提出用）。文字は黒のまま・白抜きは使わない */
+.page.brand{}
+.page.brand .d-head{border-bottom-color:#1e2d40;}
+.page.brand h2{background:#eeebe5;border-left-color:#1e2d40;}
+.page.brand h3{border-bottom-color:#c8a96e;}
+.page.brand thead th{background:#eeebe5;border-bottom:1.5pt solid #1e2d40;}
+.page.brand td.mk{background:#f7f5f1;}
+.page.brand table.kv td:first-child{background:#f7f5f1;}
+.page.brand .d-foot{border-top-color:#c8a96e;}
+.page.brand .d-sub{border-bottom:1pt solid #c8a96e;}
+
+/* 画面上のページ番号バッジ・はみ出し警告（印刷では消す） */
+.pg-badge{position:absolute;top:-11px;left:0;font-size:11px;font-weight:700;color:#5a6a7a;
+  font-family:"Yu Gothic UI",sans-serif;}
+.pg-over{position:absolute;top:-11px;right:0;font-size:11px;font-weight:700;color:#c0392b;
+  font-family:"Yu Gothic UI",sans-serif;}
+@media print{
+  body{background:#fff;}
+  .page{box-shadow:none;margin:0;width:auto;min-height:0;padding:0;}
+  .pg-badge,.pg-over{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-title">打合せ資料プレビュー</span>
+  <div class="topbar-actions">
+    <select class="mode-select" id="theme-select" title="配色">
+      <option value="mono">モノクロ（業者・社内向け）</option>
+      <option value="brand">ブランド（顧客提出用）</option>
+    </select>
+    <button class="tb-btn tb-btn-gold" onclick="printHTML()">🖨 印刷</button>
+    <button class="tb-btn" onclick="savePDF()">PDF</button>
+    <button class="tb-btn" onclick="saveReeditHTML()">💾 保存</button>
+    <button class="tb-btn" onclick="document.getElementById('load-input').click()">📂 読込</button>
+    <select class="mode-select" id="tpl-select" title="雛形">
+      <option value="">雛形…</option>
+      <option value="blank">新規（空の雛形）</option>
+      <option value="sample">サンプル（3社打合せ）</option>
+    </select>
+    <input type="file" id="load-input" accept=".html,.htm,.json" style="display:none">
+  </div>
+</div>
+
+<div class="main">
+  <div class="editor" id="editor"></div>
+  <div class="preview" id="preview-area">
+    <div class="preview-inner" id="preview-inner"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   打合せ資料プレビュー
+   - 左：エディタ／右：A4プレビュー（入力即反映）
+   - 改頁は手動のみ（自動セクション改頁はしない）。続くページには
+     「次ページへ続く」を出す＝見積雛形と同じ作法
+   - 保存HTMLに JSON 状態を埋め込み、読み込んで再編集できる
+   ============================================================ */
+
+const STATE_KEY = 'artrays_uchiawase_state_v1';
+const ESC = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+/* 改行→<br>、行頭の「・」は箇条書き扱いしない（そのまま出す） */
+const NL = s => ESC(s).replace(/\r?\n/g,'<br>');
+const LINES = s => String(s==null?'':s).split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+const uid = () => 'b' + Math.random().toString(36).slice(2,9);
+
+let state = null;
+
+/* ── 雛形 ───────────────────────────────── */
+function blankState(){
+  return {
+    theme:'mono',
+    meta:{
+      docTitle:'打合せ資料', subject:'',
+      date:todayJP(),
+      corp:'株式会社アート・レイズ',
+      corpSub:'〒874-0829　大分県別府市上原町13番25号\nTEL 0977-21-0603　担当：亀井 悟',
+      foot:'株式会社アート・レイズ　〒874-0829　大分県別府市上原町13番25号　TEL 0977-21-0603　担当：亀井 悟'
+    },
+    blocks:[
+      {id:uid(),t:'kv',title:'1. 打合せ概要',rows:[['日　時',''],['場　所',''],['出席（予定）',''],['物　件',''],['目　的','']]},
+      {id:uid(),t:'rich',title:'2. 前提',body:'',list:''},
+      {id:uid(),t:'table',title:'3. 本日の議題',
+        cols:[{l:'項',w:'10mm',c:1},{l:'内　容',w:'',c:0},{l:'対象',w:'22mm',c:0},{l:'目安',w:'14mm',c:1}],
+        rows:[['1','','','']]},
+      {id:uid(),t:'list',title:'4. 本日のゴール',ordered:true,items:''}
+    ]
+  };
+}
+
+function todayJP(){
+  const d = new Date();
+  return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日';
+}
+
+function sampleState(){
+  const s = blankState();
+  s.meta.docTitle = '3社打合せ 資料';
+  s.meta.subject  = 'プレミストタワー大分（PMタワー大分）2705号室　内装工事';
+  s.blocks = [
+    {id:uid(),t:'kv',title:'1. 打合せ概要',rows:[
+      ['日　時','2026年8月　　日（　）　　：　　〜'],
+      ['場　所',''],
+      ['出席（予定）','タマイM&S株式会社　高橋 義一 様　／　タカラスタンダード株式会社　谷川 雄也 様　／　株式会社アート・レイズ　亀井 悟'],
+      ['物　件','プレミストタワー大分 2705号室（27階・Pタイプ・約150㎡）'],
+      ['お引渡し','2028年2月 予定'],
+      ['目　的','お引渡し後に当社が施工する範囲について、必要商品の取扱可否・仕様・納期・概算単価を確認する']
+    ]},
+    {id:uid(),t:'rich',title:'2. 前提（本件の進め方）',
+      body:'施工会社への設計変更として発注すると、標準仕様からの変更はいずれも高額になります。そのため、変更を希望する箇所も一度は標準仕様のまま竣工させ、お引渡し後に当社が撤去・作り替える方針で施主の合意を得ています。',
+      list:'間仕切り壁は軽量鉄骨（LGS）下地のため、撤去・再構築を前提に建具寸法は当社側で決められます。\nクロスは全面貼替えのため、壁内の下地補強は解体後にまとめて施工します。\n施工は引渡し以降。本日の単価は概算とし、確定は現地実測後とします。'},
+    {id:uid(),t:'table',title:'3. 本日の議題',
+      cols:[{l:'項',w:'10mm',c:1},{l:'内　容',w:'',c:0},{l:'対象',w:'22mm',c:0},{l:'目安',w:'14mm',c:1}],
+      rows:[
+        ['1','物件概要・工事範囲・スケジュールの共有','3社','10分'],
+        ['2','キッチン天板の載せ替え可否（本日の最重要事項）','タカラ','25分'],
+        ['3','エマウォール・洗面化粧台の後施工／変更可否','タカラ','15分'],
+        ['4','全品目の取扱可否・仕入ルート・掛率','タマイ','20分'],
+        ['5','納期・搬入条件（タワーマンション）','タマイ','10分'],
+        ['6','宿題の確認と次回日程','3社','10分']
+      ]},
+    {id:uid(),t:'list',title:'4. 本日のゴール',ordered:true,
+      items:'キッチン天板を他社人造石で載せ替えられるかの可否判断（不可の場合の代替案まで）\n必要商品一覧の全品目について、取扱可否と概算単価の目処\n製作期間の長い品目の発注リードタイムの把握\n各社の宿題と回答期限の確定'},
+    {id:uid(),t:'pagebreak'},
+    {id:uid(),t:'qa',title:'A. タカラスタンダード様へ',groups:[
+      {h:'A-1. キッチン天板の載せ替え（最重要）',
+       items:'標準の人造大理石天板から、他社人造石への天板交換が竣工後に可能か。キャビネットへの後載せの構造・固定方法。\n天板はコの字一体（天板＋両サイド＋ダイニング側）／トメ加工（45°留め接ぎ）を希望。留意すべき納まり・可能な板厚・見付寸法。\n天板交換時のシンクの扱い。既存流用の可否、または新規手配の要否。\n水栓・IHの開口。ガスコンロからIHへ変更予定。開口寸法・下地の対応可否。\n天板交換後のメーカー保証の扱い（対象外となる範囲）。\n交換が不可の場合の代替案と、その場合の概算。'},
+      {h:'A-2. エマウォール（ホーロー壁パネル）',
+       items:'トイレ1・2に巾木上〜天井まで貼る計画。竣工後の後貼りが可能か。\n必要な下地条件と、出隅・入隅・天井際の見切り納まり。\nクロス全面貼替えと同時施工となるため、施工順序の推奨。'}
+    ]},
+    {id:uid(),t:'qa',title:'B. タマイM&S様へ',groups:[
+      {h:'',items:'別紙「必要商品一覧」全品目の取扱可否と仕入ルート。\n概算単価（下代）と、複数メーカーをまとめて発注した場合の条件。\n製作期間・納期。特に受注生産品のリードタイム。\n納入先＝当社事務所。現場への直送の可否（搬入時間帯・エレベーター制限・養生条件）。\n見積の有効期限と、施工までの価格改定リスクの見込み。'}
+    ]},
+    {id:uid(),t:'pagebreak'},
+    {id:uid(),t:'items',title:'必要商品一覧',showPrice:true,rows:[
+      {mk:'シーザーストーン',pl:'LDK キッチン',sp:'人造石天板　コの字一体（天板・両サイド・ダイニング側）／トメ加工\nキッチン本体 L=3,000 × D=1,000　色柄未定',qt:'1式'},
+      {mk:'日本フラッシュ\n＋ユニオン／3M',pl:'LDK\nキッチン入口',sp:'アルミガラス建具　親子ドア　W850・300 × H2,250\nフレーム：ブラック／ガラスフィルム SH2MACR-1',qt:'1ヶ所'},
+      {mk:'南海プライウッド',pl:'洋室1 WIC内',sp:'システム収納「ノエル3」　アッシュウォールナット\nW2,350／1,180／1,800　CH2,250　※寸法は確定前（概寸）',qt:'1式'},
+      {mk:'LIXIL',pl:'トイレ1・2',sp:'便器　サティス GR8（ピュアホワイト／ブラック）',qt:'2台'},
+      {mk:'日立',pl:'LDK キッチン',sp:'IHクッキングヒーター　HTB-TS2500NWKF　W=750\n※標準はガスコンロ／単相200V回路の有無を確認',qt:'1台'}
+    ]},
+    {id:uid(),t:'note',items:'寸法は図面拾いによる概寸です。確定はお引渡し後の現地実測によります。\n本一覧は商品（材工分離の「材」）のみです。工事費は含みません。'}
+  ];
+  return s;
+}
+
+/* ── ブロック定義 ─────────────────────────── */
+const KINDS = {
+  kv:   {label:'定義表',  desc:'項目名と内容の2列表（打合せ概要など）'},
+  rich: {label:'本文',    desc:'見出し＋段落＋箇条書き'},
+  list: {label:'箇条書き',desc:'番号付き／中黒のリスト'},
+  table:{label:'表',      desc:'列を自由に決められる表'},
+  qa:   {label:'確認事項',desc:'宛先ごとの質問リスト（小見出し付き）'},
+  items:{label:'品目一覧',desc:'メーカー／場所／品名・仕様／数量（＋単価記入欄）'},
+  note: {label:'注記',    desc:'小さい文字の補足リスト'},
+  pagebreak:{label:'改頁',desc:'ここから次のページ'}
+};
+
+/* ── エディタ描画 ─────────────────────────── */
+function renderEditor(){
+  const el = document.getElementById('editor');
+  const m = state.meta;
+  let h = '';
+
+  h += `<div class="ed-card"><div class="ed-head"><span class="ed-kind">書類</span>
+    <span class="ed-title" style="padding-left:2px;">ヘッダー・フッター</span></div><div class="ed-body">
+    <label class="fl">資料名</label><input class="f" data-meta="docTitle" value="${ESC(m.docTitle)}">
+    <label class="fl">件名（物件名など）</label><input class="f" data-meta="subject" value="${ESC(m.subject)}">
+    <label class="fl">作成日</label><input class="f" data-meta="date" value="${ESC(m.date)}">
+    <label class="fl">社名</label><input class="f" data-meta="corp" value="${ESC(m.corp)}">
+    <label class="fl">社名の下（住所・TEL・担当）</label><textarea class="f" rows="2" data-meta="corpSub">${ESC(m.corpSub)}</textarea>
+    <label class="fl">フッター（最終ページのみ）</label><textarea class="f" rows="2" data-meta="foot">${ESC(m.foot)}</textarea>
+  </div></div>`;
+
+  state.blocks.forEach((b,i)=>{
+    if(b.t==='pagebreak'){
+      h += `<div class="pb-card" data-i="${i}">✂ 改頁（ここから次のページ）
+        <span style="margin-left:auto;">
+          <button class="ico-btn" data-act="up" data-i="${i}" title="上へ">▲</button>
+          <button class="ico-btn" data-act="down" data-i="${i}" title="下へ">▼</button>
+          <button class="ico-btn" data-act="del" data-i="${i}" title="削除">✕</button>
+        </span></div>`;
+      return;
+    }
+    h += `<div class="ed-card"><div class="ed-head">
+      <span class="ed-kind">${KINDS[b.t]?KINDS[b.t].label:b.t}</span>
+      <input class="ed-title" data-blk="${i}" data-fld="title" value="${ESC(b.title||'')}" placeholder="見出し（空欄なら非表示）">
+      <button class="ico-btn" data-act="up" data-i="${i}" title="上へ">▲</button>
+      <button class="ico-btn" data-act="down" data-i="${i}" title="下へ">▼</button>
+      <button class="ico-btn" data-act="del" data-i="${i}" title="削除">✕</button>
+      </div><div class="ed-body">${editorBody(b,i)}</div></div>`;
+  });
+
+  h += `<div class="blk-adder">`;
+  Object.keys(KINDS).forEach(k=>{
+    h += `<button data-add="${k}" title="${ESC(KINDS[k].desc)}">＋ ${KINDS[k].label}</button>`;
+  });
+  h += `</div>`;
+
+  el.innerHTML = h;
+}
+
+function editorBody(b,i){
+  const D = (f,v)=>`data-blk="${i}" data-fld="${f}"`;
+  if(b.t==='kv'){
+    let h = '';
+    (b.rows||[]).forEach((r,j)=>{
+      h += `<div class="kvrow">
+        <input class="f" data-blk="${i}" data-row="${j}" data-col="0" value="${ESC(r[0])}" placeholder="項目名">
+        <input class="f" data-blk="${i}" data-row="${j}" data-col="1" value="${ESC(r[1])}" placeholder="内容">
+        <button class="ico-btn" data-act="rowdel" data-i="${i}" data-j="${j}">✕</button></div>`;
+    });
+    return h + `<button class="add-btn" data-act="rowadd" data-i="${i}">＋ 行を追加</button>`;
+  }
+  if(b.t==='rich'){
+    return `<label class="fl">本文（段落／空行で段落を分ける）</label>
+      <textarea class="f" rows="4" ${D('body')}>${ESC(b.body||'')}</textarea>
+      <label class="fl">箇条書き（1行＝1項目・空欄可）</label>
+      <textarea class="f" rows="3" ${D('list')}>${ESC(b.list||'')}</textarea>`;
+  }
+  if(b.t==='list'){
+    return `<label class="fl">形式</label>
+      <select class="f" ${D('ordered')}>
+        <option value="1"${b.ordered?' selected':''}>番号付き（1. 2. 3.）</option>
+        <option value="0"${b.ordered?'':' selected'}>中黒（・）</option>
+      </select>
+      <label class="fl">項目（1行＝1項目）</label>
+      <textarea class="f" rows="5" ${D('items')}>${ESC(b.items||'')}</textarea>`;
+  }
+  if(b.t==='table'){
+    let h = `<label class="fl">列（1行＝1列／「見出し | 幅 | 中央寄せ(c)」）</label>
+      <textarea class="f" rows="4" ${D('colsText')}>${ESC((b.cols||[]).map(c=>[c.l,c.w||'',c.c?'c':''].join(' | ')).join('\n'))}</textarea>
+      <p class="hint">幅は 22mm のように。空欄なら自動。3つめに c を書くと中央寄せ。</p>
+      <label class="fl">行（1行＝1レコード／セルは「 | 」区切り）</label>
+      <textarea class="f" rows="7" ${D('rowsText')}>${ESC((b.rows||[]).map(r=>r.join(' | ')).join('\n'))}</textarea>`;
+    return h;
+  }
+  if(b.t==='qa'){
+    let h = '';
+    (b.groups||[]).forEach((g,j)=>{
+      h += `<div style="border:1px solid #eee;border-radius:6px;padding:7px;margin-bottom:6px;">
+        <div style="display:flex;gap:4px;align-items:center;">
+          <input class="f" data-blk="${i}" data-grp="${j}" data-gfld="h" value="${ESC(g.h||'')}" placeholder="小見出し（空欄可）">
+          <button class="ico-btn" data-act="grpdel" data-i="${i}" data-j="${j}">✕</button>
+        </div>
+        <label class="fl">質問（1行＝1問）</label>
+        <textarea class="f" rows="5" data-blk="${i}" data-grp="${j}" data-gfld="items">${ESC(g.items||'')}</textarea>
+      </div>`;
+    });
+    return h + `<button class="add-btn" data-act="grpadd" data-i="${i}">＋ 小見出しを追加</button>`;
+  }
+  if(b.t==='items'){
+    let h = `<label class="fl" style="display:flex;align-items:center;gap:6px;">
+      <input type="checkbox" data-blk="${i}" data-fld="showPrice" ${b.showPrice?'checked':''} style="width:auto;">
+      単価の記入欄を付ける</label>`;
+    (b.rows||[]).forEach((r,j)=>{
+      h += `<div style="border:1px solid #eee;border-radius:6px;padding:7px;margin-bottom:6px;">
+        <div style="display:flex;gap:4px;align-items:center;margin-bottom:4px;">
+          <span style="font-size:11px;font-weight:700;color:#5a6a7a;">${j+1}</span>
+          <input class="f" data-blk="${i}" data-irow="${j}" data-ifld="mk" value="${ESC(r.mk||'')}" placeholder="メーカー">
+          <input class="f" data-blk="${i}" data-irow="${j}" data-ifld="pl" value="${ESC(r.pl||'')}" placeholder="場所">
+          <input class="f" style="flex:0 0 60px;" data-blk="${i}" data-irow="${j}" data-ifld="qt" value="${ESC(r.qt||'')}" placeholder="数量" inputmode="text">
+          <button class="ico-btn" data-act="irowdel" data-i="${i}" data-j="${j}">✕</button>
+        </div>
+        <textarea class="f" rows="2" data-blk="${i}" data-irow="${j}" data-ifld="sp" placeholder="品名・仕様（改行可）">${ESC(r.sp||'')}</textarea>
+      </div>`;
+    });
+    return h + `<button class="add-btn" data-act="irowadd" data-i="${i}">＋ 品目を追加</button>`;
+  }
+  if(b.t==='note'){
+    return `<label class="fl">注記（1行＝1項目）</label>
+      <textarea class="f" rows="4" ${D('items')}>${ESC(b.items||'')}</textarea>`;
+  }
+  return '';
+}
+
+/* ── プレビュー描画 ───────────────────────── */
+function headHTML(){
+  const m = state.meta;
+  return `<div class="d-head"><div class="row">
+    <div class="d-doc">${ESC(m.docTitle)}${m.subject?`<small>${ESC(m.subject)}</small>`:''}</div>
+    <div class="d-meta">${ESC(m.date)}\n${ESC(m.corp)}${m.corpSub?'\n'+ESC(m.corpSub):''}</div>
+  </div></div>`;
+}
+
+function blockHTML(b, firstInPage){
+  const H = b.title ? `<h2${firstInPage?' class="first"':''}>${ESC(b.title)}</h2>` : '';
+  if(b.t==='kv'){
+    const rows = (b.rows||[]).map(r=>`<tr><td>${NL(r[0])}</td><td>${NL(r[1])}</td></tr>`).join('');
+    return H + `<table class="kv"><tbody>${rows}</tbody></table>`;
+  }
+  if(b.t==='rich'){
+    const ps = String(b.body||'').split(/\n\s*\n/).filter(x=>x.trim())
+      .map(p=>`<p>${NL(p)}</p>`).join('');
+    const li = LINES(b.list).map(x=>`<li>${ESC(x)}</li>`).join('');
+    return H + ps + (li?`<ul>${li}</ul>`:'');
+  }
+  if(b.t==='list'){
+    const li = LINES(b.items).map(x=>`<li>${ESC(x)}</li>`).join('');
+    if(!li) return H;
+    return H + (b.ordered?`<ol>${li}</ol>`:`<ul>${li}</ul>`);
+  }
+  if(b.t==='table'){
+    const cols = b.cols||[];
+    const th = cols.map(c=>`<th${c.w?` style="width:${ESC(c.w)}"`:''}${c.c?' class="c"':''}>${ESC(c.l)}</th>`).join('');
+    const tr = (b.rows||[]).map(r=>`<tr>`+cols.map((c,k)=>`<td${c.c?' class="c"':''}>${NL(r[k]||'')}</td>`).join('')+`</tr>`).join('');
+    return H + `<table><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table>`;
+  }
+  if(b.t==='qa'){
+    let h = H;
+    (b.groups||[]).forEach(g=>{
+      if(g.h) h += `<h3>${ESC(g.h)}</h3>`;
+      const li = LINES(g.items).map(x=>`<li>${ESC(x)}</li>`).join('');
+      if(li) h += `<ol class="q">${li}</ol>`;
+    });
+    return h;
+  }
+  if(b.t==='items'){
+    const price = !!b.showPrice;
+    const th = `<tr><th style="width:8mm" class="c">No.</th><th style="width:26mm">メーカー</th>
+      <th style="width:23mm">場所</th><th>品名・仕様</th><th style="width:12mm" class="c">数量</th>
+      ${price?'<th style="width:23mm" class="c">単価（記入欄）</th>':''}</tr>`;
+    const tr = (b.rows||[]).map((r,j)=>`<tr><td class="c">${j+1}</td><td class="mk">${NL(r.mk)}</td>
+      <td>${NL(r.pl)}</td><td>${NL(r.sp)}</td><td class="c">${NL(r.qt)}</td>
+      ${price?'<td class="fill"></td>':''}</tr>`).join('');
+    return H + `<table><thead>${th}</thead><tbody>${tr}</tbody></table>`;
+  }
+  if(b.t==='note'){
+    const li = LINES(b.items).map(x=>`<li>${ESC(x)}</li>`).join('');
+    return H + (li?`<ul class="d-note">${li}</ul>`:'');
+  }
+  return '';
+}
+
+function render(){
+  /* 改頁ブロックでページを割る。自動改頁はしない（作法：改頁は手動） */
+  const pages = [[]];
+  state.blocks.forEach(b=>{
+    if(b.t==='pagebreak'){ pages.push([]); return; }
+    pages[pages.length-1].push(b);
+  });
+
+  const cls = state.theme==='brand' ? 'page brand' : 'page';
+  let html = '';
+  pages.forEach((blks,pi)=>{
+    const last = pi === pages.length-1;
+    let inner = headHTML();
+    blks.forEach((b,bi)=> inner += blockHTML(b, bi===0));
+    if(!last) inner += `<div class="d-cont">次ページへ続く</div>`;
+    if(last && state.meta.foot) inner += `<div class="d-foot">${NL(state.meta.foot)}</div>`;
+    html += `<div class="${cls}" data-pg="${pi+1}">
+      <div class="pg-badge">${pi+1} / ${pages.length}</div>
+      <div class="pg-over" data-over="${pi}"></div>${inner}</div>`;
+  });
+  document.getElementById('preview-inner').innerHTML = html;
+
+  fitPreview();
+  checkOverflow();
+  document.title = (state.meta.docTitle||'打合せ資料') + (state.meta.subject?'_'+state.meta.subject:'');
+  try{ localStorage.setItem(STATE_KEY, JSON.stringify(state)); }catch(e){}
+}
+
+/* A4幅をプレビュー枠に合わせて縮小表示 */
+function fitPreview(){
+  const area = document.getElementById('preview-area');
+  const inner = document.getElementById('preview-inner');
+  const pageW = 210 * 96 / 25.4;                 /* 210mm を px 換算 */
+  const avail = area.clientWidth - 24;
+  const scale = Math.min(1, avail / pageW);
+  inner.style.transform = 'scale(' + scale + ')';
+  inner.style.width = pageW + 'px';
+  inner.style.marginLeft = 'auto';
+  inner.style.marginRight = 'auto';
+  /* 縮小した分の余白を詰める */
+  const h = inner.scrollHeight * scale;
+  inner.style.marginBottom = (h - inner.scrollHeight) + 'px';
+}
+
+/* はみ出し検知（A4の内寸を超えたら警告。改頁は手動なので気づけるようにする） */
+function checkOverflow(){
+  const mmpx = 96/25.4;
+  const usable = (297 - 24) * mmpx;   /* 上下12mm余白を引いた内寸 */
+  let over = 0;
+  document.querySelectorAll('#preview-inner .page').forEach((p,i)=>{
+    const badge = p.querySelector('.pg-over');
+    const contentH = p.scrollHeight - 24*mmpx;
+    const diff = contentH - usable;
+    if(diff > 2){
+      over++;
+      badge.textContent = '⚠ はみ出し 約' + Math.ceil(diff/mmpx) + 'mm';
+    }else{
+      badge.textContent = '';
+    }
+  });
+  const ed = document.getElementById('editor');
+  const old = ed.querySelector('.warn');
+  if(old) old.remove();
+  if(over>0){
+    const d = document.createElement('div');
+    d.className = 'warn';
+    d.textContent = '⚠ ' + over + 'ページが A4 からはみ出しています。「＋ 改頁」を入れて分けてください（自動改頁はしません）。';
+    ed.insertBefore(d, ed.firstChild);
+  }
+}
+
+/* ── 入力ハンドリング ─────────────────────── */
+document.getElementById('editor').addEventListener('input', e=>{
+  const t = e.target;
+  if(t.dataset.meta!=null){ state.meta[t.dataset.meta] = t.value; render(); return; }
+  const bi = t.dataset.blk;
+  if(bi==null) return;
+  const b = state.blocks[+bi];
+  if(!b) return;
+
+  if(t.dataset.fld!=null){
+    const f = t.dataset.fld;
+    if(f==='ordered')        b.ordered = t.value==='1';
+    else if(f==='showPrice') b.showPrice = t.checked;
+    else if(f==='colsText'){
+      b.cols = LINES(t.value).map(line=>{
+        const p = line.split('|').map(x=>x.trim());
+        return {l:p[0]||'', w:p[1]||'', c:(p[2]||'').toLowerCase()==='c'?1:0};
+      });
+    }
+    else if(f==='rowsText'){
+      b.rows = LINES(t.value).map(line=>line.split('|').map(x=>x.trim()));
+    }
+    else b[f] = t.value;
+    render(); return;
+  }
+  if(t.dataset.row!=null){ b.rows[+t.dataset.row][+t.dataset.col] = t.value; render(); return; }
+  if(t.dataset.grp!=null){ b.groups[+t.dataset.grp][t.dataset.gfld] = t.value; render(); return; }
+  if(t.dataset.irow!=null){ b.rows[+t.dataset.irow][t.dataset.ifld] = t.value; render(); return; }
+});
+
+document.getElementById('editor').addEventListener('click', e=>{
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  if(btn.dataset.add){
+    const k = btn.dataset.add;
+    const nb = {id:uid(), t:k, title:''};
+    if(k==='kv') nb.rows=[['','']];
+    if(k==='rich'){ nb.body=''; nb.list=''; }
+    if(k==='list'){ nb.ordered=true; nb.items=''; }
+    if(k==='table'){ nb.cols=[{l:'項目',w:'',c:0},{l:'内容',w:'',c:0}]; nb.rows=[['','']]; }
+    if(k==='qa') nb.groups=[{h:'',items:''}];
+    if(k==='items'){ nb.showPrice=true; nb.rows=[{mk:'',pl:'',sp:'',qt:''}]; }
+    if(k==='note') nb.items='';
+    state.blocks.push(nb); renderEditor(); render(); return;
+  }
+  const act = btn.dataset.act;
+  if(!act) return;
+  const i = +btn.dataset.i, j = +btn.dataset.j;
+  const b = state.blocks[i];
+  if(act==='del'){ state.blocks.splice(i,1); }
+  else if(act==='up' && i>0){ const x=state.blocks.splice(i,1)[0]; state.blocks.splice(i-1,0,x); }
+  else if(act==='down' && i<state.blocks.length-1){ const x=state.blocks.splice(i,1)[0]; state.blocks.splice(i+1,0,x); }
+  else if(act==='rowadd')  b.rows.push(['','']);
+  else if(act==='rowdel')  b.rows.splice(j,1);
+  else if(act==='grpadd')  b.groups.push({h:'',items:''});
+  else if(act==='grpdel')  b.groups.splice(j,1);
+  else if(act==='irowadd') b.rows.push({mk:'',pl:'',sp:'',qt:''});
+  else if(act==='irowdel') b.rows.splice(j,1);
+  else return;
+  renderEditor(); render();
+});
+
+document.getElementById('theme-select').addEventListener('change', e=>{
+  state.theme = e.target.value; render();
+});
+document.getElementById('tpl-select').addEventListener('change', e=>{
+  const v = e.target.value; e.target.value = '';
+  if(!v) return;
+  if(!confirm('現在の内容を破棄して雛形を読み込みます。よろしいですか？')) return;
+  state = (v==='sample') ? sampleState() : blankState();
+  document.getElementById('theme-select').value = state.theme;
+  renderEditor(); render(); toast('雛形を読み込みました');
+});
+window.addEventListener('resize', fitPreview);
+
+/* ── 出力（保存HTML・印刷・PDF）───────────── */
+function buildDocHTML(forPrint){
+  const inner = document.getElementById('preview-inner').cloneNode(true);
+  inner.style.transform = ''; inner.style.width = ''; inner.style.marginBottom = '';
+  inner.querySelectorAll('.pg-badge,.pg-over').forEach(n=>n.remove());
+  const css = document.getElementById('doc-css').outerHTML;
+  const title = (document.title||'打合せ資料').replace(/[\\\/:*?"<>|]/g,'_');
+  const json = JSON.stringify(state).replace(/</g,'\\u003c');
+  const SO='<scr'+'ipt', SC='</scr'+'ipt>';
+  const stateTag = SO+' id="artrays-doc-state" type="application/json">'+json+SC;
+  const printJs = forPrint ? (SO+'>window.addEventListener("load",function(){setTimeout(function(){window.print();},400);});'+SC) : '';
+  return `<!DOCTYPE html>
+<html lang="ja"><head><meta charset="UTF-8"><title>${ESC(title)}</title>
+${css}
+<style>
+  body{background:#fff;margin:0;padding:0;}
+  .page{box-shadow:none;margin:0 auto;}
+</style>
+</head><body>
+${inner.outerHTML}
+${stateTag}
+${printJs}
+</body></html>`;
+}
+
+function printHTML(){
+  let win=null;
+  try{ win = window.open('', '_blank'); }catch(e){ win=null; }
+  if(win && !win.closed){
+    win.document.open(); win.document.write(buildDocHTML(false)); win.document.close();
+    let done=false;
+    const fire=()=>{ if(done) return; done=true; try{ win.focus(); win.print(); }catch(e){} };
+    try{ win.addEventListener('load', ()=>setTimeout(fire,500)); }catch(e){}
+    setTimeout(fire,1500);
+    return;
+  }
+  const blob = new Blob([buildDocHTML(true)],{type:'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+}
+
+function loadHtml2Pdf(){
+  return new Promise((res,rej)=>{
+    if(window.html2pdf) return res(window.html2pdf);
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js';
+    s.onload=()=>res(window.html2pdf);
+    s.onerror=()=>rej(new Error('html2pdf.js の読み込みに失敗しました'));
+    document.head.appendChild(s);
+  });
+}
+
+async function savePDF(){
+  try{
+    const fn = await loadHtml2Pdf();
+    const wrap = document.createElement('div');
+    wrap.innerHTML = buildDocHTML(false).replace(/^[\s\S]*?<body>/,'').replace(/<\/body>[\s\S]*$/,'');
+    wrap.style.position='fixed'; wrap.style.left='-10000px'; wrap.style.top='0';
+    document.body.appendChild(wrap);
+    const opt={margin:0,filename:(document.title||'打合せ資料')+'.pdf',
+      image:{type:'jpeg',quality:0.96},
+      html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},
+      jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+      pagebreak:{mode:['css','legacy'],before:'.page'}};
+    await fn().set(opt).from(wrap).save();
+    wrap.remove();
+    toast('PDFを保存しました');
+  }catch(e){ alert('PDF生成に失敗しました：'+e.message); }
+}
+
+function saveReeditHTML(){
+  const blob=new Blob([buildDocHTML(false)],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=(document.title||'打合せ資料')+'.html'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+  toast('💾 再編集用HTMLを保存しました');
+}
+
+document.getElementById('load-input').addEventListener('change', async e=>{
+  const f=e.target.files&&e.target.files[0]; if(!f) return;
+  try{
+    const txt = await f.text();
+    let obj=null;
+    if(/^\s*\{/.test(txt)) obj = JSON.parse(txt);
+    else{
+      const doc = new DOMParser().parseFromString(txt,'text/html');
+      const tag = doc.getElementById('artrays-doc-state');
+      if(!tag) throw new Error('この HTML には編集データが埋め込まれていません');
+      obj = JSON.parse(tag.textContent);
+    }
+    if(!obj || !obj.blocks) throw new Error('データ形式が読み取れません');
+    state = obj;
+    (state.blocks||[]).forEach(b=>{ if(!b.id) b.id=uid(); });
+    document.getElementById('theme-select').value = state.theme||'mono';
+    renderEditor(); render(); toast('読み込みました');
+  }catch(err){ alert('読み込みに失敗しました：'+err.message); }
+  e.target.value='';
+});
+
+function toast(msg){
+  const d=document.createElement('div'); d.className='toast'; d.textContent=msg;
+  document.body.appendChild(d); setTimeout(()=>d.remove(),2200);
+}
+
+/* ── 起動 ─────────────────────────────── */
+(function init(){
+  let s=null;
+  try{ const raw=localStorage.getItem(STATE_KEY); if(raw) s=JSON.parse(raw); }catch(e){}
+  state = (s && s.blocks) ? s : sampleState();
+  (state.blocks||[]).forEach(b=>{ if(!b.id) b.id=uid(); });
+  document.getElementById('theme-select').value = state.theme||'mono';
+  renderEditor(); render();
+})();
+</script>
+<script src="back-guard.js"></script>
+</body>
+</html>
