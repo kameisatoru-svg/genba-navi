@@ -712,6 +712,13 @@ function applySplit(){
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up);
   });
+  /* 横並び⇔縦積みが切り替わると flex-basis の意味が幅↔高さに変わるため、
+     切替を検知して必ず配分を計算し直す（resize だけに頼らない） */
+  const mq = window.matchMedia('(max-width:860px)');
+  const onMode = ()=>{ applySplit(); fitPreview(); };
+  if(mq.addEventListener) mq.addEventListener('change', onMode);
+  else if(mq.addListener) mq.addListener(onMode);
+
   /* ダブルクリックで既定の配分に戻す */
   sp.addEventListener('dblclick', ()=>{
     localStorage.removeItem(SPLIT_KEY_H);
