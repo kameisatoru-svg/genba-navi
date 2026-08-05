@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ja"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>現調カメラ｜アート・レイズ</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="現調カメラ">
+<meta name="theme-color" content="#1e2d40">
+<link rel="stylesheet" href="common.css">
+<style>
+/* ── 現調カメラ 固有スタイル ───────────── */
+body{display:flex;flex-direction:column;min-height:100dvh;background:var(--bg);}
+
+.header{background:var(--navy);padding:env(safe-area-inset-top,0) 0 0;flex-shrink:0;}
+.header-inner{height:56px;display:flex;align-items:center;padding:0 16px;gap:10px;}
+.logo{font-size:17px;font-weight:900;color:var(--white);letter-spacing:.04em;flex:1;}
+.logo span{color:var(--accent);}
+.header-btn{min-width:40px;height:36px;padding:0 12px;border:none;border-radius:8px;
+  background:rgba(255,255,255,.14);color:#fff;font-size:12px;font-weight:700;cursor:pointer;}
+.header-btn:active{background:rgba(255,255,255,.26);}
+.header-btn[disabled]{opacity:.35;}
+
+.screen{display:none;flex:1;flex-direction:column;}
+.screen.active{display:flex;}
+
+/* ── セットアップ画面 ─────── */
+.setup{padding:18px 16px max(24px,env(safe-area-inset-bottom));overflow-y:auto;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--text2);
+  letter-spacing:.06em;margin-bottom:6px;}
+.field select,.field input{width:100%;height:48px;padding:0 12px;font-size:15px;
+  border:1px solid var(--border);border-radius:var(--radius-md);background:#fff;color:var(--text);}
+.field select:focus-visible,.field input:focus-visible{outline:2px solid var(--focus);outline-offset:1px;}
+
+.tpl-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.tpl{background:#fff;border:2px solid var(--border);border-radius:var(--radius-lg);
+  padding:14px 12px;cursor:pointer;text-align:left;transition:.15s;}
+.tpl:active{transform:scale(.98);}
+.tpl.sel{border-color:var(--accent);background:#fdfaf4;box-shadow:var(--shadow-card);}
+.tpl-name{font-size:14px;font-weight:800;color:var(--navy);margin-bottom:3px;}
+.tpl-meta{font-size:11px;color:var(--text2);line-height:1.5;}
+
+.note{background:#fff;border-left:3px solid var(--accent);border-radius:var(--radius-sm);
+  padding:12px 14px;font-size:12px;line-height:1.7;color:var(--text2);margin-top:6px;}
+.note b{color:var(--navy);}
+
+.big-btn{width:100%;height:var(--btn-large);border:none;border-radius:var(--radius-lg);
+  background:var(--navy);color:#fff;font-size:16px;font-weight:800;cursor:pointer;
+  margin-top:20px;letter-spacing:.04em;}
+.big-btn:active{background:var(--navy2);}
+.big-btn[disabled]{opacity:.4;}
+.big-btn.gold{background:var(--accent);color:var(--navy);}
+
+/* ── 撮影画面 ─────── */
+.cam-wrap{position:relative;flex:1;background:#000;overflow:hidden;min-height:0;}
+#video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+#grid{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+
+/* 指示バー */
+.instruct{position:absolute;top:0;left:0;right:0;z-index:6;
+  background:linear-gradient(rgba(0,0,0,.72),rgba(0,0,0,0));
+  padding:10px 14px 26px;color:#fff;}
+.ins-step{font-size:10px;color:var(--accent);font-weight:700;letter-spacing:.1em;}
+.ins-title{font-size:17px;font-weight:800;margin:2px 0 3px;line-height:1.3;}
+.ins-hint{font-size:12px;line-height:1.5;color:rgba(255,255,255,.82);}
+
+/* 水平ゲージ */
+.gauge{position:absolute;z-index:6;left:12px;bottom:120px;
+  background:rgba(0,0,0,.6);border-radius:12px;padding:10px 12px;color:#fff;min-width:132px;}
+.g-row{display:flex;align-items:baseline;gap:8px;margin-bottom:5px;}
+.g-row:last-child{margin-bottom:0;}
+.g-lab{font-size:10px;color:rgba(255,255,255,.6);width:34px;flex-shrink:0;}
+.g-val{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;}
+.g-tol{font-size:10px;color:rgba(255,255,255,.5);}
+.ok{color:#4ade80;} .warn{color:#fbbf24;} .ng{color:#f87171;}
+
+/* 判定バッジ */
+.verdict{position:absolute;z-index:6;right:12px;bottom:120px;
+  padding:9px 14px;border-radius:var(--radius-pill);font-size:13px;font-weight:800;
+  background:rgba(0,0,0,.6);color:#fff;}
+.verdict.good{background:rgba(26,122,48,.9);}
+.verdict.bad{background:rgba(192,57,43,.9);}
+
+/* 撮影バー */
+.shootbar{flex-shrink:0;background:#111;padding:12px 16px max(14px,env(safe-area-inset-bottom));
+  display:flex;align-items:center;gap:14px;}
+.shutter{width:70px;height:70px;border-radius:50%;border:4px solid #fff;background:#f87171;
+  cursor:pointer;flex-shrink:0;margin:0 auto;transition:.12s;}
+.shutter.ready{background:#4ade80;}
+.shutter:active{transform:scale(.92);}
+.side-btn{min-width:56px;height:44px;border:1px solid rgba(255,255,255,.3);border-radius:10px;
+  background:transparent;color:#fff;font-size:11px;font-weight:700;cursor:pointer;padding:0 8px;}
+.side-btn:active{background:rgba(255,255,255,.16);}
+
+/* ショット一覧 */
+.shots{flex-shrink:0;background:#1a1a1a;padding:8px 12px;display:flex;gap:7px;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.chip{flex-shrink:0;padding:6px 11px;border-radius:var(--radius-pill);font-size:11px;
+  font-weight:700;background:#333;color:#999;white-space:nowrap;border:1px solid transparent;cursor:pointer;}
+.chip.done{background:var(--green);color:#fff;}
+.chip.cur{background:var(--accent);color:var(--navy);border-color:#fff;}
+.chip.loose{background:#7a5c1a;color:#ffd98a;}
+
+/* ── 確認画面 ─────── */
+.review{padding:16px 16px max(24px,env(safe-area-inset-bottom));overflow-y:auto;}
+.rev-item{display:flex;gap:12px;background:#fff;border-radius:var(--radius-md);
+  padding:10px;margin-bottom:10px;box-shadow:var(--shadow-card);}
+.rev-item img{width:92px;height:92px;object-fit:cover;border-radius:var(--radius-sm);flex-shrink:0;background:#eee;}
+.rev-body{flex:1;min-width:0;}
+.rev-title{font-size:13px;font-weight:800;color:var(--navy);margin-bottom:3px;}
+.rev-file{font-size:10px;color:var(--text3);word-break:break-all;margin-bottom:5px;line-height:1.4;}
+.rev-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;
+  border-radius:var(--radius-pill);margin-right:5px;}
+.tag-ok{background:var(--green-bg);color:var(--green);}
+.tag-warn{background:var(--orange-bg);color:var(--orange);}
+.rev-del{border:none;background:transparent;color:var(--red);font-size:11px;
+  font-weight:700;cursor:pointer;padding:4px 0;}
+
+.empty{text-align:center;color:var(--text3);font-size:13px;padding:40px 20px;line-height:1.8;}
+.err{background:var(--red-bg);color:var(--red);border-radius:var(--radius-sm);
+  padding:12px 14px;font-size:12px;line-height:1.7;margin-bottom:14px;}
+.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);z-index:99;
+  background:rgba(0,0,0,.86);color:#fff;padding:11px 20px;border-radius:var(--radius-pill);
+  font-size:13px;font-weight:700;opacity:0;transition:opacity .25s;pointer-events:none;}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<div class="header"><div class="header-inner">
+  <div class="logo">現調<span>カメラ</span></div>
+  <button class="header-btn" id="btnBack" style="display:none">戻る</button>
+  <button class="header-btn" id="btnReview" style="display:none">確認 <span id="cnt">0</span></button>
+</div></div>
+
+<!-- ══ 1. セットアップ ══ -->
+<div class="screen active" id="scSetup"><div class="setup">
+  <div id="setupErr"></div>
+
+  <div class="field">
+    <label>案件</label>
+    <select id="ankenSel"><option value="">— 読み込み中 —</option></select>
+  </div>
+
+  <div class="field">
+    <label>区分</label>
+    <select id="kubunSel">
+      <option>現調</option><option>施工</option><option>完了</option><option>受領</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label>場所・部屋名（ファイル名に入ります）</label>
+    <input type="text" id="roomInp" placeholder="例：2F更衣室" autocomplete="off">
+  </div>
+
+  <div class="field">
+    <label>撮影テンプレート</label>
+    <div class="tpl-grid" id="tplGrid"></div>
+  </div>
+
+  <div class="note" id="tplNote"></div>
+
+  <button class="big-btn" id="btnStart">カメラを起動</button>
+
+  <div class="note" style="margin-top:18px">
+    <b>センサーでできること／できないこと</b><br>
+    傾きセンサーで <b>水平（ロール）</b> と <b>仰角（見上げ・見下ろし）</b> は正確に出せます。<br>
+    ただし <b>壁への正対（左右の振り）</b> はセンサーでは測れません（屋内は磁気が乱れて方位が使えないため）。
+    こちらは画面のグリッドに<b>壁の上下の辺を平行に合わせて</b>ください。残った誤差は、あとから4点補正で消せます。
+  </div>
+</div></div>
+
+<!-- ══ 2. 撮影 ══ -->
+<div class="screen" id="scShoot">
+  <div class="cam-wrap">
+    <video id="video" playsinline muted autoplay></video>
+    <svg id="grid" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+    <div class="instruct">
+      <div class="ins-step" id="insStep"></div>
+      <div class="ins-title" id="insTitle"></div>
+      <div class="ins-hint" id="insHint"></div>
+    </div>
+    <div class="gauge">
+      <div class="g-row"><span class="g-lab">水平</span>
+        <span class="g-val" id="vRoll">--</span><span class="g-tol" id="tRoll"></span></div>
+      <div class="g-row"><span class="g-lab">仰角</span>
+        <span class="g-val" id="vElev">--</span><span class="g-tol" id="tElev"></span></div>
+    </div>
+    <div class="verdict" id="verdict">センサー待機</div>
+  </div>
+
+  <div class="shots" id="shots"></div>
+
+  <div class="shootbar">
+    <button class="side-btn" id="btnSkip">スキップ</button>
+    <button class="shutter" id="shutter" aria-label="撮影"></button>
+    <button class="side-btn" id="btnRes">—</button>
+  </div>
+</div>
+
+<!-- ══ 3. 確認・書き出し ══ -->
+<div class="screen" id="scReview"><div class="review">
+  <div id="revList"></div>
+  <button class="big-btn gold" id="btnShare">写真を共有／保存</button>
+  <button class="big-btn" id="btnMeta">撮影メタ（JSON）を保存</button>
+  <div class="note" style="margin-top:16px">
+    <b>保存のしかた</b><br>
+    「共有／保存」で Google ドライブや「ファイル」アプリに直接送れます。案件フォルダの
+    <b>写真</b> に入れてください。<br>
+    ファイル名は現場ナビの命名規則（<code>連番_月日_時分_区分_説明</code>）で自動生成済みです。<br><br>
+    <b>撮影メタJSON</b> には各カットの水平・仰角・解像度・画角が入っています。あとで寸法を拾うときに使うので、同じフォルダに一緒に置いてください。
+  </div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════
+   現調カメラ  genba_camera.html
+   - getUserMedia + DeviceOrientation
+   - 姿勢（水平/仰角）を実測しながらガイド撮影
+   - 現場ナビ命名規則でファイル名を自動生成
+   ═══════════════════════════════════════════ */
+
+/* ── 端末別の画角テーブル（EXIF実績から。寸法計算に使う）── */
+const FOV_TABLE = {
+  'Galaxy Z Fold5': 23, 'SM-F946': 23,
+  'SC-55B': 24, 'SM-S908': 24,
+  'Pixel 8 Pro': 24, 'iPhone': 26
+};
+function guessFocal35(){
+  const ua = navigator.userAgent;
+  for (const k in FOV_TABLE) if (ua.indexOf(k) >= 0) return FOV_TABLE[k];
+  return 24; // 一般的なスマホ標準広角
+}
+
+/* ── 撮影テンプレート ──
+   targetElev: 目標仰角(度)  0=水平 / -90=真下(床) / +90=真上(天井) / null=不問
+   checkRoll : 水平を判定するか（床・天井はロール＝方位なので判定しない）
+   tol       : 許容(度)  measure=寸法用は厳しく, record=記録用は緩く       */
+const TEMPLATES = {
+  room: {
+    name: '部屋まるごと', desc: '全景＋4面＋床天井＋基準',
+    shots: [
+      {code:'全景', label:'部屋の全景', hint:'入口から。四隅がすべて入るように。ここは広角でOK（記録用）', targetElev:0, checkRoll:true, tol:8, measure:false},
+      {code:'A面', label:'A面（上）の壁に正対', hint:'壁の上下の辺をグリッドの横線と平行に。四隅を必ず入れる', targetElev:0, checkRoll:true, tol:3, measure:true},
+      {code:'B面', label:'B面（右）の壁に正対', hint:'同上。四隅が切れると後で補正できません', targetElev:0, checkRoll:true, tol:3, measure:true},
+      {code:'C面', label:'C面（下）の壁に正対', hint:'同上', targetElev:0, checkRoll:true, tol:3, measure:true},
+      {code:'D面', label:'D面（左）の壁に正対', hint:'同上', targetElev:0, checkRoll:true, tol:3, measure:true},
+      {code:'床', label:'床（真下を向けて）', hint:'胸の高さから真下へ。床の四隅がなるべく入るように', targetElev:-90, checkRoll:false, tol:4, measure:true},
+      {code:'天井', label:'天井（真上を向けて）', hint:'真上へ。廻り縁の直線が入るように', targetElev:90, checkRoll:false, tol:4, measure:true},
+      {code:'基準スケール', label:'基準スケールの寄り', hint:'コンセントプレート（1連70×120mm）かメジャーを、測りたい面と同じ平面で中央に', targetElev:0, checkRoll:true, tol:6, measure:true}
+    ]
+  },
+  wall: {
+    name: '壁1面', desc: '正対＋寄り 2カット',
+    shots: [
+      {code:'壁正対', label:'壁に正対', hint:'壁の上下の辺をグリッドの横線と平行に。四隅を入れる', targetElev:0, checkRoll:true, tol:3, measure:true},
+      {code:'壁寄り', label:'基準スケールの寄り', hint:'メジャーかコンセントプレートを壁と同じ平面に置いて', targetElev:0, checkRoll:true, tol:6, measure:true}
+    ]
+  },
+  floor: {
+    name: '床の割付用', desc: '真下2方向＋基準',
+    shots: [
+      {code:'床1', label:'床（真下・手前から）', hint:'部屋の一方の端から真下へ。床の四隅を狙う', targetElev:-90, checkRoll:false, tol:4, measure:true},
+      {code:'床2', label:'床（真下・反対側から）', hint:'反対の端から。2枚で重ねると全体が拾えます', targetElev:-90, checkRoll:false, tol:4, measure:true},
+      {code:'床基準', label:'基準スケールの寄り', hint:'既存の目地ピッチかメジャーを床に置いて真下から', targetElev:-90, checkRoll:false, tol:6, measure:true}
+    ]
+  },
+  ceiling: {
+    name: '天井の割付用', desc: '真上2カット',
+    shots: [
+      {code:'天井1', label:'天井（真上・手前から）', hint:'廻り縁の直線を入れる。四隅を狙う', targetElev:90, checkRoll:false, tol:4, measure:true},
+      {code:'天井2', label:'天井（真上・反対側から）', hint:'反対の端から', targetElev:90, checkRoll:false, tol:4, measure:true}
+    ]
+  },
+  opening: {
+    name: '開口部・建具', desc: '正面／枠／金物',
+    shots: [
+      {code:'建具正面', label:'建具の正面', hint:'枠の外側四隅を入れて正対。上下の枠をグリッドと平行に', targetElev:0, checkRoll:true, tol:3, measure:true},
+      {code:'枠寄り', label:'枠の寄り（見付・見込）', hint:'メジャーを枠に当てて', targetElev:0, checkRoll:true, tol:6, measure:true},
+      {code:'金物', label:'金物・丁番', hint:'型番が読める距離で', targetElev:null, checkRoll:false, tol:15, measure:false}
+    ]
+  },
+  free: {
+    name: '自由撮影', desc: 'ガイドなし・水平ゲージのみ',
+    shots: [{code:'記録', label:'自由撮影', hint:'水平ゲージだけ表示します。何枚でも撮れます', targetElev:null, checkRoll:true, tol:8, measure:false, repeat:true}]
+  }
+};
+
+/* ── 状態 ── */
+const S = {
+  anken:'', kubun:'現調', room:'', tplKey:'room',
+  shots:[], idx:0, photos:[], stream:null, track:null,
+  roll:null, elev:null, focal35:guessFocal35(), seq:1
+};
+
+const $ = id => document.getElementById(id);
+const toast = (m) => { const t=$('toast'); t.textContent=m; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),1900); };
+
+/* ═══ 1. セットアップ ═══ */
+(function initTemplates(){
+  const g = $('tplGrid');
+  g.innerHTML = Object.keys(TEMPLATES).map(k=>{
+    const t = TEMPLATES[k];
+    return `<button class="tpl${k===S.tplKey?' sel':''}" data-k="${k}">
+      <div class="tpl-name">${t.name}</div>
+      <div class="tpl-meta">${t.desc}<br>${t.shots.length}カット</div></button>`;
+  }).join('');
+  g.addEventListener('click', e=>{
+    const b = e.target.closest('.tpl'); if(!b) return;
+    S.tplKey = b.dataset.k;
+    [...g.children].forEach(c=>c.classList.toggle('sel', c===b));
+    renderTplNote();
+  });
+  renderTplNote();
+})();
+
+function renderTplNote(){
+  const t = TEMPLATES[S.tplKey];
+  $('tplNote').innerHTML = '<b>'+t.name+'</b> の撮影順<br>' +
+    t.shots.map((s,i)=>`${i+1}. ${s.label}`).join('<br>');
+}
+
+/* 案件リスト（data.json → localStorageにキャッシュして圏外でも使える） */
+(async function loadAnken(){
+  const sel = $('ankenSel');
+  const render = list => {
+    sel.innerHTML = '<option value="">（案件を選択）</option>' +
+      list.map(k=>`<option value="${k}">${k}</option>`).join('') +
+      '<option value="__manual__">— 手入力する —</option>';
+    const last = localStorage.getItem('gc_lastAnken');
+    if (last && list.includes(last)) sel.value = last;
+  };
+  let cached = null;
+  try { cached = JSON.parse(localStorage.getItem('gc_ankenList')||'null'); } catch(e){}
+  if (cached) render(cached);
+  try {
+    const r = await fetch('data.json', {cache:'no-store'});
+    const d = await r.json();
+    const live = (d['案件']||[])
+      .filter(a => a['案件キー'] && !['入金済み','完了','中止'].includes(a['ステータス']))
+      .map(a => a['案件キー']);
+    const all = (d['案件']||[]).map(a=>a['案件キー']).filter(Boolean);
+    const list = live.length ? live.concat(all.filter(k=>!live.includes(k))) : all;
+    localStorage.setItem('gc_ankenList', JSON.stringify(list));
+    render(list);
+  } catch(e){
+    if (!cached) { render([]); $('setupErr').innerHTML =
+      '<div class="err">案件リスト（data.json）を読めませんでした。「手入力する」を選んでください。</div>'; }
+  }
+})();
+
+$('ankenSel').addEventListener('change', e=>{
+  if (e.target.value === '__manual__'){
+    const v = prompt('案件キーを入力（例：加藤-実家相談-26）');
+    if (v){ const o=document.createElement('option'); o.value=o.textContent=v;
+      e.target.insertBefore(o, e.target.firstChild.nextSibling); e.target.value=v; }
+    else e.target.value = '';
+  }
+});
+
+/* ═══ 2. カメラ起動 ═══ */
+$('btnStart').addEventListener('click', async ()=>{
+  S.anken = $('ankenSel').value;
+  if (!S.anken || S.anken==='__manual__'){ toast('案件を選んでください'); return; }
+  localStorage.setItem('gc_lastAnken', S.anken);
+  S.kubun = $('kubunSel').value;
+  S.room  = $('roomInp').value.trim();
+  S.shots = JSON.parse(JSON.stringify(TEMPLATES[S.tplKey].shots));
+  S.idx = 0;
+
+  await requestOrientation();          // iOSはユーザー操作の中でしか許可を出せない
+  const ok = await startCamera();
+  if (!ok) return;
+  show('scShoot');
+  $('btnBack').style.display = '';
+  $('btnReview').style.display = '';
+  renderShots(); renderInstruct(); drawGrid();
+});
+
+async function requestOrientation(){
+  const DOE = window.DeviceOrientationEvent;
+  if (DOE && typeof DOE.requestPermission === 'function'){   // iOS 13+
+    try { await DOE.requestPermission(); } catch(e){}
+  }
+  window.addEventListener('deviceorientation', onOrient, true);
+}
+
+async function startCamera(){
+  try{
+    S.stream = await navigator.mediaDevices.getUserMedia({
+      video:{ facingMode:{ideal:'environment'},
+              width:{ideal:3840}, height:{ideal:2160} },
+      audio:false
+    });
+  }catch(e){
+    $('setupErr').innerHTML = '<div class="err">カメラを起動できませんでした（'+e.name+'）。<br>'+
+      'ブラウザのカメラ権限を許可してください。HTTPS（github.io）で開く必要があります。</div>';
+    return false;
+  }
+  const v = $('video');
+  v.srcObject = S.stream;
+  await v.play().catch(()=>{});
+  S.track = S.stream.getVideoTracks()[0];
+  const st = S.track.getSettings();
+  $('btnRes').textContent = (st.width||'?')+'\n×'+(st.height||'?');
+  $('btnRes').style.whiteSpace='pre-line'; $('btnRes').style.fontSize='10px';
+  return true;
+}
+
+/* ═══ 姿勢計算 ═══
+   W3C DeviceOrientation の alpha/beta/gamma から回転行列を組み、
+     仰角 elev = asin(-cosβ·cosγ)          （カメラ光軸の水平からの角度）
+     ロール roll = atan2(-cosβ·sinγ, sinβ)  （光軸まわりの回転）
+   ※ 真下/真上を向くと roll は方位に縮退するため、床・天井では判定しない。 */
+function onOrient(e){
+  if (e.beta === null || e.gamma === null) return;
+  const b = e.beta * Math.PI/180, g = e.gamma * Math.PI/180;
+  const cB=Math.cos(b), sB=Math.sin(b), cG=Math.cos(g), sG=Math.sin(g);
+  S.elev = Math.asin(Math.max(-1,Math.min(1, -cB*cG))) * 180/Math.PI;
+  S.roll = Math.atan2(-cB*sG, sB) * 180/Math.PI;
+  updateGauge();
+}
+
+/* 縦持ち/横持ちの両方を許容：0/±90/180 のうち最も近いものからのズレを「水平ズレ」とする */
+function rollDeviation(roll){
+  if (roll === null) return null;
+  let best = 1e9;
+  for (const t of [0,90,-90,180,-180]){
+    const d = Math.abs(roll - t);
+    if (d < Math.abs(best)) best = roll - t;
+  }
+  return best;
+}
+
+function updateGauge(){
+  const sh = S.shots[S.idx]; if (!sh) return;
+  const rd = rollDeviation(S.roll);
+  const ed = (sh.targetElev===null || S.elev===null) ? null : (S.elev - sh.targetElev);
+
+  const cls = (v,tol)=> v===null?'':(Math.abs(v)<=tol?'ok':(Math.abs(v)<=tol*2?'warn':'ng'));
+
+  if (sh.checkRoll && rd!==null){
+    $('vRoll').textContent = (rd>=0?'+':'')+rd.toFixed(1)+'°';
+    $('vRoll').className = 'g-val '+cls(rd, sh.tol);
+    $('tRoll').textContent = '±'+sh.tol+'°';
+  } else {
+    $('vRoll').textContent = '—'; $('vRoll').className='g-val'; $('tRoll').textContent='判定なし';
+  }
+  if (ed!==null){
+    $('vElev').textContent = (ed>=0?'+':'')+ed.toFixed(1)+'°';
+    $('vElev').className = 'g-val '+cls(ed, sh.tol);
+    $('tElev').textContent = '±'+sh.tol+'°';
+  } else {
+    $('vElev').textContent = S.elev===null?'—':S.elev.toFixed(0)+'°';
+    $('vElev').className='g-val'; $('tElev').textContent='自由';
+  }
+
+  const good = isGood();
+  const vd = $('verdict');
+  if (S.roll===null && S.elev===null){ vd.textContent='センサー未取得'; vd.className='verdict'; }
+  else if (good){ vd.textContent='OK 撮影できます'; vd.className='verdict good'; }
+  else { vd.textContent='傾きを直してください'; vd.className='verdict bad'; }
+  $('shutter').classList.toggle('ready', good);
+}
+
+function isGood(){
+  const sh = S.shots[S.idx]; if(!sh) return false;
+  if (S.roll===null && S.elev===null) return false;
+  const rd = rollDeviation(S.roll);
+  const ed = (sh.targetElev===null||S.elev===null)?0:(S.elev - sh.targetElev);
+  if (sh.checkRoll && rd!==null && Math.abs(rd) > sh.tol) return false;
+  if (Math.abs(ed) > sh.tol) return false;
+  return true;
+}
+
+/* ═══ グリッド（正対合わせ用） ═══ */
+function drawGrid(){
+  const sh = S.shots[S.idx];
+  const heavy = sh && sh.measure;
+  let g = '';
+  const line=(x1,y1,x2,y2,o,w)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"
+    stroke="#fff" stroke-opacity="${o}" stroke-width="${w}" vector-effect="non-scaling-stroke"/>`;
+  // 三分割
+  [33.33,66.67].forEach(p=>{ g+=line(p,0,p,100,.35,1); g+=line(0,p,100,p,.35,1); });
+  if (heavy){
+    // 寸法用カットは横線を増やす（壁の上下辺を平行に合わせるため）
+    [16.67,50,83.33].forEach(p=> g+=line(0,p,100,p,.5,1.4));
+    g+=line(50,0,50,100,.5,1.4);
+    // 中央十字
+    g+=line(44,50,56,50,.95,2)+line(50,44,50,56,.95,2);
+  }
+  $('grid').innerHTML = g;
+}
+
+/* ═══ 指示・ショット一覧 ═══ */
+function renderInstruct(){
+  const sh = S.shots[S.idx];
+  if (!sh){ $('insTitle').textContent='すべて撮影しました'; $('insHint').textContent='「確認」から保存へ';
+    $('insStep').textContent=''; return; }
+  $('insStep').textContent = `${S.idx+1} / ${S.shots.length}` + (sh.measure?'　寸法用':'　記録用');
+  $('insTitle').textContent = sh.label;
+  $('insHint').textContent = sh.hint;
+  drawGrid(); updateGauge();
+}
+
+function renderShots(){
+  $('shots').innerHTML = S.shots.map((s,i)=>{
+    const p = S.photos.find(p=>p.shotIdx===i);
+    let c = 'chip';
+    if (i===S.idx) c+=' cur';
+    else if (p) c += p.inTol ? ' done' : ' loose';
+    return `<button class="${c}" data-i="${i}">${p?'✓ ':''}${s.code}</button>`;
+  }).join('');
+  $('cnt').textContent = S.photos.length;
+}
+$('shots').addEventListener('click', e=>{
+  const b=e.target.closest('.chip'); if(!b) return;
+  S.idx = +b.dataset.i; renderShots(); renderInstruct();
+});
+
+/* ═══ 撮影 ═══ */
+$('shutter').addEventListener('click', capture);
+$('btnSkip').addEventListener('click', ()=>{ next(); });
+
+async function capture(){
+  const sh = S.shots[S.idx]; if(!sh) return;
+  const v = $('video');
+  if (!v.videoWidth){ toast('カメラ準備中です'); return; }
+
+  const inTol = isGood();
+  if (!inTol && !confirm('傾きが許容外です。このまま撮影しますか？\n（寸法拾いには使えない写真になります）')) return;
+
+  const cv = document.createElement('canvas');
+  cv.width = v.videoWidth; cv.height = v.videoHeight;
+  cv.getContext('2d').drawImage(v,0,0);
+  const blob = await new Promise(r=>cv.toBlob(r,'image/jpeg',0.92));
+
+  const now = new Date();
+  const p2 = n => String(n).padStart(2,'0');
+  const stamp = p2(now.getMonth()+1)+p2(now.getDate())+'_'+p2(now.getHours())+p2(now.getMinutes());
+  const desc = [S.room, sh.code].filter(Boolean).join('_');
+  const name = `${p2(S.seq++)}_${stamp}_${S.kubun}_${desc}.jpg`;
+
+  const rd = rollDeviation(S.roll);
+  const rec = {
+    shotIdx:S.idx, code:sh.code, label:sh.label, file:name, blob,
+    url:URL.createObjectURL(blob), inTol,
+    roll: S.roll===null?null:+S.roll.toFixed(2),
+    rollDev: rd===null?null:+rd.toFixed(2),
+    elev: S.elev===null?null:+S.elev.toFixed(2),
+    targetElev: sh.targetElev, tol: sh.tol, measure: sh.measure,
+    w:cv.width, h:cv.height, focal35:S.focal35,
+    at: now.toISOString()
+  };
+
+  // 同じショットの撮り直しは差し替え（自由撮影は積み増し）
+  const ex = S.photos.findIndex(p=>p.shotIdx===S.idx);
+  if (ex>=0 && !sh.repeat){ URL.revokeObjectURL(S.photos[ex].url); S.photos[ex]=rec; }
+  else S.photos.push(rec);
+
+  toast(inTol ? '撮影OK：'+sh.code : '撮影（傾き許容外）');
+  next();
+}
+
+function next(){
+  const sh = S.shots[S.idx];
+  if (!(sh && sh.repeat)){
+    const nx = S.shots.findIndex((s,i)=> i>S.idx && !S.photos.some(p=>p.shotIdx===i));
+    S.idx = nx>=0 ? nx : Math.min(S.idx+1, S.shots.length-1);
+  }
+  renderShots(); renderInstruct();
+}
+
+/* ═══ 3. 確認・書き出し ═══ */
+$('btnReview').addEventListener('click', ()=>{ renderReview(); show('scReview'); });
+$('btnBack').addEventListener('click', ()=>{
+  if ($('scReview').classList.contains('active')){ show('scShoot'); return; }
+  stopCamera(); show('scSetup');
+  $('btnBack').style.display='none'; $('btnReview').style.display='none';
+});
+
+function renderReview(){
+  if (!S.photos.length){ $('revList').innerHTML =
+    '<div class="empty">まだ撮影がありません。<br>「戻る」から撮影を続けてください。</div>'; return; }
+  $('revList').innerHTML = S.photos.map((p,i)=>{
+    const tag = p.inTol
+      ? '<span class="rev-tag tag-ok">寸法可</span>'
+      : '<span class="rev-tag tag-warn">記録のみ</span>';
+    const rs = p.rollDev===null?'—':(p.rollDev>=0?'+':'')+p.rollDev.toFixed(1)+'°';
+    const es = (p.targetElev===null||p.elev===null)?'—':((p.elev-p.targetElev>=0?'+':'')+(p.elev-p.targetElev).toFixed(1)+'°');
+    return `<div class="rev-item">
+      <img src="${p.url}" alt="">
+      <div class="rev-body">
+        <div class="rev-title">${p.label}</div>
+        <div class="rev-file">${p.file}</div>
+        <div>${tag}<span class="rev-tag" style="background:#eee;color:#555">水平 ${rs} ／ 仰角 ${es}</span></div>
+        <div style="font-size:10px;color:var(--text3);margin-top:4px">${p.w}×${p.h}px ／ ${p.focal35}mm相当</div>
+        <button class="rev-del" data-i="${i}">この1枚を削除</button>
+      </div></div>`;
+  }).join('');
+}
+$('revList').addEventListener('click', e=>{
+  const b=e.target.closest('.rev-del'); if(!b) return;
+  const i=+b.dataset.i; URL.revokeObjectURL(S.photos[i].url);
+  S.photos.splice(i,1); renderReview(); renderShots(); $('cnt').textContent=S.photos.length;
+});
+
+$('btnShare').addEventListener('click', async ()=>{
+  if (!S.photos.length){ toast('写真がありません'); return; }
+  const files = S.photos.map(p=> new File([p.blob], p.file, {type:'image/jpeg'}));
+  if (navigator.canShare && navigator.canShare({files})){
+    try { await navigator.share({files, title:S.anken}); return; } catch(e){ if(e.name==='AbortError') return; }
+  }
+  S.photos.forEach((p,i)=> setTimeout(()=>dl(p.blob,p.file), i*350));
+  toast('ダウンロードを開始しました');
+});
+
+$('btnMeta').addEventListener('click', ()=>{
+  const meta = {
+    案件キー:S.anken, 区分:S.kubun, 場所:S.room,
+    テンプレート:TEMPLATES[S.tplKey].name,
+    端末:navigator.userAgent, 画角35mm換算:S.focal35,
+    生成:new Date().toISOString(),
+    注記:'roll/elevは度。inTol=false は寸法拾いに使わないこと。正対(左右の振り)はセンサー非対応のため4点補正で処理する。',
+    撮影:S.photos.map(p=>({
+      ファイル:p.file, ショット:p.code, 寸法用:p.measure, 許容内:p.inTol,
+      水平ズレ:p.rollDev, 仰角:p.elev, 目標仰角:p.targetElev, 許容:p.tol,
+      画素:[p.w,p.h], 画角35mm換算:p.focal35, 時刻:p.at
+    }))
+  };
+  const blob = new Blob([JSON.stringify(meta,null,2)],{type:'application/json'});
+  dl(blob, `_撮影メタ_${S.anken}_${new Date().toISOString().slice(0,10)}.json`);
+  toast('メタJSONを保存しました');
+});
+
+function dl(blob,name){
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+}
+
+function stopCamera(){ if(S.stream){ S.stream.getTracks().forEach(t=>t.stop()); S.stream=null; } }
+function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active', s.id===id)); }
+window.addEventListener('pagehide', stopCamera);
+</script>
+</body></html>
