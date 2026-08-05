@@ -519,7 +519,8 @@ function fitPreview(){
   const inner = document.getElementById('preview-inner');
   const pageW = 210 * 96 / 25.4;                 /* 210mm を px 換算 */
   const avail = area.clientWidth - 24;
-  const scale = Math.min(1, avail / pageW);
+  /* プレビュー枠が非表示のとき clientWidth が 0 になり負の倍率で上下反転するため下限を置く */
+  const scale = avail > 80 ? Math.min(1, avail / pageW) : 1;
   inner.style.transform = 'scale(' + scale + ')';
   inner.style.width = pageW + 'px';
   inner.style.marginLeft = 'auto';
@@ -695,7 +696,9 @@ async function savePDF(){
       image:{type:'jpeg',quality:0.96},
       html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},
       jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
-      pagebreak:{mode:['css','legacy'],before:'.page'}};
+      /* .page 同士の page-break-before(CSS) に任せる。before:'.page' を指定すると
+         1ページ目の前でも改頁が入り、先頭に白紙が1枚出る */
+      pagebreak:{mode:['css','legacy']}};
     await fn().set(opt).from(wrap).save();
     wrap.remove();
     toast('PDFを保存しました');
