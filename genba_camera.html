@@ -407,24 +407,64 @@ async function requestOrientation(){
 }
 
 async function startCamera(){
+  stopCamera();
   try{
     /* 4:3 で要求する。16:9 を要求するとセンサー上下を約25%捨てた画角になり、
        天井・床・壁がフレームに入らなくなる（実機で確認）。 */
-    const v = { width:{ideal:4032}, height:{ideal:3024} };
-    if (S.camId) v.deviceId = {exact:S.camId}; else v.facingMode = {ideal:'environment'};
-    S.stream = await navigator.mediaDevices.getUserMedia({video:v, audio:false});
+    const c = { width:{ideal:4032}, height:{ideal:3024} };
+    if (S.camId) c.deviceId = {exact:S.camId}; else c.facingMode = {ideal:'environment'};
+    S.stream = await navigator.mediaDevices.getUserMedia({video:c, audio:false});
   }catch(e){
+    if (S.camId){ S.camId=null; return startCamera(); }   // そのレンズが使えなければ既定へ戻す
     $('setupErr').innerHTML = '<div class="err">カメラを起動できませんでした（'+e.name+'）。<br>'+
       'ブラウザのカメラ権限を許可してください。HTTPS（github.io）で開く必要があります。</div>';
     return false;
   }
-  const v = $('video');
-  v.srcObject = S.stream;
-  await v.play().catch(()=>{});
+  const vid = $('video');
+  vid.srcObject = S.stream;
+  await vid.play().catch(()=>{});
   S.track = S.stream.getVideoTracks()[0];
   const st = S.track.getSettings();
-  $('btnRes').textContent = (st.height||'?')+'p';   // 取得できた実解像度（画質の目安）
+  S.camId = st.deviceId || S.camId;
+  if (!S.cams.length) S.cams = await listCams();       // 権限取得後でないとラベルが取れない
+  const i = S.cams.findIndex(d=>d.deviceId===S.camId);
+  if (i>=0) S.camIdx = i;
+  $('btnLens').textContent = lensName(S.camId, S.camIdx);
+  $('res').textContent = (st.width||'?')+'×'+(st.height||'?');
   return true;
+}
+
+/* ── レンズ切替 ────────────
+   Androidは背面に超広角/標準/望遠が別デバイスとして並ぶ。ラベルが機種依存で
+   読めない（"camera2 2, facing back" 等）ので、名前は一度だけ手で付けて覚える。 */
+async function listCams(){
+  try{
+    const ds = await navigator.mediaDevices.enumerateDevices();
+    const cams = ds.filter(d=>d.kind==='videoinput');
+    const back = cams.filter(d=>/back|environment|rear|背面/i.test(d.label||''));
+    return back.length ? back : cams;
+  }catch(e){ return []; }
+}
+function lensName(id, i){
+  let m={}; try{ m=JSON.parse(localStorage.getItem('gc_lensNames')||'{}'); }catch(e){}
+  return m[id] || ('レンズ'+(i+1));
+}
+$('btnLens').addEventListener('click', async ()=>{
+  if (S.cams.length < 2){ toast('切替できるレンズが見つかりません'); return; }
+  S.camIdx = (S.camIdx + 1) % S.cams.length;
+  S.camId  = S.cams[S.camIdx].deviceId;
+  if (await startCamera()) toast('レンズ：'+lensName(S.camId,S.camIdx)+'（長押しで名前を変更）');
+});
+let lensHold;
+$('btnLens').addEventListener('pointerdown', ()=>{ lensHold=setTimeout(renameLens,600); });
+['pointerup','pointerleave','pointercancel'].forEach(ev=>
+  $('btnLens').addEventListener(ev, ()=>clearTimeout(lensHold)));
+function renameLens(){
+  const v = prompt('このレンズの名前（例：0.5x／1x／2x）', lensName(S.camId,S.camIdx));
+  if (!v) return;
+  let m={}; try{ m=JSON.parse(localStorage.getItem('gc_lensNames')||'{}'); }catch(e){}
+  m[S.camId]=v; localStorage.setItem('gc_lensNames', JSON.stringify(m));
+  $('btnLens').textContent=v; toast('「'+v+'」で覚えました');
 }
 
 /* ═══ 姿勢計算 ═══
