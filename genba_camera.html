@@ -415,8 +415,7 @@ async function startCamera(){
   await v.play().catch(()=>{});
   S.track = S.stream.getVideoTracks()[0];
   const st = S.track.getSettings();
-  $('btnRes').textContent = (st.width||'?')+'\n×'+(st.height||'?');
-  $('btnRes').style.whiteSpace='pre-line'; $('btnRes').style.fontSize='10px';
+  $('btnRes').textContent = (st.height||'?')+'p';   // 取得できた実解像度（画質の目安）
   return true;
 }
 
