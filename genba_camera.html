@@ -321,14 +321,12 @@ const TEMPLATES = {
 const S = {
   anken:'', kubun:'現調', room:'', tplKey:'room',
   shots:[], idx:0, photos:[], stream:null, track:null,
-  roll:null, elev:null, focal35:guessFocal35(), seq:1,
+  roll:null, elev:null, seq:1,
   camId:null, cams:[], camIdx:0, defaultCamId:null   // 背面レンズ（超広角/標準/望遠）の切替用
 };
 
-/* 焦点距離が分かるのは既定レンズだけ（UserAgent由来の推定値）。
-   超広角や望遠に切り替えたら分からないので null で正直に残す。
-   ※ 4点補正（射影変換）に焦点距離は不要なので、寸法拾いには支障ない。 */
-function focalNow(){ return S.camId === S.defaultCamId ? S.focal35 : null; }
+/* 登録済みなら実測値、未登録なら null（推測で埋めない） */
+function focalNow(){ const c = lensCfg(S.camId); return c && c.f35 ? c.f35 : null; }
 
 const $ = id => document.getElementById(id);
 const toast = (m) => { const t=$('toast'); t.textContent=m; t.classList.add('show');
@@ -490,8 +488,9 @@ async function listCams(){
   }catch(e){ return []; }
 }
 function lensName(id, i){
-  let m={}; try{ m=JSON.parse(localStorage.getItem('gc_lensNames')||'{}'); }catch(e){}
-  return m[id] || ('レンズ'+(i+1));
+  const c = lensCfg(id);
+  if (!c) return 'レンズ'+(i+1)+' ⚠';        // ⚠ = 焦点距離が未登録（姿勢補正に使えない）
+  return c.name + (c.f35 ? '' : ' ⚠');
 }
 $('btnLens').addEventListener('click', async ()=>{
   if (S.cams.length < 2){ toast('切替できるレンズが見つかりません'); return; }
