@@ -309,7 +309,8 @@ const TEMPLATES = {
 const S = {
   anken:'', kubun:'現調', room:'', tplKey:'room',
   shots:[], idx:0, photos:[], stream:null, track:null,
-  roll:null, elev:null, focal35:guessFocal35(), seq:1
+  roll:null, elev:null, focal35:guessFocal35(), seq:1,
+  camId:null, cams:[], camIdx:0        // 背面レンズ（超広角/標準/望遠）の切替用
 };
 
 const $ = id => document.getElementById(id);
