@@ -39,11 +39,27 @@ body{
 
 .main{flex:1 1 auto;display:flex;min-height:0;}
 .editor{
-  flex:0 0 400px;max-width:46vw;overflow-y:auto;background:#fff;
-  border-right:1px solid var(--border,#ddd);padding:12px 12px 80px;
+  flex:0 0 400px;min-width:0;overflow-y:auto;background:#fff;
+  padding:12px 12px 80px;
 }
-.preview{flex:1 1 auto;overflow:auto;padding:18px 10px 60px;background:#dcd8d1;}
+.preview{flex:1 1 auto;min-width:0;overflow:auto;padding:18px 10px 60px;background:#dcd8d1;}
 .preview-inner{transform-origin:top center;}
+
+/* 記入欄とプレビューの境目：ドラッグで幅を変えられる */
+.splitter{
+  flex:0 0 9px;background:var(--border,#ddd);cursor:col-resize;position:relative;
+  touch-action:none;user-select:none;-webkit-user-select:none;
+}
+.splitter::before{
+  content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:3px;height:30px;border-radius:2px;background:#9aa6b2;
+  box-shadow:5px 0 0 #9aa6b2,-5px 0 0 #9aa6b2;
+}
+.splitter:hover,.splitter.drag{background:var(--accent,#c8a96e);}
+.splitter.drag::before{background:#fff;box-shadow:5px 0 0 #fff,-5px 0 0 #fff;}
+body.resizing{cursor:col-resize;}
+body.resizing.vert{cursor:row-resize;}
+body.resizing .editor,body.resizing .preview{pointer-events:none;}
 
 .ed-card{border:1px solid var(--border,#ddd);border-radius:8px;margin-bottom:10px;background:#fff;}
 .ed-head{
@@ -95,8 +111,12 @@ input.f:focus,textarea.f:focus,select.f:focus{outline:0;border-color:var(--accen
   font-size:13px;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.25);}
 @media (max-width:860px){
   .main{flex-direction:column;}
-  .editor{flex:1 1 auto;max-width:100%;border-right:0;border-bottom:1px solid #ddd;}
+  /* 縦積みでは flex-basis が高さになる。スライダーはそのまま上下ドラッグで効く */
+  .editor{flex:0 0 45vh;}
   .preview{flex:1 1 auto;}
+  .splitter{flex:0 0 12px;cursor:row-resize;}
+  .splitter::before{width:30px;height:3px;box-shadow:0 5px 0 #9aa6b2,0 -5px 0 #9aa6b2;}
+  .splitter.drag::before{box-shadow:0 5px 0 #fff,0 -5px 0 #fff;}
 }
 </style>
 
