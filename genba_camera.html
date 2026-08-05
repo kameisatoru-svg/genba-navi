@@ -602,7 +602,31 @@ $('shots').addEventListener('click', e=>{
 
 /* ═══ 撮影 ═══ */
 $('shutter').addEventListener('click', capture);
-$('btnSkip').addEventListener('click', ()=>{ next(); });
+$('btnSplit').addEventListener('click', addPanel);
+
+/* ── 分割撮影 ────────────
+   1枚で収まらない面は「＋分割」で同じ姿勢のまま2枚目3枚目を足す。
+   2枚目以降は判定基準が「1枚目の姿勢」に切り替わる（groupRef）。 */
+function addPanel(){
+  const cur = S.shots[S.idx];
+  if (!cur || !cur.split){ toast('この項目は分割できません'); return; }
+  const grp = cur.group || cur.code;
+  const panels = S.shots.filter(s => (s.group||s.code) === grp);
+  const n = panels.length + 1;
+  const add = Object.assign({}, panels[0], {
+    group: grp, panel: n,
+    code:  grp + '(' + n + ')',
+    label: panels[0].label + '　' + n + '枚目',
+    hint:  '1枚目と同じ姿勢のまま、3割ほど重ねて隣を撮る'
+  });
+  let last = 0;
+  S.shots.forEach((s,i)=>{ if ((s.group||s.code)===grp) last = i; });
+  S.shots.splice(last+1, 0, add);
+  S.photos.forEach(p=>{ if (p.shotIdx > last) p.shotIdx++; });   // 挿入で後ろの添字がずれる
+  S.idx = last+1;
+  renderShots(); renderInstruct();
+  toast(grp+' の '+n+'枚目');
+}
 
 async function capture(){
   const sh = S.shots[S.idx]; if(!sh) return;
