@@ -400,11 +400,11 @@ async function requestOrientation(){
 
 async function startCamera(){
   try{
-    S.stream = await navigator.mediaDevices.getUserMedia({
-      video:{ facingMode:{ideal:'environment'},
-              width:{ideal:3840}, height:{ideal:2160} },
-      audio:false
-    });
+    /* 4:3 で要求する。16:9 を要求するとセンサー上下を約25%捨てた画角になり、
+       天井・床・壁がフレームに入らなくなる（実機で確認）。 */
+    const v = { width:{ideal:4032}, height:{ideal:3024} };
+    if (S.camId) v.deviceId = {exact:S.camId}; else v.facingMode = {ideal:'environment'};
+    S.stream = await navigator.mediaDevices.getUserMedia({video:v, audio:false});
   }catch(e){
     $('setupErr').innerHTML = '<div class="err">カメラを起動できませんでした（'+e.name+'）。<br>'+
       'ブラウザのカメラ権限を許可してください。HTTPS（github.io）で開く必要があります。</div>';
