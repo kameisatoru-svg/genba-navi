@@ -247,54 +247,58 @@ function guessFocal35(){
 /* ── 撮影テンプレート ──
    targetElev: 目標仰角(度)  0=水平 / -90=真下(床) / +90=真上(天井) / null=不問
    checkRoll : 水平を判定するか（床・天井はロール＝方位なので判定しない）
-   tol       : 許容(度)  measure=寸法用は厳しく, record=記録用は緩く       */
+   tol       : 許容(度)  寸法用は厳しく・記録用は緩く
+   lens      : 推奨レンズの表示（ultra=超広角 / std=標準 / tele=望遠）
+   split     : true なら「＋分割」で同じ姿勢のまま2枚目3枚目を足せる
+   ※ 1枚で収まらないのが現場の普通。分割を前提に組んである。 */
+const LENS_HINT = {ultra:'超広角(0.5x)', std:'標準(1x)', tele:'望遠(2x以上)'};
+
 const TEMPLATES = {
   room: {
     name: '部屋まるごと', desc: '全景＋4面＋床天井＋基準',
     shots: [
-      {code:'全景', label:'部屋の全景', hint:'入口から。四隅がすべて入るように。ここは広角でOK（記録用）', targetElev:0, checkRoll:true, tol:8, measure:false},
-      {code:'A面', label:'A面（上）の壁に正対', hint:'壁の上下の辺をグリッドの横線と平行に。四隅を必ず入れる', targetElev:0, checkRoll:true, tol:3, measure:true},
-      {code:'B面', label:'B面（右）の壁に正対', hint:'同上。四隅が切れると後で補正できません', targetElev:0, checkRoll:true, tol:3, measure:true},
-      {code:'C面', label:'C面（下）の壁に正対', hint:'同上', targetElev:0, checkRoll:true, tol:3, measure:true},
-      {code:'D面', label:'D面（左）の壁に正対', hint:'同上', targetElev:0, checkRoll:true, tol:3, measure:true},
-      {code:'床', label:'床（真下を向けて）', hint:'胸の高さから真下へ。床の四隅がなるべく入るように', targetElev:-90, checkRoll:false, tol:4, measure:true},
-      {code:'天井', label:'天井（真上を向けて）', hint:'真上へ。廻り縁の直線が入るように', targetElev:90, checkRoll:false, tol:4, measure:true},
-      {code:'基準スケール', label:'基準スケールの寄り', hint:'コンセントプレート（1連70×120mm）かメジャーを、測りたい面と同じ平面で中央に', targetElev:0, checkRoll:true, tol:6, measure:true}
+      {code:'全景', label:'部屋の全景', hint:'入口から。四隅が入れば十分（記録用）', lens:'ultra', targetElev:0, checkRoll:true, tol:8, measure:false},
+      {code:'A面', label:'A面（上）の壁', hint:'壁の上下の辺をグリッドの横線と平行に。1枚で入らなければ ＋分割 で左→右と足す', lens:'std', targetElev:0, checkRoll:true, tol:3, measure:true, split:true},
+      {code:'B面', label:'B面（右）の壁', hint:'同上。分割時は3割ほど重ねる', lens:'std', targetElev:0, checkRoll:true, tol:3, measure:true, split:true},
+      {code:'C面', label:'C面（下）の壁', hint:'同上', lens:'std', targetElev:0, checkRoll:true, tol:3, measure:true, split:true},
+      {code:'D面', label:'D面（左）の壁', hint:'同上', lens:'std', targetElev:0, checkRoll:true, tol:3, measure:true, split:true},
+      {code:'床', label:'床（真下）', hint:'超広角で。1枚に入らないのが普通なので ＋分割 で位置を変えて足す', lens:'ultra', targetElev:-90, checkRoll:false, tol:4, measure:true, split:true},
+      {code:'天井', label:'天井（真上）', hint:'超広角で。廻り縁の直線を入れる。足りなければ ＋分割', lens:'ultra', targetElev:90, checkRoll:false, tol:4, measure:true, split:true},
+      {code:'基準スケール', label:'基準スケールの寄り', hint:'コンセントプレート（1連70×120mm）かメジャーを、測りたい面と同じ平面で中央に', lens:'std', targetElev:0, checkRoll:true, tol:6, measure:true}
     ]
   },
   wall: {
-    name: '壁1面', desc: '正対＋寄り 2カット',
+    name: '壁1面', desc: '正対（分割可）＋寄り',
     shots: [
-      {code:'壁正対', label:'壁に正対', hint:'壁の上下の辺をグリッドの横線と平行に。四隅を入れる', targetElev:0, checkRoll:true, tol:3, measure:true},
-      {code:'壁寄り', label:'基準スケールの寄り', hint:'メジャーかコンセントプレートを壁と同じ平面に置いて', targetElev:0, checkRoll:true, tol:6, measure:true}
+      {code:'壁正対', label:'壁に正対', hint:'上下の辺をグリッドの横線と平行に。1枚で入らなければ ＋分割 で左→中→右', lens:'std', targetElev:0, checkRoll:true, tol:3, measure:true, split:true},
+      {code:'壁寄り', label:'基準スケールの寄り', hint:'メジャーかコンセントプレートを壁と同じ平面に置いて', lens:'std', targetElev:0, checkRoll:true, tol:6, measure:true}
     ]
   },
   floor: {
-    name: '床の割付用', desc: '真下2方向＋基準',
+    name: '床の割付用', desc: '真下・分割＋基準',
     shots: [
-      {code:'床1', label:'床（真下・手前から）', hint:'部屋の一方の端から真下へ。床の四隅を狙う', targetElev:-90, checkRoll:false, tol:4, measure:true},
-      {code:'床2', label:'床（真下・反対側から）', hint:'反対の端から。2枚で重ねると全体が拾えます', targetElev:-90, checkRoll:false, tol:4, measure:true},
-      {code:'床基準', label:'基準スケールの寄り', hint:'既存の目地ピッチかメジャーを床に置いて真下から', targetElev:-90, checkRoll:false, tol:6, measure:true}
+      {code:'床', label:'床（真下）', hint:'超広角で胸の高さから真下へ。＋分割 で立ち位置を変えて部屋を覆う', lens:'ultra', targetElev:-90, checkRoll:false, tol:4, measure:true, split:true},
+      {code:'床基準', label:'基準スケールの寄り', hint:'既存の目地ピッチかメジャーを床に置いて真下から', lens:'std', targetElev:-90, checkRoll:false, tol:6, measure:true}
     ]
   },
   ceiling: {
-    name: '天井の割付用', desc: '真上2カット',
+    name: '天井の割付用', desc: '真上・分割',
     shots: [
-      {code:'天井1', label:'天井（真上・手前から）', hint:'廻り縁の直線を入れる。四隅を狙う', targetElev:90, checkRoll:false, tol:4, measure:true},
-      {code:'天井2', label:'天井（真上・反対側から）', hint:'反対の端から', targetElev:90, checkRoll:false, tol:4, measure:true}
+      {code:'天井', label:'天井（真上）', hint:'超広角で真上へ。廻り縁の直線を入れる。＋分割 で立ち位置を変えて覆う', lens:'ultra', targetElev:90, checkRoll:false, tol:4, measure:true, split:true},
+      {code:'天井基準', label:'器具・点検口の寄り', hint:'照明器具や点検口の位置が分かるカット', lens:'std', targetElev:90, checkRoll:false, tol:8, measure:false}
     ]
   },
   opening: {
     name: '開口部・建具', desc: '正面／枠／金物',
     shots: [
-      {code:'建具正面', label:'建具の正面', hint:'枠の外側四隅を入れて正対。上下の枠をグリッドと平行に', targetElev:0, checkRoll:true, tol:3, measure:true},
-      {code:'枠寄り', label:'枠の寄り（見付・見込）', hint:'メジャーを枠に当てて', targetElev:0, checkRoll:true, tol:6, measure:true},
-      {code:'金物', label:'金物・丁番', hint:'型番が読める距離で', targetElev:null, checkRoll:false, tol:15, measure:false}
+      {code:'建具正面', label:'建具の正面', hint:'枠の外側四隅を入れて正対。上下の枠をグリッドと平行に', lens:'std', targetElev:0, checkRoll:true, tol:3, measure:true, split:true},
+      {code:'枠寄り', label:'枠の寄り（見付・見込）', hint:'メジャーを枠に当てて', lens:'std', targetElev:0, checkRoll:true, tol:6, measure:true},
+      {code:'金物', label:'金物・丁番', hint:'型番が読める距離で', lens:'tele', targetElev:null, checkRoll:false, tol:15, measure:false}
     ]
   },
   free: {
     name: '自由撮影', desc: 'ガイドなし・水平ゲージのみ',
-    shots: [{code:'記録', label:'自由撮影', hint:'水平ゲージだけ表示します。何枚でも撮れます', targetElev:null, checkRoll:true, tol:8, measure:false, repeat:true}]
+    shots: [{code:'記録', label:'自由撮影', hint:'水平ゲージだけ表示します。何枚でも撮れます', lens:null, targetElev:null, checkRoll:true, tol:8, measure:false, repeat:true}]
   }
 };
 
