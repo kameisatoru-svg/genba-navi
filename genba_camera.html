@@ -387,6 +387,7 @@ $('btnStart').addEventListener('click', async ()=>{
   S.kubun = $('kubunSel').value;
   S.room  = $('roomInp').value.trim();
   S.shots = JSON.parse(JSON.stringify(TEMPLATES[S.tplKey].shots));
+  S.shots.forEach(s=>{ if (s.split){ s.group = s.code; s.panel = 1; } });
   S.idx = 0;
 
   await requestOrientation();          // iOSはユーザー操作の中でしか許可を出せない
