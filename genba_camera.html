@@ -352,7 +352,9 @@ const toast = (m) => { const t=$('toast'); t.textContent=m; t.classList.add('sho
 function renderTplNote(){
   const t = TEMPLATES[S.tplKey];
   $('tplNote').innerHTML = '<b>'+t.name+'</b> の撮影順<br>' +
-    t.shots.map((s,i)=>`${i+1}. ${s.label}`).join('<br>');
+    t.shots.map((s,i)=>`${i+1}. ${s.label}`
+      + (s.lens?`　<span style="color:var(--accent)">${LENS_HINT[s.lens]}</span>`:'')
+      + (s.split?'　<span style="color:var(--text3)">分割可</span>':'')).join('<br>');
 }
 
 /* 案件リスト（data.json → localStorageにキャッシュして圏外でも使える） */
