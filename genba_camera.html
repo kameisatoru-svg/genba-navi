@@ -79,6 +79,8 @@ body{display:flex;flex-direction:column;background:var(--bg);}
 .g-lab{font-size:10px;color:rgba(255,255,255,.6);width:34px;flex-shrink:0;}
 .g-val{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;}
 .g-tol{font-size:10px;color:rgba(255,255,255,.5);}
+.g-res{font-size:10px;color:rgba(255,255,255,.45);margin-top:5px;
+  border-top:1px solid rgba(255,255,255,.15);padding-top:5px;}
 .ok{color:#4ade80;} .warn{color:#fbbf24;} .ng{color:#f87171;}
 
 /* 判定バッジ */
@@ -195,6 +197,7 @@ body{display:flex;flex-direction:column;background:var(--bg);}
         <span class="g-val" id="vRoll">--</span><span class="g-tol" id="tRoll"></span></div>
       <div class="g-row"><span class="g-lab">仰角</span>
         <span class="g-val" id="vElev">--</span><span class="g-tol" id="tElev"></span></div>
+      <div class="g-res" id="res">—</div>
     </div>
     <div class="verdict" id="verdict">センサー待機</div>
   </div>
@@ -202,9 +205,9 @@ body{display:flex;flex-direction:column;background:var(--bg);}
   <div class="shots" id="shots"></div>
 
   <div class="shootbar">
-    <button class="side-btn" id="btnSkip">スキップ</button>
+    <button class="side-btn" id="btnLens">レンズ</button>
     <button class="shutter" id="shutter" aria-label="撮影"></button>
-    <button class="side-btn" id="btnRes">—</button>
+    <button class="side-btn" id="btnSplit">＋分割</button>
   </div>
 </div>
 
