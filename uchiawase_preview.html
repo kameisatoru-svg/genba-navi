@@ -652,7 +652,74 @@ document.getElementById('tpl-select').addEventListener('change', e=>{
   document.getElementById('theme-select').value = state.theme;
   renderEditor(); render(); toast('雛形を読み込みました');
 });
-window.addEventListener('resize', fitPreview);
+window.addEventListener('resize', ()=>{ applySplit(); fitPreview(); });
+
+/* ── 記入欄／プレビューの幅（縦積みでは高さ）スライダー ───── */
+const SPLIT_KEY_H = 'artrays_uchiawase_split_w';
+const SPLIT_KEY_V = 'artrays_uchiawase_split_h';
+const DEFAULT_H = 400, DEFAULT_V = 0.45;   /* 横=px／縦=画面比 */
+
+const isVert = () => window.matchMedia('(max-width:860px)').matches;
+
+function applySplit(){
+  const ed = document.getElementById('editor');
+  const main = document.querySelector('.main');
+  if(isVert()){
+    let r = parseFloat(localStorage.getItem(SPLIT_KEY_V) || DEFAULT_V);
+    if(!(r>0.15 && r<0.85)) r = DEFAULT_V;
+    ed.style.flexBasis = Math.round(main.clientHeight * r) + 'px';
+  }else{
+    let w = parseFloat(localStorage.getItem(SPLIT_KEY_H) || DEFAULT_H);
+    const max = Math.max(260, main.clientWidth - 280);
+    if(!(w>0)) w = DEFAULT_H;
+    ed.style.flexBasis = Math.min(Math.max(240, w), max) + 'px';
+  }
+}
+
+(function initSplitter(){
+  const sp = document.getElementById('splitter');
+  const ed = document.getElementById('editor');
+  const main = document.querySelector('.main');
+  let raf = 0;
+
+  const move = e => {
+    const r = main.getBoundingClientRect();
+    if(isVert()){
+      const h = Math.min(Math.max(140, e.clientY - r.top), r.height - 160);
+      ed.style.flexBasis = h + 'px';
+      localStorage.setItem(SPLIT_KEY_V, (h / r.height).toFixed(4));
+    }else{
+      const w = Math.min(Math.max(240, e.clientX - r.left), r.width - 280);
+      ed.style.flexBasis = w + 'px';
+      localStorage.setItem(SPLIT_KEY_H, String(Math.round(w)));
+    }
+    if(!raf) raf = requestAnimationFrame(()=>{ raf = 0; fitPreview(); });
+  };
+  const up = e => {
+    sp.classList.remove('drag');
+    document.body.classList.remove('resizing','vert');
+    try{ sp.releasePointerCapture(e.pointerId); }catch(_){}
+    window.removeEventListener('pointermove', move);
+    window.removeEventListener('pointerup', up);
+    fitPreview();
+  };
+  sp.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    sp.classList.add('drag');
+    document.body.classList.add('resizing');
+    if(isVert()) document.body.classList.add('vert');
+    try{ sp.setPointerCapture(e.pointerId); }catch(_){}
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  });
+  /* ダブルクリックで既定の配分に戻す */
+  sp.addEventListener('dblclick', ()=>{
+    localStorage.removeItem(SPLIT_KEY_H);
+    localStorage.removeItem(SPLIT_KEY_V);
+    applySplit(); fitPreview();
+    toast('幅を既定に戻しました');
+  });
+})();
 
 /* ── 出力（保存HTML・印刷・PDF）───────────── */
 function buildDocHTML(forPrint){
@@ -769,6 +836,7 @@ function toast(msg){
   state = (s && s.blocks) ? s : sampleState();
   (state.blocks||[]).forEach(b=>{ if(!b.id) b.id=uid(); });
   document.getElementById('theme-select').value = state.theme||'mono';
+  applySplit();
   renderEditor(); render();
 })();
 </script>
