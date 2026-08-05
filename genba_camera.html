@@ -247,17 +247,17 @@ body{display:flex;flex-direction:column;background:var(--bg);}
    - 現場ナビ命名規則でファイル名を自動生成
    ═══════════════════════════════════════════ */
 
-/* ── 端末別の画角テーブル（EXIF実績から。寸法計算に使う）── */
-const FOV_TABLE = {
-  'Galaxy Z Fold5': 23, 'SM-F946': 23,
-  'SC-55B': 24, 'SM-S908': 24,
-  'Pixel 8 Pro': 24, 'iPhone': 26
-};
-function guessFocal35(){
-  const ua = navigator.userAgent;
-  for (const k in FOV_TABLE) if (ua.indexOf(k) >= 0) return FOV_TABLE[k];
-  return 24; // 一般的なスマホ標準広角
+/* ── レンズ設定（名前＋35mm換算焦点距離）────────────
+   ★ UserAgent から機種を当てる方式は使えない。今のChromeは機種名を伏せて
+     "Linux; Android 10; K" しか返さない（UA Reduction）。実測で確認済み。
+   → レンズごとに、かめさんが一度だけ 35mm換算焦点距離 を登録して覚えさせる。
+     値は純正カメラで撮った写真のEXIF「35mm換算焦点距離」がそのまま使える。
+     （Z Fold5 実績：超広角13mm／標準23mm／望遠69mm）
+   この値は後段の姿勢補正（正射投影）で必須。 */
+function lensCfgAll(){
+  try { return JSON.parse(localStorage.getItem('gc_lensCfg')||'{}'); } catch(e){ return {}; }
 }
+function lensCfg(id){ return lensCfgAll()[id] || null; }
 
 /* ── 撮影テンプレート ──
    targetElev: 目標仰角(度)  0=水平 / -90=真下(床) / +90=真上(天井) / null=不問
