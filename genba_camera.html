@@ -11,7 +11,9 @@
 <link rel="stylesheet" href="common.css">
 <style>
 /* ── 現調カメラ 固有スタイル ───────────── */
-body{display:flex;flex-direction:column;min-height:100dvh;background:var(--bg);}
+/* common.css が body{height:100dvh;overflow:hidden} なので、
+   スクロールは内側の .setup / .review が担う（flex:1 + min-height:0 が必須） */
+body{display:flex;flex-direction:column;background:var(--bg);}
 
 .header{background:var(--navy);padding:env(safe-area-inset-top,0) 0 0;flex-shrink:0;}
 .header-inner{height:56px;display:flex;align-items:center;padding:0 16px;gap:10px;}
@@ -22,11 +24,12 @@ body{display:flex;flex-direction:column;min-height:100dvh;background:var(--bg);}
 .header-btn:active{background:rgba(255,255,255,.26);}
 .header-btn[disabled]{opacity:.35;}
 
-.screen{display:none;flex:1;flex-direction:column;}
+.screen{display:none;flex:1;min-height:0;flex-direction:column;}
 .screen.active{display:flex;}
 
 /* ── セットアップ画面 ─────── */
-.setup{padding:18px 16px max(24px,env(safe-area-inset-bottom));overflow-y:auto;}
+.setup{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:18px 16px max(24px,env(safe-area-inset-bottom));}
 .field{margin-bottom:16px;}
 .field label{display:block;font-size:11px;font-weight:700;color:var(--text2);
   letter-spacing:.06em;margin-bottom:6px;}
@@ -104,7 +107,8 @@ body{display:flex;flex-direction:column;min-height:100dvh;background:var(--bg);}
 .chip.loose{background:#7a5c1a;color:#ffd98a;}
 
 /* ── 確認画面 ─────── */
-.review{padding:16px 16px max(24px,env(safe-area-inset-bottom));overflow-y:auto;}
+.review{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:16px 16px max(24px,env(safe-area-inset-bottom));}
 .rev-item{display:flex;gap:12px;background:#fff;border-radius:var(--radius-md);
   padding:10px;margin-bottom:10px;box-shadow:var(--shadow-card);}
 .rev-item img{width:92px;height:92px;object-fit:cover;border-radius:var(--radius-sm);flex-shrink:0;background:#eee;}
