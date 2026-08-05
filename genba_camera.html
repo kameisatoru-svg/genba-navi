@@ -334,6 +334,28 @@ const $ = id => document.getElementById(id);
 const toast = (m) => { const t=$('toast'); t.textContent=m; t.classList.add('show');
   clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),1900); };
 
+/* ── 表示領域の実測 ────────────
+   common.css の body{height:100dvh} は、機種によってシステムバー（Fold5のタスクバー等）の
+   裏まで含んだ値を返し、下端が隠れる。innerHeight / clientHeight / visualViewport のうち
+   最も小さい＝確実に見えている高さを採用して body に固定する。 */
+function fitHeight(){
+  const c = [window.innerHeight,
+             document.documentElement.clientHeight,
+             window.visualViewport && window.visualViewport.height].filter(v=>v>0);
+  if (!c.length) return;
+  document.body.style.height = Math.floor(Math.min.apply(null,c)) + 'px';
+  S.vh = c.map(v=>Math.round(v)).join('/');
+  showRes();
+}
+function showRes(){
+  const r = $('res'); if (!r) return;
+  r.textContent = (r.dataset.res || '—') + (S.vh ? ' ／ h'+S.vh : '');
+}
+window.addEventListener('resize', fitHeight);
+window.addEventListener('orientationchange', ()=>setTimeout(fitHeight,300));
+if (window.visualViewport) window.visualViewport.addEventListener('resize', fitHeight);
+fitHeight();
+
 /* ═══ 1. セットアップ ═══ */
 (function initTemplates(){
   const g = $('tplGrid');
@@ -451,7 +473,8 @@ async function startCamera(){
   const i = S.cams.findIndex(d=>d.deviceId===S.camId);
   if (i>=0) S.camIdx = i;
   $('btnLens').textContent = lensName(S.camId, S.camIdx);
-  $('res').textContent = (st.width||'?')+'×'+(st.height||'?');
+  $('res').dataset.res = (st.width||'?')+'×'+(st.height||'?');
+  fitHeight();                       // カメラ起動で表示領域が変わる機種があるので測り直す
   return true;
 }
 
