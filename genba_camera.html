@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="ja"><head>
 <meta charset="UTF-8">
-<!-- viewport-fit=cover は付けない。付けるとAndroidの下部タスクバーの裏まで
-     ビューポートが伸びて撮影バーが隠れる（index.html と同じ指定に揃える） -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<!-- viewport-fit=cover を付けると env(safe-area-inset-*) が有効になる。
+     ただしAndroidのタスクバーは inset に出ないことがあるので、
+     高さはJS(fitHeight)で実測し、撮影バーの下余白も厚めに固定で確保する。 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>現調カメラ｜アート・レイズ</title>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -91,8 +92,10 @@ body{display:flex;flex-direction:column;background:var(--bg);}
 .verdict.bad{background:rgba(192,57,43,.9);}
 
 /* 撮影バー */
-/* 下端はシステムバー（Androidのタスクバー等）と干渉しやすいので余白を厚めに取る */
-.shootbar{flex-shrink:0;background:#111;padding:10px 16px max(22px,env(safe-area-inset-bottom));
+/* 下端はシステムバー（Androidのタスクバー等）が被さる。inset が 0 で返る機種が
+   あるので、env に頼らず 64px の下余白を必ず確保する（カメラアプリでは自然な見た目）。 */
+.shootbar{flex-shrink:0;background:#111;
+  padding:10px 16px max(64px, calc(env(safe-area-inset-bottom) + 16px));
   display:flex;align-items:center;gap:14px;}
 .shutter{width:64px;height:64px;border-radius:50%;border:4px solid #fff;background:#f87171;
   cursor:pointer;flex-shrink:0;margin:0 auto;transition:.12s;}
