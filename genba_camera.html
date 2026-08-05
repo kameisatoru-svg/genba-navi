@@ -778,23 +778,27 @@ $('btnMeta').addEventListener('click', ()=>{
   const meta = {
     案件キー:S.anken, 区分:S.kubun, 場所:S.room,
     テンプレート:TEMPLATES[S.tplKey].name,
-    端末:navigator.userAgent, 既定レンズ画角35mm換算:S.focal35,
+    端末:navigator.userAgent,
     生成:new Date().toISOString(),
     注記:[
-      'roll/elev は度。許容内=false は寸法拾いに使わないこと。',
-      '正対（左右の振り）はセンサーで測れないため、4点補正（射影変換）で処理する前提。',
-      '同じ「面」で分割が2枚以上あるものは、1枚目の姿勢に±2°で揃えて撮ってある（縮尺が揃う）。',
-      '画角35mm換算は既定レンズのときだけ記録。超広角/望遠に切り替えた分は null（4点補正には不要）。'
+      '仰角/水平は度。水平生値は補正計算用の絶対値、水平ズレは目標からの差。',
+      '許容内=false は寸法拾いに使わないこと。',
+      '姿勢補正（正射投影）には 画角35mm換算 が必須。null の写真はレンズ未登録なので補正できない。',
+      '正対（左右の振り）はセンサーで測れないため、壁は横方向だけ4点補正が要る。床・天井は姿勢だけで補正が完結する。',
+      '同じ「面」で分割が2枚以上あるものは、1枚目の姿勢に±2°で揃えて撮ってある（縮尺が揃う）。'
     ],
     撮影:S.photos.map(p=>({
       ファイル:p.file, ショット:p.code, 面:p.group, 分割:p.panel, レンズ:p.lens,
       寸法用:p.measure, 許容内:p.inTol,
-      水平ズレ:p.rollDev, 仰角:p.elev, 目標仰角:p.targetElev, 許容:p.tol,
+      仰角:p.elev, 水平生値:p.roll, 水平ズレ:p.rollDev, 目標仰角:p.targetElev, 許容:p.tol,
       画素:[p.w,p.h], 画角35mm換算:p.focal35, 時刻:p.at
     }))
   };
   const blob = new Blob([JSON.stringify(meta,null,2)],{type:'application/json'});
-  dl(blob, `_撮影メタ_${S.anken}_${new Date().toISOString().slice(0,10)}.json`);
+  // ファイル名はローカル日付で（toISOString はUTCなので朝夕に1日ずれる）
+  const n = new Date(), pp = x=>String(x).padStart(2,'0');
+  const ymd = `${n.getFullYear()}-${pp(n.getMonth()+1)}-${pp(n.getDate())}`;
+  dl(blob, `_撮影メタ_${S.anken}_${ymd}.json`);
   toast('メタJSONを保存しました');
 });
 
