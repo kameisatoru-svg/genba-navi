@@ -541,7 +541,7 @@ function checkOverflow(){
     const diff = contentH - usable;
     if(diff > 2){
       over++;
-      badge.textContent = '⚠ はみ出し 約' + Math.ceil(diff/mmpx) + 'mm';
+      badge.textContent = 'A4 1枚を超過 約' + Math.ceil(diff/mmpx) + 'mm（印刷では次ページへ流れます）';
     }else{
       badge.textContent = '';
     }
@@ -552,7 +552,8 @@ function checkOverflow(){
   if(over>0){
     const d = document.createElement('div');
     d.className = 'warn';
-    d.textContent = '⚠ ' + over + 'ページが A4 からはみ出しています。「＋ 改頁」を入れて分けてください（自動改頁はしません）。';
+    d.textContent = over + 'ページが A4 1枚に収まっていません。印刷・PDFでは自動で次ページへ流れるのでそのままでも出力できます。'
+      + '区切る位置を自分で決めたい場合は「＋ 改頁」を入れてください。';
     ed.insertBefore(d, ed.firstChild);
   }
 }
