@@ -493,40 +493,61 @@ function rollDeviation(roll){
   return best;
 }
 
+/* 分割の2枚目以降は「1枚目の姿勢」を基準にする。
+   パネル間で仰角・水平が揃っていれば縮尺も揃い、あとから並べて使える。 */
+function groupRef(){
+  const cur = S.shots[S.idx];
+  if (!cur || !cur.group || cur.panel === 1) return null;
+  const p1 = S.photos.find(p => p.group === cur.group && p.panel === 1);
+  return p1 ? {elev:p1.elev, roll:p1.roll} : null;
+}
+const angDiff = (a,b)=>{ let d=a-b; while(d>180)d-=360; while(d<-180)d+=360; return d; };
+
+function setRow(vid, tid, dev, tol, note){
+  const el = $(vid);
+  if (dev===null){ el.textContent='—'; el.className='g-val'; $(tid).textContent=note||'判定なし'; return; }
+  el.textContent = (dev>=0?'+':'')+dev.toFixed(1)+'°';
+  el.className = 'g-val ' + (Math.abs(dev)<=tol ? 'ok' : (Math.abs(dev)<=tol*2 ? 'warn' : 'ng'));
+  $(tid).textContent = '±'+tol+'°'+(note?' '+note:'');
+}
+
 function updateGauge(){
   const sh = S.shots[S.idx]; if (!sh) return;
-  const rd = rollDeviation(S.roll);
-  const ed = (sh.targetElev===null || S.elev===null) ? null : (S.elev - sh.targetElev);
+  const ref = groupRef();
 
-  const cls = (v,tol)=> v===null?'':(Math.abs(v)<=tol?'ok':(Math.abs(v)<=tol*2?'warn':'ng'));
-
-  if (sh.checkRoll && rd!==null){
-    $('vRoll').textContent = (rd>=0?'+':'')+rd.toFixed(1)+'°';
-    $('vRoll').className = 'g-val '+cls(rd, sh.tol);
-    $('tRoll').textContent = '±'+sh.tol+'°';
-  } else {
-    $('vRoll').textContent = '—'; $('vRoll').className='g-val'; $('tRoll').textContent='判定なし';
-  }
-  if (ed!==null){
-    $('vElev').textContent = (ed>=0?'+':'')+ed.toFixed(1)+'°';
-    $('vElev').className = 'g-val '+cls(ed, sh.tol);
-    $('tElev').textContent = '±'+sh.tol+'°';
-  } else {
-    $('vElev').textContent = S.elev===null?'—':S.elev.toFixed(0)+'°';
-    $('vElev').className='g-val'; $('tElev').textContent='自由';
+  if (ref){                                   // 分割2枚目以降：1枚目との差
+    const dr = (sh.checkRoll && S.roll!==null && ref.roll!==null) ? angDiff(S.roll, ref.roll) : null;
+    const de = (S.elev!==null && ref.elev!==null) ? S.elev - ref.elev : null;
+    setRow('vRoll','tRoll', dr, 2, '1枚目比');
+    setRow('vElev','tElev', de, 2, '1枚目比');
+  } else {                                    // 通常：テンプレートの目標との差
+    setRow('vRoll','tRoll', sh.checkRoll ? rollDeviation(S.roll) : null, sh.tol);
+    const ed = (sh.targetElev===null||S.elev===null) ? null : (S.elev - sh.targetElev);
+    setRow('vElev','tElev', ed, sh.tol, sh.targetElev===null?'自由':'');
+    if (sh.targetElev===null && S.elev!==null){
+      $('vElev').textContent = S.elev.toFixed(0)+'°'; $('vElev').className='g-val';
+    }
   }
 
   const good = isGood();
   const vd = $('verdict');
   if (S.roll===null && S.elev===null){ vd.textContent='センサー未取得'; vd.className='verdict'; }
-  else if (good){ vd.textContent='OK 撮影できます'; vd.className='verdict good'; }
-  else { vd.textContent='傾きを直してください'; vd.className='verdict bad'; }
+  else if (good){ vd.textContent = ref?'OK 1枚目と揃いました':'OK 撮影できます'; vd.className='verdict good'; }
+  else { vd.textContent = ref?'1枚目の姿勢に戻して':'傾きを直してください'; vd.className='verdict bad'; }
   $('shutter').classList.toggle('ready', good);
 }
 
 function isGood(){
   const sh = S.shots[S.idx]; if(!sh) return false;
   if (S.roll===null && S.elev===null) return false;
+
+  const ref = groupRef();
+  if (ref){
+    if (ref.elev!==null && S.elev!==null && Math.abs(S.elev-ref.elev) > 2) return false;
+    if (sh.checkRoll && ref.roll!==null && S.roll!==null &&
+        Math.abs(angDiff(S.roll, ref.roll)) > 2) return false;
+    return true;
+  }
   const rd = rollDeviation(S.roll);
   const ed = (sh.targetElev===null||S.elev===null)?0:(S.elev - sh.targetElev);
   if (sh.checkRoll && rd!==null && Math.abs(rd) > sh.tol) return false;
