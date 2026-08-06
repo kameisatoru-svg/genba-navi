@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JAフーズ-兼用ライン-新築工事-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;}
+li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;}
+.doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);}
+.s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;}
+th{color:var(--sub);font-weight:600;}
+.amt{text-align:right;white-space:nowrap;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;}
+.tl-text{font-size:13px;}
+details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin:6px 0;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>JAフーズおおいた 兼用ライン 新築工事（見積2部）</h1>
+  <div class="sub">JAフーズ-兼用ライン-新築工事-26 ｜ 株式会社JAフーズおおいた（T-039）／窓口＝製造部 中根部長様</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">📋 見積提出済み</span>
+    <span class="badge">🏭 JAフーズおおいた（T-039）</span>
+    <span class="badge">🤝 依頼元＝インテリア中津屋 藤原様（T-006）</span>
+    <span class="badge">✍️ 原稿＝ケイテック手書き見積（指定額どおり）</span>
+    <span class="badge">📤 8/6 PDF出力済・藤原様へ返送待ち</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=JA%E3%83%95%E3%83%BC%E3%82%BA-%E5%85%BC%E7%94%A8%E3%83%A9%E3%82%A4%E3%83%B3-%E6%96%B0%E7%AF%89%E5%B7%A5%E4%BA%8B-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-08-06 ｜ サマリー初版: 2026-08-06 18:10（LIGHT反映で新規生成）</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">見積提出済</div><div class="l">ステータス（藤原様へ返送待ち）</div></div>
+  <div class="kpi"><div class="v">&yen;3,507,900</div><div class="l">① 兼用ライン 新築工事（税込）</div></div>
+  <div class="kpi"><div class="v">&yen;7,832,000</div><div class="l">② 兼用ライン カートン搬入新築工事（税込）</div></div>
+  <div class="kpi"><div class="v">&yen;11,339,900</div><div class="l">見積2部 合計（税込）</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>現在地</b>：見積書2部を作成しPDF出力済み（8/6 16:39／16:45）。<b>藤原様へメールで返送するのが次アクション</b>。送付には <code>書類/_送付用/</code> の敬称付きコピーを使う</li>
+        <li><b>経緯</b>：8/5 10:00 藤原さん（インテリア中津屋 社長）より受電「JAフーズ頼まれたんだけど、お願いしていい？ <b>見積2部</b>」。同日 10:04 メールで<b>ケイテックの手書き見積（R8 7/31付・2ページ＝2部ぶん）</b>を受領</li>
+        <li><b>作成方針</b>：<b>単価の20％アップは適用しない</b>。手書き原稿に「この通りでOKです」「この通り書いて下さい」と明記があり<b>先方指定額をそのまま採る</b>ケース（従来のJAフーズ2案件と同じ扱い）</li>
+        <li><b>発行条件</b>：発行日は原稿に合わせ<b>2026/7/31</b>（有効期限 2026/8/30）。<b>見積番号欄・施工場所は空欄</b>。宛名は「㈱JAフーズおおいた　御中／製造部　中根部長　様」</li>
+        <li><b>諸経費率0％</b>（各工事区分の明細に「諸経費」行が入っているため二重計上を回避）。<b>端数値引きなし</b>（税抜がもともと1000円単位）</li>
+        <li><b>案件キー改称</b>：2026/8/6 に <code>…-新設工事-26</code> → <code>…-新築工事-26</code> へ統一（書類の件名がかめさん確定で「新築工事」のため。フォルダ名・ファイル名・data.json・nickname_map を一括で揃えた）</li>
+        <li><b>この先の見込み</b>：中津屋は<b>9月いっぱいまで多忙</b>（1件は山田内装へ）。<b>9月を過ぎるとケイテックのJAフーズ案件がちょこちょこ出る</b>見込み＝同種の依頼が続く</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>発注者（宛名）</td><td>株式会社JAフーズおおいた（T-039）</td><td><b>製造部 中根部長様</b>／※従来のJAフーズ2案件は施設課 山田次長様窓口＝<b>部署が違う</b></td></tr>
+        <tr><td>依頼元・協力</td><td>有限会社インテリア中津屋 藤原すなお様（T-006）</td><td>fdi-nakatuya@outlook.jp／見積作成の依頼元</td></tr>
+        <tr><td>原稿作成</td><td>（有）ケイテック</td><td>手書き見積 R8 7/31付。8/4 19:37 FAX → 8/5 メール添付で受領</td></tr>
+        <tr><td>作成</td><td>株式会社アート・レイズ</td><td>担当: 亀井 悟（TEL 0977-21-0603）</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📝</div><div class="doc-info"><div class="doc-name">書類/見_JAフーズ-兼用ライン-新築工事-26.pdf ／ .html</div><div class="doc-meta-s">① 兼用ライン　新築工事。発行 2026/7/31・税抜¥3,189,000／<b>税込¥3,507,900</b>。採用版＝サフィックス無印。HTMLが編集マスター</div></div><div class="doc-st s-ok">最新版</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📝</div><div class="doc-info"><div class="doc-name">書類/見_カートン搬入_JAフーズ-兼用ライン-新築工事-26.pdf ／ .html</div><div class="doc-meta-s">② 兼用ライン　カートン搬入新築工事。発行 2026/7/31・税抜¥7,120,000／<b>税込¥7,832,000</b></div></div><div class="doc-st s-ok">最新版</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📤</div><div class="doc-info"><div class="doc-name">書類/_送付用/見積書_JAフーズおおいた様_兼用ライン新築工事_20260731.pdf ／ …カートン搬入新築工事_20260731.pdf</div><div class="doc-meta-s">敬称付きの送付用コピー（2026/8/6 作成）。<b>藤原様への返送にはこちらを使う</b></div></div><div class="doc-st s-wip">送付待</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">受領/受領_ケイテック手書き見積_JAフーズ-兼用ライン-新築工事-26.pdf</div><div class="doc-meta-s">原稿（2ページ＝見積2部ぶん）。8/5 10:04 藤原様メール添付 <code>BP-40C26_20260805_091512.pdf</code>。※当社が受け取る見積ではなく<b>当社が書くための原稿</b>のため受取見積書フォルダから案件へ移動</div></div><div class="doc-st s-ok">受領済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📞</div><div class="doc-info"><div class="doc-name">通話記録/20260805_藤原_100030</div><div class="doc-meta-s">8/5 10:00・2分26秒。見積2部の依頼／中津屋の稼働状況／9月以降もJAフーズ案件が続く見込み</div></div><div class="doc-st s-ok">整理済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📝</div><div class="doc-info"><div class="doc-name">00_履歴_JAフーズ-兼用ライン-新築工事-26.md</div><div class="doc-meta-s">案件履歴ノート（依頼経緯・作成方針・訂正の教訓・TODO）</div></div><div class="doc-st s-ok">運用中</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ 請求・注文書・契約書は未発行。Driveリンクは同期後に付与。</div>
+    </div>
+    <div class="card">
+      <div class="card-t">📷 写真・現調記録</div>
+      <ul>
+        <li>写真なし（<b>書面のみの見積代行案件</b>・現地調査は実施していない）</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話記録から抽出した重要決定事項</div>
+  <ul>
+    <li>2026/08/05 10:00 藤原さん（インテリア中津屋 社長・2分26秒）【依頼】パークプレイス（ハックプレス）の完了を確認したうえで「<b>JAフーズ頼まれたんだけど、お願いしていい？</b>」「<b>見積2部</b>」「またメールを送っとくんで」と依頼</li>
+    <li>2026/08/05【状況共有】中津屋は<b>9月いっぱいまで多忙</b>で、1件は山田内装へ回している。<b>9月を過ぎたらケイテックのJAフーズ案件がちょこちょこ出る</b>とのこと＝この先も同種の依頼が続く見込み</li>
+    <li>2026/08/06【方針・かめさん確定】書類上の工事件名は「新設工事」ではなく<b>「新築工事」</b>。案件キー・フォルダ名・ファイル名も同日「新築工事」へ統一</li>
+    <li>2026/08/06【訂正・当方の誤り】②で「¥100,000の食い違い」と報告したのは<b>当方の読み違い</b>。天井・壁 ケイカル板6mm 70㎡ は <b>¥400,000</b>（¥500,000と誤読）。正しく読めば建築工事の明細10行は¥2,590,000となり、手書きの小計・合計¥7,120,000と完全に整合。<b>ケイテック側に誤りはなく確認も不要</b>。<b>教訓＝手書き見積は明細の積み上げと先方の小計が合うかを先に検算し、合わなければまず自分の読み取りを疑う</b></li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <table>
+    <tr><th>分類</th><th class="amt">金額</th></tr>
+    <tr><td>労務費</td><td class="amt">&yen;0</td></tr>
+    <tr><td>材料費</td><td class="amt">&yen;0</td></tr>
+    <tr><td>外注費</td><td class="amt">&yen;0</td></tr>
+    <tr><td>経費</td><td class="amt">&yen;0</td></tr>
+  </table>
+  <div class="doc-meta-s" style="margin-top:6px;">原価は未集計（見積提出段階・件数0／最終集計日 2026-08-06）。</div>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <table style="margin-top:8px;">
+    <tr><th>見積合計（税込・2部）</th><td class="amt">&yen;11,339,900</td></tr>
+    <tr><th>計上原価合計</th><td class="amt">&yen;0</td></tr>
+    <tr><th>粗利（暫定）</th><td class="amt">未確定（先方指定額での作成）</td></tr>
+  </table>
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <div class="doc-meta-s">受取請求書なし（外注費計上 &yen;0）。※ ケイテック手書き見積は<b>作成のための原稿</b>であり受取見積書ではない</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">📋 見積2部の内訳</div>
+  <table>
+    <tr><th>#</th><th>工事件名（書類の表記）</th><th>内訳（税抜）</th><th class="amt">税抜</th><th class="amt">税込</th></tr>
+    <tr><td>①</td><td>兼用ライン　新築工事</td><td>建築工事 &yen;2,200,000／電気工事 &yen;156,000／手洗及びエアータオル移設 &yen;833,000</td><td class="amt">&yen;3,189,000</td><td class="amt"><b>&yen;3,507,900</b></td></tr>
+    <tr><td>②</td><td>兼用ライン　カートン搬入新築工事</td><td>建築工事 &yen;2,590,000／電気工事 &yen;320,000／シートシャッター取付工事 &yen;4,210,000</td><td class="amt">&yen;7,120,000</td><td class="amt"><b>&yen;7,832,000</b></td></tr>
+    <tr style="font-weight:700;"><td colspan="3">合計</td><td class="amt">&yen;10,309,000</td><td class="amt">&yen;11,339,900</td></tr>
+  </table>
+  <div class="doc-meta-s" style="margin-top:6px;">大項目・小項目モード。諸経費率0％（明細内に諸経費行があるため）。端数値引きなし。</div>
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/8/6（木）</div><div class="tl-text"><b>見積書2部を作成・PDF出力</b>（16:39／16:45 かめさんが出力）。<code>書類/_送付用/</code> に敬称付きコピーを作成。あわせて<b>案件キーを「新設工事」→「新築工事」へ改称</b>し、フォルダ名・ファイル名・data.json・nickname_map を一括統一。①は採用版としてサフィックスを外し無印、②は <code>見_カートン搬入_…</code> とした。<b>次＝藤原さんへメールで返送</b></div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/8/6（木）</div><div class="tl-text"><b>【訂正】②の「¥100,000の食い違い」は当方の読み違い</b>（かめさん指摘・同日解消）。ケイカル板6mm 70㎡ は¥400,000（¥500,000と誤読）で、正しく読めば手書きの小計・合計と完全に整合。<b>ケイテック側に誤りはなく確認不要</b>。編集マスターHTMLと data.json も同じ値へ揃えた</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/8/5（水）</div><div class="tl-text">藤原様より<b>メール「見積の件」</b>（10:04）で原稿を受領。添付 <code>BP-40C26_20260805_091512.pdf</code>（2ページ＝見積2部ぶん）を <code>受領/受領_ケイテック手書き見積_….pdf</code> として保存。※日次Gmailチェックが受取見積書フォルダへ取り込んでいたが、<b>当社が書くための原稿</b>のため案件フォルダへ移動</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/8/5（水）</div><div class="tl-text">10:00 藤原さん（インテリア中津屋 社長）より受電・2分26秒＝<b>JAフーズの見積2部を依頼</b>。中津屋は<b>9月いっぱいまで多忙</b>（1件は山田内装へ）で、<b>9月以降もケイテックのJAフーズ案件が続く見込み</b></div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/8/4（火）</div><div class="tl-text">ケイテックの手書き見積（R8 7/31付）が<b>19:37 FAX着</b>。翌8/5 にメール添付で正式受領</div></div>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+  <div class="doc-meta-s" style="margin-top:6px;">※ 履歴ノート（00_履歴_JAフーズ-兼用ライン-新築工事-26.md）・data.json・通話記録から構成。</div>
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li><b>宛先の部署に注意</b>：本案件は<b>製造部 中根部長様</b>。従来のJAフーズ2案件（施設課 山田次長様）とは窓口が違う。書類・メールの宛名を取り違えないこと</li>
+    <li><b>単価は先方指定どおり</b>（20％アップ非適用）。今後JAフーズ×ケイテックの依頼が続く見込みのため、この扱いを案件横断で踏襲する</li>
+    <li><b>残TODO</b>：見積2部（送付用コピー）を藤原様へメールで返送する</li>
+  </ul>
+</div>
+
+<div class="footer">
+  自動生成: 案件サマリー（AUTOマーカー方式）｜ data.json を真実の源泉とし、Drive同期後にDriveリンクを付与<br>
+  JAフーズ-兼用ライン-新築工事-26
+</div>
+
+</body>
+</html>
