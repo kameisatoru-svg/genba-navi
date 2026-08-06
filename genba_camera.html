@@ -267,14 +267,16 @@ body{display:flex;flex-direction:column;background:var(--bg);}
 <!-- ══ 3. 確認・書き出し ══ -->
 <div class="screen" id="scReview"><div class="review">
   <div id="revList"></div>
-  <button class="big-btn gold" id="btnShare">写真を共有／保存</button>
-  <button class="big-btn" id="btnMeta">撮影メタ（JSON）を保存</button>
+  <button class="big-btn gold" id="btnDl">⬇ ダウンロード（写真＋メタ）</button>
+  <button class="big-btn" id="btnShare">共有（ドライブ・LINEなど）</button>
   <div class="note" style="margin-top:16px">
-    <b>保存のしかた</b><br>
-    「共有／保存」で Google ドライブや「ファイル」アプリに直接送れます。案件フォルダの
-    <b>写真</b> に入れてください。<br>
-    ファイル名は現場ナビの命名規則（<code>連番_月日_時分_区分_説明</code>）で自動生成済みです。<br><br>
-    <b>撮影メタJSON</b> には各カットの水平・仰角・解像度・画角が入っています。あとで寸法を拾うときに使うので、同じフォルダに一緒に置いてください。
+    <b>ふつうは「ダウンロード」でOK</b><br>
+    端末の <b>Download</b> フォルダに、写真と撮影メタJSONをまとめて保存します。共有先を選ぶ画面は出ません。<br>
+    事務所のPCとWi-Fiで繋がっていれば、そのまま
+    <b>「悟さんのZ Fold5 › 内部ストレージ › Download」</b> から取り込めます。<br><br>
+    <b>「共有」</b>は、その場でドライブやLINEへ送りたいときだけ使ってください（送り先を選ぶ画面が出ます）。<br><br>
+    ファイル名は現場ナビの命名規則（<code>連番_月日_時分_区分_説明</code>）で自動生成済みです。
+    <b>撮影メタJSON</b> には各カットの水平・仰角・解像度・画角が入っており、あとで傾きを補正するのに必須なので、写真と同じ場所に置いてください。
   </div>
 </div></div>
 
