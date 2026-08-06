@@ -694,6 +694,11 @@ function addDays(n){const d=new Date();d.setDate(d.getDate()+n);return d.toLocal
 
 function switchMode(v){
   const prev = mode;
+  // ★ 1式表記へ切替える直前に、いま表示している明細の小計（諸経費・値引き前）を控える。
+  //    投入する1式行の単価に引き継ぐため。mode を書き換えたあとだと lump の小計＝0 を拾うので必ずここで取る。
+  //    （2026/8/6 修正：従来は price:0 固定で投入していたため、フラット/大項目で組んだ明細を
+  //      「一式」に切替えた瞬間に単価・金額欄が空になり、合計も ¥0 に落ちていた）
+  const carryOverPrice = (v==='lump' && prev!=='lump') ? calcTotals().subtotal : 0;
   mode=v;
   // lumpモードから他モードに切替：自動投入したlumpサンプル行を削除
   if(prev==='lump' && v!=='lump'){
@@ -709,9 +714,11 @@ function switchMode(v){
     migrateFlatToGroup();
   }
   // lumpモード切替時：groupSummaryItemsが空なら工事件名で1行サンプル投入
+  // 単価は切替前の小計を引き継ぐ（見積書＝諸経費・値引き前の小計なので、諸経費はこの上に従来どおり乗る。
+  //  請求書＝諸経費を適用しない設計のため小計＝税抜合計で一致する）
   if(v==='lump' && groupSummaryItems.length===0){
     const kojimei = document.getElementById('kojimei').value || '工事一式';
-    groupSummaryItems.push({name:kojimei, qty:1, unit:'式', price:0, note:'', _lumpAuto:true});
+    groupSummaryItems.push({name:kojimei, qty:1, unit:'式', price:carryOverPrice, note:'', _lumpAuto:true});
   }
   renderEditor();
   render();
