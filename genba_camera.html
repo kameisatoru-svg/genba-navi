@@ -873,13 +873,12 @@ function buildMeta(){
       画素:[p.w,p.h], 画角35mm換算:p.focal35, 時刻:p.at
     }))
   };
-  const blob = new Blob([JSON.stringify(meta,null,2)],{type:'application/json'});
   // ファイル名はローカル日付で（toISOString はUTCなので朝夕に1日ずれる）
   const n = new Date(), pp = x=>String(x).padStart(2,'0');
   const ymd = `${n.getFullYear()}-${pp(n.getMonth()+1)}-${pp(n.getDate())}`;
-  dl(blob, `_撮影メタ_${S.anken}_${ymd}.json`);
-  toast('メタJSONを保存しました');
-});
+  return { blob: new Blob([JSON.stringify(meta,null,2)],{type:'application/json'}),
+           name: `_撮影メタ_${S.anken}_${ymd}.json` };
+}
 
 function dl(blob,name){
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
