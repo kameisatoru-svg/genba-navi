@@ -514,8 +514,10 @@ async function startCamera(){
   $('btnLens').textContent = lensName(S.camId, S.camIdx);
   $('res').dataset.res = (st.width||'?')+'×'+(st.height||'?');
   fitHeight();                       // カメラ起動で表示領域が変わる機種があるので測り直す
-  // 未登録レンズは、映像が出てから自動で登録パネルを開く（画角を見ながら選べる）
-  if (!lensCfg(S.camId)) setTimeout(openLensPanel, 500);
+  // 焦点距離が入っていなければ、映像が出てから自動で登録パネルを開く。
+  // ※ 判定は「設定の有無」ではなく「焦点距離の有無」。名前だけ入って mm が空のまま
+  //    撮り続けてしまう事故があったため（2026-08-06 実機で発生）。
+  if (!focalNow()) setTimeout(openLensPanel, 500);
   return true;
 }
 
