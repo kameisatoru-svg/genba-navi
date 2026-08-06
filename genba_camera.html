@@ -653,19 +653,22 @@ function updateGauge(){
   $('shutter').classList.toggle('ready', good);
 }
 
-function isGood(){
+/* 引数で姿勢を渡せる。撮影時は「シャッターを押した瞬間の値」で判定するため。 */
+function isGood(roll, elev){
+  if (roll === undefined) roll = S.roll;
+  if (elev === undefined) elev = S.elev;
   const sh = S.shots[S.idx]; if(!sh) return false;
-  if (S.roll===null && S.elev===null) return false;
+  if (roll===null && elev===null) return false;
 
   const ref = groupRef();
   if (ref){
-    if (ref.elev!==null && S.elev!==null && Math.abs(S.elev-ref.elev) > 2) return false;
-    if (sh.checkRoll && ref.roll!==null && S.roll!==null &&
-        Math.abs(angDiff(S.roll, ref.roll)) > 2) return false;
+    if (ref.elev!==null && elev!==null && Math.abs(elev-ref.elev) > 2) return false;
+    if (sh.checkRoll && ref.roll!==null && roll!==null &&
+        Math.abs(angDiff(roll, ref.roll)) > 2) return false;
     return true;
   }
-  const rd = rollDeviation(S.roll);
-  const ed = (sh.targetElev===null||S.elev===null)?0:(S.elev - sh.targetElev);
+  const rd = rollDeviation(roll);
+  const ed = (sh.targetElev===null||elev===null)?0:(elev - sh.targetElev);
   if (sh.checkRoll && rd!==null && Math.abs(rd) > sh.tol) return false;
   if (Math.abs(ed) > sh.tol) return false;
   return true;
