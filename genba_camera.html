@@ -455,7 +455,7 @@ function renderTplNote(){
 
 $('ankenSel').addEventListener('change', e=>{
   if (e.target.value === '__manual__'){
-    const v = prompt('案件キーを入力（例：加藤-実家相談-26）');
+    const v = prompt('案件キーを入力（例：加藤-実家-玄関庇柱交換-26）');
     if (v){ const o=document.createElement('option'); o.value=o.textContent=v;
       const man=e.target.querySelector('option[value="__manual__"]');
       e.target.insertBefore(o, man.nextSibling); e.target.value=v; }   // 手入力の直後へ
