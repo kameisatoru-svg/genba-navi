@@ -218,6 +218,27 @@ body{display:flex;flex-direction:column;background:var(--bg);}
 
   <div class="shots" id="shots"></div>
 
+  <!-- レンズ登録パネル（未登録レンズを選ぶと自動で開く／レンズ長押しでも開く） -->
+  <div class="lens-panel" id="lensPanel">
+    <div class="lp-box">
+      <div class="lp-title">このレンズを登録</div>
+      <div class="lp-sub" id="lpWhich"></div>
+      <div class="lp-hint">
+        いま映っている画角がどれか、下から選んでください。<br>
+        画面を見ながら選べば合っています（いちばん広く写る＝超広角）。
+      </div>
+      <button class="lp-btn" data-n="0.5x" data-f="13">
+        <b>超広角　0.5x</b><span>13mm相当　床・天井・全景はこれ</span></button>
+      <button class="lp-btn" data-n="1x" data-f="23">
+        <b>標準　1x</b><span>23mm相当　壁・建具はこれ</span></button>
+      <button class="lp-btn" data-n="2x" data-f="69">
+        <b>望遠　2x以上</b><span>69mm相当　型番の寄りなど</span></button>
+      <button class="lp-btn lp-alt" id="lpManual">
+        <b>自分で数値を入れる</b><span>他機種のとき。純正カメラ写真の「35mm換算焦点距離」</span></button>
+      <button class="lp-btn lp-alt" id="lpLater"><b>あとで</b><span>登録しないと傾き補正が使えません</span></button>
+    </div>
+  </div>
+
   <div class="shootbar">
     <button class="side-btn" id="btnLens">レンズ</button>
     <button class="shutter" id="shutter" aria-label="撮影"></button>
