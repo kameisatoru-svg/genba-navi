@@ -829,17 +829,31 @@ $('revList').addEventListener('click', e=>{
   S.photos.splice(i,1); renderReview(); renderShots(); $('cnt').textContent=S.photos.length;
 });
 
-$('btnShare').addEventListener('click', async ()=>{
+/* ⬇ ダウンロード：必ず端末のDownloadへ直接保存する（共有先の選択画面は出さない）。
+   以前は「共有できれば共有／無理ならDL」の分岐にしていたため、枚数によって
+   挙動が変わって分かりづらかった（2026-08-06 かめさん指摘）。 */
+$('btnDl').addEventListener('click', ()=>{
   if (!S.photos.length){ toast('写真がありません'); return; }
-  const files = S.photos.map(p=> new File([p.blob], p.file, {type:'image/jpeg'}));
-  if (navigator.canShare && navigator.canShare({files})){
-    try { await navigator.share({files, title:S.anken}); return; } catch(e){ if(e.name==='AbortError') return; }
-  }
-  S.photos.forEach((p,i)=> setTimeout(()=>dl(p.blob,p.file), i*350));
-  toast('ダウンロードを開始しました');
+  const m = buildMeta();
+  S.photos.forEach((p,i)=> setTimeout(()=>dl(p.blob, p.file), i*350));
+  setTimeout(()=>dl(m.blob, m.name), S.photos.length*350 + 200);   // メタも必ず一緒に
+  toast(`ダウンロード開始：写真${S.photos.length}枚＋メタ`);
 });
 
-$('btnMeta').addEventListener('click', ()=>{
+/* 共有：その場でドライブ/LINEへ送りたいときだけ。送り先の選択画面が出る。 */
+$('btnShare').addEventListener('click', async ()=>{
+  if (!S.photos.length){ toast('写真がありません'); return; }
+  const m = buildMeta();
+  const files = S.photos.map(p=> new File([p.blob], p.file, {type:'image/jpeg'}));
+  files.push(new File([m.blob], m.name, {type:'application/json'}));
+  if (!(navigator.canShare && navigator.canShare({files}))){
+    toast('この端末では共有できません。ダウンロードをお使いください'); return;
+  }
+  try { await navigator.share({files, title:S.anken}); }
+  catch(e){ if (e.name!=='AbortError') toast('共有できませんでした：'+e.name); }
+});
+
+function buildMeta(){
   const meta = {
     案件キー:S.anken, 区分:S.kubun, 場所:S.room,
     テンプレート:TEMPLATES[S.tplKey].name,
