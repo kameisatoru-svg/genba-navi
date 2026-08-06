@@ -427,9 +427,10 @@ function renderTplNote(){
 (async function loadAnken(){
   const sel = $('ankenSel');
   const render = list => {
+    // 手入力は一覧の先頭に置く（新規・未登録の案件をすぐ打てるように）
     sel.innerHTML = '<option value="">（案件を選択）</option>' +
-      list.map(k=>`<option value="${k}">${k}</option>`).join('') +
-      '<option value="__manual__">— 手入力する —</option>';
+      '<option value="__manual__">— 手入力する —</option>' +
+      list.map(k=>`<option value="${k}">${k}</option>`).join('');
     const last = localStorage.getItem('gc_lastAnken');
     if (last && list.includes(last)) sel.value = last;
   };
@@ -456,7 +457,8 @@ $('ankenSel').addEventListener('change', e=>{
   if (e.target.value === '__manual__'){
     const v = prompt('案件キーを入力（例：加藤-実家相談-26）');
     if (v){ const o=document.createElement('option'); o.value=o.textContent=v;
-      e.target.insertBefore(o, e.target.firstChild.nextSibling); e.target.value=v; }
+      const man=e.target.querySelector('option[value="__manual__"]');
+      e.target.insertBefore(o, man.nextSibling); e.target.value=v; }   // 手入力の直後へ
     else e.target.value = '';
   }
 });
