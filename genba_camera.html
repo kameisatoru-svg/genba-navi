@@ -105,6 +105,22 @@ body{display:flex;flex-direction:column;background:var(--bg);}
   background:transparent;color:#fff;font-size:11px;font-weight:700;cursor:pointer;padding:0 8px;}
 .side-btn:active{background:rgba(255,255,255,.16);}
 
+/* レンズ登録パネル */
+.lens-panel{display:none;position:absolute;inset:0;z-index:20;background:rgba(0,0,0,.72);
+  align-items:center;justify-content:center;padding:16px;}
+.lens-panel.show{display:flex;}
+.lp-box{background:var(--surface);border-radius:var(--radius-lg);padding:16px;
+  width:100%;max-width:400px;max-height:100%;overflow-y:auto;}
+.lp-title{font-size:16px;font-weight:800;color:var(--navy);}
+.lp-sub{font-size:11px;color:var(--accent);font-weight:700;margin-top:2px;}
+.lp-hint{font-size:11px;line-height:1.7;color:var(--text2);margin:8px 0 12px;}
+.lp-btn{display:block;width:100%;text-align:left;border:2px solid var(--border);
+  background:#fff;border-radius:var(--radius-md);padding:11px 13px;margin-bottom:8px;cursor:pointer;}
+.lp-btn:active{background:var(--surface2);}
+.lp-btn b{display:block;font-size:14px;color:var(--navy);margin-bottom:2px;}
+.lp-btn span{display:block;font-size:11px;color:var(--text2);}
+.lp-alt{border-style:dashed;}
+
 /* ショット一覧 */
 .shots{flex-shrink:0;background:#1a1a1a;padding:8px 12px;display:flex;gap:7px;
   overflow-x:auto;-webkit-overflow-scrolling:touch;}
