@@ -753,12 +753,19 @@ async function capture(){
   const v = $('video');
   if (!v.videoWidth){ toast('カメラ準備中です'); return; }
 
-  const inTol = isGood();
-  if (!inTol && !confirm('傾きが許容外です。このまま撮影しますか？\n（寸法拾いには使えない写真になります）')) return;
-
+  /* ★ 姿勢と映像は「シャッターを押した瞬間」で固定する。
+     以前は confirm() と toBlob() の後に S.roll/S.elev を読んでいたため、
+     ダイアログを操作している間に端末が動くと、写真と記録角度がズレた
+     （2026-08-06 実機で発覚：水平-17°で撮ったのに-4.3°と記録されていた）。
+     補正計算はこの角度を信じるので、ここがズレると全部狂う。 */
+  const capRoll = S.roll, capElev = S.elev;
   const cv = document.createElement('canvas');
   cv.width = v.videoWidth; cv.height = v.videoHeight;
-  cv.getContext('2d').drawImage(v,0,0);
+  cv.getContext('2d').drawImage(v,0,0);            // 先にフレームを確保
+
+  const inTol = isGood(capRoll, capElev);
+  if (!inTol && !confirm('傾きが許容外です。このまま撮影しますか？\n（寸法拾いには使えない写真になります）')) return;
+
   const blob = await new Promise(r=>cv.toBlob(r,'image/jpeg',0.92));
 
   const now = new Date();
@@ -767,13 +774,13 @@ async function capture(){
   const desc = [S.room, sh.code].filter(Boolean).join('_');
   const name = `${p2(S.seq++)}_${stamp}_${S.kubun}_${desc}.jpg`;
 
-  const rd = rollDeviation(S.roll);
+  const rd = rollDeviation(capRoll);
   const rec = {
     shotIdx:S.idx, code:sh.code, label:sh.label, file:name, blob,
     url:URL.createObjectURL(blob), inTol,
-    roll: S.roll===null?null:+S.roll.toFixed(2),
+    roll: capRoll===null?null:+capRoll.toFixed(2),
     rollDev: rd===null?null:+rd.toFixed(2),
-    elev: S.elev===null?null:+S.elev.toFixed(2),
+    elev: capElev===null?null:+capElev.toFixed(2),
     targetElev: sh.targetElev, tol: sh.tol, measure: sh.measure,
     group: sh.group||null, panel: sh.panel||null, lens: lensName(S.camId, S.camIdx),
     w:cv.width, h:cv.height, focal35:focalNow(),
