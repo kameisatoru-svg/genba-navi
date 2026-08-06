@@ -512,6 +512,8 @@ async function startCamera(){
   $('btnLens').textContent = lensName(S.camId, S.camIdx);
   $('res').dataset.res = (st.width||'?')+'×'+(st.height||'?');
   fitHeight();                       // カメラ起動で表示領域が変わる機種があるので測り直す
+  // 未登録レンズは、映像が出てから自動で登録パネルを開く（画角を見ながら選べる）
+  if (!lensCfg(S.camId)) setTimeout(openLensPanel, 500);
   return true;
 }
 
@@ -541,22 +543,40 @@ let lensHold;
 $('btnLens').addEventListener('pointerdown', ()=>{ lensHold=setTimeout(renameLens,600); });
 ['pointerup','pointerleave','pointercancel'].forEach(ev=>
   $('btnLens').addEventListener(ev, ()=>clearTimeout(lensHold)));
-function renameLens(){
-  const cur = lensCfg(S.camId) || {};
-  const name = prompt('このレンズの名前（例：0.5x／1x／2x）', cur.name || '');
-  if (!name) return;
-  const f = prompt(
-    '35mm換算の焦点距離（mm）\n\n' +
-    '純正カメラアプリで1枚撮り、その写真の詳細情報にある「35mm換算焦点距離」を入れてください。\n' +
-    'あとで傾きを補正して平面図に起こすときに必要です。\n' +
-    '（Z Fold5 の実績値：超広角=13／標準=23／望遠=69）',
-    cur.f35 || '');
+/* ── レンズ登録パネル ────────────
+   未登録のレンズに切り替わった時点で自動で開く（＝気付かないまま撮り続けるのを防ぐ）。
+   あとからでも レンズボタン長押し で開ける。 */
+function openLensPanel(){
+  $('lpWhich').textContent =
+    `${S.cams.length ? `${S.cams.length}本中 ${S.camIdx+1}本目` : 'このカメラ'}`;
+  $('lensPanel').classList.add('show');
+}
+function saveLens(name, f35){
   const all = lensCfgAll();
-  all[S.camId] = { name: name, f35: f ? parseFloat(f) : null };
+  all[S.camId] = { name: name, f35: f35 };
   localStorage.setItem('gc_lensCfg', JSON.stringify(all));
   $('btnLens').textContent = lensName(S.camId, S.camIdx);
-  toast(f ? `「${name}」${f}mm相当で覚えました` : `「${name}」で覚えました（焦点距離は未登録）`);
+  $('lensPanel').classList.remove('show');
+  toast(`「${name}」${f35}mm相当で覚えました`);
 }
+$('lensPanel').addEventListener('click', e=>{
+  const b = e.target.closest('.lp-btn');
+  if (!b || b.id) return;                       // id付き（手入力/あとで）は別ハンドラ
+  saveLens(b.dataset.n, parseFloat(b.dataset.f));
+});
+$('lpManual').addEventListener('click', ()=>{
+  const name = prompt('レンズの名前（例：0.5x／1x／2x）', (lensCfg(S.camId)||{}).name || '');
+  if (!name) return;
+  const f = prompt('35mm換算の焦点距離（mm）\n純正カメラで撮った写真の詳細情報に出ている数値です。',
+                   (lensCfg(S.camId)||{}).f35 || '');
+  if (!f) return;
+  saveLens(name, parseFloat(f));
+});
+$('lpLater').addEventListener('click', ()=>{
+  $('lensPanel').classList.remove('show');
+  toast('未登録のままです（ボタン長押しでいつでも登録できます）');
+});
+function renameLens(){ openLensPanel(); }
 
 /* ═══ 姿勢計算 ═══
    W3C DeviceOrientation の alpha/beta/gamma から回転行列を組み、
