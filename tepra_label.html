@@ -336,7 +336,16 @@ let DATA=null, srcId='kougu', tplIdx=0, tapeW=18, cur=null, checked=new Set(), r
       '<div class="empty">data.json を読み込めませんでした<br><span style="font-size:11px">'+e.message+'</span><br><br>「自由入力」は使えます。</div>';
   }
   renderTplChips(); rebuild();
+  openBleIfHashed();          // リスト描画が終わってから位置を確定させる
 })();
+
+/* URLに #ble を付けて開くと、判定ツールを開いた状態まで送る */
+function openBleIfHashed(){
+  if(location.hash!=='#ble') return;
+  const d = document.getElementById('bleDetails');
+  d.open = true;
+  requestAnimationFrame(()=>d.scrollIntoView({behavior:'smooth', block:'center'}));
+}
 
 /* ── チップ描画 ─────────────────────────────────────────── */
 function renderTapeChips(){
