@@ -19,7 +19,15 @@ body{display:flex;flex-direction:column;min-height:100vh;}
 .htitle{font-size:17px;font-weight:800;color:var(--white);flex:1;letter-spacing:0.03em;}
 .htitle span{color:var(--accent);}
 
-.wrap{padding:14px 14px max(180px,calc(160px + env(safe-area-inset-bottom)));flex:1;}
+/* common.css が body{height:100dvh;overflow:hidden} なので、
+   このラッパーをスクロール容器にする（しないと指でスクロールできない） */
+.wrap{
+  flex:1;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  padding:14px 14px max(180px,calc(160px + env(safe-area-inset-bottom)));
+}
 
 .lbl{font-size:10px;font-weight:700;color:var(--text2);letter-spacing:0.08em;margin:14px 2px 7px;}
 .lbl:first-child{margin-top:0;}
