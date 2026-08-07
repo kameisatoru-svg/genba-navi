@@ -470,6 +470,23 @@ function splitTwo(s){
   return [s.slice(0,cands[0].i).trim(), s.slice(cands[0].i).trim()].filter(Boolean);
 }
 
+/* ── 郵送宛名まわり ───────────────────────────────────────
+      keisho：既存の敬称や（弁護士）などの注記を落としてから付け直す。
+              「吉田 祐治 様（弁護士）」→「吉田 祐治 様」 */
+function keisho(s, suffix){
+  let t = String(s==null?'':s).trim();
+  if(!t) return '';
+  t = t.replace(/[（(][^）)]*[）)]/g,'').trim();      // （弁護士）等を除去
+  t = t.replace(/[\s　]*(様|御中|さん|殿)[\s　]*$/,'').trim();  // 既存の敬称を除去
+  return t ? t + ' ' + suffix : '';
+}
+/* 住所から〒を切り出す。〒が無ければ ['', 住所] */
+function zipSplit(addr){
+  const s = String(addr==null?'':addr).trim();
+  const m = s.match(/^〒?[\s　]*(\d{3}[-－]\d{4})[\s　]*(.*)$/);
+  return m ? ['〒'+m[1].replace('－','-'), m[2].trim()] : ['', s];
+}
+
 /* ── ラベル行の生成 ─────────────────────────────────────── */
 function linesOf(rec){
   const t = SRC[srcId].tpl[tplIdx];
