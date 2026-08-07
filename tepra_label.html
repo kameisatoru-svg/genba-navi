@@ -83,6 +83,13 @@ body{display:flex;flex-direction:column;min-height:100vh;}
 .free:focus{outline:none;border-color:var(--accent);}
 .hint{font-size:11px;color:var(--text2);line-height:1.6;margin-top:7px;}
 
+/* オプション */
+.opt{display:flex;align-items:flex-start;gap:10px;background:var(--white);border:1px solid var(--line);
+  border-radius:14px;padding:13px 14px;margin-top:16px;cursor:pointer;}
+.opt input{width:20px;height:20px;accent-color:var(--navy);flex-shrink:0;margin:0;}
+.opt span{font-size:12.5px;font-weight:700;color:var(--navy);line-height:1.5;}
+.opt em{display:block;font-style:normal;font-size:11px;font-weight:600;color:var(--text3);margin-top:3px;line-height:1.5;}
+
 /* 使い方 */
 details.howto{background:var(--white);border-radius:14px;border:1px solid var(--line);margin-top:16px;overflow:hidden;}
 details.howto summary{padding:13px 14px;font-size:13px;font-weight:700;color:var(--navy);cursor:pointer;list-style:none;}
@@ -473,9 +480,9 @@ function exportCsv(){
   const cols = Math.max(...data.map(r=>r.length));
   const head = cols===1 ? ['ラベル'] : Array.from({length:cols},(_,i)=>'行'+(i+1));
   const q = s => '"' + String(s==null?'':s).replace(/"/g,'""') + '"';
-  const body = [head, ...data.map(r=>{
-    const a=r.slice(); while(a.length<cols) a.push(''); return a;
-  })].map(r=>r.map(q).join(',')).join('\r\n');
+  const rowsOut = data.map(r=>{ const a=r.slice(); while(a.length<cols) a.push(''); return a; });
+  if(document.getElementById('optHead').checked) rowsOut.unshift(head);
+  const body = rowsOut.map(r=>r.map(q).join(',')).join('\r\n');
 
   const blob = new Blob(['﻿'+body], {type:'text/csv;charset=utf-8'});
   const d = new Date(), p = n=>String(n).padStart(2,'0');
