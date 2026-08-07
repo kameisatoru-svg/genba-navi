@@ -193,6 +193,15 @@ body{display:flex;flex-direction:column;background:var(--bg);}
 
   <button class="big-btn" id="btnStart">カメラを起動</button>
 
+  <div style="text-align:center;font-size:11px;color:var(--text3);margin:14px 0 6px">— または —</div>
+  <button class="big-btn gold" id="btnSketch">✏ ラフスケッチから撮影手順をつくる</button>
+  <input type="file" id="sketchFile" accept="image/*" capture="environment" hidden>
+  <div class="note" style="margin-top:10px">
+    手描きのラフを撮ると、AIが読み取って<b>簡易清書</b>と<b>撮影手順</b>を組み立てます。
+    展開の符号（A=上／B=右／C=下／D=左）を自動で振り、建具やメモの内容に沿って
+    「次はこれを撮ってください」と順番に案内します。
+  </div>
+
   <div class="note" style="margin-top:18px">
     <b>撮影画面の使い方</b><br>
     左下の<b>レンズ</b>ボタンで超広角・標準・望遠を切り替えます。<br>
@@ -210,6 +219,14 @@ body{display:flex;flex-direction:column;background:var(--bg);}
     ただし <b>壁への正対（左右の振り）</b> はセンサーでは測れません（屋内は磁気が乱れて方位が使えないため）。
     こちらは画面のグリッドに<b>壁の上下の辺を平行に合わせて</b>ください。残った誤差は、あとから4点補正で消せます。
   </div>
+</div></div>
+
+<!-- ══ 1.5 ラフスケッチ読み取り結果 ══ -->
+<div class="screen" id="scSketch"><div class="review">
+  <div id="skStatus"></div>
+  <div id="skBody"></div>
+  <button class="big-btn gold" id="btnSkGo" style="display:none">この手順で撮影を開始</button>
+  <button class="big-btn" id="btnSkRetry" style="display:none">別のスケッチを読み取る</button>
 </div></div>
 
 <!-- ══ 2. 撮影 ══ -->
