@@ -655,9 +655,8 @@ async function bleScanList(){
   }
 
   scanSeen = new Map();
-  document.getElementById('scanOut').innerHTML='';
-  out.style.color='var(--text2)';
-  out.innerHTML='電波を受信中…（テプラの電源を入れたり切ったりして、増減する行を探してください）';
+  scanBase = null;
+  out.style.color='var(--text2)'; out.innerHTML='';
   try{
     scanRef = await navigator.bluetooth.requestLEScan({acceptAllAdvertisements:true});
   }catch(e){
@@ -666,8 +665,11 @@ async function bleScanList(){
     return;
   }
   navigator.bluetooth.addEventListener('advertisementreceived', onAdv);
-  btn.textContent='■ スキャンを止める';
-  scanTimer = setTimeout(stopScan, 60000);   // 60秒で自動停止
+  document.getElementById('scanModal').classList.add('on');
+  document.body.style.overflow='hidden';
+  document.getElementById('btnScanStop').textContent='スキャン停止';
+  scanTimer = setTimeout(stopScan, 180000);   // 3分で自動停止
+  renderScan();
 }
 
 function onAdv(ev){
