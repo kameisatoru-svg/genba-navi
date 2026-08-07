@@ -621,30 +621,35 @@ function buildStrip(){
   if(!names.length || !(W>0)) return null;
 
   const ch   = spec.h;                    // 1行なので文字高＝印字有効高
+  const hw   = ch*0.55;                   // 半角スペース幅。全角より刻みが細かく誤差が半減する
   const edge = MARGIN_MM/2;               // テプラが前後に付ける余白（片側）
   const t    = names.map(n=>widthOf(n,ch));
-  const sp   = mm => Math.max(0, Math.round(mm/ch));   // 必要mm→全角スペース数
+  const sp   = mm => Math.max(0, Math.round(mm/hw));   // 必要mm→半角スペース数
 
   const lead  = sp(W/2 - t[0]/2 - edge);
   const trail = sp(W/2 - t[t.length-1]/2 - edge);
   const gaps  = [];
   for(let i=0;i<names.length-1;i++) gaps.push(sp(W - t[i]/2 - t[i+1]/2));
 
-  let text = '　'.repeat(lead);
-  names.forEach((n,i)=>{ text += n; if(i<names.length-1) text += '　'.repeat(gaps[i]); });
-  text += '　'.repeat(trail);
+  let text = ' '.repeat(lead);
+  names.forEach((n,i)=>{ text += n; if(i<names.length-1) text += ' '.repeat(gaps[i]); });
+  text += ' '.repeat(trail);
 
   // 実際の仕上がり幅を検算（切る位置＝各空きの中央）
   const pieces = names.map((n,i)=>{
-    const before = i===0 ? edge + lead*ch          : gaps[i-1]*ch/2;
-    const after  = i===names.length-1 ? trail*ch + edge : gaps[i]*ch/2;
-    return {name:n, mm:before + t[i] + after, 収まる:t[i] <= W};
+    const before = i===0 ? edge + lead*hw           : gaps[i-1]*hw/2;
+    const after  = i===names.length-1 ? trail*hw + edge : gaps[i]*hw/2;
+    const mm = before + t[i] + after;
+    return {name:n, mm, 収まる: mm <= W + 0.6};      // ネームカードの寸法公差 ±0.6mm
   });
-  const total = edge + lead*ch + t.reduce((a,b)=>a+b,0) + gaps.reduce((a,b)=>a+b*ch,0) + trail*ch + edge;
+  const total = edge + lead*hw + t.reduce((a,b)=>a+b,0) + gaps.reduce((a,b)=>a+b*hw,0) + trail*hw + edge;
 
   const warns=[];
-  const over = pieces.filter(p=>!p.収まる).map(p=>p.name);
-  if(over.length) warns.push(`「${over.join('」「')}」は文字が${W}mmより長く、コマに収まりません（テープを細くするか名前を短く）`);
+  const longName = names.filter((n,i)=>t[i] > W).map(n=>n);
+  if(longName.length) warns.push(`「${longName.join('」「')}」は文字だけで${W}mmを超えます（テープを細くするか名前を短く）`);
+  const overPiece = pieces.filter(p=>!p.収まる).map(p=>p.name);
+  if(overPiece.length && !longName.length)
+    warns.push(`「${overPiece.join('」「')}」のコマが${W}mmを超えます（前後の名前を短くするか、コマ長さを見直してください）`);
   if(/[　-ヿ一-鿿]/.test(names.join('')) && ch < KANJI_MIN)
     warns.push(`文字高 約${ch.toFixed(1)}mm。漢字の可読下限 ${KANJI_MIN}mm を下回ります`);
   if(gaps.some(g=>g===0)) warns.push('間隔が0のコマがあります。切る位置が分かりにくいので名前を短くするか、コマ長さを大きくしてください');
