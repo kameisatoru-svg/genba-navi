@@ -241,13 +241,19 @@ details.diag summary{color:var(--accent2);}
   </details>
 
   <details class="howto diag" id="bleDetails">
-    <summary>🔍 Bluetooth方式を判定する（直接印刷できない理由）</summary>
+    <summary>🔍 直接印刷できない理由（実機で検証済み・2026-08-07）</summary>
     <div class="howto-body">
-      SR-R2500P は<b>スマホアプリ専用機</b>で、キングジム公式のPC用ソフト（テプラクリエイター）にも
-      macOS版アプリにも対応していません。つないでいい相手が iOS / Android アプリだけ、という設計です。<br><br>
-      さらにWebページから直接プリンターを叩けるのは <b>Bluetooth Low Energy（BLE）</b>の機器に限られます。
-      SR-R2500P は接続前にAndroid本体側での<b>ペアリング操作が必要</b>で、これはBLEではない
-      （＝Webからは触れない）機器の特徴です。下のボタンで実機判定できます。
+      <b style="color:var(--red)">結論：このページから直接印刷することは原理的にできません。</b><br><br>
+      ① SR-R2500P は<b>スマホアプリ専用機</b>。キングジム公式のPC用ソフト（テプラクリエイター＝SPC10）の
+      対応機種に入っておらず、TEPRA LINK 2 の macOS 版でも対応機種から外れている。<br>
+      ② Webページから直接プリンターを叩けるのは <b>Bluetooth Low Energy（BLE）</b>の機器だけ。
+      SR-R2500P は接続前にAndroid本体での<b>ペアリング操作が必要</b>＝Bluetooth Classic の特徴。<br>
+      ③ <b>実機で全電波をスキャンして確認</b>（下のツール）。テプラの電源を入れても至近距離の機器は
+      1件も増えず、増えたのは全て遠方のApple機器（-93〜-100dBm）だった。<br>
+      ④ 決め手：<b>キングジムは Bluetooth SIG に企業IDを1件も登録していない</b>
+      （公式データベース全件検索で該当ゼロ）。BLEで名乗る手段自体を持っていない。<br><br>
+      <span style="color:var(--text3)">よって、このアプリの連携方法は上の「コピー」と「CSV書き出し」です。
+      以下は検証に使ったツールで、記録として残しています。</span>
       <div style="margin-top:12px;">
         <div style="font-size:11px;color:var(--text3);line-height:1.6;margin-bottom:9px;">
           <b style="color:var(--navy)">先に準備：</b>テプラの電源を入れ、
