@@ -496,7 +496,7 @@ function renderTplChips(){
   document.getElementById('tplChips').innerHTML = SRC[srcId].tpl.map((t,i)=>
     `<div class="chip ${i===tplIdx?'on':''}" onclick="setTpl(${i})">${t.name}</div>`).join('');
 }
-function setTape(w){ tapeW=w; renderTapeChips(); drawPreview(); }
+function setTape(w){ tapeW=w; renderTapeChips(); if(srcId==='renzoku') renderKoma(); drawPreview(); }
 function setSrc(k){ srcId=k; tplIdx=0; cur=null; checked.clear(); document.getElementById('q').value='';
   renderSrcChips(); renderTplChips();
   const free = (k==='free'), rz = (k==='renzoku');
@@ -981,6 +981,8 @@ function hideToast(){ document.getElementById('toast').classList.remove('on'); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 document.getElementById('q').addEventListener('input', ()=>rebuild());
 document.getElementById('freeTa').addEventListener('input', ()=>{ drawPreview(); syncBar(); });
+document.getElementById('renzokuTa').addEventListener('input', ()=>{ renderKoma(); drawPreview(); });
+document.getElementById('komaMm').addEventListener('input', ()=>{ komaId='fr'; renderKomaChips(); renderKoma(); drawPreview(); });
 </script>
 <script src="back-guard.js"></script>
 </body></html>
