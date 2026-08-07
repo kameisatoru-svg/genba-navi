@@ -204,6 +204,26 @@ details.howto[open] summary::after{content:"−";}
     </div>
   </details>
 
+  <details class="howto">
+    <summary>このページから直接印刷できないのはなぜ？</summary>
+    <div class="howto-body">
+      SR-R2500P は<b>スマホアプリ専用機</b>で、キングジム公式のPC用ソフト（テプラクリエイター）にも
+      macOS版アプリにも対応していません。つないでいい相手が iOS / Android アプリだけ、という設計です。<br><br>
+      さらにWebページから直接プリンターを叩けるのは <b>Bluetooth Low Energy（BLE）</b>の機器に限られます。
+      SR-R2500P は接続前にAndroid本体側での<b>ペアリング操作が必要</b>で、これはBLEではない
+      （＝Webからは触れない）機器の特徴です。下のボタンで実機判定できます。
+      <div style="margin-top:12px;">
+        <button class="bbtn ghost" style="height:46px;width:100%;" onclick="bleTest()">Bluetooth方式を判定する</button>
+        <div id="bleOut" style="margin-top:9px;font-size:11.5px;line-height:1.65;"></div>
+        <div style="font-size:11px;color:var(--text3);line-height:1.6;margin-top:7px;">
+          テプラの電源を入れてから押してください。出てきた一覧に <b>SR-R2500P</b> が
+          <b>出れば</b>BLE（＝直接印刷を作り込める可能性あり）、<b>出なければ</b>Bluetooth Classic
+          （＝Webページからは原理的に不可能）です。
+        </div>
+      </div>
+    </div>
+  </details>
+
 </div>
 
 <div class="bar">
