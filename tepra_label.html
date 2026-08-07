@@ -570,6 +570,7 @@ function freeLines(){
 
 function rebuild(){
   const listEl = document.getElementById('list');
+  if(srcId==='renzoku'){ rows=[]; renderKoma(); drawPreview(); return; }
   if(srcId==='free'){ rows=[]; drawPreview(); return; }
   if(!DATA){ drawPreview(); return; }
   const src = SRC[srcId];
@@ -762,6 +763,7 @@ async function shareCurrent(){
 }
 
 function csvRows(){
+  if(srcId==='renzoku') return komaNames().map(n=>[n]);   // 流し込み印刷を使う場合はこちら
   if(srcId==='free') return freeLines();
   return rows.filter(x=>checked.has(x.i)).map(x=>x.lines);
 }
