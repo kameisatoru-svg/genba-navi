@@ -677,7 +677,8 @@ function minKomaMm(){
   const spec = TAPES.find(t=>t.w===tapeW);
   const t = names.map(n=>widthOf(n, spec.h));
   const max = Math.max(...t);
-  return {mm: Math.ceil((max+2)*2)/2, name: names[t.indexOf(max)]};
+  // 最長セル＋すき間1つぶん（半角スペース1個）を 0.5mm 単位で切り上げ
+  return {mm: Math.ceil((max + spec.h*0.55)*2)/2, name: names[t.indexOf(max)]};
 }
 function applyMinKoma(){
   const m = minKomaMm(); if(!m) return;
