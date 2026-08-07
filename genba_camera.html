@@ -1177,13 +1177,14 @@ function skShots(d){
   });
   (d.建具||[]).forEach(t=>{
     const k=t.記号||'建具';
+    const fc=/^[ABCD]$/.test(String(t.面||'').trim())?String(t.面).trim():null;  // 建具のある面
     out.push({code:k+'正面',label:`${k} 正面（${t.種別||''} ${t.寸法||''}）`.trim(),
       hint:`${t.面||'?'}面。枠の外側四隅を入れて正対`,
-      lens:'std',targetElev:0,checkRoll:true,tol:3,measure:true,split:true});
+      face:fc,lens:'std',targetElev:0,checkRoll:true,tol:3,measure:true,split:true});
     out.push({code:k+'枠',label:`${k} 枠の寄り`,hint:'メジャーを枠に当てて見付・見込',
-      lens:'std',targetElev:0,checkRoll:true,tol:6,measure:true});
+      face:fc,lens:'std',targetElev:0,checkRoll:true,tol:6,measure:true});
     out.push({code:k+'金物',label:`${k} 金物・丁番`,hint:'型番が読める距離で',
-      lens:'tele',targetElev:null,checkRoll:false,tol:15,measure:false});
+      face:fc,lens:'tele',targetElev:null,checkRoll:false,tol:15,measure:false});
   });
   (d.要確認||[]).forEach((q,i)=> out.push({code:'確認'+(i+1),label:'要確認：'+q,
     hint:'スケッチのメモに沿って記録',lens:null,targetElev:null,checkRoll:true,tol:8,measure:false}));
