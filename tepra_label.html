@@ -230,7 +230,6 @@ details.diag summary{color:var(--accent2);}
         <button class="bbtn ghost" style="height:46px;width:100%;margin-top:8px;" onclick="bleTest(false)">② すべてのBLE機器を表示</button>
         <button class="bbtn ghost" style="height:46px;width:100%;margin-top:8px;border-color:var(--accent);color:var(--accent2);" id="btnScan" onclick="bleScanList()">③ 電波を一覧で見る（推奨）</button>
         <div id="bleOut" style="margin-top:9px;font-size:11.5px;line-height:1.65;"></div>
-        <div id="scanOut" style="margin-top:9px;"></div>
         <div style="font-size:11px;color:var(--text3);line-height:1.6;margin-top:9px;">
           <b style="color:var(--navy)">読み方：</b>①で SR-R2500P が出れば BLE＝直接印刷を作り込める可能性あり。
           ①が空なら②を、<b>テプラの電源OFF時とON時の2回</b>実行して見比べてください。
@@ -257,6 +256,27 @@ details.diag summary{color:var(--accent2);}
     <button class="bbtn ghost" onclick="openTepra('jp.co.kingjim.android.tepra2')">TEPRA LINK 2</button>
     <button class="bbtn ghost" onclick="openTepra('jp.co.kingjim.hello')">Hello</button>
     <button class="bbtn ghost" id="btnShare" style="flex:0 0 78px;" onclick="shareCurrent()">共有</button>
+  </div>
+</div>
+
+<!-- ③ 電波スキャン：全画面パネル -->
+<div class="scan-modal" id="scanModal">
+  <div class="scan-head">
+    <div class="scan-title">電波スキャン<span id="scanCount"></span></div>
+    <button class="scan-x" onclick="closeScan()">閉じる</button>
+  </div>
+  <div class="scan-tool">
+    <button class="bbtn gold" style="height:46px;width:100%;" id="btnBase" onclick="setBaseline()">
+      いま見えている機器を「既知」にする
+    </button>
+    <div class="scan-hint" id="scanHint">
+      テプラの<b>電源を切ったまま</b>これを押し、そのあと<b>電源を入れて</b>ください。<br>
+      新しく現れた機器に <b style="color:var(--green)">NEW</b> が付きます。それがテプラです。
+    </div>
+  </div>
+  <div class="scan-body"><div id="scanList"></div></div>
+  <div class="scan-foot">
+    <button class="bbtn ghost" style="flex:1;" id="btnScanStop" onclick="stopScan()">スキャン停止</button>
   </div>
 </div>
 
