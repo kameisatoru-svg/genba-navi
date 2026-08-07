@@ -524,6 +524,32 @@ function openTepra(pkg){
   }
 }
 
+/* ── BLE方式の実機判定 ──────────────────────────────────── */
+async function bleTest(){
+  const out = document.getElementById('bleOut');
+  const say = (html,color)=>{ out.innerHTML = html; out.style.color = color||'var(--text2)'; };
+
+  if(!navigator.bluetooth){
+    say('<b>Web Bluetooth 非対応のブラウザです。</b><br>AndroidのChromeで開いて試してください。','var(--red)');
+    return;
+  }
+  say('機器を探しています…（一覧が出たらSR-R2500Pがあるか見てください）');
+  try{
+    const dev = await navigator.bluetooth.requestDevice({acceptAllDevices:true, optionalServices:[]});
+    say(`<b style="color:var(--green)">BLE機器として見えました：${esc(dev.name||'(名前なし)')}</b><br>`+
+        `ID: ${esc(dev.id||'')}<br>`+
+        `→ これがテプラなら、直接印刷を作り込める可能性があります（通信内容の解析が別途必要）。`);
+  }catch(e){
+    if(e && e.name==='NotFoundError'){
+      say('<b>一覧にテプラが出ませんでした。</b><br>'+
+          'BLEでは通信していない（Bluetooth Classic）ため、<b>Webページからの直接印刷は原理的に不可能</b>です。'+
+          'このページのコピー／CSV流し込みで運用してください。','var(--orange)');
+    }else{
+      say('判定できませんでした：'+esc(e && e.message ? e.message : String(e)),'var(--red)');
+    }
+  }
+}
+
 /* ── 下部バー状態 ───────────────────────────────────────── */
 function syncBar(){
   const has = !!currentLines();
