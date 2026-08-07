@@ -640,7 +640,8 @@ function buildStrip(){
     const before = i===0 ? edge + lead*hw           : gaps[i-1]*hw/2;
     const after  = i===names.length-1 ? trail*hw + edge : gaps[i]*hw/2;
     const mm = before + t[i] + after;
-    return {name:n, mm, 収まる: mm <= W + 0.6};      // ネームカードの寸法公差 ±0.6mm
+    const 端 = (i===0 || i===names.length-1);        // 両端はテプラの余白ぶん。好きな位置で切れる
+    return {name:n, mm, 端, 収まる: 端 ? true : mm <= W + 0.6};   // 公差±0.6mm
   });
   const total = edge + lead*hw + t.reduce((a,b)=>a+b,0) + gaps.reduce((a,b)=>a+b*hw,0) + trail*hw + edge;
 
