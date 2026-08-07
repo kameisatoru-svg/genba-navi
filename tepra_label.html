@@ -588,6 +588,92 @@ async function bleTest(onlyTepra){
   }
 }
 
+/* ── ③ 電波を一覧表示（Web Bluetooth Scanning API）─────────
+      Chromeの実験機能。名前・電波強度・サービスUUID・メーカーIDまで見えるので
+      「テプラの電源ON/OFFで何が増減するか」を一目で判定できる。 */
+let scanRef=null, scanSeen=null, scanTimer=null, scanDirty=false;
+
+async function bleScanList(){
+  const out = document.getElementById('bleOut');
+  const btn = document.getElementById('btnScan');
+
+  if(scanRef){ stopScan(); return; }
+
+  if(!navigator.bluetooth || !navigator.bluetooth.requestLEScan){
+    out.style.color='var(--orange)';
+    out.innerHTML =
+      '<b>この機能はChromeの実験設定をONにすると使えます。</b><br>'+
+      '1. Chromeで <b>chrome://flags</b> を開く<br>'+
+      '2. 「<b>Experimental Web Platform features</b>」を検索して <b>Enabled</b> に<br>'+
+      '3. Chromeを再起動して、このページをもう一度開く<br>'+
+      '<span style="color:var(--text3)">※onにするとこの一覧に「名前・電波の強さ・メーカーID」まで出るので、'+
+      'テプラの電源ON/OFFで何が増えるか一発で分かります。</span>';
+    return;
+  }
+
+  scanSeen = new Map();
+  document.getElementById('scanOut').innerHTML='';
+  out.style.color='var(--text2)';
+  out.innerHTML='電波を受信中…（テプラの電源を入れたり切ったりして、増減する行を探してください）';
+  try{
+    scanRef = await navigator.bluetooth.requestLEScan({acceptAllAdvertisements:true});
+  }catch(e){
+    out.style.color='var(--red)';
+    out.textContent='スキャンを開始できませんでした：'+(e&&e.message?e.message:String(e));
+    return;
+  }
+  navigator.bluetooth.addEventListener('advertisementreceived', onAdv);
+  btn.textContent='■ スキャンを止める';
+  scanTimer = setTimeout(stopScan, 60000);   // 60秒で自動停止
+}
+
+function onAdv(ev){
+  const key = ev.device.id || ev.device.name || 'x';
+  const prev = scanSeen.get(key) || {};
+  const mfg = [];
+  if(ev.manufacturerData) ev.manufacturerData.forEach((_v,cid)=>mfg.push(cid));
+  scanSeen.set(key, {
+    name : ev.device.name || prev.name || '',
+    rssi : (typeof ev.rssi==='number') ? ev.rssi : prev.rssi,
+    uuids: (ev.uuids && ev.uuids.length) ? ev.uuids : (prev.uuids||[]),
+    mfg  : mfg.length ? mfg : (prev.mfg||[]),
+    n    : (prev.n||0)+1
+  });
+  if(!scanDirty){ scanDirty=true; setTimeout(renderScan, 400); }   // 描画は間引く
+}
+
+function renderScan(){
+  scanDirty=false;
+  const el = document.getElementById('scanOut');
+  const list = [...scanSeen.values()].sort((a,b)=>(b.rssi??-999)-(a.rssi??-999));
+  if(!list.length){ el.innerHTML='<div style="font-size:11.5px;color:var(--text3)">まだ受信していません…</div>'; return; }
+  el.innerHTML = `<div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px;">受信中 ${list.length}件（電波の強い順）</div>`+
+    list.map(d=>{
+      const nm = d.name || '';
+      const hit = /SR-?R?2500|TEPRA|Tepra|KING|KJ/i.test(nm);
+      return `<div class="scan-item ${hit?'hit':''}">
+        <div class="scan-name">${nm?esc(nm):'<span class="no">(名前なし)</span>'}${hit?' ← テプラかも！':''}</div>
+        <div class="scan-meta">電波 ${d.rssi??'?'}dBm ／ 受信${d.n}回`+
+        (d.mfg.length?` ／ メーカーID ${d.mfg.map(c=>'0x'+c.toString(16).toUpperCase()).join(',')}`:'')+
+        (d.uuids.length?`<br>サービス ${esc(d.uuids.slice(0,3).join(', '))}`:'')+
+        `</div></div>`;
+    }).join('');
+}
+
+function stopScan(){
+  clearTimeout(scanTimer);
+  try{ scanRef && scanRef.stop && scanRef.stop(); }catch(_){}
+  scanRef=null;
+  navigator.bluetooth.removeEventListener('advertisementreceived', onAdv);
+  document.getElementById('btnScan').textContent='③ 電波を一覧で見る（推奨）';
+  const out=document.getElementById('bleOut');
+  out.style.color='var(--text2)';
+  out.innerHTML='スキャンを停止しました。'+
+    '<b>テプラの電源ON時とOFF時で見比べて</b>、増減する行があればそれがテプラです。'+
+    'その行の内容をそのまま伝えてください。';
+  renderScan();
+}
+
 /* ── 下部バー状態 ───────────────────────────────────────── */
 function syncBar(){
   const has = !!currentLines();
