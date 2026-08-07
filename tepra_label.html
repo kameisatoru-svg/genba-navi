@@ -605,6 +605,78 @@ function toggle(i){
   rebuild();
 }
 
+/* ── 連続印刷（等ピッチ切り分け）─────────────────────────
+      1本のテープに全部印刷し、空きの真ん中を切ると各コマがW mmになるよう
+      間の全角スペース数を割り出す。テプラの前後余白(各4mm)も勘定に入れる。 */
+function komaNames(){
+  return document.getElementById('renzokuTa').value.split('\n').map(s=>s.trim()).filter(Boolean);
+}
+function buildStrip(){
+  const W = parseFloat(String(document.getElementById('komaMm').value).replace(/[^\d.]/g,''));
+  const names = komaNames();
+  const spec = TAPES.find(t=>t.w===tapeW);
+  if(!names.length || !(W>0)) return null;
+
+  const ch   = spec.h;                    // 1行なので文字高＝印字有効高
+  const edge = MARGIN_MM/2;               // テプラが前後に付ける余白（片側）
+  const t    = names.map(n=>widthOf(n,ch));
+  const sp   = mm => Math.max(0, Math.round(mm/ch));   // 必要mm→全角スペース数
+
+  const lead  = sp(W/2 - t[0]/2 - edge);
+  const trail = sp(W/2 - t[t.length-1]/2 - edge);
+  const gaps  = [];
+  for(let i=0;i<names.length-1;i++) gaps.push(sp(W - t[i]/2 - t[i+1]/2));
+
+  let text = '　'.repeat(lead);
+  names.forEach((n,i)=>{ text += n; if(i<names.length-1) text += '　'.repeat(gaps[i]); });
+  text += '　'.repeat(trail);
+
+  // 実際の仕上がり幅を検算（切る位置＝各空きの中央）
+  const pieces = names.map((n,i)=>{
+    const before = i===0 ? edge + lead*ch          : gaps[i-1]*ch/2;
+    const after  = i===names.length-1 ? trail*ch + edge : gaps[i]*ch/2;
+    return {name:n, mm:before + t[i] + after, 収まる:t[i] <= W};
+  });
+  const total = edge + lead*ch + t.reduce((a,b)=>a+b,0) + gaps.reduce((a,b)=>a+b*ch,0) + trail*ch + edge;
+
+  const warns=[];
+  const over = pieces.filter(p=>!p.収まる).map(p=>p.name);
+  if(over.length) warns.push(`「${over.join('」「')}」は文字が${W}mmより長く、コマに収まりません（テープを細くするか名前を短く）`);
+  if(/[　-ヿ一-鿿]/.test(names.join('')) && ch < KANJI_MIN)
+    warns.push(`文字高 約${ch.toFixed(1)}mm。漢字の可読下限 ${KANJI_MIN}mm を下回ります`);
+  if(gaps.some(g=>g===0)) warns.push('間隔が0のコマがあります。切る位置が分かりにくいので名前を短くするか、コマ長さを大きくしてください');
+
+  return {text, pieces, total, ch, W, lead, trail, gaps};
+}
+
+function renderKomaChips(){
+  document.getElementById('komaChips').innerHTML = KOMA.map(k=>
+    `<div class="chip gold ${k.id===komaId?'on':''}" onclick="setKoma('${k.id}')">${k.name}</div>`).join('');
+}
+function setKoma(id){
+  komaId=id; const k=KOMA.find(x=>x.id===id);
+  if(k.mm)   document.getElementById('komaMm').value = k.mm;
+  if(k.tape){ tapeW = k.tape; renderTapeChips(); }
+  renderKomaChips(); renderKoma(); drawPreview();
+}
+function renderKoma(){
+  const note=document.getElementById('komaNote'), out=document.getElementById('komaOut');
+  note.innerHTML = (KOMA.find(k=>k.id===komaId)||{}).note || '';
+  const s = buildStrip();
+  if(!s){ out.innerHTML=''; return; }
+  const warns = (()=>{ const b=buildStrip(); return b?b.warnsCache:null; })();
+  out.innerHTML =
+    `<div class="koma-sum">
+       ${s.pieces.length}コマ ／ 1コマ <b>${s.W}mm</b> ／ テープ全長 <b>約${Math.round(s.total)}mm</b>
+       ／ 文字高 <b>約${s.ch.toFixed(1)}mm</b>
+     </div>` +
+    `<div class="koma-strip">` + s.pieces.map(p=>
+       `<div class="koma-cell ${p.収まる?'':'ng'}" style="width:${Math.max(44,p.mm*2.2)}px">
+          <div class="nm">${esc(p.name)}</div><div class="mm">${p.mm.toFixed(1)}mm</div>
+        </div>`).join('') + `</div>` +
+    `<div class="hint" style="margin-top:7px;">破線が<b>ハサミを入れる位置</b>です。各コマの実寸を検算して表示しています。</div>`;
+}
+
 /* ── プレビュー ─────────────────────────────────────────── */
 function currentLines(){
   if(srcId==='free'){ const f=freeLines(); return f.length?f[0]:null; }
