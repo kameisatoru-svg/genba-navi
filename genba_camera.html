@@ -85,12 +85,12 @@ body{display:flex;flex-direction:column;background:var(--bg);}
 .ok{color:#4ade80;} .warn{color:#fbbf24;} .ng{color:#f87171;}
 
 /* 今どの面を撮るのかを示す小さな平面図（カメラ右上に重ねる） */
-.minimap{position:absolute;z-index:7;right:10px;top:10px;width:132px;
+.minimap{position:absolute;z-index:7;right:10px;top:10px;width:var(--mm-w,132px);
   background:rgba(0,0,0,.66);border-radius:12px;padding:8px 8px 6px;}
 .minimap svg{width:100%;height:auto;display:block;}
 .mm-cap{font-size:10px;font-weight:700;color:#fff;text-align:center;margin-top:4px;line-height:1.4;}
 /* 平面図が出ているときは指示文を左に寄せて重ならないようにする */
-.has-map .instruct{padding-right:154px;}
+.has-map .instruct{padding-right:calc(var(--mm-w,132px) + 24px);}
 
 /* 判定バッジ */
 .verdict{position:absolute;z-index:6;right:12px;bottom:10px;
@@ -757,6 +757,9 @@ function drawMinimap(){
   const box = $('minimap'), wrap = document.querySelector('.cam-wrap');
   if (!f){ box.style.display='none'; wrap.classList.remove('has-map'); return; }
   box.style.display=''; wrap.classList.add('has-map');
+  // カメラ領域が狭い端末では小さくして、ゲージ・判定バッジと重ならないようにする
+  const camH = wrap.clientHeight;
+  wrap.style.setProperty('--mm-w', (camH < 430 ? 96 : 132) + 'px');
 
   const X0=24,Y0=22,X1=96,Y1=76, CX=(X0+X1)/2, CY=(Y0+Y1)/2;
   const A='#c8a96e', dim='rgba(255,255,255,.45)';
