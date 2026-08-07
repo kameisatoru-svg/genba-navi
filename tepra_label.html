@@ -668,7 +668,6 @@ function buildStrip(){
     warns.push(`コマが${W}mmに収まりません（下の「コマ長さを○mmにする」を押してください）`);
   if(/[　-ヿ一-鿿]/.test(names.join('')) && ch < KANJI_MIN)
     warns.push(`文字高 約${ch.toFixed(1)}mm。漢字の可読下限 ${KANJI_MIN}mm を下回ります`);
-  if(gaps.some(g=>g===0)) warns.push('間隔が0のコマがあります。切る位置が分かりにくいので名前を短くするか、コマ長さを大きくしてください');
 
   return {text, pieces, total, ch, W, lead, trail, gaps, warns};
 }
