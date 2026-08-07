@@ -652,7 +652,9 @@ function buildStrip(){
     const after  = i===names.length-1 ? trail*hw + edge : gap*hw/2;
     const mm = before + cell(i) + after;
     const 端 = (i===0 || i===names.length-1);        // 両端はテプラ余白ぶん。好きな位置で切れる
-    return {name:n, mm, 端, 収まる: 端 ? true : mm <= W + 0.6};   // 公差±0.6mm
+    // 公差はネームカードの±0.6mmと、スペース刻み（半角の半分）の大きい方
+    const tol = Math.max(0.6, hw/2);
+    return {name:n, mm, 端, 収まる: 端 ? true : mm <= W + tol};
   });
   const total = edge + lead*hw + names.reduce((a,_,i)=>a+cell(i),0)
               + gap*hw*(names.length-1) + trail*hw + edge;
