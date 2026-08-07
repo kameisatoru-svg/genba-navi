@@ -430,6 +430,10 @@ const SRC = {
     sub:r=>[r['案件キー'],r['メーカー'],r['カテゴリ']].filter(Boolean).join(' ・ '),
     search:r=>[r['商品名'],r['品番'],r['メーカー'],r['カテゴリ'],r['案件キー'],r['使用場所']].join(' ')
   },
+  renzoku: {
+    label:'連続（切り分け）', key:null,
+    tpl:[{id:'r1', name:'1行・等ピッチ', lines:1}]
+  },
   free: {
     label:'自由入力', key:null,
     tpl:[
@@ -438,6 +442,18 @@ const SRC = {
     ]
   }
 };
+
+/* 連続印刷のコマ長さプリセット。
+   スイッチ＝Panasonic公式FAQ「コスモスイッチ用ネームカード寸法」24.5±0.6 × 9.7±0.3mm。
+   分電盤＝メーカー公表値が見つからないため既定値。現物実測での上書き前提。 */
+const KOMA = [
+  {id:'sw', name:'スイッチ 24.5mm', mm:24.5, tape:9,
+   note:'Panasonic コスモ／ワイド21 ネームカード <b>24.5×9.7mm</b>（公式FAQの寸法図）。高さ9.7mmなので<b>9mmテープ</b>が適合します。'},
+  {id:'bd', name:'分電盤 20mm', mm:20, tape:9,
+   note:'⚠ 分電盤の名称欄はメーカーが寸法を公表していないため<b>暫定20mm</b>です。現物のブレーカー1個分の幅を実測して上書きしてください（測った値を教えていただければ既定値にします）。'},
+  {id:'fr', name:'自由', mm:null, tape:null, note:'コマ長さを直接入力してください。'}
+];
+let komaId='sw';
 
 let DATA=null, srcId='kougu', tplIdx=0, tapeW=18, cur=null, checked=new Set(), rows=[];
 
