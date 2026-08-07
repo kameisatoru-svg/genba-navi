@@ -207,7 +207,9 @@ details.diag summary{color:var(--accent2);}
   <div id="freePane" style="display:none;">
     <div class="lbl">自由入力</div>
     <textarea class="free" id="freeTa" placeholder="1行に1枚ぶん入力&#10;&#10;例）&#10;第一倉庫&#10;クロス用ローラー&#10;予備ビス M4×25"></textarea>
-    <div class="hint">1行＝ラベル1枚。書式で「2行」を選ぶと、<b>タブ</b>または「<b>／</b>」で区切ったぶんが上下2段になります。</div>
+    <div class="hint">1行＝ラベル1枚。書式で「2行」を選ぶと、<b>タブ</b>または「<b>／</b>」で区切ったぶんが上下2段になります。<br>
+      区切りが無い長い文字列（住所など）は、<b>読みやすい位置で自動的に2行に割ります</b>。
+      割る場所を指定したいときは、そこに「／」を入れてください。</div>
   </div>
 
   <label class="opt">
@@ -472,7 +474,11 @@ function freeLines(){
   const t = SRC.free.tpl[tplIdx];
   return document.getElementById('freeTa').value.split('\n')
     .map(s=>s.trim()).filter(Boolean)
-    .map(s=> t.lines===2 ? s.split(/\t|／|\//).map(x=>x.trim()).filter(Boolean).slice(0,2) : [s]);
+    .map(s=>{
+      if(t.lines!==2) return [s];
+      const parts = s.split(/\t|／|\//).map(x=>x.trim()).filter(Boolean);
+      return parts.length>=2 ? parts.slice(0,2) : splitTwo(s);   // 区切りが無ければ自動で割る
+    });
 }
 
 function rebuild(){
