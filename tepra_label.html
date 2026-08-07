@@ -406,6 +406,8 @@ function openBleIfHashed(){
   d.open = true;
   d.scrollIntoView({block:'center'});   // smoothだと環境により動かないので即時指定
 }
+/* 開いたまま #ble を付け直した場合はリロードが起きないので、これでも拾う */
+window.addEventListener('hashchange', openBleIfHashed);
 
 /* ── チップ描画 ─────────────────────────────────────────── */
 function renderTapeChips(){
