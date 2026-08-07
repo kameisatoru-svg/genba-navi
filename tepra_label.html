@@ -460,7 +460,12 @@ function splitTwo(s){
   let re2=/[^0-9０-９][0-9０-９]/g;
   while((m=re2.exec(s))) push(m.index+1, 2);                                  // 番地の直前
 
-  if(!cands.length){ const at=Math.ceil(mid); return [s.slice(0,at), s.slice(at)]; }
+  // 区切りどころが無い場合：短い語は割らない（社名を語中で切らないため）。
+  // 長すぎるものだけ、やむを得ず文字数の半分で割る。
+  if(!cands.length){
+    if(s.length<=16) return [s];
+    const at=Math.ceil(mid); return [s.slice(0,at), s.slice(at)];
+  }
   cands.sort((a,b)=> (Math.abs(a.i-mid)+a.w*1.5) - (Math.abs(b.i-mid)+b.w*1.5));
   return [s.slice(0,cands[0].i).trim(), s.slice(cands[0].i).trim()].filter(Boolean);
 }
