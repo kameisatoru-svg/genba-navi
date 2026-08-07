@@ -499,9 +499,11 @@ function renderTplChips(){
 function setTape(w){ tapeW=w; renderTapeChips(); drawPreview(); }
 function setSrc(k){ srcId=k; tplIdx=0; cur=null; checked.clear(); document.getElementById('q').value='';
   renderSrcChips(); renderTplChips();
-  const free = (k==='free');
-  document.getElementById('listPane').style.display = free?'none':'';
-  document.getElementById('freePane').style.display = free?'':'none';
+  const free = (k==='free'), rz = (k==='renzoku');
+  document.getElementById('listPane').style.display    = (free||rz)?'none':'';
+  document.getElementById('freePane').style.display    = free?'':'none';
+  document.getElementById('renzokuPane').style.display = rz?'':'none';
+  if(rz){ renderKomaChips(); renderKoma(); }
   rebuild();
 }
 function setTpl(i){ tplIdx=i; renderTplChips(); rebuild(); }
@@ -679,6 +681,7 @@ function renderKoma(){
 
 /* ── プレビュー ─────────────────────────────────────────── */
 function currentLines(){
+  if(srcId==='renzoku'){ const s=buildStrip(); return s ? [s.text] : null; }
   if(srcId==='free'){ const f=freeLines(); return f.length?f[0]:null; }
   if(!cur || cur.src!==srcId || !DATA) return null;
   const rec = (DATA[SRC[srcId].key]||[])[cur.i];
