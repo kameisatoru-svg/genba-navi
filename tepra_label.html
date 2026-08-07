@@ -354,7 +354,14 @@ const SRC = {
       {id:'tanto',    name:'2行：略称／担当者', f:r=>[r['略称']||'', (r.basic&&r.basic.contact)||'']},
       {id:'jusho',    name:'2行：住所（自動割り）', f:r=>splitTwo((r.contact&&r.contact.address)||'')},
       {id:'meijusho', name:'2行：名称／住所',   f:r=>[r['正式名称']||r['略称']||'', (r.contact&&r.contact.address)||'']},
-      {id:'jushotel', name:'2行：住所／TEL',    f:r=>[(r.contact&&r.contact.address)||'', (r.contact&&r.contact.tel)||'']}
+      {id:'jushotel', name:'2行：住所／TEL',    f:r=>[(r.contact&&r.contact.address)||'', (r.contact&&r.contact.tel)||'']},
+      /* 郵送の宛名。上＝住所、下＝社名＋御中 */
+      {id:'yuso2',  name:'📮 郵送2行：住所／社名＋御中',
+        f:r=>[(r.contact&&r.contact.address)||'', keisho(r['正式名称']||r['略称'],'御中')]},
+      {id:'yuso3',  name:'📮 郵送3行：〒／住所／社名＋御中',
+        f:r=>[...zipSplit((r.contact&&r.contact.address)||''), keisho(r['正式名称']||r['略称'],'御中')]},
+      {id:'yuso3n', name:'📮 郵送3行：住所／社名／担当者様',
+        f:r=>[(r.contact&&r.contact.address)||'', r['正式名称']||r['略称']||'', keisho(r.basic&&r.basic.contact,'様')]}
     ],
     sub:r=>[r.id,(r.rel||[]).join('/')].filter(Boolean).join(' ・ '),
     search:r=>[r.id,r['略称'],r['正式名称'],r['search']].join(' ')
@@ -571,7 +578,7 @@ function drawPreview(){
   }
 
   const n = lines.length;
-  const chMm = n===1 ? spec.h : (spec.h - LINE_GAP)/2;
+  const chMm = (spec.h - LINE_GAP*(n-1)) / n;   // 行数ぶん均等割り（3行以上でも正しく出す）
   const bodyMm = Math.max(...lines.map(s=>widthOf(s,chMm)));
   const totalMm = bodyMm + MARGIN_MM;
 
