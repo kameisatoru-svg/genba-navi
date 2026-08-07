@@ -204,6 +204,26 @@ details.diag summary{color:var(--accent2);}
     <div class="list" id="list"></div>
   </div>
 
+  <div id="renzokuPane" style="display:none;">
+    <div class="lbl">用途プリセット</div>
+    <div class="chips" id="komaChips"></div>
+
+    <div class="lbl">1コマの長さ</div>
+    <div class="koma-row">
+      <input class="search koma-mm" id="komaMm" type="text" inputmode="decimal" autocomplete="off" value="24.5">
+      <span class="koma-unit">mm</span>
+    </div>
+    <div class="hint" id="komaNote"></div>
+
+    <div class="lbl">名前（1行に1コマ）</div>
+    <textarea class="free" id="renzokuTa" placeholder="玄関&#10;台所&#10;寝室&#10;浴室&#10;脱衣室"></textarea>
+    <div class="hint">
+      すべてを1本のテープに連続印刷し、<b>空きの真ん中をハサミで切る</b>ための文字列を作ります。
+      切ったあと各コマがちょうど上の長さになるよう、間の全角スペース数を自動計算します。
+    </div>
+    <div id="komaOut"></div>
+  </div>
+
   <div id="freePane" style="display:none;">
     <div class="lbl">自由入力</div>
     <textarea class="free" id="freeTa" placeholder="1行に1枚ぶん入力&#10;&#10;例）&#10;第一倉庫&#10;クロス用ローラー&#10;予備ビス M4×25"></textarea>
