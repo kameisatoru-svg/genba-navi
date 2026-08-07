@@ -503,7 +503,7 @@ function setSrc(k){ srcId=k; tplIdx=0; cur=null; checked.clear(); document.getEl
   document.getElementById('listPane').style.display    = (free||rz)?'none':'';
   document.getElementById('freePane').style.display    = free?'':'none';
   document.getElementById('renzokuPane').style.display = rz?'':'none';
-  if(rz){ renderKomaChips(); renderKoma(); }
+  if(rz){ setKoma(komaId); }        // プリセットのテープ幅とコマ長さを適用する
   rebuild();
 }
 function setTpl(i){ tplIdx=i; renderTplChips(); rebuild(); }
