@@ -9,7 +9,8 @@
 <meta name="theme-color" content="#1e2d40">
 <link rel="stylesheet" href="common.css">
 <style>
-body{display:flex;flex-direction:column;min-height:100vh;}
+/* common.css の body{height:100dvh} に合わせる。min-heightで上書きしない */
+body{display:flex;flex-direction:column;}
 
 /* ヘッダー */
 .header{background:var(--navy);padding:env(safe-area-inset-top,0) 0 0;flex-shrink:0;position:sticky;top:0;z-index:30;}
