@@ -363,14 +363,13 @@ function rebuild(){
       <button class="row-copy" onclick="event.stopPropagation();pick(${x.i});copyCurrent();">コピー</button>
     </div>`;
   }).join('');
-  syncBar();
+  drawPreview();
 }
 
 function pick(i){
-  const x = rows.find(v=>v.i===i); if(!x) return;
-  cur = {src:srcId, i, lines:x.lines};
-  document.querySelectorAll('.row').forEach(el=>el.classList.remove('cur'));
-  rebuild(); drawPreview();
+  if(!rows.some(v=>v.i===i)) return;
+  cur = {src:srcId, i};
+  rebuild();
 }
 function toggle(i){
   checked.has(i) ? checked.delete(i) : checked.add(i);
@@ -380,7 +379,11 @@ function toggle(i){
 /* ── プレビュー ─────────────────────────────────────────── */
 function currentLines(){
   if(srcId==='free'){ const f=freeLines(); return f.length?f[0]:null; }
-  return cur && cur.src===srcId ? cur.lines : null;
+  if(!cur || cur.src!==srcId || !DATA) return null;
+  const rec = (DATA[SRC[srcId].key]||[])[cur.i];
+  if(!rec) return null;
+  const l = linesOf(rec);          // 常に「いま選ばれている書式」で組み直す
+  return l.length ? l : null;
 }
 function widthOf(s, chMm){
   let w=0; for(const ch of s){ w += /[\x20-\x7E｡-ﾟ]/.test(ch) ? chMm*0.55 : chMm; }
