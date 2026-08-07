@@ -349,7 +349,10 @@ const SRC = {
       {id:'seishiki', name:'正式名称',          f:r=>[r['正式名称']||r['略称']||'']},
       {id:'ryaku',    name:'略称',              f:r=>[r['略称']||'']},
       {id:'tel',      name:'2行：名称／TEL',    f:r=>[r['正式名称']||r['略称']||'', (r.contact&&r.contact.tel)||'']},
-      {id:'tanto',    name:'2行：略称／担当者', f:r=>[r['略称']||'', (r.basic&&r.basic.contact)||'']}
+      {id:'tanto',    name:'2行：略称／担当者', f:r=>[r['略称']||'', (r.basic&&r.basic.contact)||'']},
+      {id:'jusho',    name:'2行：住所（自動割り）', f:r=>splitTwo((r.contact&&r.contact.address)||'')},
+      {id:'meijusho', name:'2行：名称／住所',   f:r=>[r['正式名称']||r['略称']||'', (r.contact&&r.contact.address)||'']},
+      {id:'jushotel', name:'2行：住所／TEL',    f:r=>[(r.contact&&r.contact.address)||'', (r.contact&&r.contact.tel)||'']}
     ],
     sub:r=>[r.id,(r.rel||[]).join('/')].filter(Boolean).join(' ・ '),
     search:r=>[r.id,r['略称'],r['正式名称'],r['search']].join(' ')
@@ -437,6 +440,28 @@ function setSrc(k){ srcId=k; tplIdx=0; cur=null; checked.clear(); document.getEl
   rebuild();
 }
 function setTpl(i){ tplIdx=i; renderTplChips(); rebuild(); }
+
+/* ── 長い1行を「読みやすい位置」で2行に割る ─────────────────
+      住所を18mm2行で刷りたい、が主用途。優先度は
+      ①空白 ②市区町村・郡の直後 ③番地（数字）の直前。
+      いずれも中央に近いものを選ぶ。候補ゼロなら文字数で半分。 */
+function splitTwo(s){
+  s = String(s==null?'':s).trim();
+  if(!s) return [];
+  const mid = s.length/2;
+  const cands = [];
+  const push=(i,w)=>{ if(i>0 && i<s.length) cands.push({i,w}); };
+
+  [...s].forEach((ch,i)=>{ if(/[\s　]/.test(ch)) push(i,0); });           // 空白
+  let m, re1=/[市区町村郡]/g;
+  while((m=re1.exec(s))) push(m.index+1, 1);                                  // 市区町村の直後
+  let re2=/[^0-9０-９][0-9０-９]/g;
+  while((m=re2.exec(s))) push(m.index+1, 2);                                  // 番地の直前
+
+  if(!cands.length){ const at=Math.ceil(mid); return [s.slice(0,at), s.slice(at)]; }
+  cands.sort((a,b)=> (Math.abs(a.i-mid)+a.w*1.5) - (Math.abs(b.i-mid)+b.w*1.5));
+  return [s.slice(0,cands[0].i).trim(), s.slice(cands[0].i).trim()].filter(Boolean);
+}
 
 /* ── ラベル行の生成 ─────────────────────────────────────── */
 function linesOf(rec){
