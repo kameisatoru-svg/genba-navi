@@ -328,8 +328,7 @@ function setTpl(i){ tplIdx=i; renderTplChips(); rebuild(); }
 /* ── ラベル行の生成 ─────────────────────────────────────── */
 function linesOf(rec){
   const t = SRC[srcId].tpl[tplIdx];
-  return (t.f ? t.f(rec) : []).map(s=>String(s==null?'':s).trim()).filter((s,i,a)=> s!=='' || i<a.length-1 )
-         .filter(s=>s!=='');
+  return (t.f ? t.f(rec) : []).map(s=>String(s==null?'':s).trim()).filter(s=>s!=='');
 }
 function freeLines(){
   const t = SRC.free.tpl[tplIdx];
@@ -340,8 +339,8 @@ function freeLines(){
 
 function rebuild(){
   const listEl = document.getElementById('list');
-  if(srcId==='free'){ rows=[]; syncBar(); drawPreview(); return; }
-  if(!DATA){ syncBar(); return; }
+  if(srcId==='free'){ rows=[]; drawPreview(); return; }
+  if(!DATA){ drawPreview(); return; }
   const src = SRC[srcId];
   const q = document.getElementById('q').value.trim().toLowerCase();
   const all = (DATA[src.key]||[]);
@@ -349,7 +348,7 @@ function rebuild(){
             .filter(x=>x.lines.length>0)
             .filter(x=> !q || src.search(x.r).toLowerCase().includes(q));
 
-  if(!rows.length){ listEl.innerHTML = '<div class="empty">該当なし</div>'; syncBar(); return; }
+  if(!rows.length){ listEl.innerHTML = '<div class="empty">該当なし</div>'; drawPreview(); return; }
 
   listEl.innerHTML = rows.map(x=>{
     const on = checked.has(x.i), isCur = cur && cur.i===x.i && cur.src===srcId;
