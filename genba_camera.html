@@ -738,16 +738,83 @@ function drawGrid(){
   $('grid').innerHTML = g;
 }
 
+/* ═══ 小さな平面図（今どこを撮るのか） ═══
+   ショットの face（A/B/C/D・床・天井・全景）を見て、その面を光らせ、
+   部屋の中心から撮る向きへ矢印を出す。「立ち位置と向き」が一目で分かる。 */
+function faceOf(sh){
+  if (!sh) return null;
+  if (sh.face) return sh.face;
+  const c = sh.group || sh.code || '';
+  const m = c.match(/([ABCD])面/);          if (m) return m[1];
+  if (/床/.test(c))   return '床';
+  if (/天井/.test(c)) return '天井';
+  if (/全景/.test(c)) return '全景';
+  return null;
+}
+
+function drawMinimap(){
+  const sh = S.shots[S.idx], f = faceOf(sh);
+  const box = $('minimap'), wrap = document.querySelector('.cam-wrap');
+  if (!f){ box.style.display='none'; wrap.classList.remove('has-map'); return; }
+  box.style.display=''; wrap.classList.add('has-map');
+
+  const X0=24,Y0=22,X1=96,Y1=76, CX=(X0+X1)/2, CY=(Y0+Y1)/2;
+  const A='#c8a96e', dim='rgba(255,255,255,.45)';
+  const walls={ A:[X0,Y0,X1,Y0], B:[X1,Y0,X1,Y1], C:[X0,Y1,X1,Y1], D:[X0,Y0,X0,Y1] };
+  const lab ={ A:[CX,14], B:[108,CY+4], C:[CX,92], D:[12,CY+4] };
+  const mid ={ A:[CX,Y0], B:[X1,CY], C:[CX,Y1], D:[X0,CY] };
+
+  let g=`<rect x="${X0}" y="${Y0}" width="${X1-X0}" height="${Y1-Y0}"
+           fill="rgba(255,255,255,.08)" stroke="${dim}" stroke-width="2"/>`;
+  // 4面の符号
+  for (const k in lab){
+    const on = (f===k);
+    g+=`<text x="${lab[k][0]}" y="${lab[k][1]}" text-anchor="middle" font-size="12"
+          font-weight="${on?800:600}" fill="${on?A:dim}">${k}</text>`;
+  }
+  if (f==='床' || f==='天井'){
+    g+=`<rect x="${X0}" y="${Y0}" width="${X1-X0}" height="${Y1-Y0}" fill="${A}" opacity=".33"/>`;
+    g+=`<text x="${CX}" y="${CY+5}" text-anchor="middle" font-size="15" font-weight="800"
+          fill="#fff">${f==='床'?'真下':'真上'}</text>`;
+    g+=`<path d="M${CX-9},${f==='床'?CY+12:CY-18} L${CX},${f==='床'?CY+20:CY-26}
+          L${CX+9},${f==='床'?CY+12:CY-18}" fill="none" stroke="#fff" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round"/>`;
+  } else if (f==='全景'){
+    g+=`<rect x="${X0}" y="${Y0}" width="${X1-X0}" height="${Y1-Y0}"
+           fill="none" stroke="${A}" stroke-width="4"/>`;
+    g+=`<circle cx="${X0+10}" cy="${Y1-9}" r="5" fill="${A}"/>`;
+    g+=`<text x="${CX+6}" y="${CY+4}" text-anchor="middle" font-size="11"
+          font-weight="700" fill="#fff">全体</text>`;
+  } else {
+    const w=walls[f];
+    g+=`<line x1="${w[0]}" y1="${w[1]}" x2="${w[2]}" y2="${w[3]}"
+          stroke="${A}" stroke-width="6" stroke-linecap="round"/>`;
+    // 部屋の中心 → その面へ 撮る向きの矢印
+    const [mx,my]=mid[f];
+    const dx=mx-CX, dy=my-CY, L=Math.hypot(dx,dy), ux=dx/L, uy=dy/L;
+    const sx=CX+ux*6, sy=CY+uy*6, ex=CX+ux*(L-9), ey=CY+uy*(L-9);
+    g+=`<line x1="${sx}" y1="${sy}" x2="${ex}" y2="${ey}" stroke="#fff" stroke-width="2.5"/>`;
+    g+=`<path d="M${ex-uy*4-ux*6},${ey+ux*4-uy*6} L${ex},${ey}
+          L${ex+uy*4-ux*6},${ey-ux*4-uy*6}" fill="none" stroke="#fff" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round"/>`;
+    g+=`<circle cx="${CX}" cy="${CY}" r="3.5" fill="#fff"/>`;
+  }
+  $('mmSvg').innerHTML=`<svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">${g}</svg>`;
+  const cap={A:'A面（上）を撮る',B:'B面（右）を撮る',C:'C面（下）を撮る',D:'D面（左）を撮る',
+             床:'床を真下に撮る',天井:'天井を真上に撮る',全景:'部屋の全景を撮る'}[f];
+  $('mmCap').textContent = (sh.panel>1 ? `${cap}／${sh.panel}枚目` : cap);
+}
+
 /* ═══ 指示・ショット一覧 ═══ */
 function renderInstruct(){
   const sh = S.shots[S.idx];
   if (!sh){ $('insTitle').textContent='すべて撮影しました'; $('insHint').textContent='「確認」から保存へ';
-    $('insStep').textContent=''; return; }
+    $('insStep').textContent=''; drawMinimap(); return; }
   $('insStep').textContent = `${S.idx+1} / ${S.shots.length}` + (sh.measure?'　寸法用':'　記録用')
     + (sh.lens ? '　推奨：'+LENS_HINT[sh.lens] : '');
   $('insTitle').textContent = sh.label;
   $('insHint').textContent = sh.hint;
-  drawGrid(); updateGauge();
+  drawGrid(); drawMinimap(); updateGauge();
 }
 
 function renderShots(){
