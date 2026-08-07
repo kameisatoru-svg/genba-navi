@@ -100,6 +100,9 @@ details.howto[open] summary::after{content:"−";}
 .howto-body b{color:var(--navy);}
 .howto-body ol{margin:6px 0 12px;padding-left:1.3em;}
 .howto-body li{margin-bottom:3px;}
+/* 判定ツールは見つけやすく色を変える */
+details.diag{border-color:var(--accent);background:#fdfbf7;}
+details.diag summary{color:var(--accent2);}
 
 /* 下部バー */
 .bar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,0.96);backdrop-filter:blur(10px);
@@ -574,6 +577,13 @@ function hideToast(){ document.getElementById('toast').classList.remove('on'); }
 
 /* ── 雑務 ───────────────────────────────────────────────── */
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+/* URLに #ble を付けて開くと、判定ツールを開いた状態で表示する */
+if(location.hash==='#ble'){
+  const d=document.getElementById('bleDetails');
+  d.open=true;
+  setTimeout(()=>d.scrollIntoView({behavior:'smooth',block:'center'}),150);
+}
+
 document.getElementById('q').addEventListener('input', ()=>rebuild());
 document.getElementById('freeTa').addEventListener('input', ()=>{ drawPreview(); syncBar(); });
 </script>
