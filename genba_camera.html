@@ -1158,19 +1158,19 @@ function skShots(d){
   rooms.forEach(r=>{
     const pre=many?`${r.名称||'室'}_`:'';
     out.push({code:pre+'全景',label:`${r.名称||'室'} 全景`,hint:'入口から。四隅が入れば十分',
-      lens:'ultra',targetElev:0,checkRoll:true,tol:8,measure:false});
+      face:'全景',lens:'ultra',targetElev:0,checkRoll:true,tol:8,measure:false});
     ['A','B','C','D'].forEach(c=>{
       const w=(r.壁||[]).find(x=>x.符号===c)||{};
       out.push({code:pre+c+'面',label:`${r.名称||'室'} ${c}面（${wallName[c]}）`,
         hint:(w.内容? w.内容+'　':'')+'上下の辺をグリッドと平行に。入らなければ ＋分割',
-        lens:'std',targetElev:0,checkRoll:true,tol:3,measure:true,split:true});
+        face:c,lens:'std',targetElev:0,checkRoll:true,tol:3,measure:true,split:true});
     });
     out.push({code:pre+'床',label:`${r.名称||'室'} 床（真下）`,
       hint:(r.床? r.床+'　':'')+'超広角で。＋分割で位置を変えて覆う',
-      lens:'ultra',targetElev:-90,checkRoll:false,tol:4,measure:true,split:true});
+      face:'床',lens:'ultra',targetElev:-90,checkRoll:false,tol:4,measure:true,split:true});
     out.push({code:pre+'天井',label:`${r.名称||'室'} 天井（真上）`,
       hint:(r.天井? r.天井+'　':'')+'超広角で。廻り縁の直線を入れる',
-      lens:'ultra',targetElev:90,checkRoll:false,tol:4,measure:true,split:true});
+      face:'天井',lens:'ultra',targetElev:90,checkRoll:false,tol:4,measure:true,split:true});
     out.push({code:pre+'基準スケール',label:`${r.名称||'室'} 基準スケール`,
       hint:'コンセントプレート(70×120)かメジャーを面と同一平面・中央に',
       lens:'std',targetElev:0,checkRoll:true,tol:6,measure:true});
