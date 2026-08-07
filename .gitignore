@@ -10,3 +10,18 @@ _backups/
 
 # artrays-genka MCP サーバーの接続先（Apps Script のURLとトークン）
 mcp/.genka_config.json
+
+# 各セッションが data.json 編集前に作る退避バックアップ／破損時の退避コピー（コミット不要）
+# data.json 単体で約500KBあるため、コミットすると GitHub Pages 配信まで肥大する。
+# ★ 今後の退避先はリポジトリ外（C:\Users\user\artrays_backups\）を使うこと
+data.json.bak
+data.json.bak_*
+data.json.broken_*
+data.json.BROKEN_*
+data.json.tmp_*
+
+# 各HTMLアプリの編集前バックアップ（dashboard.html.bak_* / mitsumori_seikyu_preview.html.bak_* 等）
+*.html.bak_*
+
+# auto_push.bat が退避した stale な index.lock の置き場
+_tmp_lockarchive/
