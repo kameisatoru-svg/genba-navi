@@ -602,11 +602,16 @@ async function bleScanList(){
   if(!navigator.bluetooth || !navigator.bluetooth.requestLEScan){
     out.style.color='var(--orange)';
     out.innerHTML =
-      '<b>この機能はChromeの実験設定をONにすると使えます。</b><br>'+
-      '1. Chromeで <b>chrome://flags</b> を開く<br>'+
-      '2. 「<b>Experimental Web Platform features</b>」を検索して <b>Enabled</b> に<br>'+
-      '3. Chromeを再起動して、このページをもう一度開く<br>'+
-      '<span style="color:var(--text3)">※onにするとこの一覧に「名前・電波の強さ・メーカーID」まで出るので、'+
+      '<b>Chromeの実験設定をONにすると使えます（Galaxyの Chrome で行ってください）。</b><br>'+
+      '1. Chromeのアドレスバーに <b>chrome://flags</b> と<u>手入力</u>して開く（リンクからは開けません）<br>'+
+      '2. 検索欄に「<b>Experimental Web Platform</b>」と入れる<br>'+
+      '3. 「Experimental Web Platform features」を <b>Default → Enabled</b> に<br>'+
+      '4. 画面下に出る <b>再起動</b> をタップ<br>'+
+      '5. このページを開き直して、もう一度③を押す<br><br>'+
+      '<b>あわせてAndroid側の条件：</b>BLEのスキャンには<br>'+
+      '・端末の<b>位置情報がON</b>（Androidの仕様。位置は使いませんが必須です）<br>'+
+      '・Chromeに<b>「付近のデバイス」と「位置情報」の権限</b>が許可されていること<br>'+
+      '<span style="color:var(--text3)">※ONにすると一覧に「名前・電波の強さ(dBm)・サービスUUID・メーカーID」まで出るので、'+
       'テプラの電源ON/OFFで何が増えるか一発で分かります。</span>';
     return;
   }
