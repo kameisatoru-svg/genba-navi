@@ -99,6 +99,26 @@ body{display:flex;flex-direction:column;}
 .opt span{font-size:12.5px;font-weight:700;color:var(--navy);line-height:1.5;}
 .opt em{display:block;font-style:normal;font-size:11px;font-weight:600;color:var(--text3);margin-top:3px;line-height:1.5;}
 
+/* 連続（切り分け）モード */
+.koma-row{display:flex;align-items:center;gap:8px;}
+.koma-mm{flex:0 0 120px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700;}
+.koma-unit{font-size:13px;font-weight:700;color:var(--text2);}
+.koma-sum{background:var(--navy);color:var(--white);border-radius:12px;padding:11px 13px;margin-top:12px;
+  font-size:12px;line-height:1.7;}
+.koma-sum b{color:var(--accent);font-variant-numeric:tabular-nums;}
+.koma-warn{background:var(--red-bg);border:1px solid var(--red);color:var(--red);border-radius:10px;
+  padding:9px 11px;margin-top:9px;font-size:11.5px;line-height:1.6;font-weight:700;}
+/* 切り分けイメージ */
+.koma-strip{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:10px;padding-bottom:4px;scrollbar-width:none;}
+.koma-strip::-webkit-scrollbar{display:none;}
+.koma-cell{flex-shrink:0;background:var(--white);border:1px solid var(--border-strong);
+  border-left:2px dashed var(--accent2);display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:8px 4px;min-width:44px;}
+.koma-cell:last-child{border-right:2px dashed var(--accent2);}
+.koma-cell .nm{font-size:12px;font-weight:800;color:var(--navy);white-space:nowrap;}
+.koma-cell .mm{font-size:9.5px;color:var(--text3);margin-top:3px;font-variant-numeric:tabular-nums;}
+.koma-cell.ng{background:var(--red-bg);border-color:var(--red);}
+
 /* 使い方 */
 details.howto{background:var(--white);border-radius:14px;border:1px solid var(--line);margin-top:16px;overflow:hidden;}
 details.howto summary{padding:13px 14px;font-size:13px;font-weight:700;color:var(--navy);cursor:pointer;list-style:none;}
