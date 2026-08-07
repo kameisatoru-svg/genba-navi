@@ -577,13 +577,6 @@ function hideToast(){ document.getElementById('toast').classList.remove('on'); }
 
 /* ── 雑務 ───────────────────────────────────────────────── */
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-/* URLに #ble を付けて開くと、判定ツールを開いた状態で表示する */
-if(location.hash==='#ble'){
-  const d=document.getElementById('bleDetails');
-  d.open=true;
-  setTimeout(()=>d.scrollIntoView({behavior:'smooth',block:'center'}),150);
-}
-
 document.getElementById('q').addEventListener('input', ()=>rebuild());
 document.getElementById('freeTa').addEventListener('input', ()=>{ drawPreview(); syncBar(); });
 </script>
