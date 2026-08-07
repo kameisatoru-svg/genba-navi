@@ -629,7 +629,7 @@ async function bleTest(onlyTepra){
 /* ── ③ 電波を一覧表示（Web Bluetooth Scanning API）─────────
       Chromeの実験機能。名前・電波強度・サービスUUID・メーカーIDまで見えるので
       「テプラの電源ON/OFFで何が増減するか」を一目で判定できる。 */
-let scanRef=null, scanSeen=null, scanTimer=null, scanDirty=false;
+let scanRef=null, scanSeen=null, scanTimer=null, scanDirty=false, scanBase=null;
 
 async function bleScanList(){
   const out = document.getElementById('bleOut');
@@ -687,36 +687,62 @@ function onAdv(ev){
   if(!scanDirty){ scanDirty=true; setTimeout(renderScan, 400); }   // 描画は間引く
 }
 
+/* 「既知」の基準を取る。以後に現れた機器に NEW が付く */
+function setBaseline(){
+  scanBase = new Set(scanSeen.keys());
+  document.getElementById('btnBase').textContent = `基準を取り直す（既知 ${scanBase.size}件）`;
+  document.getElementById('scanHint').innerHTML =
+    `<b style="color:var(--green)">基準を取りました（${scanBase.size}件）。</b><br>`+
+    `いま<b>テプラの電源を入れて</b>ください。新しく現れた機器が上に <b style="color:var(--green)">NEW</b> 付きで出ます。`;
+  renderScan();
+}
+
 function renderScan(){
   scanDirty=false;
-  const el = document.getElementById('scanOut');
-  const list = [...scanSeen.values()].sort((a,b)=>(b.rssi??-999)-(a.rssi??-999));
-  if(!list.length){ el.innerHTML='<div style="font-size:11.5px;color:var(--text3)">まだ受信していません…</div>'; return; }
-  el.innerHTML = `<div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px;">受信中 ${list.length}件（電波の強い順）</div>`+
-    list.map(d=>{
-      const nm = d.name || '';
-      const hit = /SR-?R?2500|TEPRA|Tepra|KING|KJ/i.test(nm);
-      return `<div class="scan-item ${hit?'hit':''}">
-        <div class="scan-name">${nm?esc(nm):'<span class="no">(名前なし)</span>'}${hit?' ← テプラかも！':''}</div>
-        <div class="scan-meta">電波 ${d.rssi??'?'}dBm ／ 受信${d.n}回`+
-        (d.mfg.length?` ／ メーカーID ${d.mfg.map(c=>'0x'+c.toString(16).toUpperCase()).join(',')}`:'')+
-        (d.uuids.length?`<br>サービス ${esc(d.uuids.slice(0,3).join(', '))}`:'')+
-        `</div></div>`;
-    }).join('');
+  const el = document.getElementById('scanList');
+  if(!el) return;
+  const all = [...scanSeen.entries()];                       // Mapは発見順を保つ
+  const isNew = k => scanBase && !scanBase.has(k);
+  all.sort((a,b)=> (isNew(b[0])?1:0)-(isNew(a[0])?1:0));      // NEWを先頭へ（それ以外は発見順のまま）
+
+  document.getElementById('scanCount').textContent =
+    scanRef ? `受信中 ${all.length}件` : `停止 ${all.length}件`;
+
+  if(!all.length){
+    el.innerHTML='<div class="scan-empty">まだ電波を受信していません…<br>'+
+      '数秒待っても0件なら、端末の<b>位置情報</b>と<br>Chromeの<b>「付近のデバイス」権限</b>を確認してください。</div>';
+    return;
+  }
+  el.innerHTML = all.map(([k,d])=>{
+    const nm = d.name || '';
+    const hit = /SR-?R?2500|TEPRA|Tepra|KING|KJ/i.test(nm);
+    const fresh = isNew(k);
+    return `<div class="scan-item ${fresh?'fresh':(hit?'hit':'')}">
+      <div class="scan-name">${fresh?'<span class="badge">NEW</span>':''}${nm?esc(nm):'<span class="no">(名前なし)</span>'}${hit?' ← テプラかも！':''}</div>
+      <div class="scan-meta">電波 ${d.rssi??'?'}dBm ／ 受信${d.n}回`+
+      (d.mfg.length?` ／ メーカーID ${d.mfg.map(c=>'0x'+c.toString(16).toUpperCase()).join(',')}`:'')+
+      (d.uuids.length?`<br>サービス ${esc(d.uuids.slice(0,3).join(', '))}`:'')+
+      `</div></div>`;
+  }).join('');
 }
 
 function stopScan(){
   clearTimeout(scanTimer);
   try{ scanRef && scanRef.stop && scanRef.stop(); }catch(_){}
   scanRef=null;
-  navigator.bluetooth.removeEventListener('advertisementreceived', onAdv);
-  document.getElementById('btnScan').textContent='③ 電波を一覧で見る（推奨）';
+  try{ navigator.bluetooth.removeEventListener('advertisementreceived', onAdv); }catch(_){}
+  const b=document.getElementById('btnScanStop');
+  if(b) b.textContent='停止しました';
+  renderScan();
+}
+
+function closeScan(){
+  if(scanRef) stopScan();
+  document.getElementById('scanModal').classList.remove('on');
+  document.body.style.overflow='';
   const out=document.getElementById('bleOut');
   out.style.color='var(--text2)';
-  out.innerHTML='スキャンを停止しました。'+
-    '<b>テプラの電源ON時とOFF時で見比べて</b>、増減する行があればそれがテプラです。'+
-    'その行の内容をそのまま伝えてください。';
-  renderScan();
+  out.innerHTML='スキャンを終了しました。NEW が付いた行があれば、その内容をそのまま伝えてください。';
 }
 
 /* ── 下部バー状態 ───────────────────────────────────────── */
