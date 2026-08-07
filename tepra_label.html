@@ -683,7 +683,8 @@ function renderKoma(){
           <div class="nm">${esc(p.name)}</div><div class="mm">${p.mm.toFixed(1)}mm</div>
         </div>`).join('') + `</div>` +
     s.warns.map(w=>`<div class="koma-warn">⚠ ${w}</div>`).join('') +
-    `<div class="hint" style="margin-top:7px;">破線が<b>ハサミを入れる位置</b>です。各コマの実寸を検算して表示しています。</div>`;
+    `<div class="hint" style="margin-top:7px;">破線が<b>ハサミを入れる位置</b>です。各コマの実寸を検算して表示しています。
+       <b>両端</b>はテプラの余白が付くので、好きな位置で切って調整してください。</div>`;
 }
 
 /* ── プレビュー ─────────────────────────────────────────── */
