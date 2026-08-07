@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ja"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>テプララベル｜現場ナビ</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="テプララベル">
+<meta name="theme-color" content="#1e2d40">
+<link rel="stylesheet" href="common.css">
+<style>
+body{display:flex;flex-direction:column;min-height:100vh;}
+
+/* ヘッダー */
+.header{background:var(--navy);padding:env(safe-area-inset-top,0) 0 0;flex-shrink:0;position:sticky;top:0;z-index:30;}
+.header-inner{height:56px;display:flex;align-items:center;padding:0 8px 0 4px;gap:4px;}
+.hbtn{width:44px;height:44px;border:none;background:transparent;color:rgba(255,255,255,0.8);cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:10px;flex-shrink:0;}
+.hbtn:active{background:rgba(255,255,255,0.12);}
+.htitle{font-size:17px;font-weight:800;color:var(--white);flex:1;letter-spacing:0.03em;}
+.htitle span{color:var(--accent);}
+
+.wrap{padding:14px 14px max(180px,calc(160px + env(safe-area-inset-bottom)));flex:1;}
+
+.lbl{font-size:10px;font-weight:700;color:var(--text2);letter-spacing:0.08em;margin:14px 2px 7px;}
+.lbl:first-child{margin-top:0;}
+
+/* チップ列 */
+.chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.chips::-webkit-scrollbar{display:none;}
+.chip{flex-shrink:0;padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:var(--white);
+  font-size:13px;font-weight:700;color:var(--text2);cursor:pointer;white-space:nowrap;min-height:38px;}
+.chip:active{transform:scale(0.96);}
+.chip.on{background:var(--navy);border-color:var(--navy);color:var(--white);}
+.chip.on.gold{background:var(--accent);border-color:var(--accent);color:var(--navy);}
+
+/* テンプレは折返し表示 */
+.chips.wrapped{flex-wrap:wrap;overflow:visible;}
+
+/* プレビュー */
+.pv{background:var(--navy);border-radius:16px;padding:16px 14px 13px;margin-top:8px;}
+.pv-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:11px;gap:8px;}
+.pv-cap{font-size:10px;color:rgba(255,255,255,0.5);letter-spacing:0.08em;font-weight:700;}
+.pv-len{font-size:11px;color:var(--accent);font-weight:700;font-variant-numeric:tabular-nums;}
+.tape-outer{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:2px 0;}
+.tape-outer::-webkit-scrollbar{display:none;}
+.tape{background:#fff;border-radius:3px;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
+  min-width:60px;box-shadow:0 2px 8px rgba(0,0,0,0.3);}
+.tape-line{color:#000;white-space:nowrap;line-height:1.06;font-weight:600;
+  font-family:"Yu Gothic UI","Hiragino Sans","Noto Sans JP",sans-serif;}
+.tape-empty{color:#bbb;font-size:12px;padding:0 10px;}
+.pv-warn{margin-top:10px;font-size:11px;line-height:1.55;color:#ffd9a0;background:rgba(255,255,255,0.08);
+  border-radius:8px;padding:8px 10px;display:none;}
+.pv-warn.on{display:block;}
+
+/* 検索 */
+.search{width:100%;height:46px;border:1px solid var(--line);border-radius:12px;padding:0 14px;font-size:15px;
+  background:var(--white);color:var(--text);box-sizing:border-box;}
+.search:focus{outline:none;border-color:var(--accent);}
+
+/* リスト */
+.list{margin-top:10px;display:flex;flex-direction:column;gap:8px;}
+.row{background:var(--white);border-radius:14px;border:1px solid var(--line);padding:11px 12px;
+  display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color .12s;}
+.row.cur{border-color:var(--accent);background:#faf8f4;}
+.row-tick{width:24px;height:24px;border-radius:7px;border:1.5px solid var(--border-strong);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;background:var(--white);}
+.row-tick.on{background:var(--navy);border-color:var(--navy);}
+.row-tick svg{opacity:0;}
+.row-tick.on svg{opacity:1;}
+.row-body{flex:1;min-width:0;}
+.row-main{font-size:14px;font-weight:700;color:var(--text);line-height:1.35;word-break:break-all;}
+.row-main .l2{display:block;font-weight:600;color:var(--text2);}
+.row-sub{font-size:10px;color:var(--text3);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.row-copy{width:52px;height:44px;border-radius:11px;border:1px solid var(--line);background:var(--surface2);
+  color:var(--navy);font-size:11px;font-weight:800;flex-shrink:0;cursor:pointer;}
+.row-copy:active{background:var(--accent);border-color:var(--accent);color:var(--navy);}
+.empty{text-align:center;color:var(--text3);font-size:13px;padding:28px 0;}
+
+/* フリー入力 */
+.free{width:100%;min-height:150px;border:1px solid var(--line);border-radius:12px;padding:12px 13px;font-size:15px;
+  line-height:1.7;background:var(--white);color:var(--text);box-sizing:border-box;resize:vertical;
+  font-family:inherit;}
+.free:focus{outline:none;border-color:var(--accent);}
+.hint{font-size:11px;color:var(--text2);line-height:1.6;margin-top:7px;}
+
+/* 使い方 */
+details.howto{background:var(--white);border-radius:14px;border:1px solid var(--line);margin-top:16px;overflow:hidden;}
+details.howto summary{padding:13px 14px;font-size:13px;font-weight:700;color:var(--navy);cursor:pointer;list-style:none;}
+details.howto summary::-webkit-details-marker{display:none;}
+details.howto summary::after{content:"＋";float:right;color:var(--accent);font-weight:800;}
+details.howto[open] summary::after{content:"−";}
+.howto-body{padding:0 14px 14px;font-size:12px;line-height:1.75;color:var(--text2);}
+.howto-body b{color:var(--navy);}
+.howto-body ol{margin:6px 0 12px;padding-left:1.3em;}
+.howto-body li{margin-bottom:3px;}
+
+/* 下部バー */
+.bar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,0.96);backdrop-filter:blur(10px);
+  border-top:1px solid var(--line);padding:10px 14px max(10px,env(safe-area-inset-bottom));z-index:40;}
+.bar-row{display:flex;gap:8px;}
+.bar-row+.bar-row{margin-top:8px;}
+.bbtn{flex:1;height:50px;border-radius:13px;border:none;font-size:14px;font-weight:800;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:6px;}
+.bbtn:active{transform:scale(0.98);}
+.bbtn.main{background:var(--navy);color:var(--white);}
+.bbtn.gold{background:var(--accent);color:var(--navy);}
+.bbtn.ghost{background:var(--white);color:var(--navy);border:1px solid var(--border-strong);}
+.bbtn:disabled{opacity:0.38;cursor:default;}
+.bbtn small{font-size:10px;font-weight:700;opacity:0.75;}
+
+/* トースト */
+.toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);bottom:calc(140px + env(safe-area-inset-bottom));
+  background:var(--navy);color:var(--white);padding:12px 16px;border-radius:13px;font-size:13px;font-weight:700;
+  box-shadow:0 6px 24px rgba(0,0,0,0.3);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:60;
+  display:flex;align-items:center;gap:12px;max-width:calc(100vw - 32px);}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;}
+.toast button{background:var(--accent);color:var(--navy);border:none;border-radius:9px;padding:8px 12px;
+  font-size:12px;font-weight:800;cursor:pointer;flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <button class="hbtn" onclick="history.length>1?history.back():location.href='index.html'" title="戻る">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 5 L8 12 L15 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="htitle">テプララベル<span>.</span></div>
+    <button class="hbtn" onclick="openTepra('jp.co.kingjim.android.tepra2')" title="テプラアプリを開く">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><rect x="6" y="15" width="12" height="6"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="lbl">テープ幅</div>
+  <div class="chips" id="tapeChips"></div>
+
+  <div class="lbl">プレビュー（実寸目安）</div>
+  <div class="pv">
+    <div class="pv-head">
+      <div class="pv-cap" id="pvCap">ラベルを選んでください</div>
+      <div class="pv-len" id="pvLen"></div>
+    </div>
+    <div class="tape-outer"><div class="tape" id="tape"><span class="tape-empty">未選択</span></div></div>
+    <div class="pv-warn" id="pvWarn"></div>
+  </div>
+
+  <div class="lbl">データ元</div>
+  <div class="chips" id="srcChips"></div>
+
+  <div class="lbl">書式</div>
+  <div class="chips wrapped" id="tplChips"></div>
+
+  <div id="listPane">
+    <div class="lbl">対象を選ぶ</div>
+    <input class="search" id="q" placeholder="名前・品番・現場名で検索" autocomplete="off">
+    <div class="list" id="list"></div>
+  </div>
+
+  <div id="freePane" style="display:none;">
+    <div class="lbl">自由入力</div>
+    <textarea class="free" id="freeTa" placeholder="1行に1枚ぶん入力&#10;&#10;例）&#10;第一倉庫&#10;クロス用ローラー&#10;予備ビス M4×25"></textarea>
+    <div class="hint">1行＝ラベル1枚。書式で「2行」を選ぶと、<b>タブ</b>または「<b>／</b>」で区切ったぶんが上下2段になります。</div>
+  </div>
+
+  <details class="howto">
+    <summary>テプラアプリでの印刷手順</summary>
+    <div class="howto-body">
+      <b>■ 1枚だけ印刷する（コピー＆貼り付け）</b>
+      <ol>
+        <li>行の「コピー」を押す</li>
+        <li>出てきた「アプリを開く」でテプラアプリへ</li>
+        <li>文字入力欄を長押し → 貼り付け → 印刷</li>
+      </ol>
+      <b>■ まとめて印刷する（CSV流し込み）</b>
+      <ol>
+        <li>下の「CSV書き出し」でスマホに保存</li>
+        <li>TEPRA LINK 2 を開き、フォーム切替で<b>「流し込み」</b>を選ぶ</li>
+        <li>流し込みデータの編集画面 → <b>インポート</b> → 保存したCSVを選ぶ</li>
+        <li>列タイトルをタップ → <b>「流し込みオブジェクト挿入」</b>で配置</li>
+        <li>印刷する行を選んでまとめて印刷</li>
+      </ol>
+      <div style="font-size:11px;color:var(--text3);line-height:1.6;">
+        ※CSVはUTF-8（BOM付き）で書き出します。アプリ側で文字化けした場合は教えてください、書き出し形式を切り替えます。<br>
+        ※流し込みは最大1000行まで。
+      </div>
+    </div>
+  </details>
+
+</div>
+
+<div class="bar">
+  <div class="bar-row">
+    <button class="bbtn main" id="btnCopy" disabled onclick="copyCurrent()">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+      コピー
+    </button>
+    <button class="bbtn gold" id="btnCsv" disabled onclick="exportCsv()">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 21h16"/></svg>
+      CSV書き出し<small id="csvN"></small>
+    </button>
+  </div>
+  <div class="bar-row">
+    <button class="bbtn ghost" onclick="openTepra('jp.co.kingjim.android.tepra2')">TEPRA LINK 2</button>
+    <button class="bbtn ghost" onclick="openTepra('jp.co.kingjim.hello')">Hello</button>
+    <button class="bbtn ghost" id="btnShare" style="flex:0 0 78px;" onclick="shareCurrent()">共有</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="toastMsg"></span><button id="toastBtn">アプリを開く</button></div>
+
+<script>
+/* ── テープ仕様（SR-R2500P：180dpi・96dot／18mm時 印字高13.5mm）
+      18mm以外の印字有効高は目安値 ───────────────────────────── */
+const TAPES = [
+  {w:4,  h:2.5},
+  {w:6,  h:4.0},
+  {w:9,  h:6.5},
+  {w:12, h:9.0},
+  {w:18, h:13.5}
+];
+const MARGIN_MM = 8;      // 前後の余白合計（標準的な送り量の目安）
+const LINE_GAP  = 0.9;    // 2行時の行間(mm)
+const KANJI_MIN = 3.5;    // 漢字の可読下限(mm)：JIS Z 8313
+
+/* ── 書式定義 ───────────────────────────────────────────── */
+const SRC = {
+  anken: {
+    label:'案件', key:'案件',
+    tpl:[
+      {id:'seishiki', name:'正式工事名',        f:r=>[r['正式工事名']||r['現場+工事']||'']},
+      {id:'kyaku',    name:'顧客＋工事',        f:r=>[[r['顧客略'],r['現場+工事']].filter(Boolean).join(' ')]},
+      {id:'k2',       name:'2行：顧客／工事名', f:r=>[r['顧客略']||'', r['正式工事名']||r['現場+工事']||'']},
+      {id:'basho',    name:'2行：工事名／場所', f:r=>[r['正式工事名']||r['現場+工事']||'', r['施工場所']||'']},
+      {id:'ankenkey', name:'案件キー（社内用）',f:r=>[r['案件キー']||'']}
+    ],
+    sub:r=>[r['案件キー'],r['ステータス']].filter(Boolean).join(' ・ '),
+    search:r=>[r['案件キー'],r['顧客略'],r['現場+工事'],r['正式工事名'],r['施工場所']].join(' ')
+  },
+  torihiki: {
+    label:'取引先', key:'取引先マスター',
+    tpl:[
+      {id:'seishiki', name:'正式名称',          f:r=>[r['正式名称']||r['略称']||'']},
+      {id:'ryaku',    name:'略称',              f:r=>[r['略称']||'']},
+      {id:'tel',      name:'2行：名称／TEL',    f:r=>[r['正式名称']||r['略称']||'', (r.contact&&r.contact.tel)||'']},
+      {id:'tanto',    name:'2行：略称／担当者', f:r=>[r['略称']||'', (r.basic&&r.basic.contact)||'']}
+    ],
+    sub:r=>[r.id,(r.rel||[]).join('/')].filter(Boolean).join(' ・ '),
+    search:r=>[r.id,r['略称'],r['正式名称'],r['search']].join(' ')
+  },
+  kougu: {
+    label:'工具', key:'工具',
+    tpl:[
+      {id:'mei',    name:'名称',                  f:r=>[r['名称']||'']},
+      {id:'kata',   name:'2行：名称／メーカー型番',f:r=>[r['名称']||'', [r['メーカー'],r['型番']].filter(Boolean).join(' ')]},
+      {id:'shamei', name:'2行：社名／名称',        f:r=>['(株)アート・レイズ', r['名称']||'']},
+      {id:'kanri',  name:'2行：名称／管理No.',     f:r=>[r['名称']||'', '管理No. '+(r.id||'')]},
+      {id:'hokan',  name:'2行：保管場所／名称',    f:r=>[r['保管場所']||'(保管場所未設定)', r['名称']||'']}
+    ],
+    sub:r=>[r.id,r['メーカー'],r['型番'],r['保管場所']].filter(Boolean).join(' ・ '),
+    search:r=>[r.id,r['名称'],r['メーカー'],r['型番'],r['カテゴリ'],r['保管場所']].join(' ')
+  },
+  buzai: {
+    label:'部材', key:'部材',
+    tpl:[
+      {id:'hin',    name:'品番',                 f:r=>[r['品番']||r['商品名']||'']},
+      {id:'shohin', name:'2行：商品名／品番',    f:r=>[r['商品名']||'', r['品番']||'']},
+      {id:'basho',  name:'2行：品番／使用場所',  f:r=>[r['品番']||'', r['使用場所']||'']},
+      {id:'anken',  name:'2行：案件／品番',      f:r=>[r['案件キー']||'', r['品番']||'']},
+      {id:'suryo',  name:'2行：商品名／数量',    f:r=>[r['商品名']||'', [r['数量'],r['単位']].filter(Boolean).join('')]}
+    ],
+    sub:r=>[r['案件キー'],r['メーカー'],r['カテゴリ']].filter(Boolean).join(' ・ '),
+    search:r=>[r['商品名'],r['品番'],r['メーカー'],r['カテゴリ'],r['案件キー'],r['使用場所']].join(' ')
+  },
+  free: {
+    label:'自由入力', key:null,
+    tpl:[
+      {id:'l1', name:'1行', lines:1},
+      {id:'l2', name:'2行（タブ or ／で区切り）', lines:2}
+    ]
+  }
+};
+
+let DATA=null, srcId='kougu', tplIdx=0, tapeW=18, cur=null, checked=new Set(), rows=[];
+
+/* ── 起動 ───────────────────────────────────────────────── */
+(async function init(){
+  renderTapeChips(); renderSrcChips();
+  try{
+    const res = await fetch('data.json?_='+Date.now());
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    DATA = await res.json();
+  }catch(e){
+    DATA = null;
+    document.getElementById('list').innerHTML =
+      '<div class="empty">data.json を読み込めませんでした<br><span style="font-size:11px">'+e.message+'</span><br><br>「自由入力」は使えます。</div>';
+  }
+  renderTplChips(); rebuild();
+})();
+
+/* ── チップ描画 ─────────────────────────────────────────── */
+function renderTapeChips(){
+  document.getElementById('tapeChips').innerHTML = TAPES.map(t=>
+    `<div class="chip gold ${t.w===tapeW?'on':''}" onclick="setTape(${t.w})">${t.w}mm</div>`).join('');
+}
+function renderSrcChips(){
+  document.getElementById('srcChips').innerHTML = Object.keys(SRC).map(k=>
+    `<div class="chip ${k===srcId?'on':''}" onclick="setSrc('${k}')">${SRC[k].label}</div>`).join('');
+}
+function renderTplChips(){
+  document.getElementById('tplChips').innerHTML = SRC[srcId].tpl.map((t,i)=>
+    `<div class="chip ${i===tplIdx?'on':''}" onclick="setTpl(${i})">${t.name}</div>`).join('');
+}
+function setTape(w){ tapeW=w; renderTapeChips(); drawPreview(); }
+function setSrc(k){ srcId=k; tplIdx=0; cur=null; checked.clear(); document.getElementById('q').value='';
+  renderSrcChips(); renderTplChips();
+  const free = (k==='free');
+  document.getElementById('listPane').style.display = free?'none':'';
+  document.getElementById('freePane').style.display = free?'':'none';
+  rebuild();
+}
+function setTpl(i){ tplIdx=i; renderTplChips(); rebuild(); }
+
+/* ── ラベル行の生成 ─────────────────────────────────────── */
+function linesOf(rec){
+  const t = SRC[srcId].tpl[tplIdx];
+  return (t.f ? t.f(rec) : []).map(s=>String(s==null?'':s).trim()).filter((s,i,a)=> s!=='' || i<a.length-1 )
+         .filter(s=>s!=='');
+}
+function freeLines(){
+  const t = SRC.free.tpl[tplIdx];
+  return document.getElementById('freeTa').value.split('\n')
+    .map(s=>s.trim()).filter(Boolean)
+    .map(s=> t.lines===2 ? s.split(/\t|／|\//).map(x=>x.trim()).filter(Boolean).slice(0,2) : [s]);
+}
+
+function rebuild(){
+  const listEl = document.getElementById('list');
+  if(srcId==='free'){ rows=[]; syncBar(); drawPreview(); return; }
+  if(!DATA){ syncBar(); return; }
+  const src = SRC[srcId];
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  const all = (DATA[src.key]||[]);
+  rows = all.map((r,i)=>({r, i, lines:linesOf(r)}))
+            .filter(x=>x.lines.length>0)
+            .filter(x=> !q || src.search(x.r).toLowerCase().includes(q));
+
+  if(!rows.length){ listEl.innerHTML = '<div class="empty">該当なし</div>'; syncBar(); return; }
+
+  listEl.innerHTML = rows.map(x=>{
+    const on = checked.has(x.i), isCur = cur && cur.i===x.i && cur.src===srcId;
+    return `<div class="row ${isCur?'cur':''}" onclick="pick(${x.i})">
+      <div class="row-tick ${on?'on':''}" onclick="event.stopPropagation();toggle(${x.i})">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 L10 17.5 L19 7"/></svg>
+      </div>
+      <div class="row-body">
+        <div class="row-main">${esc(x.lines[0])}${x.lines[1]?`<span class="l2">${esc(x.lines[1])}</span>`:''}</div>
+        <div class="row-sub">${esc(src.sub(x.r)||'')}</div>
+      </div>
+      <button class="row-copy" onclick="event.stopPropagation();pick(${x.i});copyCurrent();">コピー</button>
+    </div>`;
+  }).join('');
+  syncBar();
+}
+
+function pick(i){
+  const x = rows.find(v=>v.i===i); if(!x) return;
+  cur = {src:srcId, i, lines:x.lines};
+  document.querySelectorAll('.row').forEach(el=>el.classList.remove('cur'));
+  rebuild(); drawPreview();
+}
+function toggle(i){
+  checked.has(i) ? checked.delete(i) : checked.add(i);
+  rebuild();
+}
+
+/* ── プレビュー ─────────────────────────────────────────── */
+function currentLines(){
+  if(srcId==='free'){ const f=freeLines(); return f.length?f[0]:null; }
+  return cur && cur.src===srcId ? cur.lines : null;
+}
+function widthOf(s, chMm){
+  let w=0; for(const ch of s){ w += /[\x20-\x7E｡-ﾟ]/.test(ch) ? chMm*0.55 : chMm; }
+  return w;
+}
+function drawPreview(){
+  const tape = document.getElementById('tape'),
+        cap  = document.getElementById('pvCap'),
+        lenEl= document.getElementById('pvLen'),
+        warn = document.getElementById('pvWarn');
+  const lines = currentLines();
+  const spec = TAPES.find(t=>t.w===tapeW);
+
+  if(!lines || !lines.length){
+    tape.innerHTML='<span class="tape-empty">未選択</span>';
+    tape.style.height = px(spec.h+4)+'px'; tape.style.padding='0';
+    cap.textContent='ラベルを選んでください'; lenEl.textContent=''; warn.classList.remove('on');
+    syncBar(); return;
+  }
+
+  const n = lines.length;
+  const chMm = n===1 ? spec.h : (spec.h - LINE_GAP)/2;
+  const bodyMm = Math.max(...lines.map(s=>widthOf(s,chMm)));
+  const totalMm = bodyMm + MARGIN_MM;
+
+  tape.style.height  = px(spec.h + 4)+'px';
+  tape.style.padding = '0 '+px(MARGIN_MM/2)+'px';
+  tape.innerHTML = lines.map(s=>
+    `<div class="tape-line" style="font-size:${px(chMm)}px;">${esc(s)}</div>`).join('');
+
+  cap.textContent = `${tapeW}mm ／ ${n}行 ／ 文字高 約${chMm.toFixed(1)}mm`;
+  lenEl.textContent = `長さ 約${Math.round(totalMm)}mm`;
+
+  const hasKanji = lines.some(s=>/[　-ヿ一-鿿]/.test(s));
+  const msgs=[];
+  if(hasKanji && chMm < KANJI_MIN)
+    msgs.push(`⚠ 文字高 約${chMm.toFixed(1)}mm。漢字の可読下限 ${KANJI_MIN}mm を下回ります（テープを太くするか1行に）`);
+  if(totalMm > 200)
+    msgs.push(`⚠ 長さ 約${Math.round(totalMm)}mm。文字数を減らすか2行に分けると収まります`);
+  warn.innerHTML = msgs.join('<br>');
+  warn.classList.toggle('on', msgs.length>0);
+  syncBar();
+}
+function px(mm){ return Math.max(1, mm * 3.4); }   // 画面表示倍率（実寸ではなく比率再現）
+
+/* ── コピー／共有／CSV ──────────────────────────────────── */
+function labelText(lines){ return lines.join('\n'); }
+
+async function copyCurrent(){
+  const lines = currentLines();
+  if(!lines){ toast('コピーする行がありません'); return; }
+  const ok = await writeClip(labelText(lines));
+  toast(ok ? 'コピーしました' : 'コピーできませんでした', ok);
+}
+async function writeClip(text){
+  try{ await navigator.clipboard.writeText(text); return true; }
+  catch(e){
+    try{
+      const ta=document.createElement('textarea');
+      ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select();
+      const r=document.execCommand('copy'); ta.remove(); return r;
+    }catch(_){ return false; }
+  }
+}
+async function shareCurrent(){
+  const lines = currentLines();
+  if(!lines){ toast('共有する行がありません'); return; }
+  if(!navigator.share){ toast('この端末は共有に非対応'); return; }
+  try{ await navigator.share({text: labelText(lines)}); }
+  catch(e){ if(e && e.name!=='AbortError') toast('共有できませんでした'); }
+}
+
+function csvRows(){
+  if(srcId==='free') return freeLines();
+  return rows.filter(x=>checked.has(x.i)).map(x=>x.lines);
+}
+function exportCsv(){
+  const data = csvRows();
+  if(!data.length){ toast('対象がありません'); return; }
+  const cols = Math.max(...data.map(r=>r.length));
+  const head = cols===1 ? ['ラベル'] : Array.from({length:cols},(_,i)=>'行'+(i+1));
+  const q = s => '"' + String(s==null?'':s).replace(/"/g,'""') + '"';
+  const body = [head, ...data.map(r=>{
+    const a=r.slice(); while(a.length<cols) a.push(''); return a;
+  })].map(r=>r.map(q).join(',')).join('\r\n');
+
+  const blob = new Blob(['﻿'+body], {type:'text/csv;charset=utf-8'});
+  const d = new Date(), p = n=>String(n).padStart(2,'0');
+  const name = `tepra_${SRC[srcId].label}_${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}.csv`;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  toast(`${data.length}件を書き出しました`);
+}
+
+/* ── テプラアプリ起動 ───────────────────────────────────── */
+function openTepra(pkg){
+  const store = 'https://play.google.com/store/apps/details?id='+pkg;
+  if(/Android/i.test(navigator.userAgent)){
+    location.href = `intent://#Intent;package=${pkg};S.browser_fallback_url=${encodeURIComponent(store)};end`;
+  }else{
+    window.open(store,'_blank');
+  }
+}
+
+/* ── 下部バー状態 ───────────────────────────────────────── */
+function syncBar(){
+  const has = !!currentLines();
+  document.getElementById('btnCopy').disabled  = !has;
+  document.getElementById('btnShare').disabled = !has;
+  const n = csvRows().length;
+  document.getElementById('btnCsv').disabled = n===0;
+  document.getElementById('csvN').textContent = n ? ` ${n}件` : '';
+}
+
+/* ── トースト ───────────────────────────────────────────── */
+let toastT=null;
+function toast(msg, offerOpen){
+  const el=document.getElementById('toast'), btn=document.getElementById('toastBtn');
+  document.getElementById('toastMsg').textContent = msg;
+  btn.style.display = offerOpen ? '' : 'none';
+  btn.onclick = ()=>{ hideToast(); openTepra('jp.co.kingjim.android.tepra2'); };
+  el.classList.add('on');
+  clearTimeout(toastT); toastT=setTimeout(hideToast, offerOpen?5200:2200);
+}
+function hideToast(){ document.getElementById('toast').classList.remove('on'); }
+
+/* ── 雑務 ───────────────────────────────────────────────── */
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+document.getElementById('q').addEventListener('input', ()=>rebuild());
+document.getElementById('freeTa').addEventListener('input', ()=>{ drawPreview(); syncBar(); });
+</script>
+<script src="back-guard.js"></script>
+</body></html>
