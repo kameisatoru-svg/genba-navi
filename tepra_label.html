@@ -542,7 +542,7 @@ function openTepra(pkg){
 }
 
 /* ── BLE方式の実機判定 ──────────────────────────────────── */
-async function bleTest(){
+async function bleTest(onlyTepra){
   const out = document.getElementById('bleOut');
   const say = (html,color)=>{ out.innerHTML = html; out.style.color = color||'var(--text2)'; };
 
@@ -550,17 +550,30 @@ async function bleTest(){
     say('<b>Web Bluetooth 非対応のブラウザです。</b><br>AndroidのChromeで開いて試してください。','var(--red)');
     return;
   }
-  say('機器を探しています…（一覧が出たらSR-R2500Pがあるか見てください）');
+
+  // ①は名前で絞り込む。テプラが名乗りそうな接頭辞を並べる（Chromeは複数filterをORで扱う）
+  const opts = onlyTepra
+    ? {filters:['SR-','SR','TEPRA','Tepra','tepra','KING','King','KJ'].map(p=>({namePrefix:p}))}
+    : {acceptAllDevices:true};
+
+  say(onlyTepra ? 'テプラらしい名前の機器を探しています…' : 'BLE機器を探しています…');
   try{
-    const dev = await navigator.bluetooth.requestDevice({acceptAllDevices:true, optionalServices:[]});
-    say(`<b style="color:var(--green)">BLE機器として見えました：${esc(dev.name||'(名前なし)')}</b><br>`+
+    const dev = await navigator.bluetooth.requestDevice(opts);
+    say(`<b style="color:var(--green)">BLEで見つかりました：${esc(dev.name||'(名前なし)')}</b><br>`+
         `ID: ${esc(dev.id||'')}<br>`+
-        `→ これがテプラなら、直接印刷を作り込める可能性があります（通信内容の解析が別途必要）。`);
+        `→ これがテプラなら、直接印刷を作り込める可能性があります（通信内容の解析が別途必要）。`+
+        `<br>この画面をそのまま伝えてください。`);
   }catch(e){
-    if(e && e.name==='NotFoundError'){
-      say('<b>一覧にテプラが出ませんでした。</b><br>'+
-          'BLEでは通信していない（Bluetooth Classic）ため、<b>Webページからの直接印刷は原理的に不可能</b>です。'+
-          'このページのコピー／CSV流し込みで運用してください。','var(--orange)');
+    const n = e && e.name;
+    if(n==='NotFoundError'){
+      say(onlyTepra
+        ? '<b>テプラらしい名前のBLE機器は見つかりませんでした。</b><br>'+
+          '次に「② すべてのBLE機器を表示」を、<b>テプラの電源OFF時とON時の2回</b>実行して、'+
+          '増える機器があるか見比べてください。増えなければ Bluetooth Classic 確定です。'
+        : '<b>選ばずに閉じました（または該当なし）。</b><br>'+
+          'ON時とOFF時で一覧を見比べて、増える機器があるか確認してください。','var(--orange)');
+    }else if(n==='NotAllowedError'){
+      say('Bluetoothの利用が許可されませんでした。ブラウザの権限と、端末のBluetooth/位置情報がONか確認してください。','var(--red)');
     }else{
       say('判定できませんでした：'+esc(e && e.message ? e.message : String(e)),'var(--red)');
     }
