@@ -84,6 +84,14 @@ body{display:flex;flex-direction:column;background:var(--bg);}
   border-top:1px solid rgba(255,255,255,.15);padding-top:5px;}
 .ok{color:#4ade80;} .warn{color:#fbbf24;} .ng{color:#f87171;}
 
+/* 今どの面を撮るのかを示す小さな平面図（カメラ右上に重ねる） */
+.minimap{position:absolute;z-index:7;right:10px;top:10px;width:132px;
+  background:rgba(0,0,0,.66);border-radius:12px;padding:8px 8px 6px;}
+.minimap svg{width:100%;height:auto;display:block;}
+.mm-cap{font-size:10px;font-weight:700;color:#fff;text-align:center;margin-top:4px;line-height:1.4;}
+/* 平面図が出ているときは指示文を左に寄せて重ならないようにする */
+.has-map .instruct{padding-right:154px;}
+
 /* 判定バッジ */
 .verdict{position:absolute;z-index:6;right:12px;bottom:120px;
   padding:9px 14px;border-radius:var(--radius-pill);font-size:13px;font-weight:800;
