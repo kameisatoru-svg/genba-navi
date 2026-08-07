@@ -689,10 +689,17 @@ function renderKoma(){
   note.innerHTML = (KOMA.find(k=>k.id===komaId)||{}).note || '';
   const s = buildStrip();
   if(!s){ out.innerHTML=''; return; }
+  const m = minKomaMm();
+  const needBigger = m && m.mm > s.W + 0.01;
   out.innerHTML =
     `<div class="koma-sum">
        ${s.pieces.length}コマ ／ 1コマ <b>${s.W}mm</b> ／ テープ全長 <b>約${Math.round(s.total)}mm</b>
        ／ 文字高 <b>約${s.ch.toFixed(1)}mm</b>
+       ${m ? `<div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.18);">
+         ${tapeW}mmテープでこの名前を入れるなら最低 <b>${m.mm}mm</b>（最長「${esc(m.name)}」）
+         ${needBigger ? `<button class="bbtn gold" style="height:38px;width:100%;margin-top:8px;font-size:12.5px;"
+              onclick="applyMinKoma()">コマ長さを ${m.mm}mm にする</button>` : ''}
+       </div>` : ''}
      </div>` +
     `<div class="koma-strip">` + s.pieces.map(p=>
        `<div class="koma-cell ${p.収まる?'':'ng'}" style="width:${Math.max(44,p.mm*2.2)}px">
