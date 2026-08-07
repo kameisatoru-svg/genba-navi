@@ -103,6 +103,12 @@ details.howto[open] summary::after{content:"−";}
 /* 判定ツールは見つけやすく色を変える */
 details.diag{border-color:var(--accent);background:#fdfbf7;}
 details.diag summary{color:var(--accent2);}
+/* ③ 電波一覧 */
+.scan-item{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:6px;}
+.scan-item.hit{border-color:var(--green);background:var(--green-bg);}
+.scan-name{font-size:12.5px;font-weight:800;color:var(--navy);word-break:break-all;}
+.scan-name .no{color:var(--text3);font-weight:600;}
+.scan-meta{font-size:10.5px;color:var(--text2);margin-top:2px;line-height:1.5;word-break:break-all;font-variant-numeric:tabular-nums;}
 
 /* 下部バー */
 .bar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,0.96);backdrop-filter:blur(10px);
@@ -222,7 +228,9 @@ details.diag summary{color:var(--accent2);}
         </div>
         <button class="bbtn ghost" style="height:46px;width:100%;" onclick="bleTest(true)">① テプラだけを探す</button>
         <button class="bbtn ghost" style="height:46px;width:100%;margin-top:8px;" onclick="bleTest(false)">② すべてのBLE機器を表示</button>
+        <button class="bbtn ghost" style="height:46px;width:100%;margin-top:8px;border-color:var(--accent);color:var(--accent2);" id="btnScan" onclick="bleScanList()">③ 電波を一覧で見る（推奨）</button>
         <div id="bleOut" style="margin-top:9px;font-size:11.5px;line-height:1.65;"></div>
+        <div id="scanOut" style="margin-top:9px;"></div>
         <div style="font-size:11px;color:var(--text3);line-height:1.6;margin-top:9px;">
           <b style="color:var(--navy)">読み方：</b>①で SR-R2500P が出れば BLE＝直接印刷を作り込める可能性あり。
           ①が空なら②を、<b>テプラの電源OFF時とON時の2回</b>実行して見比べてください。
