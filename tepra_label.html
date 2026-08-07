@@ -447,10 +447,12 @@ const SRC = {
    スイッチ＝Panasonic公式FAQ「コスモスイッチ用ネームカード寸法」24.5±0.6 × 9.7±0.3mm。
    分電盤＝メーカー公表値が見つからないため既定値。現物実測での上書き前提。 */
 const KOMA = [
-  {id:'sw', name:'スイッチ 24.5mm', mm:24.5, tape:9,
+  {id:'sw', name:'スイッチ（9mm）', mm:24.5, tape:9,
    note:'Panasonic コスモ／ワイド21 ネームカード <b>24.5×9.7mm</b>（公式FAQの寸法図）。高さ9.7mmなので<b>9mmテープ</b>が適合します。'},
-  {id:'bd', name:'分電盤 20mm', mm:20, tape:9,
-   note:'⚠ 分電盤の名称欄はメーカーが寸法を公表していないため<b>暫定20mm</b>です。現物のブレーカー1個分の幅を実測して上書きしてください（測った値を教えていただければ既定値にします）。'},
+  {id:'bd', name:'分電盤ブレーカー（9mm）', mm:26, tape:9,
+   note:'<b>9mmテープ固定</b>。9mmは文字高6.5mmなので、全角1文字あたり約6.5mm使います（4文字＝26mm）。'+
+        'コマ長さの既定26mmは4文字ぶんの目安です。⚠ 分電盤の名称欄はメーカーが寸法を公表していないので、'+
+        '現物のブレーカー1個分を実測して上書きしてください。'},
   {id:'fr', name:'自由', mm:null, tape:null, note:'コマ長さを直接入力してください。'}
 ];
 let komaId='sw';
@@ -656,6 +658,20 @@ function buildStrip(){
   if(gaps.some(g=>g===0)) warns.push('間隔が0のコマがあります。切る位置が分かりにくいので名前を短くするか、コマ長さを大きくしてください');
 
   return {text, pieces, total, ch, W, lead, trail, gaps, warns};
+}
+
+/* 入力した名前が全部収まる最小のコマ長さ（切りしろ2mmを見込む） */
+function minKomaMm(){
+  const names = komaNames(); if(!names.length) return null;
+  const spec = TAPES.find(t=>t.w===tapeW);
+  const t = names.map(n=>widthOf(n, spec.h));
+  const max = Math.max(...t);
+  return {mm: Math.ceil((max+2)*2)/2, name: names[t.indexOf(max)]};
+}
+function applyMinKoma(){
+  const m = minKomaMm(); if(!m) return;
+  document.getElementById('komaMm').value = m.mm;
+  komaId='fr'; renderKomaChips(); renderKoma(); drawPreview();
 }
 
 function renderKomaChips(){
