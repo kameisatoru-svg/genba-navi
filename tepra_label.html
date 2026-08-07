@@ -344,7 +344,7 @@ function openBleIfHashed(){
   if(location.hash!=='#ble') return;
   const d = document.getElementById('bleDetails');
   d.open = true;
-  requestAnimationFrame(()=>d.scrollIntoView({behavior:'smooth', block:'center'}));
+  d.scrollIntoView({block:'center'});   // smoothだと環境により動かないので即時指定
 }
 
 /* ── チップ描画 ─────────────────────────────────────────── */
