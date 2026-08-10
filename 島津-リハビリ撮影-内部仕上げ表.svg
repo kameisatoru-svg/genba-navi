@@ -3,6 +3,7 @@
   <!-- タイトル -->
   <text x="24" y="38" font-size="20" font-weight="bold" fill="#1a2a3a">■大分リハビリテーション病院 一般撮影室 内部仕上げ表</text>
   <text x="1164" y="38" font-size="12" fill="#555" text-anchor="end">2026/06/17</text>
+  <text x="1164" y="56" font-size="11" font-weight="bold" fill="#c0392b" text-anchor="end">※後日訂正（2026-08-10 実態反映）：C面＝FE-76751で施工</text>
   <text x="24" y="62" font-size="11" fill="#c0392b">※赤字は注記です。ご確認願います。</text>
   <text x="300" y="62" font-size="11" fill="#555">※グレー字は支給品（お見積り不要）。</text>
 
@@ -58,7 +59,7 @@
   <g font-size="10.5" fill="#222">
     <text x="508" y="138">ビニルクロス（サンゲツ FE）</text>
     <text x="508" y="156">A面 操作室側：<tspan font-weight="bold">FE-76751</tspan></text>
-    <text x="508" y="172">C面 廊下側：<tspan font-weight="bold">FE-76251</tspan></text>
+    <text x="508" y="172">C面 廊下側：<tspan font-weight="bold">FE-76751</tspan> <tspan fill="#c0392b" font-size="9.5">（後日訂正）</tspan></text>
     <text x="508" y="188">D面 受付側：<tspan font-weight="bold">FE-76728</tspan></text>
     <text x="508" y="204">B面 空室側：<tspan font-weight="bold">FE-76109</tspan></text>
     <text x="508" y="222" fill="#c0392b">※縦貼り。割付は割付図参照</text>
@@ -91,5 +92,6 @@
     <text x="34" y="400">○ 数量（見_改２）：床 18㎡ ／ 壁クロス 49㎡。床＝巾1820縦割り2列、壁＝縦貼り(A/C面4短冊・B/D面6短冊)、天井＝横流れ920×6帯。</text>
     <text x="34" y="424" fill="#c0392b">※ 壁品番は島津レイアウト図（操作室=下）を180°回転し各壁の隣接室で対応付け。FE品番のリピート（柄合わせ）有無・在庫を発注前に確認。</text>
     <text x="34" y="444" fill="#c0392b">※ 寸法・数量は清書基準の概略。壁柱の見付・見込、入隅/出隅の回し分は別途。発注前に最終確認。</text>
+    <text x="34" y="468" fill="#c0392b" font-weight="bold">※ 後日訂正（2026-08-10 実態反映）：C面 廊下側は旧記載FE-76251が誤りで、実施はA面と同じFE-76751（白系枝柄・リピート タテ64.2×ヨコ92cm・柄合わせ要）。</text>
   </g>
 </svg>
