@@ -21,6 +21,8 @@
 
   <!-- ===== タイトル ===== -->
   <text x="30" y="38" font-size="21" font-weight="bold" fill="#1a2a3a">大分リハビリテーション病院 一般撮影室 平面図（清書）</text>
+  <text x="1110" y="28" font-size="12" font-weight="bold" fill="#c0392b" text-anchor="end">※後日訂正（2026-08-10 実態反映）</text>
+  <text x="1110" y="44" font-size="11" fill="#c0392b" text-anchor="end">C面はFE-76251の記載誤り。実施はA面と同じFE-76751</text>
   <text x="30" y="58" font-size="12" fill="#555">現地手書き（操作室=上・壁＝太線）を基準に作図／壁の途切れ＝建具・窓／柱＝壁柱／開き勝手・建具は図面アプリ準拠／寸法mm・CH=2790</text>
 
   <!-- ===== 操作室(隣接・上) ===== -->
@@ -125,7 +127,7 @@
   <rect x="306" y="158" width="13" height="13" fill="#fff" stroke="#a8600a"/>
   <text x="324" y="169" font-size="11.5" fill="#a8600a" font-weight="bold">A面 操作室側：FE-76751</text>
   <rect x="306" y="548" width="13" height="13" fill="#fff" stroke="#a8600a"/>
-  <text x="324" y="559" font-size="11.5" fill="#a8600a" font-weight="bold">C面 廊下側：FE-76251</text>
+  <text x="324" y="559" font-size="11.5" fill="#a8600a" font-weight="bold">C面 廊下側：FE-76751 <tspan fill="#c0392b" font-size="10">（後日訂正）</tspan></text>
   <g transform="rotate(-90 288 360)">
     <rect x="242" y="353" width="13" height="13" fill="#fff" stroke="#a8600a"/>
     <text x="260" y="364" font-size="11.5" fill="#a8600a" font-weight="bold">D面 受付側：FE-76728</text>
@@ -207,7 +209,7 @@
     <text x="0" y="46" font-size="12" fill="#333">○ 巾木：<tspan font-weight="bold">田島 No.80</tspan>（品番。※高さではない）</text>
     <text x="0" y="66" font-size="12" fill="#333">○ 天井：サンゲツ <tspan font-weight="bold">FE-76202</tspan>（ルーバー〔エアー吹出〕有）</text>
     <text x="0" y="90" font-size="12" fill="#333">○ 壁クロス（サンゲツ・壁＝縦貼り／天井＝横流れ）：</text>
-    <text x="16" y="110" font-size="12" fill="#333">A面 操作室側 <tspan font-weight="bold">FE-76751</tspan>　／　C面 廊下側 <tspan font-weight="bold">FE-76251</tspan></text>
+    <text x="16" y="110" font-size="12" fill="#333">A面 操作室側 <tspan font-weight="bold">FE-76751</tspan>　／　C面 廊下側 <tspan font-weight="bold">FE-76751</tspan><tspan fill="#c0392b" font-size="10">（後日訂正・A面と同柄）</tspan></text>
     <text x="16" y="130" font-size="12" fill="#333">D面 受付側 <tspan font-weight="bold">FE-76728</tspan>　／　B面 空室側 <tspan font-weight="bold">FE-76109</tspan></text>
     <text x="0" y="154" font-size="12" fill="#333">○ 建具：操作室ドアW970／ドアW900（H2025）／親子ドアW1280(親右子左)</text>
     <text x="16" y="172" font-size="12" fill="#333">中連窓 W850・H850（腰下860）　ドアは内開き（実線=扉/点線=軌道）</text>
