@@ -2,7 +2,9 @@
 <defs><marker id="dimS" markerWidth="11" markerHeight="11" refX="2" refY="5" orient="auto"><path d="M8,2 L2,5 L8,8" fill="none" stroke="#c0392b" stroke-width="1.1"/></marker><marker id="dimE" markerWidth="11" markerHeight="11" refX="8" refY="5" orient="auto"><path d="M2,2 L8,5 L2,8" fill="none" stroke="#c0392b" stroke-width="1.1"/></marker><pattern id="col" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#d4dde4"/><line x1="0" y1="0" x2="0" y2="8" stroke="#5f7c8c" stroke-width="1.6"/></pattern><pattern id="colside" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="8" height="8" fill="#e7eef3"/><line x1="0" y1="0" x2="0" y2="8" stroke="#7e98a8" stroke-width="1.3"/></pattern></defs>
 <text x="32" y="42" font-size="22" font-weight="bold" fill="#1a2a3a">大分リハビリテーション病院 一般撮影室 壁・天井クロス割付図① 展開図（サンゲツ FE）</text>
 <text x="32" y="63" font-size="13" fill="#555">壁＝縦貼り・<tspan font-weight="bold">貼り出しは右から左（各面とも右角スタート）</tspan>／点線は正面視（B面は奥行=柱側面の巻込を投影。実材増の根拠は②）</text>
-<text x="32" y="83" font-size="11.5" fill="#7a4a00"><tspan font-weight="bold" fill="#2e8b46">緑＝端材流用（ドア上枠から下のみ）</tspan>：ドア上は横1枚を角から貼り、脇の小幅(≒10cm)は縦1本取らず端材(内)を横継ぎ流用＝総m圧縮（無地◎／リピート柄A・Dは柄合わせで限定）</text>
+<text x="32" y="83" font-size="11.5" fill="#7a4a00"><tspan font-weight="bold" fill="#2e8b46">緑＝端材流用（ドア上枠から下のみ）</tspan>：ドア上は横1枚を角から貼り、脇の小幅(≒10cm)は縦1本取らず端材(内)を横継ぎ流用＝総m圧縮（無地◎／リピート柄A・C・Dは柄合わせで限定）</text>
+<text x="1453" y="36" font-size="14" font-weight="bold" fill="#c0392b" text-anchor="end">※後日訂正（2026-08-10 実態反映）</text>
+<text x="1453" y="56" font-size="12.5" fill="#c0392b" text-anchor="end">C面はFE-76251の記載誤り。実施はA面と同じFE-76751（柄合わせ要）</text>
 <text x="32.0" y="110.0" font-size="15" font-weight="bold" fill="#a8600a">A面 操作室側　FE-76751</text>
 <text x="32.0" y="128.0" font-size="12.5" fill="#7a4a00">縦貼り4短冊／柄合わせ要(タテ642)・柄物=端材流用は限定</text>
 <text x="520.4" y="110.0" font-size="11" font-weight="bold" fill="#2c3e50" text-anchor="end">◀ 貼り出し（右→左）</text>
@@ -56,8 +58,8 @@
 <text x="902.9" y="533.7" font-size="13" fill="#c0392b" text-anchor="middle">5073</text>
 <line x1="540.4" y1="140.0" x2="540.4" y2="516.7" stroke="#c0392b" stroke-width="0.9" marker-start="url(#dimS)" marker-end="url(#dimE)"/>
 <text x="532.4" y="328.3" font-size="13" fill="#c0392b" transform="rotate(-90 532.4 328.3)" text-anchor="middle">2790</text>
-<text x="32.0" y="580.0" font-size="15" font-weight="bold" fill="#a8600a">C面 廊下側　FE-76251</text>
-<text x="32.0" y="598.0" font-size="12.5" fill="#7a4a00">縦貼り4短冊／無地貼可・端材流用が有効</text>
+<text x="32.0" y="580.0" font-size="15" font-weight="bold" fill="#a8600a">C面 廊下側　FE-76751 <tspan font-size="11.5" fill="#c0392b">（後日訂正：旧記載FE-76251は誤り）</tspan></text>
+<text x="32.0" y="598.0" font-size="12.5" fill="#7a4a00">縦貼り4短冊／柄合わせ要(タテ642)・柄物=端材流用は限定</text>
 <text x="520.4" y="580.0" font-size="11" font-weight="bold" fill="#2c3e50" text-anchor="end">◀ 貼り出し（右→左）</text>
 <rect x="32.0" y="610.0" width="488.4" height="376.7" fill="#eaf3fa" stroke="#2c3e50" stroke-width="2.4"/>
 <rect x="272.0" y="610.0" width="124.2" height="376.7" fill="#dceaf5"/>
