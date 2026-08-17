@@ -3038,8 +3038,8 @@ function renderKpi() {
   const today = new Date();
   const ym = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
 
-  // 進行中: 中止・入金済み以外(要件定義書ベース)
-  const ongoing = all.filter(a => !['中止', '入金済み'].includes(a['ステータス'])).length;
+  // 進行中: 中止・保留・入金済み以外(要件定義書ベース。保留＝追跡不要で寝かせた案件)
+  const ongoing = all.filter(a => !['中止', '保留', '入金済み'].includes(a['ステータス'])).length;
 
   // 今月の見積総額: 発行日が当月の見積金額合計（件数も集計）
   let monthlyEstimateCount = 0;
@@ -3065,7 +3065,7 @@ function renderKpi() {
   ['相談', '調査中', '見積準備', '見積提出済み'].forEach(s => ZONE_OF[s] = '営業');
   ['施工予定', '施工中', '請求済み'].forEach(s => ZONE_OF[s] = '施工');
   const bd = { 営業: 0, 施工: 0, 完了系: 0 };
-  all.filter(a => !['中止', '入金済み'].includes(a['ステータス']))
+  all.filter(a => !['中止', '保留', '入金済み'].includes(a['ステータス']))
      .forEach(a => { bd[ZONE_OF[a['ステータス']] || '完了系']++; });
 
   // 今週の施工予定: ステータス=施工予定 かつ 備考の予定日が本日±7日内の件数
@@ -4037,7 +4037,7 @@ function renderTimeline() {
 
   // 完了・クローズ系は表示から除外（退去）。進行中の案件だけを残す。
   const TIMELINE_EXCLUDE = new Set([
-    '中止', '消滅', '保守管理(継続)',
+    '中止', '消滅', '保留', '保守管理(継続)',
     '完了', '完了(請求書作成済み)', '完了・請求書作成待ち'
   ]);
   // 並び順は「期間内に予定・発行などの動きがある案件を優先 → 動きが無ければパイプライン順」。
