@@ -46,6 +46,7 @@
   --status-sodan:          #a8c5da;  /* 相談(薄い青) */
   --status-mitsumori-prep: #c8b9d9;  /* 見積準備(薄い紫) */
   --status-shomet:         #c0c0c0;  /* 消滅(グレー) */
+  --status-horyu:          #a89f91;  /* 保留(追跡不要・寝かせ) */
 
   /* アラート色 */
   --danger:  #c0392b;
@@ -2561,7 +2562,8 @@ const STATUS_META = {
   '相談':               { color: 'var(--status-sodan)',          icon: 'icon-calendar' },
   '調査中':             { color: 'var(--status-sodan)',          icon: 'icon-calendar' },
   '見積準備':           { color: 'var(--status-mitsumori-prep)', icon: 'icon-document' },
-  '消滅':               { color: 'var(--status-shomet)',         icon: 'icon-warning-triangle' }
+  '消滅':               { color: 'var(--status-shomet)',         icon: 'icon-warning-triangle' },
+  '保留':               { color: 'var(--status-horyu)',          icon: 'icon-clock' }
 };
 
 // --- ステータスごとの「次の一手」ヒント（リマインド／タイムラインで共用）---
@@ -2594,7 +2596,7 @@ const KANBAN_ZONES = [
   { id: 'shiko', label: '施工〜入金ゾーン', cols: ['施工予定', '施工中', '請求済み', '入金済み'] }
 ];
 const KANBAN_CLOSED_ZONE = {
-  id: 'closed', label: 'クローズゾーン', cols: ['完了・請求書作成待ち', '完了(請求書作成済み)', '完了', '保守管理(継続)', '中止', '消滅']
+  id: 'closed', label: 'クローズゾーン', cols: ['完了・請求書作成待ち', '完了(請求書作成済み)', '完了', '保守管理(継続)', '保留', '中止', '消滅']
 };
 const KANBAN_COLS = [...KANBAN_ZONES.flatMap(z => z.cols), ...KANBAN_CLOSED_ZONE.cols];
 
