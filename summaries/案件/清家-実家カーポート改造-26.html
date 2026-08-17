@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>清家-実家カーポート改造-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;} li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;} .doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;} .doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);} .s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;} th{color:var(--sub);font-weight:600;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;} .tl-text{font-size:13px;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>清家邸 実家カーポート改造工事</h1>
+  <div class="sub">清家-実家カーポート改造-26 ｜ 大分県別府市（清家邸 実家）</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">💬 相談（折り返し待ち）</span>
+    <span class="badge">🏠 清家様（T-057・個人）</span>
+    <span class="badge">🔧 依頼先＝オグシアルミ（T-033）方針</span>
+    <span class="badge">📏 有効高 約1,900mm ⇔ 車 1,955mm＝約55mm不足</span>
+    <span class="badge">📸 LINE写真10点 受領済</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E6%B8%85%E5%AE%B6-%E5%AE%9F%E5%AE%B6%E3%82%AB%E3%83%BC%E3%83%9D%E3%83%BC%E3%83%88%E6%94%B9%E9%80%A0-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">サマリー初回生成: 2026-08-17 12:05（LIGHT反映・8/16 通話＋8/16 LINE写真10点を反映）</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">相談</div><div class="l">ステータス（2026/8/17 起票）</div></div>
+  <div class="kpi"><div class="v">折り返し待ち</div><div class="l">清家様が「月曜（8/17）に聞いてみる」＝先方ルートの返答待ち</div></div>
+  <div class="kpi"><div class="v">約55mm不足</div><div class="l">梁下 約1,900mm ⇔ 入庫車 全高1,955mm（数値は要実測）</div></div>
+  <div class="kpi"><div class="v">+100〜200mm</div><div class="l">希望する嵩上げ量（梁下で床から2,000mm以上）</div></div>
+  <div class="kpi"><div class="v">TOEX製・埋込柱</div><div class="l">既存はR屋根・側面支持型／柱脚に埋込レベル線＝掘削は避けたい意向</div></div>
+  <div class="kpi"><div class="v">未提示</div><div class="l">金額・日程とも現時点で提示なし</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>進行フロー</b>：相談受電（8/16）→LINE写真10点受領（8/16 送信・8/17 確認）→案件起票・T-057 採番（8/17）→<b>オグシアルミへ調査依頼メール下書き作成（8/17・送信待ち）</b>→可否回答→現地調査・実測→見積</li>
+        <li><b>現在地</b>：<b>相談段階</b>。①清家様からの折り返し ②オグシアルミへの依頼メール送信、の2本待ち</li>
+        <li><b>相談内容</b>：既存カーポートに<b>レクサスLM（全高1,955mm）</b>を入れたい。現状の梁下は約1,900mmで入らない</li>
+        <li><b>第一希望</b>：既存柱を活かしたまま意匠性の高い屋根へ架け替え（「末広みたいなおしゃれなやつ」）</li>
+        <li><b>次善策</b>：柱を20cmほど継ぎ足して嵩上げ＋太柱／鉄骨で補強</li>
+        <li><b>避けたい点</b>：新規建て替えは<b>掘削が必要</b>で施工が大変なため避けたい（先方意向）</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">📐 現況スペック（写真読み取り・要現地実測）</div>
+      <table>
+        <tr><th>項目</th><th>値</th></tr>
+        <tr><td>入庫予定車</td><td>レクサスLM 全高1,955／全長5,125／全幅1,890mm</td></tr>
+        <tr><td>梁下端（有効高）</td><td>約1,900mm ← <b>約55mm不足</b></td></tr>
+        <tr><td>梁天端</td><td>約2,000mm</td></tr>
+        <tr><td>メーカー</td><td>TOEX（東洋エクステリア・現LIXIL）／ラベル 20008321</td></tr>
+        <tr><td>形式</td><td>R屋根・側面支持型／柱はブロック塀沿いに3本</td></tr>
+        <tr><td>柱断面</td><td>見付け 約85mm／見込み 約155〜160mm</td></tr>
+        <tr><td>柱脚</td><td><b>埋込式</b>（柱脚に「埋込レベル線」シール）</td></tr>
+        <tr><td>その他</td><td>「積雪20cmを超えないうちに雪おろしを」の注意シールあり＝既存屋根の耐雪仕様</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>顧客</td><td>清家様（T-057 清家邸）</td><td>窓口＝ご主人。(株)信和（T-003）関係者。<b>清家石油（T-025）とは別</b></td></tr>
+        <tr><td>元請</td><td>株式会社アート・レイズ</td><td>—</td></tr>
+        <tr><td>協力業者（予定）</td><td>株式会社オグシアルミ（T-033）</td><td>アルミ・エクステリア。カーポート基礎見積ほか実績多数。施工体制書類では『三協テック株式会社』名義を使う場合あり</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-bottom:8px;">見積書・図面はまだ未作成（相談段階）。現時点の資料は受領写真と通話記録のみ。</div>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📞</div><div class="doc-info"><div class="doc-name">通話記録/20260816_清家_100319_transcript.md</div><div class="doc-meta-s">2026/8/16 10:03（実尺118秒）ご主人よりカーポート改造の相談。第一希望＝既存柱を活かした意匠屋根／次善策＝柱20cm嵩上げ＋補強／掘削は避けたい／「月曜に聞いてみる」＝折り返し待ち。金額・日付の言及なし</div></div><div class="doc-st s-ok">文字起こし済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">00_履歴_清家-実家カーポート改造-26.md</div><div class="doc-meta-s">履歴ノート（先頭追記方式）。要アクション・条件メモを保持</div></div><div class="doc-st s-ok">最新</div></a>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ Driveリンクは同期後に付与。</div>
+    </div>
+    <div class="card">
+      <div class="card-t">📷 写真・現調記録</div>
+      <ul>
+        <li><b>LINE受領写真 12ファイル</b>（8/16 9:30〜9:36 送信）＝全景2・全景マスク版2・内観1・計測4・柱脚1・メーカーラベル1・車両諸元カード1</li>
+        <li>計測写真：梁下端の高さ／梁天端の高さ／柱の見込み／柱の見付け</li>
+        <li><b>⚠️ 01・02 の無印版は車のナンバープレートが写り込んでいる</b>。業者・社外へ出す資料には <code>_ナンバーマスク_業者送付用</code> 版を使うこと</li>
+        <li><b>現地調査（実測）は未実施</b>。数値はすべて写真読み取りのため、可否回答後に実測が必要</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話・LINEから抽出した重要決定事項</div>
+  <ul>
+    <li>2026/08/16 10:03 ご主人 通話【要望】<b>第一希望＝既存の柱をそのまま活かして「おしゃれなカーポート」に</b>できないか。次善策は<b>柱を20cmほど継ぎ足して嵩上げ</b>し、太い柱／鉄骨で周囲を補強。新規建て替えは<b>掘削が必要で施工が大変</b>なため避けたい</li>
+    <li>2026/08/16 10:03 ご主人 通話【見立て】先方自身が「既存を結構使っているので厳しいと言われると思う」＝<b>第一希望は難しい可能性が高い</b>という認識を共有</li>
+    <li>2026/08/16 10:03 ご主人 通話【約束】清家様が「<b>月曜（＝8/17）に聞いてみる</b>」＝<b>先方ルートでも確認が進む見込み・折り返し待ち</b>。金額・日付の言及なし。<span class="doc-meta-s">※逐語の「ゲツヨ」は<b>月曜</b>の聞き取り（業者名ではない・2026/8/17 確認）</span></li>
+    <li>2026/08/16 09:33〜09:36 LINE【要件が数値で確定】「柱を伸ばせる？<b>角が床から2000位欲しい</b>」「この柱を利用して<b>中島見たいな屋根</b>つけれるか？」「<b>今の柱を補強して20cm高く出来るか？</b>」「<b>これが入るようにしたい</b>」＝入庫車は<b>レクサスLM 全高1,955mm</b></li>
+    <li>2026/08/17 方針【依頼先】かめさん判断で<b>オグシアルミ（T-033）へ依頼する方針</b>。確認事項は①既存柱を活かしたまま意匠性の高い屋根に架け替えられるか ②不可の場合の次善策＝柱20cm嵩上げ＋太柱／鉄骨補強の実現性 ③概算費用。<b>Gmail下書きは作成済みで、写真10点を添付して送信するだけの状態</b></li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <div class="doc-meta-s">原価計上なし（相談段階・見積未作成）</div>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <div class="doc-meta-s">受取見積書・受取請求書なし</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/8/17（月）</div><div class="tl-text"><b>案件を起票し、依頼先の方針を確定</b>。カーポート改造の受け皿となる案件が AR-2026・data.json とも不在だったため、既存の <code>清家-網戸修理-26</code>（網戸・障子）とは別案件として分離し新規起票（案件71→72件）。顧客を<b>T-057 清家邸</b>で採番登録。依頼先は<b>オグシアルミ（T-033）</b>とし、過去メールの署名から連絡先を確定して取引先マスターを補完。<b>調査依頼メールのGmail下書きを作成済み（写真10点を添付して送信するだけ）</b>。案件キーも <code>清家-自宅カーポート改造-26</code> から <b><code>清家-実家カーポート改造-26</code></b> へリネーム（現場は現自宅ではなく実家のため）。</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/8/16（日）9:30〜9:36</div><div class="tl-text"><b>LINEで写真10点を受領し、要件が数値で確定</b>（8/17 にPC版LINEで内容確認）。入庫予定車は<b>レクサスLM 全高1,955mm</b>、現状の<b>梁下は約1,900mm＝約55mm不足</b>。既存は<b>TOEX（東洋エクステリア・現LIXIL）製</b>のR屋根・側面支持型、柱はブロック塀沿いに3本、柱断面は見付け約85mm／見込み約155〜160mm、<b>柱脚は埋込式</b>。先方の希望は<b>梁下（角）で床から2,000mm以上</b>＝実質+100〜200mmの嵩上げ。<b>⚠️ 数値はすべて写真読み取りのため要現地実測</b>。写真01・02 はナンバー写り込みがあるためマスク版を業者送付用に別途作成。</div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/8/16（日）10:03</div><div class="tl-text"><b>相談受電（実尺118秒）</b>。ご主人よりカーポート改造の相談。第一希望＝<b>既存柱を活かした意匠性の高い屋根への架け替え</b>、次善策＝<b>柱20cm継ぎ足し＋太柱／鉄骨補強</b>、<b>掘削は避けたい</b>。先方自身「既存を結構使っているので厳しいと言われると思う」との見立て。<b>「月曜に聞いてみる」＝折り返し待ち</b>。金額・日程の言及なし。<span class="doc-meta-s">通話記録/20260816_清家_100319_transcript.md</span></div></div>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li><b>清家-網戸修理-26 とは別案件</b>（同じ実家拠点だが工事内容が別）。顧客の (株)信和（T-003）・清家石油（T-025）とも区別すること</li>
+    <li>成否の分岐点は<b>「既存の埋込柱を活かせるか」</b>の一点。活かせなければ掘削を伴う建て替えとなり、先方が避けたい方向へ振れる</li>
+    <li>数値はすべて写真読み取り。<b>受注前に必ず現地実測</b>（特に梁下有効高・柱の埋込深さ）</li>
+    <li>次の一手：①オグシアルミへ調査依頼メール送信 ②清家様の折り返し受領 → 可否確認・現地調査日程調整</li>
+  </ul>
+</div>
+
+<div class="footer">株式会社アート・レイズ ｜ 清家-実家カーポート改造-26 案件サマリー</div>
+
+</body>
+</html>
