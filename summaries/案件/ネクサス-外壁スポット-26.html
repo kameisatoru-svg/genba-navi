@@ -48,22 +48,23 @@ th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;} th{color
   <div class="sub">ネクサス-外壁スポット-26 ｜ 大分県大分市</div>
   <div class="badges">
     <!-- AUTO:JSON:STATUS_BADGES -->
-    <span class="badge">📝 見積発行</span>
+    <span class="badge">⏸️ 保留（追跡不要）</span>
     <span class="badge">🏢 ネクサスプラザ（T-011）</span>
     <span class="badge">💡 外壁アームスポットLED交換</span>
+    <span class="badge">⌛ 見積有効期限 2026/7/23 経過</span>
     <!-- /AUTO:JSON:STATUS_BADGES -->
     <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E3%83%8D%E3%82%AF%E3%82%B5%E3%82%B9-%E5%A4%96%E5%A3%81%E3%82%B9%E3%83%9D%E3%83%83%E3%83%88-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
   </div>
   <!-- AUTO:JSON:LAST_UPDATED -->
-  <div class="sub" style="margin-top:6px;">data.json最終更新: （未登録・見積のみ）｜ サマリー更新: 2026-06-23</div>
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-08-17 12:25 ｜ サマリー最終反映: 2026-08-17 18:05（LIGHT反映・保留への変更を反映）</div>
   <!-- /AUTO:JSON:LAST_UPDATED -->
 </div>
 
 <!-- AUTO:JSON:KPI_ROW -->
 <div class="kpi-row">
-  <div class="kpi"><div class="v">見積発行</div><div class="l">ステータス</div></div>
-  <div class="kpi"><div class="v">¥99,220</div><div class="l">見積（税込）</div></div>
-  <div class="kpi"><div class="v">¥90,200</div><div class="l">税抜（諸経費10%込）</div></div>
+  <div class="kpi"><div class="v">保留</div><div class="l">ステータス（8/17 かめさん判断・追跡不要）</div></div>
+  <div class="kpi"><div class="v">¥99,000</div><div class="l">見積（税込・PDFが正）</div></div>
+  <div class="kpi"><div class="v">2026/7/23</div><div class="l">見積有効期限（経過済み・再見積の要否あり）</div></div>
   <div class="kpi"><div class="v">写真1枚</div><div class="l">夜間現況（6/22）</div></div>
 </div>
 <!-- /AUTO:JSON:KPI_ROW -->
@@ -73,8 +74,9 @@ th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;} th{color
     <div class="card">
       <div class="card-t">📅 進行状況・フロー</div>
       <ul>
-        <li><b>進行フロー</b>：見積作成（2026/6/22発行）→ 顧客提示・受注待ち</li>
-        <li><b>現在地</b>：見積書（ARM-T011-260622-01）発行済み。受注・施工日程は未確定</li>
+        <li><b>進行フロー</b>：見積作成（6/22）→ メール送付（6/23・有効期限7/23）→ 返答なし → <b>保留（8/17・追跡不要）</b></li>
+        <li><b>現在地</b>：<b>保留</b>。見積有効期限を経過し先方から動きが無いため、こちらから採否を追いかけない扱い（8/17 かめさん判断）。看板ではクローズゾーンの「保留」列に表示され、進行中カウント・タイムラインからは除外</li>
+        <li><b>復帰の手順</b>：先方から発注の連絡が来たら営業ゾーンへ戻す（<code>genba_progress.py status ネクサス-外壁スポット-26 見積提出済み --force</code>）。有効期限切れのため<b>再見積の要否を先に確認</b>する</li>
         <li><b>工事内容</b>：外壁アームスポットLED看板照明の交換工事（高所作業車使用）</li>
       </ul>
     </div>
@@ -149,7 +151,8 @@ th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;} th{color
   <div class="card-t">🕒 タイムライン</div>
   <!-- AUTO:WORKFLOW:TIMELINE:START -->
   <div class="timeline">
-    <div class="tl-item recent"><div class="tl-date">2026/8/10（月）</div><div class="tl-text">日次チェック：履歴ノート <code>00_履歴_ネクサス-外壁スポット-26.md</code> の新規作成を検知し、時系列を補完。<b>見積有効期限 2026/7/23 を18日経過</b>したまま返答待ち。ネクサスは <code>ネクサス-ビル漏水修理-26</code>・<code>ネクサス-漏水調査2-26</code>（いずれも施工予定）が並行しているため、<b>その打合せの際に本件の実施意向と有効期限の更新／再見積の要否をあわせて確認</b>するのが早い<!--auto_260810_timeline_hokan--></div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/8/17（月）</div><div class="tl-text"><b>保留（追跡不要）へ変更</b>。見積有効期限（2026/7/23）を経過し先方から動きが無いため、<b>こちらから採否を追いかけない</b>扱いとするかめさん判断。data.json のステータスを 見積提出済み→保留 に変更（<code>genba_progress.py status</code> 経由）。<b>この対応にあわせて「保留」ステータスを新設</b>（従来は 中止／消滅 のみで、中止＝受注可能性を捨てる意味になってしまうため）。<b>先方から発注の連絡が来たら営業ゾーンへ戻す</b>（再見積の要否を先に確認）</div></div>
+    <div class="tl-item"><div class="tl-date">2026/8/10（月）</div><div class="tl-text">日次チェック：履歴ノート <code>00_履歴_ネクサス-外壁スポット-26.md</code> の新規作成を検知し、時系列を補完。<b>見積有効期限 2026/7/23 を18日経過</b>したまま返答待ち。ネクサスは <code>ネクサス-ビル漏水修理-26</code>・<code>ネクサス-漏水調査2-26</code>（いずれも施工予定）が並行しているため、<b>その打合せの際に本件の実施意向と有効期限の更新／再見積の要否をあわせて確認</b>するのが早い<!--auto_260810_timeline_hokan--></div></div>
     <div class="tl-item"><div class="tl-date">2026/6/29（月）</div><div class="tl-text">daily-gmail-check の<b>送信突合</b>で 6/23 の見積送付メールを検知し、data.json へ案件として登録（旧案件番号 AR-26-020）</div></div>
     <div class="tl-item"><div class="tl-date">2026/6/23（火）</div><div class="tl-text"><b>見積書を力武様へメール送付</b>（件名「外壁アームスポットの見積もりです。」）。<b>有効期限 2026/7/23</b>。ファイル＝<code>書類/見_ネクサス-外壁スポット-26.pdf</code>（HTML併存）</div></div>
     <div class="tl-item"><div class="tl-date">2026/6/22（月）</div><div class="tl-text">見積書（ARM-T011-260622-01）発行。外壁アームスポットLED照明交換工事。夜間現況写真1枚を記録。<br>⚠️<b>金額の不一致</b>：本サマリーの内訳表は<b>税込¥99,220</b>（小計82,000＋諸経費10%＝税抜90,200）だが、data.json と発行PDF は<b>税込¥99,000</b>（税抜90,000）。<b>PDFが正</b>とみられるため内訳表の諸経費行を要確認<!--auto_260810_kingaku_fuicchi--></div></div>
