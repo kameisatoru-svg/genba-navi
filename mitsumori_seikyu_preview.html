@@ -1127,6 +1127,8 @@ function renderGroupBlocks(){
             <div class="middle-header" style="display:flex;align-items:center;gap:6px;padding:4px 0;">
               <span style="font-size:11px;color:#888;flex-shrink:0;">▸ 中項目</span>
               <input value="${m.name}" oninput="groupItems[${gi}].middleItems[${mi}].name=this.value;render()" placeholder="中項目名（例：給水・排水・床仕上げ）" style="flex:1;font-weight:600;background:#fff;">
+              <button class="grp-move-btn" title="上へ移動（同じ大項目内で中項目の順を入替）" onclick="middleMove(${gi},${mi},-1)" ${mi===0?'disabled':''} style="font-size:11px;padding:3px 8px;border:1px solid var(--border);background:#fff;border-radius:4px;cursor:pointer;flex-shrink:0;">▲</button>
+              <button class="grp-move-btn" title="下へ移動（同じ大項目内で中項目の順を入替）" onclick="middleMove(${gi},${mi},1)" ${mi===g.middleItems.length-1?'disabled':''} style="font-size:11px;padding:3px 8px;border:1px solid var(--border);background:#fff;border-radius:4px;cursor:pointer;flex-shrink:0;">▼</button>
               <button class="del-btn" onclick="groupDelMiddle(${gi},${mi})" title="中項目を削除">✕</button>
             </div>
             <div style="overflow-x:auto">
@@ -1222,6 +1224,17 @@ function groupMove(gi,dir){
   const ni=gi+dir;
   if(ni<0 || ni>=groupItems.length) return;
   const t=groupItems[gi]; groupItems[gi]=groupItems[ni]; groupItems[ni]=t;
+  renderGroupBlocks(); render();
+}
+// ── 中項目の並び替え（同じ大項目の中でのみ入替）──
+// ・明細（小項目）は中項目にぶら下がったまま一緒に動く
+// ・先頭で▲／末尾で▼はボタン側を disabled にしているが、直接呼ばれても安全に何もしない
+function middleMove(gi,mi,dir){
+  const g = groupItems[gi];
+  if(!g || !g.middleItems) return;
+  const ni = mi + dir;
+  if(ni < 0 || ni >= g.middleItems.length) return;
+  const t = g.middleItems[mi]; g.middleItems[mi] = g.middleItems[ni]; g.middleItems[ni] = t;
   renderGroupBlocks(); render();
 }
 function groupAddGroup(){groupItems.push({name:'新規大項目',pageBreak:false,middleItems:[],items:[{name:'',qty:1,unit:'㎡',price:0,note:''}]});renderGroupBlocks();render();}
