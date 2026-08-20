@@ -1822,15 +1822,30 @@ function checkAndPaginateGroup(){
   const allBreaks=[...new Set([...breakPoints,...autoBreakPoints])].sort((a,b)=>a-b);
   if(allBreaks.length===0)return;
 
+  // ── 「次ページへ続く」を出すかの判定（2026/8/21 かめさん指示）──
+  // 中項目が"途中で"ページをまたぐときだけ出す。中項目がそのページで完結し、
+  // 次ページが新しい中項目・新しい大項目・大項目計から始まる場合は出さない。
+  // 判定は改ページ位置 bp（＝次ページ先頭行）から上へ遡り、
+  //   先に「見出し行（＝ブロック開始）」に当たれば継続中 → 出す
+  //   先に「計の行（＝ブロック終了）」に当たれば完結  → 出さない
+  // 中項目を使わない従来モード（大項目直下に明細）でも、大項目見出し／小計で同じ判定になる。
+  const isContinuingAt=(bp)=>{
+    for(let i=bp-1;i>=0;i--){
+      const cl=allRows[i].classList;
+      if(cl.contains('middle-subtotal-row')||cl.contains('group-subtotal-row')) return false;
+      if(cl.contains('middle-section-header')||cl.contains('group-section-header')) return true;
+    }
+    return true; // 先頭ブロックの途中
+  };
+
   // ページに分割してDOMを再構築
   // まず元のdetailPageのtbodyを1ページ目分だけ残す
   const firstBreak=allBreaks[0];
 
   // 1ページ目の末尾に「次ページへ続く」
-  // ★ 同じ工事項目がページを跨いで継続する場合のみ表示（既定）。
-  //   次ページ先頭が新しい大項目（group-section-header）＝当該工事はこのページで
-  //   完結しているので「次ページへ続く」は省く。
-  if(!isGrpHeader(firstBreak)){
+  // ★ 中項目が途中でページを跨ぐ場合のみ表示（かめさん指示 2026/8/21）。
+  //   中項目がこのページで完結し、次ページが新しい中項目／大項目から始まる場合は省く。
+  if(isContinuingAt(firstBreak)){
     const noticeRow=document.createElement('tr');
     noticeRow.className='next-page-notice';
     noticeRow.innerHTML='<td colspan="5" style="text-align:center;padding:5px 8px;font-size:11px;color:#666;background:#f0f2f4;border-top:1px dashed #aaa;font-style:italic;">―　次ページへ続く　―</td>';
@@ -1878,8 +1893,8 @@ function checkAndPaginateGroup(){
     });
 
     // 最終ページ以外は「次ページへ続く」
-    // ★ 次ページ先頭が新しい大項目なら当該工事は完結しているので省略（既定）。
-    if(si<segments.length-1 && !isGrpHeader(seg.end)){
+    // ★ 中項目が途中で跨ぐ場合のみ（かめさん指示 2026/8/21）。判定は isContinuingAt に集約。
+    if(si<segments.length-1 && isContinuingAt(seg.end)){
       const nr=document.createElement('tr');
       nr.className='next-page-notice';
       nr.innerHTML='<td colspan="5" style="text-align:center;padding:5px 8px;font-size:11px;color:#666;background:#f0f2f4;border-top:1px dashed #aaa;font-style:italic;">―　次ページへ続く　―</td>';
