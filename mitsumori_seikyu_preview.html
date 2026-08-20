@@ -1129,6 +1129,7 @@ function renderGroupBlocks(){
               <input value="${m.name}" oninput="groupItems[${gi}].middleItems[${mi}].name=this.value;render()" placeholder="中項目名（例：給水・排水・床仕上げ）" style="flex:1;font-weight:600;background:#fff;">
               <button class="grp-move-btn" title="上へ移動（同じ大項目内で中項目の順を入替）" onclick="middleMove(${gi},${mi},-1)" ${mi===0?'disabled':''} style="font-size:11px;padding:3px 8px;border:1px solid var(--border);background:#fff;border-radius:4px;cursor:pointer;flex-shrink:0;">▲</button>
               <button class="grp-move-btn" title="下へ移動（同じ大項目内で中項目の順を入替）" onclick="middleMove(${gi},${mi},1)" ${mi===g.middleItems.length-1?'disabled':''} style="font-size:11px;padding:3px 8px;border:1px solid var(--border);background:#fff;border-radius:4px;cursor:pointer;flex-shrink:0;">▼</button>
+              <button class="pb-btn${m.pageBreak?' on':''}" title="${mi===0?'先頭の中項目には設定できません。大項目側の「改頁」を使ってください':'この中項目の前で改ページ'}" onclick="middleTogglePageBreak(${gi},${mi})" ${mi===0?'disabled':''} style="flex-shrink:0;">改頁</button>
               <button class="del-btn" onclick="groupDelMiddle(${gi},${mi})" title="中項目を削除">✕</button>
             </div>
             <div style="overflow-x:auto">
@@ -1237,6 +1238,17 @@ function middleMove(gi,mi,dir){
   const t = g.middleItems[mi]; g.middleItems[mi] = g.middleItems[ni]; g.middleItems[ni] = t;
   renderGroupBlocks(); render();
 }
+// ── 中項目の手動改ページ ──
+// ・工事明細ページで「この中項目の見出しの前」から次ページに送る（大項目の改頁と同じ pb-row-mark 方式）
+// ・先頭の中項目（mi===0）は対象外。そこで切ると大項目見出しだけが前ページ末尾に取り残されるため、
+//   大項目側の「改頁」を使ってもらう（ボタンも disabled にしてある）
+function middleTogglePageBreak(gi,mi){
+  const g = groupItems[gi];
+  if(!g || !g.middleItems || !g.middleItems[mi]) return;
+  if(mi === 0) return;
+  g.middleItems[mi].pageBreak = !g.middleItems[mi].pageBreak;
+  renderGroupBlocks(); render();
+}
 function groupAddGroup(){groupItems.push({name:'新規大項目',pageBreak:false,middleItems:[],items:[{name:'',qty:1,unit:'㎡',price:0,note:''}]});renderGroupBlocks();render();}
 function groupDelGroup(gi){groupItems.splice(gi,1);renderGroupBlocks();render();}
 function groupAddItem(gi){groupItems[gi].items.push({name:'',qty:'',unit:'',price:'',note:''});renderGroupBlocks();render();}
@@ -1247,7 +1259,7 @@ function groupDelItem(gi,ii){groupItems[gi].items.splice(ii,1);renderGroupBlocks
 // middleItems が1件以上のときは items は使わず middleItems[].items を使う
 function groupAddMiddle(gi){
   if(!groupItems[gi].middleItems) groupItems[gi].middleItems=[];
-  groupItems[gi].middleItems.push({name:'',items:[{name:'',qty:'',unit:'',price:'',note:''}]});
+  groupItems[gi].middleItems.push({name:'',pageBreak:false,items:[{name:'',qty:'',unit:'',price:'',note:''}]});
   renderGroupBlocks();render();
 }
 function groupDelMiddle(gi,mi){
@@ -1578,8 +1590,9 @@ function render(){
         // 中項目モード：中項目見出し→明細→中項目計
         g.middleItems.forEach((m,mi)=>{
           const mSub = calcMiddleTotal(m);
-          // 中項目見出し行（グレー陰影）
-          allRows+=`<tr class="middle-section-header"><td colspan="5" style="background:#d8d8d8;color:#222;font-weight:700;font-size:11px;padding:4px 8px 4px 16px;text-align:left;">▸ ${prefixedMiddleName(gi,mi,m)}</td></tr>`;
+          // 中項目見出し行（グレー陰影）。改頁フラグはクラスで付与（mi===0 は大項目側の改頁に任せる）
+          const mPbClass = (mi>0 && m.pageBreak) ? 'middle-section-header pb-row-mark' : 'middle-section-header';
+          allRows+=`<tr class="${mPbClass}"><td colspan="5" style="background:#d8d8d8;color:#222;font-weight:700;font-size:11px;padding:4px 8px 4px 16px;text-align:left;">▸ ${prefixedMiddleName(gi,mi,m)}</td></tr>`;
           // 明細行
           m.items.forEach(it=>{
             const amt=(it.qty&&it.price)?fmtN(qRound(it.qty)*parseFloat(it.price)):'';
