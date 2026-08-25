@@ -64,6 +64,26 @@ def main() -> int:
     except OSError:
         fp = None
 
+    # 1) まず素の JSON として読めるかを見る。
+    #    末尾破損はここで落ちる。--check 自体も読めずに落ちるので、
+    #    先にこちらで捕まえないと「黙って exit 0」になってしまう。
+    try:
+        with open(DATA, "r", encoding="utf-8") as f:
+            json.load(f)
+    except Exception as e:
+        emit(chr(10).join([
+            "data.json が JSON として読めません（破損の可能性）。",
+            "",
+            "  %s" % e,
+            "",
+            "直前の書き込みで壊れた可能性が高いです。手で編集せず、退避から復旧してください。",
+            "  退避コピー: mcp/_backups/ ",
+            "  リポジトリ外の退避: C:/Users/user/artrays_backups/",
+            "  再検証:     python mcp/artrays_data_server.py --check",
+        ]))
+        return 2
+
+    # 2) 読めたら、意味的な検証を artrays_data_server に委譲する
     try:
         proc = subprocess.run(
             [sys.executable, str(REPO / "mcp" / "artrays_data_server.py"), "--check"],
@@ -72,8 +92,10 @@ def main() -> int:
         )
         report = json.loads(proc.stdout.decode("utf-8", errors="replace") or "{}")
     except Exception as e:
-        emit("data.json の検証を実行できませんでした: %s" % e)
-        return 0  # 検証できないことを理由に作業を止めない
+        # JSON として読めることは 1) で確認済みなので、ここは検証器側の都合。
+        # 作業は止めないが、黙らせない。
+        emit("data.json は読めましたが、検証器を実行できませんでした: %s" % e)
+        return 0
 
     errors = report.get("エラー") or []
     warns = report.get("警告") or []
