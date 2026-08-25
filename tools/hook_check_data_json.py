@@ -27,6 +27,15 @@ DATA = REPO / "data.json"
 STATE = REPO / ".claude" / ".data_json_state"
 
 
+
+def emit(text: str) -> None:
+    """stderr へUTF-8バイトで直接書く（cp932 で落ちないように）。"""
+    try:
+        sys.stderr.buffer.write((text + chr(10)).encode("utf-8", errors="replace"))
+        sys.stderr.buffer.flush()
+    except Exception:
+        pass
+
 def read_hook_input() -> dict:
     """stdin をUTF-8固定で読む（cp932 だと日本語が壊れるため）。"""
     try:
@@ -36,7 +45,7 @@ def read_hook_input() -> dict:
         return {}
 
 
-def fingerprint() -> str:
+def fingeremit() -> str:
     st = DATA.stat()
     return "%d:%d" % (st.st_mtime_ns, st.st_size)
 
@@ -63,7 +72,7 @@ def main() -> int:
         )
         report = json.loads(proc.stdout.decode("utf-8", errors="replace") or "{}")
     except Exception as e:
-        print("data.json の検証を実行できませんでした: %s" % e, file=sys.stderr)
+        print("data.json の検証を実行できませんでした: %s" % e)
         return 0  # 検証できないことを理由に作業を止めない
 
     errors = report.get("エラー") or []
@@ -80,7 +89,7 @@ def main() -> int:
             "  退避コピー: mcp/_backups/ ",
             "  再検証:     python mcp/artrays_data_server.py --check",
         ]
-        print("\n".join(lines), file=sys.stderr)
+        emit("\n".join(lines))
         return 2  # exit 2 = stderr を Claude に渡す
 
     # 正常。指紋を記録して次回は素通りさせる
@@ -92,7 +101,7 @@ def main() -> int:
         pass
 
     if warns:
-        print("data.json OK（既知の警告 %d件）" % len(warns), file=sys.stderr)
+        emit("data.json OK（既知の警告 %d件）" % len(warns))
     return 0
 
 
@@ -100,5 +109,5 @@ if __name__ == "__main__":
     try:
         sys.exit(main())
     except Exception as e:  # フックが原因でセッションを止めない
-        print("hook_check_data_json 内部エラー: %s" % e, file=sys.stderr)
+        emit("hook_check_data_json 内部エラー: %s" % e)
         sys.exit(0)

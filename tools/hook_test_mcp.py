@@ -31,6 +31,15 @@ SUITES = {
 }
 
 
+
+def emit(text: str) -> None:
+    """stderr へUTF-8バイトで直接書く（cp932 で落ちないように）。"""
+    try:
+        sys.stderr.buffer.write((text + chr(10)).encode("utf-8", errors="replace"))
+        sys.stderr.buffer.flush()
+    except Exception:
+        pass
+
 def read_hook_input() -> dict:
     try:
         raw = sys.stdin.buffer.read()
@@ -77,7 +86,7 @@ def main() -> int:
                 env={**os.environ, "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"},
             )
         except Exception as e:
-            print("%s を実行できませんでした: %s" % (suite, e), file=sys.stderr)
+            emit("%s を実行できませんでした: %s" % (suite, e))
             continue
         if proc.returncode != 0:
             tail = proc.stderr.decode("utf-8", errors="replace").strip().splitlines()
@@ -90,10 +99,10 @@ def main() -> int:
             out += ["    " + t for t in tail]
             out.append("")
         out.append("mcp/ を変更したので自動でテストを回しました。先に直してください。")
-        print("\n".join(out), file=sys.stderr)
+        emit("\n".join(out))
         return 2
 
-    print("mcp テスト通過: %s" % ", ".join(targets), file=sys.stderr)
+    emit("mcp テスト通過: %s" % ", ".join(targets))
     return 0
 
 
@@ -101,5 +110,5 @@ if __name__ == "__main__":
     try:
         sys.exit(main())
     except Exception as e:
-        print("hook_test_mcp 内部エラー: %s" % e, file=sys.stderr)
+        emit("hook_test_mcp 内部エラー: %s" % e)
         sys.exit(0)
