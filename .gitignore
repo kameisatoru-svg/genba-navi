@@ -28,3 +28,11 @@ _tmp_lockarchive/
 
 # hookify のローカルルール（GitHub Pages で公開する必要が無いローカル設定）
 .claude/*.local.md
+
+# data.json の破損コピー・日付付きバックアップ（リポジトリ外 artrays_backups/ へ退避する運用）
+# ※ 公開サイトなので、ここに置いたままだと GitHub Pages から誰でもDLできてしまう
+data.json.CORRUPT*
+data.json.backup_*
+data.json.write_test
+data.backup_*
+data.bak_*
