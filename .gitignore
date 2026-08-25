@@ -25,3 +25,6 @@ data.json.tmp_*
 
 # auto_push.bat が退避した stale な index.lock の置き場
 _tmp_lockarchive/
+
+# hookify のローカルルール（GitHub Pages で公開する必要が無いローカル設定）
+.claude/*.local.md
