@@ -112,6 +112,11 @@ def main() -> int:
     tpl = js_to_py(extract_literal(src, "CHECK_TEMPLATE"))
 
     # CHECK_TEMPLATE['A'] = CHECK_TEMPLATE['B'] のエイリアスを反映
+    order = []
+    mo = re.search(r"const\s+STATUS_ORDER\s*=\s*\[(.*?)\]", src, re.S)
+    if mo:
+        order = re.findall(r"['\"]([^'\"]+)['\"]", mo.group(1))
+
     aliases = re.findall(
         r"CHECK_TEMPLATE\[\s*['\"]([^'\"]+)['\"]\s*\]\s*=\s*"
         r"CHECK_TEMPLATE\[\s*['\"]([^'\"]+)['\"]\s*\]", src)
@@ -136,16 +141,18 @@ def main() -> int:
     missing_status = {}
     orphan_keys = {}
     used_keys = set()
+    with_check_keys = set()
     no_check = 0
 
     for a in ankens:
         key = a.get("案件キー") or "(キー無し)"
         status = a.get("ステータス")
         chk = a.get("チェック")
-        if not isinstance(chk, dict):
+        if not isinstance(chk, dict) or not chk:
             no_check += 1
         else:
             used_keys |= set(chk)
+            with_check_keys.add(key)
         if status not in tpl:
             missing_status.setdefault(status, []).append(key)
             continue
@@ -165,16 +172,42 @@ def main() -> int:
 
     ng = False
 
-    out("[1] テンプレートに定義が無いステータス")
-    if missing_status:
+    # パイプライン(STATUS_ORDER)に含まれるかで重みが変わる。
+    #   含まれる  = 進行中なのにチェックリストが無い -> 要対応
+    #   含まれない = 終端・停止状態 -> 定義するかは設計判断
+    in_pipeline = {st: ks for st, ks in missing_status.items() if st in order}
+    off_pipeline = {st: ks for st, ks in missing_status.items() if st not in order}
+
+    out("[1-A] 要対応: 進行中(STATUS_ORDER内)なのにテンプレートが無い")
+    if in_pipeline:
         ng = True
-        for st, keys in sorted(missing_status.items(), key=lambda x: -len(x[1])):
+        for st, keys in sorted(in_pipeline.items(), key=lambda x: -len(x[1])):
             out("  ✗ 「%s」 … %d件" % (st, len(keys)))
             for k in keys[:5]:
                 out("        %s" % k)
-            if len(keys) > 5:
-                out("        ... 他 %d件" % (len(keys) - 5))
-        out("    → この案件は workflow.html でチェックリストを描画できない")
+        out("    → 進行中の案件が手順を追えない。テンプレートを定義すること")
+    else:
+        out("  なし")
+    out()
+
+    out("[1-B] 設計判断: 終端・停止ステータスでテンプレートが無い")
+    if off_pipeline:
+        for st, keys in sorted(off_pipeline.items(), key=lambda x: -len(x[1])):
+            has = sum(1 for k in keys if k in with_check_keys)
+            out("  ・「%s」 … %d件（うちチェック保持 %d件）" % (st, len(keys), has))
+            for k in keys[:3]:
+                out("        %s" % k)
+            if len(keys) > 3:
+                out("        ... 他 %d件" % (len(keys) - 3))
+        out("")
+        out("    現在の挙動（壊れてはいない）:")
+        out("      - dashboard: 「ワークフローを開く」ボタンが出ない・進捗バーも出ない")
+        out("      - workflow.html を直接開くと『テンプレート未対応』と表示される")
+        out("    定義した場合（stages 空 = 終端テンプレート）:")
+        out("      - ボタンは出るが、開くと『Phase 2 で実装予定』の表示になる")
+        out("      - STATUS_ORDER に無いステータスは持ち越し項目も出ない")
+        out("        （getCarryOverItems は currentIdx <= 0 で [] を返す）")
+        out("    → 中身のあるチェックリストを出したいなら、STATUS_ORDER への追加もセットで要る")
     else:
         out("  なし")
     out()
@@ -204,7 +237,39 @@ def main() -> int:
 
     out("[4] チェック未作成の案件: %d件" % no_check)
     out()
-    out("判定: %s" % ("要対応（[1][2] を先に）" if ng else "整合している"))
+
+    out("[5] 似たステータス名の併存（統合できないか）")
+    pairs = []
+    names = sorted(set(list(tpl) + [a.get("ステータス") for a in ankens if a.get("ステータス")]))
+    for i, x in enumerate(names):
+        for y in names[i + 1:]:
+            if x and y and (x in y or y in x):
+                cx = sum(1 for a in ankens if a.get("ステータス") == x)
+                cy = sum(1 for a in ankens if a.get("ステータス") == y)
+                pairs.append((x, cx, x in tpl, y, cy, y in tpl))
+    if pairs:
+        for x, cx, tx, y, cy, ty in pairs:
+            out("  ・「%s」%d件(テンプレ%s) と 「%s」%d件(テンプレ%s)"
+                % (x, cx, "有" if tx else "無", y, cy, "有" if ty else "無"))
+        out("    → 片方だけテンプレートがあるなら、名前が割れている可能性が高い")
+    else:
+        out("  なし")
+    out()
+
+    out("[6] 案件配列と中止案件配列の重複")
+    dup = ({a.get("案件キー") for a in ankens}
+           & {a.get("案件キー") for a in (data.get("中止案件") or [])})
+    if dup:
+        ng = True
+        out("  ✗ 同じ案件が両方に入っている … %d件" % len(dup))
+        for k in sorted(dup):
+            out("        %s" % k)
+        out("    → 二重計上になる。どちらを正とするか決めて片方から外すこと")
+    else:
+        out("  なし")
+    out()
+
+    out("判定: %s" % ("要対応あり" if ng else "要対応なし（[1-B][5] は設計判断）"))
     return 1 if ng else 0
 
 
