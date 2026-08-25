@@ -36,3 +36,6 @@ data.json.backup_*
 data.json.write_test
 data.backup_*
 data.bak_*
+
+# PostToolUse フックが data.json の変化検知に使う指紋ファイル
+.claude/.data_json_state
