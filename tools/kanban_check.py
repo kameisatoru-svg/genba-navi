@@ -243,9 +243,15 @@ def main() -> int:
     names = sorted(set(list(tpl) + [a.get("ステータス") for a in ankens if a.get("ステータス")]))
     for i, x in enumerate(names):
         for y in names[i + 1:]:
-            if x and y and (x in y or y in x):
-                cx = sum(1 for a in ankens if a.get("ステータス") == x)
-                cy = sum(1 for a in ankens if a.get("ステータス") == y)
+            if not (x and y and (x in y or y in x)):
+                continue
+            cx = sum(1 for a in ankens if a.get("ステータス") == x)
+            cy = sum(1 for a in ankens if a.get("ステータス") == y)
+            # 実際に両方が使われている場合か、使われている側にテンプレが無い場合だけ
+            # 問題とみなす。片方が0件でエイリアス解決済みなら揺れは解消している。
+            both_used = cx > 0 and cy > 0
+            used_without_tpl = (cx > 0 and x not in tpl) or (cy > 0 and y not in tpl)
+            if both_used or used_without_tpl:
                 pairs.append((x, cx, x in tpl, y, cy, y in tpl))
     if pairs:
         for x, cx, tx, y, cy, ty in pairs:
