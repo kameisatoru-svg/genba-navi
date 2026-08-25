@@ -45,7 +45,7 @@ def read_hook_input() -> dict:
         return {}
 
 
-def fingeremit() -> str:
+def fingerprint() -> str:
     st = DATA.stat()
     return "%d:%d" % (st.st_mtime_ns, st.st_size)
 
@@ -72,7 +72,7 @@ def main() -> int:
         )
         report = json.loads(proc.stdout.decode("utf-8", errors="replace") or "{}")
     except Exception as e:
-        print("data.json の検証を実行できませんでした: %s" % e)
+        emit("data.json の検証を実行できませんでした: %s" % e)
         return 0  # 検証できないことを理由に作業を止めない
 
     errors = report.get("エラー") or []
