@@ -292,9 +292,6 @@ def main() -> int:
     if known:
         for st in sorted(used - known):
             issues.append("実データで使用中だが KNOWN_STATUS に無い: 「%s」（--check が警告を出し続ける）" % st)
-        for st in sorted(used - set(tpl)):
-            if st not in known:
-                continue
         for st in sorted(set(tpl) - known):
             issues.append("テンプレートにあるが KNOWN_STATUS に無い: 「%s」" % st)
     else:

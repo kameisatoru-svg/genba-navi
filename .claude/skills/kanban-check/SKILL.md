@@ -70,6 +70,16 @@ PYTHONUTF8=1 python tools/kanban_check.py
 どちらを正とするか決めて片方から外す。**data.json は直接編集しない**
 （`artrays-data` MCP か `genba_progress.py` 経由）。
 
+### [7] ステータス定義の3箇所の食い違い ← 本当の異常
+ステータスの定義は **3箇所**に散っている:
+
+1. `check_template.js` の `CHECK_TEMPLATE`（＋`STATUS_ORDER`）
+2. `mcp/artrays_data_server.py` の `KNOWN_STATUS`
+3. `data.json` の実データ
+
+どれかに足し忘れると、`--check` が警告を出し続けて**本物の警告が埋もれる**。
+ステータスを増やすときは3箇所すべてに入れること。
+
 ## 走らせるタイミング
 
 - `check_template.js` を編集した直後
