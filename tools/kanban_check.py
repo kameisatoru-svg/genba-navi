@@ -275,6 +275,39 @@ def main() -> int:
         out("  なし")
     out()
 
+    out("[7] ステータス定義の3箇所の食い違い")
+    # ステータスの定義は3箇所に散っている:
+    #   check_template.js の CHECK_TEMPLATE / STATUS_ORDER
+    #   mcp/artrays_data_server.py の KNOWN_STATUS
+    #   data.json の実データ
+    known = set()
+    ads = REPO / "mcp" / "artrays_data_server.py"
+    if ads.exists():
+        msrc = io.open(ads, encoding="utf-8").read()
+        mk = re.search(r"KNOWN_STATUS\s*=\s*\[(.*?)\]", msrc, re.S)
+        if mk:
+            known = set(re.findall(r'"([^"]+)"', mk.group(1)))
+    used = {a.get("ステータス") for a in ankens if a.get("ステータス")}
+    issues = []
+    if known:
+        for st in sorted(used - known):
+            issues.append("実データで使用中だが KNOWN_STATUS に無い: 「%s」（--check が警告を出し続ける）" % st)
+        for st in sorted(used - set(tpl)):
+            if st not in known:
+                continue
+        for st in sorted(set(tpl) - known):
+            issues.append("テンプレートにあるが KNOWN_STATUS に無い: 「%s」" % st)
+    else:
+        issues.append("KNOWN_STATUS を読み取れなかった（artrays_data_server.py の書式変更？）")
+    if issues:
+        ng = True
+        for i in issues:
+            out("  ✗ " + i)
+        out("    → 3箇所（CHECK_TEMPLATE / KNOWN_STATUS / 実データ）を揃えること")
+    else:
+        out("  なし（CHECK_TEMPLATE・KNOWN_STATUS・実データが揃っている）")
+    out()
+
     out("判定: %s" % ("要対応あり" if ng else "要対応なし（[1-B][5] は設計判断）"))
     return 1 if ng else 0
 
