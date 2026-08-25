@@ -98,7 +98,8 @@ def js_to_py(blob: str):
     s = "".join(cleaned)
 
     # 'xxx' -> "xxx"（内部に " が無い前提。この定義では成立している）
-    s = re.sub(r"'([^'\]*)'", lambda m: json.dumps(m.group(1), ensure_ascii=False), s)
+    _sq = "'([^'" + chr(92) + chr(92) + "]*)'"
+    s = re.sub(_sq, lambda m: json.dumps(m.group(1), ensure_ascii=False), s)
     # 裸のキー -> "キー"
     s = re.sub(r"([{,]\s*)([A-Za-z_$][\w$]*)(\s*:)", r'\1"\2"\3', s)
     # 末尾カンマ
