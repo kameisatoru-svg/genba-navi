@@ -150,7 +150,9 @@ def main() -> int:
             missing_status.setdefault(status, []).append(key)
             continue
         if isinstance(chk, dict):
-            extra = set(chk) - keys_by_status[status]
+            # 前のステータスで付けたチェックが残るのは正常なので、
+            # 「どのステータスのテンプレートにも無い」ものだけを異常とみなす。
+            extra = set(chk) - all_template_keys
             if extra:
                 orphan_keys[key] = (status, sorted(extra))
 
@@ -177,15 +179,16 @@ def main() -> int:
         out("  なし")
     out()
 
-    out("[2] ステータスに存在しない項目IDを持つ案件（保存されているが表示されない）")
+    out("[2] どのステータスのテンプレートにも無い項目IDを持つ案件")
     if orphan_keys:
         ng = True
         for k, (st, extra) in list(orphan_keys.items())[:15]:
             out("  ✗ %s（%s）: %s" % (k, st, ", ".join(extra[:6])))
         if len(orphan_keys) > 15:
             out("  ... 他 %d件" % (len(orphan_keys) - 15))
+        out("    → check_template.js から消えた項目が data 側に残っている。永久に表示されない")
     else:
-        out("  なし")
+        out("  なし（前ステータスからの持ち越しは正常として除外している）")
     out()
 
     out("[3] テンプレートにあるが一度も使われていない項目ID")
