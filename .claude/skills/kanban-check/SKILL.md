@@ -77,4 +77,4 @@ PYTHONUTF8=1 python tools/kanban_check.py
 - 「ワークフローに何も出ない」と言われたとき
 - 週次点検
 
-exit 1 = [1-A] か [6] に該当あり。[1-B] [5] だけなら exit 0。
+exit 1 = [1-A] [2] [6] のいずれかに該当あり。[1-B] [3] [5] だけなら exit 0。
