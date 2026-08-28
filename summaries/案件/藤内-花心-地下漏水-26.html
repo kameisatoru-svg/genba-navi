@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>藤内-花心-地下漏水-26 案件サマリー</title>
+<style>
+:root{--bg:#1a1a2e;--card:#26264a;--card2:#2e2e58;--txt:#e8e8f2;--sub:#9a9ac0;--acc1:#22c1c3;--acc2:#fdbb2d;--ok:#4ade80;--warn:#facc15;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:clamp(13px,1.6vw,15px);line-height:1.6;padding:16px;}
+.header{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-radius:14px;padding:18px 20px;margin-bottom:16px;color:#10102a;}
+.header h1{font-size:clamp(17px,2.6vw,24px);font-weight:800;}
+.header .sub{font-size:clamp(12px,1.6vw,14px);opacity:.85;margin-top:2px;}
+.badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.badge{background:rgba(16,16,42,.85);color:#fff;border-radius:14px;padding:3px 12px;font-size:12px;font-weight:700;}
+.workflow-link{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;background:rgba(16,16,42,.55);border:1px solid rgba(16,16,42,.7);border-radius:16px;color:#fff;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;}
+.workflow-link:hover{background:rgba(16,16,42,.8);}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.kpi .v{font-size:clamp(15px,2.2vw,20px);font-weight:800;color:var(--acc1);}
+.kpi .l{font-size:11px;color:var(--sub);margin-top:2px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;}
+.card-t{font-weight:800;font-size:clamp(13px,1.8vw,15px);margin-bottom:10px;color:var(--acc2);}
+ul{padding-left:1.3em;} li{margin-bottom:4px;}
+.doc{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:10px;padding:9px 12px;margin-bottom:7px;text-decoration:none;color:inherit;transition:background .15s,transform .15s;}
+a.doc:hover{background:#34345a;transform:translateX(3px);}
+.doc-icon{font-size:18px;} .doc-info{flex:1;min-width:0;}
+.doc-name{font-weight:700;font-size:13px;word-break:break-all;} .doc-meta-s{font-size:11px;color:var(--sub);}
+.doc-st{font-size:11px;border-radius:10px;padding:2px 9px;font-weight:700;white-space:nowrap;}
+.s-ok{background:#14532d;color:var(--ok);} .s-wip{background:#56450c;color:var(--warn);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 8px;border-bottom:1px solid #3a3a66;text-align:left;} th{color:var(--sub);font-weight:600;}
+.timeline .tl-item{display:flex;gap:10px;padding:6px 0;border-left:2px solid #3a3a66;padding-left:12px;margin-left:4px;position:relative;}
+.timeline .tl-item::before{content:"";position:absolute;left:-5px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--sub);}
+.timeline .tl-item.recent::before{background:var(--ok);}
+.tl-date{color:var(--sub);font-size:12px;white-space:nowrap;min-width:90px;} .tl-text{font-size:13px;}
+.footer{text-align:center;color:var(--sub);font-size:11px;margin-top:18px;}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:400px){.kpi-row{grid-template-columns:1fr;}}
+@media print{body{background:#fff;color:#000;}.card,.kpi{background:#f4f4f8;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>花心跡（現・質屋） 地下漏水 原因調査</h1>
+  <div class="sub">藤内-花心-地下漏水-26 ｜ 大分市都町「花心」跡（現・質屋）</div>
+  <div class="badges">
+    <!-- AUTO:JSON:STATUS_BADGES -->
+    <span class="badge">💬 相談（2026/8/28 採番）</span>
+    <span class="badge">🧑 顧客＝藤内さん（<b>取引先マスター未登録・要登録</b>）</span>
+    <span class="badge">🔍 まず<b>水圧調査</b>（5年前と同じ方法）</span>
+    <span class="badge">🚫 <b>9/20 予定の斫りは先送り</b></span>
+    <span class="badge">🚰 調査業者＝すみださん（水道・<b>未登録</b>）</span>
+    <span class="badge">💴 調査費用は<b>藤内さん（テナント側）負担</b>の意向</span>
+    <span class="badge">📐 当時の排水図面は<b>存在しない</b>（保管は H29 以降のみ）</span>
+    <!-- /AUTO:JSON:STATUS_BADGES -->
+    <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E8%97%A4%E5%86%85-%E8%8A%B1%E5%BF%83-%E5%9C%B0%E4%B8%8B%E6%BC%8F%E6%B0%B4-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
+  </div>
+  <!-- AUTO:JSON:LAST_UPDATED -->
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-08-28 17:32 ｜ サマリー初回作成: 2026-08-28 18:0x（LIGHT反映・新規採番のためサマリー未作成だったので生成。<b>8/27 初回相談＋8/28 の通話2件（藤内さん 14:59／水道業者すみださん 16:42）</b>を反映＝<b>当時の図面は存在しないことが確定</b>／<b>9/20 予定の斫りは先送りし先に水圧調査</b>／<b>同日中に水道業者へ依頼まで完了</b>）</div>
+  <!-- /AUTO:JSON:LAST_UPDATED -->
+</div>
+
+<!-- AUTO:JSON:KPI_ROW -->
+<div class="kpi-row">
+  <div class="kpi"><div class="v">相談</div><div class="l">ステータス（2026/8/28 採番）</div></div>
+  <div class="kpi"><div class="v">水圧調査</div><div class="l">来週の早い時期・<b>朝一</b>（店舗は昼から営業）／鍵を借りて入る</div></div>
+  <div class="kpi"><div class="v">〜8/31(月)</div><div class="l">すみださんが訪問日を確定してかめさんへ連絡</div></div>
+  <div class="kpi"><div class="v">要アクション 3件</div><div class="l">①調査日の受領→藤内さんへ連絡・鍵と立会いの段取り ②藤内さんの取引先登録 ③すみださんの取引先登録</div></div>
+</div>
+<!-- /AUTO:JSON:KPI_ROW -->
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="card-t">📅 進行状況・フロー</div>
+      <ul>
+        <li><b>進行フロー</b>：初回相談（8/27 17:01）→ 案件採番（8/28）→ <b>方針決定＝水圧調査を先行</b>（8/28 14:59）→ <b>水道業者へ正式依頼済み</b>（8/28 16:42）→ <b>調査日の連絡待ち（〜8/31 ごろ）</b> → 調査実施 → 原因特定 → 修繕工事の想定</li>
+        <li><b>現況</b>：漏水箇所は<b>食洗機の下（地下）</b>。<b>真ん中・右・端の3か所からポタポタ落ちている</b>（朝バケツを空にして夜には一杯になる量）。<b>給水の大元を止めても漏れ、食洗機を動かしていない日も漏れる。雨の日に多いが降っていない日も漏れる</b>。</li>
+        <li><b>既往</b>：<b>5年前の水圧調査では圧が下がらず「給水漏れではない」と判定</b>し不動産会社へ報告済み。そのとき<b>排水口の詰まり（髪の毛状）</b>が見つかり別業者が対応。グリストラップ周りは藤内さん側で改修済みだが状況は変わらず。</li>
+        <li><b>当時の床構造</b>（通話で共有）：<b>厨房周りにブロックを積み、防水シートで防水層を作り、軽量骨材を敷き詰め、その上にコンクリートを打設</b>。<b>配管はコンクリート内</b>のため目視できない。</li>
+        <li><b>斫りを見送った理由</b>：①斫っても原因が分からない可能性が高い ②復旧時に継ぎ手から新たに漏れるリスクがある。</li>
+        <li><b>利害の構図</b>：ビルオーナー側（メディアエステート）は<b>食洗機の給水が原因と決めつけている</b>。藤内さんは「当方が原因ではない」ことを客観的に示したい意向＝<b>係争含み</b>。</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-t">👥 関係者</div>
+      <table>
+        <tr><th>役割</th><th>名称</th><th>備考</th></tr>
+        <tr><td>顧客・相談者</td><td>藤内さん</td><td><b>取引先マスター未登録</b>。正式名称・連絡先・法人格が未取得＝<b>要登録</b></td></tr>
+        <tr><td>現場</td><td>大分市都町「花心」跡（現・質屋）</td><td>当社が<b>約10年前</b>に内装施工（年次は記憶ベース・要現物確認）</td></tr>
+        <tr><td>ビルオーナー側</td><td>メディアエステート ニイダさん</td><td>不動産会社。連絡先未取得。逐語の「メリアエステート／メリアステート」は聞き取り崩れ</td></tr>
+        <tr><td>調査業者</td><td>すみださん（水道）</td><td><b>nickname_map・取引先マスターとも未登録</b>＝要登録。<code>01_振り分け保留.md</code> に追記提案あり</td></tr>
+        <tr><td>元請・施工</td><td>株式会社アート・レイズ</td><td>原因調査の取りまとめ。特定後に修繕工事の想定</td></tr>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card-t">📂 主要書類</div>
+      <!-- AUTO:FILES:MAIN_DOCS -->
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📞</div><div class="doc-info"><div class="doc-name">通話記録/20260828_藤内さん_145950_transcript.md</div><div class="doc-meta-s">2026/8/28 14:59 藤内さん：図面は存在しないことを報告。<b>斫りを先送りし水圧調査を先行</b>することで合意。調査費用は藤内さん負担の意向</div></div><div class="doc-st s-ok">文字起こし済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📞</div><div class="doc-info"><div class="doc-name">通話記録/20260828_すみだくん_164239_transcript.md</div><div class="doc-meta-s">2026/8/28 16:42 水道業者すみださん：<b>水圧調査を正式依頼</b>（5年前と同じ方法）。所見＝「営業していない日も漏れるなら給水より排水（汚水）が怪しい」</div></div><div class="doc-st s-ok">文字起こし済</div></a>
+      <a class="doc" href="" target="_blank"><div class="doc-icon">📞</div><div class="doc-info"><div class="doc-name">通話記録/20260827_藤内_170142_transcript.md</div><div class="doc-meta-s">2026/8/27 17:01 藤内さん（実尺6分6秒・幻覚ガード検査済み／申告尺と乖離なし）：初回相談。図面探索と現地確認の2点を依頼</div></div><div class="doc-st s-ok">文字起こし済</div></a>
+      <div class="doc-meta-s" style="margin-top:4px;">原音 m4a 3本を同フォルダに保管。※ 見積書・請求書はいずれも未発行。</div>
+      <!-- /AUTO:FILES:MAIN_DOCS -->
+      <div class="doc-meta-s" style="margin-top:4px;">※ Driveリンクは同期後に付与。</div>
+    </div>
+    <div class="card">
+      <div class="card-t">📷 写真・現調記録</div>
+      <ul>
+        <li>なし（<code>写真/</code> は空。現地確認は未実施＝<b>水圧調査の立会い時に撮影する</b>）</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO:CALL_DECISIONS -->
+<div class="card">
+  <div class="card-t">📞 通話記録から抽出した重要決定事項</div>
+  <ul>
+    <li>2026/08/28 14:59 藤内さん 通話【決定】<b>当時の排水図面は存在しない</b>。当社の保管は<b>平成29年（2017年）以降</b>のみで、約10年前の花心施工分は残っていない＝<b>図面待ちはしない</b><!--cd_260828_fujiuchi_zumen_nashi--></li>
+    <li>2026/08/28 14:59 藤内さん 通話【決定】<b>予定されていた斫り（厨房土間・9/20 段取り）は先送りし、先に水圧調査を実施</b>することで合意。理由＝①斫っても原因が分からない可能性が高い ②復旧時に継ぎ手から新たに漏れるリスクがある<!--cd_260828_hatsuri_okuri--></li>
+    <li>2026/08/28 14:59 藤内さん 通話【決定】<b>調査費用は藤内さん（テナント側）が負担する意向</b>。あわせて当時の床構造を共有＝<b>厨房周りにブロックを積み、防水シートで防水層を作り、軽量骨材を敷き詰め、その上にコンクリートを打設</b>（配管はコンクリート内）<!--cd_260828_hiyou_kouzou--></li>
+    <li>2026/08/28 16:42 すみださん（水道・<b>未登録</b>）通話【決定】<b>水圧調査を正式依頼</b>。方法は<b>5年前と同じ</b>（水を張り水圧計で圧の低下を見る）。<b>来週の早い時期・朝一に実施</b>（店舗は昼から営業のため午前中／水圧をかけてから1〜2時間の放置が必要／<b>鍵を借りて入る</b>）。【業者所見】「<b>営業していない日も漏れるなら、給水より排水（汚水）が怪しい</b>」<!--cd_260828_sumida_suiatsu--></li>
+    <li>2026/08/28【保留】<b>すみださんが来週の訪問日を確定し 8/31(月) ごろにかめさんへ連絡</b>／<b>藤内さん側が予定していた 9/20 の斫りをどうするかは調査結果を見て判断</b>（〜9/20）<!--cd_260828_hoyu--></li>
+    <li>2026/08/27 17:01 藤内さん 通話【依頼】①<b>当時（約10年前）の図面、特に排水ルートの図面を探す</b> ②<b>かめさんが現地を見て漏水箇所の当たりを付ける</b> の2点。⇒ ①は 8/28 に「存在しない」で決着、②は水圧調査へ発展<!--cd_260827_shodan--></li>
+    <li>※逐語の「東内さん」＝<b>藤内さん</b>、「メリアエステート／メリアステート」＝<b>メディアエステート</b> の聞き取り崩れ</li>
+  </ul>
+</div>
+<!-- /AUTO:CALL_DECISIONS -->
+
+<div class="card">
+  <div class="card-t">💰 原価・利益サマリー</div>
+  <!-- AUTO:CALC:PROFIT_CATEGORIES -->
+  <div class="doc-meta-s">見積未発行・原価計上なし（相談フェーズ）。data.jsonの原価4分類（労務費・材料費・外注費・経費）はいずれも未計上</div>
+  <!-- /AUTO:CALC:PROFIT_CATEGORIES -->
+  <!-- AUTO:CALC:PROFIT_TOTAL -->
+  <!-- /AUTO:CALC:PROFIT_TOTAL -->
+</div>
+
+<div class="card">
+  <div class="card-t">🧾 外注費・受取書類</div>
+  <!-- AUTO:FILES:GAICHU_TABLE -->
+  <div class="doc-meta-s">受取見積書・受取請求書なし（相談フェーズ・外注未発注）</div>
+  <!-- /AUTO:FILES:GAICHU_TABLE -->
+</div>
+
+<div class="card">
+  <div class="card-t">🕒 タイムライン</div>
+  <!-- AUTO:WORKFLOW:TIMELINE:START -->
+  <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/8/28（金）14:59・16:42 ─ <b>斫りを先送りし水圧調査へ方針転換。同日中に水道業者へ依頼まで完了</b></div><div class="tl-text"><b>【藤内さん 14:59】当時の排水図面は存在しないことが確定</b>（当社の保管は<b>平成29年（2017年）以降</b>のみで、約10年前の花心施工分は残っていない）＝<b>図面待ちはしない</b>。<b>予定されていた斫り（厨房土間・9/20 段取り）は先送りし、まず 5年前と同じ水圧調査を行う</b>方針で合意。理由＝①<b>斫っても原因が分からない可能性が高い</b> ②<b>復旧時に継ぎ手から新たに漏れるリスクがある</b>。<b>調査費用は藤内さん（テナント側）が負担する意向</b>。あわせて当時の床構造を共有＝<b>厨房周りにブロックを積み、防水シートで防水層を作り、軽量骨材を敷き詰め、その上にコンクリートを打設</b>（<b>配管はコンクリート内</b>）。<br><b>【すみださん 16:42】水道業者へ水圧調査を正式依頼</b>。方法は<b>5年前と同じ</b>（水を張り水圧計で圧の低下を見る）。<b>来週の早い時期・朝一に実施</b>（店舗は昼から営業のため午前中／<b>水圧をかけてから1〜2時間の放置が必要</b>／<b>鍵を借りて入る</b>）。<b>業者所見＝「営業していない日も漏れるなら、給水より排水（汚水）が怪しい</b>」（5年前は排水口の詰まり＝髪の毛状が見つかり別業者が対応した経緯あり）。<br><b>【保留】すみださんが訪問日を確定し 8/31(月) ごろ連絡</b>／<b>藤内さん側の 9/20 の斫りをどうするかは調査結果を見て判断</b>（〜9/20）。<b>【TODO】調査日を受けて藤内さんへ伝え、鍵と立会いを段取りする</b>（〜9/20）。<br>⚠ <b>すみださんは nickname_map・取引先マスターとも未登録</b>（<code>01_振り分け保留.md</code> に追記提案を記載）。<span class="doc-meta-s">出典: 00_履歴_藤内-花心-地下漏水-26.md（2026-08-28 セクション）／通話記録 20260828_藤内さん_145950・20260828_すみだくん_164239</span><!--tl_260828_suiatsu_chosa--></div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/8/28（金）─ <b>新規案件として採番</b></div><div class="tl-text">かめさんの指示により新規案件として採番。<b>data.json へ登録（ステータス＝相談）</b>、案件フォルダを作成し、<b>8/27 の通話記録を移設</b>。<b>ToDo 2件を起票</b>。<span class="doc-meta-s">出典: 00_履歴_藤内-花心-地下漏水-26.md（2026-08-28 採番セクション）</span><!--tl_260828_saiban--></div></div>
+    <div class="tl-item recent"><div class="tl-date">2026/8/27（木）17:01 ─ <b>藤内さんより初回相談（電話）</b></div><div class="tl-text">都町「花心」（当社が<b>約10年前</b>に内装施工／<b>現在は質屋</b>）の<b>地下で水漏れが継続</b>。<b>大元の水道（給水）を止めても漏れ続ける</b>ためかめさんの見立ては<b>排水系</b>で、藤内さんも同意見。ビル自体が古く藤内さんは<b>ビル本体の配管</b>が原因と推測するが、<b>ビルオーナーは店側の責任にしたい意向</b>で係争含みの気配。厨房の<b>食洗機を置いている場所の下に水が溜まっている</b>らしく、オーナー側は<b>厨房をハツって内部を確認したい</b>と言っている。<br><b>【依頼2点】</b>①<b>当時（約10年前）の図面、特に排水ルートの図面を探してほしい</b> ②<b>かめさんが一度現地を見て漏水箇所の当たりを付けてほしい</b>（その結果を踏まえて工事に入る意向）。<br><b>【既往】約5年前</b>、地下漏水を理由に<b>不動産屋（メディアエステート）経由で厨房中央の排水溝周りを防水施工</b>した実績あり（<b>地震によるクラック</b>が契機）。<b>グリストラップ周りは藤内さん側で改修工事済み</b>だが状況は変わらず。厨房の床はコンクリート打ちのため排水ルートは目視できない。<br><b>【段取り】</b>現地確認の日程は未定・かめさんの都合のよいときに電話。不動産屋は<b>メディアエステート・ニイダさん</b>（連絡先未取得／分からなければ藤内さんへLINE）。<br><b>※「約10年前」「約5年前」はいずれも通話内の記憶ベースで年次は要現物確認</b> <code>※要確認</code>。<span class="doc-meta-s">通話記録/20260827_藤内_170142_transcript.md（実尺6分6秒・幻覚ガード検査済み）</span><!--tl_260827_shodan--></div></div>
+  </div>
+  <!-- AUTO:WORKFLOW:TIMELINE:END -->
+</div>
+
+<div class="card">
+  <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
+  <ul>
+    <li><b>かめさんの見立て</b>：<b>建物のクラックからの回り込み（雨漏りの可能性が高い）</b>で、漏れている真上が原因とは限らない</li>
+    <li><b>係争含みの案件</b>。オーナー側（メディアエステート）とテナント側（藤内さん）で原因の主張が対立しているため、<b>調査結果は客観的な記録（写真・計測値・日時）とセットで残す</b>こと</li>
+    <li><b>藤内さん・すみださんとも取引先マスター未登録</b>。請求・発注の前に <code>meishi-to-data-json</code> 等で登録が必要</li>
+    <li>次の一手：<b>すみださんからの調査日連絡（〜8/31 ごろ）</b> → 藤内さんへ伝達・鍵と立会いの段取り → 調査当日に立会い・写真記録</li>
+  </ul>
+</div>
+
+<div class="footer">株式会社アート・レイズ ｜ 藤内-花心-地下漏水-26 案件サマリー</div>
+
+</body>
+</html>
