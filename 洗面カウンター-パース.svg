@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1485 1050" font-family="'Noto Sans CJK JP','Noto Sans JP',sans-serif">
+<defs><marker id="laCTR" markerWidth="9" markerHeight="9" refX="8" refY="5" orient="auto"><path d="M1.5,1.5 L8.5,5 L1.5,8.5 Z" fill="#a8600a"/></marker><marker id="laGRN" markerWidth="9" markerHeight="9" refX="8" refY="5" orient="auto"><path d="M1.5,1.5 L8.5,5 L1.5,8.5 Z" fill="#4e8a48"/></marker><marker id="laDIM" markerWidth="9" markerHeight="9" refX="8" refY="5" orient="auto"><path d="M1.5,1.5 L8.5,5 L1.5,8.5 Z" fill="#c0392b"/></marker><marker id="laBRN" markerWidth="9" markerHeight="9" refX="8" refY="5" orient="auto"><path d="M1.5,1.5 L8.5,5 L1.5,8.5 Z" fill="#6b5510"/></marker><marker id="laBLU" markerWidth="9" markerHeight="9" refX="8" refY="5" orient="auto"><path d="M1.5,1.5 L8.5,5 L1.5,8.5 Z" fill="#1e4e79"/></marker><marker id="laWALL" markerWidth="9" markerHeight="9" refX="8" refY="5" orient="auto"><path d="M1.5,1.5 L8.5,5 L1.5,8.5 Z" fill="#2c3e50"/></marker><marker id="laPNK" markerWidth="9" markerHeight="9" refX="8" refY="5" orient="auto"><path d="M1.5,1.5 L8.5,5 L1.5,8.5 Z" fill="#8a4a6e"/></marker><marker id="laGRY" markerWidth="9" markerHeight="9" refX="8" refY="5" orient="auto"><path d="M1.5,1.5 L8.5,5 L1.5,8.5 Z" fill="#557"/></marker></defs>
+<rect x="0" y="0" width="1485" height="1050" fill="#ffffff"/>
+<text x="30" y="42" font-size="24" font-weight="bold" fill="#1a2a3a">洗面所 収納カウンター設置 パース（2点透視）</text>
+<text x="30" y="68" font-size="13" fill="#555">イメージ（概略・水平視線の2点透視図）／ 寸法・仕様は「洗面カウンター-計画図_清書」参照 ／ 2026-07-02</text>
+<line x1="30" y1="80" x2="1455" y2="80" stroke="#888" stroke-width="1"/>
+<polygon points="553.2,950.0 1144.9,650.3 853.3,548.8 345.1,689.2" fill="#f2f0ec" stroke="#cccccc" stroke-width="1.0" stroke-linejoin="round"/>
+<polygon points="462.2,159.2 476.9,160.1 481.3,159.3 466.6,158.4" fill="#f9ffff" stroke="#8aa0b0" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="462.2,656.9 466.6,660.6 466.6,158.4 462.2,159.2" fill="#babfc3" stroke="#8aa0b0" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="466.6,660.6 481.3,656.5 481.3,159.3 466.6,158.4" fill="#e3e9ee" stroke="#8aa0b0" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="459.2,151.3 478.7,152.6 484.8,151.3 465.2,150.0" fill="#eaf3fa" stroke="#8aa0b0" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="459.2,159.1 465.2,158.0 465.2,150.0 459.2,151.3" fill="#aeb5ba" stroke="#8aa0b0" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="465.2,158.0 484.8,159.2 484.8,151.3 465.2,150.0" fill="#d5dde4" stroke="#8aa0b0" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="476.9,418.8 797.4,381.7 801.7,382.4 480.2,420.0" fill="#f3faff" stroke="#2c3e50" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="476.9,652.8 480.2,655.6 480.2,420.0 476.9,418.8" fill="#b5babf" stroke="#2c3e50" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="480.2,655.6 801.7,566.0 801.7,382.4 480.2,420.0" fill="#dde4ea" stroke="#2c3e50" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="474.3,411.0 797.7,375.3 804.0,376.3 479.1,412.6" fill="#dce7ef" stroke="#2c3e50" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="474.3,418.8 479.1,420.5 479.1,412.6 474.3,411.0" fill="#a4acb2" stroke="#2c3e50" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="479.1,420.5 804.0,382.4 804.0,376.3 479.1,412.6" fill="#c8d2da" stroke="#2c3e50" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="797.4,179.8 804.0,180.2 920.0,170.2 913.3,169.7" fill="#f9ffff" stroke="#8aa0b0" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="797.4,564.3 913.3,609.7 913.3,169.7 797.4,179.8" fill="#babfc3" stroke="#8aa0b0" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="913.3,609.7 920.0,607.3 920.0,170.2 913.3,169.7" fill="#e3e9ee" stroke="#8aa0b0" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="795.6,173.7 804.3,174.3 922.6,163.3 913.7,162.5" fill="#eaf3fa" stroke="#8aa0b0" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="795.6,179.8 913.7,169.5 913.7,162.5 795.6,173.7" fill="#aeb5ba" stroke="#8aa0b0" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="913.7,169.5 922.6,170.2 922.6,163.3 913.7,162.5" fill="#d5dde4" stroke="#8aa0b0" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="679.2,428.3 794.3,412.0 905.7,434.6 785.7,456.1" fill="#fffaff" stroke="#c48ab0" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="679.2,600.1 785.7,654.6 785.7,456.1 679.2,428.3" fill="#ccbac3" stroke="#c48ab0" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="785.7,654.6 905.7,612.4 905.7,434.6 785.7,456.1" fill="#f9e4ef" stroke="#c48ab0" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="829.3,424.7 835.2,426.3 839.0,428.1 840.3,430.2 839.1,432.3 835.3,434.5 829.0,436.5 820.4,438.2 810.1,439.6 798.5,440.6 786.4,441.1 774.3,441.1 763.0,440.5 753.2,439.4 745.4,437.9 740.0,436.1 737.1,434.1 737.0,431.9 739.4,429.8 744.2,427.7 751.1,425.9 759.7,424.4 769.5,423.2 780.2,422.4 791.2,422.0 802.1,422.0 812.3,422.5 821.6,423.4" fill="#ffffff" stroke="#c48ab0" stroke-width="1.2" stroke-linejoin="round"/>
+<polygon points="743.1,400.6 752.9,399.3 760.2,400.8 750.3,402.0" fill="#edf3f8" stroke="#9aa4ad" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="743.1,422.4 750.3,424.1 750.3,402.0 743.1,400.6" fill="#b1b5b9" stroke="#9aa4ad" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="750.3,424.1 760.2,422.6 760.2,400.8 750.3,402.0" fill="#d8dde2" stroke="#9aa4ad" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="670.1,397.8 675.6,397.1 781.9,420.1 776.1,421.0" fill="#f3faff" stroke="#2c3e50" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="670.1,602.6 776.1,658.0 776.1,421.0 670.1,397.8" fill="#b5babf" stroke="#2c3e50" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="776.1,658.0 781.9,655.9 781.9,420.1 776.1,421.0" fill="#dde4ea" stroke="#2c3e50" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="668.2,390.9 676.2,390.0 784.3,412.3 775.8,413.5" fill="#dce7ef" stroke="#2c3e50" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="668.2,397.8 775.8,421.4 775.8,413.5 668.2,390.9" fill="#a4acb2" stroke="#2c3e50" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="775.8,421.4 784.3,420.1 784.3,412.3 775.8,413.5" fill="#c8d2da" stroke="#2c3e50" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="671.8,379.5 678.0,378.9 748.5,392.2 742.1,393.0" fill="#d7f9d3" stroke="#4e8a48" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="671.8,391.4 742.1,406.1 742.1,393.0 671.8,379.5" fill="#a0ba9d" stroke="#4e8a48" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="742.1,406.1 748.5,405.2 748.5,392.2 742.1,393.0" fill="#c4e3c0" stroke="#4e8a48" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="558.3,394.2 659.0,383.7 745.1,401.0 637.8,414.6" fill="#ceedff" stroke="#4a7aa8" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="558.3,633.8 637.8,688.0 637.8,414.6 558.3,394.2" fill="#9ab1c4" stroke="#4a7aa8" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="637.8,688.0 745.1,651.8 745.1,401.0 637.8,414.6" fill="#bcd8f0" stroke="#4a7aa8" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="637.8,507.1 745.1,485.8 745.1,484.3 637.8,505.4" fill="#4a7aa8" stroke="#4a7aa8" stroke-width="0.8" stroke-linejoin="round"/>
+<polygon points="638.8,481.0 642.0,480.4 643.9,481.1 640.7,481.6" fill="#5186b8" stroke="#4a7aa8" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="638.8,492.2 640.7,492.9 640.7,481.6 638.8,481.0" fill="#3c6489" stroke="#4a7aa8" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="640.7,492.9 643.9,492.3 643.9,481.1 640.7,481.6" fill="#4a7aa8" stroke="#4a7aa8" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="638.8,517.6 642.0,516.9 643.9,517.7 640.7,518.4" fill="#5186b8" stroke="#4a7aa8" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="638.8,528.9 640.7,529.7 640.7,518.4 638.8,517.6" fill="#3c6489" stroke="#4a7aa8" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="640.7,529.7 643.9,529.0 643.9,517.7 640.7,518.4" fill="#4a7aa8" stroke="#4a7aa8" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="483.8,414.6 549.5,407.1 611.5,424.7 541.3,434.0" fill="#fffdb8" stroke="#a8862a" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="483.8,654.6 541.3,702.2 541.3,434.0 483.8,414.6" fill="#c9bc89" stroke="#a8862a" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="541.3,702.2 611.5,679.4 611.5,424.7 541.3,434.0" fill="#f6e6a8" stroke="#a8862a" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="483.8,413.8 549.5,406.4 552.2,407.1 486.3,414.6" fill="#fde597" stroke="#a8862a" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="483.8,414.6 486.3,415.4 486.3,414.6 483.8,413.8" fill="#bcab71" stroke="#a8862a" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="486.3,415.4 552.2,407.9 552.2,407.1 486.3,414.6" fill="#e6d18a" stroke="#a8862a" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="538.3,432.1 608.2,422.9 611.5,423.9 541.3,433.1" fill="#fde597" stroke="#a8862a" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="538.3,432.9 541.3,434.0 541.3,433.1 538.3,432.1" fill="#bcab71" stroke="#a8862a" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="541.3,434.0 611.5,424.7 611.5,423.9 541.3,433.1" fill="#e6d18a" stroke="#a8862a" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="486.9,641.7 536.9,681.4 536.9,611.9 486.9,578.5" fill="#efd98e" stroke="#a8862a" stroke-width="1.0" stroke-linejoin="round"/>
+<polygon points="507.4,603.4 513.6,607.7 513.6,604.3 507.4,600.1" fill="#a8862a" stroke="#a8862a" stroke-width="0.8" stroke-linejoin="round"/>
+<polygon points="486.9,573.3 536.9,606.1 536.9,536.6 486.9,510.2" fill="#efd98e" stroke="#a8862a" stroke-width="1.0" stroke-linejoin="round"/>
+<polygon points="507.4,532.1 513.6,535.5 513.6,532.2 507.4,528.8" fill="#a8862a" stroke="#a8862a" stroke-width="0.8" stroke-linejoin="round"/>
+<polygon points="486.9,504.9 536.9,530.8 536.9,461.3 486.9,441.8" fill="#efd98e" stroke="#a8862a" stroke-width="1.0" stroke-linejoin="round"/>
+<polygon points="507.4,460.8 513.6,463.4 513.6,460.1 507.4,457.6" fill="#a8862a" stroke="#a8862a" stroke-width="0.8" stroke-linejoin="round"/>
+<polygon points="493.2,398.5 544.3,393.3 549.2,394.5 497.8,399.9" fill="#d7f9d3" stroke="#4e8a48" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="493.2,415.0 497.8,416.6 497.8,399.9 493.2,398.5" fill="#a0ba9d" stroke="#4e8a48" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="497.8,416.6 549.2,410.6 549.2,394.5 497.8,399.9" fill="#c4e3c0" stroke="#4e8a48" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="535.4,411.1 589.0,404.9 594.7,406.4 540.8,412.7" fill="#d7f9d3" stroke="#4e8a48" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="535.4,429.0 540.8,430.8 540.8,412.7 535.4,411.1" fill="#a0ba9d" stroke="#4e8a48" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="540.8,430.8 594.7,423.8 594.7,406.4 540.8,412.7" fill="#c4e3c0" stroke="#4e8a48" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="540.1,395.5 549.2,394.5 589.0,404.9 579.6,406.0" fill="#d7f9d3" stroke="#4e8a48" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="540.1,411.7 579.6,423.3 579.6,406.0 540.1,395.5" fill="#a0ba9d" stroke="#4e8a48" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="579.6,423.3 589.0,422.1 589.0,404.9 579.6,406.0" fill="#c4e3c0" stroke="#4e8a48" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="480.2,390.6 684.6,370.9 760.1,384.1 543.1,408.9" fill="#ffdda9" stroke="#a8600a" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="480.2,398.5 543.1,417.8 543.1,408.9 480.2,390.6" fill="#bea47e" stroke="#a8600a" stroke-width="1.4" stroke-linejoin="round"/>
+<polygon points="543.1,417.8 760.1,391.6 760.1,384.1 543.1,408.9" fill="#e8c99a" stroke="#a8600a" stroke-width="1.4" stroke-linejoin="round"/>
+<text x="693.8" y="463.5" font-size="15" fill="#1e4e79" text-anchor="middle" font-weight="bold">凍</text>
+<text x="693.8" y="588.0" font-size="15" fill="#1e4e79" text-anchor="middle" font-weight="bold">冷</text>
+<line x1="610.7" y1="257.3" x2="660.7" y2="397.3" stroke="#a8600a" stroke-width="1" marker-end="url(#laCTR)"/>
+<text x="616.7" y="261.3" font-size="14" fill="#a8600a" text-anchor="start" font-weight="bold">新設：メルクシパイン積層カウンター t30×D500×L約980</text>
+<line x1="985.1" y1="326.9" x2="745.1" y2="398.9" stroke="#c0392b" stroke-width="1" marker-end="url(#laDIM)"/>
+<text x="991.1" y="330.9" font-size="14" fill="#c0392b" text-anchor="start" font-weight="bold">放熱クリア 10〜20</text>
+<line x1="993.7" y1="390.8" x2="743.7" y2="398.8" stroke="#4e8a48" stroke-width="1" marker-end="url(#laGRN)"/>
+<text x="999.7" y="394.8" font-size="14" fill="#4e8a48" text-anchor="start" font-weight="bold">笠木側の下駄 h約52</text>
+<line x1="548.3" y1="338.5" x2="568.3" y2="418.5" stroke="#4e8a48" stroke-width="1" marker-end="url(#laGRN)"/>
+<text x="554.3" y="342.5" font-size="14" fill="#4e8a48" text-anchor="start" font-weight="bold">カラーBOX側の下駄＝コの字型 h約63（引出側オープン）</text>
+<line x1="450.7" y1="456.6" x2="510.7" y2="416.6" stroke="#4e8a48" stroke-width="1" marker-end="url(#laGRN)"/>
+<text x="444.7" y="460.6" font-size="14" fill="#4e8a48" text-anchor="end" font-weight="bold">トレイ差込口（すき間約60）</text>
+<line x1="440.7" y1="512.7" x2="510.7" y2="522.7" stroke="#6b5510" stroke-width="1" marker-end="url(#laBRN)"/>
+<text x="434.7" y="516.7" font-size="14" fill="#6b5510" text-anchor="end" font-weight="bold">引出側</text>
+<line x1="455.8" y1="675.6" x2="515.8" y2="625.6" stroke="#6b5510" stroke-width="1" marker-end="url(#laBRN)"/>
+<text x="449.8" y="679.6" font-size="14" fill="#6b5510" text-anchor="end" font-weight="bold">カラーBOX</text>
+<line x1="753.8" y1="726.7" x2="693.8" y2="636.7" stroke="#1e4e79" stroke-width="1" marker-end="url(#laBLU)"/>
+<text x="759.8" y="730.7" font-size="14" fill="#1e4e79" text-anchor="start" font-weight="bold">冷蔵庫 W500×D570</text>
+<line x1="899.0" y1="658.7" x2="779.0" y2="538.7" stroke="#2c3e50" stroke-width="1" marker-end="url(#laWALL)"/>
+<text x="905.0" y="662.7" font-size="14" fill="#2c3e50" text-anchor="start" font-weight="bold">L型笠木壁（既存）H900＋笠木t30</text>
+<line x1="979.0" y1="568.9" x2="849.0" y2="508.9" stroke="#8a4a6e" stroke-width="1" marker-end="url(#laPNK)"/>
+<text x="985.0" y="572.9" font-size="14" fill="#8a4a6e" text-anchor="start" font-weight="bold">洗面化粧台（手洗い・既存）</text>
+<line x1="976.6" y1="221.4" x2="916.6" y2="261.4" stroke="#557" stroke-width="1" marker-end="url(#laGRY)"/>
+<text x="982.6" y="225.4" font-size="14" fill="#557" text-anchor="start" font-weight="bold">既存壁（中間間仕切り）天端H1925</text>
+<text x="30" y="1010" font-size="13" fill="#555">※ 本図はイメージです。部材寸法・下駄形状（コの字・側板逃げ）・クリアランスの数値は「洗面カウンター-計画図_清書」を正とします。</text>
+<text x="30" y="1040" font-size="11" fill="#666">洗面カウンター-パース ／ A4横 ／ 原図：手書きスケッチ（パース）</text>
+</svg>
