@@ -204,7 +204,11 @@ python3 -c "import cairosvg; cairosvg.svg2png(url='<f>.svg', write_to='<f>.png',
   - `chrome --headless --disable-gpu --no-sandbox --user-data-dir=<tmp> --no-pdf-header-footer --print-to-pdf=<out.pdf> <in.html>`。
   - 複数ページは**1ページずつPDF化して `pypdf`(PdfWriter.append)で結合**。※1つのHTMLに全SVGを並べると marker/pattern の id 重複で誤描画＝必ず分離。
   - 検証：`fitz` で `page.get_text()` が文字を返せばベクター成功（ラスタなら0）。各ページ 842×595pt＝A4横。
-- **フォントは印刷可読サイズ**：viewBox 1485幅＝297mm（1単位≒0.2mm）なら本文≧13単位(≒7pt)・見出し≧15。極小ラベル（7〜8単位＝4pt級）は判読不可＝禁止。パネルが小さく文字が入らないなら分割か拡大。
+- **フォントは「mm実寸」で決める（px/unit指定を信じない）** — JIS Z 8313：**漢字3.5mm以上**、実用値は**図中注記・表本文4.0mm以上**・寸法値4.5mm・室名6mm・見出し5.5mm・タイトル7.5mm以上。
+  - 手順：`1unit_mm = 印刷高さmm ÷ viewBox高さ` を先に確定 →**全用途の実寸mmを一覧計算し、基準未満が無いことを出力前に確認**する。
+  - **A4横（printable 287×200mm）に viewBox 1485×1050 を流すと 1unit＝0.19mm**。この場合、本文4.0mmには**21単位**が要る＝実質A4に情報密度の高い図は載らない。**内容が多いものは A3横で出す**（printable 410×287mm・1unit＝0.2733mm → **本文14.7単位＝4.0mm**）。
+  - 収まらないときの順序：**①長いラベルを図から追い出す（記号＋別表に逃がす）→ ②ページ分割 → ③A3化**。文字を縮めるのは禁じ手。
+  - ※旧記述「本文≧13単位(≒7pt)」は A4横だと 2.6mm でJIS未満。**2026-08-31 に上記へ改訂**（大吉日出店の平面図・クロス割付で実測2.1mmだったのを是正）。
 - **文字グレーは #555 以上**（薄いと印刷で消える）。[[feedback_print_gray_minimum]]の #666 が下限・既定は #555、注記の薄茶は #7a4a00。線/枠の `stroke` は薄くてもよいが `fill` の文字は濃く。
 - **Chromeの出力先**：日本語パス/Drive仮想FSへ直接 `--screenshot`/`--print-to-pdf` するとアクセス拒否。出力は**ASCII名で %TEMP% に書き**→`cp` で案件/genba-naviへ。`--user-data-dir` 指定必須（無いと "Missing headless user data directory"）。
 
