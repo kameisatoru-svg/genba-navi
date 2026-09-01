@@ -404,12 +404,13 @@ function goBack(){
   var SAVED_KEY   = 'ai_assist_saved_chats';    // ユーザーが名前を付けて保存した会話リスト
   var MAX_SAVED   = 50;                          // 保存リスト最大件数
 
-  // 選択可能なモデル（旧 claude-sonnet-4-20250514 は 2026-06-15 退役→404 のため廃止）
+  // 選択可能なモデル（2026-09-02 Opus 5 / Sonnet 5 へ更新。旧 claude-sonnet-4-20250514 は 2026-06-15 退役→404 のため廃止）
+  // 保存済みの旧IDは getModel() が MODELS に無いと判定して DEFAULT_MODEL へフォールバックする
   var MODELS = [
-    { id: 'claude-opus-4-8',   label: 'Opus 4.8（高精度）' },
-    { id: 'claude-sonnet-4-6', label: 'Sonnet 4.6（高速・低コスト）' }
+    { id: 'claude-opus-5',   label: 'Opus 5（高精度）' },
+    { id: 'claude-sonnet-5', label: 'Sonnet 5（高速・低コスト）' }
   ];
-  var DEFAULT_MODEL = 'claude-opus-4-8';
+  var DEFAULT_MODEL = 'claude-opus-5';
   function getModel(){
     var m = (localStorage.getItem(MODEL_KEY) || '').trim();
     for(var i=0;i<MODELS.length;i++){ if(MODELS[i].id === m) return m; }
