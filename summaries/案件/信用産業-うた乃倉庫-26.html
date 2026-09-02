@@ -56,23 +56,23 @@ details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin
   <div class="sub">信用産業-うた乃倉庫-26 ｜ 大分県別府市 うた乃総本店 厨房横作業場</div>
   <div class="badges">
     <!-- AUTO:JSON:STATUS_BADGES -->
-    <span class="badge">💴 請求済み</span>
+    <span class="badge">💰 <b>入金済み（2026/6/30 ¥87,780 着金・満額）</b></span>
     <span class="badge">🏢 株式会社信用産業（T-009）</span>
     <span class="badge">✅ 施工完了（5/20）</span>
-    <span class="badge">⏳ 未入金</span>
+    <span class="badge">🔧 <b>9/2 台帳訂正：請求額 ¥96,558 → ¥87,780</b>（実発行PDFに一致）＝<b>「未収¥8,778」は誤検出で解消</b></span>
     <!-- /AUTO:JSON:STATUS_BADGES -->
     <a class="workflow-link" href="https://kameisatoru-svg.github.io/genba-navi/workflow.html?key=%E4%BF%A1%E7%94%A8%E7%94%A3%E6%A5%AD-%E3%81%86%E3%81%9F%E4%B9%83%E5%80%89%E5%BA%AB-26" target="_blank" rel="noopener" title="準備状況ワークフローを開く">🔍 ワークフローを開く</a>
   </div>
   <!-- AUTO:JSON:LAST_UPDATED -->
-  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-06-17 09:05（原価集計: 2026-05-18）</div>
+  <div class="sub" style="margin-top:6px;">data.json最終更新: 2026-09-02（原価集計: 2026-05-18）｜ サマリー反映: 2026-09-02 16:5x（<b>発行済PDFを実読して照合し、data.json の請求額 ¥96,558 → ¥87,780 へ訂正</b>。6/30 の入金 ¥87,780 は<b>請求満額</b>で、<b>未収¥8,778はそもそも存在しなかった</b>＝値引き処理ではなく台帳の誤りの訂正）</div>
   <!-- /AUTO:JSON:LAST_UPDATED -->
 </div>
 
 <!-- AUTO:JSON:KPI_ROW -->
 <div class="kpi-row">
-  <div class="kpi"><div class="v">請求済み</div><div class="l">ステータス</div></div>
-  <div class="kpi"><div class="v">¥87,780</div><div class="l">請求額（税込・発行済PDF）</div></div>
-  <div class="kpi"><div class="v">未入金</div><div class="l">入金状況</div></div>
+  <div class="kpi"><div class="v">入金済み</div><div class="l">ステータス（<b>6/30 満額着金</b>）</div></div>
+  <div class="kpi"><div class="v">¥87,780</div><div class="l">請求額（税込・発行済PDFの実額＝税抜¥79,800＋税¥7,980）</div></div>
+  <div class="kpi"><div class="v">未収 ¥0</div><div class="l"><b>「残¥8,778」は台帳金額の誤りによる誤検出</b>。9/2 に訂正し解消</div></div>
   <div class="kpi"><div class="v">2026/5/20</div><div class="l">施工完了日</div></div>
 </div>
 <!-- /AUTO:JSON:KPI_ROW -->
@@ -159,6 +159,7 @@ details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin
   <div class="card-t">🕒 タイムライン</div>
   <!-- AUTO:WORKFLOW:TIMELINE:START -->
   <div class="timeline">
+    <div class="tl-item recent"><div class="tl-date">2026/9/2（水） ─ <b>「残¥8,778 未収」は誤検出と判明・台帳を訂正</b></div><div class="tl-text">かめさんより「<b>8,778円 値引きにしといて</b>」との指示を受けたが、<b>発行済の請求書PDFを実読して照合したところ値引きは不要</b>と判明。<b>実発行PDF＝ARS-T009-260520-01／2026/5/20発行／スポットクーラー取替¥59,800＋取付工事¥15,000＋産廃処分¥5,000＝税抜¥79,800＋消費税¥7,980＝税込¥87,780</b>（<b>諸経費10%は請求書に入っていない</b>）。<b>2026/6/30 の入金 ¥87,780 はこの請求書の満額</b>で、<b>未収も不足も発生していなかった</b>。原因は data.json の請求金額に<b>見積ベースの¥96,558（諸経費10%込み・実際には請求していない額）</b>が入っていたことで、7/29 の通帳照合時に「先方が税抜で振り込んだ」と解釈したのが誤り。<b>金額を¥87,780へ訂正し、値引きフィールドは設けず</b>、ステータスを<b>入金済み</b>へ。これで信用産業（T-009）向けの未収は<b>ゼロ</b>。<code>※要確認</code> 諸経費10%の請求漏れが意図的だったかのみ、かめさんの記憶を確認したい<!--mv_260902_utano_souko_teisei--></div></div>
     <div class="tl-item recent"><div class="tl-date">2026/7/28（火）</div><div class="tl-text">請求書 ARS-T009-260520-01 の送付状況を確認。2026-05-28に信用産業 安藤様（andoh@ssg.co.jp）宛「スポットクーラー取替工事請求書送付いたします」で送付済みと判明し、日次チェックの「送付漏れ疑い」は誤検知として解消。以後この案件は送付整合済みとして扱う</div></div>
     <div class="tl-item recent"><div class="tl-date">2026/5/20（水）</div><div class="tl-text">施工完了（YAMAZEN SSA-Y25-2 設置・排熱ダクト既存流用）。旧機YS-422D撤去・産廃処分。請求書 ARS-T009-260520-01 発行（税込¥87,780）・工事完了報告書発行（施工前後写真入り）</div></div>
     <div class="tl-item recent"><div class="tl-date">2026/5/18（月）</div><div class="tl-text">新機 YAMAZEN SSA-Y25-2 を楽天「くらしのeショップ」で購入（¥59,800税込）。data.json案件登録・ワークフローHTML生成。見積は出来高でOKと江田社長了承</div></div>
@@ -171,7 +172,7 @@ details.tl-archive summary{cursor:pointer;color:var(--sub);font-size:12px;margin
   <div class="card-t">📝 所見・特記事項（手書き保護領域）</div>
   <ul>
     <li><b>現場名の訂正</b>：正しくは「うた乃総本店」（履歴ノート・発行済PDFで確定）。data.json の施工場所「うた乃別府本店」は旧表記。次回data.json更新時に「うた乃総本店」へ訂正推奨</li>
-    <li><b>金額の差異</b>：data.json請求金額は¥96,558だが、実際の発行済請求書PDFは税込¥87,780（税抜¥79,800＋消費税¥7,980）。本サマリーは発行済PDFの実額を採用。data.jsonの金額・備考（諸経費10%表記）は次回更新で実発行額へ要訂正</li>
+    <li>✅ <b>【解決済 2026/9/2】金額の差異は訂正完了</b>：data.json の請求金額 ¥96,558（見積ベース・諸経費10%込み）を、<b>実際の発行済請求書PDF の税込¥87,780（税抜¥79,800＋消費税¥7,980）へ訂正</b>。この不一致が「残¥8,778 未収」の正体で、<b>実際には 6/30 に満額入金済み＝未収なし</b>だった。<code>※要確認</code> 諸経費10%（¥7,980）を請求書に入れ忘れた可能性があり、意図的か否かのみかめさんに確認したい（既に満額入金済みのため追加請求は現実的でない）</li>
     <li>HIH広瀬には在庫なし→楽天通販で対応。排熱ダクト径互換のため既存壁穴をそのまま使用</li>
     <li>来月のAMEX/楽天明細で機器代¥59,800を材料費として原価計上し、粗利を確定させる</li>
     <li>厨房工事は別途タニコー大分営業所（岩尾氏）と連携が必要（T-009共通の注意点）</li>
