@@ -39,3 +39,8 @@ data.bak_*
 
 # PostToolUse フックが data.json の変化検知に使う指紋ファイル
 .claude/.data_json_state
+
+# genka.json 等 data.json 以外のJSONの日付付きバックアップもリポジトリ外へ
+# （2026/9/4 追加：genka.json.bak_20260630_福利厚生追加前 が追跡されたまま残っていたため）
+genka.json.bak_*
+*.json.bak_*
